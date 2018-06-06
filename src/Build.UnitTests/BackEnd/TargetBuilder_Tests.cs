@@ -1356,7 +1356,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>The lookup</returns>
         private Lookup CreateStandardLookup(ProjectInstance project)
         {
-            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties), null);
+            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
             return lookup;
         }
 

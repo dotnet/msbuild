@@ -84,30 +84,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<ProjectItemInstance, ProjectItemInstance> _cloneTable;
 
-        /// <summary>
-        /// A dictionary of named values for debugger display only. If 
-        /// not debugging, this should be null.
-        /// </summary>
-        private IDictionary<string, object> _globalsForDebugging;
-
         #endregion
 
         #region Constructors
 
         /// <summary>
         /// Construct a lookup over specified items and properties.
-        /// Accept a dictionary of named values for debugger display only. If 
-        /// not debugging, this should be null.
         /// </summary>
-        internal Lookup(ItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties, IDictionary<string, object> globalsForDebugging)
+        internal Lookup(ItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectItems, "projectItems");
             ErrorUtilities.VerifyThrowInternalNull(properties, "properties");
 
             Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
-
-            _globalsForDebugging = globalsForDebugging;
         }
 
         /// <summary>
@@ -124,8 +114,6 @@ namespace Microsoft.Build.BackEnd
             // Clones need to share an (item)clone table; the batching engine asks for items from the lookup,
             // then populates buckets with them, which have clone lookups.
             _cloneTable = that._cloneTable;
-
-            _globalsForDebugging = that._globalsForDebugging;
         }
 
         #endregion
@@ -199,15 +187,6 @@ namespace Microsoft.Build.BackEnd
         {
             get { return _lookupScopes.First.Next.Value.PropertySets; }
             set { _lookupScopes.First.Next.Value.PropertySets = value; }
-        }
-
-        /// <summary>
-        /// A dictionary of named values for debugger display only. If 
-        /// not debugging, this should be null.
-        /// </summary>
-        internal IDictionary<string, object> GlobalsForDebugging
-        {
-            get { return _globalsForDebugging; }
         }
 
         #endregion
