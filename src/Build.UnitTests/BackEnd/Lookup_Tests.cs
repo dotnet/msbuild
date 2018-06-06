@@ -1436,25 +1436,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
     {
         internal static Lookup CreateEmptyLookup()
         {
-            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), null);
+            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>());
             return lookup;
         }
 
         internal static Lookup CreateLookup(ItemDictionary<ProjectItemInstance> items)
         {
-            Lookup lookup = new Lookup(items, new PropertyDictionary<ProjectPropertyInstance>(), null);
+            Lookup lookup = new Lookup(items, new PropertyDictionary<ProjectPropertyInstance>());
             return lookup;
         }
 
         internal static Lookup CreateLookup(PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), properties, null);
+            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), properties);
             return lookup;
         }
 
         internal static Lookup CreateLookup(PropertyDictionary<ProjectPropertyInstance> properties, ItemDictionary<ProjectItemInstance> items)
         {
-            Lookup lookup = new Lookup(items, properties, null);
+            Lookup lookup = new Lookup(items, properties);
             return lookup;
         }
     }
