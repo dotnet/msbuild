@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Xml;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -129,10 +130,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                return new Microsoft.Build.Collections.ReadOnlyCollection<ProjectOutputElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectOutputElement>(Children)
-                    );
+                return new Microsoft.Build.Collections.ReadOnlyCollection<ProjectOutputElement>(Children.OfType<ProjectOutputElement>());
             }
         }
 
