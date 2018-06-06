@@ -11,7 +11,6 @@
   <Target Name="Publish"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
-                            SetBadgeProps;
                             Package;
                             PublishArtifacts;
                             FinishBuild" />
@@ -19,7 +18,6 @@
   <Target Name="PublishWithoutPackage"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
-                            SetBadgeProps;
                             PublishArtifacts;
                             FinishBuild" />
 
