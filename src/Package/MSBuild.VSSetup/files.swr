@@ -11,7 +11,7 @@ folder InstallDir:\MSBuild\15.0
   file source=$(ThirdPartyNotice)
 
 folder InstallDir:\MSBuild\15.0\Bin
-  file source=$(MSBuildConversionBinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenArchitecture=all vs.file.ngenApplication="[installDir]\MSBuild\15.0\Bin\msbuild.exe" vs.file.ngenApplication="[installDir]\MSBuild\15.0\Bin\MSBuild.exe"
+  file source=$(MSBuildConversionBinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenArchitecture=all vs.file.ngenApplication="[installDir]\MSBuild\15.0\Bin\MSBuild.exe"
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=all vs.file.ngenApplication="[installDir]\MSBuild\15.0\Bin\MSBuild.exe"
   file source=$(MSBuildConversionBinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all vs.file.ngenApplication="[installDir]\MSBuild\15.0\Bin\MSBuild.exe"
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all vs.file.ngenApplication="[installDir]\MSBuild\15.0\Bin\MSBuild.exe"
