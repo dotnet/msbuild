@@ -694,7 +694,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
             ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
             XmlUtilities.VerifyThrowArgumentValidElementName(itemTypeToUse);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[itemTypeToUse] == null, "OM_ReservedName", itemTypeToUse);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(itemTypeToUse), "OM_ReservedName", itemTypeToUse);
 
             // TaskItems don't have an item type. So for their benefit, we have to lookup and add the regular item definition.
             List<ProjectItemDefinitionInstance> inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions);

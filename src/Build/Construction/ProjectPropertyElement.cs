@@ -85,7 +85,7 @@ namespace Microsoft.Build.Construction
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
 
-            ErrorUtilities.VerifyThrowInvalidOperation(XMakeElements.IllegalItemPropertyNames[name] == null && !ReservedPropertyNames.IsReservedProperty(name), "OM_CannotCreateReservedProperty", name);
+            ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name) && !ReservedPropertyNames.IsReservedProperty(name), "OM_CannotCreateReservedProperty", name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 
@@ -102,7 +102,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowArgumentLength(newName, "newName");
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newName] == null, "CannotModifyReservedProperty", newName);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedProperty", newName);
 
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.

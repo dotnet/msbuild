@@ -98,7 +98,7 @@ namespace Microsoft.Build.Construction
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
-            ErrorUtilities.VerifyThrowInvalidOperation(XMakeElements.IllegalItemPropertyNames[name] == null, "CannotModifyReservedItemMetadata", name);
+            ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowArgumentLength(newName, "newName");
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newName] == null, "CannotModifyReservedItemMetadata", newName);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedItemMetadata", newName);
 
             if (ExpressedAsAttribute)
             {

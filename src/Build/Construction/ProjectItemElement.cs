@@ -398,7 +398,7 @@ namespace Microsoft.Build.Construction
         internal static ProjectItemElement CreateDisconnected(string itemType, ProjectRootElement containingProject)
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(itemType);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[itemType] == null, "CannotModifyReservedItem", itemType);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(itemType), "CannotModifyReservedItem", itemType);
 
             XmlElementWithLocation element = containingProject.CreateElement(itemType);
 
@@ -417,7 +417,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowArgumentLength(newItemType, "itemType");
             XmlUtilities.VerifyThrowArgumentValidElementName(newItemType);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newItemType] == null, "CannotModifyReservedItem", newItemType);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newItemType), "CannotModifyReservedItem", newItemType);
 
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
