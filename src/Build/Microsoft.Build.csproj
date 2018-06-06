@@ -246,6 +246,7 @@
     <Compile Include="BackEnd\Components\SdkResolution\HostedSdkResolverServiceBase.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResult.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResultFactory.cs" />
+    <Compile Include="BackEnd\Node\LoggingNodeConfiguration.cs" />
     <Compile Include="BackEnd\Shared\ConfigurationMetadata.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />

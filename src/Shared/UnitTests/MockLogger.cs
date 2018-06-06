@@ -5,12 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Text;
 
 using Microsoft.Build.Framework;
-
+using Shouldly;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Xunit;
 using Xunit.Abstractions;
@@ -31,6 +32,7 @@ namespace Microsoft.Build.UnitTests
         private readonly object _lockObj = new object();  // Protects _fullLog, _testOutputHelper, lists, counts
         private StringBuilder _fullLog = new StringBuilder();
         private readonly ITestOutputHelper _testOutputHelper;
+        private readonly bool _profileEvaluation;
 
         /// <summary>
         /// Should the build finished event be logged in the log file. This is to work around the fact we have different
@@ -159,7 +161,7 @@ namespace Microsoft.Build.UnitTests
          */
         public LoggerVerbosity Verbosity
         {
-            get { return LoggerVerbosity.Normal; }
+            get => LoggerVerbosity.Normal;
             set {/* do nothing */}
         }
 
@@ -171,15 +173,8 @@ namespace Microsoft.Build.UnitTests
          */
         public string Parameters
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                // do nothing
-            }
+            get => null;
+            set {/* do nothing */}
         }
 
         /*
@@ -191,6 +186,13 @@ namespace Microsoft.Build.UnitTests
         public void Initialize(IEventSource eventSource)
         {
             eventSource.AnyEventRaised += LoggerEventHandler;
+
+            if (_profileEvaluation)
+            {
+                var eventSource3 = eventSource as IEventSource3;
+                eventSource3.ShouldNotBeNull();
+                eventSource3.IncludeEvaluationProfiles();
+            }
         }
 
         /// <summary>
@@ -216,14 +218,10 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        public MockLogger()
-        {
-            _testOutputHelper = null;
-        }
-
-        public MockLogger(ITestOutputHelper testOutputHelper)
+        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false)
         {
             _testOutputHelper = testOutputHelper;
+            _profileEvaluation = profileEvaluation;
         }
 
         public List<Action<object, BuildEventArgs>> AdditionalHandlers { get; set; } = new List<Action<object, BuildEventArgs>>();

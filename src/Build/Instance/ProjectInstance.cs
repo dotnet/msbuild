@@ -2146,13 +2146,16 @@ namespace Microsoft.Build.Execution
                 // Enables task parameter logging based on whether any of the loggers attached
                 // to the Project have their verbosity set to Diagnostic. If no logger has
                 // been set to log diagnostic then the existing/default value will be persisted.
-                parameters.LogTaskInputs = parameters.LogTaskInputs || loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic);
+                parameters.LogTaskInputs =
+                    parameters.LogTaskInputs ||
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggingService?.IncludeTaskInputs == true;
             }
 
             if (remoteLoggers != null)
             {
-                parameters.ForwardingLoggers = (remoteLoggers is ICollection<ForwardingLoggerRecord>) ?
-                    ((ICollection<ForwardingLoggerRecord>)remoteLoggers) :
+                parameters.ForwardingLoggers = remoteLoggers is ICollection<ForwardingLoggerRecord> records ?
+                    records :
                     new List<ForwardingLoggerRecord>(remoteLoggers);
             }
 

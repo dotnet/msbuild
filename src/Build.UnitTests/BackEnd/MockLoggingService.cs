@@ -190,6 +190,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set;
         }
 
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        public bool IncludeEvaluationProfile
+        {
+            get => false;
+            set { }
+        }
+
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
+        public bool IncludeTaskInputs
+        {
+            get => false;
+            set { }
+        }
+
         public void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes)
         {
             throw new NotImplementedException();

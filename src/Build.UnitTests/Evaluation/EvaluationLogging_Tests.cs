@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -172,6 +173,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         }
                     }
                 });
+        }
+
+        [Fact]
+        public void TurnOnProfileEvaluationFromLogger()
+        {
+            AssertLoggingEvents(
+                (project, logger) =>
+                {
+                    foreach (var e in logger.AllBuildEvents.OfType<ProjectEvaluationFinishedEventArgs>())
+                    {
+                        e.ProfilerResult.ShouldNotBeNull();
+                    }
+                },
+                new MockLogger(null, true));
         }
     }
 }

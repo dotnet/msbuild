@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// A list of ILoggers registered with the LoggingService
         /// </summary>
-        private List<ILogger> _iloggerList;
+        private List<ILogger> _loggers;
 
         /// <summary>
         /// A list of LoggerDescriptions which describe how to create a forwarding logger on a node. These are
@@ -148,7 +148,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Index into the eventSinkDictionary which indicates which sink is the sink for any logger registered through RegisterLogger
         /// </summary>
-        private int _centralLoggerSinkId = -1;
+        private int _centralForwardingLoggerSinkId = -1;
 
         /// <summary>
         /// What is the Id for the next logger registered with the logging service.
@@ -196,6 +196,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private int _nodeId = 0;
 
+        /// <summary>
+        /// Whether to include evaluation profiles in events.
+        /// </summary>
+        private bool? _includeEvaluationProfile;
+
+        /// <summary>
+        /// Whether to include task inputs in task events.
+        /// </summary>
+        private bool? _includeTaskInputs;
+
         #region LoggingThread Data
 
         /// <summary>
@@ -225,16 +235,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private LoggerMode _logMode = NativeMethodsShared.IsMono ? LoggerMode.Synchronous : LoggerMode.Asynchronous;
 
-        /// <summary>
-        /// A list of warnings to treat as errors.
-        /// </summary>
-        private ISet<string> _warningsAsErrors = null;
-
-        /// <summary>
-        /// A list of warnings to treat as low importance messages.
-        /// </summary>
-        private ISet<string> _warningsAsMessages = null;
-
         #endregion
 
         #endregion
@@ -250,7 +250,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             _projectFileMap = new Dictionary<int, string>();
             _logMode = loggerMode;
-            _iloggerList = new List<ILogger>();
+            _loggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
             _eventSinkDictionary = new Dictionary<int, IBuildEventSink>();
             _nodeId = nodeId;
@@ -404,13 +404,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Is it starting to shutdown
         /// Has it shutdown
         /// </summary>
-        public LoggingServiceState ServiceState
-        {
-            get
-            {
-                return _serviceState;
-            }
-        }
+        public LoggingServiceState ServiceState => _serviceState;
 
         /// <summary>
         /// Use to optimize away status messages. When this is set to true, only "critical"
@@ -418,15 +412,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public bool OnlyLogCriticalEvents
         {
-            get
-            {
-                return _onlyLogCriticalEvents;
-            }
+            get => _onlyLogCriticalEvents;
 
-            set
-            {
-                _onlyLogCriticalEvents = value;
-            }
+            set => _onlyLogCriticalEvents = value;
         }
 
         /// <summary>
@@ -434,15 +422,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public int MaxCPUCount
         {
-            get
-            {
-                return _maxCPUCount;
-            }
+            get => _maxCPUCount;
 
-            set
-            {
-                _maxCPUCount = value;
-            }
+            set => _maxCPUCount = value;
         }
 
         /// <summary>
@@ -450,50 +432,53 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This is used by the node provider to get a list of registered descriptions so that 
         /// they can be transmitted to child nodes.
         /// </summary>
-        public ICollection<LoggerDescription> LoggerDescriptions
-        {
-            get
-            {
-                return _loggerDescriptions;
-            }
-        }
+        public ICollection<LoggerDescription> LoggerDescriptions => _loggerDescriptions;
 
         /// <summary>
         /// Enumerator over all registered loggers.
         /// </summary>
-        public ICollection<ILogger> Loggers
-        {
-            get { return _iloggerList; }
-        }
+        public ICollection<ILogger> Loggers => _loggers;
 
         /// <summary>
         /// What type of logging mode is the logger running under. 
         /// Is it Synchronous or Asynchronous
         /// </summary>
-        public LoggerMode LoggingMode
-        {
-            get
-            {
-                return _logMode;
-            }
-        }
+        public LoggerMode LoggingMode => _logMode;
 
         /// <summary>
         /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
         /// </summary>
         public ISet<string> WarningsAsErrors
         {
-            get { return _warningsAsErrors; }
-            set { _warningsAsErrors = value; }
-        }
+            get;
+            set;
+        } = null;
 
         /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
         {
-            get { return _warningsAsMessages; }
-            set { _warningsAsMessages = value; }
+            get;
+            set;
+        } = null;
+
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        public bool IncludeEvaluationProfile
+        {
+            get => (_includeEvaluationProfile = _includeEvaluationProfile ??_eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationProfiles)).Value;
+            set => _includeEvaluationProfile = value;
+        }
+
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
+        public bool IncludeTaskInputs
+        {
+            get => (_includeTaskInputs = _includeTaskInputs ?? _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeTaskInputs)).Value;
+            set => _includeTaskInputs = value;
         }
 
         /// <summary>
@@ -584,13 +569,13 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 lock (_lockObject)
                 {
-                    if (_iloggerList == null)
+                    if (_loggers == null)
                     {
                         return null;
                     }
 
                     List<string> loggerTypes = new List<string>();
-                    foreach (ILogger logger in _iloggerList)
+                    foreach (ILogger logger in _loggers)
                     {
                         loggerTypes.Add(logger.GetType().FullName);
                     }
@@ -697,7 +682,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     try
                     {
                         // 1. Shutdown forwarding loggers so that any events they have left to forward can get into the queue
-                        foreach (ILogger logger in _iloggerList)
+                        foreach (ILogger logger in _loggers)
                         {
                             if (logger is IForwardingLogger)
                             {
@@ -726,7 +711,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     }
 
                     // 4. Shutdown the central loggers
-                    foreach (ILogger logger in _iloggerList)
+                    foreach (ILogger logger in _loggers)
                     {
                         ShutdownLogger(logger);
                     }
@@ -735,7 +720,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     // Revert the centralLogger sinId back to -1 so that when another central logger is registered, it will generate a new
                     // sink for the central loggers.
-                    _centralLoggerSinkId = -1;
+                    _centralForwardingLoggerSinkId = -1;
 
                     // Clean up anything related to the asynchronous logging
                     if (_logMode == LoggerMode.Asynchronous)
@@ -744,7 +729,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         _loggingQueueProcessor = null;
                     }
 
-                    _iloggerList = new List<ILogger>();
+                    _loggers = new List<ILogger>();
                     _loggerDescriptions = null;
                     _eventSinkDictionary = null;
                     _filterEventSource = null;
@@ -795,7 +780,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 ErrorUtilities.VerifyThrow(logger != null, "logger was null");
 
                 // If the logger is already in the list it should not be registered again.
-                if (_iloggerList.Contains(logger))
+                if (_loggers.Contains(logger))
                 {
                     return false;
                 }
@@ -803,13 +788,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 // If we have not created a distributed logger to forward all events to the central loggers and
                 // a sink which will consume the events and send them to each of the central loggers, we
                 // should do that now
-                if (_centralLoggerSinkId == -1)
+                if (_centralForwardingLoggerSinkId == -1)
                 {
                     // Create a forwarding logger which forwards all events to an eventSourceSink
                     Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
                     string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
-                    LoggerDescription centralLoggerDescrption = new LoggerDescription
+                    LoggerDescription centralForwardingLoggerDescription = new LoggerDescription
                                                                                      (
                                                                                       loggerClassName,
                                                                                       loggerAssemblyName,
@@ -820,19 +805,19 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     // Registering a distributed logger will initialize the logger, and create and initialize the forwarding logger.
                     // In addition it will register the logging description so that it can be instantiated on a node.
-                    RegisterDistributedLogger(logger, centralLoggerDescrption);
+                    RegisterDistributedLogger(logger, centralForwardingLoggerDescription);
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
                     // will be attached to that eventSource sink so that they get all of the events forwarded by 
                     // forwarded by the CentralForwardingLogger
-                    _centralLoggerSinkId = centralLoggerDescrption.LoggerId;
+                    _centralForwardingLoggerSinkId = centralForwardingLoggerDescription.LoggerId;
                 }
                 else
                 {
                     // We have already create a forwarding logger and have a single eventSink which 
                     // a logger can listen to inorder to get all events in the system
-                    EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralLoggerSinkId];
+                    EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId];
 
                     // Initialize and register the logger
                     InitializeLogger(logger, eventSource);
@@ -855,7 +840,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                if (_iloggerList.Count > 0)
+                if (_loggers.Count > 0)
                 {
                     ShutdownComponent();
                 }
@@ -899,7 +884,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 };
 
                 // If the logger is already in the list it should not be registered again.
-                if (_iloggerList.Contains(centralLogger))
+                if (_loggers.Contains(centralLogger))
                 {
                     return false;
                 }
@@ -907,7 +892,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Assign a unique logger Id to this distributed logger
                 int sinkId = _nextSinkId++;
                 forwardingLogger.LoggerId = sinkId;
-                eventSourceSink.Name = "Sink for forwarding logger \"" + sinkId + "\".";
+                eventSourceSink.Name = $"Sink for forwarding logger \"{sinkId}\".";
 
                 // Initialize and register the central logger
                 InitializeLogger(centralLogger, eventSourceSink);
@@ -1406,7 +1391,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // Keep track of the loggers so they can be unregistered later on
-            _iloggerList.Add(logger);
+            _loggers.Add(logger);
         }
 
         /// <summary>

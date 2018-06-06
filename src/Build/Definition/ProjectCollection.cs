@@ -1752,7 +1752,7 @@ namespace Microsoft.Build.Evaluation
         /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
         /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
         /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource2
+        internal class ReusableLogger : INodeLogger, IEventSource3
         {
             /// <summary>
             /// The logger we are wrapping.
@@ -1844,6 +1844,10 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private TelemetryEventHandler _telemetryEventHandler;
 
+            private bool _includeEvaluationProfiles;
+
+            private bool _includeTaskInputs;
+
             /// <summary>
             /// Constructor.
             /// </summary>
@@ -1930,24 +1934,53 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
 
-#endregion
+            /// <summary>
+            /// Should evaluation events include profiling information?
+            /// </summary>
+            public void IncludeEvaluationProfiles()
+            {
+                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
+                {
+                    buildEventSource3.IncludeEvaluationProfiles();
+                }
 
-#region ILogger Members
+                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
+                {
+                    designTimeEventSource3.IncludeEvaluationProfiles();
+                }
+
+                _includeEvaluationProfiles = true;
+            }
+
+            /// <summary>
+            /// Should task events include task inputs?
+            /// </summary>
+            public void IncludeTaskInputs()
+            {
+                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
+                {
+                    buildEventSource3.IncludeTaskInputs();
+                }
+
+                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
+                {
+                    designTimeEventSource3.IncludeTaskInputs();
+                }
+
+                _includeTaskInputs = true;
+            }
+            #endregion
+
+            #region ILogger Members
 
             /// <summary>
             /// The logger verbosity
             /// </summary>
             public LoggerVerbosity Verbosity
             {
-                get
-                {
-                    return _originalLogger.Verbosity;
-                }
+                get => _originalLogger.Verbosity;
 
-                set
-                {
-                    _originalLogger.Verbosity = value;
-                }
+                set => _originalLogger.Verbosity = value;
             }
 
             /// <summary>
@@ -1955,15 +1988,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string Parameters
             {
-                get
-                {
-                    return _originalLogger.Parameters;
-                }
+                get => _originalLogger.Parameters;
 
-                set
-                {
-                    _originalLogger.Parameters = value;
-                }
+                set => _originalLogger.Parameters = value;
             }
 
             /// <summary>
@@ -1977,9 +2004,9 @@ namespace Microsoft.Build.Evaluation
                     _designTimeEventSource = eventSource;
                     RegisterForEvents(_designTimeEventSource);
 
-                    if (_originalLogger is INodeLogger)
+                    if (_originalLogger is INodeLogger logger)
                     {
-                        ((INodeLogger)_originalLogger).Initialize(this, nodeCount);
+                        logger.Initialize(this, nodeCount);
                     }
                     else
                     {
@@ -2067,6 +2094,19 @@ namespace Microsoft.Build.Evaluation
                 if (eventSource is IEventSource2 eventSource2)
                 {
                     eventSource2.TelemetryLogged += _telemetryEventHandler;
+                }
+
+                if (eventSource is IEventSource3 eventSource3)
+                {
+                    if (_includeEvaluationProfiles)
+                    {
+                        eventSource3.IncludeEvaluationProfiles();
+                    }
+
+                    if (_includeTaskInputs)
+                    {
+                        eventSource3.IncludeTaskInputs();
+                    }
                 }
             }
 
