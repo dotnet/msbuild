@@ -333,7 +333,6 @@ namespace Microsoft.Build.Evaluation
         /// This is the only non-private member of this class.
         /// This is a helper static method so that the caller can just do "Evaluator.Evaluate(..)" without
         /// newing one up, yet the whole class need not be static.
-        /// The optional ProjectInstance is only exposed when doing debugging. It is not used by the evaluator.
         /// </remarks>
         internal static void Evaluate(
             IEvaluatorData<P, I, M, D> data,
