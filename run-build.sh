@@ -169,7 +169,6 @@ fi
 
 if [ "$STAGE0_SOURCE_DIR" == "" ]; then
     (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "$DotNetCliVersion" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$INSTALL_ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
-    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --shared-runtime --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE")
 else
     echo "Copying bootstrap cli from $STAGE0_SOURCE_DIR"
     cp -r $STAGE0_SOURCE_DIR/* "$DOTNET_INSTALL_DIR"
@@ -180,6 +179,9 @@ if [ $EXIT_CODE != 0 ]; then
     echo "run-build: Error: installing stage0 with exit code $EXIT_CODE." >&2
     exit $EXIT_CODE
 fi
+
+#ignore 1.1.2 install failure, as it is not present on all platforms
+(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --runtime "dotnet" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" || true)
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
