@@ -40,6 +40,10 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
         internal static readonly string[] directorySeparatorStrings = directorySeparatorCharacters.Select(c => c.ToString()).ToArray();
 
+        // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
+        private static readonly Lazy<ConcurrentDictionary<string, ImmutableArray<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, ImmutableArray<string>>>(() => new ConcurrentDictionary<string, ImmutableArray<string>>(StringComparer.OrdinalIgnoreCase));
+        private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
+
         private readonly ConcurrentDictionary<string, ImmutableArray<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
 
@@ -74,7 +78,15 @@ namespace Microsoft.Build.Shared
 
         public FileMatcher(GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null)
         {
-            _cachedGlobExpansions = getFileSystemDirectoryEntriesCache;
+            if (Traits.Instance.MSBuildCacheFileEnumerations)
+            {
+                _cachedGlobExpansions = s_cachedGlobExpansions.Value;
+                _cachedGlobExpansionsLock = s_cachedGlobExpansionsLock;
+            }
+            else
+            {
+                _cachedGlobExpansions = getFileSystemDirectoryEntriesCache;
+            }
 
             _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
                 ? getFileSystemEntries
@@ -122,6 +134,15 @@ namespace Microsoft.Build.Shared
 
         internal static void ClearFileEnumerationsCache()
         {
+            if (s_cachedGlobExpansions.IsValueCreated)
+            {
+                s_cachedGlobExpansions.Value.Clear();
+            }
+
+            if (s_cachedGlobExpansionsLock.IsValueCreated)
+            {
+                s_cachedGlobExpansionsLock.Value.Clear();
+            }
         }
 
         /// <summary>
@@ -1713,44 +1734,42 @@ namespace Microsoft.Build.Shared
             IEnumerable<string> excludeSpecsUnescaped = null
         )
         {
-            if (_cachedGlobExpansions != null)
-            {
-                string filesKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
-
-                ImmutableArray<string> files;
-                if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
-                {
-                    // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
-                    object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(filesKey, _ => new object());
-                    lock (locks)
-                    {
-                        if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
-                        {
-                            files =
-                                _cachedGlobExpansions.GetOrAdd(
-                                    filesKey,
-                                    (_) =>
-                                        GetFilesImplementation(
-                                            projectDirectoryUnescaped,
-                                            filespecUnescaped,
-                                            excludeSpecsUnescaped)
-                                            .ToImmutableArray());
-                        }
-                    }
-                }
-
-                // Copy the file enumerations to prevent outside modifications of the cache (e.g. sorting, escaping) and to maintain the original contract that a new array is created on each call.
-                var filesToReturn = files.ToArray();
-
-                return filesToReturn;
-            }
-            else
+            if (_cachedGlobExpansions == null)
             {
                 return GetFilesImplementation(
                     projectDirectoryUnescaped,
                     filespecUnescaped,
                     excludeSpecsUnescaped);
             }
+
+            var filesKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+
+            ImmutableArray<string> files;
+            if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+            {
+                // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
+                object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(filesKey, _ => new object());
+                lock (locks)
+                {
+                    if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+                    {
+                        files =
+                            _cachedGlobExpansions.GetOrAdd(
+                                filesKey,
+                                (_) =>
+                                    GetFilesImplementation(
+                                        projectDirectoryUnescaped,
+                                        filespecUnescaped,
+                                        excludeSpecsUnescaped)
+                                        .ToImmutableArray());
+                    }
+                }
+            }
+
+            // Copy the file enumerations to prevent outside modifications of the cache (e.g. sorting, escaping) and to maintain the original method contract that a new array is created on each call.
+            var filesToReturn = files.ToArray();
+
+            return filesToReturn;
         }
 
         private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, IEnumerable<string> excludes)

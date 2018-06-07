@@ -40,6 +40,10 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
+
+        /// <summary>
+        /// Cache file existence for the entire process
+        /// </summary>
         public readonly bool CacheFileExistence = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileExistence"));
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace Microsoft.Build.Utilities
         public readonly bool UseSimpleInternConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleInternConcurrency"));
 
         /// <summary>
-        /// Cache wildcard expansions
+        /// Cache wildcard expansions for the entire process
         /// </summary>
         public readonly bool MSBuildCacheFileEnumerations = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileEnumerations"));
 
