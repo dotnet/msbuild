@@ -11,12 +11,12 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
-        <target state="needs-review-translation">ID de package NuGet de l'outil à installer.</target>
+        <target state="translated">ID de package NuGet de l'outil à installer.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install a tool for use on the command line.</source>
-        <target state="needs-review-translation">Installe un outil à utiliser sur la ligne de commande.</target>
+        <target state="translated">Installez un outil à utiliser sur la ligne de commande.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -31,7 +31,7 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
-        <target state="needs-review-translation">Version du package d'outils dans NuGet.</target>
+        <target state="translated">Version du package d'outils à installer.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -46,7 +46,7 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool to the current user's tools directory.</source>
-        <target state="needs-review-translation">Effectuez l'installation à l'échelle des utilisateurs.</target>
+        <target state="translated">Installez l'outil dans le répertoire des outils de l'utilisateur actuel.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -121,37 +121,37 @@ L'outil '{1}' (version '{2}') a été installé correctement.</target>
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
         <source>Add an additional NuGet package source to use during installation.</source>
-        <target state="new">Add an additional NuGet package source to use during installation.</target>
+        <target state="translated">Ajoutez une source de package NuGet supplémentaire à utiliser durant l'installation.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="new">FILE</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
-        <target state="new">The directory where the tool will be installed. The directory will be created if it does not exist.</target>
+        <target state="translated">Répertoire où l'outil va être installé. Ce répertoire est créé, s'il n'existe pas déjà.</target>
         <note />
       </trans-unit>
     </body>

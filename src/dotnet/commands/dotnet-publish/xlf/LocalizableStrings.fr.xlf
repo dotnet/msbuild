@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Framework cible de la publication. Le framework cible doit être spécifié dans le fichier projet.</target>
+        <target state="translated">Framework cible pour lequel la publication est effectuée. Le framework cible doit être spécifié dans le fichier projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">Répertoire de sortie dans lequel placer les artefacts publiés.</target>
+        <target state="translated">Répertoire de sortie dans lequel placer les artefacts publiés.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -40,7 +40,8 @@
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publiez le runtime .NET Core avec votre application pour éviter à l'utilisateur de l'installer sur la machine cible. La valeur par défaut est 'true' si un identificateur de runtime est spécifié.</target>
+        <target state="translated">Publiez le runtime .NET Core avec votre application pour éviter à l'utilisateur de l'installer sur la machine cible.
+La valeur par défaut est 'true' si un identificateur de runtime est spécifié.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -51,13 +52,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <target state="translated">Runtime cible pour lequel la publication est effectuée. S'utilise pour la création d'un déploiement autonome.
+L'action par défaut consiste à publier une application qui dépend d'un framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Configuration pour laquelle la publication est effectuée. La valeur par défaut pour la plupart des projets est 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

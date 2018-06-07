@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The output directory to place built packages in.</source>
-        <target state="needs-review-translation">要放置建置套件的目錄。</target>
+        <target state="translated">放置組建套件所在的輸出目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
-        <target state="needs-review-translation">包含 PDB 和來源檔案。來源檔案會傳入產生之 NuGet 套件中的 src 資料夾</target>
+        <target state="translated">包含 PDB 和原始程式檔。原始程式檔會進入所產生之 NuGet 套件中的 'src' 資料夾。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
-        <target state="needs-review-translation">設定套件中提供服務的旗標。如需詳細資訊，請參閱 https://aka.ms/nupkgservicing。</target>
+        <target state="translated">設定套件中的服務旗標。如需詳細資訊，請參閱 https://aka.ms/nupkgservicing。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
+        <target state="translated">要用於建置套件的組態。大部分的專案預設為「偵錯」。</target>
         <note />
       </trans-unit>
     </body>

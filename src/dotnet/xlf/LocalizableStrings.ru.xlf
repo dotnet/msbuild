@@ -130,7 +130,7 @@
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="translated">Удаление.</target>
+        <target state="translated">Удалить</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">

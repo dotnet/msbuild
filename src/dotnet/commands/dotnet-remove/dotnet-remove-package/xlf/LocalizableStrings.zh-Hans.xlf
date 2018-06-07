@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Remove a NuGet package reference from the project.</source>
-        <target state="needs-review-translation">.NET“删除包引用”命令。</target>
+        <target state="translated">从项目中删除 NuGet 包引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>The package reference to remove.</source>
-        <target state="needs-review-translation">要删除的包引用。</target>
+        <target state="translated">要删除的包引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">

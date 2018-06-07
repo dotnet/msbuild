@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Pokaż pomoc.</target>
+        <target state="translated">Pokaż pomoc wiersza polecenia.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -59,42 +59,42 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Create a new .NET project or file.</source>
-        <target state="needs-review-translation">Zainicjuj projekty platformy .NET.</target>
+        <target state="translated">Utwórz nowy projekt lub plik platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in a .NET project.</source>
-        <target state="needs-review-translation">Przywróć zależności określone w projekcie platformy .NET.</target>
+        <target state="translated">Przywróć zależności określone w projekcie platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Build a .NET project.</source>
-        <target state="needs-review-translation">Kompiluje projekt platformy .NET.</target>
+        <target state="translated">Kompiluj projekt platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publish a .NET project for deployment.</source>
-        <target state="needs-review-translation">Publikuje projekt platformy .NET do wdrożenia (w tym środowisko uruchomieniowe).</target>
+        <target state="translated">Publikuj projekt platformy .NET do wdrożenia.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Build and run a .NET project output.</source>
-        <target state="needs-review-translation">Kompiluje i natychmiast wykonuje projekt platformy .NET.</target>
+        <target state="translated">Kompiluj i uruchom dane wyjściowe projektu platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Run unit tests using the test runner specified in a .NET project.</source>
-        <target state="needs-review-translation">Uruchamia testy jednostkowe przy użyciu określonego w projekcie modułu uruchamiającego testy.</target>
+        <target state="translated">Uruchom testy jednostkowe przy użyciu modułu uruchamiającego testy określonego w projekcie platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Create a NuGet package.</source>
-        <target state="needs-review-translation">Tworzy pakiet NuGet.</target>
+        <target state="translated">Utwórz pakiet NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="needs-review-translation">Migruje projekt oparty na pliku project.json do projektu opartego na programie MSBuild.</target>
+        <target state="translated">Migruj projekt project.json do projektu programu MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add a package or reference to a .NET project.</source>
-        <target state="needs-review-translation">Dodaj odwołanie do projektu.</target>
+        <target state="translated">Dodaj pakiet lub odwołanie do projektu platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove a package or reference from a .NET project.</source>
-        <target state="needs-review-translation">Usuń odwołanie z projektu.</target>
+        <target state="translated">Usuń pakiet lub odwołanie z projektu platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -124,12 +124,12 @@
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Run Microsoft Build Engine (MSBuild) commands.</source>
-        <target state="needs-review-translation">Uruchamia aparat Microsoft Build Engine (MSBuild).</target>
+        <target state="translated">Uruchom polecenia aparatu Microsoft Build Engine (MSBuild).</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Run Microsoft Test Engine (VSTest) commands.</source>
-        <target state="needs-review-translation">Uruchamia narzędzie Microsoft Test Execution Command Line Tool.</target>
+        <target state="translated">Uruchom polecenia aparatu Microsoft Test Engine (VSTest).</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -139,22 +139,22 @@
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build outputs of a .NET project.</source>
-        <target state="needs-review-translation">Wyczyść dane wyjściowe kompilacji.</target>
+        <target state="translated">Wyczyść dane wyjściowe kompilacji projektu platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
         <source>Modify Visual Studio solution files.</source>
-        <target state="needs-review-translation">Modyfikuj pliki rozwiązania (SLN).</target>
+        <target state="translated">Modyfikuj pliki rozwiązania programu Visual Studio.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references of a .NET project.</source>
-        <target state="needs-review-translation">Wyświetl listę odwołań projektu lub zainstalowanych narzędzi.</target>
+        <target state="translated">Wyświetl listę odwołań projektu dla projektu platformy .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">Określone polecenie („{0}”) nie jest prawidłowym poleceniem interfejsu wiersza polecenia. Określ prawidłowe polecenia interfejsu wiersza polecenia. Aby uzyskać więcej informacji, uruchom polecenie dotnet help.</target>
+        <target state="translated">Określone polecenie („{0}”) nie jest prawidłowym poleceniem zestawu SDK. Określ prawidłowe polecenie zestawu SDK. Aby uzyskać więcej informacji, uruchom polecenie dotnet help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the SDK commands.</source>
-        <target state="needs-review-translation">Narzędzie pozwalające uzyskać bardziej szczegółową pomoc dotyczącą poszczególnych poleceń interfejsu wiersza polecenia.</target>
+        <target state="translated">Narzędzie pozwalające uzyskać bardziej szczegółową pomoc dotyczącą poszczególnych poleceń zestawu SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>The SDK command to launch online help for.</source>
-        <target state="needs-review-translation">Polecenie interfejsu wiersza polecenie, dla którego chcesz wyświetlić bardziej szczegółową pomoc.</target>
+        <target state="translated">Polecenie zestawu SDK, dla którego ma zostać uruchomiona pomoc online.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet [command] --help' for more information on a command.</source>
-        <target state="needs-review-translation">Uruchom polecenie „dotnet POLECENIE --help”, aby uzyskać więcej informacji o danym poleceniu.</target>
+        <target state="translated">Uruchom polecenie „dotnet [polecenie] --help”, aby uzyskać więcej informacji o danym poleceniu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -244,12 +244,12 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="needs-review-translation">Przechowuje określone zestawy w magazynie środowiska uruchomieniowego.</target>
+        <target state="translated">Przechowuj określone zestawy w magazynie pakietu środowiska uruchomieniowego.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or manage tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">Zainstaluj lub pracuj z narzędziami, które rozszerzają środowisko .NET.</target>
+        <target state="translated">Zainstaluj lub zarządzaj narzędziami, które rozszerzają środowisko .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -259,42 +259,42 @@
       </trans-unit>
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
-        <target state="new">Create and manage development certificates.</target>
+        <target state="translated">Utwórz certyfikaty deweloperskie i zarządzaj nimi.</target>
         <note />
       </trans-unit>
       <trans-unit id="EfDefinition">
         <source>Entity Framework Core command-line tools.</source>
-        <target state="new">Entity Framework Core command-line tools.</target>
+        <target state="translated">Narzędzia wiersza polecenia programu Entity Framework Core.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
+        <target state="translated">Narzędzia wiersza polecenia pamięci podręcznej programu SQL Server.</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
-        <target state="new">Manage development user secrets.</target>
+        <target state="translated">Zarządzaj wpisami tajnymi użytkowników dotyczącymi czynności deweloperskich.</target>
         <note />
       </trans-unit>
       <trans-unit id="WatchDefinition">
         <source>Start a file watcher that runs a command when files change.</source>
-        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <target state="translated">Rozpocznij pracę obserwatora plików służącego do uruchamiania polecenia po wprowadzeniu zmian w plikach.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
         <source>Additional commands from bundled tools:</source>
-        <target state="new">Additional commands from bundled tools:</target>
+        <target state="translated">Dodatkowe polecenia z narzędzi w pakiecie:</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET Core SDK command.</source>
-        <target state="new">Execute a .NET Core SDK command.</target>
+        <target state="translated">Wykonaj polecenie zestawu .NET Core SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
-        <target state="new">Execute a .NET Core application.</target>
+        <target state="translated">Wykonaj aplikację platformy .NET Core.</target>
         <note />
       </trans-unit>
     </body>

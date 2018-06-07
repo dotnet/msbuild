@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">게시할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에서 지정해야 합니다.</target>
+        <target state="translated">게시할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에서 지정해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">게시할 아티팩트를 배치할 출력 디렉터리입니다.</target>
+        <target state="translated">게시된 아티팩트를 배치할 출력 디렉터리입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -40,7 +40,8 @@
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 응용 프로그램과 함께 .NET Core 런타임을 게시합니다. 런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
+        <target state="translated">런타임은 대상 컴퓨터에 설치할 필요가 없으므로 응용 프로그램과 함께 .NET Core 런타임을 게시합니다.
+런타임 식별자가 지정된 경우 기본값은 'true'입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -51,13 +52,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <target state="translated">게시할 대상 런타임입니다. 자체 포함 배포를 만들 때 사용됩니다.
+기본값은 프레임워크 종속 응용 프로그램을 게시하는 것입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">게시할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
         <note />
       </trans-unit>
     </body>

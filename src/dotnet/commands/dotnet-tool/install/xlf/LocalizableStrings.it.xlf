@@ -11,12 +11,12 @@ Lo strumento '{1}' (versione '{2}') è stato installato.</target>
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
-        <target state="needs-review-translation">ID pacchetto NuGet dello strumento da installare.</target>
+        <target state="translated">ID pacchetto NuGet dello strumento da installare.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install a tool for use on the command line.</source>
-        <target state="needs-review-translation">Installa uno strumento da usare sulla riga di comando.</target>
+        <target state="translated">Installa uno strumento da usare sulla riga di comando.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -31,12 +31,12 @@ Lo strumento '{1}' (versione '{2}') è stato installato.</target>
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
-        <target state="needs-review-translation">Versione del pacchetto dello strumento in NuGet.</target>
+        <target state="translated">Versione del pacchetto dello strumento da installare.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
+        <target state="translated">ID_PACCHETTO</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
@@ -46,7 +46,7 @@ Lo strumento '{1}' (versione '{2}') è stato installato.</target>
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool to the current user's tools directory.</source>
-        <target state="needs-review-translation">Esegue l'installazione a livello di utente.</target>
+        <target state="translated">Installa lo strumento nella directory degli strumenti dell'utente corrente.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -121,37 +121,37 @@ Lo strumento '{1}' (versione '{2}') è stato installato.</target>
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
         <source>Add an additional NuGet package source to use during installation.</source>
-        <target state="new">Add an additional NuGet package source to use during installation.</target>
+        <target state="translated">Aggiunge un'altra origine pacchetto NuGet da usare durante l'installazione.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">ORIGINE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
+        <target state="translated">VERSIONE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="new">FILE</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PERCORSO</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
-        <target state="new">The directory where the tool will be installed. The directory will be created if it does not exist.</target>
+        <target state="translated">Directory in cui verrà installato lo strumento. Se non esiste già, verrà creata.</target>
         <note />
       </trans-unit>
     </body>

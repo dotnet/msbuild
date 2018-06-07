@@ -29,22 +29,22 @@
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>The NuGet package source to use for the restore.</source>
-        <target state="needs-review-translation">Especifica el origen de un paquete NuGet para usarlo durante la restauración.</target>
+        <target state="translated">El origen de un paquete de NuGet para usarlo para la restauración.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIR</source>
-        <target state="needs-review-translation">DIRECTORIO_DE:PAQUETES</target>
+        <target state="translated">PACKAGES_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">Directorio donde se instalarán los paquetes.</target>
+        <target state="translated">El directorio en el que se restauran paquetes.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
         <source>Prevent restoring multiple projects in parallel.</source>
-        <target state="needs-review-translation">Deshabilita la restauración de varios proyectos en paralelo.</target>
+        <target state="translated">Evite la restauración de varios proyectos en paralelo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Do not restore project-to-project references and only restore the specified project.</source>
-        <target state="needs-review-translation">Establezca esta marca para que se omitan las referencias de proyecto a proyecto y se restaure solo el proyecto raíz.</target>
+        <target state="translated">No restaure referencias de proyecto a proyecto y restaure solo el proyecto especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -79,13 +79,14 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>The target runtime to restore packages for.</source>
-        <target state="needs-review-translation">Runtime de destino para el que restaurar los paquetes.</target>
+        <target state="translated">El tiempo de ejecución de destino para el que se restauran los paquetes.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
         <source>Force all dependencies to be resolved even if the last restore was successful.
 This is equivalent to deleting project.assets.json.</source>
-        <target state="needs-review-translation">Establezca este indicador para forzar la resolución de todas las dependencias aunque la última restauración se haya realizado correctamente. Esta acción es equivalente a eliminar project.assets.json.</target>
+        <target state="translated">Fuerce la resolución de todas las dependencias aunque la última restauración se haya realizado correctamente.
+Esta acción es equivalente a eliminar project.assets.json.</target>
         <note />
       </trans-unit>
     </body>

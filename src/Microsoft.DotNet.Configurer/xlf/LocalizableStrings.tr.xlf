@@ -64,11 +64,11 @@ Bu hatayı düzeltmek için bazı seçenekler:
 Successfully installed the ASP.NET Core HTTPS Development Certificate.
 To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
 For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="needs-review-translation">ASP.NET Core
+        <target state="translated">ASP.NET Core
 ------------
 ASP.NET Core HTTPS Geliştirme Sertifikası başarıyla yüklendi.
-Sertifikaya güvenmek için (yalnızca Windows ve macOS) önce 'dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final', sonra 'dotnet-dev-certs https --trust' komutlarını çalıştırarak dev-certs aracını yükleyin.
-HTTPS yapılandırması hakkında daha fazla bilgi için bkz. https://go.microsoft.com/fwlink/?linkid=848054.</target>
+Sertifikaya güvenmek için 'dotnet dev-certs https --trust' komutunu çalıştırın (yalnızca Windows ve macOS). Diğer platformlarda güven ilişkisini oluşturmak için ilgili platforma özgü belgelere başvurun.
+HTTPS yapılandırması hakkında daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
     </body>

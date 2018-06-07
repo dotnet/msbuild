@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
-        <target state="needs-review-translation">將此旗標設定為略過專案對專案參考並僅建置根專案</target>
+        <target state="translated">請勿建置專案對專案的參考，而只建置指定的專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Do not use incremental building.</source>
-        <target state="needs-review-translation">停用累加建置。</target>
+        <target state="translated">請勿使用累加建置。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">要放置建置成品的輸出目錄。</target>
+        <target state="translated">放置建置成品的輸出目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to build for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <target state="translated">要為其進行建置的目標架構。該目標架構必須在專案檔中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="new">The target runtime to build for.</target>
+        <target state="translated">要為其進行建置的目標執行階段。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
+        <target state="translated">要用於建置專案的組態。大部分的專案預設為「偵錯」。</target>
         <note />
       </trans-unit>
     </body>

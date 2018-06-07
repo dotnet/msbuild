@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
-        <target state="needs-review-translation">Задайте этот флаг, чтобы пропускать ссылки проектов на проекты и выполнять сборку только корневого проекта.</target>
+        <target state="translated">Не выполнять сборку для ссылок между проектами и выполнить сборку только для указанного проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Do not use incremental building.</source>
-        <target state="needs-review-translation">Отключение инкрементной сборки.</target>
+        <target state="translated">Не использовать инкрементную сборку.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">Выходной каталог для размещения созданных артефактов.</target>
+        <target state="translated">Выходной каталог для размещения артефактов сборки.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to build for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <target state="translated">Целевая платформа для сборки. Целевая платформа также должна быть указана в файле проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="new">The target runtime to build for.</target>
+        <target state="translated">Целевая среда выполнения для сборки.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
+        <target state="translated">Конфигурация, используемая при сборке проекта. По умолчанию для большинства проектов используется "Debug".</target>
         <note />
       </trans-unit>
     </body>

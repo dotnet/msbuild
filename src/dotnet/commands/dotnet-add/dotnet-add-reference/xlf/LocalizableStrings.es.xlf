@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Add a project-to-project reference to the project.</source>
-        <target state="needs-review-translation">Comando de .NET para agregar una referencia de proyecto a proyecto</target>
+        <target state="translated">Agrega referencia de proyecto a proyecto al proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Agrega una referencia solo cuando el destino es una plataforma específica.</target>
+        <target state="translated">Agrega una referencia solo cuando el destino es una plataforma específica.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectPathArgumentDescription">
         <source>The paths to the projects to add as references.</source>
-        <target state="new">The paths to the projects to add as references.</target>
+        <target state="translated">Las rutas a los proyectos para agregar como referencias.</target>
         <note />
       </trans-unit>
     </body>

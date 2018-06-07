@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The output directory to place built packages in.</source>
-        <target state="needs-review-translation">Diretório no qual os pacotes compilados serão colocados.</target>
+        <target state="translated">O diretório de saída no qual os pacotes do build serão colocados.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
-        <target state="needs-review-translation">Incluir os arquivos de origem e os PDBs. Os arquivos de origem vão para a pasta de origem no pacote nuget resultante</target>
+        <target state="translated">Incluir os arquivos de origem e os PDBs. Os arquivos de origem vão para a pasta 'src' no pacote do nuget resultante.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
-        <target state="needs-review-translation">Defina o sinalizador operacional no pacote. Para obter mais informações, consulte https://aka.ms/nupkgservicing.</target>
+        <target state="translated">Definir o sinalizador operacional no pacote. Para obter mais informações, confira https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
+        <target state="translated">A configuração a ser usada para compilar o pacote. O padrão para a maioria dos projetos é 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

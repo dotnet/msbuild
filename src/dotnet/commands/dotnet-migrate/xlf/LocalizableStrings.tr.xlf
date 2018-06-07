@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PATH</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -35,13 +35,15 @@ Bir seçenek belirtilmezse, geçerli dizin varsayılan olarak kullanılır.</tar
       <trans-unit id="CmdTemplateDescription">
         <source>The base MSBuild template to use for the migrated project.
 The default is the project included in dotnet new.</source>
-        <target state="needs-review-translation">Geçirilen uygulama için kullanılacak temel MSBuild şablonu. Yeni dotnet’e eklenen proje, varsayılan değerdir.</target>
+        <target state="translated">Geçirilen proje için kullanılacak temel MSBuild şablonu.
+Yeni dotnet’e eklenen proje, varsayılan değerdir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the SDK package that will be referenced in the migrated project.
 The default is the version of the SDK in dotnet new.</source>
-        <target state="needs-review-translation">Geçirilen uygulamada başvurulacak SDK paketinin sürümü. Yeni dotnet’teki SDK sürümü, varsayılan değerdir.</target>
+        <target state="translated">Geçirilen projede başvurulacak SDK paketinin sürümü. 
+Yeni dotnet’teki SDK sürümü, varsayılan değerdir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

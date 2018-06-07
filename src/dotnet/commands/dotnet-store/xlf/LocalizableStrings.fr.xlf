@@ -14,12 +14,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to store the given assemblies in.</source>
-        <target state="needs-review-translation">Répertoire de sortie dans lequel stocker les assemblys spécifiés.</target>
+        <target state="translated">Répertoire de sortie dans lequel stocker les assemblys spécifiés.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
         <source>FRAMEWORK_VERSION</source>
-        <target state="needs-review-translation">FrameworkVersion</target>
+        <target state="translated">FRAMEWORK_VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
@@ -29,22 +29,22 @@
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
         <source>WORKING_DIR</source>
-        <target state="needs-review-translation">IntermediateWorkingDir</target>
+        <target state="translated">WORKING_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
         <source>The working directory used by the command to execute.</source>
-        <target state="needs-review-translation">Répertoire utilisé par la commande à exécuter.</target>
+        <target state="translated">Répertoire de travail utilisé par la commande pour s'exécuter.</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateDirExists">
         <source>Intermediate working directory {0} already exists. Remove {0} or specify another directory with -w.</source>
-        <target state="translated">Le répertoire de travail intermédiaire {0} existe déjà. Supprimez {0} ou spécifiez un autre répertoire avec -w.</target>
+        <target state="translated">Le répertoire de travail intermédiaire {0} existe déjà. Retirez {0} ou spécifiez un autre répertoire avec -w.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
         <source>Skip the optimization phase.</source>
-        <target state="needs-review-translation">Ignore la phase d'optimisation.</target>
+        <target state="translated">Ignorez la phase d'optimisation.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectManifest">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="SkipSymbolsOptionDescription">
         <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
-        <target state="needs-review-translation">Ignore la création de fichiers de symboles pour le profilage des assemblys optimisés.</target>
+        <target state="translated">Ignorez la création de fichiers de symboles pour le profilage des assemblys optimisés.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyManifests">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
-        <target state="new">The target framework to store packages for. The target framework has to be specified in the project file.</target>
+        <target state="translated">Framework cible pour lequel le stockage des packages est effectué. Le framework cible doit être spécifié dans le fichier projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to store packages for.</source>
-        <target state="new">The target runtime to store packages for.</target>
+        <target state="translated">Runtime cible pour lequel le stockage des packages est effectué.</target>
         <note />
       </trans-unit>
     </body>

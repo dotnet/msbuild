@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
+        <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -595,8 +595,8 @@
       <trans-unit id="ProjectCouldNotBeEvaluated">
         <source>Project `{0}` could not be evaluated. Evaluation failed with following error:
 {1}.</source>
-        <target state="translated">'{0}' 프로젝트를 평가할 수 없습니다. 다음 오류와 함께 평가가 실패했습니다.
-{1}</target>
+        <target state="translated">'{0}' 프로젝트를 평가할 수 없습니다. 다음 오류로 인해 평가가 실패했습니다.
+{1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
@@ -606,7 +606,7 @@
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
         <source>Invalid solution `{0}`. {1}.</source>
-        <target state="translated">'{0}' 솔루션이 잘못되었습니다. {1}</target>
+        <target state="translated">'{0}' 솔루션이 잘못되었습니다. {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
@@ -616,22 +616,22 @@
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="needs-review-translation">명령의 세부 정보 표시 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal], d[etailed] 및 diag[nostic]입니다.</target>
+        <target state="translated">MSBuild 세부 정보 표시 수준을 설정합니다. 허용되는 값은 q[uiet], m[inimal], n[ormal], d[etailed] 및 diag[nostic]입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
-        <target state="needs-review-translation">프로젝트에서 $(VersionSuffix) 속성의 값을 정의합니다.</target>
+        <target state="translated">프로젝트를 빌드할 때 사용할 $(VersionSuffix) 속성의 값을 설정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">도움말 정보를 표시합니다.</target>
+        <target state="translated">명령줄 도움말을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Do not restore the project before building.</source>
-        <target state="needs-review-translation">명령을 실행할 때 암시적 복원을 수행하지 않습니다.</target>
+        <target state="translated">빌드하기 전에 프로젝트를 복원하지 마세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -830,17 +830,17 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FormatVersionIsHigher">
         <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
-        <target state="translated">형식 버전이 지원되는 버전보다 높습니다. 이 도구는 이 SDK 버전을 지원하지 않을 수 있습니다. SDK를 업데이트하세요.</target>
+        <target state="translated">형식 버전이 지원되는 버전보다 높습니다. 이 SDK 버전에서 이 도구를 지원하지 않을 수 있습니다. SDK를 업데이트하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMalformed">
         <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="translated">형식 버전의 형식이 잘못되었습니다. 이 도구는 이 SDK 버전을 지원하지 않을 수 있습니다. 도구 작성자에게 문의하세요.</target>
+        <target state="translated">형식 버전의 형식이 잘못되었습니다. 이 SDK 버전에서 이 도구를 지원하지 않을 수 있습니다. 도구 작성자에게 문의하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="FormatVersionIsMissing">
         <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
-        <target state="translated">형식 버전이 누락되었습니다. 이 도구는 이 SDK 버전을 지원하지 않을 수 있습니다. 도구 작성자에게 문의하세요.</target>
+        <target state="translated">형식 버전이 누락되었습니다. 이 SDK 버전에서 이 도구를 지원하지 않을 수 있습니다. 도구 작성자에게 문의하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
@@ -860,37 +860,37 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">수행할 프로젝트 파일입니다. 파일을 지정하지 않으면 명령이 현재 디렉터리에서 파일을 검색합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="LevelArgumentName">
         <source>LEVEL</source>
-        <target state="new">LEVEL</target>
+        <target state="translated">LEVEL</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
+        <target state="translated">CONFIGURATION</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
+        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
-        <target state="needs-review-translation">设置此标志以忽略项目到项目引用，仅生成根项目</target>
+        <target state="translated">请勿生成项目到项目引用，仅生成指定项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Do not use incremental building.</source>
-        <target state="needs-review-translation">禁用增量生成。</target>
+        <target state="translated">请勿使用增量生成。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">用于放置生成项目的输出目录。</target>
+        <target state="translated">要放置生成项目的输出目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to build for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <target state="translated">要生成的目标框架。必须在项目文件中指定目标框架。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="new">The target runtime to build for.</target>
+        <target state="translated">要生成的目标运行时。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
+        <target state="translated">用于生成项目的配置。大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
     </body>

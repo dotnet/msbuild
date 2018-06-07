@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Cílová platforma pro publikování. Cílová platforma musí být v souboru projektu zadaná.</target>
+        <target state="translated">Cílová architektura pro publikování. Cílová architektura musí být zadaná v souboru projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">Výstupní adresář do kterého se umisťují publikované artefakty.</target>
+        <target state="translated">Výstupní adresář do kterého se mají umístit publikované artefakty</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -40,7 +40,8 @@
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publikuje spolu s aplikací modul runtime .NET Core, aby se tento modul nemusel instalovat na cílový počítač. Standardně se nastaví na True, pokud je zadaný identifikátor modulu runtime.</target>
+        <target state="translated">Publikuje spolu s aplikací modul runtime .NET Core, aby se tento modul nemusel instalovat na cílový počítač.
+Výchozí hodnota je True, pokud je zadaný identifikátor modulu runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -51,13 +52,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <target state="translated">Cílový modul runtime pro publikování. Používá se při vytváření nezávislého nasazení.
+Ve výchozím nastavení se publikuje aplikace závislá na architektuře.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Konfigurace pro publikování. Výchozí možností pro většinu projektů je Debug.</target>
         <note />
       </trans-unit>
     </body>

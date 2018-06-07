@@ -29,22 +29,22 @@
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>The NuGet package source to use for the restore.</source>
-        <target state="needs-review-translation">Geri yükleme sırasında kullanılacak bir NuGet paket kaynağı belirtir.</target>
+        <target state="translated">Geri yükleme için kullanılacak NuGet paket kaynağı.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIR</source>
-        <target state="needs-review-translation">PACKAGES_DIRECTORY</target>
+        <target state="translated">PACKAGES_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">Paketlerin yükleneceği dizin.</target>
+        <target state="translated">Paketlerin geri yükleneceği dizin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
         <source>Prevent restoring multiple projects in parallel.</source>
-        <target state="needs-review-translation">Birden fazla projenin paralel olarak geri yüklenmesini devre dışı bırakır.</target>
+        <target state="translated">Birden fazla projenin paralel olarak geri yüklenmesini önler.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Do not restore project-to-project references and only restore the specified project.</source>
-        <target state="needs-review-translation">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi geri yüklemek için bu bayrağı ayarlayın.</target>
+        <target state="translated">Projeden projeye başvuruları geri yüklemez ve yalnızca belirtilen projeyi geri yükler.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -79,13 +79,14 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>The target runtime to restore packages for.</source>
-        <target state="needs-review-translation">Paketlerin geri yükleneceği hedef çalışma zamanı.</target>
+        <target state="translated">Paketlerin geri yükleneceği hedef çalışma zamanı.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
         <source>Force all dependencies to be resolved even if the last restore was successful.
 This is equivalent to deleting project.assets.json.</source>
-        <target state="needs-review-translation">Son geri yükleme başarılı olsa bile tüm bağımlılıkların çözümlenmesini zorlamak için bu bayrağı ayarlayın. Bu, project.assets.json öğesini silmeyle eşdeğerdir.</target>
+        <target state="translated">Son geri yükleme başarılı olsa bile tüm bağımlılıkları çözümlenmeye zorlar.
+project.assets.json öğesini silmeyle eşdeğerdir.</target>
         <note />
       </trans-unit>
     </body>

@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed in the current development environment.</source>
-        <target state="needs-review-translation">列出目前開發環境中安裝的工具。</target>
+        <target state="translated">列出目前開發環境中所安裝的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools in the current user's tools directory.</source>
-        <target state="needs-review-translation">列出全體使用者工具。</target>
+        <target state="translated">列出目前使用者工具目錄中的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -49,12 +49,12 @@
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tools to list.</source>
-        <target state="new">The directory containing the tools to list.</target>
+        <target state="translated">包含要列出之工具的目錄。</target>
         <note />
       </trans-unit>
     </body>

@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
-        <target state="needs-review-translation">p2p(프로젝트 간) 참조를 무시하고 루트 프로젝트만 빌드하려면 이 플래그를 설정합니다.</target>
+        <target state="translated">p2p(프로젝트 간) 참조를 빌드하지 않고 지정한 프로젝트만 빌드합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Do not use incremental building.</source>
-        <target state="needs-review-translation">증분 빌드를 사용하지 않습니다.</target>
+        <target state="translated">증분 빌드를 사용하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">빌드된 아티팩트를 배치할 출력 디렉터리입니다.</target>
+        <target state="translated">빌드된 아티팩트를 배치할 출력 디렉터리입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to build for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <target state="translated">빌드할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에도 지정되어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="new">The target runtime to build for.</target>
+        <target state="translated">빌드할 대상 런타임입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
+        <target state="translated">프로젝트 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
         <note />
       </trans-unit>
     </body>

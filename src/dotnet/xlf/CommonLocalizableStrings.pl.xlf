@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
-        <target state="translated">Nie można odnaleźć żadnego projektu w lokalizacji „{0}”.</target>
+        <target state="translated">Nie można odnaleźć żadnego projektu w katalogu „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Znaleziono więcej niż jeden projekt w lokalizacji „{0}”. Określ, który ma zostać użyty.</target>
+        <target state="translated">Znaleziono więcej niż jeden projekt w katalogu „{0}”. Określ, który ma zostać użyty.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -209,12 +209,12 @@
       </trans-unit>
       <trans-unit id="XYFoundButInvalid">
         <source>{0} `{1}` found but is invalid.</source>
-        <target state="translated">Element {0} „{1}” został znaleziony, ale jest nieprawidłowy.</target>
+        <target state="translated">Znaleziono element {0} „{1}”, ale jest on nieprawidłowy.</target>
         <note />
       </trans-unit>
       <trans-unit id="XFoundButInvalid">
         <source>`{0}` found but is invalid.</source>
-        <target state="translated">Element „{0}” został znaleziony, ale jest nieprawidłowy.</target>
+        <target state="translated">Znaleziono element „{0}”, ale jest on nieprawidłowy.</target>
         <note />
       </trans-unit>
       <trans-unit id="OperationInvalid">
@@ -564,7 +564,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">Znaleziono więcej niż jeden plik rozwiązania w lokalizacji {0}. Określ, który ma zostać użyty.</target>
+        <target state="translated">Znaleziono więcej niż jeden plik rozwiązania w katalogu {0}. Określ, który ma zostać użyty.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
@@ -616,22 +616,22 @@
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="needs-review-translation">Ustaw poziom szczegółowości polecenia. Dopuszczalne wartości to: q[uiet], m[inimal], n[ormal], d[etailed] i diag[nostic].</target>
+        <target state="translated">Ustaw poziom szczegółowości programu MSBuild. Dopuszczalne wartości to: q[uiet], m[inimal], n[ormal], d[etailed] i diag[nostic].</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
-        <target state="needs-review-translation">Określa wartość właściwości $(VersionSuffix) w projekcie.</target>
+        <target state="translated">Ustaw wartość właściwości $(VersionSuffix) do użycia podczas kompilowania projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Wyświetl informacje pomocy.</target>
+        <target state="translated">Pokaż pomoc wiersza polecenia.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Do not restore the project before building.</source>
-        <target state="needs-review-translation">Nie wykonuje niejawnego przywracania podczas wykonywania polecenia.</target>
+        <target state="translated">Nie przywracaj projektu przed kompilowaniem.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -860,37 +860,37 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
+        <target state="translated">PROJEKT</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Plik projektu, na którym ma zostać wykonana operacja. Jeśli nie określono pliku, polecenie przeszuka bieżący katalog pod jego kątem.</target>
         <note />
       </trans-unit>
       <trans-unit id="LevelArgumentName">
         <source>LEVEL</source>
-        <target state="new">LEVEL</target>
+        <target state="translated">POZIOM</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">PLATFORMA</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
+        <target state="translated">IDENTYFIKATOR_ŚRODOWISKA_URUCHOMIENIOWEGO</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
+        <target state="translated">KONFIGURACJA</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
+        <target state="translated">SUFIKS_WERSJI</target>
         <note />
       </trans-unit>
     </body>

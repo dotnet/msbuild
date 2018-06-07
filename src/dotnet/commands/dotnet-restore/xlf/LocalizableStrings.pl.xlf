@@ -29,22 +29,22 @@
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>The NuGet package source to use for the restore.</source>
-        <target state="needs-review-translation">Określa źródło pakietów NuGet do użycia podczas przywracania.</target>
+        <target state="translated">Źródło pakietów NuGet do użycia na potrzeby przywracania.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIR</source>
-        <target state="needs-review-translation">KATALOG_PAKIETÓW</target>
+        <target state="translated">KATALOG_PAKIETÓW</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">Katalog, w którym mają zostać zainstalowane pakiety.</target>
+        <target state="translated">Katalog, w którym zostaną przywrócone pakiety.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
         <source>Prevent restoring multiple projects in parallel.</source>
-        <target state="needs-review-translation">Wyłącza równoległe przywracanie wielu projektów.</target>
+        <target state="translated">Nie zezwalaj na równoległe przywracanie wielu projektów.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Do not restore project-to-project references and only restore the specified project.</source>
-        <target state="needs-review-translation">Ustaw tę flagę, aby ignorować odwołania między projektami i przywrócić tylko projekt główny.</target>
+        <target state="translated">Nie przywracaj odwołań między projektami i przywróć tylko określony projekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -79,13 +79,14 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>The target runtime to restore packages for.</source>
-        <target state="needs-review-translation">Docelowe środowisko uruchomieniowe, dla którego mają zostać przywrócone pakiety.</target>
+        <target state="translated">Docelowe środowisko uruchomieniowe, dla którego mają zostać przywrócone pakiety.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
         <source>Force all dependencies to be resolved even if the last restore was successful.
 This is equivalent to deleting project.assets.json.</source>
-        <target state="needs-review-translation">Ustaw tę flagę, aby wymusić rozstrzygnięcie wszystkich zależności nawet w przypadku, gdy ostatnie przywracanie się powiodło. Jest to równoważne usunięciu pliku project.assets.json.</target>
+        <target state="translated">Wymuś rozstrzygnięcie wszystkich zależności nawet w przypadku, gdy ostatnie przywracanie się powiodło.
+Jest to równoważne usunięciu pliku project.assets.json.</target>
         <note />
       </trans-unit>
     </body>
