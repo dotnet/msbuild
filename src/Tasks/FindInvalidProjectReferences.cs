@@ -5,13 +5,8 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Tasks
@@ -36,17 +31,17 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reference moniker metadata
         /// </summary>
-        private static readonly string s_referencePlatformMonikerMetadata = "TargetPlatformMoniker";
+        private const string ReferencePlatformMonikerMetadata = "TargetPlatformMoniker";
 
         /// <summary>
         /// SimpleName group
         /// </summary>
-        private static readonly string s_platformSimpleNameGroup = "PLATFORMIDENTITY";
+        private const string PlatformSimpleNameGroup = "PLATFORMIDENTITY";
 
         /// <summary>
         /// Version group
         /// </summary>
-        private static readonly string s_platformVersionGroup = "PLATFORMVERSION";
+        private const string PlatformVersionGroup = "PLATFORMVERSION";
 
         #endregion
 
@@ -55,41 +50,25 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// List of Platform monikers for each referenced project
         /// </summary>
-        public ITaskItem[] ProjectReferences
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] ProjectReferences { get; set; }
 
         /// <summary>
         /// Target platform version of the current project
         /// </summary>
         [Required]
-        public string TargetPlatformVersion
-        {
-            get;
-            set;
-        }
+        public string TargetPlatformVersion { get; set; }
 
         /// <summary>
         /// Target platform identifier of the current project
         /// </summary>
         [Required]
-        public string TargetPlatformIdentifier
-        {
-            get;
-            set;
-        }
+        public string TargetPlatformIdentifier { get; set; }
 
         /// <summary>
         /// Invalid references to be unresolved 
         /// </summary>
         [Output]
-        public ITaskItem[] InvalidReferences
-        {
-            get;
-            private set;
-        }
+        public ITaskItem[] InvalidReferences { get; private set; }
 
         #endregion
 
@@ -100,25 +79,21 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            Version targetPlatformVersionAsVersion = null;
-            List<ITaskItem> invalidReferences = new List<ITaskItem>();
+            var invalidReferences = new List<ITaskItem>();
 
-            Version.TryParse(TargetPlatformVersion, out targetPlatformVersionAsVersion);
+            Version.TryParse(TargetPlatformVersion, out Version targetPlatformVersionAsVersion);
 
             if (ProjectReferences != null)
             {
                 foreach (ITaskItem item in ProjectReferences)
                 {
                     string referenceIdentity = item.ItemSpec;
-                    string referencePlatformMoniker = item.GetMetadata(s_referencePlatformMonikerMetadata);
-
-                    string platform = null;
-                    Version version = null;
+                    string referencePlatformMoniker = item.GetMetadata(ReferencePlatformMonikerMetadata);
 
                     // For each moniker, compare version, issue localized message if the referenced project targets 
                     // a platform with version higher than the current project and make the reference invalid by adding it to
                     // an invalid reference list output
-                    if (ParseMoniker(referencePlatformMoniker, out platform, out version))
+                    if (ParseMoniker(referencePlatformMoniker, out _, out Version version))
                     {
                         if (targetPlatformVersionAsVersion < version)
                         {
@@ -148,9 +123,9 @@ namespace Microsoft.Build.Tasks
 
             if (match.Success)
             {
-                platformIdentity = match.Groups[s_platformSimpleNameGroup].Value.Trim();
+                platformIdentity = match.Groups[PlatformSimpleNameGroup].Value.Trim();
 
-                string rawVersion = match.Groups[s_platformVersionGroup].Value.Trim();
+                string rawVersion = match.Groups[PlatformVersionGroup].Value.Trim();
                 parsedVersion = Version.TryParse(rawVersion, out platformVersion);
             }
 

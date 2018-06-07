@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
     /// for use until the one in the CLR is fixed. When it is we can go back to using ITypeInfo.
     /// </summary>
     [Guid("00020401-0000-0000-C000-000000000046")]
-    [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
     public interface IFixedTypeInfo
     {
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Tasks
         // actually returns void, not HRESULT.
         [PreserveSig]
         void CloseEnum();
-        void CountEnum(IntPtr iRef, ref System.UInt32 ulCount);
+        void CountEnum(IntPtr iRef, ref UInt32 ulCount);
         void ResetEnum();
         void EnumTypeDefs();
         void EnumInterfaceImpls();
@@ -261,8 +261,8 @@ namespace Microsoft.Build.Tasks
         void GetFileProps([In] UInt32 mdFile, [MarshalAs(UnmanagedType.LPArray)] char[] strName, UInt32 cchName, out UInt32 cchNameRequired, out IntPtr bHashData, out UInt32 cchHashBytes, out UInt32 dwFileFlags);
         void GetExportedTypeProps();
         void GetManifestResourceProps();
-        void EnumAssemblyRefs([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] asmRefs, System.UInt32 asmRefCount, out System.UInt32 iFetched);
-        void EnumFiles([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] fileRefs, System.UInt32 fileRefCount, out System.UInt32 iFetched);
+        void EnumAssemblyRefs([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] asmRefs, UInt32 asmRefCount, out UInt32 iFetched);
+        void EnumFiles([In, Out] ref IntPtr phEnum, [MarshalAs(UnmanagedType.LPArray), Out] UInt32[] fileRefs, UInt32 fileRefCount, out UInt32 iFetched);
         void EnumExportedTypes();
         void EnumManifestResources();
         void GetAssemblyFromScope(out UInt32 mdAsm);
@@ -340,32 +340,32 @@ namespace Microsoft.Build.Tasks
         public uint cchBuf;
     }
 
-    [ComImport(), Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAssemblyCache
     {
         /* Unused.
-        [PreserveSig()]
+        [PreserveSig]
         int UninstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, IntPtr pvReserved, int pulDisposition);
          */
         int UninstallAssembly();
 
-        [PreserveSig()]
+        [PreserveSig]
         uint QueryAssemblyInfo(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName, ref ASSEMBLY_INFO pAsmInfo);
 
         /* Unused.
-        [PreserveSig()]
+        [PreserveSig]
         int CreateAssemblyCacheItem(uint dwFlags, IntPtr pvReserved, out object ppAsmItem, [MarshalAs(UnmanagedType.LPWStr)] string pszAssemblyName);
          */
         int CreateAssemblyCacheItem();
 
         /* Unused.
-        [PreserveSig()]
+        [PreserveSig]
         int CreateAssemblyScavenger(out object ppAsmScavenger);
          */
         int CreateAssemblyScavenger();
 
         /* Unused.
-        [PreserveSig()]
+        [PreserveSig]
         int InstallAssembly(uint dwFlags, [MarshalAs(UnmanagedType.LPWStr)] string pszManifestFilePath, IntPtr pvReserved);
          */
         int InstallAssembly();
@@ -382,28 +382,28 @@ namespace Microsoft.Build.Tasks
     [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
     internal interface IAssemblyName
     {
-        [PreserveSig()]
+        [PreserveSig]
         int SetProperty(
                 int PropertyId,
                 IntPtr pvProperty,
                 int cbProperty);
 
-        [PreserveSig()]
+        [PreserveSig]
         int GetProperty(
                 int PropertyId,
                 IntPtr pvProperty,
                 ref int pcbProperty);
 
-        [PreserveSig()]
+        [PreserveSig]
         int Finalize();
 
-        [PreserveSig()]
+        [PreserveSig]
         int GetDisplayName(
                 StringBuilder pDisplayName,
                 ref int pccDisplayName,
                 int displayFlags);
 
-        [PreserveSig()]
+        [PreserveSig]
         int Reserved(ref Guid guid,
             Object obj1,
             Object obj2,
@@ -413,35 +413,35 @@ namespace Microsoft.Build.Tasks
             int cbReserved,
             out IntPtr ppv);
 
-        [PreserveSig()]
+        [PreserveSig]
         int GetName(
                 ref int pccBuffer,
                 StringBuilder pwzName);
 
-        [PreserveSig()]
+        [PreserveSig]
         int GetVersion(
                 out int versionHi,
                 out int versionLow);
-        [PreserveSig()]
+        [PreserveSig]
         int IsEqual(
                 IAssemblyName pAsmName,
                 int cmpFlags);
 
-        [PreserveSig()]
+        [PreserveSig]
         int Clone(out IAssemblyName pAsmName);
     }// IAssemblyName
 
     [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
     internal interface IAssemblyEnum
     {
-        [PreserveSig()]
+        [PreserveSig]
         int GetNextAssembly(
                 IntPtr pvReserved,
                 out IAssemblyName ppName,
                 int flags);
-        [PreserveSig()]
+        [PreserveSig]
         int Reset();
-        [PreserveSig()]
+        [PreserveSig]
         int Clone(out IAssemblyEnum ppEnum);
     }// IAssemblyEnum
 
@@ -516,7 +516,7 @@ namespace Microsoft.Build.Tasks
         #region Constants
 
         internal static readonly IntPtr NullPtr = IntPtr.Zero;
-        internal static readonly IntPtr InvalidIntPtr = new IntPtr((int)-1);
+        internal static readonly IntPtr InvalidIntPtr = new IntPtr(-1);
 
         internal const uint NORMAL_PRIORITY_CLASS = 0x0020;
         internal const uint CREATE_NO_WINDOW = 0x08000000;
@@ -870,7 +870,7 @@ namespace Microsoft.Build.Tasks
 
             if (targetExists && (File.GetAttributes(newFileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
             {
-                throw new System.IO.IOException("Moving target is read-only");
+                throw new IOException("Moving target is read-only");
             }
 
             if (string.Equals(existingFileName, newFileName, StringComparison.Ordinal))
@@ -1295,7 +1295,7 @@ typedef enum _tagAssemblyComparisonResult
         //------------------------------------------------------------------------------
         [DllImport(Advapi32DLL, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal extern static bool CryptReleaseContext([In] IntPtr Prov, [In] uint Flags);
+        internal static extern bool CryptReleaseContext([In] IntPtr Prov, [In] uint Flags);
 
         //------------------------------------------------------------------------------
         // CertFreeCertificateContext
@@ -1452,12 +1452,12 @@ typedef enum _tagAssemblyComparisonResult
             /// <summary>
             /// Path to the gac
             /// </summary>
-            private static string s_gacPath = Path.Combine(NativeMethodsShared.FrameworkBasePath, "gac");
+            private static readonly string s_gacPath = Path.Combine(NativeMethodsShared.FrameworkBasePath, "gac");
 
             /// <summary>
             /// Regex for directory version parsing
             /// </summary>
-            private static Regex s_assemblyVersionRegex = new Regex(
+            private static readonly Regex s_assemblyVersionRegex = new Regex(
                 @"^([.\d]+)_([^_]*)_([a-fA-F\d]{16})$",
                 RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
@@ -1555,9 +1555,6 @@ typedef enum _tagAssemblyComparisonResult
             {
                 if (NativeMethodsShared.IsWindows)
                 {
-                    int hr = 0;
-                    IAssemblyName fusionName = null;
-
                     if (_assemblyEnum == null)
                     {
                         yield break;
@@ -1571,7 +1568,7 @@ typedef enum _tagAssemblyComparisonResult
                     while (!_done)
                     {
                         // Now get next IAssemblyName from m_AssemblyEnum
-                        hr = _assemblyEnum.GetNextAssembly((IntPtr)0, out fusionName, 0);
+                        int hr = _assemblyEnum.GetNextAssembly((IntPtr)0, out IAssemblyName fusionName, 0);
 
                         if (hr < 0)
                         {
@@ -1652,7 +1649,7 @@ typedef enum _tagAssemblyComparisonResult
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return (IEnumerator)GetEnumerator();
+                return GetEnumerator();
             }
 
             public static string AssemblyPathFromStrongName(string strongName)

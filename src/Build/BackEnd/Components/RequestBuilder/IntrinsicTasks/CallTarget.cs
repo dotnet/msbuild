@@ -22,14 +22,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task logging helper
         /// </summary>
-        private TaskLoggingHelper _logHelper = null;
-
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public CallTarget()
-        {
-        }
+        private TaskLoggingHelper _logHelper;
 
         #region Properties
 
