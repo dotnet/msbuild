@@ -45,7 +45,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attributes list for item which is case-insensitive.
         /// </summary>
-        private static readonly HashSet<string> KnownAttributesOnItemIgnoreCase = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update };
+        private static readonly HashSet<string> KnownAttributesOnItemIgnoreCase = new HashSet<string>(KnownAttributesOnItem, StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Valid attributes on import element
