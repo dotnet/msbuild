@@ -2786,9 +2786,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             "))));
             p.Build(new string[] { "MIDL" }, new ILogger[] { logger });
 
-            logger.AssertLogContains(@"[a.idl|dlldatadir\a_dlldata.c|headerdir\a.h|tlbdir\a.tlb|proxydir\a_p.c|interfacedir\a_i.c]",
-                                     @"[b.idl|mydlldata.c|headerdir\b.h|tlbdir\b.tlb|proxydir\b_p.c|interfacedir\b_i.c]",
-                                     @"[c.idl|dlldatadir\c_dlldata.c|myheader.h|tlbdir\c.tlb|proxydir\c_p.c|interfacedir\c_i.c]");
+            logger.AssertLogContains(@"[a.idl|" + Path.Combine("dlldatadir", "a_dlldata.c") + "|" + Path.Combine("headerdir", "a.h") + "|" + Path.Combine("tlbdir", "a.tlb")
+                                        + "|" + Path.Combine("proxydir", "a_p.c") + "|" + Path.Combine("interfacedir", "a_i.c") + "]",
+                                     @"[b.idl|mydlldata.c|" + Path.Combine("headerdir", "b.h") + "|" + Path.Combine("tlbdir", "b.tlb") + "|" + Path.Combine("proxydir", "b_p.c")
+                                        + "|" + Path.Combine("interfacedir", "b_i.c") + "]",
+                                     @"[c.idl|" + Path.Combine("dlldatadir", "c_dlldata.c") + "|myheader.h|" + Path.Combine("tlbdir", "c.tlb") + "|" + Path.Combine("proxydir", "c_p.c")
+                                        + "|" + Path.Combine("interfacedir", "c_i.c") + "]");
         }
 
         [Fact]
