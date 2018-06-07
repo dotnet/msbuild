@@ -98,6 +98,48 @@ namespace Microsoft.Build.UnitTests.Definition
                 });
         }
 
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        public void ReevaluationShouldRespectContextLifetime(EvaluationContext.SharingPolicy policy)
+        {
+            var collection = _env.CreateProjectCollection().Collection;
+
+            var context1 = EvaluationContext.Create(policy);
+
+            var project = Project.FromXmlReader(
+                XmlReader.Create(new StringReader("<Project></Project>")),
+                new ProjectOptions
+                {
+                    ProjectCollection = collection,
+                    EvaluationContext = context1,
+                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                });
+
+            project.AddItem("a", "b");
+
+            project.ReevaluateIfNecessary();
+
+            var context2 = GetEvaluationContext(project);
+
+            switch (policy)
+            {
+                case EvaluationContext.SharingPolicy.Shared:
+                    context1.ShouldBeSameAs(context2);
+                    break;
+                case EvaluationContext.SharingPolicy.Isolated:
+                    context1.ShouldNotBeSameAs(context2);
+                    break;
+            }
+        }
+
+        private static EvaluationContext GetEvaluationContext(Project p)
+        {
+            var fieldInfo = p.GetType().GetField("_lastEvaluationContext", BindingFlags.NonPublic | BindingFlags.Instance);
+            var value = fieldInfo.GetValue(p);
+            return (EvaluationContext) value;
+        }
+
         private void EvaluateProjects(EvaluationContext context, Action<Project> projectAction = null)
         {
             var collection = _env.CreateProjectCollection().Collection;

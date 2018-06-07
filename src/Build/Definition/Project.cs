@@ -2179,7 +2179,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
         {
-            _lastEvaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated); ;
+            _lastEvaluationContext = evaluationContext;
             ReevaluateIfNecessary(LoggingService);
         }
 
@@ -2734,6 +2734,8 @@ namespace Microsoft.Build.Evaluation
 
         private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
         {
+            _lastEvaluationContext = _lastEvaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+
             Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                 _data,
                 _xml,
