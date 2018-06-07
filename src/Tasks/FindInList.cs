@@ -18,17 +18,12 @@ namespace Microsoft.Build.Tasks
         // The list to search through
         private ITaskItem[] _list;
         // Whether to match just the file part, or the full item spec
-        private bool _matchFileNameOnly = false;
         // The item found, if any
-        private ITaskItem _itemFound = null;
         // The itemspec to find
-        private string _itemSpecToFind;
         // Whether to match case sensitively
         // Default is case insensitive
-        private bool _caseSensitive;
         // Whether to return the last match
         // (default is the first match)
-        private bool _findLastMatch = false;
 
         /// <summary>
         /// The list to search through
@@ -38,75 +33,47 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_list, "list");
+                ErrorUtilities.VerifyThrowArgumentNull(_list, nameof(List));
                 return _list;
             }
-            set { _list = value; }
+            set => _list = value;
         }
 
         /// <summary>
         /// Whether to match against just the file part of the itemspec,
         /// or the whole itemspec (the default)
         /// </summary>
-        public bool MatchFileNameOnly
-        {
-            get { return _matchFileNameOnly; }
-            set { _matchFileNameOnly = value; }
-        }
+        public bool MatchFileNameOnly { get; set; }
 
         /// <summary>
         /// The first matching item found in the list, if any
         /// </summary>
         [Output]
-        public ITaskItem ItemFound
-        {
-            get { return _itemFound; }
-            set { _itemFound = value; }
-        }
+        public ITaskItem ItemFound { get; set; }
 
         /// <summary>
         /// The itemspec to try to find
         /// </summary>
         [Required]
-        public string ItemSpecToFind
-        {
-            get { return _itemSpecToFind; }
-            set { _itemSpecToFind = value; }
-        }
+        public string ItemSpecToFind { get; set; }
 
         /// <summary>
         /// Whether or not to match case sensitively
         /// </summary>
-        public bool CaseSensitive
-        {
-            get { return _caseSensitive; }
-            set { _caseSensitive = value; }
-        }
+        public bool CaseSensitive { get; set; }
 
         /// <summary>
         /// Whether or not to return the last match, instead of 
         /// the first one
         /// </summary>
-        public bool FindLastMatch
-        {
-            get { return _findLastMatch; }
-            set { _findLastMatch = value; }
-        }
+        public bool FindLastMatch { get; set; }
 
         /// <summary>
         /// Entry point
         /// </summary>
         public override bool Execute()
         {
-            StringComparison comparison;
-            if (_caseSensitive)
-            {
-                comparison = StringComparison.Ordinal;
-            }
-            else
-            {
-                comparison = StringComparison.OrdinalIgnoreCase;
-            }
+            StringComparison comparison = CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
             if (!FindLastMatch)
             {
@@ -141,13 +108,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool IsMatchingItem(StringComparison comparison, ITaskItem item)
         {
-            string filename;
             try
             {
                 var path = FileUtilities.FixFilePath(item.ItemSpec);
-                filename = (MatchFileNameOnly ? Path.GetFileName(path) : path);
+                string filename = (MatchFileNameOnly ? Path.GetFileName(path) : path);
 
-                if (String.Equals(filename, _itemSpecToFind, comparison))
+                if (String.Equals(filename, ItemSpecToFind, comparison))
                 {
                     ItemFound = item;
                     Log.LogMessageFromResources(MessageImportance.Low, "FindInList.Found", path);

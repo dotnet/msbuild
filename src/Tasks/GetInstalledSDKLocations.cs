@@ -9,11 +9,11 @@
 //-----------------------------------------------------------------------
 
 using System;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -67,14 +67,11 @@ namespace Microsoft.Build.Tasks
         [Required]
         public string TargetPlatformVersion
         {
-            get
-            {
-                return _targetPlatformVersion;
-            }
+            get => _targetPlatformVersion;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "TargetPlatformVersion");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(TargetPlatformVersion));
                 _targetPlatformVersion = value;
             }
         }
@@ -85,14 +82,11 @@ namespace Microsoft.Build.Tasks
         [Required]
         public string TargetPlatformIdentifier
         {
-            get
-            {
-                return _targetPlatformIdentifier;
-            }
+            get => _targetPlatformIdentifier;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "TargetPlatformIdentifier");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(TargetPlatformIdentifier));
                 _targetPlatformIdentifier = value;
             }
         }
@@ -100,30 +94,18 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Root registry root to look for SDKs
         /// </summary>
-        public string SDKRegistryRoot
-        {
-            get;
-            set;
-        }
+        public string SDKRegistryRoot { get; set; }
 
         /// <summary>
         /// Root directory on disk to look for SDKs
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public string[] SDKDirectoryRoots
-        {
-            get;
-            set;
-        }
+        public string[] SDKDirectoryRoots { get; set; }
 
         /// <summary>
         /// Root directories on disk to look for new style extension SDKs
         /// </summary>
-        public string[] SDKExtensionDirectoryRoots
-        {
-            get;
-            set;
-        }
+        public string[] SDKExtensionDirectoryRoots { get; set; }
 
         /// <summary>
         /// When set to true, the task will produce a warning if there were no SDKs found.
@@ -135,11 +117,7 @@ namespace Microsoft.Build.Tasks
         /// The itemspec is the SDK install location. There is a piece of metadata called SDKName which contains the name of the SDK.
         /// </summary>
         [Output]
-        public ITaskItem[] InstalledSDKs
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] InstalledSDKs { get; set; }
         #endregion
 
         #region ITask Members
@@ -147,7 +125,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Get the SDK.
         /// </summary>
-        /// <returns>true</returns>
         public override bool Execute()
         {
             // TargetPlatformVersion and TargetPlatformIdentifier are requried to correctly look for SDKs.
@@ -177,7 +154,7 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("GetInstalledSDKs.CouldNotGetSDKList", e.Message);
             }
 
-            List<ITaskItem> outputItems = new List<ITaskItem>();
+            var outputItems = new List<ITaskItem>();
 
             if (installedSDKs != null && installedSDKs.Count > 0)
             {
@@ -189,7 +166,7 @@ namespace Microsoft.Build.Tasks
                     string sdkInfo = ResourceUtilities.FormatResourceString("GetInstalledSDKs.SDKNameAndLocation", sdk.Key, sdk.Value.Item1);
                     Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", sdkInfo);
 
-                    TaskItem item = new TaskItem(sdk.Value.Item1);
+                    var item = new TaskItem(sdk.Value.Item1);
                     item.SetMetadata("SDKName", sdk.Key);
                     item.SetMetadata("PlatformVersion", sdk.Value.Item2);
 
@@ -214,13 +191,12 @@ namespace Microsoft.Build.Tasks
             // We need to register an object so that at the end of the build we will clear the static toolLocationhelper caches.
             // this is important because if someone adds an SDK between builds we would not know about it and not be able to use it.
             // This code is mainly used to deal with the case where msbuild nodes hang around between builds.
-            IBuildEngine4 buildEngine4 = BuildEngine as IBuildEngine4;
-            if (buildEngine4 != null)
+            if (BuildEngine is IBuildEngine4 buildEngine4)
             {
                 object staticCacheDisposer = buildEngine4.GetRegisteredTaskObject(StaticSDKCacheKey, RegisteredTaskObjectLifetime.Build);
                 if (staticCacheDisposer == null)
                 {
-                    BuildCacheDisposeWrapper staticDisposer = new BuildCacheDisposeWrapper(new BuildCacheDisposeWrapper.CallDuringDispose(ToolLocationHelper.ClearSDKStaticCache));
+                    BuildCacheDisposeWrapper staticDisposer = new BuildCacheDisposeWrapper(ToolLocationHelper.ClearSDKStaticCache);
                     buildEngine4.RegisterTaskObject(StaticSDKCacheKey, staticDisposer, RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
                 }
             }

@@ -2,15 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.Serialization;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -23,13 +15,6 @@ namespace Microsoft.Build.Tasks
     [Serializable]
     internal sealed class InvalidParameterValueException : Exception
     {
-        /// <summary>
-        /// Don't allow default construction.
-        /// </summary>
-        private InvalidParameterValueException()
-        {
-        }
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -56,26 +41,14 @@ namespace Microsoft.Build.Tasks
         {
         }
 
-        private string paramName;
-
         /// <summary>
         /// The name of the parameter.
         /// </summary>
-        public string ParamName
-        {
-            get { return paramName; }
-            set { paramName = value; }
-        }
-
-        private string actualValue;
+        public string ParamName { get; set; }
 
         /// <summary>
         /// The value supplied, that was bad.
         /// </summary>
-        public string ActualValue
-        {
-            get { return actualValue; }
-            set { actualValue = value; }
-        }
+        public string ActualValue { get; set; }
     }
 }

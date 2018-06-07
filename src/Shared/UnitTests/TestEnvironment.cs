@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -352,7 +355,7 @@ namespace Microsoft.Build.UnitTests
 
     public class EnvironmentInvariant : TestInvariant
     {
-        private IDictionary _initialEnvironment;
+        private readonly IDictionary _initialEnvironment;
 
         public EnvironmentInvariant()
         {
@@ -394,7 +397,7 @@ namespace Microsoft.Build.UnitTests
             int newFilesCount = newFiles.Length;
             if (newFilesCount > _originalFiles.Length)
             {
-                foreach (var file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
+                foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
                 {
                     string contents = File.ReadAllText(file.FullName);
 
