@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャットダウンしています。診断情報は "{1}" のファイル内で見つかる可能性があり、MSBuild_*.failure.txt という名前になります。この場所は変更できます。変更するには、MSBUILDDEBUGPATH 環境変数を別のディレクトリに設定します。</target>
+        <target state="translated">MSB4166: 子ノード "{0}" は処理の途中で終了しました。シャット ダウンしています。診断情報は "{1}" のファイル内で見つかる可能性があり、MSBuild_*.failure.txt という名前になります。この場所は変更できます。変更するには、MSBUILDDEBUGPATH 環境変数を別のディレクトリに設定します。</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -806,7 +806,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: プロジェクトの既定の XML 名前空間は MSBuild の XML 名前空間か、名前空間なしでなければなりません。プロジェクトが MSBuild 2003 形式で作成されている場合、xmlns="{0}" を &lt;Project&gt; 要素に追加してください。プロジェクトが古い 1.0 または 1.2 形式で作成されている場合、MSBuild 2003 形式に変換してください。</target>
+        <target state="translated">MSB4041: プロジェクトの既定の XML 名前空間は MSBuild の XML 名前空間であるか、名前空間なしである必要があります。プロジェクトが MSBuild 2003 形式で作成されている場合、xmlns="{0}" を &lt;Project&gt; 要素に追加してください。プロジェクトが古い 1.0 または 1.2 形式で作成されている場合、MSBuild 2003 形式に変換してください。</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1029,7 +1029,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">"$(AspNetConfiguration)" 構成はこの Web プロジェクトではサポートされていないため、省略します。AspNetConfiguration プロパティを使用し、/p:AspNetConfiguration=&lt;value&gt; をコマンド ラインに追加することによって、Web プロジェクトをビルドするのに使われた構成を上書きすることができます。現在、Web プロジェクトでは、Debug 構成と Release 構成のみがサポートされています。</target>
+        <target state="translated">"$(AspNetConfiguration)" 構成はこの Web プロジェクトではサポートされていないため、省略します。AspNetConfiguration プロパティを使用し、/p:AspNetConfiguration=&lt;value&gt; をコマンド ラインに追加することによって、Web プロジェクトをビルドするのに使われた構成をオーバーライドすることができます。現在、Web プロジェクトでは、Debug 構成と Release 構成のみがサポートされています。</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -2043,7 +2043,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="translated">ターゲット "{0}" を省略しました。ターゲットがプロジェクトに存在しないので、SkipNonexistentTargets が true に設定されます。</target>
+        <target state="translated">ターゲット "{0}" はスキップされました。ターゲットがプロジェクトに存在しないので、SkipNonexistentTargets が true に設定されます。</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
@@ -2105,7 +2105,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: SDK 参照 "{0}" のバージョン "{1}" は、代わりにバージョン "{2}" に解決されました。参照されたバージョンを一致するように更新しない場合、必要なバージョンとは別のバージョンを使用する可能性があります。</target>
+        <target state="translated">MSB4241: SDK 参照 "{0}" のバージョン "{1}" は、代わりにバージョン "{2}" に解決されました。  参照されたバージョンを一致するように更新しない場合、必要なバージョンとは別のバージョンを使用する可能性があります。</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2119,17 +2119,17 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="SdkResolverManifestInvalid">
         <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
-        <target state="new">MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</target>
+        <target state="translated">MSB4245: SDK 競合回避モジュール マニフェスト ファイルが無効です。これは MSBuild インストールが破損しているか、無効であることを示しています。マニフェスト ファイル パス '{0}'。メッセージ: {1}</target>
         <note>{StrBegin="MSB4245: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverNoDllOrManifest">
         <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
-        <target state="new">MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</target>
+        <target state="translated">MSB4246: SDK 競合回避モジュール フォルダーは存在しますが、SDK 競合回避モジュール DLL またはマニフェスト ファイルがありません。これは MSBuild インストールが破損しているか、無効であることを示しています。SDK 競合回避モジュール パス: {0}</target>
         <note>{StrBegin="MSB4246: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverDllInManifestMissing">
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
-        <target state="new">MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</target>
+        <target state="translated">MSB4247: SDK 競合回避モジュールを読み込めませんでした。マニフェスト ファイルは存在しますが、SDK 競合回避モジュール DLL ファイルへのパスが見つかりませんでした。マニフェスト ファイル パス '{0}'。SDK 競合回避モジュール パス: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>

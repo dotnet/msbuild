@@ -293,32 +293,32 @@
       </trans-unit>
       <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
         <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
-        <target state="new">Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</target>
+        <target state="translated">"{2}" 매개 변수가 프로젝트에 "{3}"(으)로 설정되었고 파일 크기가 일치하기 때문에 "{0}"에서 "{1}"(으)로 파일을 다운로드할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.Downloading">
         <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
-        <target state="new">Downloading from "{0}" to "{1}" ({2:N0} bytes).</target>
+        <target state="translated">"{0}"에서 "{1}"(으)로 다운로드 중입니다({2:N0}바이트).</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorDownloading">
         <source>MSB3923: Failed to download file "{0}".  {1}</source>
-        <target state="new">MSB3923: Failed to download file "{0}".  {1}</target>
+        <target state="translated">MSB3923: "{0}" 파일을 다운로드하지 못했습니다.  {1}</target>
         <note>{StrBegin="MSB3923: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorInvalidUrl">
         <source>MSB3921: The specified URL "{0}" is not valid.</source>
-        <target state="new">MSB3921: The specified URL "{0}" is not valid.</target>
+        <target state="translated">MSB3921: 지정된 URL "{0}"이(가) 잘못되었습니다.</target>
         <note>{StrBegin="MSB3921: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorUnknownFileName">
         <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
-        <target state="new">MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</target>
+        <target state="translated">MSB3922: URL "{0}"에서 파일 이름을 확인하지 못했습니다. "{1}" 매개 변수를 사용하여 파일 이름을 지정하세요.</target>
         <note>{StrBegin="MSB3922: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.Retrying">
         <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="new">MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <target state="translated">MSB3924: "{0}" 파일을 다운로드하지 못했습니다. {2}ms 후 {1}을(를) 다시 시도합니다. {3}</target>
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
@@ -2670,17 +2670,17 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
         <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</source>
-        <target state="needs-review-translation">MSB3755: 참조 "{0}"을(를) 찾을 수 없습니다. 이 참조가 코드에 필요할 경우 컴파일 오류가 발생할 수 있습니다.</target>
+        <target state="translated">MSB3755: 참조 "{0}"을(를) 찾을 수 없습니다. 이 참조가 코드에 필요할 경우 컴파일 오류가 발생할 수 있습니다.</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="needs-review-translation">MSB3756: xml 요소 "{0}"은(는) xml 요소 "{1}" 아래에서 올바르지 않습니다.</target>
+        <target state="translated">MSB3756: &lt;{0}&gt; 요소가 &lt;{1}&gt; 요소의 유효한 자식이 아닙니다. 유효한 자식 요소는 &lt;Code&gt;, &lt;Reference&gt;, &lt;Using&gt;입니다.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="needs-review-translation">MSB3757: 여러 코드 xml 요소를 찾았으며 이는 허용되지 않습니다. 이 문제를 해결하려면 작업에서 부가적인 코드 xml을 삭제하세요.</target>
+        <target state="translated">MSB3757: &lt;Code&gt; 요소를 하나만 지정할 수 있습니다.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3040,37 +3040,37 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
-        <target state="new">MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</target>
+        <target state="translated">MSB3759: 지정한 코드 형식 "{0}"이(가) 잘못되었습니다. 지원되는 코드 형식은 "{1}"입니다.</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
         <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
-        <target state="new">MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</target>
+        <target state="translated">MSB3759: 지정한 코드 언어 "{0}"이(가) 잘못되었습니다. 지원되는 코드 언어는 "{1}"입니다.</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.NoSourceCode">
         <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
-        <target state="new">MSB3760: You must specify source code within the Code element or a path to a file containing source code.</target>
+        <target state="translated">MSB3760: 코드 요소 또는 소스 코드가 포함된 파일의 경로 내에서 소스 코드를 지정해야 합니다.</target>
         <note>{StrBegin="MSB3760: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilingAssembly">
         <source>Compiling task source code</source>
-        <target state="new">Compiling task source code</target>
+        <target state="translated">작업 소스 코드 컴파일</target>
         <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidTaskXml">
         <source>MSB3761: The specified task XML is invalid.  {0}</source>
-        <target state="new">MSB3761: The specified task XML is invalid.  {0}</target>
+        <target state="translated">MSB3761: 지정한 작업 XML이 잘못되었습니다.  {0}</target>
         <note>{StrBegin="MSB3761: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="new">MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</target>
+        <target state="translated">MSB3756: &lt;Code&gt; 요소에 대해 "{0}" 특성이 잘못되었습니다. 유효한 특성은 "Language", "Source", "Type"입니다.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</target>
+        <target state="translated">MSB3752: &lt;{1}&gt; 요소의 "{0}" 특성이 설정되었지만 비어 있습니다. "{0}" 특성은 설정된 경우 비어 있을 수 없습니다.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
     </body>

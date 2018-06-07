@@ -293,32 +293,32 @@
       </trans-unit>
       <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
         <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
-        <target state="new">Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</target>
+        <target state="translated">"{2}" パラメーターがプロジェクトで "{3}" に設定されているため、またファイルのサイズが一致するため、"{0}" から "{1}" にファイルをダウンロードしませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.Downloading">
         <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
-        <target state="new">Downloading from "{0}" to "{1}" ({2:N0} bytes).</target>
+        <target state="translated">"{0}" から "{1}" にダウンロードしています ({2:N0} バイト)。</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorDownloading">
         <source>MSB3923: Failed to download file "{0}".  {1}</source>
-        <target state="new">MSB3923: Failed to download file "{0}".  {1}</target>
+        <target state="translated">MSB3923: ファイル "{0}" をダウンロードできませんでした。{1}</target>
         <note>{StrBegin="MSB3923: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorInvalidUrl">
         <source>MSB3921: The specified URL "{0}" is not valid.</source>
-        <target state="new">MSB3921: The specified URL "{0}" is not valid.</target>
+        <target state="translated">MSB3921: 指定した URL "{0}" が無効です。</target>
         <note>{StrBegin="MSB3921: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorUnknownFileName">
         <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
-        <target state="new">MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</target>
+        <target state="translated">MSB3922: URL "{0}" からファイル名を決定できませんでした。ファイル名を "{1}" パラメーターで指定してください。</target>
         <note>{StrBegin="MSB3922: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.Retrying">
         <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="new">MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <target state="translated">MSB3924: ファイル "{0}" をダウンロードできませんでした。{2} ミリ秒以内に {1} を再試行します。{3}</target>
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
@@ -866,7 +866,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.ExcludedPermissionsNotSupported">
         <source>MSB3133: The ExcludePermissions property is deprecated. The permission set requested by the application has been set to the permissions defined in Internet or Local Intranet zone. To continue using a custom Permission Set, define your custom permission set in the Security Page of the Project Designer.</source>
-        <target state="translated">MSB3133: ExcludePermissions プロパティは使用しないでください。アプリケーションによって要求されたアクセス許可セットが、インターネットまたはローカル イントラネット ゾーンで定義されたアクセス許可に設定されています。カスタム アクセス許可セットを使用して続行するには、プロジェクト デザイナーの [セキュリティ] ページでカスタム アクセス許可セットを定義します。</target>
+        <target state="translated">MSB3133: ExcludePermissions プロパティは非推奨です。アプリケーションによって要求されたアクセス許可セットが、インターネットまたはローカル イントラネット ゾーンで定義されたアクセス許可に設定されています。カスタム アクセス許可セットを使用して続行するには、プロジェクト デザイナーの [セキュリティ] ページでカスタム アクセス許可セットを定義します。</target>
         <note>{StrBegin="MSB3133: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.KnownTargetZoneCannotHaveAdditionalPermissionType">
@@ -1138,7 +1138,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.BadImageFormat">
         <source>MSB3574: Did not recognize "{0}" as a managed assembly.</source>
-        <target state="translated">MSB3574: "{0}" はマネージ アセンブリとして認識されませんでした。</target>
+        <target state="translated">MSB3574: "{0}" はマネージド アセンブリとして認識されませんでした。</target>
         <note>{StrBegin="MSB3574: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteAssembly">
@@ -1213,7 +1213,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MissingFile">
         <source>MSB3819: Cannot find assembly "{0}", which may contain managed resources that need to be included in this app package.  Please ensure that this assembly exists.</source>
-        <target state="translated">MSB3819: アセンブリ "{0}" が見つかりません。このアセンブリには、アプリケーション パッケージに含める必要があるマネージ リソースが含まれている可能性があります。このアセンブリが存在することを確認してください。</target>
+        <target state="translated">MSB3819: アセンブリ "{0}" が見つかりません。このアセンブリには、アプリケーション パッケージに含める必要があるマネージド リソースが含まれている可能性があります。このアセンブリが存在することを確認してください。</target>
         <note>{StrBegin="MSB3819: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PathTooLong">
@@ -2670,17 +2670,17 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
         <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</source>
-        <target state="needs-review-translation">MSB3755: 参照 "{0}" が見つかりませんでした。この参照がコードで必要とされる場合は、コンパイル エラーが発生する可能性があります。"</target>
+        <target state="translated">MSB3755: 参照 "{0}" が見つかりませんでした。この参照がコードで必要とされる場合は、コンパイル エラーが発生する可能性があります。</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="needs-review-translation">MSB3756: xml 要素 "{0}" は xml 要素 "{1}" の下では無効です。</target>
+        <target state="translated">MSB3756: 要素 &lt;{0}&gt; は &lt;{1}&gt; の無効な子要素です。有効な子要素は &lt;Code&gt;、&lt;Reference&gt;、および &lt;Using&gt; です。</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="needs-review-translation">MSB3757: 複数のコード xml 要素が見つかりました。これは無効です。この問題を解決するには、タスクから余分なコード xml 要素を削除してください。</target>
+        <target state="translated">MSB3757: 指定できるのは &lt;Code&gt; 要素 1 つだけです。</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3040,37 +3040,37 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
-        <target state="new">MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</target>
+        <target state="translated">MSB3759: 指定されたコードの種類 "{0}" が無効です。サポートされているコードの種類は "{1}" です。</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
         <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
-        <target state="new">MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</target>
+        <target state="translated">MSB3759: 指定されたコード言語 "{0}" が無効です。サポートされているコード言語は "{1}" です。</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.NoSourceCode">
         <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
-        <target state="new">MSB3760: You must specify source code within the Code element or a path to a file containing source code.</target>
+        <target state="translated">MSB3760: Code 要素内にソース コード、またはソース コードを含むファイルへのパスを指定する必要があります。</target>
         <note>{StrBegin="MSB3760: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilingAssembly">
         <source>Compiling task source code</source>
-        <target state="new">Compiling task source code</target>
+        <target state="translated">タスク ソース コードのコンパイル</target>
         <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidTaskXml">
         <source>MSB3761: The specified task XML is invalid.  {0}</source>
-        <target state="new">MSB3761: The specified task XML is invalid.  {0}</target>
+        <target state="translated">MSB3761: 指定されたタスク XML が無効です。{0}</target>
         <note>{StrBegin="MSB3761: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="new">MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</target>
+        <target state="translated">MSB3756: 属性 "{0}" は &lt;Code&gt; 要素には無効です。有効な属性は "Language"、"Source"、および "Type" です。</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</target>
+        <target state="translated">MSB3752: &lt;{1}&gt; 要素の "{0}" 属性が設定されていますが空白です。"{0}" 属性を設定する場合は空白にはできません。</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
     </body>
