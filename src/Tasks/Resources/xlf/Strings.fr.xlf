@@ -293,32 +293,32 @@
       </trans-unit>
       <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
         <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
-        <target state="new">Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</target>
+        <target state="translated">Impossible de télécharger le fichier de "{0}" vers "{1}", car le paramètre "{2}" a la valeur "{3}" dans le projet et les tailles des fichiers correspondent.</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.Downloading">
         <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
-        <target state="new">Downloading from "{0}" to "{1}" ({2:N0} bytes).</target>
+        <target state="translated">Téléchargement de "{0}" vers "{1}" ({2:N0} octets).</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorDownloading">
         <source>MSB3923: Failed to download file "{0}".  {1}</source>
-        <target state="new">MSB3923: Failed to download file "{0}".  {1}</target>
+        <target state="translated">MSB3923: Échec de téléchargement du fichier "{0}". {1}</target>
         <note>{StrBegin="MSB3923: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorInvalidUrl">
         <source>MSB3921: The specified URL "{0}" is not valid.</source>
-        <target state="new">MSB3921: The specified URL "{0}" is not valid.</target>
+        <target state="translated">MSB3921: L'URL spécifiée ("{0}") n'est pas valide.</target>
         <note>{StrBegin="MSB3921: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorUnknownFileName">
         <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
-        <target state="new">MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</target>
+        <target state="translated">MSB3922: Échec de détermination d'un nom de fichier à partir de l'URL "{0}". Spécifiez un nom de fichier avec le paramètre "{1}".</target>
         <note>{StrBegin="MSB3922: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.Retrying">
         <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="new">MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <target state="translated">MSB3924: Échec de téléchargement du fichier "{0}". Nouvelle tentative de {1} dans {2} ms. {3}</target>
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
@@ -2670,17 +2670,17 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
         <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</source>
-        <target state="needs-review-translation">MSB3755: Impossible de trouver la référence "{0}". Si cette référence est exigée par votre code, cela peut entraîner des erreurs de compilation."</target>
+        <target state="translated">MSB3755: Impossible de trouver la référence "{0}". Si cette référence est exigée par votre code, cela peut entraîner des erreurs de compilation.</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="needs-review-translation">MSB3756: l'élément xml "{0}" n'est pas valide sous l'élément xml "{1}".</target>
+        <target state="translated">MSB3756: L'élément &lt;{0}&gt; n'est pas un enfant valide de l'élément &lt;{1}&gt;. Les éléments enfants valides sont &lt;Code&gt;, &lt;Reference&gt; et &lt;Using&gt;.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="needs-review-translation">MSB3757: Plusieurs éléments xml de code ont été trouvés, ce qui n'est pas autorisé. Pour corriger ce problème, supprimez les éléments xml de code supplémentaires de la tâche.</target>
+        <target state="translated">MSB3757: Un seul élément &lt;Code&gt; peut être spécifié.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3040,37 +3040,37 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
-        <target state="new">MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</target>
+        <target state="translated">MSB3759: Le type de code spécifié ("{0}") n'est pas valide. Les types de code pris en charge sont "{1}".</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
         <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
-        <target state="new">MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</target>
+        <target state="translated">MSB3759: Le langage de code spécifié ("{0}") n'est pas valide. Les langages de code pris en charge sont "{1}".</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.NoSourceCode">
         <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
-        <target state="new">MSB3760: You must specify source code within the Code element or a path to a file containing source code.</target>
+        <target state="translated">MSB3760: Vous devez spécifier le code source dans l'élément Code ou un chemin à un fichier contenant le code source.</target>
         <note>{StrBegin="MSB3760: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilingAssembly">
         <source>Compiling task source code</source>
-        <target state="new">Compiling task source code</target>
+        <target state="translated">Compilation du code source de la tâche</target>
         <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidTaskXml">
         <source>MSB3761: The specified task XML is invalid.  {0}</source>
-        <target state="new">MSB3761: The specified task XML is invalid.  {0}</target>
+        <target state="translated">MSB3761: La tâche XML spécifiée n'est pas valide. {0}</target>
         <note>{StrBegin="MSB3761: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="new">MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</target>
+        <target state="translated">MSB3756: L'attribut "{0}" n'est pas valide pour l'élément &lt;Code&gt;. Les attributs valides sont "Language", "Source" et "Type".</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</target>
+        <target state="translated">MSB3752: L'attribut "{0}" de l'élément &lt;{1}&gt; a été défini, mais il est vide. Si l'attribut "{0}" est défini, il ne doit pas être vide.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
     </body>
