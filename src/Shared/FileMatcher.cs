@@ -40,8 +40,8 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] directorySeparatorCharacters = { '/', '\\' };
         internal static readonly string[] directorySeparatorStrings = directorySeparatorCharacters.Select(c => c.ToString()).ToArray();
 
-        private readonly ConcurrentDictionary<string, ImmutableArray<string>> s_cachedFileEnumerations;
-        private readonly Lazy<ConcurrentDictionary<string, object>> s_cachedFileEnumerationsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
+        private readonly ConcurrentDictionary<string, ImmutableArray<string>> _cachedGlobExpansions;
+        private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
         /// Cache of the list of invalid path characters, because this method returns a clone (for security reasons)
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         public static FileMatcher Default = new FileMatcher(FileSystemFactory.GetFileSystem(), null);
 
-        public FileMatcher(IFileSystemAbstraction fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null) : this(
+        public FileMatcher(IFileSystemAbstraction fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileEntryExpansionCache = null) : this(
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
                 entityType,
@@ -68,13 +68,13 @@ namespace Microsoft.Build.Shared
                 projectDirectory,
                 stripProjectDirectory),
             fileSystem.DirectoryExists,
-            getFileSystemDirectoryEntriesCache)
+            fileEntryExpansionCache)
         {
         }
 
         public FileMatcher(GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null)
         {
-            s_cachedFileEnumerations = getFileSystemDirectoryEntriesCache;
+            _cachedGlobExpansions = getFileSystemDirectoryEntriesCache;
 
             _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
                 ? getFileSystemEntries
@@ -1713,21 +1713,21 @@ namespace Microsoft.Build.Shared
             IEnumerable<string> excludeSpecsUnescaped = null
         )
         {
-            if (s_cachedFileEnumerations != null)
+            if (_cachedGlobExpansions != null)
             {
                 string filesKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
                 ImmutableArray<string> files;
-                if (!s_cachedFileEnumerations.TryGetValue(filesKey, out files))
+                if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
                 {
                     // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
-                    object locks = s_cachedFileEnumerationsLock.Value.GetOrAdd(filesKey, _ => new object());
+                    object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(filesKey, _ => new object());
                     lock (locks)
                     {
-                        if (!s_cachedFileEnumerations.TryGetValue(filesKey, out files))
+                        if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
                         {
                             files =
-                                s_cachedFileEnumerations.GetOrAdd(
+                                _cachedGlobExpansions.GetOrAdd(
                                     filesKey,
                                     (_) =>
                                         GetFilesImplementation(

@@ -13,6 +13,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
@@ -48,7 +49,7 @@ namespace Microsoft.Build.Evaluation
 
         protected EngineFileUtilities EngineFileUtilities { get; }
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, IFileSystemAbstraction fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileMatcherCache)
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
@@ -58,7 +59,7 @@ namespace Microsoft.Build.Evaluation
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
-            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(fileSystem, fileMatcherCache));
+            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(evaluationContext.FileSystem, evaluationContext.FileEntryExpansionCache));
         }
 
         private ImmutableList<I> GetItems(string itemType)

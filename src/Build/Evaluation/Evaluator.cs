@@ -202,7 +202,6 @@ namespace Microsoft.Build.Evaluation
         private static readonly EngineFileUtilities.IOCache _fallbackSearchPathsCache = new EngineFileUtilities.IOCache();
 
         private readonly EvaluationProfiler _evaluationProfiler;
-        private IFileSystemAbstraction _fileSystem;
 
         /// <summary>
         /// Private constructor called by the static Evaluate method.
@@ -221,8 +220,8 @@ namespace Microsoft.Build.Evaluation
             EvaluationContext evaluationContext,
             bool profileEvaluation)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data, "data");
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
+            ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
 
             // Create containers for the evaluation results
             data.InitializeForEvaluation(toolsetProvider);
@@ -247,9 +246,8 @@ namespace Microsoft.Build.Evaluation
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
-            _evaluationContext = evaluationContext;
+            _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
-            _fileSystem = evaluationContext?.FileSystem ?? FileSystemFactory.GetFileSystem();
         }
 
         /// <summary>
@@ -759,7 +757,7 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
-                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _fileSystem, _evaluationContext?.FileMatcherCache ?? new ConcurrentDictionary<string, ImmutableArray<string>>(StringComparer.OrdinalIgnoreCase));
+                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext);
 
                     // Pass3: evaluate project items
                     foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
