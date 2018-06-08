@@ -357,15 +357,15 @@ namespace Microsoft.Build.Tasks
         {
             // There were some projects that were skipped so we need to recreate the
             // project array with those projects removed
-            var projectsToBuildArrayList = new List<ITaskItem>();
+            var projectsToBuildList = new List<ITaskItem>();
             for (int i = 0; i < Projects.Length; i++)
             {
                 if (!skipProjects[i])
                 {
-                    projectsToBuildArrayList.Add(Projects[i]);
+                    projectsToBuildList.Add(Projects[i]);
                 }
             }
-            ITaskItem[] projectToBuildInParallel = projectsToBuildArrayList.ToArray();
+            ITaskItem[] projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
             if (projectToBuildInParallel.Length > 0)

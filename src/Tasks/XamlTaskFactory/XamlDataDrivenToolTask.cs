@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Ordered list of switches
         /// </summary>
-        /// <returns>ArrayList of switches in declaration order</returns>
+        /// <returns>Switches in declaration order</returns>
         internal virtual IEnumerable<string> SwitchOrderList { get; }
 
         /// <summary>

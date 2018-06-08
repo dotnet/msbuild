@@ -27,8 +27,7 @@ namespace Microsoft.Build.Tasks
         private Dictionary<string, ITaskItem> _sourceItems = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Hashtable of Key=Reference, Value=Irrelevent.
-        /// A list of unique dependies.
+        /// A list of unique dependencies.
         /// </summary>
         private HashSet<Reference> _dependees = new HashSet<Reference>();
 

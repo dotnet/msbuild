@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.Bootstrapper;
 
@@ -98,14 +98,14 @@ namespace Microsoft.Build.Tasks
                 // in order, looking to see if the item is built.  If it is, remove the item from 
                 // the hashtable.  All remaining items in the table can not be built, so errors 
                 // will be issued.
-                var items = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                var items = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (ITaskItem bootstrapperItem in BootstrapperItems)
                 {
                     string installAttribute = bootstrapperItem.GetMetadata("Install");
                     if (String.IsNullOrEmpty(installAttribute) || Shared.ConversionUtilities.ConvertStringToBool(installAttribute))
                     {
-                        if (!items.Contains(bootstrapperItem.ItemSpec))
+                        if (!items.ContainsKey(bootstrapperItem.ItemSpec))
                         {
                             items.Add(bootstrapperItem.ItemSpec, bootstrapperItem);
                         }
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks
 
                 foreach (Product product in products)
                 {
-                    if (items.Contains(product.ProductCode))
+                    if (items.ContainsKey(product.ProductCode))
                     {
                         settings.ProductBuilders.Add(product.ProductBuilder);
                         items.Remove(product.ProductCode);

@@ -47,7 +47,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// Gets all of the validation errors of the file being validated.
         /// </summary>
         /// <value>An array of type string, containing all of the validation errors.</value>
-        /// <remarks>This method uses ArrayList.Copy to copy the errors.</remarks>
         public string[] ValidationErrors => _validationErrors.ToArray();
 
         /// <summary>
@@ -60,7 +59,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// Gets all of the validation warnings of the file being validated.
         /// </summary>
         /// <value>An array of type string, containing all of the validation warnings.</value>
-        /// <remarks>This method uses ArrayList.Copy to copy the warnings.</remarks>
         public string[] ValidationWarnings => _validationWarnings.ToArray();
     }
 }

@@ -6,10 +6,12 @@ using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
@@ -320,7 +322,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return null;
             if (items.Length <= 1)
                 return items;
-            Hashtable list = new Hashtable();
+            var list = new Dictionary<string, ITaskItem>();
             foreach (ITaskItem item in items)
             {
                 if (String.IsNullOrEmpty(item.ItemSpec))
@@ -339,13 +341,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     key = Path.GetFullPath(item.ItemSpec).ToUpperInvariant();
                 }
 
-                if (!list.Contains(key))
+                if (!list.ContainsKey(key))
+                {
                     list.Add(key, item);
+                }
             }
 
-            ITaskItem[] outputItems = new ITaskItem[list.Count];
-            list.Values.CopyTo(outputItems, 0);
-            return outputItems;
+            return list.Values.ToArray();
         }
 
         public static ITaskItem[] SortItems(ITaskItem[] items)
