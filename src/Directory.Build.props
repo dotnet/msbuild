@@ -63,7 +63,7 @@
 
   <ItemGroup>
     <PackageReference Condition="'$(DisableNerdbankVersioning)' != 'true'" Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-003" PrivateAssets="all" Condition="'$(OsEnvironment)'!='windows'"/>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-003" PrivateAssets="all"/>
   </ItemGroup>
   
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
