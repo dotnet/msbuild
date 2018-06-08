@@ -34,6 +34,9 @@
       <NugetConfigSuffix>
         <![CDATA[
 </packageSources>
+<disabledPackageSources>
+   <clear/>
+</disabledPackageSources>
 </configuration>
         ]]>
       </NugetConfigSuffix>

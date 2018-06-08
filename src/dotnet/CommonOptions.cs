@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                 description,
                 Accept.ExactlyOneArgument()
                     .With(name: CommonLocalizableStrings.ConfigurationArgumentName)
-                    .WithSuggestionsFrom("DEBUG", "RELEASE")
+                    .WithSuggestionsFrom("Debug", "Release")
                     .ForwardAsSingle(o => $"-property:Configuration={o.Arguments.Single()}"));
 
         public static Option VersionSuffixOption() =>

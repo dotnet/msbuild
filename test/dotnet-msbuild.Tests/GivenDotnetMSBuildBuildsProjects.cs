@@ -159,26 +159,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 $"The MSBuild logger argument should not be specified when telemetry is disabled.");
         }
 
-        [Theory]
-        [InlineData("/p")]
-        [InlineData("/property")]
-        [InlineData("-p")]
-        [InlineData("-property")]
-        public void GivenAPropertyValueWithASemicolonItIsQuotedToMSBuild(string propertyOption)
-        {
-            var testInstance = TestAssets.Get("ProjectPrintsNoWarn")
-                .CreateInstance()
-                .WithSourceFiles();
-
-            new MSBuildCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput($@"/restore {propertyOption}:NoWarn=1234;5678;90\")
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining(@"NoWarn => 1234;5678;90\");
-        }
-
         private string[] GetArgsForMSBuild(Func<bool> sentinelExists)
         {
             Telemetry.Telemetry telemetry;
