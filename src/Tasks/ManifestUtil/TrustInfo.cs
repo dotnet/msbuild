@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -12,7 +10,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
-using System.Text;
 using System.Xml;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -23,20 +20,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class TrustInfo
     {
-        private PermissionSet _inputPermissionSet = null;
-        private XmlDocument _inputTrustInfoDocument = null;
+        private PermissionSet _inputPermissionSet;
+        private XmlDocument _inputTrustInfoDocument;
         private bool _isFullTrust = true;
-        private PermissionSet _outputPermissionSet = null;
-        private bool _preserveFullTrustPermissionSet = false;
+        private PermissionSet _outputPermissionSet;
         private string _sameSiteSetting = "site";
-        private bool _sameSiteChanged = false;
-
-        /// <summary>
-        /// Initializes a new instance of the TrustInfo class.
-        /// </summary>
-        public TrustInfo()
-        {
-        }
+        private bool _sameSiteChanged;
 
         private void AddSameSiteAttribute(XmlElement permissionSetElement)
         {
@@ -66,9 +55,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             XmlDocument document = permissionSetElement.OwnerDocument;
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
 
-            if (_preserveFullTrustPermissionSet)
+            if (PreserveFullTrustPermissionSet)
             {
-                XmlAttribute unrestrictedAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
+                var unrestrictedAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
                 if (_isFullTrust)
                 {
                     if (unrestrictedAttribute == null)
@@ -81,14 +70,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 else
                 {
                     if (unrestrictedAttribute != null)
+                    {
                         permissionSetElement.Attributes.RemoveNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
+                    }
                 }
             }
             else
             {
                 if (_isFullTrust)
                 {
-                    XmlAttribute unrestrictedAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
+                    var unrestrictedAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
                     if (unrestrictedAttribute == null)
                     {
                         unrestrictedAttribute = document.CreateAttribute(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
@@ -96,12 +87,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                     unrestrictedAttribute.Value = "true";
                     while (permissionSetElement.FirstChild != null)
+                    {
                         permissionSetElement.RemoveChild(permissionSetElement.FirstChild);
+                    }
                 }
             }
 
             // Add ID="Custom" attribute if there's not one already
-            XmlAttribute idAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.idAttribute));
+            var idAttribute = (XmlAttribute)permissionSetElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.idAttribute));
             if (idAttribute == null)
             {
                 idAttribute = document.CreateAttribute(XmlUtil.TrimPrefix(XPaths.idAttribute));
@@ -109,12 +102,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             if (String.IsNullOrEmpty(idAttribute.Value))
+            {
                 idAttribute.Value = "Custom";
+            }
 
             AddSameSiteAttribute(permissionSetElement);
 
-            if (permissionSetElement.ParentNode == null || permissionSetElement.ParentNode.NodeType == XmlNodeType.Document)
+            if (permissionSetElement.ParentNode == null ||
+                permissionSetElement.ParentNode.NodeType == XmlNodeType.Document)
+            {
                 return;
+            }
 
             XmlAttribute idrefAttribute = null;
             XmlElement defaultAssemblyRequestElement = (XmlElement)permissionSetElement.ParentNode.SelectSingleNode(XPaths.defaultAssemblyRequestElement, nsmgr);
@@ -131,7 +129,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             if (String.Compare(idAttribute.Value, idrefAttribute.Value, StringComparison.Ordinal) != 0)
+            {
                 idrefAttribute.Value = idAttribute.Value;
+            }
         }
 
         private PermissionSet GetInputPermissionSet()
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (_inputPermissionSet == null)
             {
                 XmlElement psElement = GetInputPermissionSetElement();
-                if (_preserveFullTrustPermissionSet)
+                if (PreserveFullTrustPermissionSet)
                 {
                     XmlAttribute unrestrictedAttribute = (XmlAttribute)psElement.Attributes.GetNamedItem(XmlUtil.TrimPrefix(XPaths.unrestrictedAttribute));
                     _isFullTrust = unrestrictedAttribute != null && Boolean.Parse(unrestrictedAttribute.Value);
@@ -166,7 +166,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (_inputTrustInfoDocument == null)
             {
                 _inputTrustInfoDocument = new XmlDocument();
-                XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(_inputTrustInfoDocument.NameTable);
                 XmlElement trustInfoElement = _inputTrustInfoDocument.CreateElement(XmlUtil.TrimPrefix(XPaths.trustInfoElement), XmlNamespaces.asmv2);
                 _inputTrustInfoDocument.AppendChild(trustInfoElement);
             }
@@ -179,18 +178,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return null;
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(_inputTrustInfoDocument.NameTable);
             XmlElement trustInfoElement = _inputTrustInfoDocument.DocumentElement;
-            if (trustInfoElement == null)
-                return null;
-            XmlElement securityElement = (XmlElement)trustInfoElement.SelectSingleNode(XPaths.securityElement, nsmgr);
-            if (securityElement == null)
-                return null;
-            XmlElement requestedPrivilegeElement = (XmlElement)securityElement.SelectSingleNode(XPaths.requestedPrivilegeElement, nsmgr);
-            if (requestedPrivilegeElement == null)
-                return null;
+            XmlElement securityElement = (XmlElement) trustInfoElement?.SelectSingleNode(XPaths.securityElement, nsmgr);
+            XmlElement requestedPrivilegeElement = (XmlElement) securityElement?.SelectSingleNode(XPaths.requestedPrivilegeElement, nsmgr);
             return requestedPrivilegeElement;
         }
 
-        private XmlElement GetRequestedPrivilegeElement(XmlElement inputRequestedPrivilegeElement, XmlDocument document)
+        private static XmlElement GetRequestedPrivilegeElement(XmlElement inputRequestedPrivilegeElement, XmlDocument document)
         {
             //  <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
             //      <!--
@@ -311,7 +304,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Debug.Assert(document != null, "GetPermissionSetElement was passed a null document");
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
             XmlElement trustInfoElement = document.DocumentElement;
-            XmlElement securityElement = (XmlElement)trustInfoElement.SelectSingleNode(XPaths.securityElement, nsmgr);
+            var securityElement = (XmlElement)trustInfoElement.SelectSingleNode(XPaths.securityElement, nsmgr);
             if (securityElement == null)
             {
                 securityElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.securityElement), XmlNamespaces.asmv2);
@@ -367,8 +360,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 PermissionSet ps = GetOutputPermissionSet();
                 if (ps == null)
+                {
                     return false;
-                PermissionSet ups = new PermissionSet(PermissionState.None);
+                }
+                var ups = new PermissionSet(PermissionState.None);
                 ups.AddPermission(new SecurityPermission(SecurityPermissionFlag.UnmanagedCode));
                 return ps.Intersect(ups) != null;
             }
@@ -384,10 +379,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 GetInputPermissionSet();
                 return _isFullTrust;
             }
-            set
-            {
-                _isFullTrust = value;
-            }
+            set => _isFullTrust = value;
         }
 
         /// <summary>
@@ -395,28 +387,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         public PermissionSet PermissionSet
         {
-            get
-            {
-                return GetOutputPermissionSet();
-            }
-            set
-            {
-                // Can't allow null because we use that to track whether we should save or not, pass an empty permission set instead
-                if (value == null)
-                    throw new ArgumentNullException("PermissionSet cannot be set to null.");
-                _outputPermissionSet = value;
-            }
+            get => GetOutputPermissionSet();
+            set => _outputPermissionSet = value ?? throw new ArgumentNullException("PermissionSet cannot be set to null.");
         }
 
         /// <summary>
         /// Determines whether to preserve partial trust permission when the full trust flag is set.
         /// If this option is false with full trust specified, then any permissions defined in the permission set object will be dropped on save.
         /// </summary>
-        public bool PreserveFullTrustPermissionSet
-        {
-            get { return _preserveFullTrustPermissionSet; }
-            set { _preserveFullTrustPermissionSet = value; }
-        }
+        public bool PreserveFullTrustPermissionSet { get; set; }
 
         /// <summary>
         /// Reads the application trust from an XML file.
@@ -442,17 +421,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void Read(Stream s, string xpath)
         {
             Clear();
-            XmlDocument document = new XmlDocument();
-            XmlReaderSettings xrSettings = new XmlReaderSettings();
-            xrSettings.DtdProcessing = DtdProcessing.Ignore;
+            var document = new XmlDocument();
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
             using (XmlReader xr = XmlReader.Create(s, xrSettings))
             {
                 document.Load(xr);
             }
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
-            XmlElement trustInfoElement = (XmlElement)document.SelectSingleNode(xpath, nsmgr);
+            var trustInfoElement = (XmlElement)document.SelectSingleNode(xpath, nsmgr);
             if (trustInfoElement == null)
+            {
                 return; // no trustInfo element is okay
+            }
             ReadTrustInfo(trustInfoElement.OuterXml);
         }
 
@@ -497,7 +477,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         public string SameSiteAccess
         {
-            get { return _sameSiteSetting; }
+            get => _sameSiteSetting;
             set
             {
                 _sameSiteSetting = value;
@@ -507,10 +487,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public override string ToString()
         {
-            MemoryStream m = new MemoryStream();
+            var m = new MemoryStream();
             Write(m);
             m.Position = 0;
-            StreamReader r = new StreamReader(m);
+            var r = new StreamReader(m);
             return r.ReadToEnd();
         }
 
@@ -533,7 +513,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="output"></param>
         public void Write(Stream output)
         {
-            XmlDocument outputDocument = new XmlDocument();
+            var outputDocument = new XmlDocument();
             XmlElement inputPermissionSetElement = GetInputPermissionSetElement();
 
             //NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
@@ -542,17 +522,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             string tempPrivilegeDocument = null;
 
-            XmlDocument privilegeDocument = new XmlDocument();
+            var privilegeDocument = new XmlDocument();
             XmlElement inputRequestedPrivilegeElement = GetInputRequestedPrivilegeElement();
-            XmlElement requestedPrivilegeElement = null;
 
-            requestedPrivilegeElement = GetRequestedPrivilegeElement(inputRequestedPrivilegeElement, privilegeDocument);
+            XmlElement requestedPrivilegeElement = GetRequestedPrivilegeElement(inputRequestedPrivilegeElement, privilegeDocument);
 
             if (requestedPrivilegeElement != null)
             {
                 privilegeDocument.AppendChild(requestedPrivilegeElement);
 
-                MemoryStream p = new MemoryStream();
+                var p = new MemoryStream();
                 privilegeDocument.Save(p);
                 p.Position = 0;
                 tempPrivilegeDocument = Util.WriteTempFile(p);
@@ -595,17 +574,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
 
                 // Wrap <PermissionSet> in a <TrustInfo> section
-                Stream s = null;
-                if (tempPrivilegeDocument != null)
-                    s = XmlUtil.XslTransform(trustInfoResource2, m, new DictionaryEntry("defaultRequestedPrivileges", tempPrivilegeDocument));
-                else
-                    s = XmlUtil.XslTransform(trustInfoResource2, m);
+                Stream s = tempPrivilegeDocument != null ? XmlUtil.XslTransform(trustInfoResource2, m, new DictionaryEntry("defaultRequestedPrivileges", tempPrivilegeDocument)) : XmlUtil.XslTransform(trustInfoResource2, m);
                 Util.CopyStream(s, output);
             }
             finally
             {
                 if (tempPrivilegeDocument != null)
+                {
                     File.Delete(tempPrivilegeDocument);
+                }
             }
         }
 
@@ -670,9 +647,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public void WriteManifest(Stream input, Stream output)
         {
             int t1 = Environment.TickCount;
-            XmlDocument document = new XmlDocument();
-            XmlReaderSettings xrSettings = new XmlReaderSettings();
-            xrSettings.DtdProcessing = DtdProcessing.Ignore;
+            var document = new XmlDocument();
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
             using (XmlReader xr = XmlReader.Create(input, xrSettings))
             {
                 document.Load(xr);
@@ -680,9 +656,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
             XmlElement assemblyElement = (XmlElement)document.SelectSingleNode(XPaths.assemblyElement, nsmgr);
             if (assemblyElement == null)
+            {
                 throw new BadImageFormatException();
+            }
 
-            XmlElement trustInfoElement = (XmlElement)assemblyElement.SelectSingleNode(XPaths.trustInfoElement, nsmgr);
+            var trustInfoElement = (XmlElement)assemblyElement.SelectSingleNode(XPaths.trustInfoElement, nsmgr);
             if (trustInfoElement == null)
             {
                 trustInfoElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.trustInfoElement), XmlNamespaces.asmv2);
@@ -697,13 +675,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                XmlElement securityElement = (XmlElement)trustInfoElement.SelectSingleNode(XPaths.securityElement, nsmgr);
+                var securityElement = (XmlElement)trustInfoElement.SelectSingleNode(XPaths.securityElement, nsmgr);
                 if (securityElement == null)
                 {
                     securityElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.securityElement), XmlNamespaces.asmv2);
                     trustInfoElement.AppendChild(securityElement);
                 }
-                XmlElement applicationRequestMinimumElement = (XmlElement)securityElement.SelectSingleNode(XPaths.applicationRequestMinimumElement, nsmgr);
+                var applicationRequestMinimumElement = (XmlElement)securityElement.SelectSingleNode(XPaths.applicationRequestMinimumElement, nsmgr);
                 if (applicationRequestMinimumElement == null)
                 {
                     applicationRequestMinimumElement = document.CreateElement(XmlUtil.TrimPrefix(XPaths.applicationRequestMinimumElement), XmlNamespaces.asmv2);
@@ -712,10 +690,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 XmlNodeList permissionSetNodes = applicationRequestMinimumElement.SelectNodes(XPaths.permissionSetElement, nsmgr);
                 foreach (XmlNode permissionSetNode in permissionSetNodes)
+                {
                     applicationRequestMinimumElement.RemoveChild(permissionSetNode);
+                }
 
                 XmlDocument permissionSetDocument = GetOutputPermissionSetDocument();
-                XmlElement permissionSetElement = (XmlElement)document.ImportNode(permissionSetDocument.DocumentElement, true);
+                var permissionSetElement = (XmlElement)document.ImportNode(permissionSetDocument.DocumentElement, true);
                 applicationRequestMinimumElement.AppendChild(permissionSetElement);
                 FixupPermissionSetElement(permissionSetElement);
             }

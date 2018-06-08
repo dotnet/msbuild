@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Build.Shared;
 
@@ -22,9 +20,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static Stream Serialize(Manifest manifest)
         {
             manifest.OnBeforeSave();
-            MemoryStream m = new MemoryStream();
-            XmlSerializer s = new XmlSerializer(manifest.GetType());
-            StreamWriter w = new StreamWriter(m);
+            var m = new MemoryStream();
+            var s = new XmlSerializer(manifest.GetType());
+            var w = new StreamWriter(m);
 
             int t1 = Environment.TickCount;
             s.Serialize(w, manifest);
@@ -42,9 +40,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="manifest">The object representation of the manifest.</param>
         public static void WriteManifest(Manifest manifest)
         {
-            string path = manifest.SourcePath;
-            if (path == null)
-                path = "manifest.xml";
+            string path = manifest.SourcePath ?? "manifest.xml";
             WriteManifest(manifest, path);
         }
 
@@ -60,7 +56,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 WriteManifest(manifest, s);
             }
         }
-
 
         /// <summary>
         /// Writes the specified object representation of a manifest to XML.
@@ -98,12 +93,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Stream s1 = Serialize(manifest);
             string n = manifest.AssemblyIdentity.GetFullName(AssemblyIdentity.FullNameFlags.All);
             if (String.IsNullOrEmpty(n))
+            {
                 n = manifest.GetType().Name;
+            }
             Util.WriteLogFile(n + ".write.0-serialized.xml", s1);
 
-            string resource = null;
+            string resource;
 
-            if (targetframeWorkVersion == null || targetframeWorkVersion.Length == 0 || Util.CompareFrameworkVersions(targetframeWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
+            if (string.IsNullOrEmpty(targetframeWorkVersion) || Util.CompareFrameworkVersions(targetframeWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
             {
                 resource = "write2.xsl";
             }
@@ -112,11 +109,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 resource = "write3.xsl";
             }
 
-            Stream s2 = null;
+            Stream s2;
 
             if (manifest.GetType() == typeof(ApplicationManifest))
             {
-                ApplicationManifest am = (ApplicationManifest)manifest;
+                var am = (ApplicationManifest)manifest;
                 if (am.TrustInfo == null)
                 {
                     s2 = XmlUtil.XslTransform(resource, s1);
@@ -147,7 +144,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                     }
 
-                    DictionaryEntry arg = new DictionaryEntry("trust-file", temp);
+                    var arg = new DictionaryEntry("trust-file", temp);
                     try
                     {
                         s2 = XmlUtil.XslTransform(resource, s1, arg);
@@ -159,10 +156,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
             }
             else
+            {
                 s2 = XmlUtil.XslTransform(resource, s1);
+            }
             Util.WriteLogFile(n + ".write.1-transformed.xml", s2);
 
-            Stream s3 = null;
+            Stream s3;
             if (manifest.InputStream == null)
             {
                 s3 = s2;
@@ -170,7 +169,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             else
             {
                 string temp = Util.WriteTempFile(manifest.InputStream);
-                DictionaryEntry arg = new DictionaryEntry("base-file", temp);
+                var arg = new DictionaryEntry("base-file", temp);
                 try
                 {
                     s3 = XmlUtil.XslTransform("merge.xsl", s2, arg);

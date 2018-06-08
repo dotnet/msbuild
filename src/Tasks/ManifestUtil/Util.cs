@@ -14,7 +14,6 @@ using System.Reflection;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -23,14 +22,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static readonly string Schema = Environment.GetEnvironmentVariable("VSPSCHEMA");
         internal static readonly bool logging = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSPLOG"));
         internal static readonly string logPath = GetLogPath();
-        private static readonly char[] s_fileNameInvalidChars = new char[] { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
-        private static StreamWriter s_logFileWriter = null;
+        private static readonly char[] s_fileNameInvalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
+        private static StreamWriter s_logFileWriter;
         // Major, Minor, Build and Revision of CLR v2.0
-        private static int[] s_clrVersion2 = new int[] { 2, 0, 50727, 0 };
+        private static readonly int[] s_clrVersion2 = { 2, 0, 50727, 0 };
 
         #region " Platform <-> ProcessorArchitecture mapping "
         // Note: These two arrays are parallel and must correspond to one another.
-        private readonly static string[] s_platforms = new string[]
+        private static readonly string[] s_platforms =
         {
             "AnyCPU",
             "x86",
@@ -38,7 +37,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             "Itanium",
             "arm"
         };
-        private readonly static string[] s_processorArchitectures = new string[]
+        private static readonly string[] s_processorArchitectures =
         {
             "msil",
             "x86",
@@ -73,7 +72,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             const int bufferSize = 0x4000;
             byte[] buffer = new byte[bufferSize];
             int bytesCopied = 0;
-            int bytesRead = 0;
+            int bytesRead;
             do
             {
                 bytesRead = input.Read(buffer, 0, bufferSize);
@@ -105,7 +104,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static string GetClrVersion()
         {
-            Version v = System.Environment.Version;
+            Version v = Environment.Version;
             v = new Version(v.Major, v.Minor, v.Build, 0);
             return v.ToString();
         }
@@ -120,8 +119,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (string.IsNullOrEmpty(targetFrameworkVersion))
                 return GetClrVersion();
 
-            Version clrVersion = null;
-            Version currentVersion = System.Environment.Version;
+            Version clrVersion;
+            Version currentVersion = Environment.Version;
             Version frameworkVersion = GetTargetFrameworkVersion(targetFrameworkVersion);
 
             // for FX 4.0 or above use the current version.
@@ -191,9 +190,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 s = fi.OpenRead();
-                HashAlgorithm hashAlg = null;
+                HashAlgorithm hashAlg;
 
-                if (targetFrameWorkVersion == null || targetFrameWorkVersion.Length == 0 || Util.CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
+                if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
                     hashAlg = new SHA1CryptoServiceProvider();
                 }
@@ -206,8 +205,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             finally
             {
-                if (s != null)
-                    s.Close();
+                s?.Close();
             }
         }
 
@@ -226,8 +224,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (key != null)
             {
                 string org = (string)key.GetValue("RegisteredOrganization");
-                if (org != null)
-                    org = org.Trim();
+                org = org?.Trim();
                 if (!String.IsNullOrEmpty(org))
                     return org;
             }
@@ -327,10 +324,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (ITaskItem item in items)
             {
                 if (String.IsNullOrEmpty(item.ItemSpec))
+                {
                     continue;
+                }
 
-                string key = null;
-                AssemblyIdentity id = new AssemblyIdentity(item.ItemSpec);
+                string key;
+                var id = new AssemblyIdentity(item.ItemSpec);
                 if (id.IsStrongName)
                 {
                     key = id.GetFullName(AssemblyIdentity.FullNameFlags.All);

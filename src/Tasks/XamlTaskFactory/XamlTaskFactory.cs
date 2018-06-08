@@ -47,41 +47,23 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the task pulled from the XAML.
         /// </summary>
-        public string TaskName
-        {
-            get;
-            private set;
-        }
+        public string TaskName { get; private set; }
 
         /// <summary>
         /// The namespace of the task pulled from the XAML.
         /// </summary>
-        public string TaskNamespace
-        {
-            get;
-            private set;
-        }
+        public string TaskNamespace { get; private set; }
 
         /// <summary>
         /// The contents of the UsingTask body.
         /// </summary>
-        public string TaskElementContents
-        {
-            get;
-            private set;
-        }
+        public string TaskElementContents { get; private set; }
 
         /// <summary>
         /// The name of this factory. This factory name will be used in error messages. For example
         /// Task "Mytask" failed to load from "FactoryName".
         /// </summary>
-        public string FactoryName
-        {
-            get
-            {
-                return "XamlTaskFactory";
-            }
-        }
+        public string FactoryName { get; } = "XamlTaskFactory";
 
         /// <summary>
         /// The task type object.
@@ -108,9 +90,11 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
             ErrorUtilities.VerifyThrowArgumentNull(taskParameters, "taskParameters");
 
-            TaskLoggingHelper log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName);
-            log.TaskResources = AssemblyResources.PrimaryResources;
-            log.HelpKeywordPrefix = "MSBuild.";
+            var log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
 
             if (taskElementContents == null)
             {
@@ -127,7 +111,7 @@ namespace Microsoft.Build.Tasks
 
             TaskName = parser.GeneratedTaskName;
             TaskNamespace = parser.Namespace;
-            TaskGenerator generator = new TaskGenerator(parser);
+            var generator = new TaskGenerator(parser);
 
             CodeCompileUnit dom = generator.GenerateCode();
 
@@ -135,32 +119,34 @@ namespace Microsoft.Build.Tasks
 
             // create the code generator options    
             // Since we are running msbuild 12.0 these had better load.
-            CompilerParameters compilerParameters = new CompilerParameters
-                (
-                    new string[]
-                    {
-                        "System.dll",
-                        Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Framework.dll"),
-                        Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"),
-                        Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
-                    }
-
-                );
-
-            compilerParameters.GenerateInMemory = true;
-            compilerParameters.TreatWarningsAsErrors = false;
+            var compilerParameters = new CompilerParameters
+            (
+                new[]
+                {
+                    "System.dll",
+                    Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Framework.dll"),
+                    Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"),
+                    Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
+                }
+            )
+            {
+                GenerateInMemory = true,
+                TreatWarningsAsErrors = false
+            };
 
             // create the code provider
-            CodeDomProvider codegenerator = CodeDomProvider.CreateProvider("cs");
+            var codegenerator = CodeDomProvider.CreateProvider("cs");
             CompilerResults results;
             bool debugXamlTask = Environment.GetEnvironmentVariable("MSBUILDWRITEXAMLTASK") == "1";
             if (debugXamlTask)
             {
-                using (StreamWriter outputWriter = new StreamWriter(taskName + "_XamlTask.cs"))
+                using (var outputWriter = new StreamWriter(taskName + "_XamlTask.cs"))
                 {
-                    CodeGeneratorOptions options = new CodeGeneratorOptions();
-                    options.BlankLinesBetweenMembers = true;
-                    options.BracingStyle = "C";
+                    var options = new CodeGeneratorOptions
+                    {
+                        BlankLinesBetweenMembers = true,
+                        BracingStyle = "C"
+                    };
 
                     codegenerator.GenerateCodeFromCompileUnit(dom, outputWriter, options);
                 }
@@ -169,7 +155,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                results = codegenerator.CompileAssemblyFromDom(compilerParameters, new[] { dom });
+                results = codegenerator.CompileAssemblyFromDom(compilerParameters, dom);
             }
 
             try
@@ -183,7 +169,7 @@ namespace Microsoft.Build.Tasks
 
             if (_taskAssembly == null)
             {
-                StringBuilder errorList = new StringBuilder();
+                var errorList = new StringBuilder();
                 errorList.AppendLine();
                 foreach (CompilerError error in results.Errors)
                 {

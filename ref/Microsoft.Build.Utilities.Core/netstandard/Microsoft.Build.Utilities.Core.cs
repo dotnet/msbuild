@@ -224,10 +224,10 @@ namespace Microsoft.Build.Utilities
         public TaskLoggingHelper(Microsoft.Build.Framework.IBuildEngine buildEngine, string taskName) { }
         public TaskLoggingHelper(Microsoft.Build.Framework.ITask taskInstance) { }
         protected Microsoft.Build.Framework.IBuildEngine BuildEngine { get { throw null; } }
-        public bool HasLoggedErrors { get { throw null; } }
-        public string HelpKeywordPrefix { get { throw null; } set { } }
-        protected string TaskName { get { throw null; } }
-        public System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
+        public bool HasLoggedErrors { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string HelpKeywordPrefix { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        protected string TaskName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Resources.ResourceManager TaskResources { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string ExtractMessageCode(string message, out string messageWithoutCodePrefix) { messageWithoutCodePrefix = default(string); throw null; }
         public virtual string FormatResourceString(string resourceName, params object[] args) { throw null; }
         public virtual string FormatString(string unformatted, params object[] args) { throw null; }

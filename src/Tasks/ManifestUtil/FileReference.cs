@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Xml.Serialization;
@@ -18,15 +16,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class FileReference : BaseReference
     {
-        private ComClass[] _comClasses = null;
-        private string _writeableType = null;
-        private ProxyStub[] _proxyStubs = null;
-        private TypeLib[] _typeLibs = null;
+        private ComClass[] _comClasses;
+        private string _writeableType;
+        private ProxyStub[] _proxyStubs;
+        private TypeLib[] _typeLibs;
 
         /// <summary>
         /// Initializes a new instance of the FileReference class.
         /// </summary>
-        public FileReference() : base()
+        public FileReference()
         {
         }
 
@@ -42,32 +40,39 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Specifies the set of COM classes referenced by the manifest for isolated applications and Reg-Free COM.
         /// </summary>
         [XmlIgnore]
-        public ComClass[] ComClasses
-        {
-            get { return _comClasses; }
-        }
+        public ComClass[] ComClasses => _comClasses;
 
         internal bool ImportComComponent(string path, OutputMessageCollection outputMessages, string outputDisplayName)
         {
-            ComImporter importer = new ComImporter(path, outputMessages, outputDisplayName);
+            var importer = new ComImporter(path, outputMessages, outputDisplayName);
             if (importer.Success)
             {
-                ArrayList list = new ArrayList();
+                var typeLibs = new List<TypeLib>();
 
                 // Add TypeLib objects from importer...
                 if (_typeLibs != null)
-                    list.AddRange(_typeLibs);
+                {
+                    typeLibs.AddRange(_typeLibs);
+                }
+
                 if (importer.TypeLib != null)
-                    list.Add(importer.TypeLib);
-                _typeLibs = (TypeLib[])list.ToArray(typeof(TypeLib));
+                {
+                    typeLibs.Add(importer.TypeLib);
+                }
+                _typeLibs = typeLibs.ToArray();
 
                 // Add ComClass objects from importer...
-                list.Clear();
+                var comClasses = new List<ComClass>();
                 if (_comClasses != null)
-                    list.AddRange(_comClasses);
+                {
+                    comClasses.AddRange(_comClasses);
+                }
+
                 if (importer.ComClasses != null)
-                    list.AddRange(importer.ComClasses);
-                _comClasses = (ComClass[])list.ToArray(typeof(ComClass));
+                {
+                    comClasses.AddRange(importer.ComClasses);
+                }
+                _comClasses = comClasses.ToArray();
             }
             return importer.Success;
         }
@@ -78,32 +83,23 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool IsDataFile
         {
-            get { return String.Compare(_writeableType, "applicationData", StringComparison.OrdinalIgnoreCase) == 0; }
-            set { _writeableType = value ? "applicationData" : null; }
+            get => String.Compare(_writeableType, "applicationData", StringComparison.OrdinalIgnoreCase) == 0;
+            set => _writeableType = value ? "applicationData" : null;
         }
 
         /// <summary>
         /// Specifies the set of proxy stubs referenced by the manifest for isolated applications and Reg-Free COM.
         /// </summary>
         [XmlIgnore]
-        public ProxyStub[] ProxyStubs
-        {
-            get { return _proxyStubs; }
-        }
+        public ProxyStub[] ProxyStubs => _proxyStubs;
 
-        protected internal override string SortName
-        {
-            get { return TargetPath; }
-        }
+        protected internal override string SortName => TargetPath;
 
         /// <summary>
         /// Specifies the set of type libraries referenced by the manifest.
         /// </summary>
         [XmlIgnore]
-        public TypeLib[] TypeLibs
-        {
-            get { return _typeLibs; }
-        }
+        public TypeLib[] TypeLibs => _typeLibs;
 
         #region " XmlSerializer "
 
@@ -112,8 +108,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlArray("ComClasses")]
         public ComClass[] XmlComClasses
         {
-            get { return _comClasses; }
-            set { _comClasses = value; }
+            get => _comClasses;
+            set => _comClasses = value;
         }
 
         [Browsable(false)]
@@ -121,8 +117,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlArray("ProxyStubs")]
         public ProxyStub[] XmlProxyStubs
         {
-            get { return _proxyStubs; }
-            set { _proxyStubs = value; }
+            get => _proxyStubs;
+            set => _proxyStubs = value;
         }
 
         [Browsable(false)]
@@ -130,8 +126,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlArray("TypeLibs")]
         public TypeLib[] XmlTypeLibs
         {
-            get { return _typeLibs; }
-            set { _typeLibs = value; }
+            get => _typeLibs;
+            set => _typeLibs = value;
         }
 
         [Browsable(false)]
@@ -139,8 +135,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("WriteableType")]
         public string XmlWriteableType
         {
-            get { return _writeableType; }
-            set { _writeableType = value; }
+            get => _writeableType;
+            set => _writeableType = value;
         }
 
         #endregion
@@ -169,34 +165,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         [XmlIgnore]
-        public string ClsId
-        {
-            get { return _clsid; }
-        }
+        public string ClsId => _clsid;
 
         [XmlIgnore]
-        public string Description
-        {
-            get { return _description; }
-        }
+        public string Description => _description;
 
         [XmlIgnore]
-        public string ProgId
-        {
-            get { return _progid; }
-        }
+        public string ProgId => _progid;
 
         [XmlIgnore]
-        public string ThreadingModel
-        {
-            get { return _threadingModel; }
-        }
+        public string ThreadingModel => _threadingModel;
 
         [XmlIgnore]
-        public string TlbId
-        {
-            get { return _tlbid; }
-        }
+        public string TlbId => _tlbid;
 
         #region " XmlSerializer "
 
@@ -205,8 +186,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Clsid")]
         public string XmlClsId
         {
-            get { return _clsid; }
-            set { _clsid = value; }
+            get => _clsid;
+            set => _clsid = value;
         }
 
         [Browsable(false)]
@@ -214,8 +195,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Description")]
         public string XmlDescription
         {
-            get { return _description; }
-            set { _description = value; }
+            get => _description;
+            set => _description = value;
         }
 
         [Browsable(false)]
@@ -223,8 +204,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Progid")]
         public string XmlProgId
         {
-            get { return _progid; }
-            set { _progid = value; }
+            get => _progid;
+            set => _progid = value;
         }
 
         [Browsable(false)]
@@ -232,8 +213,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("ThreadingModel")]
         public string XmlThreadingModel
         {
-            get { return _threadingModel; }
-            set { _threadingModel = value; }
+            get => _threadingModel;
+            set => _threadingModel = value;
         }
 
         [Browsable(false)]
@@ -241,8 +222,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Tlbid")]
         public string XmlTlbId
         {
-            get { return _tlbid; }
-            set { _tlbid = value; }
+            get => _tlbid;
+            set => _tlbid = value;
         }
 
         #endregion
@@ -271,48 +252,44 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         [XmlIgnore]
-        public string Flags
-        {
-            get { return _flags; }
-        }
+        public string Flags => _flags;
 
         private static string FlagsFromInt(int flags)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             if ((flags & 1) != 0)
+            {
                 sb.Append("RESTRICTED,");
+            }
+
             if ((flags & 2) != 0)
+            {
                 sb.Append("CONTROL,");
+            }
+
             if ((flags & 4) != 0)
+            {
                 sb.Append("HIDDEN,");
+            }
+
             if ((flags & 8) != 0)
+            {
                 sb.Append("HASDISKIMAGE,");
+            }
             return sb.ToString().TrimEnd(',');
         }
 
         [XmlIgnore]
-        public string HelpDirectory
-        {
-            get { return _helpDirectory; }
-        }
+        public string HelpDirectory => _helpDirectory;
 
         [XmlIgnore]
-        public string ResourceId
-        {
-            get { return _resourceid; }
-        }
+        public string ResourceId => _resourceid;
 
         [XmlIgnore]
-        public string TlbId
-        {
-            get { return _tlbid; }
-        }
+        public string TlbId => _tlbid;
 
         [XmlIgnore]
-        public string Version
-        {
-            get { return _version; }
-        }
+        public string Version => _version;
 
         #region " XmlSerializer "
 
@@ -321,8 +298,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Flags")]
         public string XmlFlags
         {
-            get { return _flags; }
-            set { _flags = value; }
+            get => _flags;
+            set => _flags = value;
         }
 
         [Browsable(false)]
@@ -330,8 +307,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("HelpDir")]
         public string XmlHelpDirectory
         {
-            get { return _helpDirectory; }
-            set { _helpDirectory = value; }
+            get => _helpDirectory;
+            set => _helpDirectory = value;
         }
 
         [Browsable(false)]
@@ -339,8 +316,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("ResourceId")]
         public string XmlResourceId
         {
-            get { return _resourceid; }
-            set { _resourceid = value; }
+            get => _resourceid;
+            set => _resourceid = value;
         }
 
         [Browsable(false)]
@@ -348,8 +325,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Tlbid")]
         public string XmlTlbId
         {
-            get { return _tlbid; }
-            set { _tlbid = value; }
+            get => _tlbid;
+            set => _tlbid = value;
         }
 
         [Browsable(false)]
@@ -357,8 +334,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Version")]
         public string XmlVersion
         {
-            get { return _version; }
-            set { _version = value; }
+            get => _version;
+            set => _version = value;
         }
 
         #endregion
@@ -381,10 +358,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         [XmlIgnore]
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name => _name;
 
         [XmlIgnore]
         public bool Versioned
@@ -392,11 +366,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get
             {
                 if (String.Compare(_versioned, "yes", StringComparison.OrdinalIgnoreCase) == 0)
+                {
                     return true;
+                }
+
                 if (String.Compare(_versioned, "no", StringComparison.OrdinalIgnoreCase) == 0)
+                {
                     return false;
-                else
-                    return true;
+                }
+                return true;
             }
         }
 
@@ -407,8 +385,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Name")]
         public string XmlName
         {
-            get { return _name; }
-            set { _name = value; }
+            get => _name;
+            set => _name = value;
         }
 
         [Browsable(false)]
@@ -416,8 +394,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Versioned")]
         public string XmlVersioned
         {
-            get { return _versioned; }
-            set { _versioned = value; }
+            get => _versioned;
+            set => _versioned = value;
         }
 
         #endregion
@@ -432,39 +410,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private string _numMethods;
         private string _tlbid;
 
-        public ProxyStub()
-        {
-        }
+        [XmlIgnore]
+        public string BaseInterface => _baseInterface;
 
         [XmlIgnore]
-        public string BaseInterface
-        {
-            get { return _baseInterface; }
-        }
+        public string IID => _iid;
 
         [XmlIgnore]
-        public string IID
-        {
-            get { return _iid; }
-        }
+        public string Name => _name;
 
         [XmlIgnore]
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string NumMethods => _numMethods;
 
         [XmlIgnore]
-        public string NumMethods
-        {
-            get { return _numMethods; }
-        }
-
-        [XmlIgnore]
-        public string TlbId
-        {
-            get { return _tlbid; }
-        }
+        public string TlbId => _tlbid;
 
         #region " XmlSerializer "
 
@@ -473,8 +432,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("BaseInterface")]
         public string XmlBaseInterface
         {
-            get { return _baseInterface; }
-            set { _baseInterface = value; }
+            get => _baseInterface;
+            set => _baseInterface = value;
         }
 
         [Browsable(false)]
@@ -482,8 +441,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Iid")]
         public string XmlIID
         {
-            get { return _iid; }
-            set { _iid = value; }
+            get => _iid;
+            set => _iid = value;
         }
 
         [Browsable(false)]
@@ -491,8 +450,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Name")]
         public string XmlName
         {
-            get { return _name; }
-            set { _name = value; }
+            get => _name;
+            set => _name = value;
         }
 
         [Browsable(false)]
@@ -500,8 +459,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("NumMethods")]
         public string XmlNumMethods
         {
-            get { return _numMethods; }
-            set { _numMethods = value; }
+            get => _numMethods;
+            set => _numMethods = value;
         }
 
         [Browsable(false)]
@@ -509,8 +468,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Tlbid")]
         public string XmlTlbId
         {
-            get { return _tlbid; }
-            set { _tlbid = value; }
+            get => _tlbid;
+            set => _tlbid = value;
         }
 
         #endregion

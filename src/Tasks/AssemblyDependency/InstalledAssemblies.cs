@@ -2,16 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Reflection;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
 {
@@ -20,12 +11,11 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal class InstalledAssemblies
     {
-        private RedistList _redistList = null;
+        private readonly RedistList _redistList;
 
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="redistList"></param>
         internal InstalledAssemblies(RedistList redistList)
         {
             _redistList = redistList;
@@ -52,7 +42,6 @@ namespace Microsoft.Build.Tasks
             isPrerequisite = false;
             isRedistRoot = null;
             redistName = null;
-
 
             // Short-circuit in cases where there is no redist list.
             if (_redistList == null)
@@ -83,8 +72,6 @@ namespace Microsoft.Build.Tasks
                 isPrerequisite = _redistList.IsPrerequisiteAssembly(highestVersionFromRedistList.FullName);
                 isRedistRoot = _redistList.IsRedistRoot(highestVersionFromRedistList.FullName);
                 redistName = _redistList.RedistName(highestVersionFromRedistList.FullName);
-
-                return;
             }
         }
 
@@ -95,12 +82,7 @@ namespace Microsoft.Build.Tasks
         internal AssemblyNameExtension RemapAssemblyExtension(AssemblyNameExtension assemblyName)
         {
             // Short-circuit in cases where there is no redist list
-            if (_redistList == null)
-            {
-                return null;
-            }
-
-            return _redistList.RemapAssembly(assemblyName);
+            return _redistList?.RemapAssembly(assemblyName);
         }
 
         /// <summary>

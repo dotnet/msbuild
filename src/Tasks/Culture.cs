@@ -3,13 +3,6 @@
 
 using System;
 using System.IO;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -33,9 +26,6 @@ namespace Microsoft.Build.Tasks
         /// <remarks>
         /// We've decided to ignore explicit Culture attributes on items.
         /// </remarks>
-        /// <param name="name"></param>
-        /// <param name="dependentUponFileName"></param>
-        /// <returns></returns>
         internal static ItemCultureInfo GetItemCultureInfo
         (
             string name,
@@ -44,7 +34,7 @@ namespace Microsoft.Build.Tasks
         {
             ItemCultureInfo info;
             info.culture = null;
-            string parentName = dependentUponFilename == null ? String.Empty : dependentUponFilename;
+            string parentName = dependentUponFilename ?? String.Empty;
 
             if (0 == String.Compare(Path.GetFileNameWithoutExtension(parentName),
                                    Path.GetFileNameWithoutExtension(name),

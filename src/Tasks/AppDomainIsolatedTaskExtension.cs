@@ -3,11 +3,6 @@
 
 #if FEATURE_APPDOMAIN
 
-using System;
-using System.IO;
-using System.Resources;
-using System.Security.Permissions;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -41,16 +36,10 @@ namespace Microsoft.Build.Tasks
         /// Gets an instance of a TaskLoggingHelperExtension class containing task logging methods.
         /// </summary>
         /// <value>The logging helper object.</value>
-        new public TaskLoggingHelper Log
-        {
-            get
-            {
-                return _logExtension;
-            }
-        }
+        public new TaskLoggingHelper Log => _logExtension;
 
         // the logging helper
-        private TaskLoggingHelperExtension _logExtension;
+        private readonly TaskLoggingHelperExtension _logExtension;
 
         #endregion
     }

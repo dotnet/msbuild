@@ -13,9 +13,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Xaml;
-using System.Xml;
 using System.IO;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
@@ -28,203 +26,72 @@ namespace Microsoft.Build.Tasks.Xaml
     internal class TaskParser
     {
         /// <summary>
-        /// The name of the task e.g., CL
-        /// </summary>
-        private string _name;
-
-        /// <summary>
-        /// The name of the executable e.g., cl.exe
-        /// </summary>
-        private string _toolName;
-
-        /// <summary>
-        /// The base class 
-        /// </summary>
-        private string _baseClass = "DataDrivenToolTask";
-
-        /// <summary>
-        /// The namespace to generate the class into
-        /// </summary>
-        private string _namespaceValue = "XamlTaskNamespace";
-
-        /// <summary>
-        /// The resource namespace to pass to the base class, if any
-        /// </summary>
-        private string _resourceNamespaceValue = null;
-
-        /// <summary>
-        /// The prefix to append before a switch is emitted.
-        /// Is typically a "/", but can also be a "-"
-        /// </summary>
-        private string _defaultPrefix = String.Empty;
-
-        /// <summary>
-        /// The list that contains all of the properties that can be set on a task
-        /// </summary>
-        private LinkedList<Property> _properties = new LinkedList<Property>();
-
-        /// <summary>
-        /// The list that contains all of the properties that have a default value
-        /// </summary>
-        private LinkedList<Property> _defaultSet = new LinkedList<Property>();
-
-        /// <summary>
-        /// The list of properties that serve as fallbacks for other properties.
-        /// That is, if a certain property is not set, but has a fallback, we need to check
-        /// to see if that fallback is set.
-        /// </summary>
-        private Dictionary<string, string> _fallbackSet = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
         /// The set of switches added so far.
         /// </summary>
-        private HashSet<string> _switchesAdded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _switchesAdded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// The ordered list of how the switches get emitted.
         /// </summary>
-        private List<string> _switchOrderList = new List<string>();
-
-        /// <summary>
-        /// The errors that occurred while parsing the xml file or generating the code
-        /// </summary>
-        private LinkedList<string> _errorLog = new LinkedList<string>();
-
-        /// <summary>
-        /// The constructor.
-        /// </summary>
-        public TaskParser()
-        {
-            // do nothing
-        }
+        private readonly List<string> _switchOrderList = new List<string>();
 
         #region Properties
 
         /// <summary>
         /// The name of the task
         /// </summary>
-        public string GeneratedTaskName
-        {
-            get
-            {
-                return _name;
-            }
-
-            set
-            {
-                _name = value;
-            }
-        }
+        public string GeneratedTaskName { get; set; }
 
         /// <summary>
         /// The base type of the class
         /// </summary>
-        public string BaseClass
-        {
-            get
-            {
-                return _baseClass;
-            }
-        }
+        public string BaseClass { get; } = "DataDrivenToolTask";
 
         /// <summary>
         /// The namespace of the class
         /// </summary>
-        public string Namespace
-        {
-            get
-            {
-                return _namespaceValue;
-            }
-        }
+        public string Namespace { get; } = "XamlTaskNamespace";
 
         /// <summary>
         /// Namespace for the resources
         /// </summary>
-        public string ResourceNamespace
-        {
-            get
-            {
-                return _resourceNamespaceValue;
-            }
-        }
+        public string ResourceNamespace { get; }
 
         /// <summary>
         /// The name of the executable
         /// </summary>
-        public string ToolName
-        {
-            get
-            {
-                return _toolName;
-            }
-        }
+        public string ToolName { get; private set; }
 
         /// <summary>
         /// The default prefix for each switch
         /// </summary>
-        public string DefaultPrefix
-        {
-            get
-            {
-                return _defaultPrefix;
-            }
-        }
+        public string DefaultPrefix { get; private set; } = String.Empty;
 
         /// <summary>
         /// All of the parameters that were parsed
         /// </summary>
-        public LinkedList<Property> Properties
-        {
-            get
-            {
-                return _properties;
-            }
-        }
+        public LinkedList<Property> Properties { get; } = new LinkedList<Property>();
 
         /// <summary>
         /// All of the parameters that have a default value
         /// </summary>
-        public LinkedList<Property> DefaultSet
-        {
-            get
-            {
-                return _defaultSet;
-            }
-        }
+        public LinkedList<Property> DefaultSet { get; } = new LinkedList<Property>();
 
         /// <summary>
         /// All of the properties that serve as fallbacks for unset properties
         /// </summary>
-        public Dictionary<string, string> FallbackSet
-        {
-            get
-            {
-                return _fallbackSet;
-            }
-        }
+        public Dictionary<string, string> FallbackSet { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// The ordered list of properties
         /// </summary>
-        public IEnumerable<string> SwitchOrderList
-        {
-            get
-            {
-                return _switchOrderList;
-            }
-        }
+        public IEnumerable<string> SwitchOrderList => _switchOrderList;
 
         /// <summary>
         /// Returns the log of errors
         /// </summary>
-        public LinkedList<string> ErrorLog
-        {
-            get
-            {
-                return _errorLog;
-            }
-        }
+        public LinkedList<string> ErrorLog { get; } = new LinkedList<string>();
+
         #endregion
 
         /// <summary>
@@ -232,13 +99,13 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public bool Parse(string contentOrFile, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile, "contentOrFile");
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, "desiredRule");
+            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile, nameof(contentOrFile));
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
 
             bool parseSuccessful = ParseAsContentOrFile(contentOrFile, desiredRule);
             if (!parseSuccessful)
             {
-                StringBuilder parseErrors = new StringBuilder();
+                var parseErrors = new StringBuilder();
                 parseErrors.AppendLine();
                 foreach (string error in ErrorLog)
                 {
@@ -318,8 +185,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXamlDocument(TextReader reader, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reader, "reader");
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, "desiredRule");
+            ErrorUtilities.VerifyThrowArgumentNull(reader, nameof(reader));
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
 
             object rootObject = XamlServices.Load(reader);
             if (null != rootObject)
@@ -360,23 +227,23 @@ namespace Microsoft.Build.Tasks.Xaml
                 return false;
             }
 
-            _defaultPrefix = rule.SwitchPrefix;
+            DefaultPrefix = rule.SwitchPrefix;
 
-            _toolName = rule.ToolName;
-            _name = rule.Name;
+            ToolName = rule.ToolName;
+            GeneratedTaskName = rule.Name;
 
             // Dictionary of property name strings to property objects. If a property is in the argument list of the current property then we want to make sure
             // that the argument property is a dependency of the current property.
 
             // As properties are parsed they are added to this dictionary so that after we can find the property instances from the names quickly.
-            Dictionary<string, Property> argumentDependencyLookup = new Dictionary<string, Property>(StringComparer.OrdinalIgnoreCase);
+            var argumentDependencyLookup = new Dictionary<string, Property>(StringComparer.OrdinalIgnoreCase);
 
             // baseClass = attribute.InnerText;
             // namespaceValue = attribute.InnerText;
             // resourceNamespaceValue = attribute.InnerText;
             foreach (XamlTypes.BaseProperty property in rule.Properties)
             {
-                if (!ParseParameterGroupOrParameter(property, _properties, null, argumentDependencyLookup /*Add to the dictionary properties as they are parsed*/))
+                if (!ParseParameterGroupOrParameter(property, Properties, null, argumentDependencyLookup /*Add to the dictionary properties as they are parsed*/))
                 {
                     return false;
                 }
@@ -391,8 +258,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 // Find all of the properties in arguments list.
                 foreach (Argument argument in arguments)
                 {
-                    Property argumentProperty = null;
-                    if (argumentDependencyLookup.TryGetValue(argument.Parameter, out argumentProperty))
+                    if (argumentDependencyLookup.TryGetValue(argument.Parameter, out Property argumentProperty))
                     {
                         property.DependentArgumentProperties.AddLast(argumentProperty);
                     }
@@ -407,9 +273,7 @@ namespace Microsoft.Build.Tasks.Xaml
                     List<Argument> valueArguments = value.Arguments;
                     foreach (Argument argument in valueArguments)
                     {
-                        Property argumentProperty = null;
-
-                        if (argumentDependencyLookup.TryGetValue(argument.Parameter, out argumentProperty))
+                        if (argumentDependencyLookup.TryGetValue(argument.Parameter, out Property argumentProperty))
                         {
                             // If the property contains a value sub property that has a argument then we will declare that the original property has the same dependenecy.
                             property.DependentArgumentProperties.AddLast(argumentProperty);
@@ -465,10 +329,12 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 foreach (XamlTypes.EnumValue enumValue in enumProperty.AdmissibleValues)
                 {
-                    Value value = new Value();
+                    var value = new Value
+                    {
+                        Name = enumValue.Name,
+                        SwitchName = enumValue.Switch
+                    };
 
-                    value.Name = enumValue.Name;
-                    value.SwitchName = enumValue.Switch;
                     if (value.SwitchName == null)
                     {
                         value.SwitchName = String.Empty;
@@ -492,10 +358,12 @@ namespace Microsoft.Build.Tasks.Xaml
                         value.Arguments = new List<Argument>();
                         foreach (XamlTypes.Argument argument in enumValue.Arguments)
                         {
-                            Argument arg = new Argument();
-                            arg.Parameter = argument.Property;
-                            arg.Separator = argument.Separator;
-                            arg.Required = argument.IsRequired;
+                            var arg = new Argument
+                            {
+                                Parameter = argument.Property,
+                                Separator = argument.Separator,
+                                Required = argument.IsRequired
+                            };
                             value.Arguments.Add(arg);
                         }
                     }
@@ -518,10 +386,12 @@ namespace Microsoft.Build.Tasks.Xaml
                     propertyToAdd.Arguments = new List<Argument>();
                 }
 
-                Argument arg = new Argument();
-                arg.Parameter = argument.Property;
-                arg.Separator = argument.Separator;
-                arg.Required = argument.IsRequired;
+                var arg = new Argument
+                {
+                    Parameter = argument.Property,
+                    Separator = argument.Separator,
+                    Required = argument.IsRequired
+                };
                 propertyToAdd.Arguments.Add(arg);
             }
 
@@ -540,7 +410,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for 
         /// this parameter group
         /// </summary>
-        private Property ObtainAttributes(XamlTypes.BaseProperty baseProperty, Property parameterGroup)
+        private static Property ObtainAttributes(XamlTypes.BaseProperty baseProperty, Property parameterGroup)
         {
             Property parameter;
             if (parameterGroup != null)

@@ -2,15 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -33,30 +27,13 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class AssignCulture : TaskExtension
     {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public AssignCulture()
-        {
-        }
-
         #region Properties
-
-        private ITaskItem[] _files = Array.Empty<TaskItem>();
-        private ITaskItem[] _assignedFiles = null;
-        private ITaskItem[] _assignedFilesWithCulture = null;
-        private ITaskItem[] _assignedFilesWithNoCulture = null;
-        private ITaskItem[] _cultureNeutralAssignedFiles = null;
 
         /// <summary>
         /// The incoming list of files to assign a culture to.
         /// </summary>
         [Required]
-        public ITaskItem[] Files
-        {
-            get { return _files; }
-            set { _files = value; }
-        }
+        public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// This outgoing list of files is exactly the same as the incoming Files
@@ -71,10 +48,7 @@ namespace Microsoft.Build.Tasks
         /// that original attribute is used instead.
         /// </summary>
         [Output]
-        public ITaskItem[] AssignedFiles
-        {
-            get { return _assignedFiles; }
-        }
+        public ITaskItem[] AssignedFiles { get; private set; }
 
         /// <summary>
         /// This is a subset of AssignedFiles that has all of the items that
@@ -88,10 +62,7 @@ namespace Microsoft.Build.Tasks
         ///      AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture
         /// </summary>
         [Output]
-        public ITaskItem[] AssignedFilesWithCulture
-        {
-            get { return _assignedFilesWithCulture; }
-        }
+        public ITaskItem[] AssignedFilesWithCulture { get; private set; }
 
         /// <summary>
         /// This is a subset of AssignedFiles that has all of the items that
@@ -102,10 +73,7 @@ namespace Microsoft.Build.Tasks
         ///      AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture
         /// </summary>
         [Output]
-        public ITaskItem[] AssignedFilesWithNoCulture
-        {
-            get { return _assignedFilesWithNoCulture; }
-        }
+        public ITaskItem[] AssignedFilesWithNoCulture { get; private set; }
 
         /// <summary>
         /// This list has the same number of items as the Files list or the
@@ -134,26 +102,22 @@ namespace Microsoft.Build.Tasks
         /// because 'XX' is not a valid culture identifier.
         /// </summary>
         [Output]
-        public ITaskItem[] CultureNeutralAssignedFiles
-        {
-            get { return _cultureNeutralAssignedFiles; }
-        }
+        public ITaskItem[] CultureNeutralAssignedFiles { get; private set; }
 
         #endregion
 
         #region ITask Members
-
-
+        
         /// <summary>
         /// Execute.
         /// </summary>
         /// <returns></returns>
         public override bool Execute()
         {
-            _assignedFiles = new TaskItem[Files.Length];
-            _cultureNeutralAssignedFiles = new TaskItem[Files.Length];
-            ArrayList cultureList = new ArrayList();
-            ArrayList noCultureList = new ArrayList();
+            AssignedFiles = new ITaskItem[Files.Length];
+            CultureNeutralAssignedFiles = new ITaskItem[Files.Length];
+            var cultureList = new List<ITaskItem>();
+            var noCultureList = new List<ITaskItem>();
 
             bool retValue = true;
 
@@ -170,7 +134,7 @@ namespace Microsoft.Build.Tasks
                             dependentUpon
                         );
 
-                    if (info.culture != null && info.culture.Length > 0)
+                    if (!string.IsNullOrEmpty(info.culture))
                     {
                         AssignedFiles[i].SetMetadata("Culture", info.culture);
                         AssignedFiles[i].SetMetadata("WithCulture", "true");
@@ -182,8 +146,8 @@ namespace Microsoft.Build.Tasks
                         AssignedFiles[i].SetMetadata("WithCulture", "false");
                     }
 
-                    CultureNeutralAssignedFiles[i] = new TaskItem(AssignedFiles[i]);
-                    CultureNeutralAssignedFiles[i].ItemSpec = info.cultureNeutralFilename;
+                    CultureNeutralAssignedFiles[i] =
+                        new TaskItem(AssignedFiles[i]) { ItemSpec = info.cultureNeutralFilename };
 
                     Log.LogMessageFromResources
                     (
@@ -209,8 +173,8 @@ namespace Microsoft.Build.Tasks
 #endif
             }
 
-            _assignedFilesWithCulture = (ITaskItem[])cultureList.ToArray(typeof(ITaskItem));
-            _assignedFilesWithNoCulture = (ITaskItem[])noCultureList.ToArray(typeof(ITaskItem));
+            AssignedFilesWithCulture = cultureList.ToArray();
+            AssignedFilesWithNoCulture = noCultureList.ToArray();
 
             return retValue;
         }

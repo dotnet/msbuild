@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks
             }
 #endif
 
-            foreach (var cultureName in AssemblyUtilities.GetAllCultures())
+            foreach (CultureInfo cultureName in AssemblyUtilities.GetAllCultures())
             {
                 ValidCultureNames.Add(cultureName.Name);
             }

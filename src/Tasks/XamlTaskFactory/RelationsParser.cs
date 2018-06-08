@@ -6,11 +6,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using System.IO;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks.Xaml
 {
@@ -19,176 +17,64 @@ namespace Microsoft.Build.Tasks.Xaml
     /// </summary>
     internal class SwitchRelations
     {
-        private string _switchValue;
-        private string _status;
-        private List<string> _includedPlatforms;
-        private List<string> _excludedPlatforms;
-        private List<string> _conflicts;
-        private List<string> _overrides;
-        private List<string> _requires;
-        private Dictionary<string, List<string>> _externalOverrides;
-        private Dictionary<string, List<string>> _externalConflicts;
-        private Dictionary<string, List<string>> _externalRequires;
-
         public SwitchRelations()
         {
-            _switchValue = String.Empty;
-            _status = String.Empty;
-            _conflicts = new List<string>();
-            _overrides = new List<string>();
-            _requires = new List<string>();
-            _includedPlatforms = new List<string>();
-            _excludedPlatforms = new List<string>();
-            _externalOverrides = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-            _externalConflicts = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-            _externalRequires = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            SwitchValue = String.Empty;
+            Status = String.Empty;
+            Conflicts = new List<string>();
+            Overrides = new List<string>();
+            Requires = new List<string>();
+            IncludedPlatforms = new List<string>();
+            ExcludedPlatforms = new List<string>();
+            ExternalOverrides = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            ExternalConflicts = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            ExternalRequires = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         }
 
         public SwitchRelations Clone()
         {
-            SwitchRelations cloned = new SwitchRelations();
-            cloned._switchValue = _switchValue;
-            cloned._status = _status;
-            cloned._conflicts = new List<string>(_conflicts);
-            cloned._overrides = new List<string>(_overrides);
-            cloned._requires = new List<string>(_requires);
-            cloned._excludedPlatforms = new List<string>(_excludedPlatforms);
-            cloned._includedPlatforms = new List<string>(_includedPlatforms);
-            cloned._externalConflicts = new Dictionary<string, List<string>>(_externalConflicts, StringComparer.OrdinalIgnoreCase);
-            cloned._externalOverrides = new Dictionary<string, List<string>>(_externalOverrides, StringComparer.OrdinalIgnoreCase);
-            cloned._externalRequires = new Dictionary<string, List<string>>(_externalRequires, StringComparer.OrdinalIgnoreCase);
+            var cloned = new SwitchRelations
+            {
+                SwitchValue = SwitchValue,
+                Status = Status,
+                Conflicts = new List<string>(Conflicts),
+                Overrides = new List<string>(Overrides),
+                Requires = new List<string>(Requires),
+                ExcludedPlatforms = new List<string>(ExcludedPlatforms),
+                IncludedPlatforms = new List<string>(IncludedPlatforms),
+                ExternalConflicts = new Dictionary<string, List<string>>(
+                    ExternalConflicts,
+                    StringComparer.OrdinalIgnoreCase),
+                ExternalOverrides = new Dictionary<string, List<string>>(
+                    ExternalOverrides,
+                    StringComparer.OrdinalIgnoreCase),
+                ExternalRequires = new Dictionary<string, List<string>>(
+                    ExternalRequires,
+                    StringComparer.OrdinalIgnoreCase)
+            };
 
             return cloned;
         }
 
-        public string SwitchValue
-        {
-            get
-            {
-                return _switchValue;
-            }
+        public string SwitchValue { get; set; }
 
-            set
-            {
-                _switchValue = value;
-            }
-        }
+        public string Status { get; set; }
 
-        public string Status
-        {
-            get
-            {
-                return _status;
-            }
+        public List<string> Conflicts { get; set; }
 
-            set
-            {
-                _status = value;
-            }
-        }
+        public List<string> IncludedPlatforms { get; set; }
 
-        public List<string> Conflicts
-        {
-            get
-            {
-                return _conflicts;
-            }
+        public List<string> ExcludedPlatforms { get; set; }
 
-            set
-            {
-                _conflicts = value;
-            }
-        }
+        public List<string> Overrides { get; set; }
 
-        public List<string> IncludedPlatforms
-        {
-            get
-            {
-                return _includedPlatforms;
-            }
+        public List<string> Requires { get; set; }
 
-            set
-            {
-                _includedPlatforms = value;
-            }
-        }
+        public Dictionary<string, List<string>> ExternalOverrides { get; set; }
 
-        public List<string> ExcludedPlatforms
-        {
-            get
-            {
-                return _excludedPlatforms;
-            }
+        public Dictionary<string, List<string>> ExternalConflicts { get; set; }
 
-            set
-            {
-                _excludedPlatforms = value;
-            }
-        }
-
-        public List<string> Overrides
-        {
-            get
-            {
-                return _overrides;
-            }
-
-            set
-            {
-                _overrides = value;
-            }
-        }
-
-        public List<string> Requires
-        {
-            get
-            {
-                return _requires;
-            }
-
-            set
-            {
-                _requires = value;
-            }
-        }
-
-        public Dictionary<string, List<string>> ExternalOverrides
-        {
-            get
-            {
-                return _externalOverrides;
-            }
-            set
-            {
-                _externalOverrides = value;
-            }
-        }
-
-        public Dictionary<string, List<string>> ExternalConflicts
-        {
-            get
-            {
-                return _externalConflicts;
-            }
-
-            set
-            {
-                _externalConflicts = value;
-            }
-        }
-
-        public Dictionary<string, List<string>> ExternalRequires
-        {
-            get
-            {
-                return _externalRequires;
-            }
-
-            set
-            {
-                _externalRequires = value;
-            }
-        }
+        public Dictionary<string, List<string>> ExternalRequires { get; set; }
     }
 
     /// <summary>
@@ -197,72 +83,9 @@ namespace Microsoft.Build.Tasks.Xaml
     internal class RelationsParser
     {
         /// <summary>
-        /// The name of the task e.g., CL
-        /// </summary>
-        private string _name;
-
-        /// <summary>
-        /// The name of the executable e.g., cl.exe
-        /// </summary>
-        private string _toolName;
-
-        /// <summary>
-        /// The base class 
-        /// </summary>
-        private string _baseClass = "DataDrivenToolTask";
-
-        /// <summary>
-        /// The namespace to generate the class into
-        /// </summary>
-        private string _namespaceValue = "MyDataDrivenTasks";
-
-        /// <summary>
-        /// The resource namespace to pass to the base class, if any
-        /// </summary>
-        private string _resourceNamespaceValue = null;
-
-        /// <summary>
-        /// The prefix to append before a switch is emitted.
-        /// Is typically a "/", but can also be a "-"
-        /// </summary>
-        private string _defaultPrefix = "/";
-
-        /// <summary>
-        /// The list that contains all of the properties that can be set on a task
-        /// </summary>
-        private LinkedList<Property> _properties = new LinkedList<Property>();
-
-        /// <summary>
-        /// The list that contains all of the properties that can be set on a task
-        /// </summary>
-        private Dictionary<string, SwitchRelations> _switchRelationsList = new Dictionary<string, SwitchRelations>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// The list that contains all of the properties that have a default value
-        /// </summary>
-        private LinkedList<Property> _defaultSet = new LinkedList<Property>();
-
-        /// <summary>
-        /// The list of properties that serve as fallbacks for other properties.
-        /// That is, if a certain property is not set, but has a fallback, we need to check
-        /// to see if that fallback is set.
-        /// </summary>
-        private Dictionary<string, string> _fallbackSet = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
         /// A boolean to see if the current file parsed is an import file.
         /// </summary>
         private bool _isImport;
-
-        /// <summary>
-        /// The number of errors that occurred while parsing the xml file or generating the code
-        /// </summary>
-        private int _errorCount;
-
-        /// <summary>
-        /// The errors that occurred while parsing the xml file or generating the code
-        /// </summary>
-        private LinkedList<string> _errorLog = new LinkedList<string>();
 
         #region Private const strings
         private const string xmlNamespace = "http://schemas.microsoft.com/developer/msbuild/tasks/2005";
@@ -273,16 +96,10 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string resourceNamespaceAttribute = "RESOURCENAMESPACE";
         private const string importType = "IMPORT";
         private const string tasksAttribute = "TASKS";
-        private const string parameterType = "PARAMETER";
-        private const string parameterGroupType = "PARAMETERGROUP";
-        private const string enumType = "VALUE";
         private const string task = "TASK";
         private const string nameProperty = "NAME";
         private const string status = "STATUS";
         private const string switchName = "SWITCH";
-        private const string reverseSwitchName = "REVERSESWITCH";
-        private const string oldName = "OLDNAME";
-        private const string argumentType = "ARGUMENT";
         private const string argumentValueName = "ARGUMENTVALUE";
         private const string relations = "RELATIONS";
         private const string switchGroupType = "SWITCHGROUP";
@@ -290,177 +107,70 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string includedPlatformType = "INCLUDEDPLATFORM";
         private const string excludedPlatformType = "EXCLUDEDPLATFORM";
         private const string overridesType = "OVERRIDES";
-        private const string conflictsType = "CONFLICTS";
         private const string requiresType = "REQUIRES";
-        private const string externalOverridesType = "EXTERNALOVERRIDES";
-        private const string externalConflictsType = "EXTERNALCONFLICTS";
-        private const string externalRequiresType = "EXTERNALREQUIRES";
         private const string toolAttribute = "TOOL";
         private const string switchAttribute = "SWITCH";
 
-        // properties
-        private const string typeProperty = "TYPE";
-        private const string typeAlways = "ALWAYS";
-        private const string trueProperty = "TRUE";
-        private const string falseProperty = "FALSE";
-        private const string minProperty = "MIN";
-        private const string maxProperty = "MAX";
-        private const string separatorProperty = "SEPARATOR";
-        private const string defaultProperty = "DEFAULT";
-        private const string fallbackProperty = "FALLBACKARGUMENTPARAMETER";
-        private const string outputProperty = "OUTPUT";
-        private const string argumentProperty = "ARGUMENTPARAMETER";
-        private const string argumentRequiredProperty = "REQUIRED";
-        private const string propertyRequiredProperty = "REQUIRED";
-        private const string reversibleProperty = "REVERSIBLE";
-        private const string categoryProperty = "CATEGORY";
-        private const string displayNameProperty = "DISPLAYNAME";
-        private const string descriptionProperty = "DESCRIPTION";
         #endregion
-
-        /// <summary>
-        /// The constructor.
-        /// </summary>
-        public RelationsParser()
-        {
-            // do nothing
-        }
-
+        
         #region Properties
 
         /// <summary>
         /// The name of the task
         /// </summary>
-        public string GeneratedTaskName
-        {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
+        public string GeneratedTaskName { get; set; }
 
         /// <summary>
         /// The base type of the class
         /// </summary>
-        public string BaseClass
-        {
-            get
-            {
-                return _baseClass;
-            }
-        }
+        public string BaseClass { get; private set; } = "DataDrivenToolTask";
 
         /// <summary>
         /// The namespace of the class
         /// </summary>
-        public string Namespace
-        {
-            get
-            {
-                return _namespaceValue;
-            }
-        }
+        public string Namespace { get; private set; } = "MyDataDrivenTasks";
 
         /// <summary>
         /// Namespace for the resources
         /// </summary>
-        public string ResourceNamespace
-        {
-            get
-            {
-                return _resourceNamespaceValue;
-            }
-        }
+        public string ResourceNamespace { get; private set; }
 
         /// <summary>
         /// The name of the executable
         /// </summary>
-        public string ToolName
-        {
-            get
-            {
-                return _toolName;
-            }
-        }
+        public string ToolName { get; private set; }
 
         /// <summary>
         /// The default prefix for each switch
         /// </summary>
-        public string DefaultPrefix
-        {
-            get
-            {
-                return _defaultPrefix;
-            }
-        }
+        public string DefaultPrefix { get; private set; } = "/";
 
         /// <summary>
         /// All of the parameters that were parsed
         /// </summary>
-        public LinkedList<Property> Properties
-        {
-            get
-            {
-                return _properties;
-            }
-        }
+        public LinkedList<Property> Properties { get; } = new LinkedList<Property>();
 
         /// <summary>
         /// All of the parameters that have a default value
         /// </summary>
-        public LinkedList<Property> DefaultSet
-        {
-            get
-            {
-                return _defaultSet;
-            }
-        }
+        public LinkedList<Property> DefaultSet { get; } = new LinkedList<Property>();
 
         /// <summary>
         /// All of the properties that serve as fallbacks for unset properties
         /// </summary>
-        public Dictionary<string, string> FallbackSet
-        {
-            get
-            {
-                return _fallbackSet;
-            }
-        }
+        public Dictionary<string, string> FallbackSet { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Returns the number of errors encountered
         /// </summary>
-        public int ErrorCount
-        {
-            get
-            {
-                return _errorCount;
-            }
-        }
+        public int ErrorCount { get; private set; }
 
         /// <summary>
         /// Returns the log of errors
         /// </summary>
-        public LinkedList<string> ErrorLog
-        {
-            get
-            {
-                return _errorLog;
-            }
-        }
+        public LinkedList<string> ErrorLog { get; } = new LinkedList<string>();
 
-        public Dictionary<string, SwitchRelations> SwitchRelationsList
-        {
-            get
-            {
-                return _switchRelationsList;
-            }
-        }
-
+        public Dictionary<string, SwitchRelations> SwitchRelationsList { get; } = new Dictionary<string, SwitchRelations>(StringComparer.OrdinalIgnoreCase);
 
         #endregion
 
@@ -472,9 +182,8 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             try
             {
-                XmlDocument xmlDocument = new XmlDocument();
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Ignore;
+                var xmlDocument = new XmlDocument();
+                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 XmlReader reader = XmlReader.Create(fileName, settings);
                 xmlDocument.Load(reader);
                 return xmlDocument;
@@ -499,9 +208,8 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             try
             {
-                XmlDocument xmlDocument = new XmlDocument();
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Ignore;
+                var xmlDocument = new XmlDocument();
+                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
                 xmlDocument.Load(reader);
                 return xmlDocument;
@@ -516,8 +224,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Parses the xml file
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
         public bool ParseXmlDocument(string fileName)
         {
             XmlDocument xmlDocument = LoadFile(fileName);
@@ -536,7 +242,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXmlDocument(XmlDocument xmlDocument)
         {
-            ErrorUtilities.VerifyThrow(xmlDocument != null, "NoXml");
+            ErrorUtilities.VerifyThrow(xmlDocument != null, nameof(xmlDocument));
 
             // find the root element
             XmlNode node = xmlDocument.FirstChild;
@@ -573,33 +279,33 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 if (String.Equals(attribute.Name, prefixString, StringComparison.OrdinalIgnoreCase))
                 {
-                    _defaultPrefix = attribute.InnerText;
+                    DefaultPrefix = attribute.InnerText;
                 }
                 else if (String.Equals(attribute.Name, toolNameString, StringComparison.OrdinalIgnoreCase))
                 {
-                    _toolName = attribute.InnerText;
+                    ToolName = attribute.InnerText;
                 }
                 else if (String.Equals(attribute.Name, nameProperty, StringComparison.OrdinalIgnoreCase))
                 {
-                    _name = attribute.InnerText;
+                    GeneratedTaskName = attribute.InnerText;
                 }
                 else if (String.Equals(attribute.Name, baseClassAttribute, StringComparison.OrdinalIgnoreCase))
                 {
-                    _baseClass = attribute.InnerText;
+                    BaseClass = attribute.InnerText;
                 }
                 else if (String.Equals(attribute.Name, namespaceAttribute, StringComparison.OrdinalIgnoreCase))
                 {
-                    _namespaceValue = attribute.InnerText;
+                    Namespace = attribute.InnerText;
                 }
                 else if (String.Equals(attribute.Name, resourceNamespaceAttribute, StringComparison.OrdinalIgnoreCase))
                 {
-                    _resourceNamespaceValue = attribute.InnerText;
+                    ResourceNamespace = attribute.InnerText;
                 }
             }
             // parse the child nodes if it has any
             if (node.HasChildNodes)
             {
-                return ParseSwitchGroupOrSwitch(node.FirstChild, _switchRelationsList, null);
+                return ParseSwitchGroupOrSwitch(node.FirstChild, SwitchRelationsList, null);
             }
             else
             {
@@ -611,9 +317,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Checks to see if the "name" attribute exists
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="attributeName"></param>
-        /// <returns></returns>
         private static bool VerifyAttributeExists(XmlNode node, string attributeName)
         {
             if (node.Attributes != null)
@@ -632,8 +335,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Checks to see if the element's name is "task"
         /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
         private static bool VerifyNodeName(XmlNode node)
         {
             return String.Equals(node.Name, relations, StringComparison.OrdinalIgnoreCase);
@@ -707,12 +408,12 @@ namespace Microsoft.Build.Tasks.Xaml
             return true;
         }
 
-        private bool ParseSwitch(XmlNode node, Dictionary<string, SwitchRelations> switchRelationsList, SwitchRelations switchRelations)
+        private static bool ParseSwitch(XmlNode node, Dictionary<string, SwitchRelations> switchRelationsList, SwitchRelations switchRelations)
         {
             SwitchRelations switchRelationsToAdd = ObtainAttributes(node, switchRelations);
 
             // make sure that the switchRelationsList has a name, unless it is type always
-            if (switchRelationsToAdd.SwitchValue == null || switchRelationsToAdd.SwitchValue == String.Empty)
+            if (string.IsNullOrEmpty(switchRelationsToAdd.SwitchValue))
             {
                 return false;
             }
@@ -723,7 +424,6 @@ namespace Microsoft.Build.Tasks.Xaml
                 switchRelationsList.Remove(switchRelationsToAdd.SwitchValue);
             }
 
-
             // build the dependencies and the values for a parameter
             XmlNode child = node.FirstChild;
             while (child != null)
@@ -732,8 +432,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 {
                     if (String.Equals(child.Name, requiresType, StringComparison.OrdinalIgnoreCase))
                     {
-                        string Name = String.Empty;
-                        string Tool = String.Empty;
+                        string tool = String.Empty;
                         string Switch = String.Empty;
                         bool isExternal = false;
                         foreach (XmlAttribute attrib in child.Attributes)
@@ -741,11 +440,10 @@ namespace Microsoft.Build.Tasks.Xaml
                             switch (attrib.Name.ToUpperInvariant())
                             {
                                 case nameProperty:
-                                    Name = attrib.InnerText;
                                     break;
                                 case toolAttribute:
                                     isExternal = true;
-                                    Tool = attrib.InnerText;
+                                    tool = attrib.InnerText;
                                     break;
                                 case switchAttribute:
                                     Switch = attrib.InnerText;
@@ -756,21 +454,26 @@ namespace Microsoft.Build.Tasks.Xaml
                         }
 
                         if (!isExternal)
-                            if (Switch != String.Empty)
-                                switchRelationsToAdd.Requires.Add(Switch);
-                            else
-                                return false;
-                        else
                         {
-                            if (!switchRelationsToAdd.ExternalRequires.ContainsKey(Tool))
+                            if (Switch != String.Empty)
                             {
-                                List<string> switches = new List<string>();
-                                switches.Add(Switch);
-                                switchRelationsToAdd.ExternalRequires.Add(Tool, switches);
+                                switchRelationsToAdd.Requires.Add(Switch);
                             }
                             else
                             {
-                                switchRelationsToAdd.ExternalRequires[Tool].Add(Switch);
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            if (!switchRelationsToAdd.ExternalRequires.ContainsKey(tool))
+                            {
+                                var switches = new List<string> { Switch };
+                                switchRelationsToAdd.ExternalRequires.Add(tool, switches);
+                            }
+                            else
+                            {
+                                switchRelationsToAdd.ExternalRequires[tool].Add(Switch);
                             }
                         }
                     }
@@ -833,10 +536,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for 
         /// this parameter group
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="switchGroup"></param>
-        /// <returns></returns>
-        private SwitchRelations ObtainAttributes(XmlNode node, SwitchRelations switchGroup)
+        private static SwitchRelations ObtainAttributes(XmlNode node, SwitchRelations switchGroup)
         {
             SwitchRelations switchRelations;
             if (switchGroup != null)
@@ -869,12 +569,10 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Increases the error count by 1, and logs the error message
         /// </summary>
-        /// <param name="messageResourceName"></param>
-        /// <param name="messageArgs"></param>
         private void LogError(string messageResourceName, params object[] messageArgs)
         {
-            _errorLog.AddLast(ResourceUtilities.FormatResourceString(messageResourceName, messageArgs));
-            _errorCount++;
+            ErrorLog.AddLast(ResourceUtilities.FormatResourceString(messageResourceName, messageArgs));
+            ErrorCount++;
         }
 
         /// <summary>

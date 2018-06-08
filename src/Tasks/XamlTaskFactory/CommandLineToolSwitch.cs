@@ -6,9 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -78,11 +76,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string TypeInteger = "CommandLineToolSwitchType.Integer";
 
         /// <summary>
-        /// ITaskItem switch type
-        /// </summary>
-        private const string TypeITaskItem = "CommandLineToolSwitchType.ITaskItem";
-
-        /// <summary>
         /// ITaskItemArray switch type.
         /// </summary>
         private const string TypeITaskItemArray = "CommandLineToolSwitchType.ITaskItemArray";
@@ -93,71 +86,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string TypeStringArray = "CommandLineToolSwitchType.StringArray";
 
         #endregion
-
-        /// <summary>
-        /// The name of the switch.
-        /// </summary>
-        private string _name = String.Empty;
-
-        /// <summary>
-        /// The switch type
-        /// </summary>
-        private CommandLineToolSwitchType _type;
-
-        /// <summary>
-        /// "true" if this should be emitted on the command line.
-        /// </summary>
-        private bool _includeInCommandLine;
-
-        /// <summary>
-        /// The suffix to use when the switch is false/negated.
-        /// </summary>
-        private string _falseSuffix = String.Empty;
-
-        /// <summary>
-        /// The suffix to use when the switch is true.
-        /// </summary>
-        private string _trueSuffix = String.Empty;
-
-        /// <summary>
-        /// The separator to use between the switch name and its parameters.
-        /// </summary>
-        private string _separator = String.Empty;
-
-        /// <summary>
-        /// The fallback parameter.
-        /// </summary>
-        private string _fallback = String.Empty;
-
-        /// <summary>
-        /// Flag indicating if the switch is required.
-        /// </summary>
-        private bool _required;
-
-        /// <summary>
-        /// Parents for the switch.
-        /// </summary>
-        private LinkedList<string> _parents = new LinkedList<string>();
-
-        /// <summary>
-        /// Overrides for the switch.
-        /// </summary>
-        private LinkedList<KeyValuePair<string, string>> _overrides = new LinkedList<KeyValuePair<string, string>>();
-
-        /// <summary>
-        /// Flag indicating if the switch is valid.
-        /// </summary>
-        private bool _isValid;
-
-        /// <summary>
-        /// Flag for boolean switches, indicating the switch is reversible.
-        /// </summary>
-        private bool _reversible;
-
-        /// <summary>
-        /// Flag indicating if the switch has multiple values.
-        /// </summary>
-        private bool _allowMultipleValues;
 
         /// <summary>
         /// The value for a boolean switch.
@@ -180,36 +108,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private ITaskItem[] _taskItemArray;
 
         /// <summary>
-        /// The value for a string type.
-        /// </summary>
-        private string _value = String.Empty;
-
-        /// <summary>
-        /// The switch text.
-        /// </summary>
-        private string _switchValue = String.Empty;
-
-        /// <summary>
-        /// The reverse switch text, for reversible switches.
-        /// </summary>
-        private string _reverseSwitchValue = String.Empty;
-
-        /// <summary>
-        /// The arguments from which the value should be derived.
-        /// </summary>
-        private ICollection<Tuple<string, bool>> _arguments;
-
-        /// <summary>
-        /// Thw switch description.
-        /// </summary>
-        private string _description = String.Empty;
-
-        /// <summary>
-        /// The display name for the switch.
-        /// </summary>
-        private string _displayName = String.Empty;
-
-        /// <summary>
         /// The default constructor creates a new CommandLineToolSwitch to hold the name of
         /// the tool, the attributes, the dependent switches, and the values (if they exist)
         /// </summary>
@@ -223,7 +121,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public CommandLineToolSwitch(CommandLineToolSwitchType toolType)
         {
-            _type = toolType;
+            Type = toolType;
         }
 
         #region Properties
@@ -231,229 +129,75 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// The name of the parameter
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return _name;
-            }
-
-            set
-            {
-                _name = value;
-            }
-        }
+        public string Name { get; set; } = String.Empty;
 
         /// <summary>
         /// Specifies if this switch should be included on the command-line.
         /// </summary>
-        public bool IncludeInCommandLine
-        {
-            get
-            {
-                return _includeInCommandLine;
-            }
-
-            set
-            {
-                _includeInCommandLine = value;
-            }
-        }
+        public bool IncludeInCommandLine { get; set; }
 
         /// <summary>
         /// The Value of the parameter
         /// </summary>
-        public string Value
-        {
-            get
-            {
-                return _value;
-            }
-
-            set
-            {
-                _value = value;
-            }
-        }
+        public string Value { get; set; } = String.Empty;
 
         /// <summary>
         /// Flag indicating if the switch is valid.
         /// </summary>
-        public bool IsValid
-        {
-            get
-            {
-                return _isValid;
-            }
-
-            set
-            {
-                _isValid = value;
-            }
-        }
+        public bool IsValid { get; set; }
 
         /// <summary>
         /// The SwitchValue of the parameter
         /// </summary>
-        public string SwitchValue
-        {
-            get
-            {
-                return _switchValue;
-            }
-
-            set
-            {
-                _switchValue = value;
-            }
-        }
+        public string SwitchValue { get; set; } = String.Empty;
 
         /// <summary>
         /// The SwitchValue of the parameter
         /// </summary>
-        public string ReverseSwitchValue
-        {
-            get
-            {
-                return _reverseSwitchValue;
-            }
-
-            set
-            {
-                _reverseSwitchValue = value;
-            }
-        }
+        public string ReverseSwitchValue { get; set; } = String.Empty;
 
         /// <summary>
         /// The arguments.
         /// </summary>
-        public ICollection<Tuple<string, bool>> Arguments
-        {
-            get
-            {
-                return _arguments;
-            }
-
-            set
-            {
-                _arguments = value;
-            }
-        }
+        public ICollection<Tuple<string, bool>> Arguments { get; set; }
 
         /// <summary>
         /// The DisplayName of the parameter
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                return _displayName;
-            }
-
-            set
-            {
-                _displayName = value;
-            }
-        }
+        public string DisplayName { get; set; } = String.Empty;
 
         /// <summary>
         /// The Description of the parameter
         /// </summary>
-        public string Description
-        {
-            get
-            {
-                return _description;
-            }
-
-            set
-            {
-                _description = value;
-            }
-        }
+        public string Description { get; set; } = String.Empty;
 
         /// <summary>
         /// The type of the switch, i.e., boolean, string, stringarray, etc.
         /// </summary>
-        public CommandLineToolSwitchType Type
-        {
-            get
-            {
-                return _type;
-            }
-
-            set
-            {
-                _type = value;
-            }
-        }
+        public CommandLineToolSwitchType Type { get; set; }
 
         /// <summary>
         /// Indicates whether or not the switch is emitted with a flag when false
         /// </summary>
-        public bool Reversible
-        {
-            get
-            {
-                return _reversible;
-            }
-
-            set
-            {
-                _reversible = value;
-            }
-        }
+        public bool Reversible { get; set; }
 
         /// <summary>
         /// True if multiple values are allowed.
         /// </summary>
-        public bool AllowMultipleValues
-        {
-            get
-            {
-                return _allowMultipleValues;
-            }
-
-            set
-            {
-                _allowMultipleValues = value;
-            }
-        }
+        public bool AllowMultipleValues { get; set; }
 
         /// <summary>
         /// The flag to append at the end of a switch when the switch is set to false
         /// i.e., for all CL switches that are reversible, the FalseSuffix is "-"
         /// </summary>
-        public string FalseSuffix
-        {
-            get
-            {
-                return _falseSuffix;
-            }
-
-            set
-            {
-                _falseSuffix = value;
-            }
-        }
+        public string FalseSuffix { get; set; } = String.Empty;
 
         /// <summary>
         /// The flag to append to the end of the switch when that switch is true
         /// i.e., In the OptimizeForWindows98, the switch is OPT, the FalseSuffix is
         /// :NOWIN98, and the TrueSuffix is :WIN98
         /// </summary>
-        public string TrueSuffix
-        {
-            get
-            {
-                return _trueSuffix;
-            }
-
-            set
-            {
-                _trueSuffix = value;
-            }
-        }
+        public string TrueSuffix { get; set; } = String.Empty;
 
         /// <summary>
         /// The separator indicates the characters that go between the switch and the string
@@ -461,83 +205,34 @@ namespace Microsoft.Build.Tasks.Xaml
         /// string array case, or the characters that go between the switch and the 
         /// appendage for the boolean case.
         /// </summary>
-        public string Separator
-        {
-            get
-            {
-                return _separator;
-            }
-
-            set
-            {
-                _separator = value;
-            }
-        }
+        public string Separator { get; set; } = String.Empty;
 
         /// <summary>
         /// The Fallback attribute is used to specify which property to look at in the
         /// case that the argument property is not set, or if the file that the 
         /// argument property indicates is nonexistent.
         /// </summary>
-        public string FallbackArgumentParameter
-        {
-            get
-            {
-                return _fallback;
-            }
-
-            set
-            {
-                _fallback = value;
-            }
-        }
+        public string FallbackArgumentParameter { get; set; } = String.Empty;
 
         /// <summary>
         /// This attribute specifies whether or not an argument attribute is required.
         /// </summary>
-        public bool ArgumentRequired
-        {
-            get;
-            set;
-        }
+        public bool ArgumentRequired { get; set; }
 
         /// <summary>
         /// This property indicates whether or not the property is required in the project file
         /// </summary>
-        public bool Required
-        {
-            get
-            {
-                return _required;
-            }
-
-            set
-            {
-                _required = value;
-            }
-        }
+        public bool Required { get; set; }
 
         /// <summary>
         /// This property indicates the parent of the dependency
         /// </summary>
-        public LinkedList<string> Parents
-        {
-            get
-            {
-                return _parents;
-            }
-        }
+        public LinkedList<string> Parents { get; } = new LinkedList<string>();
 
         /// <summary>
         /// This property indicates the parent of the dependency
         /// </summary>
-        public LinkedList<KeyValuePair<string, string>> Overrides
-        {
-            get
-            {
-                return _overrides;
-            }
-        }
+        public LinkedList<KeyValuePair<string, string>> Overrides { get; } = new LinkedList<KeyValuePair<string, string>>();
 
         /// <summary>
         /// The BooleanValue is used for the boolean switches, and are set to true
@@ -547,13 +242,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.Boolean, "InvalidType", TypeBoolean);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Boolean, "InvalidType", TypeBoolean);
                 return _booleanValue;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.Boolean, "InvalidType", TypeBoolean);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Boolean, "InvalidType", TypeBoolean);
                 _booleanValue = value;
             }
         }
@@ -565,13 +260,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.Integer, "InvalidType", TypeInteger);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Integer, "InvalidType", TypeInteger);
                 return _number;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.Integer, "InvalidType", TypeInteger);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Integer, "InvalidType", TypeInteger);
                 _number = value;
             }
         }
@@ -584,13 +279,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.StringArray, "InvalidType", TypeStringArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.StringArray, "InvalidType", TypeStringArray);
                 return _stringList;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.StringArray, "InvalidType", TypeStringArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.StringArray, "InvalidType", TypeStringArray);
                 _stringList = value;
             }
         }
@@ -603,13 +298,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.ITaskItemArray, "InvalidType", TypeITaskItemArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.ITaskItemArray, "InvalidType", TypeITaskItemArray);
                 return _taskItemArray;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(_type == CommandLineToolSwitchType.ITaskItemArray, "InvalidType", TypeITaskItemArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.ITaskItemArray, "InvalidType", TypeITaskItemArray);
                 _taskItemArray = value;
             }
         }
@@ -633,37 +328,25 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public PropertyRelation(string argument, string value, bool required)
         {
-            this.Argument = argument;
-            this.Value = value;
-            this.Required = required;
+            Argument = argument;
+            Value = value;
+            Required = required;
         }
 
         /// <summary>
         /// The name of the argument
         /// </summary>
-        public string Argument
-        {
-            get;
-            set;
-        }
+        public string Argument { get; set; }
 
         /// <summary>
         /// The value.
         /// </summary>
-        public string Value
-        {
-            get;
-            set;
-        }
+        public string Value { get; set; }
 
         /// <summary>
         /// Flag indicating if the argument is required or not.
         /// </summary>
-        public bool Required
-        {
-            get;
-            set;
-        }
+        public bool Required { get; set; }
     }
 
     /// <summary>
@@ -677,16 +360,12 @@ namespace Microsoft.Build.Tasks.Xaml
         public CommandLineArgumentRelation(string argument, string value, bool required, string separator)
             : base(argument, value, required)
         {
-            this.Separator = separator;
+            Separator = separator;
         }
 
         /// <summary>
         /// The separator.
         /// </summary>
-        public string Separator
-        {
-            get;
-            set;
-        }
+        public string Separator { get; set; }
     }
 }
