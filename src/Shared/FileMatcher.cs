@@ -1734,6 +1734,17 @@ namespace Microsoft.Build.Shared
             IEnumerable<string> excludeSpecsUnescaped = null
         )
         {
+            // For performance. Short-circuit iff there is no wildcard.
+            // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
+            // regular expression that does the same thing, regardless of whether
+            // filespec contains one of the characters.
+            // Choose LastIndexOfAny instead of IndexOfAny because it seems more likely
+            // that wildcards will tend to be towards the right side.
+            if (!HasWildcards(filespecUnescaped))
+            {
+                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
+            }
+
             if (_cachedGlobExpansions == null)
             {
                 return GetFilesImplementation(
@@ -2022,22 +2033,11 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The array of files.</returns>
-        internal string[] GetFilesImplementation(
+        private string[] GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             IEnumerable<string> excludeSpecsUnescaped)
         {
-            // For performance. Short-circuit iff there is no wildcard.
-            // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
-            // regular expression that does the same thing, regardless of whether
-            // filespec contains one of the characters.
-            // Choose LastIndexOfAny instead of IndexOfAny because it seems more likely
-            // that wildcards will tend to be towards the right side.
-            if (!HasWildcards(filespecUnescaped))
-            {
-                return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
-            }
-
             // UNDONE (perf): Short circuit the complex processing when we only have a path and a wildcarded filename
 
             /*
