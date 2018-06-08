@@ -1442,6 +1442,11 @@
         <target state="translated">MSB3455: 명령줄이 명령의 최대 길이를 초과하는 {0}자이기 때문에 ResGen.exe를 실행할 수 없습니다. 이 문제를 해결하려면 (1) 불필요한 어셈블리 참조를 제거하거나 (2) 해당 참조의 경로를 더 짧게 만드세요.</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">AssemblyFoldersEx 위치: "{0}"</target>

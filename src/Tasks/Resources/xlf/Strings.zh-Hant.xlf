@@ -1442,6 +1442,11 @@
         <target state="translated">MSB3455: ResGen.exe 可能無法執行，因為命令列的長度為 {0} 個字元，超過命令的最大長度。若要修正這個問題，請 (1) 移除不必要的組件參考，或者 (2) 使那些參考的路徑變短。</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">AssemblyFoldersEx 位置: "{0}"</target>

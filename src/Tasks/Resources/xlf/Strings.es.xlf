@@ -1442,6 +1442,11 @@
         <target state="translated">MSB3455: Es posible que ResGen.exe no se ejecute porque la línea de comandos tiene {0} caracteres, lo que supera la longitud máxima del comando. Para corregir este problema, (1) quite las referencias de ensamblado innecesarias, o bien (2) acorte las rutas de acceso a las referencias.</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">Ubicación de AssemblyFoldersEx: "{0}"</target>

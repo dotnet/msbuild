@@ -1442,6 +1442,11 @@
         <target state="translated">MSB3455: программа ResGen.exe может не выполняться, поскольку длина команды составляет следующее число символов: {0}, что превышает максимальную длину команды. Для исправления этой неполадки (1) удалите ненужные ссылки на сборки или (2) сократите длину путей этих ссылок.</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">Расположение AssemblyFoldersEx: "{0}"</target>
