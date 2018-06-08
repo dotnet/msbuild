@@ -8,8 +8,8 @@
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
-        <source>NETSDK1066: The application host cannot be used without specifying a RuntimeIdentifier. Either specify a RuntimeIdentifier or set UseAppHost to false.</source>
-        <target state="new">NETSDK1066: The application host cannot be used without specifying a RuntimeIdentifier. Either specify a RuntimeIdentifier or set UseAppHost to false.</target>
+        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
+        <target state="new">NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</target>
         <note>{StrBegin="NETSDK1066: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">

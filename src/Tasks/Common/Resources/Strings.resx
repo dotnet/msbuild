@@ -382,7 +382,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1065: "}</comment>
   </data>
   <data name="CannotUseAppHostWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>NETSDK1066: The application host cannot be used without specifying a RuntimeIdentifier. Either specify a RuntimeIdentifier or set UseAppHost to false.</value>
+    <value>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</value>
     <comment>{StrBegin="NETSDK1066: "}</comment>
   </data>
   <data name="CannotUseSelfContainedWithoutAppHost" xml:space="preserve">
