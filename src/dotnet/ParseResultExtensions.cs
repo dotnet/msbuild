@@ -10,7 +10,7 @@ namespace Microsoft.DotNet.Cli
     public static class ParseResultExtensions
     {
         public static void ShowHelp(this ParseResult parseResult) =>
-            Console.WriteLine(parseResult.Command().HelpView());
+            Console.WriteLine(parseResult.Command().HelpView().TrimEnd());
 
         public static void ShowHelpOrErrorIfAppropriate(this ParseResult parseResult)
         {
@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli
                 throw new CommandParsingException(
                     message: string.Join(Environment.NewLine,
                                          parseResult.Errors.Select(e => e.Message)),
-                    helpText: parseResult?.Command()?.HelpView());
+                    helpText: parseResult?.Command()?.HelpView().TrimEnd());
             }
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
                 appliedCommand.Arguments.Contains("/?"))
             {
                 // NOTE: this is a temporary stage in refactoring toward the ClicCommandLineParser being used at the CLI entry point. 
-                throw new HelpException(parseResult.Command().HelpView());
+                throw new HelpException(parseResult.Command().HelpView().TrimEnd());
             }
         }
     }

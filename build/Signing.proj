@@ -21,12 +21,12 @@
 
   <Target Name="SetSigningProperties">
     <PropertyGroup>
-      <SdkResolverOutputDirectory>$(BaseOutputDirectory)/intermediate/MSBuildExtensionsLayout/MSBuildSdkResolver</SdkResolverOutputDirectory>
+      <SdkResolverOutputDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout/MSBuildSdkResolver</SdkResolverOutputDirectory>
 
       <!-- The OutDir and IntermediateOutputPath properties are required by MicroBuild. MicroBuild only
            signs files that are under these paths. -->
       <OutDir Condition="'$(OutDir)' == ''">$(BaseOutputDirectory)</OutDir>
-      <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(BaseOutputDirectory)/intermediate</IntermediateOutputPath>
+      <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateDirectory)</IntermediateOutputPath>
     </PropertyGroup>
   </Target>
 

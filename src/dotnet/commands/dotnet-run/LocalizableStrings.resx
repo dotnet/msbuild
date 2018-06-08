@@ -138,6 +138,12 @@
   <data name="CommandOptionNoLaunchProfileDescription" xml:space="preserve">
     <value>Do not attempt to use launchSettings.json to configure the application.</value>
   </data>
+  <data name="ConfigurationOptionDescription" xml:space="preserve">
+    <value>The configuration to run for. The default for most projects is 'Debug'.</value>
+  </data>
+  <data name="FrameworkOptionDescription" xml:space="preserve">
+    <value>The target framework to run for. The target framework must also be specified in the project file.</value>
+  </data>
   <data name="RunCommandException" xml:space="preserve">
     <value>The build failed. Please fix the build errors and run again.</value>
   </data>

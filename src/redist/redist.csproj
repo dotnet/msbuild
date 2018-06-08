@@ -15,10 +15,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-    <!-- The project json migration commands depend on an older version of Roslyn.
-         Lift the version here to match what tool_roslyn depends on (otherwise an older version will
-         be added to the TPA when we crossgen and we won't be able to crossgen tool_roslyn -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisCSharpPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

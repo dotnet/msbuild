@@ -7,8 +7,6 @@ This repo contains the source code for cross-platform [.NET Core](http://github.
 Looking for the .NET Core SDK tooling?
 ----------------------------------------
 
-If you are looking the release of the .NET Core tools (CLI, MSBuild and the new csproj), see https://dot.net/core.
-
 If you are looking for the latest nightly of the .NET Core SDK, see https://github.com/dotnet/core-sdk.
 
 Found an issue?

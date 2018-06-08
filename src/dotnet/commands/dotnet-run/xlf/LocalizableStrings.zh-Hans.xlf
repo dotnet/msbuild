@@ -136,6 +136,16 @@ The current {1} is '{2}'.</source>
         <target state="translated">“{0}”不是有效的项目文件。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to run for. The default for most projects is 'Debug'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="new">The target framework to run for. The target framework must also be specified in the project file.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

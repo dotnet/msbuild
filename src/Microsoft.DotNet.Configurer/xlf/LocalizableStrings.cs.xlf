@@ -71,6 +71,11 @@ Pokud chcete certifikátu důvěřovat (platí jenom pro Windows a macOS), nains
 Další informace o konfiguraci protokolu HTTPS najdete na webu https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -15,7 +15,7 @@
       <SdkOutputDirectory>$(BaseOutputDirectory)/dotnet</SdkOutputDirectory>
       <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
       <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
-      <IntermediateDirectory>$(BaseOutputDirectory)/intermediate</IntermediateDirectory>
+      <IntermediateDirectory>$(BaseOutputDirectory)/int</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
       <AspNetCoreSharedFxPublishDirectory>$(IntermediateDirectory)/aspnetSharedFxPublish</AspNetCoreSharedFxPublishDirectory>

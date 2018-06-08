@@ -18,28 +18,28 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Adds reference only when targeting a specific framework.</source>
-        <target state="translated">只有在以特定架構為目標時才新增參考。</target>
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">只有在以特定架構為目標時才新增參考。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="translated">無須執行還原預覽及相容性檢查，即可新增參考。</target>
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">無須執行還原預覽及相容性檢查，即可新增參考。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="translated">指定在還原期間要使用的 NuGet 套件來源。</target>
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="needs-review-translation">指定在還原期間要使用的 NuGet 套件來源。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restores the packages to the specified directory.</source>
-        <target state="translated">將套件還原到指定目錄。</target>
+        <source>The directory to restore packages to.</source>
+        <target state="needs-review-translation">將套件還原到指定目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>Version for the package to be added.</source>
-        <target state="translated">要新增的套件版本。</target>
+        <source>The version of the package to add.</source>
+        <target state="needs-review-translation">要新增的套件版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -63,8 +63,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
-        <source>PACKAGE_DIRECTORY</source>
-        <target state="translated">PACKAGE_DIRECTORY</target>
+        <source>PACKAGE_DIR</source>
+        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

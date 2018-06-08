@@ -41,14 +41,14 @@ namespace Microsoft.DotNet.Cli
                                   };
                               }
                           })),
-                CommonOptions.FrameworkOption(),
+                CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 Create.Option(
                     "--framework-version",
                     LocalizableStrings.FrameworkVersionOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.FrameworkVersionOption)
                         .ForwardAsSingle(o => $"-property:RuntimeFrameworkVersion={o.Arguments.Single()}")),
-                CommonOptions.RuntimeOption(),
+                CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 Create.Option(
                     "-o|--output",
                     LocalizableStrings.OutputOptionDescription,

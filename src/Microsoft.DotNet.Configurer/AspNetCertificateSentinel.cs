@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Configurer
 
         private string SentinelPath => Path.Combine(_dotnetUserProfileFolderPath, SENTINEL);
 
-        public AspNetCertificateSentinel(CliFolderPathCalculator cliFallbackFolderPathCalculator) :
+        public AspNetCertificateSentinel() :
             this(
                 CliFolderPathCalculator.DotnetUserProfileFolderPath,
                 FileSystemWrapper.Default.File,

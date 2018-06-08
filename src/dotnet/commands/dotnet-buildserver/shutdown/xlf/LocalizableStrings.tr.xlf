@@ -8,18 +8,18 @@
         <note />
       </trans-unit>
       <trans-unit id="MSBuildOptionDescription">
-        <source>Shuts down the MSBuild build server.</source>
-        <target state="translated">MSBuild derleme sunucusunu kapatır.</target>
+        <source>Shut down the MSBuild build server.</source>
+        <target state="needs-review-translation">MSBuild derleme sunucusunu kapatır.</target>
         <note />
       </trans-unit>
       <trans-unit id="VBCSCompilerOptionDescription">
-        <source>Shuts down the VB/C# compiler build server.</source>
-        <target state="translated">VB/C# derleyici derleme sunucusunu kapatır.</target>
+        <source>Shut down the VB/C# compiler build server.</source>
+        <target state="needs-review-translation">VB/C# derleyici derleme sunucusunu kapatır.</target>
         <note />
       </trans-unit>
       <trans-unit id="RazorOptionDescription">
-        <source>Shuts down the Razor build server.</source>
-        <target state="translated">Razor derleme sunucusunu kapatır.</target>
+        <source>Shut down the Razor build server.</source>
+        <target state="needs-review-translation">Razor derleme sunucusunu kapatır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShuttingDownServer">

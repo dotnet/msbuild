@@ -334,19 +334,34 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         private sealed class MockFactory : SdkResultFactory
         {
             public override SdkResult IndicateFailure(IEnumerable<string> errors, IEnumerable<string> warnings = null)
-                => new MockResult { Success = false, Errors = errors, Warnings = warnings  };
+                => new MockResult(success: false, path: null, version: null, warnings: warnings, errors: errors);
 
             public override SdkResult IndicateSuccess(string path, string version, IEnumerable<string> warnings = null)
-                => new MockResult { Success = true, Path = path, Version = version, Warnings = warnings };
+                => new MockResult(success: true, path: path, version: version, warnings: warnings);
         }
 
         private sealed class MockResult : SdkResult
         {
-            public new bool Success { get => base.Success; set => base.Success = value; }
-            public string Version { get; set; }
-            public string Path { get; set; }
-            public IEnumerable<string> Errors { get; set; }
-            public IEnumerable<string> Warnings { get; set; }
+            public MockResult(bool success, string path, string version, IEnumerable<string> warnings = null,
+                IEnumerable<string> errors = null)
+            {
+                Success = success;
+                Path = path;
+                Version = version;
+                Warnings = warnings;
+                Errors = errors;
+            }
+
+            public new bool Success
+            {
+                get => base.Success;
+                private set => base.Success = value;
+            }
+
+            public override string Version { get; protected set; }
+            public override string Path { get; protected set; }
+            public IEnumerable<string> Errors { get; }
+            public IEnumerable<string> Warnings { get; }
         }
     }
 }

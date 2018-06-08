@@ -60,20 +60,6 @@ namespace Microsoft.DotNet.Tests
         }
 
         [Fact]
-        public void WhenTheProfileRootIsUndefinedThenDotnetDoesNotCrash()
-        {
-            var testDirectory = TestAssets.CreateTestDirectory();
-            var testStartTime = GetTruncatedDateTime();
-            
-            var optimizationProfileFilePath = GetOptimizationProfileFilePath(testDirectory.FullName);
-
-            new TestCommand("dotnet")
-                .WithUserProfileRoot("")
-                .ExecuteWithCapturedOutput("--help")
-                .Should().Pass();
-        }
-
-        [Fact]
         public void WhenCliRepoBuildsThenDotnetWritesOptimizationDataToTheDefaultProfileRoot()
         {
             var optimizationProfileFilePath = GetOptimizationProfileFilePath();

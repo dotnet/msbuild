@@ -18,28 +18,28 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Adds reference only when targeting a specific framework.</source>
-        <target state="translated">Aggiunge il riferimento solo se destinato a un framework specifico.</target>
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Aggiunge il riferimento solo se destinato a un framework specifico.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Aggiunge il riferimento senza eseguire l'anteprima di restore e la verifica della compatibilità.</target>
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Aggiunge il riferimento senza eseguire l'anteprima di restore e la verifica della compatibilità.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="translated">Consente di specificare le origini pacchetto NuGet da usare durante il ripristino.</target>
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="needs-review-translation">Consente di specificare le origini pacchetto NuGet da usare durante il ripristino.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restores the packages to the specified directory.</source>
-        <target state="translated">Ripristina i pacchetti nella directory specificata.</target>
+        <source>The directory to restore packages to.</source>
+        <target state="needs-review-translation">Ripristina i pacchetti nella directory specificata.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>Version for the package to be added.</source>
-        <target state="translated">Versione del pacchetto da aggiungere.</target>
+        <source>The version of the package to add.</source>
+        <target state="needs-review-translation">Versione del pacchetto da aggiungere.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -63,8 +63,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
-        <source>PACKAGE_DIRECTORY</source>
-        <target state="translated">DIRECTORY_PACCHETTO</target>
+        <source>PACKAGE_DIR</source>
+        <target state="needs-review-translation">DIRECTORY_PACCHETTO</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

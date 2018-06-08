@@ -123,32 +123,41 @@
   <data name="AppDescription" xml:space="preserve">
     <value>Command to add, remove, and list projects from the solution (SLN) file.</value>
   </data>
+  <data name="SolutionArgumentName" xml:space="preserve">
+    <value>SLN_FILE</value>
+  </data>
+  <data name="SolutionArgumentDescription" xml:space="preserve">
+    <value>The solution file to operate on. If not specified, the command will search the current directory for one.</value>
+  </data>
   <data name="AppHelpText" xml:space="preserve">
     <value>Projects to add or to remove from the solution.</value>
   </data>
   <data name="AddAppFullName" xml:space="preserve">
-    <value>.NET Add project(s) to a solution file Command</value>
+    <value>Add one or more projects to a solution file.</value>
   </data>
-  <data name="AddSubcommandHelpText" xml:space="preserve">
-    <value>Add one or more specified projects to the solution.</value>
+  <data name="AddProjectPathArgumentName" xml:space="preserve">
+    <value>PROJECT_PATH</value>
+  </data>
+  <data name="AddProjectPathArgumentDescription" xml:space="preserve">
+    <value>The paths to the projects to add to the solution.</value>
+  </data>
+  <data name="RemoveProjectPathArgumentName" xml:space="preserve">
+    <value>PROJECT_PATH</value>
+  </data>
+  <data name="RemoveProjectPathArgumentDescription" xml:space="preserve">
+    <value>The paths to the projects to from from the solution.</value>
   </data>
   <data name="RemoveAppFullName" xml:space="preserve">
-    <value>.NET Remove project(s) from a solution file Command</value>
+    <value>Remove one or more projects from a solution file.</value>
   </data>
   <data name="RemoveSubcommandHelpText" xml:space="preserve">
     <value>Remove the specified project(s) from the solution. The project is not impacted.</value>
   </data>
   <data name="ListAppFullName" xml:space="preserve">
-    <value>.NET List project(s) in a solution file Command</value>
+    <value>List all projects in a solution file.</value>
   </data>
   <data name="ListSubcommandHelpText" xml:space="preserve">
     <value>List all projects in the solution.</value>
-  </data>
-  <data name="CreateAppFullName" xml:space="preserve">
-    <value>.NET Create a solution file Command</value>
-  </data>
-  <data name="CreateSubcommandHelpText" xml:space="preserve">
-    <value>Create a solution file.</value>
   </data>
   <data name="ProjectsHeader" xml:space="preserve">
     <value>Project(s)</value>
