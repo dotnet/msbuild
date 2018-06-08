@@ -882,6 +882,7 @@ namespace Microsoft.Build.Evaluation.Context
     {
         internal EvaluationContext() { }
         public static Microsoft.Build.Evaluation.Context.EvaluationContext Create(Microsoft.Build.Evaluation.Context.EvaluationContext.SharingPolicy policy) { throw null; }
+        public void ResetCaches() { }
         public enum SharingPolicy
         {
             Isolated = 1,

@@ -70,6 +70,10 @@ namespace Microsoft.Build.Shared.FileSystem
             return FileOrDirectoryExists(FileArtifactType.FileOrDirectory, path);
         }
 
+        public void ClearCaches()
+        {
+        }
+
         private static bool FileOrDirectoryExists(FileArtifactType fileArtifactType, string path)
         {
             // The path gets normalized so we always use backslashes

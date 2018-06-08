@@ -41,5 +41,7 @@ namespace Microsoft.Build.Shared.FileSystem
         /// Determines whether the given path refers to an existing entry in the directory service.
         /// </summary>
         bool DirectoryEntryExists(string path);
+
+        void ClearCaches();
     }
 }

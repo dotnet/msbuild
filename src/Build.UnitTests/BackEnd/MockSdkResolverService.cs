@@ -15,6 +15,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
         }
 
+        public void ClearCaches()
+        {
+        }
+
         public Build.BackEnd.SdkResolution.SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             return null;

@@ -76,5 +76,16 @@ namespace Microsoft.Build.Evaluation.Context
                     return null;
             }
         }
+
+        /// <summary>
+        /// Ideally caches should be discarded by discarding this entire object.
+        /// However, there could be situations where API users have a <see cref="Project"/> object loaned to another entity, and cannot swap the context, but still need to reset it.
+        /// </summary>
+        public void ResetCaches()
+        {
+            SdkResolverService.ClearCaches();
+            FileSystem.ClearCaches();
+            FileEntryExpansionCache.Clear();
+        }
     }
 }
