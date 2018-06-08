@@ -21,7 +21,7 @@
     
     <!-- Defaults for target frameworks and architecture -->
     <LibraryTargetFrameworks>netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(OsEnvironment)'=='windows'  or '$(DotNetBuildFromSource)'=='true'">net46;netstandard2.0</LibraryTargetFrameworks>
     <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">net461</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
@@ -63,6 +63,7 @@
 
   <ItemGroup>
     <PackageReference Condition="'$(DisableNerdbankVersioning)' != 'true'" Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-003" PrivateAssets="all"/>
   </ItemGroup>
   
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
