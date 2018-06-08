@@ -1,14 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using System.Globalization;
-using System.Resources;
-
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -17,68 +9,27 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class Warning : TaskExtension
     {
-        private string _text;
-
         /// <summary>
         /// Error message
         /// </summary>
-        public string Text
-        {
-            get
-            {
-                return _text;
-            }
-
-            set
-            {
-                _text = value;
-            }
-        }
-
-        private string _code;
+        public string Text { get; set; }
 
         /// <summary>
         /// Warning code
         /// </summary>
-        public string Code
-        {
-            get
-            {
-                return _code;
-            }
-            set
-            {
-                _code = value;
-            }
-        }
+        public string Code { get; set; }
 
         /// <summary>
         /// Relevant file if any.
         /// If none is provided, the file containing the Warning 
         /// task will be used.
         /// </summary>
-        public string File
-        {
-            get;
-            set;
-        }
-
-        private string _helpKeyword;
+        public string File { get; set; }
 
         /// <summary>
         /// Warning help keyword
         /// </summary>
-        public string HelpKeyword
-        {
-            get
-            {
-                return _helpKeyword;
-            }
-            set
-            {
-                _helpKeyword = value;
-            }
-        }
+        public string HelpKeyword { get; set; }
 
         /// <summary>
         /// Main task method

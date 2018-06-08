@@ -293,32 +293,32 @@
       </trans-unit>
       <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
         <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
-        <target state="new">Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</target>
+        <target state="translated">未将文件从“{0}”下载到“{1}”，因为“{2}”参数在项目中设置为“{3}”，而两个文件的大小一致。</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.Downloading">
         <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
-        <target state="new">Downloading from "{0}" to "{1}" ({2:N0} bytes).</target>
+        <target state="translated">正在从“{0}”下载到“{1}”({2:N0} 字节)。</target>
         <note />
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorDownloading">
         <source>MSB3923: Failed to download file "{0}".  {1}</source>
-        <target state="new">MSB3923: Failed to download file "{0}".  {1}</target>
+        <target state="translated">MSB3923: 未能下载文件“{0}”。{1}</target>
         <note>{StrBegin="MSB3923: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorInvalidUrl">
         <source>MSB3921: The specified URL "{0}" is not valid.</source>
-        <target state="new">MSB3921: The specified URL "{0}" is not valid.</target>
+        <target state="translated">MSB3921: 指定 URL“{0}”无效。</target>
         <note>{StrBegin="MSB3921: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.ErrorUnknownFileName">
         <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
-        <target state="new">MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</target>
+        <target state="translated">MSB3922: 未能通过 URL“{0}”确定文件名。请使用“{1}”参数指定文件名。</target>
         <note>{StrBegin="MSB3922: "}</note>
       </trans-unit>
       <trans-unit id="DownloadFile.Retrying">
         <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="new">MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</target>
+        <target state="translated">MSB3924: 未能下载文件“{0}”。将在 {2} 毫秒内重试 {1}。{3}</target>
         <note>{StrBegin="MSB3924: "}</note>
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
@@ -2358,6 +2358,46 @@
         <target state="translated">MSB3394: 类型库“{0}”未注册，无法注销。</target>
         <note>{StrBegin="MSB3394: "}</note>
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
+        <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="new">Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
+        <target state="new">MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</target>
+        <note>{StrBegin="MSB3931: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotExtractFile">
+        <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
+        <target state="new">MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</target>
+        <note>{StrBegin="MSB3936: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
+        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</target>
+        <note>{StrBegin="MSB3935: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotOpenFile">
+        <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
+        <target state="new">MSB3933: Failed to open zip file "{0}".  {1}</target>
+        <note>{StrBegin="MSB3933: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="new">MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <note>{StrBegin="MSB3934: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorFileDoesNotExist">
+        <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="new">MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3932: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.FileComment">
+        <source>Unzipping file "{0}" to "{1}".</source>
+        <target state="new">Unzipping file "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: “{1}”是无效的“{0}”参数值。有效值为: {2}</target>
@@ -2670,17 +2710,17 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
         <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</source>
-        <target state="needs-review-translation">MSB3755: 未能找到引用“{0}”。如果代码需要此引用，则可能会出现编译错误。</target>
+        <target state="translated">MSB3755: 未能找到引用“{0}”。如果代码需要此引用，则可能会出现编译错误。</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
         <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
-        <target state="needs-review-translation">MSB3756: XML 元素“{0}”在 XML 元素“{1}”下无效。</target>
+        <target state="translated">MSB3756: 元素 &lt;{0}&gt; 不是 &lt;{1}&gt; 元素的有效子元素。有效子元素为 &lt;Code&gt;、&lt;Reference&gt; 和 &lt;Using&gt;。</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
         <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
-        <target state="needs-review-translation">MSB3757: 已找到多个 Code XML 元素，不允许存在这种情况。若要解决此问题，请从任务中移除任何其他 Code XML 元素。</target>
+        <target state="translated">MSB3757: 只能指定一个 &lt;Code&gt; 元素。</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3040,38 +3080,58 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
-        <target state="new">MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</target>
+        <target state="translated">MSB3759: 指定的代码类型“{0}”无效。支持的代码类型是“{1}”。</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
         <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
-        <target state="new">MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</target>
+        <target state="translated">MSB3759: 指定的代码语言“{0}”无效。支持的代码语言是“{1}”。</target>
         <note>{StrBegin="MSB3759: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.NoSourceCode">
         <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
-        <target state="new">MSB3760: You must specify source code within the Code element or a path to a file containing source code.</target>
+        <target state="translated">MSB3760: 必须在代码元素或包含源代码的文件路径中指定源代码。</target>
         <note>{StrBegin="MSB3760: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilingAssembly">
         <source>Compiling task source code</source>
-        <target state="new">Compiling task source code</target>
+        <target state="translated">编译任务源代码</target>
         <note />
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidTaskXml">
         <source>MSB3761: The specified task XML is invalid.  {0}</source>
-        <target state="new">MSB3761: The specified task XML is invalid.  {0}</target>
+        <target state="translated">MSB3761: 指定的任务 XML 无效。{0}</target>
         <note>{StrBegin="MSB3761: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
         <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
-        <target state="new">MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</target>
+        <target state="translated">MSB3756: 属性“{0}”对 &lt;Code&gt; 元素无效。有效的属性是“语言”、“源”和“类型”。</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
-        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</target>
+        <target state="translated">MSB3752: 已设置 &lt;{1}&gt; 元素的“{0}”属性，但其为空。如果设置了“{0}”属性，其不得为空。</target>
         <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.Comment">
+        <source>Zipping directory "{0}" to "{1}".</source>
+        <target state="new">Zipping directory "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="new">MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3941: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFailed">
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
+        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</target>
+        <note>{StrBegin="MSB3943: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFileExists">
+        <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="new">MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>
   </file>

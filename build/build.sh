@@ -346,21 +346,13 @@ function ErrorHostType {
 }
 
 function Build {
-  CreateDirectory $ArtifactsDir
+  InstallDotNetCli
 
-  if [ "$hostType" = "core" ]; then
-    InstallDotNetCli
-    echo "Using dotnet from: $DOTNET_INSTALL_DIR"
-  fi
-
+  echo "Using dotnet from: $DOTNET_INSTALL_DIR"
   if $prepareMachine
   then
     CreateDirectory "$NuGetPackageRoot"
-    if [ "$hostType" != "mono" ]; then
-        eval "$(QQ $DOTNET_HOST_PATH) nuget locals all --clear"
-    else
-        eval "nuget locals all -clear"
-    fi
+    eval "$(QQ $DOTNET_HOST_PATH) nuget locals all --clear"
 
     ExitIfError $? "Failed to clear NuGet cache"
   fi
@@ -436,10 +428,10 @@ function Build {
 }
 
 function AssertNugetPackages {
-  packageCount=$(find $PackagesDir -type f | wc -l)
   if $pack || $dotnetBuildFromSource
   then
 
+    packageCount=$(find $PackagesDir -type f | wc -l)
     if [ $packageCount -ne 5 ]
     then
       ExitIfError 1 "Did not find 5 packages in $PackagesDir"
@@ -475,7 +467,7 @@ fi
 
 msbuildToUse="msbuild"
 MONO_MSBUILD_DIR="$ArtifactsDir/mono-msbuild"
-MSBUILD_DOWNLOAD_URL="https://github.com/mono/msbuild/releases/download/v0.05/mono_msbuild_port2-394a6b5e.zip"
+MSBUILD_DOWNLOAD_URL="https://github.com/mono/msbuild/releases/download/0.06/mono_msbuild_xplat-master-3c930fa8.zip"
 MSBUILD_ZIP="$ArtifactsDir/msbuild.zip"
 
 log=false

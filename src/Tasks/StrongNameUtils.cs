@@ -29,10 +29,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads contents of a key file. Reused from vsdesigner code.
         /// </summary>
-        /// <param name="log"></param>
-        /// <param name="keyFile"></param>
-        /// <param name="keyPair"></param>
-        /// <param name="publicKey"></param>
         internal static void ReadKeyFile(TaskLoggingHelper log, string keyFile, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
             // Initialize parameters
@@ -70,7 +66,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Make a new key pair from what we read
-            StrongNameKeyPair snp = new StrongNameKeyPair(keyFileContents);
+            var snp = new StrongNameKeyPair(keyFileContents);
 
             // If anything fails reading the public key portion of the strong name key pair, then
             // assume that keyFile contained only the public key portion of the public/private pair.
@@ -91,11 +87,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Given a key file or container, extract private/public key data. Reused from vsdesigner code.
         /// </summary>
-        /// <param name="log"></param>
-        /// <param name="keyFile"></param>
-        /// <param name="keyContainer"></param>
-        /// <param name="keyPair"></param>
-        /// <param name="publicKey"></param>
         internal static void GetStrongNameKey(TaskLoggingHelper log, string keyFile, string keyContainer, out StrongNameKeyPair keyPair, out byte[] publicKey)
         {
             // Gets either a strong name key pair from the key file or a key container.
@@ -103,7 +94,7 @@ namespace Microsoft.Build.Tasks
             // Initialize parameters
             keyPair = null;
             publicKey = null;
-            if (keyContainer != null && keyContainer.Length != 0)
+            if (!string.IsNullOrEmpty(keyContainer))
             {
                 try
                 {
@@ -123,7 +114,7 @@ namespace Microsoft.Build.Tasks
                     throw new StrongNameException(e);
                 }
             }
-            else if (keyFile != null && keyFile.Length != 0)
+            else if (!string.IsNullOrEmpty(keyFile))
             {
                 ReadKeyFile(log, keyFile, out keyPair, out publicKey);
             }
@@ -137,7 +128,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal static StrongNameLevel GetAssemblyStrongNameLevel(string assemblyPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath, "assemblyPath");
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath, nameof(assemblyPath));
 
             StrongNameLevel snLevel = StrongNameLevel.Unknown;
             IntPtr fileHandle = NativeMethods.InvalidIntPtr;
@@ -147,11 +138,15 @@ namespace Microsoft.Build.Tasks
                 // open the assembly
                 fileHandle = NativeMethods.CreateFile(assemblyPath, NativeMethods.GENERIC_READ, FileShare.Read, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero);
                 if (fileHandle == NativeMethods.InvalidIntPtr)
+                {
                     return snLevel;
+                }
 
                 // if it's not a disk file, exit
                 if (NativeMethods.GetFileType(fileHandle) != NativeMethods.FILE_TYPE_DISK)
+                {
                     return snLevel;
+                }
 
                 IntPtr fileMappingHandle = IntPtr.Zero;
 
@@ -159,7 +154,9 @@ namespace Microsoft.Build.Tasks
                 {
                     fileMappingHandle = NativeMethods.CreateFileMapping(fileHandle, IntPtr.Zero, NativeMethods.PAGE_READONLY, 0, 0, null);
                     if (fileMappingHandle == IntPtr.Zero)
+                    {
                         return snLevel;
+                    }
 
                     IntPtr fileMappingBase = IntPtr.Zero;
 
@@ -167,26 +164,30 @@ namespace Microsoft.Build.Tasks
                     {
                         fileMappingBase = NativeMethods.MapViewOfFile(fileMappingHandle, NativeMethods.FILE_MAP_READ, 0, 0, IntPtr.Zero);
                         if (fileMappingBase == IntPtr.Zero)
+                        {
                             return snLevel;
+                        }
 
                         // retrieve NT headers pointer from the file
                         IntPtr ntHeader = NativeMethods.ImageNtHeader(fileMappingBase);
-
                         if (ntHeader == IntPtr.Zero)
+                        {
                             return snLevel;
+                        }
 
                         // get relative virtual address of the COR20 header
                         uint cor20HeaderRva = GetCor20HeaderRva(ntHeader);
-
                         if (cor20HeaderRva == 0)
+                        {
                             return snLevel;
+                        }
 
-                        IntPtr lastRvaSection = IntPtr.Zero;
                         // get the pointer to the COR20 header structure
-                        IntPtr cor20HeaderPtr = NativeMethods.ImageRvaToVa(ntHeader, fileMappingBase, cor20HeaderRva, out lastRvaSection);
-
+                        IntPtr cor20HeaderPtr = NativeMethods.ImageRvaToVa(ntHeader, fileMappingBase, cor20HeaderRva, out _);
                         if (cor20HeaderPtr == IntPtr.Zero)
+                        {
                             return snLevel;
+                        }
 
                         // get the COR20 structure itself
                         NativeMethods.IMAGE_COR20_HEADER cor20Header = (NativeMethods.IMAGE_COR20_HEADER)Marshal.PtrToStructure(cor20HeaderPtr, typeof(NativeMethods.IMAGE_COR20_HEADER));
@@ -253,7 +254,7 @@ namespace Microsoft.Build.Tasks
 
             // this should really be a structure, but NDP can't marshal fixed size struct arrays in a struct... ugh.
             // this ulong corresponds to a IMAGE_DATA_DIRECTORY structure
-            ulong cor20DataDirectoryLong = 0;
+            ulong cor20DataDirectoryLong;
 
             // see if we have a 32bit header or a 64bit header
             if (optionalHeaderMagic == NativeMethods.IMAGE_NT_OPTIONAL_HDR32_MAGIC)
@@ -279,7 +280,7 @@ namespace Microsoft.Build.Tasks
             // this code extracts the virtualAddress (uint) and size (uint) fields from the ulong by doing simple 
             // bit masking/shifting ops
             uint virtualAddress = (uint)(cor20DataDirectoryLong & 0x00000000ffffffff);
-            uint size = (uint)(cor20DataDirectoryLong >> 32);
+            // uint size = (uint)(cor20DataDirectoryLong >> 32);
 
             return virtualAddress;
         }

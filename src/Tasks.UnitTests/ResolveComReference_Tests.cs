@@ -5,10 +5,7 @@
 
 using System;
 using System.Collections;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Collections.Generic;
-
 
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
@@ -16,28 +13,19 @@ using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.Shared;
 using Xunit;
 using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 
 namespace Microsoft.Build.UnitTests
 {
-    /*
-     * Class:   ResolveComReference_Tests
-     *
-     * Test the ResolveComReference task in various ways.
-     *
-     */
     sealed public class ResolveComReference_Tests
     {
-        /*
-         * Method:  SetupTaskItem
-         * 
-         * Creates a valid task item that's modified later
-         */
+        /// <summary>
+        /// Creates a valid task item that's modified later
+        /// </summary>
         private TaskItem SetupTaskItem()
         {
-            TaskItem item = new TaskItem();
+            var item = new TaskItem();
 
             item.SetMetadata(ComReferenceItemMetadataNames.guid, "{5C6D0C4D-D530-4B08-B22F-307CA6BFCB65}");
             item.SetMetadata(ComReferenceItemMetadataNames.versionMajor, "1");
@@ -192,7 +180,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private TaskItem CreateComReferenceTaskItem(string itemSpec, string guid, string vMajor, string vMinor, string lcid, string wrapperType, string embedInteropTypes)
         {
-            TaskItem item = new TaskItem(itemSpec);
+            var item = new TaskItem(itemSpec);
 
             item.SetMetadata(ComReferenceItemMetadataNames.guid, guid);
             item.SetMetadata(ComReferenceItemMetadataNames.versionMajor, vMajor);
@@ -236,7 +224,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private ComReferenceInfo CreateComReferenceInfo(ITaskItem taskItem, string typeLibName, string typeLibPath)
         {
-            ComReferenceInfo referenceInfo = new ComReferenceInfo();
+            var referenceInfo = new ComReferenceInfo();
 
             referenceInfo.taskItem = taskItem;
             referenceInfo.attr = ResolveComReference.TaskItemToTypeLibAttr(taskItem);
@@ -295,7 +283,7 @@ namespace Microsoft.Build.UnitTests
             CreateTestReferences(out axRefInfo, out tlbRefInfo, out piaRefInfo,
                 out axAttr, out tlbAttr, out piaAttr, out notInProjectAttr);
 
-            ResolveComReference rcr = new ResolveComReference();
+            var rcr = new ResolveComReference();
 
             // populate the ResolveComReference's list of project references
             rcr.allProjectRefs = new List<ComReferenceInfo>();
@@ -303,10 +291,8 @@ namespace Microsoft.Build.UnitTests
             rcr.allProjectRefs.Add(tlbRefInfo);
             rcr.allProjectRefs.Add(piaRefInfo);
 
-            ComReferenceInfo referenceInfo;
-
             // find the Ax ref, matching with any type of reference - should NOT find it
-            bool retValue = rcr.IsExistingProjectReference(axAttr, null, out referenceInfo);
+            bool retValue = rcr.IsExistingProjectReference(axAttr, null, out ComReferenceInfo referenceInfo);
             Assert.True(retValue == false && referenceInfo == null); // "ActiveX ref should NOT be found for any type of ref"
 
             // find the Ax ref, matching with aximp types - should find it
@@ -343,7 +329,6 @@ namespace Microsoft.Build.UnitTests
             retValue = rcr.IsExistingProjectReference(piaAttr, ComReferenceTypes.aximp, out referenceInfo);
             Assert.True(retValue == false && referenceInfo == null); // "Pia ref should NOT be found for aximp ref types"
 
-
             // try to find a non existing reference
             retValue = rcr.IsExistingProjectReference(notInProjectAttr, null, out referenceInfo);
             Assert.True(retValue == false && referenceInfo == null); // "not in project ref should not be found"
@@ -361,7 +346,7 @@ namespace Microsoft.Build.UnitTests
             CreateTestReferences(out axRefInfo, out tlbRefInfo, out piaRefInfo,
                 out axAttr, out tlbAttr, out piaAttr, out notInProjectAttr);
 
-            ResolveComReference rcr = new ResolveComReference();
+            var rcr = new ResolveComReference();
 
             // populate the ResolveComReference's list of project references
             rcr.allDependencyRefs = new List<ComReferenceInfo>();
@@ -369,10 +354,8 @@ namespace Microsoft.Build.UnitTests
             rcr.allDependencyRefs.Add(tlbRefInfo);
             rcr.allDependencyRefs.Add(piaRefInfo);
 
-            ComReferenceInfo referenceInfo;
-
             // find the Ax ref - should find it
-            bool retValue = rcr.IsExistingDependencyReference(axAttr, out referenceInfo);
+            bool retValue = rcr.IsExistingDependencyReference(axAttr, out ComReferenceInfo referenceInfo);
             Assert.True(retValue == true && referenceInfo == axRefInfo); // "ActiveX ref should be found"
 
             // find the Tlb ref - should find it
@@ -407,7 +390,7 @@ namespace Microsoft.Build.UnitTests
             CreateTestReferences(out axRefInfo, out tlbRefInfo, out piaRefInfo,
                 out axAttr, out tlbAttr, out piaAttr, out notInProjectAttr);
 
-            ResolveComReference rcr = new ResolveComReference();
+            var rcr = new ResolveComReference();
             rcr.BuildEngine = new MockEngine();
 
             // populate the ResolveComReference's list of project references
@@ -436,8 +419,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BothKeyFileAndKeyContainer()
         {
-            ResolveComReference rcr = new ResolveComReference();
-            MockEngine e = new MockEngine();
+            var rcr = new ResolveComReference();
+            var e = new MockEngine();
             rcr.BuildEngine = e;
 
             rcr.KeyFile = "foo";
@@ -451,8 +434,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DelaySignWithoutEitherKeyFileOrKeyContainer()
         {
-            ResolveComReference rcr = new ResolveComReference();
-            MockEngine e = new MockEngine();
+            var rcr = new ResolveComReference();
+            var e = new MockEngine();
             rcr.BuildEngine = e;
 
             rcr.DelaySign = true;
@@ -486,27 +469,27 @@ namespace Microsoft.Build.UnitTests
             {
                 string fxVersion = fxVersions[i];
 
-                ArrayList taskItems = new ArrayList();
+                var taskItems = new List<ITaskItem>();
 
-                TaskItem nonGacNoPrivate = new TaskItem(@"C:\windows\gar\test1.dll");
+                var nonGacNoPrivate = new TaskItem(@"C:\windows\gar\test1.dll");
                 nonGacNoPrivate.SetMetadata(ItemMetadataNames.embedInteropTypes, "true");
 
-                TaskItem gacNoPrivate = new TaskItem(@"C:\windows\gac\assembly1.dll");
+                var gacNoPrivate = new TaskItem(@"C:\windows\gac\assembly1.dll");
                 gacNoPrivate.SetMetadata(ItemMetadataNames.embedInteropTypes, "true");
 
-                TaskItem nonGacPrivateFalse = new TaskItem(@"C:\windows\gar\test1.dll");
+                var nonGacPrivateFalse = new TaskItem(@"C:\windows\gar\test1.dll");
                 nonGacPrivateFalse.SetMetadata(ItemMetadataNames.privateMetadata, "false");
                 nonGacPrivateFalse.SetMetadata(ItemMetadataNames.embedInteropTypes, "true");
 
-                TaskItem gacPrivateFalse = new TaskItem(@"C:\windows\gac\assembly1.dll");
+                var gacPrivateFalse = new TaskItem(@"C:\windows\gac\assembly1.dll");
                 gacPrivateFalse.SetMetadata(ItemMetadataNames.privateMetadata, "false");
                 gacPrivateFalse.SetMetadata(ItemMetadataNames.embedInteropTypes, "true");
 
-                TaskItem nonGacPrivateTrue = new TaskItem(@"C:\windows\gar\test1.dll");
+                var nonGacPrivateTrue = new TaskItem(@"C:\windows\gar\test1.dll");
                 nonGacPrivateTrue.SetMetadata(ItemMetadataNames.privateMetadata, "true");
                 nonGacPrivateTrue.SetMetadata(ItemMetadataNames.embedInteropTypes, "true");
 
-                TaskItem gacPrivateTrue = new TaskItem(@"C:\windows\gac\assembly1.dll");
+                var gacPrivateTrue = new TaskItem(@"C:\windows\gac\assembly1.dll");
                 gacPrivateTrue.SetMetadata(ItemMetadataNames.privateMetadata, "true");
                 gacPrivateTrue.SetMetadata(ItemMetadataNames.embedInteropTypes, "true");
 
@@ -559,10 +542,10 @@ namespace Microsoft.Build.UnitTests
         {
             string gacPath = @"C:\windows\gac";
 
-            ResolveComReference rcr = new ResolveComReference();
+            var rcr = new ResolveComReference();
             rcr.BuildEngine = new MockEngine();
 
-            ArrayList taskItems = new ArrayList();
+            var taskItems = new List<ITaskItem>();
             TaskItem nonGacNoPrivate = new TaskItem(@"C:\windows\gar\test1.dll");
             TaskItem gacNoPrivate = new TaskItem(@"C:\windows\gac\assembly1.dll");
 
@@ -614,7 +597,7 @@ namespace Microsoft.Build.UnitTests
             CreateTestReferences(out axRefInfo, out tlbRefInfo, out piaRefInfo,
                 out axAttr, out tlbAttr, out piaAttr, out notInProjectAttr);
 
-            ResolveComReference rcr = new ResolveComReference();
+            var rcr = new ResolveComReference();
             rcr.BuildEngine = new MockEngine();
 
             // populate the ResolveComReference's list of project references
@@ -642,13 +625,13 @@ namespace Microsoft.Build.UnitTests
 
             // tlb and ax refs with same lib name but different attributes should be considered conflicting
             // We don't care about typelib name conflicts for PIA refs, because we don't have to create wrappers for them
-            ComReferenceInfo conflictTlb = new ComReferenceInfo(tlbRefInfo);
+            var conflictTlb = new ComReferenceInfo(tlbRefInfo);
             conflictTlb.attr = notInProjectAttr;
             rcr.allProjectRefs.Add(conflictTlb);
-            ComReferenceInfo conflictAx = new ComReferenceInfo(axRefInfo);
+            var conflictAx = new ComReferenceInfo(axRefInfo);
             conflictAx.attr = notInProjectAttr;
             rcr.allProjectRefs.Add(conflictAx);
-            ComReferenceInfo piaRef = new ComReferenceInfo(piaRefInfo);
+            var piaRef = new ComReferenceInfo(piaRefInfo);
             piaRef.attr = notInProjectAttr;
             rcr.allProjectRefs.Add(piaRef);
 
@@ -757,10 +740,9 @@ namespace Microsoft.Build.UnitTests
             Guid axGuid = Guid.NewGuid();
             ComReferenceInfo tlbRefInfo;
 
-            ResolveComReference rcr = new ResolveComReference();
+            var rcr = new ResolveComReference();
             rcr.BuildEngine = new MockEngine();
             rcr.IncludeVersionInInteropName = includeVersionInInteropName;
-
             rcr.allProjectRefs = new List<ComReferenceInfo>();
 
             TaskItem axTaskItem = CreateComReferenceTaskItem("ref", axGuid.ToString(), "1", "2", "1033", ComReferenceTypes.aximp);
@@ -790,7 +772,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(2, rcr.allProjectRefs.Count); // "Should be two references"
 
-            tlbRefInfo = (ComReferenceInfo)rcr.allProjectRefs[1];
+            tlbRefInfo = rcr.allProjectRefs[1];
             var embedInteropTypes = tlbRefInfo.taskItem.GetMetadata(ItemMetadataNames.embedInteropTypes);
             Assert.Equal("false", embedInteropTypes); // "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
             Assert.True(ComReference.AreTypeLibAttrEqual(tlbRefInfo.attr, axRefInfo.attr)); // "reference information should be the same"

@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: Fin prématurée du nœud enfant "{0}". Arrêt. Les informations de diagnostic se trouvent dans des fichiers situés dans "{1}", qui se nomment MSBuild_*.failure.txt. Vous pouvez changer l'emplacement en affectant un autre répertoire à la variable d'environnement MSBUILDDEBUGPATH.</target>
+        <target state="translated">MSB4166: Fin prématurée du nœud enfant "{0}" . Arrêt. Des informations de diagnostic se trouvent dans des fichiers nommés MSBuild_*.failure.txt dans "{1}". Pour changer d'emplacement, affectez un répertoire différent à la variable d'environnement MSBUILDDEBUGPATH.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -221,7 +221,7 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: MSBuildToolsPath n'est pas identique à MSBuildBinPath pour le ToolsVersion "{0}" défini sur "{1}". Si les deux sont présents, ils doivent avoir la même valeur.</target>
+        <target state="translated">MSB4142: MSBuildToolsPath n'est pas identique à MSBuildBinPath pour le ToolsVersion "{0}" défini à "{1}". Si les deux sont présents, ils doivent avoir la même valeur.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
@@ -806,7 +806,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: l'espace de noms XML par défaut du projet doit être l'espace de noms XML MSBuild ou aucun espace de noms. Si le projet a été créé au format MSBuild 2003, ajoutez xmlns="{0}" à l'élément &lt;Project&gt;. S'il a été créé dans des formats antérieurs comme 1.0 ou 1.2, convertissez-le au format MSBuild 2003.</target>
+        <target state="translated">MSB4041: l'espace de noms XML par défaut du projet doit être l'espace de noms XML MSBuild ou aucun espace de noms. Si le projet est créé au format MSBuild 2003, ajoutez xmlns="{0}" à l'élément &lt;Project&gt;. Si le projet a été créé avec l'ancien format 1.0 ou 1.2, convertissez-le au format MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1943,12 +1943,12 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: la valeur "{0}" est non valide pour la spécification d'un kit SDK. L'attribut doit être une liste de paires nom/version minimale du kit SDK, délimitées par une barre oblique.</target>
+        <target state="translated">MSB4229: La valeur "{0}" n'est pas valide pour une spécification de SDK. L'attribut doit être une liste séparée par des points-virgules de paires nom_SDK/version_minimum, séparées par une barre oblique.</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: impossible d'instancier la tâche "{0}" à partir de "{1}". Cette version de MSBuild ne prend pas en charge {2}.</target>
+        <target state="translated">MSB4802: La tâche "{0}" n'a pas pu être instanciée à partir de "{1}". Cette version de MSBuild ne prend pas en charge {2}.</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -1983,7 +1983,7 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: paramètres de l'enregistreur d'événements binaire non valides : "{0}". Attendu : ProjectImports={{None,Embed,ZipFile}} et/ou [LogFile=]filePath.binlog (chemin ou nom du fichier journal avec l'extension ".binlog").</target>
+        <target state="translated">MSB4234: Paramètre(s) de l’enregistrement d’événements binaire non valide(s) : "{0}". Attendu(s) : ProjectImports={{None,Embed,ZipFile}} et/ou [LogFile=]filePath.binlog (le chemin ou le nom du fichier journal doit avoir l’extension ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2068,7 +2068,7 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: le programme de résolution du kit SDK basé sur NuGet n'a pas pu s'exécuter, car les assemblys NuGet sont introuvables.  Vérifiez votre installation de MSBuild, ou affectez à la variable d'environnement "{0}" le dossier qui contient les assemblys NuGet nécessaires. {1}</target>
+        <target state="translated">MSB4243: Impossible d'exécuter la résolution de SDK NuGet parce que les assemblys NuGet n'ont pas pu être localisés. Vérifiez votre installation de MSBuild ou définissez la variable d'environnement "{0}" dans le dossier qui contient les assemblys NuGet obligatoires. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2098,14 +2098,14 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: impossible de spécifier plusieurs versions du même kit SDK "{0}". La version du kit SDK "{1}" résolue à partir de l'emplacement "{2}" va être utilisée. La version "{3}" va être ignorée.</target>
+        <target state="translated">MSB4240: Impossible de spécifier plusieurs versions du même SDK "{0}". La version du SDK "{1}" résolue précédemment à partir de l'emplacement "{2}" va être utilisée, et la version "{3}" va être ignorée.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: la référence du kit SDK "{0}" version "{1}" a été résolue en version "{2}" à la place.  Vous pouvez utiliser une autre version que celle prévue, si vous ne mettez pas à jour la version référencée correspondante.</target>
+        <target state="translated">MSB4241: La référence du SDK "{0}" version "{1}" a été résolue avec la version "{2}" à la place. Vous risquez d'utiliser une version différente de celle attendue si vous ne mettez pas à jour la version référencée correspondante.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2119,17 +2119,17 @@ Utilisation :          {0} Utilisation moyenne : {1:###.0}</target>
       </trans-unit>
       <trans-unit id="SdkResolverManifestInvalid">
         <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
-        <target state="new">MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</target>
+        <target state="translated">MSB4245: Le fichier manifeste du programme de résolution de SDK n'est pas valide, ce qui peut indiquer que l'installation de MSBuild est endommagée ou non valide. Chemin du fichier manifeste : '{0}'. Message : {1}</target>
         <note>{StrBegin="MSB4245: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverNoDllOrManifest">
         <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
-        <target state="new">MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</target>
+        <target state="translated">MSB4246: Le dossier du programme de résolution de SDK existe, mais il n'y a aucun fichier DLL ou manifeste pour ce programme. L'installation de MSBuild est peut-être endommagée ou non valide. Chemin du programme de résolution de SDK : {0}</target>
         <note>{StrBegin="MSB4246: "}</note>
       </trans-unit>
       <trans-unit id="SdkResolverDllInManifestMissing">
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
-        <target state="new">MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</target>
+        <target state="translated">MSB4247: Impossible de charger le programme de résolution de SDK. Un fichier manifeste existe, mais le chemin au fichier DLL du programme de résolution de SDK est introuvable. Chemin du fichier manifeste : '{0}'. Chemin du programme de résolution de SDK : {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>

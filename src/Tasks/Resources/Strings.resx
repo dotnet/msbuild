@@ -2692,6 +2692,60 @@
   </data>
 
   <!--
+        MSB3931 - MSB3940   Task: Unzip
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Unzip.ErrorCouldNotCreateDestinationDirectory">
+    <value>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</value>
+    <comment>{StrBegin="MSB3931: "}</comment>
+  </data>
+  <data name="Unzip.ErrorFileDoesNotExist">
+    <value>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3932: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotOpenFile">
+    <value>MSB3933: Failed to open zip file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB3933: "}</comment>
+  </data>
+  <data name="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+    <value>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</value>
+    <comment>{StrBegin="MSB3934: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotMakeFileWriteable">
+    <value>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</value>
+    <comment>{StrBegin="MSB3935: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotExtractFile">
+    <value>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</value>
+    <comment>{StrBegin="MSB3936: "}</comment>
+  </data>
+  <data name="Unzip.DidNotUnzipBecauseOfFileMatch">
+    <value>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
+  </data>
+  <data name="Unzip.FileComment">
+    <value>Unzipping file "{0}" to "{1}".</value>
+  </data>
+
+  <!--
+        MSB3941 - MSB3950   Task: ZipDirectory
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ZipDirectory.ErrorDirectoryDoesNotExist">
+    <value>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3941: "}</comment>
+  </data>
+  <data name="ZipDirectory.ErrorFileExists">
+    <value>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</value>
+    <comment>{StrBegin="MSB3942: "}</comment>
+  </data>
+  <data name="ZipDirectory.ErrorFailed">
+    <value>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</value>
+    <comment>{StrBegin="MSB3943: "}</comment>
+  </data>
+  <data name="ZipDirectory.Comment">
+    <value>Zipping directory "{0}" to "{1}".</value>
+  </data>
+  <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
         See the comments above each task's messages for individual task message buckets.
@@ -2771,6 +2825,8 @@
             MSB3901 - MSB3910   Task: Telemetry
             MSB3911 - MSB3920   Task: CodeTaskFactory
             MSB3921 - MSB3930   Task: DownloadFile
+            MSB3931 - MSB3940   Task: Unzip
+            MSB3941 - MSB3950   Task: ZipDirectory
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)

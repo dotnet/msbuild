@@ -24,9 +24,6 @@ using Microsoft.Build.Internal;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
-#if MSBUILD_DEBUGGER
-using Microsoft.Build.Debugging;
-#endif
 using System.Xml;
 using System.IO;
 using System.Collections;
@@ -131,13 +128,6 @@ namespace Microsoft.Build.Execution
         /// Items organized by evaluatedInclude value
         /// </summary>
         private MultiDictionary<string, ProjectItemInstance> _itemsByEvaluatedInclude;
-
-        /// <summary>
-        /// Items, properties and other project level values to display
-        /// in the debugger, if we are being debugged.
-        /// If not debugging, this is null.
-        /// </summary>
-        private IDictionary<string, object> _initialGlobalsForDebugging;
 
         /// <summary>
         /// The project's root directory, for evaluation of relative paths and
@@ -1117,16 +1107,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Items, properties and other project level values to display
-        /// in the debugger, if we are being debugged.
-        /// If not debugging, this is null.
-        /// </summary>
-        internal IDictionary<string, object> InitialGlobalsForDebugging
-        {
-            get { return _initialGlobalsForDebugging; }
-        }
-
-        /// <summary>
         /// Task classes and locations known to this project. 
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
@@ -1944,8 +1924,6 @@ namespace Microsoft.Build.Execution
             {
                 _globalPropertiesToTreatAsLocal = globalPropertiesToTreatAsLocal;
             }
-
-            // ignore _initialGlobalsForDebugging. Only used for the debugger.
         }
 
         private void TranslateTargets(INodePacketTranslator translator)
@@ -2146,13 +2124,16 @@ namespace Microsoft.Build.Execution
                 // Enables task parameter logging based on whether any of the loggers attached
                 // to the Project have their verbosity set to Diagnostic. If no logger has
                 // been set to log diagnostic then the existing/default value will be persisted.
-                parameters.LogTaskInputs = parameters.LogTaskInputs || loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic);
+                parameters.LogTaskInputs =
+                    parameters.LogTaskInputs ||
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggingService?.IncludeTaskInputs == true;
             }
 
             if (remoteLoggers != null)
             {
-                parameters.ForwardingLoggers = (remoteLoggers is ICollection<ForwardingLoggerRecord>) ?
-                    ((ICollection<ForwardingLoggerRecord>)remoteLoggers) :
+                parameters.ForwardingLoggers = remoteLoggers is ICollection<ForwardingLoggerRecord> records ?
+                    records :
                     new List<ForwardingLoggerRecord>(remoteLoggers);
             }
 
@@ -2586,7 +2567,7 @@ namespace Microsoft.Build.Execution
 
             ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
-            _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
+            Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 this,
                 xml,
                 projectLoadSettings ?? buildParameters.ProjectLoadSettings, /* Use override ProjectLoadSettings if specified */
@@ -2597,7 +2578,6 @@ namespace Microsoft.Build.Execution
                 buildParameters.ToolsetProvider,
                 ProjectRootElementCache,
                 buildEventContext,
-                this /* for debugging only */,
                 sdkResolverService ?? SdkResolverService.Instance,
                 submissionId);
 

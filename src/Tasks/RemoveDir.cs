@@ -2,12 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
-using System.Globalization;
-using System.Reflection;
-using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -29,23 +25,18 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_directories, "directories");
+                ErrorUtilities.VerifyThrowArgumentNull(_directories, nameof(Directories));
                 return _directories;
             }
-            set { _directories = value; }
+            set => _directories = value;
         }
 
         //-----------------------------------------------------------------------------------
         // Property:  list of directories that were removed from disk
         //-----------------------------------------------------------------------------------
-        private ITaskItem[] _removedDirectories;
 
         [Output]
-        public ITaskItem[] RemovedDirectories
-        {
-            get { return _removedDirectories; }
-            set { _removedDirectories = value; }
-        }
+        public ITaskItem[] RemovedDirectories { get; set; }
 
         //-----------------------------------------------------------------------------------
         // Execute -- this runs the task
@@ -55,21 +46,18 @@ namespace Microsoft.Build.Tasks
             // Delete each directory
             bool overallSuccess = true;
             // Our record of the directories that were removed
-            ArrayList removedDirectoriesList = new ArrayList();
+            var removedDirectoriesList = new List<ITaskItem>();
 
             foreach (ITaskItem directory in Directories)
             {
                 if (Directory.Exists(directory.ItemSpec))
                 {
-                    bool unauthorizedAccess = false;
-                    bool currentSuccess;
-
                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                     Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.Removing", directory.ItemSpec);
 
                     // Try to remove the directory, this will not log unauthorized access errors since
                     // we will attempt to remove read only attributes and try again.
-                    currentSuccess = RemoveDirectory(directory, false, out unauthorizedAccess);
+                    bool currentSuccess = RemoveDirectory(directory, false, out bool unauthorizedAccess);
 
                     // The first attempt failed, to we will remove readonly attributes and try again..
                     if (!currentSuccess && unauthorizedAccess)
@@ -107,7 +95,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
             // convert the list of deleted files into an array of ITaskItems
-            RemovedDirectories = (ITaskItem[])removedDirectoriesList.ToArray(typeof(ITaskItem));
+            RemovedDirectories = removedDirectoriesList.ToArray();
             return overallSuccess;
         }
 
@@ -121,9 +109,9 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Try to delete the directory
-                System.IO.Directory.Delete(directory.ItemSpec, true);
+                Directory.Delete(directory.ItemSpec, true);
             }
-            catch (System.UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException e)
             {
                 success = false;
                 // Log the fact that there was a problem only if we have been asked to.

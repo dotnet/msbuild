@@ -48,7 +48,7 @@ namespace Microsoft.Build.Tasks
             bool delaySign, string keyFile, string keyContainer, bool noClassMembers, string targetProcessorArchitecture, bool includeTypeLibVersionInName, bool executeAsTool, string sdkToolsPath, IBuildEngine buildEngine, string[] environmentVariables)
             : base(taskLoggingHelper, silent, resolverCallback, referenceInfo, itemName, outputDirectory, delaySign, keyFile, keyContainer, includeTypeLibVersionInName, executeAsTool, sdkToolsPath, buildEngine, environmentVariables)
         {
-            _hasTemporaryWrapper = hasTemporaryWrapper;
+            HasTemporaryWrapper = hasTemporaryWrapper;
             _noClassMembers = noClassMembers;
             _targetProcessorArchitecture = targetProcessorArchitecture;
             _referenceFiles = referenceFiles;
@@ -61,30 +61,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// does this reference have a temporary (i.e. written to tmp directory) wrapper?
         /// </summary>
-        private bool HasTemporaryWrapper
-        {
-            get
-            {
-                return _hasTemporaryWrapper;
-            }
-        }
-
-        private bool _hasTemporaryWrapper;
+        private bool HasTemporaryWrapper { get; }
 
         /// <summary>
         /// directory we should write the wrapper to
         /// </summary>
-        protected override string OutputDirectory
-        {
-            get
-            {
-                return (HasTemporaryWrapper) ? Path.GetTempPath() : base.OutputDirectory;
-            }
-        }
+        protected override string OutputDirectory => (HasTemporaryWrapper) ? Path.GetTempPath() : base.OutputDirectory;
 
-        private bool _noClassMembers = false;
-        private string _targetProcessorArchitecture = null;
-        private IEnumerable<string> _referenceFiles = null;
+        private readonly bool _noClassMembers;
+        private readonly string _targetProcessorArchitecture;
+        private readonly IEnumerable<string> _referenceFiles;
 
         #endregion
 
@@ -161,22 +147,24 @@ namespace Microsoft.Build.Tasks
             {
                 // delegate generation of the assembly to an instance of the TlbImp ToolTask. MUST
                 // HAVE SET SDKTOOLSPATH TO THE TARGET SDK TO WORK
-                var tlbImp = new ResolveComReference.TlbImp();
+                var tlbImp = new ResolveComReference.TlbImp
+                {
+                    BuildEngine = BuildEngine,
+                    EnvironmentVariables = EnvironmentVariables,
+                    DelaySign = DelaySign,
+                    KeyContainer = KeyContainer,
+                    KeyFile = KeyFile,
+                    OutputAssembly = wrapperPath,
+                    ToolPath = ToolPath,
+                    TypeLibName = ReferenceInfo.fullTypeLibPath,
+                    AssemblyNamespace = rootNamespace,
+                    AssemblyVersion = null,
+                    PreventClassMembers = _noClassMembers,
+                    SafeArrayAsSystemArray = true,
+                    Silent = Silent,
+                    Transform = ResolveComReference.TlbImpTransformFlags.TransformDispRetVals
+                };
 
-                tlbImp.BuildEngine = BuildEngine;
-                tlbImp.EnvironmentVariables = EnvironmentVariables;
-                tlbImp.DelaySign = DelaySign;
-                tlbImp.KeyContainer = KeyContainer;
-                tlbImp.KeyFile = KeyFile;
-                tlbImp.OutputAssembly = wrapperPath;
-                tlbImp.ToolPath = ToolPath;
-                tlbImp.TypeLibName = ReferenceInfo.fullTypeLibPath;
-                tlbImp.AssemblyNamespace = rootNamespace;
-                tlbImp.AssemblyVersion = null;
-                tlbImp.PreventClassMembers = _noClassMembers;
-                tlbImp.SafeArrayAsSystemArray = true;
-                tlbImp.Silent = Silent;
-                tlbImp.Transform = ResolveComReference.TlbImpTransformFlags.TransformDispRetVals;
                 if (_referenceFiles != null)
                 {
                     // Issue is that there may be reference dependencies that need to be passed in. It is possible
@@ -214,8 +202,8 @@ namespace Microsoft.Build.Tasks
                 generateWrapperSucceeded = tlbImp.Execute();
 
                 // store the wrapper info...
-                wrapperInfo = new ComReferenceWrapperInfo();
-                wrapperInfo.path = (HasTemporaryWrapper) ? null : wrapperPath;
+                wrapperInfo = new ComReferenceWrapperInfo { path = (HasTemporaryWrapper) ? null : wrapperPath };
+
                 // Changed to ReflectionOnlyLoadFrom, related to bug:
                 //  RCR: Bad COM-interop assemblies being generated when using 64-bit MSBuild to build a project that is targeting 32-bit platform
                 // The original call to UnsafeLoadFrom loads the assembly in preparation for execution. If the assembly is x86 and this is x64 msbuild.exe then we
@@ -231,13 +219,10 @@ namespace Microsoft.Build.Tasks
             else
             {
                 // use framework classes in-proc to generate the assembly
-                TypeLibConverter converter = new TypeLibConverter();
+                var converter = new TypeLibConverter();
+                AssemblyBuilder assemblyBuilder;
 
-                AssemblyBuilder assemblyBuilder = null;
-                StrongNameKeyPair keyPair;
-                byte[] publicKey;
-
-                GetAndValidateStrongNameKey(out keyPair, out publicKey);
+                GetAndValidateStrongNameKey(out StrongNameKeyPair keyPair, out byte[] publicKey);
 
                 try
                 {
@@ -293,9 +278,11 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // store the wrapper info...
-                wrapperInfo = new ComReferenceWrapperInfo();
-                wrapperInfo.path = (HasTemporaryWrapper) ? null : wrapperPath;
-                wrapperInfo.assembly = assemblyBuilder;
+                wrapperInfo = new ComReferenceWrapperInfo
+                {
+                    path = (HasTemporaryWrapper) ? null : wrapperPath,
+                    assembly = assemblyBuilder
+                };
             }
 
             // ...and we're done!
@@ -311,7 +298,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                FileInfo wrapperFile = new FileInfo(wrapperPath);
+                var wrapperFile = new FileInfo(wrapperPath);
 
                 if (wrapperFile.Exists)
                 {
@@ -389,16 +376,12 @@ namespace Microsoft.Build.Tasks
          */
         Assembly ITypeLibImporterNotifySink.ResolveRef(object objTypeLib)
         {
-            TYPELIBATTR attr;
-
             // get attributes for our dependent typelib
             ITypeLib typeLib = (ITypeLib)objTypeLib;
-            ComReference.GetTypeLibAttrForTypeLib(ref typeLib, out attr);
-
-            ComReferenceWrapperInfo wrapperInfo;
+            ComReference.GetTypeLibAttrForTypeLib(ref typeLib, out TYPELIBATTR attr);
 
             // call our callback to do the dirty work for us
-            if (!ResolverCallback.ResolveComClassicReference(attr, base.OutputDirectory, null, null, out wrapperInfo))
+            if (!ResolverCallback.ResolveComClassicReference(attr, base.OutputDirectory, null, null, out ComReferenceWrapperInfo wrapperInfo))
             {
                 if (!Silent)
                 {
@@ -410,7 +393,9 @@ namespace Microsoft.Build.Tasks
 
             Debug.Assert(wrapperInfo.assembly != null, "Successfully resolved assembly cannot be null!");
             if (wrapperInfo.assembly == null)
+            {
                 throw new ComReferenceResolutionException();
+            }
 
             if (!Silent)
             {

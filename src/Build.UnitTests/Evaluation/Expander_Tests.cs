@@ -1212,7 +1212,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             secondaryItemsByName.ImportItems(resourceItemGroup);
             secondaryItemsByName.ImportItems(contentItemGroup2);
 
-            Lookup lookup = new Lookup(secondaryItemsByName, pg, null);
+            Lookup lookup = new Lookup(secondaryItemsByName, pg);
 
             // Add primary items
             lookup.EnterScope("x");

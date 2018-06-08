@@ -43,7 +43,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
-    <PackageReference Include="System.IO.Pipes.AccessControl" Version="4.3.0" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.0.0" />
@@ -247,6 +246,7 @@
     <Compile Include="BackEnd\Components\SdkResolution\HostedSdkResolverServiceBase.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResult.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResultFactory.cs" />
+    <Compile Include="BackEnd\Node\LoggingNodeConfiguration.cs" />
     <Compile Include="BackEnd\Shared\ConfigurationMetadata.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />

@@ -6,11 +6,11 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Text;
 
 namespace Microsoft.Build.Tasks
 {
@@ -27,15 +27,12 @@ namespace Microsoft.Build.Tasks
         [Required]
         public ITaskItem[] References
         {
-            get
-            {
-                return (ITaskItem[])Bag["References"];
-            }
+            get => (ITaskItem[])Bag[nameof(References)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "References");
-                Bag["References"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(References));
+                Bag[nameof(References)] = value;
             }
         }
 
@@ -44,15 +41,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string DisabledWarnings
         {
-            get
-            {
-                return (string)Bag["DisabledWarnings"];
-            }
+            get => (string)Bag[nameof(DisabledWarnings)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "DisabledWarnings");
-                Bag["DisabledWarnings"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(DisabledWarnings));
+                Bag[nameof(DisabledWarnings)] = value;
             }
         }
 
@@ -61,15 +55,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string InputDocumentationFile
         {
-            get
-            {
-                return (string)Bag["InputDocumentationFile"];
-            }
+            get => (string)Bag[nameof(InputDocumentationFile)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "InputDocumentationFile");
-                Bag["InputDocumentationFile"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(InputDocumentationFile));
+                Bag[nameof(InputDocumentationFile)] = value;
             }
         }
 
@@ -78,15 +69,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string OutputDocumentationFile
         {
-            get
-            {
-                return (string)Bag["OutputDocumentationFile"];
-            }
+            get => (string)Bag[nameof(OutputDocumentationFile)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "OutputDocumentationFile");
-                Bag["OutputDocumentationFile"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(OutputDocumentationFile));
+                Bag[nameof(OutputDocumentationFile)] = value;
             }
         }
 
@@ -95,15 +83,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string InputPDBFile
         {
-            get
-            {
-                return (string)Bag["InputPDBFile"];
-            }
+            get => (string)Bag[nameof(InputPDBFile)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "InputPDBFile");
-                Bag["InputPDBFile"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(InputPDBFile));
+                Bag[nameof(InputPDBFile)] = value;
             }
         }
 
@@ -112,15 +97,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string OutputPDBFile
         {
-            get
-            {
-                return (string)Bag["OutputPDBFile"];
-            }
+            get => (string)Bag[nameof(OutputPDBFile)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "OutputPDBFile");
-                Bag["OutputPDBFile"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(OutputPDBFile));
+                Bag[nameof(OutputPDBFile)] = value;
             }
         }
 
@@ -130,15 +112,12 @@ namespace Microsoft.Build.Tasks
         [Required]
         public string WinMDModule
         {
-            get
-            {
-                return (string)Bag["WinMDModule"];
-            }
+            get => (string)Bag[nameof(WinMDModule)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "WinMDModule");
-                Bag["WinMDModule"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(WinMDModule));
+                Bag[nameof(WinMDModule)] = value;
             }
         }
 
@@ -148,15 +127,12 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string OutputWindowsMetadataFile
         {
-            get
-            {
-                return (string)Bag["OutputWindowsMetadataFile"];
-            }
+            get => (string)Bag[nameof(OutputWindowsMetadataFile)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "OutputWindowsMetadataFile");
-                Bag["OutputWindowsMetadataFile"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(OutputWindowsMetadataFile));
+                Bag[nameof(OutputWindowsMetadataFile)] = value;
             }
         }
 
@@ -165,8 +141,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string SdkToolsPath
         {
-            get { return (string)Bag["SdkToolsPath"]; }
-            set { Bag["SdkToolsPath"] = value; }
+            get => (string)Bag[nameof(SdkToolsPath)];
+            set => Bag[nameof(SdkToolsPath)] = value;
         }
 
         /// <summary>
@@ -175,8 +151,8 @@ namespace Microsoft.Build.Tasks
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "UTF", Justification = "Not worth breaking customers because of case correction")]
         public bool UTF8Output
         {
-            get { return (bool)Bag["UTF8Output"]; }
-            set { Bag["UTF8Output"] = value; }
+            get => (bool)Bag[nameof(UTF8Output)];
+            set => Bag[nameof(UTF8Output)] = value;
         }
 
         /// <summary>
@@ -184,8 +160,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool TreatWarningsAsErrors
         {
-            get { return (bool)Bag["TreatWarningsAsErrors"]; }
-            set { Bag["TreatWarningsAsErrors"] = value; }
+            get => (bool)Bag[nameof(TreatWarningsAsErrors)];
+            set => Bag[nameof(TreatWarningsAsErrors)] = value;
         }
 
         /// <summary>
@@ -193,58 +169,31 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string AssemblyUnificationPolicy
         {
-            get
-            {
-                return (string)Bag["AssemblyUnificationPolicy"];
-            }
+            get => (string)Bag[nameof(AssemblyUnificationPolicy)];
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "AssemblyUnificationPolicy");
-                Bag["AssemblyUnificationPolicy"] = value;
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(AssemblyUnificationPolicy));
+                Bag[nameof(AssemblyUnificationPolicy)] = value;
             }
         }
 
         /// <summary>
         /// The name of the tool to execute.
         /// </summary>
-        override protected string ToolName
-        {
-            get
-            {
-                return "winmdexp.exe";
-            }
-        }
+        protected override string ToolName => "winmdexp.exe";
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard output stream
         /// </summary>
-        protected override Encoding StandardOutputEncoding
-        {
-            get
-            {
-                return (UTF8Output) ? Encoding.UTF8 : base.StandardOutputEncoding;
-            }
-        }
+        protected override Encoding StandardOutputEncoding => UTF8Output ? Encoding.UTF8 : base.StandardOutputEncoding;
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard error stream
         /// </summary>
-        protected override Encoding StandardErrorEncoding
-        {
-            get
-            {
-                return (UTF8Output) ? Encoding.UTF8 : base.StandardErrorEncoding;
-            }
-        }
+        protected override Encoding StandardErrorEncoding => UTF8Output ? Encoding.UTF8 : base.StandardErrorEncoding;
 
-        protected override bool UseNewLineSeparatorInResponseFile
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool UseNewLineSeparatorInResponseFile => true;
 
         #endregion
 
@@ -265,13 +214,13 @@ namespace Microsoft.Build.Tasks
 
             commandLine.AppendSwitchUnquotedIfNotNull("/out:", OutputWindowsMetadataFile);
             commandLine.AppendSwitchWithSplitting("/nowarn:", DisabledWarnings, ",", ';', ',');
-            commandLine.AppendWhenTrue("/warnaserror+", this.Bag, "TreatWarningsAsErrors");
-            commandLine.AppendWhenTrue("/utf8output", this.Bag, "UTF8Output");
+            commandLine.AppendWhenTrue("/warnaserror+", Bag, "TreatWarningsAsErrors");
+            commandLine.AppendWhenTrue("/utf8output", Bag, "UTF8Output");
 
             if (References != null)
             {
                 // Loop through all the references passed in.  We'll be adding separate
-                foreach (ITaskItem reference in this.References)
+                foreach (ITaskItem reference in References)
                 {
                     commandLine.AppendSwitchUnquotedIfNotNull("/reference:", reference.ItemSpec);
                 }
@@ -286,22 +235,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The full path of the tool to execute.
         /// </summary>
-        override protected string GenerateFullPathToTool()
+        protected override string GenerateFullPathToTool()
         {
-            string pathToTool = null;
-
-            if (String.IsNullOrEmpty(pathToTool) || !File.Exists(pathToTool))
-            {
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
-            }
-
-            return pathToTool;
+            return SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
         }
 
         /// <summary>
         /// Validate parameters, log errors and warnings and return true if Execute should proceed.
         /// </summary>
-        override protected bool ValidateParameters()
+        protected override bool ValidateParameters()
         {
             if (References == null)
             {

@@ -10,12 +10,11 @@ branch = GithubBranchName
 // What this repo is using for its machine images at the current time
 imageVersionMap = ['Windows_NT':'latest-dev15-5',
                     'OSX10.13':'latest-or-auto',
-                    'Ubuntu14.04':'latest-or-auto',
                     'Ubuntu16.04':'20170731',
                     'RHEL7.2' : 'latest']
 
 def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, shouldSkipTestsWhenResultsNotFound = false, isSourceBuild = false) {
-    def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}${isSourceBuild ? '_SourceBuild' : ''}", isPR)
+    def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}${isSourceBuild ? '_SourceBuild_' : ''}", isPR)
 
     // Create a new job with the specified name.  The brace opens a new closure
     // and calls made within that closure apply to the newly created job.
@@ -76,7 +75,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
 }
 
 [true, false].each { isPR ->
-    ['Windows_NT', 'OSX10.13', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
+    ['Windows_NT', 'OSX10.13', 'Ubuntu16.04'].each {osName ->
         def runtimes = ['CoreCLR']
 
         if (osName == 'Windows_NT') {
@@ -84,10 +83,10 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
         }
 
         // TODO: make this !windows once RHEL builds are working
-        if (osName.startsWith('Ubuntu') || osName.startsWith('OSX')) {
-            runtimes.add('Mono')
-            runtimes.add('MonoTest')
-        }
+        //if (osName.startsWith('Ubuntu') || osName.startsWith('OSX')) {
+            //runtimes.add('Mono')
+            //runtimes.add('MonoTest')
+        //}
 
         def script = "NA"
         def machineAffinityOverride = null
@@ -150,16 +149,15 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
     }
 }
 
-// reenable when nuget / corefx issue on rhel7.2 is fixed: https://github.com/Microsoft/msbuild/issues/3265
 // sourcebuild simulation
-// CreateJob(
-//     "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
-//     "CoreCLR",
-//     "RHEL7.2",
-//     true,
-//     null,
-//     true,
-//     true)
+CreateJob(
+    "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
+    "CoreCLR",
+    "RHEL7.2",
+    true,
+    null,
+    true,
+    true)
 
 JobReport.Report.generateJobReport(out)
 

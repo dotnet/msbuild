@@ -172,6 +172,25 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        bool IncludeEvaluationProfile
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
+        bool IncludeTaskInputs
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         /// <summary>

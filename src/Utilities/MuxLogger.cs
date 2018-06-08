@@ -129,6 +129,24 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        public bool IncludeEvaluationProfiles
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
+        public bool IncludeTaskInputs
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Initialize the logger.
         /// </summary>
         public void Initialize(IEventSource eventSource)
@@ -153,6 +171,19 @@ namespace Microsoft.Build.Utilities
             _eventSourceForBuild.BuildFinished += _buildFinishedEventHandler;
             _eventSourceForBuild.ProjectStarted += _projectStartedEventHandler;
             _eventSourceForBuild.ProjectFinished += _projectFinishedEventHandler;
+
+            if (_eventSourceForBuild is IEventSource3 eventSource3)
+            {
+                if (IncludeEvaluationProfiles)
+                {
+                    eventSource3.IncludeEvaluationProfiles();
+                }
+
+                if (IncludeTaskInputs)
+                {
+                    eventSource3.IncludeTaskInputs();
+                }
+            }
         }
 
         /// <summary>

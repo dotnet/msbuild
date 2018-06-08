@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
@@ -603,6 +604,34 @@ namespace Microsoft.Build.UnitTests
         public override void Revert()
         {
             Directory.SetCurrentDirectory(_originalValue);
+        }
+    }
+
+    public class TransientZipArchive : TransientTestState
+    {
+        private TransientZipArchive()
+        {
+        }
+
+        public string Path { get; set; }
+
+        public static TransientZipArchive Create(TransientTestFolder source, TransientTestFolder destination, string filename = "test.zip")
+        {
+            Directory.CreateDirectory(destination.FolderPath);
+
+            string path = System.IO.Path.Combine(destination.FolderPath, filename);
+
+            ZipFile.CreateFromDirectory(source.FolderPath, path);
+
+            return new TransientZipArchive
+            {
+                Path = path
+            };
+        }
+
+        public override void Revert()
+        {
+            FileUtilities.DeleteNoThrow(Path);
         }
     }
 }

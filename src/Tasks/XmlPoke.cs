@@ -37,10 +37,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private ITaskItem _value;
 
-        /// <summary>
-        /// The namespaces for XPath query's prefixes.
-        /// </summary>
-        private string _namespaces;
         #endregion
 
         #region Properties
@@ -51,14 +47,11 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, "XmlInputPath");
+                ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, nameof(XmlInputPath));
                 return _xmlInputPath;
             }
 
-            set
-            {
-                _xmlInputPath = value;
-            }
+            set => _xmlInputPath = value;
         }
 
         /// <summary>
@@ -68,14 +61,11 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
+                ErrorUtilities.VerifyThrowArgumentNull(_query, nameof(Query));
                 return _query;
             }
 
-            set
-            {
-                _query = value;
-            }
+            set => _query = value;
         }
 
         /// <summary>
@@ -86,31 +76,18 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_value, "Value");
+                ErrorUtilities.VerifyThrowArgumentNull(_value, nameof(Value));
                 return _value;
             }
 
-            set
-            {
-                _value = value;
-            }
+            set => _value = value;
         }
 
         /// <summary>
         /// The namespaces for XPath query's prefixes.
         /// </summary>
-        public string Namespaces
-        {
-            get
-            {
-                return _namespaces;
-            }
+        public string Namespaces { get; set; }
 
-            set
-            {
-                _namespaces = value;
-            }
-        }
         #endregion
 
         /// <summary>
@@ -130,9 +107,7 @@ namespace Microsoft.Build.Tasks
             {
                 using (FileStream fs = new FileStream(_xmlInputPath.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    XmlReaderSettings xrs = new XmlReaderSettings();
-                    xrs.DtdProcessing = DtdProcessing.Ignore;
-
+                    XmlReaderSettings xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
                     {
                         xmlDoc.Load(sr);
@@ -151,7 +126,7 @@ namespace Microsoft.Build.Tasks
             }
 
             XPathNavigator nav = xmlDoc.CreateNavigator();
-            XPathExpression expr = null;
+            XPathExpression expr;
 
             try
             {
@@ -170,12 +145,12 @@ namespace Microsoft.Build.Tasks
             }
 
             // Create the namespace manager and parse the input.
-            XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(nav.NameTable);
+            var xmlNamespaceManager = new XmlNamespaceManager(nav.NameTable);
 
             // Arguments parameters
             try
             {
-                LoadNamespaces(ref xmlNamespaceManager, _namespaces);
+                LoadNamespaces(ref xmlNamespaceManager, Namespaces);
             }
             catch (Exception e)
             {
@@ -241,14 +216,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="namespaceManager">The namespace manager to load namespaces to.</param>
         /// <param name="namepaces">The namespaces as XML snippet.</param>
-        private void LoadNamespaces(ref XmlNamespaceManager namespaceManager, string namepaces)
+        private static void LoadNamespaces(ref XmlNamespaceManager namespaceManager, string namepaces)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             try
             {
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Ignore;
-
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<Namespaces>" + namepaces + "</Namespaces>"), settings))
                 {
                     doc.Load(reader);
@@ -261,21 +234,25 @@ namespace Microsoft.Build.Tasks
 
             XmlNodeList xnl = doc.SelectNodes("/Namespaces/*[local-name() = 'Namespace']");
 
-            for (int i = 0; i < xnl.Count; i++)
+            for (int i = 0; i < xnl?.Count; i++)
             {
                 XmlNode xn = xnl[i];
 
-                if (xn.Attributes["Prefix"] == null)
+                const string prefixAttr = "Prefix";
+                XmlAttribute prefix = xn.Attributes?[prefixAttr];
+                if (prefix == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPoke.NamespacesParameterNoAttribute", "Name"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPoke.NamespacesParameterNoAttribute", prefixAttr));
                 }
 
-                if (xn.Attributes["Uri"] == null)
+                const string uriAttr = "Uri";
+                XmlAttribute uri = xn.Attributes[uriAttr];
+                if (uri == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPoke.NamespacesParameterNoAttribute", "Uri"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPoke.NamespacesParameterNoAttribute", uriAttr));
                 }
 
-                namespaceManager.AddNamespace(xn.Attributes["Prefix"].Value, xn.Attributes["Uri"].Value);
+                namespaceManager.AddNamespace(prefix.Value, uri.Value);
             }
         }
     }

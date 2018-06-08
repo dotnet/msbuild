@@ -16,66 +16,30 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class ResolveCodeAnalysisRuleSet : TaskExtension
     {
-        /// <summary>
-        /// The desired code analysis rule set file.
-        /// </summary>
-        private string _codeAnalysisRuleSet;
-
-        /// <summary>
-        /// The location of the project currently being built.
-        /// </summary>
-        private string _projectDirectory;
-
-        /// <summary>
-        /// The set of additional directories to search for code analysis rule set files.
-        /// </summary>
-        private string[] _codeAnalysisRuleSetDirectories;
-
-        /// <summary>
-        /// The location of the resolved rule set file. May be null if the file
-        /// does not exist on disk.
-        /// </summary>
-        private string _resolvedCodeAnalysisRuleSet;
-
         #region Properties
 
         /// <summary>
         /// The desired code analysis rule set file. May be a simple name, relative
         /// path, or full path.
         /// </summary>
-        public string CodeAnalysisRuleSet
-        {
-            get { return _codeAnalysisRuleSet; }
-            set { _codeAnalysisRuleSet = value; }
-        }
+        public string CodeAnalysisRuleSet { get; set; }
 
         /// <summary>
         /// The set of additional directories to search for code analysis rule set files.
         /// </summary>
-        public string[] CodeAnalysisRuleSetDirectories
-        {
-            get { return _codeAnalysisRuleSetDirectories; }
-            set { _codeAnalysisRuleSetDirectories = value; }
-        }
+        public string[] CodeAnalysisRuleSetDirectories { get; set; }
 
         /// <summary>
         /// The location of the project currently being built.
         /// </summary>
-        public string MSBuildProjectDirectory
-        {
-            get { return _projectDirectory; }
-            set { _projectDirectory = value; }
-        }
+        public string MSBuildProjectDirectory { get; set; }
 
         /// <summary>
         /// The location of the resolved rule set file. May be null if the file
         /// does not exist on disk.
         /// </summary>
         [Output]
-        public string ResolvedCodeAnalysisRuleSet
-        {
-            get { return _resolvedCodeAnalysisRuleSet; }
-        }
+        public string ResolvedCodeAnalysisRuleSet { get; private set; }
 
         /// <summary>
         /// Runs the task.
@@ -83,7 +47,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the task succeeds without errors; false otherwise.</returns>
         public override bool Execute()
         {
-            _resolvedCodeAnalysisRuleSet = GetResolvedRuleSetPath();
+            ResolvedCodeAnalysisRuleSet = GetResolvedRuleSetPath();
 
             return !Log.HasLoggedErrors;
         }
@@ -109,30 +73,30 @@ namespace Microsoft.Build.Tasks
         /// <returns>The full or relative path to the rule set, or null if the file does not exist.</returns>
         private string GetResolvedRuleSetPath()
         {
-            if (string.IsNullOrEmpty(_codeAnalysisRuleSet))
+            if (string.IsNullOrEmpty(CodeAnalysisRuleSet))
             {
                 return null;
             }
 
-            if (_codeAnalysisRuleSet == Path.GetFileName(_codeAnalysisRuleSet))
+            if (CodeAnalysisRuleSet == Path.GetFileName(CodeAnalysisRuleSet))
             {
                 // This is a simple file name.
                 // Check if the file exists in the MSBuild project directory.
-                if (!string.IsNullOrEmpty(_projectDirectory))
+                if (!string.IsNullOrEmpty(MSBuildProjectDirectory))
                 {
-                    string fullName = Path.Combine(_projectDirectory, _codeAnalysisRuleSet);
+                    string fullName = Path.Combine(MSBuildProjectDirectory, CodeAnalysisRuleSet);
                     if (File.Exists(fullName))
                     {
-                        return _codeAnalysisRuleSet;
+                        return CodeAnalysisRuleSet;
                     }
                 }
 
                 // Try the rule set directories if we have some.
-                if (_codeAnalysisRuleSetDirectories != null)
+                if (CodeAnalysisRuleSetDirectories != null)
                 {
-                    foreach (string directory in _codeAnalysisRuleSetDirectories)
+                    foreach (string directory in CodeAnalysisRuleSetDirectories)
                     {
-                        string fullName = Path.Combine(directory, _codeAnalysisRuleSet);
+                        string fullName = Path.Combine(directory, CodeAnalysisRuleSet);
                         if (File.Exists(fullName))
                         {
                             return fullName;
@@ -140,26 +104,26 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            else if (!Path.IsPathRooted(_codeAnalysisRuleSet))
+            else if (!Path.IsPathRooted(CodeAnalysisRuleSet))
             {
                 // This is a path relative to the project.
-                if (!string.IsNullOrEmpty(_projectDirectory))
+                if (!string.IsNullOrEmpty(MSBuildProjectDirectory))
                 {
-                    string fullName = Path.Combine(_projectDirectory, _codeAnalysisRuleSet);
+                    string fullName = Path.Combine(MSBuildProjectDirectory, CodeAnalysisRuleSet);
                     if (File.Exists(fullName))
                     {
-                        return _codeAnalysisRuleSet;
+                        return CodeAnalysisRuleSet;
                     }
                 }
             }
-            else if (File.Exists(_codeAnalysisRuleSet))
+            else if (File.Exists(CodeAnalysisRuleSet))
             {
                 // This is a full path.
-                return _codeAnalysisRuleSet;
+                return CodeAnalysisRuleSet;
             }
 
             // We can't resolve the rule set to any existing file.
-            Log.LogWarningWithCodeFromResources("Compiler.UnableToFindRuleSet", _codeAnalysisRuleSet);
+            Log.LogWarningWithCodeFromResources("Compiler.UnableToFindRuleSet", CodeAnalysisRuleSet);
             return null;
         }
 

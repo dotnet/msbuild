@@ -6,18 +6,18 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
-using System.Globalization;
-using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Security;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Security;
+using System.Text;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -38,11 +38,7 @@ namespace Microsoft.Build.Tasks
         /// Emitted file will have the default extension for that language.
         /// </summary>
         [Required]
-        public string Language
-        {
-            get;
-            set;
-        }
+        public string Language { get; set; }
 
         /// <summary>
         /// Description of attributes to write.
@@ -53,21 +49,13 @@ namespace Microsoft.Build.Tasks
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// If a parameter index is skipped, it's an error.
         /// </summary>
-        public ITaskItem[] AssemblyAttributes
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] AssemblyAttributes { get; set; }
 
         /// <summary>
         /// Destination folder for the generated code.
         /// Typically the intermediate folder.
         /// </summary>
-        public ITaskItem OutputDirectory
-        {
-            get;
-            set;
-        }
+        public ITaskItem OutputDirectory { get; set; }
 
         /// <summary>
         /// The path to the file that was generated.
@@ -77,11 +65,7 @@ namespace Microsoft.Build.Tasks
         /// the default extension for the language selected.
         /// </summary>
         [Output]
-        public ITaskItem OutputFile
-        {
-            get;
-            set;
-        }
+        public ITaskItem OutputFile { get; set; }
 
         /// <summary>
         /// Main entry point.
@@ -90,7 +74,7 @@ namespace Microsoft.Build.Tasks
         {
             if (String.IsNullOrEmpty(Language))
             {
-                Log.LogErrorWithCodeFromResources("General.InvalidValue", "Language", "WriteCodeFragment");
+                Log.LogErrorWithCodeFromResources("General.InvalidValue", nameof(Language), "WriteCodeFragment");
                 return false;
             }
 
@@ -100,12 +84,10 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            string extension;
-
 #if FEATURE_CODEDOM
-            var code = GenerateCode(out extension);
+            var code = GenerateCode(out string extension);
 #else
-            var code = GenerateCodeCoreClr(out extension);
+            var code = GenerateCodeCoreClr(out string extension);
 #endif
 
             if (Log.HasLoggedErrors)
@@ -174,9 +156,9 @@ namespace Microsoft.Build.Tasks
 
             extension = provider.FileExtension;
 
-            CodeCompileUnit unit = new CodeCompileUnit();
+            var unit = new CodeCompileUnit();
 
-            CodeNamespace globalNamespace = new CodeNamespace();
+            var globalNamespace = new CodeNamespace();
             unit.Namespaces.Add(globalNamespace);
 
             // Declare authorship. Unfortunately CodeDOM puts this comment after the attributes.
@@ -194,15 +176,15 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem attributeItem in AssemblyAttributes)
             {
-                CodeAttributeDeclaration attribute = new CodeAttributeDeclaration(new CodeTypeReference(attributeItem.ItemSpec));
+                var attribute = new CodeAttributeDeclaration(new CodeTypeReference(attributeItem.ItemSpec));
 
                 // Some attributes only allow positional constructor arguments, or the user may just prefer them.
                 // To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
                 // If a parameter index is skipped, it's an error.
                 IDictionary customMetadata = attributeItem.CloneCustomMetadata();
 
-                List<CodeAttributeArgument> orderedParameters = new List<CodeAttributeArgument>(new CodeAttributeArgument[customMetadata.Count + 1] /* max possible slots needed */);
-                List<CodeAttributeArgument> namedParameters = new List<CodeAttributeArgument>();
+                var orderedParameters = new List<CodeAttributeArgument>(new CodeAttributeArgument[customMetadata.Count + 1] /* max possible slots needed */);
+                var namedParameters = new List<CodeAttributeArgument>();
 
                 foreach (DictionaryEntry entry in customMetadata)
                 {
@@ -211,9 +193,7 @@ namespace Microsoft.Build.Tasks
 
                     if (name.StartsWith("_Parameter", StringComparison.OrdinalIgnoreCase))
                     {
-                        int index;
-
-                        if (!Int32.TryParse(name.Substring("_Parameter".Length), out index))
+                        if (!Int32.TryParse(name.Substring("_Parameter".Length), out int index))
                         {
                             Log.LogErrorWithCodeFromResources("General.InvalidValue", name, "WriteCodeFragment");
                             return null;
@@ -262,9 +242,8 @@ namespace Microsoft.Build.Tasks
                 haveGeneratedContent = true;
             }
 
-            StringBuilder generatedCode = new StringBuilder();
-
-            using (StringWriter writer = new StringWriter(generatedCode, CultureInfo.CurrentCulture))
+            var generatedCode = new StringBuilder();
+            using (var writer = new StringWriter(generatedCode, CultureInfo.CurrentCulture))
             {
                 provider.GenerateCodeFromCompileUnit(unit, writer, new CodeGeneratorOptions());
             }
@@ -288,7 +267,7 @@ namespace Microsoft.Build.Tasks
             extension = null;
             bool haveGeneratedContent = false;
 
-            StringBuilder code = new StringBuilder();
+            var code = new StringBuilder();
             switch (Language.ToLowerInvariant())
             {
                 case "c#":
@@ -360,8 +339,8 @@ namespace Microsoft.Build.Tasks
             IDictionary customMetadata = attributeItem.CloneCustomMetadata();
             
             // Initialize count + 1 to access starting at 1
-            List<string> orderedParameters = new List<string>(new string[customMetadata.Count + 1]);
-            List<string> namedParameters = new List<string>();
+            var orderedParameters = new List<string>(new string[customMetadata.Count + 1]);
+            var namedParameters = new List<string>();
 
             foreach (DictionaryEntry entry in customMetadata)
             {
@@ -370,9 +349,7 @@ namespace Microsoft.Build.Tasks
 
                 if (name.StartsWith("_Parameter", StringComparison.OrdinalIgnoreCase))
                 {
-                    int index;
-
-                    if (!int.TryParse(name.Substring("_Parameter".Length), out index))
+                    if (!int.TryParse(name.Substring("_Parameter".Length), out int index))
                     {
                         Log.LogErrorWithCodeFromResources("General.InvalidValue", name, "WriteCodeFragment");
                         return null;
@@ -417,7 +394,7 @@ namespace Microsoft.Build.Tasks
         private const int MaxLineLength = 80;
 
         // copied from Microsoft.CSharp.CSharpCodeProvider
-        private string QuoteSnippetStringCSharp(string value)
+        private static string QuoteSnippetStringCSharp(string value)
         {
             // If the string is short, use C style quoting (e.g "\r\n")
             // Also do it if it is too long to fit in one line
@@ -430,9 +407,9 @@ namespace Microsoft.Build.Tasks
         }
 
         // copied from Microsoft.CSharp.CSharpCodeProvider
-        private string QuoteSnippetStringCStyle(string value)
+        private static string QuoteSnippetStringCStyle(string value)
         {
-            StringBuilder b = new StringBuilder(value.Length + 5);
+            var b = new StringBuilder(value.Length + 5);
 
             b.Append("\"");
 
@@ -500,9 +477,9 @@ namespace Microsoft.Build.Tasks
         }
 
         // copied from Microsoft.CSharp.CSharpCodeProvider
-        private string QuoteSnippetStringVerbatimStyle(string value)
+        private static string QuoteSnippetStringVerbatimStyle(string value)
         {
-            StringBuilder b = new StringBuilder(value.Length + 5);
+            var b = new StringBuilder(value.Length + 5);
 
             b.Append("@\"");
 
@@ -520,9 +497,9 @@ namespace Microsoft.Build.Tasks
         }
 
         // copied from Microsoft.VisualBasic.VBCodeProvider
-        private string QuoteSnippetStringVisualBasic(string value)
+        private static string QuoteSnippetStringVisualBasic(string value)
         {
-            StringBuilder b = new StringBuilder(value.Length + 5);
+            var b = new StringBuilder(value.Length + 5);
 
             bool fInDoubleQuotes = true;
 
@@ -609,14 +586,14 @@ namespace Microsoft.Build.Tasks
             return b.ToString();
         }
 
-        private void EnsureNotInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
+        private static void EnsureNotInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
         {
             if (!fInDoubleQuotes) return;
             b.Append("\"");
             fInDoubleQuotes = false;
         }
 
-        private void EnsureInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
+        private static void EnsureInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
         {
             if (fInDoubleQuotes) return;
             b.Append("&\"");

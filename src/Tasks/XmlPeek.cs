@@ -24,64 +24,24 @@ namespace Microsoft.Build.Tasks
     public class XmlPeek : TaskExtension
     {
         #region Members
-        /// <summary>
-        /// The XML input as a file path.
-        /// </summary>
-        private ITaskItem _xmlInputPath;
-
-        /// <summary>
-        /// The XML input as a string.
-        /// </summary>
-        private string _xmlContent;
 
         /// <summary>
         /// The XPath Query.
         /// </summary>
         private string _query;
 
-        /// <summary>
-        /// The results that this task will return.
-        /// </summary>
-        private ITaskItem[] _result;
-
-        /// <summary>
-        /// The namespaces for XPath query's prefixes.
-        /// </summary>
-        private string _namespaces;
         #endregion
 
         #region Properties
         /// <summary>
         /// The XML input as a file path.
         /// </summary>
-        public ITaskItem XmlInputPath
-        {
-            get
-            {
-                return _xmlInputPath;
-            }
-
-            set
-            {
-                _xmlInputPath = value;
-            }
-        }
+        public ITaskItem XmlInputPath { get; set; }
 
         /// <summary>
         /// The XML input as a string.
         /// </summary>
-        public string XmlContent
-        {
-            get
-            {
-                return _xmlContent;
-            }
-
-            set
-            {
-                _xmlContent = value;
-            }
-        }
+        public string XmlContent { get; set; }
 
         /// <summary>
         /// The XPath Query.
@@ -94,49 +54,25 @@ namespace Microsoft.Build.Tasks
                 return _query;
             }
 
-            set
-            {
-                _query = value;
-            }
+            set => _query = value;
         }
 
         /// <summary>
         /// The results returned by this task.
         /// </summary>
         [Output]
-        public ITaskItem[] Result
-        {
-            get
-            {
-                return _result;
-            }
-        }
+        public ITaskItem[] Result { get; private set; }
 
         /// <summary>
         /// The namespaces for XPath query's prefixes.
         /// </summary>
-        public string Namespaces
-        {
-            get
-            {
-                return _namespaces;
-            }
-
-            set
-            {
-                _namespaces = value;
-            }
-        }
+        public string Namespaces { get; set; }
 
         /// <summary>
         /// Set to true to prohibit loading XML with embedded DTD and produce error MSB3733
         /// if DTD is present. This was a pre-v15 behavior. By default, a DTD clause if any is ignored.
         /// </summary>
-        public bool ProhibitDtd
-        {
-            get;
-            set;
-        }
+        public bool ProhibitDtd { get; set; }
         #endregion
 
         /// <summary>
@@ -146,11 +82,11 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             XmlInput xmlinput;
-            ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
+            ErrorUtilities.VerifyThrowArgumentNull(_query, nameof(Query));
 
             try
             {
-                xmlinput = new XmlInput(_xmlInputPath, _xmlContent);
+                xmlinput = new XmlInput(XmlInputPath, XmlContent);
             }
             catch (Exception e)
             {
@@ -180,7 +116,7 @@ namespace Microsoft.Build.Tasks
                     throw;
                 }
 
-                Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", _xmlInputPath.ItemSpec, e.Message);
+                Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
                 return false;
             }
             finally
@@ -189,7 +125,7 @@ namespace Microsoft.Build.Tasks
             }
 
             XPathNavigator nav = xpathdoc.CreateNavigator();
-            XPathExpression expr = null;
+            XPathExpression expr;
             try
             {
                 // Create the expression from query
@@ -207,11 +143,11 @@ namespace Microsoft.Build.Tasks
             }
 
             // Create the namespace manager and parse the input.
-            XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(nav.NameTable);
+            var xmlNamespaceManager = new XmlNamespaceManager(nav.NameTable);
 
             try
             {
-                LoadNamespaces(ref xmlNamespaceManager, _namespaces);
+                LoadNamespaces(ref xmlNamespaceManager, Namespaces);
             }
             catch (Exception e)
             {
@@ -236,7 +172,7 @@ namespace Microsoft.Build.Tasks
 
             XPathNodeIterator iter = nav.Select(expr);
 
-            List<string> peekValues = new List<string>();
+            var peekValues = new List<string>();
             while (iter.MoveNext())
             {
                 if (iter.Current.NodeType == XPathNodeType.Attribute
@@ -250,17 +186,17 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            _result = new ITaskItem[peekValues.Count];
+            Result = new ITaskItem[peekValues.Count];
             int i = 0;
             foreach (string item in peekValues)
             {
-                _result[i++] = new TaskItem(item);
+                Result[i++] = new TaskItem(item);
 
                 // This can be logged a lot, so low importance
                 Log.LogMessageFromResources(MessageImportance.Low, "XmlPeek.Found", item);
             }
 
-            if (_result.Length == 0)
+            if (Result.Length == 0)
             {
                 // Logged no more than once per execute of this task
                 Log.LogMessageFromResources("XmlPeek.NotFound");
@@ -274,14 +210,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="namespaceManager">The namespace manager to load namespaces to.</param>
         /// <param name="namepaces">The namespaces as XML snippet.</param>
-        private void LoadNamespaces(ref XmlNamespaceManager namespaceManager, string namepaces)
+        private static void LoadNamespaces(ref XmlNamespaceManager namespaceManager, string namepaces)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             try
             {
-                XmlReaderSettings settings = new XmlReaderSettings();
-                settings.DtdProcessing = DtdProcessing.Ignore;
-
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<Namespaces>" + namepaces + "</Namespaces>"), settings))
                 {
                     doc.Load(reader);
@@ -293,21 +227,25 @@ namespace Microsoft.Build.Tasks
             }
 
             XmlNodeList xnl = doc.SelectNodes("/Namespaces/*[local-name() = 'Namespace']");
-            for (int i = 0; i < xnl.Count; i++)
+            for (int i = 0; i < xnl?.Count; i++)
             {
                 XmlNode xn = xnl[i];
 
-                if (xn.Attributes["Prefix"] == null)
+                const string prefixAttr = "Prefix";
+                XmlAttribute prefix = xn.Attributes?[prefixAttr];
+                if (prefix == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", "Name"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", prefixAttr));
                 }
 
-                if (xn.Attributes["Uri"] == null)
+                const string uriAttr = "Uri";
+                XmlAttribute uri = xn.Attributes[uriAttr];
+                if (uri == null)
                 {
-                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", "Uri"));
+                    throw new ArgumentException(ResourceUtilities.FormatResourceString("XmlPeek.NamespacesParameterNoAttribute", uriAttr));
                 }
 
-                namespaceManager.AddNamespace(xn.Attributes["Prefix"].Value, xn.Attributes["Uri"].Value);
+                namespaceManager.AddNamespace(prefix.Value, uri.Value);
             }
         }
 
@@ -317,14 +255,9 @@ namespace Microsoft.Build.Tasks
         internal class XmlInput
         {
             /// <summary>
-            /// What XML input type are we at.
-            /// </summary>
-            private XmlModes _xmlMode;
-
-            /// <summary>
             /// This either contains the raw Xml or the path to Xml file.
             /// </summary>
-            private string _data;
+            private readonly string _data;
 
             /// <summary>
             /// Filestream used to read XML.
@@ -350,12 +283,12 @@ namespace Microsoft.Build.Tasks
 
                 if (xmlInputPath != null)
                 {
-                    _xmlMode = XmlModes.XmlFile;
+                    XmlMode = XmlModes.XmlFile;
                     _data = xmlInputPath.ItemSpec;
                 }
                 else
                 {
-                    _xmlMode = XmlModes.Xml;
+                    XmlMode = XmlModes.Xml;
                     _data = xmlContent;
                 }
             }
@@ -379,13 +312,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Returns the current mode of the XmlInput
             /// </summary>
-            public XmlModes XmlMode
-            {
-                get
-                {
-                    return _xmlMode;
-                }
-            }
+            public XmlModes XmlMode { get; }
 
             /// <summary>
             /// Creates correct reader based on the input type.
@@ -393,10 +320,11 @@ namespace Microsoft.Build.Tasks
             /// <returns>The XmlReader object</returns>
             public XmlReader CreateReader(bool prohibitDtd)
             {
-                var settings = new XmlReaderSettings() {
+                var settings = new XmlReaderSettings
+                {
                     DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore
                 };
-                if (_xmlMode == XmlModes.XmlFile)
+                if (XmlMode == XmlModes.XmlFile)
                 {
                     _fs = new FileStream(_data, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     return XmlReader.Create(_fs, settings: settings);

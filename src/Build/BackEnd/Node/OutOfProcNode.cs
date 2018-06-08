@@ -765,6 +765,16 @@ namespace Microsoft.Build.Execution
 
             _shutdownException = null;
 
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationProfiles)
+            {
+                _loggingService.IncludeEvaluationProfile = true;
+            }
+
+            if (configuration.LoggingNodeConfiguration.IncludeTaskInputs)
+            {
+                _loggingService.IncludeTaskInputs = true;
+            }
+
             try
             {
                 // If there are no node loggers to initialize dont do anything

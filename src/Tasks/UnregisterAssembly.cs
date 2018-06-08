@@ -4,9 +4,7 @@
 #if FEATURE_APPDOMAIN
 
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Resources;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -14,7 +12,6 @@ using System.Threading;
 using System.Runtime.InteropServices.ComTypes;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -25,46 +22,16 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class UnregisterAssembly : AppDomainIsolatedTaskExtension
     {
-        #region Constructors
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public UnregisterAssembly()
-        {
-            // do nothing
-        }
-
-        #endregion
-
         #region Properties
 
-        public ITaskItem[] Assemblies
-        {
-            get { return _assemblies; }
-            set { _assemblies = value; }
-        }
+        public ITaskItem[] Assemblies { get; set; }
 
-        private ITaskItem[] _assemblies = null;
-
-        public ITaskItem[] TypeLibFiles
-        {
-            get { return _typeLibFiles; }
-            set { _typeLibFiles = value; }
-        }
-
-        private ITaskItem[] _typeLibFiles = null;
+        public ITaskItem[] TypeLibFiles { get; set; }
 
         /// <summary>
         /// The cache file for Register/UnregisterAssembly. Necessary for UnregisterAssembly to do the proper clean up.
         /// </summary>
-        public ITaskItem AssemblyListFile
-        {
-            get { return _assemblyListFile; }
-            set { _assemblyListFile = value; }
-        }
-
-        private ITaskItem _assemblyListFile = null;
+        public ITaskItem AssemblyListFile { get; set; }
 
         #endregion
 
@@ -74,9 +41,9 @@ namespace Microsoft.Build.Tasks
         /// Task entry point
         /// </summary>
         /// <returns></returns>
-        override public bool Execute()
+        public override bool Execute()
         {
-            AssemblyRegistrationCache cacheFile = null;
+            AssemblyRegistrationCache cacheFile;
 
             if (AssemblyListFile != null)
             {
@@ -126,9 +93,7 @@ namespace Microsoft.Build.Tasks
             {
                 for (int i = 0; i < cacheFile.Count; i++)
                 {
-                    string assemblyPath = null, typeLibraryPath = null;
-
-                    cacheFile.GetEntry(i, out assemblyPath, out typeLibraryPath);
+                    cacheFile.GetEntry(i, out string assemblyPath, out string typeLibraryPath);
 
                     try
                     {
@@ -173,9 +138,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper unregistration method
         /// </summary>
-        /// <param name="assemblyPath"></param>
-        /// <param name="typeLibPath"></param>
-        /// <returns></returns>
         private bool Unregister(string assemblyPath, string typeLibPath)
         {
             ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, "typeLibPath");
@@ -189,7 +151,7 @@ namespace Microsoft.Build.Tasks
                     // Load the specified assembly. 
                     Assembly asm = Assembly.UnsafeLoadFrom(assemblyPath);
 
-                    RegistrationServices comRegistrar = new RegistrationServices();
+                    var comRegistrar = new RegistrationServices();
 
                     try
                     {
@@ -250,7 +212,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
             else
+            {
                 Log.LogWarningWithCodeFromResources("UnregisterAssembly.UnregisterAsmFileDoesNotExist", assemblyPath);
+            }
 
             Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisteringTypeLib", typeLibPath);
 
@@ -305,7 +269,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
             else
+            {
                 Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisterTlbFileDoesNotExist", typeLibPath);
+            }
 
             return true;
         }
@@ -313,7 +279,7 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Data
-        private static Mutex s_unregisteringLock = new Mutex(false, unregisteringLockName);
+        private static readonly Mutex s_unregisteringLock = new Mutex(false, unregisteringLockName);
         private const string unregisteringLockName = "MSBUILD_V_3_5_UNREGISTER_LOCK";
         #endregion
     }
