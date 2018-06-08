@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
-            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.1")
+            var outputDll = testInstance.Root.GetDirectory("bin", configuration, "netcoreapp2.2")
                 .GetFile($"{testAppName}.dll");
 
             var outputRunCommand = new DotnetCommand();
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             new BuildCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework netcoreapp2.1")
+                .Execute("--framework netcoreapp2.2")
                 .Should().Pass();
         }
 

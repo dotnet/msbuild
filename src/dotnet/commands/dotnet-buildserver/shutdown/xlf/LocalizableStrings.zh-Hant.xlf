@@ -8,18 +8,18 @@
         <note />
       </trans-unit>
       <trans-unit id="MSBuildOptionDescription">
-        <source>Shuts down the MSBuild build server.</source>
-        <target state="translated">關閉 MSBuild 組建伺服器。</target>
+        <source>Shut down the MSBuild build server.</source>
+        <target state="needs-review-translation">關閉 MSBuild 組建伺服器。</target>
         <note />
       </trans-unit>
       <trans-unit id="VBCSCompilerOptionDescription">
-        <source>Shuts down the VB/C# compiler build server.</source>
-        <target state="translated">關閉 VB/C# 編譯器組建伺服器。</target>
+        <source>Shut down the VB/C# compiler build server.</source>
+        <target state="needs-review-translation">關閉 VB/C# 編譯器組建伺服器。</target>
         <note />
       </trans-unit>
       <trans-unit id="RazorOptionDescription">
-        <source>Shuts down the Razor build server.</source>
-        <target state="translated">關閉 Razor 組建伺服器。</target>
+        <source>Shut down the Razor build server.</source>
+        <target state="needs-review-translation">關閉 Razor 組建伺服器。</target>
         <note />
       </trans-unit>
       <trans-unit id="ShuttingDownServer">

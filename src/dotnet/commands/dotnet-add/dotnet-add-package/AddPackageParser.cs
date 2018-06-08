@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli
                               Accept.ExactlyOneArgument()
                                     .With(name: LocalizableStrings.CmdFramework)
                                     .ForwardAsSingle(o => $"--framework {o.Arguments.Single()}")),
-                Create.Option("-n|--no-restore ",
+                Create.Option("-n|--no-restore",
                               LocalizableStrings.CmdNoRestoreDescription),
                 Create.Option("-s|--source",
                               LocalizableStrings.CmdSourceDescription,

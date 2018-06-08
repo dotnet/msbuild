@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Configurer
     public class DotnetFirstTimeUseConfigurer
     {
         private IReporter _reporter;
-        private IEnvironmentProvider _environmentProvider;
+        private DotnetFirstRunConfiguration _dotnetFirstRunConfiguration;
         private INuGetCachePrimer _nugetCachePrimer;
         private INuGetCacheSentinel _nugetCacheSentinel;
         private IFirstTimeUseNoticeSentinel _firstTimeUseNoticeSentinel;
@@ -29,7 +29,7 @@ namespace Microsoft.DotNet.Configurer
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IAspNetCoreCertificateGenerator aspNetCoreCertificateGenerator,
             IFileSentinel toolPathSentinel,
-            IEnvironmentProvider environmentProvider,
+            DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
             IReporter reporter,
             string cliFallbackFolderPath,
             IEnvironmentPath pathAdder)
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Configurer
             _aspNetCertificateSentinel = aspNetCertificateSentinel;
             _aspNetCoreCertificateGenerator = aspNetCoreCertificateGenerator;
             _toolPathSentinel = toolPathSentinel;
-            _environmentProvider = environmentProvider;
+            _dotnetFirstRunConfiguration = dotnetFirstRunConfiguration;
             _reporter = reporter;
             _cliFallbackFolderPath = cliFallbackFolderPath;
             _pathAdder = pathAdder ?? throw new ArgumentNullException(nameof(pathAdder));
@@ -93,11 +93,8 @@ namespace Microsoft.DotNet.Configurer
 #if EXCLUDE_ASPNETCORE
             return false;
 #else
-            var generateAspNetCertificate =
-                _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
-
             return ShouldRunFirstRunExperience() &&
-                generateAspNetCertificate &&
+                _dotnetFirstRunConfiguration.GenerateAspNetCertificate &&
                 !_aspNetCertificateSentinel.Exists();
 #endif
         }
@@ -116,11 +113,8 @@ namespace Microsoft.DotNet.Configurer
 
         private bool ShouldPrintFirstTimeUseNotice()
         {
-            var showFirstTimeUseNotice =
-                _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_PRINT_TELEMETRY_MESSAGE", true);
-
             return ShouldRunFirstRunExperience() &&
-                showFirstTimeUseNotice &&
+                _dotnetFirstRunConfiguration.PrintTelemetryMessage &&
                 !_firstTimeUseNoticeSentinel.Exists();
         }
 
@@ -157,10 +151,7 @@ namespace Microsoft.DotNet.Configurer
 
         private bool ShouldRunFirstRunExperience()
         {
-            var skipFirstTimeExperience =
-                _environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
-
-            return !skipFirstTimeExperience;
+            return !_dotnetFirstRunConfiguration.SkipFirstRunExperience;
         }
     }
 }

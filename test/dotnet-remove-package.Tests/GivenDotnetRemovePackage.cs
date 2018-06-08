@@ -16,11 +16,10 @@ namespace Microsoft.DotNet.Cli.Remove.Package.Tests
 
 Arguments:
   <PROJECT>        The project file to operate on. If a file is not specified, the command will search the current directory for one.
-  <PACKAGE_NAME>   Package reference to remove.
+  <PACKAGE_NAME>   The package reference to remove.
 
 Options:
-  -h, --help   Show help information.
-";
+  -h, --help   Show command line help.";
 
         private const string RemoveCommandHelpText = @"Usage: dotnet remove [options] <PROJECT> [command]
 
@@ -28,12 +27,11 @@ Arguments:
   <PROJECT>   The project file to operate on. If a file is not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
+  -h, --help   Show command line help.
 
 Commands:
   package <PACKAGE_NAME>     Remove a NuGet package reference from the project.
-  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.
-";
+  reference <PROJECT_PATH>   Remove a project-to-project reference from the project.";
 
         [Theory]
         [InlineData("--help")]

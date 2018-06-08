@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
-        <source>Package reference to remove.</source>
-        <target state="translated">Referência de pacote a ser removida.</target>
+        <source>The package reference to remove.</source>
+        <target state="needs-review-translation">Referência de pacote a ser removida.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageReference">

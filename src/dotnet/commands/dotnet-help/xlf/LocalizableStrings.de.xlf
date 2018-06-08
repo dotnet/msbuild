@@ -32,14 +32,9 @@
         <target state="translated">Allgemeine Optionen für alle Befehle</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommonOptions">
-        <source>Common options</source>
-        <target state="translated">Allgemeine Optionen</target>
-        <note />
-      </trans-unit>
       <trans-unit id="HelpDefinition">
-        <source>Show help.</source>
-        <target state="translated">Hilfe anzeigen.</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">Hilfe anzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -63,43 +58,43 @@
         <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
-        <source>Initialize .NET projects.</source>
-        <target state="translated">.NET-Projekte initialisieren.</target>
+        <source>Create a new .NET project or file.</source>
+        <target state="needs-review-translation">.NET-Projekte initialisieren.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the .NET project.</source>
-        <target state="translated">Im .NET-Projekt angegebene Abhängigkeiten wiederherstellen.</target>
+        <source>Restore dependencies specified in a .NET project.</source>
+        <target state="needs-review-translation">Im .NET-Projekt angegebene Abhängigkeiten wiederherstellen.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
-        <source>Builds a .NET project.</source>
-        <target state="translated">Erstellt ein .NET-Projekt.</target>
+        <source>Build a .NET project.</source>
+        <target state="needs-review-translation">Erstellt ein .NET-Projekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
-        <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="translated">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Runtime).</target>
+        <source>Publish a .NET project for deployment.</source>
+        <target state="needs-review-translation">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Runtime).</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a .NET project.</source>
-        <target state="translated">Kompiliert ein .NET-Projekt und führt es umgehend aus.</target>
+        <source>Build and run a .NET project output.</source>
+        <target state="needs-review-translation">Kompiliert ein .NET-Projekt und führt es umgehend aus.</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
-        <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="translated">Führt mithilfe des im Projekt angegebenen Test Runners Komponententests aus.</target>
+        <source>Run unit tests using the test runner specified in a .NET project.</source>
+        <target state="needs-review-translation">Führt mithilfe des im Projekt angegebenen Test Runners Komponententests aus.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
-        <source>Creates a NuGet package.</source>
-        <target state="translated">Erstellt ein NuGet-Paket.</target>
+        <source>Create a NuGet package.</source>
+        <target state="needs-review-translation">Erstellt ein NuGet-Paket.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
-        <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="translated">Migriert ein auf „project.json“ basierendes Projekt zu einem MSBuild-basierten Projekt.</target>
+        <source>Migrate a project.json project to an MSBuild project.</source>
+        <target state="needs-review-translation">Migriert ein auf „project.json“ basierendes Projekt zu einem MSBuild-basierten Projekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -108,13 +103,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
-        <source>Add reference to the project.</source>
-        <target state="translated">Verweis zum Projekt hinzufügen.</target>
+        <source>Add a package or reference to a .NET project.</source>
+        <target state="needs-review-translation">Verweis zum Projekt hinzufügen.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
-        <source>Remove reference from the project.</source>
-        <target state="translated">Verweis aus dem Projekt entfernen.</target>
+        <source>Remove a package or reference from a .NET project.</source>
+        <target state="needs-review-translation">Verweis aus dem Projekt entfernen.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -128,14 +123,14 @@
         <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
-        <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="translated">Führt die Microsoft-Build-Engine (MSBuild) aus.
+        <source>Run Microsoft Build Engine (MSBuild) commands.</source>
+        <target state="needs-review-translation">Führt die Microsoft-Build-Engine (MSBuild) aus.
 </target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
-        <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="translated">Führt Microsoft Testausführungs-Befehlszeilentool aus.</target>
+        <source>Run Microsoft Test Engine (VSTest) commands.</source>
+        <target state="needs-review-translation">Führt Microsoft Testausführungs-Befehlszeilentool aus.</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -144,23 +139,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
-        <source>Clean build output(s).</source>
-        <target state="translated">Buildausgabe(n) bereinigen.</target>
+        <source>Clean build outputs of a .NET project.</source>
+        <target state="needs-review-translation">Buildausgabe(n) bereinigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
-        <source>Modify solution (SLN) files.</source>
-        <target state="translated">Projektmappendateien (SLN-Dateien) ändern.</target>
+        <source>Modify Visual Studio solution files.</source>
+        <target state="needs-review-translation">Projektmappendateien (SLN-Dateien) ändern.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List references of a .NET project.</source>
+        <source>List project references of a .NET project.</source>
         <target state="needs-review-translation">Hiermit werden Projektverweise oder installierte Tools aufgelistet.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</source>
-        <target state="translated">Der angegebene Befehl "{0}" ist kein gültiger CLI-Befehl. Geben Sie gültige CLI-Befehle an. Führen Sie die dotnet-Hilfe aus, um weitere Informationen zu erhalten.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="needs-review-translation">Der angegebene Befehl "{0}" ist kein gültiger CLI-Befehl. Geben Sie gültige CLI-Befehle an. Führen Sie die dotnet-Hilfe aus, um weitere Informationen zu erhalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -169,8 +164,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Utility to get more detailed help about each of the CLI commands.</source>
-        <target state="translated">Programm für detailliertere Hilfe zu den einzelnen CLI-Befehlen.</target>
+        <source>Utility to get more detailed help about each of the SDK commands.</source>
+        <target state="needs-review-translation">Programm für detailliertere Hilfe zu den einzelnen CLI-Befehlen.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -179,8 +174,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
-        <source>CLI command for which to view more detailed help.</source>
-        <target state="translated">CLI-Befehl, für den detailliertere Hilfe angezeigt werden soll.</target>
+        <source>The SDK command to launch online help for.</source>
+        <target state="needs-review-translation">CLI-Befehl, für den detailliertere Hilfe angezeigt werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -214,8 +209,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
-        <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
-        <target state="translated">Führen Sie "dotnet COMMAND --help" aus, um weitere Informationen zu einem Befehl zu erhalten.</target>
+        <source>Run 'dotnet [command] --help' for more information on a command.</source>
+        <target state="needs-review-translation">Führen Sie "dotnet COMMAND --help" aus, um weitere Informationen zu einem Befehl zu erhalten.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -249,13 +244,13 @@
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
-        <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="translated">Speichert die angegebenen Assemblys im Runtimespeicher.</target>
+        <source>Store the specified assemblies in the runtime package store.</source>
+        <target state="needs-review-translation">Speichert die angegebenen Assemblys im Runtimespeicher.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
-        <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="translated">Installation oder Arbeit mit Tools zum Erweitern der .NET-Benutzeroberfläche.</target>
+        <source>Install or manage tools that extend the .NET experience.</source>
+        <target state="needs-review-translation">Installation oder Arbeit mit Tools zum Erweitern der .NET-Benutzeroberfläche.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -289,8 +284,18 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
-        <source>Additional tools ('dotnet [tool-name] --help' for more information):</source>
-        <target state="new">Additional tools ('dotnet [tool-name] --help' for more information):</target>
+        <source>Additional commands from bundled tools:</source>
+        <target state="new">Additional commands from bundled tools:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKCommandUsageDescription">
+        <source>Execute a .NET Core SDK command.</source>
+        <target state="new">Execute a .NET Core SDK command.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutionUsageDescription">
+        <source>Execute a .NET Core application.</source>
+        <target state="new">Execute a .NET Core application.</target>
         <note />
       </trans-unit>
     </body>

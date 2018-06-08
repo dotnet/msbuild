@@ -18,18 +18,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AddAppFullName">
-        <source>.NET Add project(s) to a solution file Command</source>
-        <target state="translated">Comando para adicionar projetos a um arquivo de solução do .NET</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSubcommandHelpText">
-        <source>Add one or more specified projects to the solution.</source>
-        <target state="translated">Adicione um ou mais projetos especificados à solução.</target>
+        <source>Add one or more projects to a solution file.</source>
+        <target state="needs-review-translation">Comando para adicionar projetos a um arquivo de solução do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
-        <source>.NET Remove project(s) from a solution file Command</source>
-        <target state="translated">Comando para remover projetos de um arquivo de solução do .NET</target>
+        <source>Remove one or more projects from a solution file.</source>
+        <target state="needs-review-translation">Comando para remover projetos de um arquivo de solução do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
@@ -38,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">
-        <source>.NET List project(s) in a solution file Command</source>
-        <target state="translated">Comando para listar projetos em um arquivo de solução do .NET</target>
+        <source>List all projects in a solution file.</source>
+        <target state="needs-review-translation">Comando para listar projetos em um arquivo de solução do .NET</target>
         <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
@@ -47,14 +42,34 @@
         <target state="translated">Listar todos os projetos na solução.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CreateAppFullName">
-        <source>.NET Create a solution file Command</source>
-        <target state="translated">Comando para criar o arquivo de solução do .NET</target>
+      <trans-unit id="SolutionArgumentName">
+        <source>SLN_FILE</source>
+        <target state="new">SLN_FILE</target>
         <note />
       </trans-unit>
-      <trans-unit id="CreateSubcommandHelpText">
-        <source>Create a solution file.</source>
-        <target state="translated">Criar um arquivo de solução.</target>
+      <trans-unit id="SolutionArgumentDescription">
+        <source>The solution file to operate on. If not specified, the command will search the current directory for one.</source>
+        <target state="new">The solution file to operate on. If not specified, the command will search the current directory for one.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="new">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentDescription">
+        <source>The paths to the projects to add to the solution.</source>
+        <target state="new">The paths to the projects to add to the solution.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="new">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentDescription">
+        <source>The paths to the projects to from from the solution.</source>
+        <target state="new">The paths to the projects to from from the solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectsHeader">

@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PLIK_JSON_PROJEKTU/GLOBALNY_PLIK_JSON/PLIK_ROZWIĄZANIA/KATALOG_PROJEKTU</target>
+        <source>PATH</source>
+        <target state="needs-review-translation">PLIK_JSON_PROJEKTU/GLOBALNY_PLIK_JSON/PLIK_ROZWIĄZANIA/KATALOG_PROJEKTU</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -33,13 +33,15 @@ W przypadku braku podanej wartości domyślnie jest to bieżący katalog.</targe
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
-        <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="translated">Podstawowy szablon programu MSBuild do użycia dla zmigrowanej aplikacji. Domyślną wartością jest projekt uwzględniony w poleceniu dotnet new.</target>
+        <source>The base MSBuild template to use for the migrated project.
+The default is the project included in dotnet new.</source>
+        <target state="needs-review-translation">Podstawowy szablon programu MSBuild do użycia dla zmigrowanej aplikacji. Domyślną wartością jest projekt uwzględniony w poleceniu dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="translated">Wersja pakietu SDK, do którego odwołanie będzie się znajdować w zmigrowanej aplikacji. Domyślnie jest to wersja pakietu SDK podana w poleceniu dotnet new.</target>
+        <source>The version of the SDK package that will be referenced in the migrated project.
+The default is the version of the SDK in dotnet new.</source>
+        <target state="needs-review-translation">Wersja pakietu SDK, do którego odwołanie będzie się znajdować w zmigrowanej aplikacji. Domyślnie jest to wersja pakietu SDK podana w poleceniu dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

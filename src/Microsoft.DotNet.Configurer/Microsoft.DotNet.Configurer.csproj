@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" />
     <PackageReference Include="NuGet.Configuration" Version="$(NuGetConfigurationPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />

@@ -15,60 +15,61 @@ namespace Microsoft.DotNet.Help.Tests
     public class GivenThatIWantToShowHelpForDotnetCommand : TestBase
     {
         private const string HelpText =
-@"Usage: dotnet [runtime-options] [path-to-application]
-Usage: dotnet [sdk-options] [command] [arguments] [command-options]
+@"Usage: dotnet [runtime-options] [path-to-application] [arguments]
+
+Execute a .NET Core application.
+
+runtime-options:
+  --additionalprobingpath <path>     Path containing probing policy and assemblies to probe for.
+  --additional-deps <path>           Path to additional deps.json file.
+  --fx-version <version>             Version of the installed Shared Framework to use to run the application.
+  --roll-forward-on-no-candidate-fx  Roll forward on no candidate shared framework is enabled.
 
 path-to-application:
   The path to an application .dll file to execute.
 
-SDK commands:
-  new              Initialize .NET projects.
-  restore          Restore dependencies specified in the .NET project.
-  run              Compiles and immediately executes a .NET project.
-  build            Builds a .NET project.
-  publish          Publishes a .NET project for deployment (including the runtime).
-  test             Runs unit tests using the test runner specified in the project.
-  pack             Creates a NuGet package.
-  migrate          Migrates a project.json based project to a msbuild based project.
-  clean            Clean build output(s).
-  sln              Modify solution (SLN) files.
-  add              Add reference to the project.
-  remove           Remove reference from the project.
-  list             List references of a .NET project.
-  nuget            Provides additional NuGet commands.
-  msbuild          Runs Microsoft Build Engine (MSBuild).
-  vstest           Runs Microsoft Test Execution Command Line Tool.
-  store            Stores the specified assemblies in the runtime store.
-  tool             Install or work with tools that extend the .NET experience.
-  build-server     Interact with servers started by a build.
-  help             Show help.
+Usage: dotnet [sdk-options] [command] [command-options] [arguments]
 
-Common options:
-  -v|--verbosity        Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].
-  -h|--help             Show help.
-
-Run 'dotnet COMMAND --help' for more information on a command.
+Execute a .NET Core SDK command.
 
 sdk-options:
-  --version        Display .NET Core SDK version in use.
-  --info           Display .NET Core information.
-  --list-sdks      Display the installed SDKs.
-  --list-runtimes  Display the installed runtimes.
-  -d|--diagnostics Enable diagnostic output.
+  -d|--diagnostics  Enable diagnostic output.
+  -h|--help         Show command line help.
+  --info            Display .NET Core information.
+  --list-runtimes   Display the installed runtimes.
+  --list-sdks       Display the installed SDKs.
+  --version         Display .NET Core SDK version in use.
 
-runtime-options:
-  --additionalprobingpath <path>    Path containing probing policy and assemblies to probe for.
-  --fx-version <version>            Version of the installed Shared Framework to use to run the application.
-  --roll-forward-on-no-candidate-fx Roll forward on no candidate shared framework is enabled.
-  --additional-deps <path>          Path to additional deps.json file.
+SDK commands:
+  add               Add a package or reference to a .NET project.
+  build             Build a .NET project.
+  build-server      Interact with servers started by a build.
+  clean             Clean build outputs of a .NET project.
+  help              Show command line help.
+  list              List project references of a .NET project.
+  migrate           Migrate a project.json project to an MSBuild project.
+  msbuild           Run Microsoft Build Engine (MSBuild) commands.
+  new               Create a new .NET project or file.
+  nuget             Provides additional NuGet commands.
+  pack              Create a NuGet package.
+  publish           Publish a .NET project for deployment.
+  remove            Remove a package or reference from a .NET project.
+  restore           Restore dependencies specified in a .NET project.
+  run               Build and run a .NET project output.
+  sln               Modify Visual Studio solution files.
+  store             Store the specified assemblies in the runtime package store.
+  test              Run unit tests using the test runner specified in a .NET project.
+  tool              Install or manage tools that extend the .NET experience.
+  vstest            Run Microsoft Test Engine (VSTest) commands.
 
-Additional tools ('dotnet [tool-name] --help' for more information):
-  dev-certs      Create and manage development certificates.
-  ef             Entity Framework Core command-line tools.
-  sql-cache      SQL Server cache command-line tools.
-  user-secrets   Manage development user secrets.
-  watch          Start a file watcher that runs a command when files change.
-";
+Additional commands from bundled tools:
+  dev-certs         Create and manage development certificates.
+  ef                Entity Framework Core command-line tools.
+  sql-cache         SQL Server cache command-line tools.
+  user-secrets      Manage development user secrets.
+  watch             Start a file watcher that runs a command when files change.
+
+Run 'dotnet [command] --help' for more information on a command.";
 
         [Theory]
         [InlineData("--help")]

@@ -25,32 +25,33 @@ namespace Microsoft.DotNet.Cli
                           "n", "normal",
                           "d", "detailed",
                           "diag", "diagnostic")
+                      .With(name: CommonLocalizableStrings.LevelArgumentName)
                       .ForwardAsSingle(o => $"-verbosity:{o.Arguments.Single()}"));
         
-        public static Option FrameworkOption() =>
+        public static Option FrameworkOption(string description) =>
             Create.Option(
                 "-f|--framework",
-                CommonLocalizableStrings.FrameworkOptionDescription,
+                description,
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.TargetFrameworksFromProjectFile())
-                    .With(name: "FRAMEWORK")
+                    .With(name: CommonLocalizableStrings.FrameworkArgumentName)
                     .ForwardAsSingle(o => $"-property:TargetFramework={o.Arguments.Single()}"));
         
-        public static Option RuntimeOption() =>
+        public static Option RuntimeOption(string description) =>
             Create.Option(
                 "-r|--runtime",
-                CommonLocalizableStrings.RuntimeOptionDescription,
+                description,
                 Accept.ExactlyOneArgument()
                     .WithSuggestionsFrom(_ => Suggest.RunTimesFromProjectFile())
-                    .With(name: "RUNTIME_IDENTIFIER")
+                    .With(name: CommonLocalizableStrings.RuntimeIdentifierArgumentName)
                     .ForwardAsSingle(o => $"-property:RuntimeIdentifier={o.Arguments.Single()}"));
                 
-        public static Option ConfigurationOption() =>
+        public static Option ConfigurationOption(string description) =>
             Create.Option(
                 "-c|--configuration",
-                CommonLocalizableStrings.ConfigurationOptionDescription,
+                description,
                 Accept.ExactlyOneArgument()
-                    .With(name: "CONFIGURATION")
+                    .With(name: CommonLocalizableStrings.ConfigurationArgumentName)
                     .WithSuggestionsFrom("DEBUG", "RELEASE")
                     .ForwardAsSingle(o => $"-property:Configuration={o.Arguments.Single()}"));
 
@@ -59,7 +60,7 @@ namespace Microsoft.DotNet.Cli
                 "--version-suffix",
                 CommonLocalizableStrings.CmdVersionSuffixDescription,
                 Accept.ExactlyOneArgument()
-                    .With(name: "VERSION_SUFFIX")
+                    .With(name: CommonLocalizableStrings.VersionSuffixArgumentName)
                     .ForwardAsSingle(o => $"-property:VersionSuffix={o.Arguments.Single()}"));
 
         public static ArgumentsRule DefaultToCurrentDirectory(this ArgumentsRule rule) =>

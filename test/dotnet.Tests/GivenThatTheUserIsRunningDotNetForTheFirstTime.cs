@@ -213,7 +213,7 @@ namespace Microsoft.DotNet.Tests
 
             File.Exists(profiled).Should().BeTrue();
             File.ReadAllText(profiled).Should().Be(
-                $"export PATH=\"$PATH:{new CliFolderPathCalculator().ToolsShimPathInUnix.PathWithDollar}\"");
+                $"export PATH=\"$PATH:{CliFolderPathCalculator.ToolsShimPathInUnix.PathWithDollar}\"");
         }
 
         [MacOsOnlyFact]
@@ -234,7 +234,7 @@ namespace Microsoft.DotNet.Tests
             command.ExecuteWithCapturedOutput("internal-reportinstallsuccess test").Should().Pass();
 
             File.Exists(pathsd).Should().BeTrue();
-            File.ReadAllText(pathsd).Should().Be(new CliFolderPathCalculator().ToolsShimPathInUnix.PathWithTilde);
+            File.ReadAllText(pathsd).Should().Be(CliFolderPathCalculator.ToolsShimPathInUnix.PathWithTilde);
         }
 
         [Fact]

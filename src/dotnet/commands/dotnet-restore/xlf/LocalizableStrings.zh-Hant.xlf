@@ -28,23 +28,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
-        <source>Specifies a NuGet package source to use during the restore.</source>
-        <target state="translated">指定要在還原期間使用的 NuGet 套件來源。</target>
+        <source>The NuGet package source to use for the restore.</source>
+        <target state="needs-review-translation">指定要在還原期間使用的 NuGet 套件來源。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>PACKAGES_DIRECTORY</source>
-        <target state="translated">PACKAGES_DIRECTORY</target>
+        <source>PACKAGES_DIR</source>
+        <target state="needs-review-translation">PACKAGES_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
-        <source>Directory to install packages in.</source>
-        <target state="translated">要安裝套件的目錄。</target>
+        <source>The directory to restore packages to.</source>
+        <target state="needs-review-translation">要安裝套件的目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
-        <source>Disables restoring multiple projects in parallel.</source>
-        <target state="translated">停用平行還原多個專案的功能。</target>
+        <source>Prevent restoring multiple projects in parallel.</source>
+        <target state="needs-review-translation">停用平行還原多個專案的功能。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -68,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only restore the root project.</source>
-        <target state="translated">將此旗標設定為略過專案對專案參考，且僅還原根專案。</target>
+        <source>Do not restore project-to-project references and only restore the specified project.</source>
+        <target state="needs-review-translation">將此旗標設定為略過專案對專案參考，且僅還原根專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -78,13 +78,14 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
-        <source>Target runtime to restore packages for.</source>
-        <target state="translated">要對其還原套件的目標執行階段。</target>
+        <source>The target runtime to restore packages for.</source>
+        <target state="needs-review-translation">要對其還原套件的目標執行階段。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
-        <source>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</source>
-        <target state="translated">設定此旗標可在即使上次還原已成功的情況下，仍然強制解決所有相依性。如此等同於刪除 project.assets.json。</target>
+        <source>Force all dependencies to be resolved even if the last restore was successful.
+This is equivalent to deleting project.assets.json.</source>
+        <target state="needs-review-translation">設定此旗標可在即使上次還原已成功的情況下，仍然強制解決所有相依性。如此等同於刪除 project.assets.json。</target>
         <note />
       </trans-unit>
     </body>

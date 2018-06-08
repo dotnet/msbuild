@@ -14,7 +14,7 @@ namespace Microsoft.DotNet.Configurer
         private readonly IDirectory _directory;
         private string _dotnetUserProfileFolderPath;
 
-        public UserLevelCacheWriter(CliFolderPathCalculator cliFolderPathCalculator) :
+        public UserLevelCacheWriter() :
             this(
                 CliFolderPathCalculator.DotnetUserProfileFolderPath,
                 FileSystemWrapper.Default.File,

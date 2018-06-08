@@ -30,7 +30,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
-    <CliTargetFramework>netcoreapp2.1</CliTargetFramework>
+    <CliTargetFramework>netcoreapp2.2</CliTargetFramework>
+    <!-- We only need this until we get a stage0 with a 2.2 SDK. -->
+    <NETCoreAppMaximumVersion>2.2</NETCoreAppMaximumVersion>
   </PropertyGroup>
 
   <Import Project="build/BranchInfo.props" />
