@@ -808,11 +808,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         </None>
                     </ItemGroup>
                 </Project>";
-#if FEATURE_XMLTEXTREADER
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
-#else
-            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
-#endif
             Project project = new Project(reader);
             ProjectItem item = project.GetItems("None").Single();
 
@@ -858,11 +854,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-#if FEATURE_XMLTEXTREADER
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
-#else
-            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
-#endif
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
 
@@ -894,11 +886,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     </ItemGroup>
                 </Project>";
 
-#if FEATURE_XMLTEXTREADER
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
-#else
-            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new StringReader(projectString));
-#endif
             Project project = new Project(reader);
             IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
 
