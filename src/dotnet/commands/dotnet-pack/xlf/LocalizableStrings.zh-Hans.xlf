@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The output directory to place built packages in.</source>
-        <target state="needs-review-translation">用于放置生成包的目录。</target>
+        <target state="translated">要放置生成包的输出目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
-        <target state="needs-review-translation">包括 PDB 和源文件。源文件放入 nuget 结果包的 src 文件夹中</target>
+        <target state="translated">包括 PDB 和源文件。源文件放入 nuget 结果包的“src”文件夹中。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
-        <target state="needs-review-translation">在包中设置可用标志。有关详细信息，请参阅 https://aka.ms/nupkgservicing。</target>
+        <target state="translated">在包中设置可用标志。有关详细信息，请参阅 https://aka.ms/nupkgservicing。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
+        <target state="translated">用于生成包的配置。大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
     </body>

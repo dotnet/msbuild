@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="SolutionFile">
         <source>Solution file</source>
-        <target state="translated">Archivo de la solución</target>
+        <target state="translated">Archivo de solución</target>
         <note />
       </trans-unit>
       <trans-unit id="Executable">
@@ -254,7 +254,7 @@
       </trans-unit>
       <trans-unit id="XYDoesNotExist">
         <source>{0} `{1}` does not exist.</source>
-        <target state="translated">El {0} `{1}` no existe.</target>
+        <target state="translated">El {0} "{1}" no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneXFound">
@@ -429,7 +429,7 @@
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
         <source>Reference `{0}` deleted.</source>
-        <target state="translated">Se ha eliminado la referencia “{0}”.</target>
+        <target state="translated">Se ha eliminado la referencia "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceNotFoundInTheProject">
@@ -601,7 +601,7 @@
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
         <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
-        <target state="translated">El proyecto "{0}" tiene un tipo de proyecto desconocido y no se puede agregar al archivo de la solución. Póngase en contacto con el proveedor de SDK para obtener asistencia</target>
+        <target state="translated">El proyecto "{0}" tiene un tipo de proyecto desconocido y no se puede agregar al archivo de solución. Póngase en contacto con el proveedor de SDK para obtener asistencia</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -616,22 +616,22 @@
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="needs-review-translation">Establece el nivel de detalle del comando. Los valores permitidos son q[uiet], m[inimal], n[ormal], d[etailed] y diag[nostic]</target>
+        <target state="translated">Establece el nivel de detalle de MSBuild. Los valores permitidos son q[uiet], m[inimal], n[ormal], d[etailed] y diag[nostic].</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
-        <target state="needs-review-translation">Define el valor para la propiedad $(VersionSuffix) del proyecto.</target>
+        <target state="translated">Establece el valor de la propiedad $(VersionSuffix) que se usará al compilar el proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Muestra información de ayuda.</target>
+        <target state="translated">Muestra ayuda de la línea de comandos.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Do not restore the project before building.</source>
-        <target state="needs-review-translation">No realiza una restauración implícita al ejecutar el comando.</target>
+        <target state="translated">No restaure el proyecto antes de la compilación.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -651,7 +651,7 @@
       </trans-unit>
       <trans-unit id="EnvironmentPathOSXNeedReopen">
         <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
-        <target state="translated">Dado que acaba de instalar el SDK de .Net Core, tendrá que volver a abrir la terminal antes de ejecutar la herramienta instalada.</target>
+        <target state="translated">Dado que acaba de instalar el SDK de .Net Core, tendrá que volver a abrir el terminal antes de ejecutar la herramienta instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentPathWindowsNeedReopen">
@@ -666,12 +666,12 @@
       </trans-unit>
       <trans-unit id="ToolSettingsMissingEntryPoint">
         <source>Command '{0}' is missing an entry point setting.</source>
-        <target state="translated">En el comando “{0}”, falta un valor de punto de entrada.</target>
+        <target state="translated">En el comando "{0}", falta un valor de punto de entrada.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsInvalidCommandName">
         <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
-        <target state="translated">El comando “{0}” contiene uno o varios de los siguientes caracteres no válidos: {1}.</target>
+        <target state="translated">El comando "{0}" contiene uno o varios de los siguientes caracteres no válidos: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolSettingsMoreThanOneCommand">
@@ -681,7 +681,7 @@
       </trans-unit>
       <trans-unit id="ToolSettingsUnsupportedRunner">
         <source>Command '{0}' uses unsupported runner '{1}'."</source>
-        <target state="translated">El comando “{0}” utiliza un ejecutor que no se admite: “{1}”.</target>
+        <target state="translated">El comando "{0}" utiliza un ejecutor que no se admite: "{1}"."</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPackageConflictPackageId">
@@ -860,37 +860,37 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
+        <target state="translated">PROYECTO</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Archivo del proyecto sobre el que se va a operar. Si no se especifica un archivo, el comando buscará uno en el directorio actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="LevelArgumentName">
         <source>LEVEL</source>
-        <target state="new">LEVEL</target>
+        <target state="translated">LEVEL</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">PLATAFORMA</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
+        <target state="translated">ID_DEL_ENTORNO_DE_TIEMPO_DE_EJECUCIÓN</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
+        <target state="translated">CONFIGURACIÓN</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
+        <target state="translated">SUFIJO_DE_VERSIÓN</target>
         <note />
       </trans-unit>
     </body>

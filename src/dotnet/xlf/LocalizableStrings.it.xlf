@@ -215,12 +215,12 @@
       </trans-unit>
       <trans-unit id="XSuccessfullyUpdated">
         <source>{0} successfully updated.</source>
-        <target state="translated">{0} è stato aggiornato.</target>
+        <target state="translated">L'elemento {0} è stato aggiornato.</target>
         <note />
       </trans-unit>
       <trans-unit id="XIsInvalid">
         <source>{0} is invalid.</source>
-        <target state="translated">{0} non è valido.</target>
+        <target state="translated">L'elemento {0} non è valido.</target>
         <note />
       </trans-unit>
       <trans-unit id="XYFoundButInvalid">
@@ -245,7 +245,7 @@
       </trans-unit>
       <trans-unit id="XNotFound">
         <source>{0} not found.</source>
-        <target state="translated">{0} non è stato trovato.</target>
+        <target state="translated">L'elemento {0} non è stato trovato.</target>
         <note />
       </trans-unit>
       <trans-unit id="XOrYNotFound">
@@ -265,7 +265,7 @@
       </trans-unit>
       <trans-unit id="XDoesNotExist">
         <source>{0} does not exist.</source>
-        <target state="translated">{0} non esiste.</target>
+        <target state="translated">L'elemento {0} non esiste.</target>
         <note />
       </trans-unit>
       <trans-unit id="XYDoesNotExist">
@@ -300,7 +300,7 @@
       </trans-unit>
       <trans-unit id="XWasNotExpected">
         <source>{0} was not expected.</source>
-        <target state="translated">{0} è imprevisto.</target>
+        <target state="translated">L'elemento {0} non è previsto.</target>
         <note />
       </trans-unit>
       <trans-unit id="XNotProvided">

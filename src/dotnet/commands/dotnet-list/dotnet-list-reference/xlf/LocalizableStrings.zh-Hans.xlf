@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>List all project-to-project references of the project.</source>
-        <target state="needs-review-translation">.NET Core 项目到项目的依赖项查看器</target>
+        <target state="translated">列出项目的所有项目到项目引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -16,7 +16,7 @@
         <source>There are no {0} references in project {1}.
 {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
         <target state="translated">项目 {1} 中没有 {0} 引用。
-{0} 是正在请求的项类型(项目、包、p2p)，{1} 是项目文件或解决方案文件上操作的对象。</target>
+{0} 是正在请求的项类型(项目、包、p2p)，{1} 是操作的对象(项目文件或解决方案文件)。</target>
         <note />
       </trans-unit>
     </body>

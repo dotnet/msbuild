@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Add a NuGet package reference to the project.</source>
-        <target state="needs-review-translation">Polecenie dodawania odwołania do pakietu platformy .NET</target>
+        <target state="translated">Dodaj odwołanie do pakietu NuGet do projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,27 +19,27 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Dodaje odwołanie tylko w przypadku określenia konkretnej platformy docelowej.</target>
+        <target state="translated">Dodaj odwołanie tylko w przypadku określenia konkretnej platformy docelowej.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Add the reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Dodaje odwołanie bez tworzenia podglądu przywracania i sprawdzania zgodności.</target>
+        <target state="translated">Dodaj odwołanie bez tworzenia podglądu przywracania i sprawdzania zgodności.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet package source to use during the restore.</source>
-        <target state="needs-review-translation">Określa źródła pakietów NuGet podczas przywracania.</target>
+        <target state="translated">Źródło pakietów NuGet do użycia podczas przywracania.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">Przywraca pakiety do określonego katalogu.</target>
+        <target state="translated">Katalog, w którym zostaną przywrócone pakiety.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the package to add.</source>
-        <target state="needs-review-translation">Wersja pakietu do dodania.</target>
+        <target state="translated">Wersja pakietu do dodania.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIR</source>
-        <target state="needs-review-translation">KATALOG_PAKIETU</target>
+        <target state="translated">KATALOG_PAKIETU</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

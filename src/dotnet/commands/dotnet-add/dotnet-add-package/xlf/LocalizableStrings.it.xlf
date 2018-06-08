@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Add a NuGet package reference to the project.</source>
-        <target state="needs-review-translation">Comando Aggiungi riferimento al pacchetto .NET</target>
+        <target state="translated">Aggiunge un riferimento al pacchetto NuGet al progetto.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,27 +19,27 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Aggiunge il riferimento solo se destinato a un framework specifico.</target>
+        <target state="translated">Aggiunge il riferimento solo se destinato a un framework specifico.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Add the reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Aggiunge il riferimento senza eseguire l'anteprima di restore e la verifica della compatibilità.</target>
+        <target state="translated">Aggiunge il riferimento senza eseguire l'anteprima di restore e la verifica della compatibilità.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet package source to use during the restore.</source>
-        <target state="needs-review-translation">Consente di specificare le origini pacchetto NuGet da usare durante il ripristino.</target>
+        <target state="translated">Origine pacchetto NuGet da usare durante il ripristino.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">Ripristina i pacchetti nella directory specificata.</target>
+        <target state="translated">Directory in cui ripristinare i pacchetti.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the package to add.</source>
-        <target state="needs-review-translation">Versione del pacchetto da aggiungere.</target>
+        <target state="translated">Versione del pacchetto da aggiungere.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIR</source>
-        <target state="needs-review-translation">DIRECTORY_PACCHETTO</target>
+        <target state="translated">DIR_PACCHETTO</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

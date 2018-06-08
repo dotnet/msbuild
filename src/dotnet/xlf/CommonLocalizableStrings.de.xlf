@@ -259,7 +259,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneXFound">
         <source>More than one {0} found.</source>
-        <target state="translated">Es wurden mehrere Elemente vom Typ "{0}" gefunden.</target>
+        <target state="translated">Es wurden mehrere Elemente "{0}" gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="XAlreadyContainsY">
@@ -294,7 +294,7 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
         <source>Please specify at least one {0}.</source>
-        <target state="translated">Geben Sie mindestens ein Element vom Typ "{0}" an.</target>
+        <target state="translated">Geben Sie mindestens ein Element "{0}" an.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConnectWithTheServer">
@@ -329,7 +329,7 @@
       </trans-unit>
       <trans-unit id="FoundInvalidProject">
         <source>Found a project `{0}` but it is invalid.</source>
-        <target state="translated">Ein Projekt vom Typ "{0}" wurde gefunden, ist aber ungültig.</target>
+        <target state="translated">Ein Projekt "{0}" wurde gefunden, ist aber ungültig.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProject">
@@ -384,7 +384,7 @@
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAPackageReference">
         <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis vom Typ "{1}" vorhanden.</target>
+        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis "{1}" vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
@@ -474,7 +474,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Das Projekt "{1}" enthält keine Verweise vom Typ "{0}". ;; "{0}" ist die Art des angeforderten Elements (Projekt, Paket, P2P). "{1}" ist das Objekt, für das ein Vorgang ausgeführt wird (eine Projektdatei oder eine Projektmappendatei). </target>
+        <target state="translated">Das Projekt "{1}" enthält keine Verweise "{0}". ;; "{0}" ist die Art des angeforderten Elements (Projekt, Paket, P2P). "{1}" ist das Objekt, für das ein Vorgang ausgeführt wird (eine Projektdatei oder eine Projektmappendatei). </target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -564,12 +564,12 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">In „{0}“ wurden mehrere Projektmappendateien gefunden. Geben Sie an, welche davon verwendet werden soll.</target>
+        <target state="translated">In "{0}" wurden mehrere Projektmappendateien gefunden. Geben Sie an, welche davon verwendet werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">
         <source>Solution {0} already contains project {1}.</source>
-        <target state="translated">Die Projektmappe „{0}“ enthält bereits das Projekt „{1}“.</target>
+        <target state="translated">Die Projektmappe "{0}" enthält bereits das Projekt "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentsProjectOrSolutionDescription">
@@ -584,7 +584,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
         <source>Project `{0}` cannot be added due to incompatible targeted frameworks between the two projects. Please review the project you are trying to add and verify that is compatible with the following targets:</source>
-        <target state="translated">Projekt „{0}“ kann nicht hinzugefügt werden, weil die Zielframeworks der beiden Projekte nicht kompatibel sind. Bitte überprüfen Sie das Projekt, das Sie hinzuzufügen versuchen, und stellen Sie sicher, dass es mit folgenden Zielen kompatibel ist:</target>
+        <target state="translated">Projekt "{0}" kann nicht hinzugefügt werden, weil die Zielframeworks der beiden Projekte nicht kompatibel sind. Bitte überprüfen Sie das Projekt, das Sie hinzuzufügen versuchen, und stellen Sie sicher, dass es mit folgenden Zielen kompatibel ist:</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectDoesNotTargetFramework">
@@ -616,22 +616,22 @@
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="needs-review-translation">Legen Sie den Ausführlichkeitsgrad des Befehls fest. Zulässige Werte sind "q[uiet]" (keine Ausgabe), "m[inimal]", "n[ormal]", "d[etailed]" (ausführlich) und "diag[nostic]" (Diagnose).</target>
+        <target state="translated">Hiermit wird der Ausführlichkeitsgrad von MSBuild festgelegt. Zulässige Werte sind "q[uiet]", "m[inimal]", "n[ormal]", "d[etailed]" und "diag[nostic]".</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
-        <target state="needs-review-translation">Definiert den Wert für die Eigenschaft "$(VersionSuffix)" im Projekt.</target>
+        <target state="translated">Hiermit wird der Wert der $(VersionSuffix)-Eigenschaft festgelegt, die beim Erstellen des Projekts verwendet werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Hilfeinformationen anzeigen.</target>
+        <target state="translated">Hiermit wird die Hilfe zur Befehlszeile angezeigt.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Do not restore the project before building.</source>
-        <target state="needs-review-translation">Führt beim Ausführen des Befehls keine implizite Wiederherstellung durch.</target>
+        <target state="translated">Hiermit wird das Projekt nicht vor der Erstellung wiederhergestellt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -860,37 +860,37 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Die zu verwendende Projektdatei. Wenn keine Datei angegeben ist, sucht der Befehl im aktuellen Verzeichnis nach einer Datei.</target>
         <note />
       </trans-unit>
       <trans-unit id="LevelArgumentName">
         <source>LEVEL</source>
-        <target state="new">LEVEL</target>
+        <target state="translated">LEVEL</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
+        <target state="translated">CONFIGURATION</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
+        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

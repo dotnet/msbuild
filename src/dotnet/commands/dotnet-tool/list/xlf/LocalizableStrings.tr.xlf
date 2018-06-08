@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed in the current development environment.</source>
-        <target state="needs-review-translation">Geçerli geliştirme ortamında yüklü araçları listeler.</target>
+        <target state="translated">Geçerli geliştirme ortamında yüklü araçları listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools in the current user's tools directory.</source>
-        <target state="needs-review-translation">Kullanıcıya yönelik araçları listeleyin.</target>
+        <target state="translated">Geçerli kullanıcının araçlar dizinindeki araçları listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -49,12 +49,12 @@
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tools to list.</source>
-        <target state="new">The directory containing the tools to list.</target>
+        <target state="translated">Listelenecek aracı içeren dizin.</target>
         <note />
       </trans-unit>
     </body>

@@ -138,12 +138,12 @@ Geçerli {1}: '{2}'.</target>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to run for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to run for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Çalıştırılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to run for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to run for. The target framework must also be specified in the project file.</target>
+        <target state="translated">Çalıştırılacak hedef çerçeve. Hedef çerçevenin proje dosyasında da belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
     </body>

@@ -19,22 +19,22 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The directory containing the build artifacts to clean.</source>
-        <target state="needs-review-translation">빌드 출력이 위치한 디렉터리입니다.</target>
+        <target state="translated">정리할 빌드 아티팩트를 포함하는 디렉터리입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to clean for. The target framework must also be specified in the project file.</target>
+        <target state="translated">정리할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에도 지정되어야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to clean for.</source>
-        <target state="new">The target runtime to clean for.</target>
+        <target state="translated">정리할 대상 런타임입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to clean for. The default for most projects is 'Debug'.</target>
+        <target state="translated">정리할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
         <note />
       </trans-unit>
     </body>

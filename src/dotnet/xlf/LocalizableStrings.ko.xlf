@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
+        <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -350,7 +350,7 @@
       </trans-unit>
       <trans-unit id="FoundMoreThanOneProjectIn">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 파일을 지정하세요.</target>
+        <target state="translated">'{0}'에서 프로젝트를 두 개 이상 찾았습니다. 사용할 프로젝트를 지정하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundInvalidProject">

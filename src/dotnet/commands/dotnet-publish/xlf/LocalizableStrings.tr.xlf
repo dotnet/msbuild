@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
+        <target state="translated">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">Yayımlanan yapıtların yerleştirileceği çıkış dizini.</target>
+        <target state="translated">Yayımlanan yapıtların yerleştirileceği çıkış dizini.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -40,7 +40,8 @@
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
+        <target state="translated">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. 
+Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -51,13 +52,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <target state="translated">Yayımlamanın yapılacağı hedef çalışma zamanı. Kendi içinde dağıtımlar oluşturulurken kullanılır. 
+Varsayılan seçenek, çerçeveye bağımlı bir proje yayımlamaktır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Yayımlanacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
         <note />
       </trans-unit>
     </body>

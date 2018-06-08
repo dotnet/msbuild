@@ -19,22 +19,22 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The directory containing the build artifacts to clean.</source>
-        <target state="needs-review-translation">O diretório no qual as saídas do build foram colocadas.</target>
+        <target state="translated">O diretório que contém os artefatos de build a serem limpos.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to clean for. The target framework must also be specified in the project file.</target>
+        <target state="translated">A estrutura de destino para a qual a limpeza ocorrerá. A estrutura de destino também precisa ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to clean for.</source>
-        <target state="new">The target runtime to clean for.</target>
+        <target state="translated">O tempo de execução de destino para o qual a limpeza ocorrerá.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to clean for. The default for most projects is 'Debug'.</target>
+        <target state="translated">A configuração para a qual a limpeza ocorrerá. O padrão para a maioria dos projetos é 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

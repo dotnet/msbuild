@@ -9,17 +9,17 @@
       </trans-unit>
       <trans-unit id="MSBuildOptionDescription">
         <source>Shut down the MSBuild build server.</source>
-        <target state="needs-review-translation">Vypne buildovací server MSBuild.</target>
+        <target state="translated">Vypne buildovací server MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="VBCSCompilerOptionDescription">
         <source>Shut down the VB/C# compiler build server.</source>
-        <target state="needs-review-translation">Vypne buildovací server kompilátoru VB/C#.</target>
+        <target state="translated">Vypne buildovací server kompilátoru VB/C#.</target>
         <note />
       </trans-unit>
       <trans-unit id="RazorOptionDescription">
         <source>Shut down the Razor build server.</source>
-        <target state="needs-review-translation">Vypne buildovací server Razor.</target>
+        <target state="translated">Vypne buildovací server Razor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShuttingDownServer">

@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="AddAppFullName">
         <source>Add one or more projects to a solution file.</source>
-        <target state="needs-review-translation">Команда .NET "Добавить проекты в файл решения"</target>
+        <target state="translated">Добавление проектов в файл решения.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
-        <target state="needs-review-translation">Команда .NET "Удалить проекты из файла решения"</target>
+        <target state="translated">Удаление проектов из файла решения.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="ListAppFullName">
         <source>List all projects in a solution file.</source>
-        <target state="needs-review-translation">Команда .NET "Перечислить проекты в файле решения"</target>
+        <target state="translated">Вывод списка всех проектов в файле решения.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
@@ -44,37 +44,37 @@
       </trans-unit>
       <trans-unit id="SolutionArgumentName">
         <source>SLN_FILE</source>
-        <target state="new">SLN_FILE</target>
+        <target state="translated">SLN_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionArgumentDescription">
         <source>The solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="new">The solution file to operate on. If not specified, the command will search the current directory for one.</target>
+        <target state="translated">Обрабатываемый файл решения. Если не указать его, команда будет искать его в текущем каталоге.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentDescription">
         <source>The paths to the projects to add to the solution.</source>
-        <target state="new">The paths to the projects to add to the solution.</target>
+        <target state="translated">Пути к проектам, которые необходимо добавить в решение.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">
         <source>The paths to the projects to from from the solution.</source>
-        <target state="new">The paths to the projects to from from the solution.</target>
+        <target state="translated">Пути к проектам, которые необходимо удалить из решения.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectsHeader">
         <source>Project(s)</source>
-        <target state="new">Project(s)</target>
+        <target state="translated">Проекты</target>
         <note />
       </trans-unit>
     </body>

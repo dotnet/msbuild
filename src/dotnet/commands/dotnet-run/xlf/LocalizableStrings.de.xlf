@@ -138,12 +138,12 @@ Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verw
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to run for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to run for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Die Konfiguration für die Ausführung. Der Standardwert für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to run for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to run for. The target framework must also be specified in the project file.</target>
+        <target state="translated">Das Zielframework für die Ausführung. Das Zielframework muss auch in der Projektdatei angegeben werden.</target>
         <note />
       </trans-unit>
     </body>

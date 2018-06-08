@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>The settings file to use when running tests.</source>
-        <target state="needs-review-translation">Testleri çalıştırırken kullanılacak ayarlar.</target>
+        <target state="translated">Testleri çalıştırırken kullanılacak ayarlar dosyası.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdListTestsDescription">
         <source>List the discovered tests instead of running the tests.</source>
-        <target state="needs-review-translation">Bulunan testleri listeler</target>
+        <target state="translated">Testleri çalıştırmak yerine bulunan testleri listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
@@ -40,24 +40,23 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         See https://aka.ms/vstest-filtering for more information on filtering support.
                                         </source>
-        <target state="needs-review-translation">Belirtilen ifadeyle eşleşen testleri çalıştırır.
+        <target state="translated">Belirtilen ifadeyle eşleşen testleri çalıştırır.
                                         Örnekler:
                                         Önceliği 1: --filter "Priority = 1" olarak ayarlanmış testleri çalıştırır
-                                        Belirtilen tam ada sahip bir test çalıştırır: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
-                                        Belirtilen adı içeren testleri çalıştırır: --filter "FullyQualifiedName~Namespace.Class"
-                                        Filtreleme desteği hakkında daha fazla bilgi: https://aka.ms/vstest-filtering
+                                        Belirtilen tam ada sahip bir test çalıştırır: --filter "TamAd=AdAlanı.SınıfAdı.MetotAdı"
+                                        Belirtilen adı içeren testleri çalıştırır: --filter "tamAd~AdAlanı.Sınıf"
+                                        Filtreleme desteği hakkında daha fazla bilgi için bkz. https://aka.ms/vstest-filtering.
                                         </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>The path to the custom adapters to use for the test run.</source>
-        <target state="needs-review-translation">Test çalıştırmasında, belirtilen yoldaki özel bağdaştırıcıları kullanır.
-                                        Örnek: --test-adapter-path &lt;BAĞDAŞTIRICI_YOLU&gt;</target>
+        <target state="translated">Test çalıştırması için kullanılacak özel bağdaştırıcıların yolu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LOGGER</source>
-        <target state="needs-review-translation">LoggerUri/FriendlyName</target>
+        <target state="translated">LOGGER</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
@@ -66,11 +65,11 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="needs-review-translation">Test sonuçları için bir günlükçü belirtin.
+        <target state="translated">Test sonuçları için kullanılacak günlükçü.
                                         Örnekler:
                                         Benzersiz dosya adı kullanarak trx biçiminde günlük kaydı: --logger trx
                                         Belirtilen dosya adını kullanarak trx biçiminde günlük kaydı: --logger "trx;LogFileName=&lt;TestSonuçları.trx&gt;"
-                                        Günlükçü bağımsız değişkenleri desteği hakkında daha fazla bilgi:https://aka.ms/vstest-report</target>
+                                        Günlükçü bağımsız değişkenleri hakkında daha fazla bilgi için bkz. https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -80,18 +79,17 @@
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">Çalıştırılacak ikililerin bulunacağı dizin</target>
+        <target state="translated">Derlenen yapıtların yerleştirileceği çıkış dizini.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>LOG_FILE</source>
-        <target state="needs-review-translation">DOSYA_YOLU</target>
+        <target state="translated">LOG_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logging to the specified file.</source>
-        <target state="needs-review-translation">Test platformu için ayrıntılı günlükleri etkinleştirir.
-                                        Günlükler belirtilen dosyaya yazılır.</target>
+        <target state="translated">Belirtilen dosyaya ayrıntılı günlük kaydını etkinleştirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
@@ -101,19 +99,19 @@
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
         <source>ADAPTER_PATH</source>
-        <target state="needs-review-translation">PATH_TO_ADAPTER</target>
+        <target state="translated">ADAPTER_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdResultsDirectoryDescription">
         <source>The directory where the test results will be placed.
 The specified directory will be created if it does not exist.</source>
-        <target state="needs-review-translation">Test sonuçlarının yerleştirileceği dizin. Belirtilen dizin yoksa, oluşturulur.
-                                        Örnek: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
+        <target state="translated">Test sonuçlarının yerleştirileceği dizin.
+Belirtilen dizin yoksa oluşturulur.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToResultsDirectory">
         <source>RESULTS_DIR</source>
-        <target state="needs-review-translation">PATH_TO_RESULTS_DIRECTORY</target>
+        <target state="translated">RESULTS_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
@@ -124,41 +122,42 @@ RunSettings arguments:
   Use a space to separate multiple '[name]=[value]' pairs.
   See https://aka.ms/vstest-runsettings-arguments for more information on RunSettings arguments.
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
-        <target state="needs-review-translation">
+        <target state="translated">
 
 RunSettings bağımsız değişkenleri:
-  Komut satırı aracılığıyla runsettings yapılandırmalarını geçirmeye yönelik bağımsız değişkenler. Bağımsız değişkenler, "-- " karakterlerinden sonra [ad]=[değer] biçiminde ad-değer çifti olarak belirtilebilir. -- karakterlerinden sonra boşluk olduğuna dikkat edin. 
-  Birden fazla [ad] =[değer] çiftini ayırmak için boşluk kullanın.
-  RunSettings bağımsız değişkenleri desteği hakkında daha fazla bilgi: https://aka.ms/vstest-runsettings-arguments
+  RunSettings yapılandırmaları olarak geçirilecek bağımsız değişkenler. Bağımsız değişkenler "-- " (-- sonrasındaki boşluğa dikkat edin) sonrasında '[ad]=[değer]' çifti olarak belirtilir. 
+  Birden fazla '[ad]=[değer]' çiftini ayırmak için boşluk kullanın.
+  RunSettings bağımsız değişkenleri hakkında daha fazla bilgi için bkz. https://aka.ms/vstest-runsettings-arguments.
   Örnek: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
         <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
         <source>DATA_COLLECTOR_NAME</source>
-        <target state="needs-review-translation">DATA_COLLECTOR_FRIENDLY_NAME</target>
+        <target state="translated">DATA_COLLECTOR_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="cmdCollectDescription">
         <source>The friendly name of the data collector to use for the test run.
                                         More info here: https://aka.ms/vstest-collect</source>
-        <target state="needs-review-translation">Test çalıştırması için veri toplayıcıyı etkinleştirir.
-                                        Daha fazla bilgi için bkz. https://aka.ms/vstest-collect</target>
+        <target state="translated">Test çalıştırması için kullanılacak veri toplayıcının kolay adı.
+                                        Daha fazla bilgi için bkz.: https://aka.ms/vstest-collect</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
 Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
-        <target state="needs-review-translation">Testi blame modunda çalıştırır. Bu seçenek, test konağının kilitlenmesine neden olan sorunlu testi belirlemek için kullanışlıdır. Geçerli dizinde testin kilitlenmeden önceki yürütme sırasını yakalayan "Sequence.xml" adlı bir çıkış dosyası oluşturur.</target>
+        <target state="translated">Testleri blame modunda çalıştırır. Bu seçenek, test konağının kilitlenmesine neden olan sorunlu testi yalıtmak için kullanışlıdır.
+Geçerli dizinde testin kilitlenmeden önceki test yürütme sırasını yakalayan ‘Sequence.xml’ adlı dosyayı çıkarır.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to run tests for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to run tests for. The target framework must also be specified in the project file.</target>
+        <target state="translated">Testlerin çalıştırılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında da belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for running tests. The default for most projects is 'Debug'.</target>
+        <target state="translated">Testleri çalıştırmak için kullanılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
         <note />
       </trans-unit>
     </body>

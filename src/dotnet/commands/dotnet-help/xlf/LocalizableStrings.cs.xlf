@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Zobrazí nápovědu.</target>
+        <target state="translated">Zobrazí nápovědu příkazového řádku.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -59,42 +59,42 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Create a new .NET project or file.</source>
-        <target state="needs-review-translation">Inicializuje projekty .NET.</target>
+        <target state="translated">Vytvoří nový projekt nebo soubor .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in a .NET project.</source>
-        <target state="needs-review-translation">Obnoví závislosti zadané v projektu .NET.</target>
+        <target state="translated">Obnoví závislosti zadané v projektu .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Build a .NET project.</source>
-        <target state="needs-review-translation">Sestaví projekt .NET.</target>
+        <target state="translated">Sestaví projekt .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publish a .NET project for deployment.</source>
-        <target state="needs-review-translation">Publikuje projekt .NET pro nasazení (včetně modulu runtime).</target>
+        <target state="translated">Publikuje projekt .NET pro nasazení.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Build and run a .NET project output.</source>
-        <target state="needs-review-translation">Zkompiluje a hned spustí projekt .NET.</target>
+        <target state="translated">Sestaví a spustí výstup projektu .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Run unit tests using the test runner specified in a .NET project.</source>
-        <target state="needs-review-translation">Spustí testy jednotek v nástroji Test Runner zadaném v projektu.</target>
+        <target state="translated">Spustí testy jednotek v nástroji Test Runner zadaném v projektu .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Create a NuGet package.</source>
-        <target state="needs-review-translation">Vytvoří balíček NuGet.</target>
+        <target state="translated">Vytvoří balíček NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="needs-review-translation">Na základě projektu migruje soubor project.json na projekt založený na nástroji MSBuild.</target>
+        <target state="translated">Migruje projekt project.json na projekt MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add a package or reference to a .NET project.</source>
-        <target state="needs-review-translation">Přidá odkaz k projektu.</target>
+        <target state="translated">Přidá do projektu .NET balíček nebo odkaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove a package or reference from a .NET project.</source>
-        <target state="needs-review-translation">Odebere odkaz z projektu.</target>
+        <target state="translated">Odebere z projektu .NET balíček nebo odkaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -124,12 +124,12 @@
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Run Microsoft Build Engine (MSBuild) commands.</source>
-        <target state="needs-review-translation">Spustí Microsoft Build Engine (MSBuild).</target>
+        <target state="translated">Spustí příkazy MSBuild (Microsoft Build Engine).</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Run Microsoft Test Engine (VSTest) commands.</source>
-        <target state="needs-review-translation">Spustí nástroj příkazového řádku od Microsoftu, který testuje spuštění.</target>
+        <target state="translated">Spustí příkazy VSTest (Microsoft Test Engine).</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -139,22 +139,22 @@
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build outputs of a .NET project.</source>
-        <target state="needs-review-translation">Smaže výstupy sestavení.</target>
+        <target state="translated">Vyčistí výstupy sestavení projektu .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
         <source>Modify Visual Studio solution files.</source>
-        <target state="needs-review-translation">Umožňuje upravovat soubory řešení (SLN).</target>
+        <target state="translated">Upraví soubory řešení sady Visual Studio.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references of a .NET project.</source>
-        <target state="needs-review-translation">Zobrazí seznam odkazů projektu nebo nainstalovaných nástrojů.</target>
+        <target state="translated">Vypíše seznam odkazů na projekt daného projektu .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">Zadaný příkaz {0} není platným příkazem rozhraní příkazového řádku. Zadejte prosím platné příkazy rozhraní příkazového řádku. Další informace získáte spuštěním příkazu dotnet help.</target>
+        <target state="translated">Zadaný příkaz {0} není platným příkazem sady SDK. Zadejte prosím platný příkaz sady SDK. Další informace získáte spuštěním příkazu dotnet help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the SDK commands.</source>
-        <target state="needs-review-translation">Nástroj k získání podrobnější nápovědy k jednotlivým příkazům rozhraní příkazového řádku.</target>
+        <target state="translated">Nástroj k získání podrobnější nápovědy k jednotlivým příkazům sady SDK</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>The SDK command to launch online help for.</source>
-        <target state="needs-review-translation">Příkaz rozhraní příkazového řádku, ke kterému chcete získat podrobnější nápovědu</target>
+        <target state="translated">Příkaz sady SDK, pro který se má spustit online nápověda</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet [command] --help' for more information on a command.</source>
-        <target state="needs-review-translation">Další informace o příkazu získáte spuštěním příkazu dotnet PŘÍKAZ --help.</target>
+        <target state="translated">Další informace o příkazu získáte spuštěním příkazu dotnet [příkaz] --help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -244,12 +244,12 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="needs-review-translation">Ukládá zadaná nastavení do úložiště runtime.</target>
+        <target state="translated">Uloží zadaná sestavení do úložiště balíčků modulu runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or manage tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">Instaluje nástroje, které rozšiřují prostředí .NET, nebo s nimi pracuje.</target>
+        <target state="translated">Umožňuje instalaci nebo správu nástrojů, které rozšiřují prostředí .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -259,42 +259,42 @@
       </trans-unit>
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
-        <target state="new">Create and manage development certificates.</target>
+        <target state="translated">Vytvoří a spravuje certifikáty pro vývoj.</target>
         <note />
       </trans-unit>
       <trans-unit id="EfDefinition">
         <source>Entity Framework Core command-line tools.</source>
-        <target state="new">Entity Framework Core command-line tools.</target>
+        <target state="translated">Nástroje příkazového řádku Entity Framework Core</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
+        <target state="translated">Nástroje příkazového řádku mezipaměti SQL Serveru</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
-        <target state="new">Manage development user secrets.</target>
+        <target state="translated">Spravuje tajné kódy uživatelů pro vývoj.</target>
         <note />
       </trans-unit>
       <trans-unit id="WatchDefinition">
         <source>Start a file watcher that runs a command when files change.</source>
-        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <target state="translated">Spustí sledovací proces souborů, který při změnách souborů spustí příkaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
         <source>Additional commands from bundled tools:</source>
-        <target state="new">Additional commands from bundled tools:</target>
+        <target state="translated">Další příkazy z nástrojů v balíčku:</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET Core SDK command.</source>
-        <target state="new">Execute a .NET Core SDK command.</target>
+        <target state="translated">Spustí příkaz sady .NET Core SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
-        <target state="new">Execute a .NET Core application.</target>
+        <target state="translated">Spustí aplikaci .NET Core.</target>
         <note />
       </trans-unit>
     </body>

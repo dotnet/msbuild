@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The output directory to place built packages in.</source>
-        <target state="needs-review-translation">Каталог для размещения созданных пакетов.</target>
+        <target state="translated">Выходной каталог для размещения собранных пакетов.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
-        <target state="needs-review-translation">Включение PDB-файлов и исходных файлов. Исходные файлы передаются в папку src в получившемся проекте NuGet</target>
+        <target state="translated">Включение PDB-файлов и исходных файлов. Исходные файлы помещаются в папку "src" в итоговом пакете NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
-        <target state="needs-review-translation">Установка флага "подлежит обслуживанию" в пакете. Дополнительные сведения см. на странице https://aka.ms/nupkgservicing.</target>
+        <target state="translated">Задание для пакета флага "подлежит обслуживанию". Дополнительные сведения: https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
+        <target state="translated">Конфигурация, используемая для сборки пакета. По умолчанию для большинства проектов используется "Debug".</target>
         <note />
       </trans-unit>
     </body>

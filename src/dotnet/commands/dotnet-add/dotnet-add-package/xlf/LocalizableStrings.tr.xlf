@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Add a NuGet package reference to the project.</source>
-        <target state="needs-review-translation">.NET Paket Başvurusu Ekleme Komutu</target>
+        <target state="translated">Projeye bir NuGet paketi başvurusu ekleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,27 +19,27 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Yalnızca belirli bir çerçeveyi hedeflerken başvuru ekler.</target>
+        <target state="translated">Başvuruyu yalnızca belirli bir çerçeveyi hedeflerken ekler.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Add the reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Geri yükleme önizlemesi ve uyumluluk denetimi gerçekleştirmeden başvuru ekler.</target>
+        <target state="translated">Başvuruyu, geri yükleme önizlemesi ve uyumluluk denetimi gerçekleştirmeden ekler.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet package source to use during the restore.</source>
-        <target state="needs-review-translation">Geri yükleme sırasında kullanılacak NuGet paketi kaynaklarını belirtir.</target>
+        <target state="translated">Geri yükleme sırasında kullanılacak NuGet paketi kaynağı.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">Paketleri belirtilen dizine geri yükler.</target>
+        <target state="translated">Paketlerin geri yükleneceği dizin.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the package to add.</source>
-        <target state="needs-review-translation">Eklenecek paketin sürümü.</target>
+        <target state="translated">Eklenecek paketin sürümü.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIR</source>
-        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
+        <target state="translated">PACKAGE_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

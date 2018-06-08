@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">要发布的目标框架。目标框架必须在项目文件中指定。</target>
+        <target state="translated">要发布的目标框架。必须在项目文件中指定目标框架。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">用于放置已发布项的输出目录。</target>
+        <target state="translated">要放置已发布项目的输出目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -40,7 +40,8 @@
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">随附应用程序发布 .NET Core 运行时，免除在目标计算机上安装运行时的需求。如果指定了运行时标识符，则默认为 “true”。</target>
+        <target state="translated">随附应用程序发布 .NET Core 运行时，免除在目标计算机上安装运行时的需求。
+如果指定了运行时标识符，则默认为 "true"。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -51,13 +52,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <target state="translated">要发布的目标运行时。创建自包含部署时使用此项。
+默认操作为发布依赖框架的应用程序。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">要发布的配置。大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
     </body>

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Целевая платформа публикации. Целевая платформа должна быть указана в файле проекта.</target>
+        <target state="translated">Целевая платформа публикации. Целевая платформа должна быть указана в файле проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">Выходной каталог для размещения опубликованных артефактов.</target>
+        <target state="translated">Выходной каталог для размещения опубликованных артефактов.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -40,7 +40,8 @@
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Опубликуйте среду выполнения .NET Core вместе с приложением, чтобы ее не нужно было устанавливать на целевом компьютере. Если идентификатор среды выполнения указан, значение по умолчанию — true.</target>
+        <target state="translated">Опубликуйте среду выполнения .NET Core вместе с приложением, чтобы ее не нужно было устанавливать на целевом компьютере.
+Если указан идентификатор среды выполнения, этот параметр по умолчанию имеет значение "true" (истина).</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -51,13 +52,13 @@ The default is 'true' if a runtime identifier is specified.</source>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <target state="translated">Целевая среда выполнения публикации. Используется при создании автономного развертывания.
+По умолчанию публикуется платформозависимое приложение.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Конфигурация для публикации. По умолчанию для большинства проектов используется "Debug".</target>
         <note />
       </trans-unit>
     </body>
