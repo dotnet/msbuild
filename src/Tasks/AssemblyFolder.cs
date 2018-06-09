@@ -39,21 +39,6 @@ namespace Microsoft.Build.Tasks
             Dictionary<string, string> directories
         )
         {
-            if (!NativeMethodsShared.IsWindows && hive == Registry.LocalMachine)
-            {
-                string path = NativeMethodsShared.FrameworkBasePath;
-                if (Directory.Exists(path))
-                {
-                    foreach (string p in Directory.EnumerateDirectories(path))
-                    {
-                        directories[
-                            "hklm" + "\\" + p.Substring(p.LastIndexOf(Path.DirectorySeparatorChar) + 1)] = p;
-                    }
-                }
-
-                return;
-            }
-
             using (RegistryKey baseKey = hive.OpenSubKey(key))
             {
                 string aliasKey = String.Empty;
