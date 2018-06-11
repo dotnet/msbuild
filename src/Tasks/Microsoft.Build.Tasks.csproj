@@ -927,13 +927,12 @@
   <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
   <!-- ==========================================================================================-->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Reflection" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Runtime.Serialization" />
     <!-- Needed by GenerateResource's ResXResourceReader: UNDONE: When CLR has moved this type to improve layering, remove this reference -->
     <Reference Include="System.Windows.Forms" />
