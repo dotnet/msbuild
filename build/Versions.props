@@ -56,8 +56,8 @@
     <NuGetCommandsVersion>$(NuGetPackageVersion)</NuGetCommandsVersion>
     <NuGetProtocolVersion>$(NuGetPackageVersion)</NuGetProtocolVersion>
 
-    <SystemCollectionsImmutableVersion>1.5.0-rc1</SystemCollectionsImmutableVersion>
-    <SystemReflectionMetadataVersion>1.6.0-rc1</SystemReflectionMetadataVersion>
+    <SystemCollectionsImmutableVersion>1.5.0</SystemCollectionsImmutableVersion>
+    <SystemReflectionMetadataVersion>1.6.0</SystemReflectionMetadataVersion>
 </PropertyGroup>
 
   <!-- Test Dependencies -->
