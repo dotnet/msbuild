@@ -941,7 +941,7 @@
     <!-- Needed by Xaml Task Factory -->
     <Reference Include="System.Xaml" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+  <ItemGroup>
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices" />
   </ItemGroup>
