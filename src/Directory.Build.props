@@ -20,8 +20,7 @@
     <Platforms>AnyCPU;x64</Platforms>
     
     <!-- Defaults for target frameworks and architecture -->
-    <LibraryTargetFrameworks>netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(OsEnvironment)'=='windows'  or '$(DotNetBuildFromSource)'=='true'">net46;netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks>net46;netstandard2.0</LibraryTargetFrameworks>
     <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">net461</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 
