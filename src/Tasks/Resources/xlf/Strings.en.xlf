@@ -401,6 +401,16 @@
         <target state="new">The working directory "{0}" does not exist.</target>
         <note>No error code because an error will be prefixed.</note>
       </trans-unit>
+      <trans-unit id="FileHash.FileNotFound">
+        <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
+        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3954: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'.</source>
+        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'.</target>
+        <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
         <target state="new">Found "{0}".</target>
@@ -2238,7 +2248,7 @@
         <source>Project reference "{0}" has not been resolved.</source>
         <target state="new">Project reference "{0}" has not been resolved.</target>
         <note>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </note>
@@ -2462,6 +2472,16 @@
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
         <target state="new">"{1}" is an invalid value for the "{0}" parameter.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.HashMismatch">
+        <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
+        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <note>{StrBegin="MSB3952: "}</note>
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.InvalidInputParameters">
+        <source>MSB3951: Invalid input parameters. Either Hash or HashBase64 must be specified, but not both.</source>
+        <target state="new">MSB3951: Invalid input parameters. Either Hash or HashBase64 must be specified, but not both.</target>
+        <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
