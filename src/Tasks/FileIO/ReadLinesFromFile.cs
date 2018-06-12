@@ -2,11 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Collections;
-using System.Diagnostics;
-using System.Globalization;
-
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -18,28 +14,17 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class ReadLinesFromFile : TaskExtension
     {
-        private ITaskItem _file = null;
-        private ITaskItem[] _lines = Array.Empty<TaskItem>();
-
         /// <summary>
         /// File to read lines from.
         /// </summary>
         [Required]
-        public ITaskItem File
-        {
-            get { return _file; }
-            set { _file = value; }
-        }
+        public ITaskItem File { get; set; }
 
         /// <summary>
         /// Receives lines from file.
         /// </summary>
         [Output]
-        public ITaskItem[] Lines
-        {
-            get { return _lines; }
-            set { _lines = value; }
-        }
+        public ITaskItem[] Lines { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Execute the task.
@@ -52,13 +37,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (System.IO.File.Exists(File.ItemSpec))
                 {
-                    string[] textLines = null;
                     try
                     {
-                        textLines = System.IO.File.ReadAllLines(File.ItemSpec);
+                        string[] textLines = System.IO.File.ReadAllLines(File.ItemSpec);
 
-                        ArrayList nonEmptyLines = new ArrayList();
-                        char[] charsToTrim = new char[] { '\0', ' ', '\t' };
+                        var nonEmptyLines = new List<ITaskItem>();
+                        char[] charsToTrim = { '\0', ' ', '\t' };
 
                         foreach (string textLine in textLines)
                         {
@@ -75,28 +59,17 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        Lines = (ITaskItem[])nonEmptyLines.ToArray(typeof(ITaskItem));
+                        Lines = nonEmptyLines.ToArray();
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        LogError(_file, e, ref success);
+                        Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", File.ItemSpec, e.Message);
+                        success = false;
                     }
                 }
             }
 
             return success;
-        }
-
-        /// <summary>
-        /// Log an error.
-        /// </summary>
-        /// <param name="file">The being accessed</param>
-        /// <param name="e">The exception.</param>
-        /// <param name="success">Whether the task should return an error.</param>
-        private void LogError(ITaskItem fileName, Exception e, ref bool success)
-        {
-            Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", fileName.ItemSpec, e.Message);
-            success = false;
         }
     }
 }

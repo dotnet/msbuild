@@ -3,48 +3,34 @@
 
 using System;
 using System.Collections;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     internal class PackageCollection : IEnumerable
     {
-        private ArrayList _list;
-        private Hashtable _cultures;
-
-        public PackageCollection()
-        {
-            _list = new ArrayList();
-            _cultures = new Hashtable();
-        }
+        private readonly List<Package> _list = new List<Package>();
+        private readonly Dictionary<string, Package> _cultures = new Dictionary<string, Package>(StringComparer.OrdinalIgnoreCase);
 
         public Package Item(int index)
         {
-            return (Package)_list[index];
+            return _list[index];
         }
 
         public Package Package(string culture)
         {
-            if (_cultures.Contains(culture.ToLowerInvariant()))
-            {
-                return (Package)_cultures[culture.ToLowerInvariant()];
-            }
-
-            return null;
+            return _cultures.TryGetValue(culture, out Package package) ? package : null;
         }
 
-        public int Count
-        {
-            get { return _list.Count; }
-        }
+        public int Count => _list.Count;
 
         internal void Add(Package package)
         {
-            if (!_cultures.Contains(package.Culture.ToLowerInvariant()))
+            if (!_cultures.ContainsKey(package.Culture))
             {
                 _list.Add(package);
-                _cultures.Add(package.Culture.ToLowerInvariant(), package);
+                _cultures.Add(package.Culture, package);
             }
             else
             {

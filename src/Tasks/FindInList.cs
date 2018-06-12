@@ -15,15 +15,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class FindInList : TaskExtension
     {
-        // The list to search through
         private ITaskItem[] _list;
-        // Whether to match just the file part, or the full item spec
-        // The item found, if any
-        // The itemspec to find
-        // Whether to match case sensitively
-        // Default is case insensitive
-        // Whether to return the last match
-        // (default is the first match)
 
         /// <summary>
         /// The list to search through

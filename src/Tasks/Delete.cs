@@ -2,15 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
+using System.IO;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -21,50 +17,28 @@ namespace Microsoft.Build.Tasks
     {
         #region Properties
 
-        private ITaskItem[] _files = null;
-        private bool _canceling = false;
+        private ITaskItem[] _files;
+        private bool _canceling;
 
         [Required]
         public ITaskItem[] Files
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_files, "files");
+                ErrorUtilities.VerifyThrowArgumentNull(_files, nameof(Files));
                 return _files;
             }
 
-            set
-            {
-                _files = value;
-            }
+            set => _files = value;
         }
-
-        private bool _treatErrorsAsWarnings = false;
 
         /// <summary>
         /// When true, errors will be logged as warnings.
         /// </summary>
-        public bool TreatErrorsAsWarnings
-        {
-            get { return _treatErrorsAsWarnings; }
-            set { _treatErrorsAsWarnings = value; }
-        }
-
-        private ITaskItem[] _deletedFiles;
+        public bool TreatErrorsAsWarnings { get; set; } = false;
 
         [Output]
-        public ITaskItem[] DeletedFiles
-        {
-            get
-            {
-                return _deletedFiles;
-            }
-            set
-            {
-                _deletedFiles = value;
-            }
-        }
-
+        public ITaskItem[] DeletedFiles { get; set; }
 
         #endregion
 
@@ -83,8 +57,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            ArrayList deletedFilesList = new ArrayList();
-            HashSet<string> deletedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var deletedFilesList = new List<ITaskItem>();
+            var deletedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ITaskItem file in Files)
             {
@@ -125,7 +99,7 @@ namespace Microsoft.Build.Tasks
                 deletedFilesSet.Add(file.ItemSpec);
             }
             // convert the list of deleted files into an array of ITaskItems
-            DeletedFiles = (ITaskItem[])deletedFilesList.ToArray(typeof(ITaskItem));
+            DeletedFiles = deletedFilesList.ToArray();
             return !Log.HasLoggedErrors;
         }
 
@@ -134,7 +108,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="file">The file that wasn't deleted.</param>
         /// <param name="e">The exception.</param>
-        /// <param name="success">Whether the task should return an error.</param>
         private void LogError(ITaskItem file, Exception e)
         {
             if (TreatErrorsAsWarnings)

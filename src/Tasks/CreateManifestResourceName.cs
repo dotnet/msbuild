@@ -2,17 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-using System.Diagnostics;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Tasks
 {
@@ -24,11 +21,7 @@ namespace Microsoft.Build.Tasks
     {
         #region Properties
 
-        private ITaskItem[] _resourceFiles = null;
-        private string _rootNamespace = null;
-        private ITaskItem[] _manifestResourceNames = null;
-        private ITaskItem[] _resourceFilesWithManifestResourceNames = null;
-        private bool _prependCultureAsDirectory = true;
+        private ITaskItem[] _resourceFiles;
 
         [SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Taskitem", Justification = "Shipped this way in Dev11 Beta (go-live)")]
@@ -38,11 +31,7 @@ namespace Microsoft.Build.Tasks
         /// Should the culture name be prepended to the manifest resource name as a directory?
         /// This is true by default.
         /// </summary>
-        public bool PrependCultureAsDirectory
-        {
-            get { return _prependCultureAsDirectory; }
-            set { _prependCultureAsDirectory = value; }
-        }
+        public bool PrependCultureAsDirectory { get; set; } = true;
 
         /// <summary>
         /// The possibly dependent resource files.
@@ -52,20 +41,16 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_resourceFiles, "resourceFiles");
+                ErrorUtilities.VerifyThrowArgumentNull(_resourceFiles, nameof(ResourceFiles));
                 return _resourceFiles;
             }
-            set { _resourceFiles = value; }
+            set => _resourceFiles = value;
         }
 
         /// <summary>
         /// Rootnamespace to use for naming.
         /// </summary>
-        public string RootNamespace
-        {
-            get { return _rootNamespace; }
-            set { _rootNamespace = value; }
-        }
+        public string RootNamespace { get; set; } = null;
 
         /// <summary>
         /// The resulting manifest names.
@@ -73,34 +58,26 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
 
         [Output]
-        public ITaskItem[] ManifestResourceNames
-        {
-            get { return _manifestResourceNames; }
-        }
+        public ITaskItem[] ManifestResourceNames { get; private set; }
 
         /// <summary>
         /// The initial list of resource names, with additional metadata for manifest resource names
         /// </summary>
         [Output]
-        public ITaskItem[] ResourceFilesWithManifestResourceNames
-        {
-            get { return _resourceFilesWithManifestResourceNames; }
-            set { _resourceFilesWithManifestResourceNames = value; }
-        }
-        #endregion
+        public ITaskItem[] ResourceFilesWithManifestResourceNames { get; set; }
 
+        #endregion
 
         /// <summary>
         /// Method in the derived class that composes the manifest name.
         /// </summary>
         /// <param name="fileName">The file name of the dependent (usually a .resx)</param>
         /// <param name="linkFileName">The name of the file specified by the Link attribute.</param>
-        /// <param name="rootNamespace">The root namespace (usually from the project file). May be null</param>
+        /// <param name="rootNamespaceName">The root namespace (usually from the project file). May be null</param>
         /// <param name="dependentUponFileName">The file name of the parent of this dependency. May be null</param>
-        /// <param name="culture">The override culture of this resource, if any</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <returns>Returns the manifest name</returns>
-        abstract protected string CreateManifestName
+        protected abstract string CreateManifestName
         (
             string fileName,
             string linkFileName,
@@ -115,7 +92,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="fileName">Name of the candidate source file.</param>
         /// <returns>True, if this is a validate source file.</returns>
-        abstract protected bool IsSourceFile(string fileName);
+        protected abstract bool IsSourceFile(string fileName);
 
         /// <summary>
         /// Given a file path, return a stream on top of that path.
@@ -124,7 +101,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="mode">File mode</param>
         /// <param name="access">Access type</param>
         /// <returns>The FileStream</returns>
-        private Stream CreateFileStreamOverNewFileStream(string path, FileMode mode, FileAccess access)
+        private static Stream CreateFileStreamOverNewFileStream(string path, FileMode mode, FileAccess access)
         {
             return new FileStream(path, mode, access);
         }
@@ -140,8 +117,8 @@ namespace Microsoft.Build.Tasks
             CreateFileStream createFileStream
         )
         {
-            _manifestResourceNames = new TaskItem[ResourceFiles.Length];
-            _resourceFilesWithManifestResourceNames = new TaskItem[ResourceFiles.Length];
+            ManifestResourceNames = new ITaskItem[ResourceFiles.Length];
+            ResourceFilesWithManifestResourceNames = new ITaskItem[ResourceFiles.Length];
 
             bool success = true;
             int i = 0;
@@ -150,7 +127,7 @@ namespace Microsoft.Build.Tasks
             // Empty namespaces are allowed.
             if (RootNamespace != null)
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "CreateManifestResourceName.RootNamespace", _rootNamespace);
+                Log.LogMessageFromResources(MessageImportance.Low, "CreateManifestResourceName.RootNamespace", RootNamespace);
             }
             else
             {
@@ -163,10 +140,10 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     string fileName = resourceFile.ItemSpec;
-                    string dependentUpon = (string)resourceFile.GetMetadata(ItemMetadataNames.dependentUpon);
+                    string dependentUpon = resourceFile.GetMetadata(ItemMetadataNames.dependentUpon);
 
                     // Pre-log some information.
-                    bool isDependentOnSourceFile = (dependentUpon != null) && (dependentUpon.Length > 0) && IsSourceFile(dependentUpon);
+                    bool isDependentOnSourceFile = !string.IsNullOrEmpty(dependentUpon) && IsSourceFile(dependentUpon);
 
                     if (isDependentOnSourceFile)
                     {
@@ -205,20 +182,19 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Emit an item with our manifest name.
-                    _manifestResourceNames[i] = new TaskItem(resourceFile);
-                    _manifestResourceNames[i].ItemSpec = manifestName;
+                    ManifestResourceNames[i] = new TaskItem(resourceFile) { ItemSpec = manifestName };
 
                     // Emit a new item preserving the itemSpec of the resourceFile, but with new metadata for manifest resource name
-                    _resourceFilesWithManifestResourceNames[i] = new TaskItem(resourceFile);
-                    _resourceFilesWithManifestResourceNames[i].SetMetadata("ManifestResourceName", manifestName);
+                    ResourceFilesWithManifestResourceNames[i] = new TaskItem(resourceFile);
+                    ResourceFilesWithManifestResourceNames[i].SetMetadata("ManifestResourceName", manifestName);
 
                     // Add a LogicalName metadata to Non-Resx resources
                     // LogicalName isn't used for Resx resources because the ManifestResourceName metadata determines the filename of the 
                     // .resources file which then is used as the embedded resource manifest name                    
-                    if (String.IsNullOrEmpty(_resourceFilesWithManifestResourceNames[i].GetMetadata("LogicalName")) &&
-                        String.Equals(_resourceFilesWithManifestResourceNames[i].GetMetadata("Type"), "Non-Resx", StringComparison.OrdinalIgnoreCase))
+                    if (String.IsNullOrEmpty(ResourceFilesWithManifestResourceNames[i].GetMetadata("LogicalName")) &&
+                        String.Equals(ResourceFilesWithManifestResourceNames[i].GetMetadata("Type"), "Non-Resx", StringComparison.OrdinalIgnoreCase))
                     {
-                        _resourceFilesWithManifestResourceNames[i].SetMetadata("LogicalName", manifestName);
+                        ResourceFilesWithManifestResourceNames[i].SetMetadata("LogicalName", manifestName);
                     }
 
                     // Post-logging
@@ -242,10 +218,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if succeeded.</returns>
         public override bool Execute()
         {
-            return Execute
-            (
-                new CreateFileStream(CreateFileStreamOverNewFileStream)
-            );
+            return Execute(CreateFileStreamOverNewFileStream);
         }
 
         #endregion
@@ -282,15 +255,17 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static string MakeValidEverettSubFolderIdentifier(string subName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subName, "subName");
+            ErrorUtilities.VerifyThrowArgumentNull(subName, nameof(subName));
 
             if (subName.Length == 0)
+            {
                 return subName;
+            }
 
             // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
             // original - if the first character is an invalid first identifier character but a valid subsequent one,
             // we prepend an underscore to it.
-            StringBuilder everettId = new StringBuilder(subName.Length + 1);
+            var everettId = new StringBuilder(subName.Length + 1);
 
             // the first character has stronger restrictions than the rest
             if (!IsValidEverettIdFirstChar(subName[0]))
@@ -333,14 +308,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static string MakeValidEverettFolderIdentifier(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name, "name");
+            ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
 
             // give string length to avoid reallocations; +1 since the resulting string may be one char longer than the
             // original - if the name is a single underscore we add another underscore to it
-            StringBuilder everettId = new StringBuilder(name.Length + 1);
+            var everettId = new StringBuilder(name.Length + 1);
 
             // split folder name into subnames separated by '.', if any
-            string[] subNames = name.Split(new char[] { '.' });
+            string[] subNames = name.Split('.');
 
             // convert each subname separately
             everettId.Append(MakeValidEverettSubFolderIdentifier(subNames[0]));
@@ -353,7 +328,9 @@ namespace Microsoft.Build.Tasks
 
             // folder name cannot be a single underscore - add another underscore to it
             if (everettId.ToString() == "_")
+            {
                 everettId.Append('_');
+            }
 
             return everettId.ToString();
         }
@@ -362,16 +339,14 @@ namespace Microsoft.Build.Tasks
         /// This method is provided for compatibility with Everett which used to convert parts of resource names into
         /// valid identifiers
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
         public static string MakeValidEverettIdentifier(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name, "name");
+            ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
 
-            StringBuilder everettId = new StringBuilder(name.Length);
+            var everettId = new StringBuilder(name.Length);
 
             // split the name into folder names
-            string[] subNames = name.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
+            string[] subNames = name.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
             // convert every folder name
             everettId.Append(MakeValidEverettFolderIdentifier(subNames[0]));

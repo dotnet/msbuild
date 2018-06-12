@@ -3,12 +3,12 @@
 
 using Microsoft.Build.Shared;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     /// <summary>
     /// This class is the top-level object for the bootstrapper system.
     /// </summary>
-    [ComVisibleAttribute(true), GuidAttribute("1D9FE38A-0226-4b95-9C6B-6DFFA2236270"), ClassInterface(ClassInterfaceType.None)]
+    [ComVisible(true), Guid("1D9FE38A-0226-4b95-9C6B-6DFFA2236270"), ClassInterface(ClassInterfaceType.None)]
     public class BootstrapperBuilder : IBootstrapperBuilder
     {
         private static readonly bool s_logging = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSPLOG"));
@@ -32,13 +32,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         private XmlDocument _document;
 
         private XmlNamespaceManager _xmlNamespaceManager;
-        private ProductCollection _products = new ProductCollection();
-        private Hashtable _cultures = new Hashtable();
-        private Hashtable _validationResults = new Hashtable();
+        private readonly ProductCollection _products = new ProductCollection();
+        private readonly Dictionary<string, XmlNode> _cultures = new Dictionary<string, XmlNode>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, ProductValidationResults> _validationResults = new Dictionary<string, ProductValidationResults>(StringComparer.Ordinal);
         private BuildResults _results;
         private BuildResults _loopDependenciesWarnings;
-        private bool _fValidate = true;
-        private bool _fInitialized = false;
+        private bool _fInitialized;
 
         private const string SETUP_EXE = "setup.exe";
         private const string SETUP_BIN = "setup.bin";
@@ -92,7 +91,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// <value>Path to bootstrapper files.</value>
         public string Path
         {
-            get { return _path; }
+            get => _path;
             set
             {
                 if (!_fInitialized || string.Compare(_path, value, StringComparison.OrdinalIgnoreCase) != 0)
@@ -111,7 +110,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             get
             {
                 if (!_fInitialized)
+                {
                     Refresh();
+                }
 
                 return _products;
             }
@@ -140,12 +141,18 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
 
                 if (!_fInitialized)
+                {
                     Refresh();
+                }
 
                 if (String.IsNullOrEmpty(settings.Culture))
+                {
                     settings.Culture = MapLCIDToCultureName(settings.LCID);
+                }
                 if (String.IsNullOrEmpty(settings.FallbackCulture))
+                {
                     settings.FallbackCulture = MapLCIDToCultureName(settings.FallbackLCID);
+                }
 
                 if (String.IsNullOrEmpty(settings.Culture) || settings.Culture == "*")
                 {
@@ -154,7 +161,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 AddBuiltProducts(settings);
 
-                ArrayList componentFilesCopied = new ArrayList();
+                var componentFilesCopied = new List<string>();
 
                 // Copy setup.bin to the output directory
                 string strOutputExe = System.IO.Path.Combine(settings.OutputPath, SETUP_EXE);
@@ -164,7 +171,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     return _results;
                 }
 
-                ResourceUpdater resourceUpdater = new ResourceUpdater();
+                var resourceUpdater = new ResourceUpdater();
 
                 // Build up the String table for setup.exe
                 if (!BuildResources(settings, resourceUpdater))
@@ -190,11 +197,13 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 // Key: File hash, Value: A DictionaryEntry whose Key is "EULAx" and value is a 
                 // fully qualified path to a eula. It can be any eula that matches the hash.
-                Hashtable eulas = new Hashtable();
+                var eulas = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.Ordinal);
 
                 // Copy package files, add each Package config info to the config file
                 if (!BuildPackages(settings, configElement, resourceUpdater, componentFilesCopied, eulas))
+                {
                     return _results;
+                }
 
                 // Transform the configuration xml into something the bootstrapper will understand
                 DumpXmlToFile(configElement, "bootstrapper.cfg.xml");
@@ -203,17 +212,16 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 DumpStringToFile(config, "bootstrapper.cfg", false);
 
                 // Put eulas in the resource stream
-                foreach (object obj in eulas.Values)
+                foreach (KeyValuePair<string, string> de in eulas.Values)
                 {
-                    DictionaryEntry de = (DictionaryEntry)obj;
                     string data;
-                    FileInfo fi = new System.IO.FileInfo(de.Value.ToString());
+                    var fi = new FileInfo(de.Value);
                     using (FileStream fs = fi.OpenRead())
                     {
                         data = new StreamReader(fs).ReadToEnd();
                     }
 
-                    resourceUpdater.AddStringResource(44, de.Key.ToString(), data);
+                    resourceUpdater.AddStringResource(44, de.Key, data);
                 }
 
                 resourceUpdater.AddStringResource(44, "COUNT", eulas.Count.ToString(CultureInfo.InvariantCulture));
@@ -235,7 +243,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return _results;
         }
 
-        private void Merge(Dictionary<string, Product> output, Dictionary<string, Product> input)
+        private static void Merge(Dictionary<string, Product> output, Dictionary<string, Product> input)
         {
             foreach (Product product in input.Values)
             {
@@ -243,18 +251,20 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private void AddProduct(Dictionary<string, Product> output, Product product)
+        private static void AddProduct(Dictionary<string, Product> output, Product product)
         {
             if (!output.ContainsKey(product.ProductCode.ToLowerInvariant()))
+            {
                 output.Add(product.ProductCode.ToLowerInvariant(), product);
+            }
         }
 
         private void AddBuiltProducts(BuildSettings settings)
         {
-            Dictionary<string, ProductBuilder> builtProducts = new Dictionary<string, ProductBuilder>();
-            Dictionary<string, Product> productsAndIncludes = new Dictionary<string, Product>();
+            var builtProducts = new Dictionary<string, ProductBuilder>();
+            var productsAndIncludes = new Dictionary<string, Product>();
 
-            if (_loopDependenciesWarnings != null && _loopDependenciesWarnings.Messages != null)
+            if (_loopDependenciesWarnings?.Messages != null)
             {
                 foreach (BuildMessage message in _loopDependenciesWarnings.Messages)
                 {
@@ -314,7 +324,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
                 }
 
-                foreach (ArrayList missingDependecies in builder.Product.MissingDependencies)
+                foreach (List<string> missingDependecies in builder.Product.MissingDependencies)
                 {
                     if (missingDependecies.Count == 1)
                     {
@@ -322,7 +332,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
                     else
                     {
-                        StringBuilder missingProductCodes = new StringBuilder();
+                        var missingProductCodes = new StringBuilder();
                         foreach (string productCode in missingDependecies)
                         {
                             missingProductCodes.Append(productCode);
@@ -399,7 +409,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// <param name="culture">The culture used to build the bootstrapper</param>
         /// <param name="fallbackCulture">The fallback culture used to build the bootstrapper</param>
         /// <param name="componentsLocation">How the bootstrapper would package the selected components</param>
-        /// <returns></returns>
         public string[] GetOutputFolders(string[] productCodes, string culture, string fallbackCulture, ComponentsLocation componentsLocation)
         {
             if (!_fInitialized)
@@ -407,8 +416,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 Refresh();
             }
 
-            Hashtable folders = new Hashtable();
-            BuildSettings settings = new BuildSettings();
+            var folders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var settings = new BuildSettings();
             string invariantPath = PackagePath.ToLowerInvariant();
             invariantPath = Util.AddTrailingChar(invariantPath, System.IO.Path.DirectorySeparatorChar);
             settings.CopyComponents = false;
@@ -423,12 +432,13 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             foreach (string productCode in productCodes)
             {
                 Product product = Products.Product(productCode);
-                if (product == null)
-                    continue;
-                settings.ProductBuilders.Add(product.ProductBuilder);
+                if (product != null)
+                {
+                    settings.ProductBuilders.Add(product.ProductBuilder);
+                }
             }
-            ArrayList files = new ArrayList();
 
+            var files = new List<string>();
             BuildPackages(settings, null, null, files, null);
 
             foreach (string file in files)
@@ -436,23 +446,24 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 string folder = System.IO.Path.GetDirectoryName(file);
                 if (folder.Substring(0, invariantPath.Length).ToLowerInvariant().CompareTo(invariantPath) == 0)
                 {
-                    string relPath = folder.Substring(invariantPath.Length).ToLowerInvariant();
+                    string relPath = folder.Substring(invariantPath.Length);
                     if (!folders.Contains(relPath))
-                        folders.Add(relPath, relPath);
+                    {
+                        folders.Add(relPath);
+                    }
                 }
             }
 
-            ArrayList list = new ArrayList(folders.Values);
-            string[] a = new string[list.Count];
-            list.CopyTo(a, 0);
-            return a;
+            return folders.ToArray();
         }
 
         internal bool ContainsCulture(string culture)
         {
             if (!_fInitialized)
+            {
                 Refresh();
-            return _cultures.Contains(culture);
+            }
+            return _cultures.ContainsKey(culture);
         }
 
         internal string[] Cultures
@@ -460,36 +471,23 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             get
             {
                 if (!_fInitialized)
+                {
                     Refresh();
+                }
 
-                ArrayList list = new ArrayList(_cultures.Values);
+                List<string> list = _cultures.Values.Select(v => v.ToString()).ToList();
                 list.Sort();
-                string[] a = new string[list.Count];
-                list.CopyTo(a, 0);
-                return a;
+                return list.ToArray();
             }
         }
 
-        internal bool Validate
-        {
-            get { return _fValidate; }
-            set { _fValidate = value; }
-        }
+        internal bool Validate { get; set; } = true;
 
-        private string BootstrapperPath
-        {
-            get { return System.IO.Path.Combine(Path, ENGINE_PATH); }
-        }
+        private string BootstrapperPath => System.IO.Path.Combine(Path, ENGINE_PATH);
 
-        private string PackagePath
-        {
-            get { return System.IO.Path.Combine(Path, PACKAGE_PATH); }
-        }
+        private string PackagePath => System.IO.Path.Combine(Path, PACKAGE_PATH);
 
-        private string SchemaPath
-        {
-            get { return System.IO.Path.Combine(Path, SCHEMA_PATH); }
-        }
+        private string SchemaPath => System.IO.Path.Combine(Path, SCHEMA_PATH);
 
         private void Refresh()
         {
@@ -521,12 +519,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     string resourceFile = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
                     if (File.Exists(resourceFile))
                     {
-                        XmlDocument resourceDoc = new XmlDocument();
+                        var resourceDoc = new XmlDocument();
                         try
                         {
-                            XmlReaderSettings xrs = new XmlReaderSettings();
-                            xrs.DtdProcessing = DtdProcessing.Ignore;
-                            using (XmlReader xr = XmlReader.Create(resourceFile, xrs))
+                            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                            using (var xr = XmlReader.Create(resourceFile, xrs))
                             {
                                 resourceDoc.Load(xr);
                             }
@@ -539,29 +536,27 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         }
 
                         XmlNode rootNode = resourceDoc.SelectSingleNode("Resources");
-                        if (rootNode != null)
+                        XmlAttribute cultureAttribute = (XmlAttribute) rootNode?.Attributes.GetNamedItem("Culture");
+                        if (cultureAttribute != null)
                         {
-                            XmlAttribute cultureAttribute = (XmlAttribute)rootNode.Attributes.GetNamedItem("Culture");
-                            if (cultureAttribute != null)
+                            XmlNode stringsNode = rootNode.SelectSingleNode("Strings");
+                            XmlNode stringNode = stringsNode?.SelectSingleNode(string.Format(CultureInfo.InvariantCulture, "String[@Name='{0}']", cultureAttribute.Value));
+                            if (stringNode != null)
                             {
-                                XmlNode stringsNode = rootNode.SelectSingleNode("Strings");
-                                if (stringsNode != null)
-                                {
-                                    XmlNode stringNode = stringsNode.SelectSingleNode(string.Format(CultureInfo.InvariantCulture, "String[@Name='{0}']", cultureAttribute.Value));
-                                    if (stringNode != null)
-                                    {
-                                        string culture = stringNode.InnerText;
+                                string culture = stringNode.InnerText;
 
-                                        XmlNode resourcesNode = rootNode.OwnerDocument.ImportNode(rootNode, true);
-                                        resourcesNode.Attributes.RemoveNamedItem("Culture");
-                                        XmlAttribute newAttribute = (XmlAttribute)rootNode.OwnerDocument.ImportNode(cultureAttribute, false);
-                                        newAttribute.Value = stringNode.InnerText;
-                                        resourcesNode.Attributes.Append(newAttribute);
-                                        if (!_cultures.Contains(culture.ToLowerInvariant()))
-                                            _cultures.Add(culture.ToLowerInvariant(), resourcesNode);
-                                        else
-                                            Debug.Fail("Already found resources for culture " + stringNode.InnerText);
-                                    }
+                                XmlNode resourcesNode = rootNode.OwnerDocument.ImportNode(rootNode, true);
+                                resourcesNode.Attributes.RemoveNamedItem("Culture");
+                                var newAttribute = (XmlAttribute)rootNode.OwnerDocument.ImportNode(cultureAttribute, false);
+                                newAttribute.Value = stringNode.InnerText;
+                                resourcesNode.Attributes.Append(newAttribute);
+                                if (!_cultures.ContainsKey(culture))
+                                {
+                                    _cultures.Add(culture, resourcesNode);
+                                }
+                                else
+                                {
+                                    Debug.Fail("Already found resources for culture " + stringNode.InnerText);
                                 }
                             }
                         }
@@ -597,9 +592,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
             _document.AppendChild(rootElement);
 
-            Hashtable availableProducts = new Hashtable();
+            var availableProducts = new Dictionary<string, Product>(StringComparer.Ordinal);
             // A second copy of all the project which will get destroyed during the generation of the build order
-            Hashtable buildQueue = new Hashtable();
+            var buildQueue = new Dictionary<string, Product>(StringComparer.Ordinal);
 
             XmlNodeList productsFound = rootElement.SelectNodes(BOOTSTRAPPER_PREFIX + ":Product", _xmlNamespaceManager);
             foreach (XmlNode productNode in productsFound)
@@ -629,36 +624,34 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             OrderProducts(availableProducts, buildQueue);
         }
 
-        private void AddDependencies(Product p, Hashtable availableProducts)
+        private void AddDependencies(Product p, Dictionary<string, Product> availableProducts)
         {
             foreach (string relatedProductCode in SelectRelatedProducts(p, "DependsOnProduct"))
             {
-                if (availableProducts.Contains(relatedProductCode))
+                if (availableProducts.TryGetValue(relatedProductCode, out Product product))
                 {
-                    p.AddDependentProduct((Product)availableProducts[relatedProductCode]);
+                    p.AddDependentProduct(product);
                 }
                 else
                 {
-                    ArrayList missingDependencies = new ArrayList();
-                    missingDependencies.Add(relatedProductCode);
-                    p.AddMissingDependency(missingDependencies);
+                    p.AddMissingDependency(new List<string> { relatedProductCode });
                 }
             }
 
             foreach (XmlNode eitherProductNode in SelectEitherProducts(p))
             {
-                List<Product> foundDependencies = new List<Product>();
-                ArrayList allDependencies = new ArrayList();
+                var foundDependencies = new List<Product>();
+                var allDependencies = new List<string>();
 
                 foreach (XmlNode relatedProductNode in eitherProductNode.SelectNodes(String.Format(CultureInfo.InvariantCulture, "{0}:DependsOnProduct", BOOTSTRAPPER_PREFIX), _xmlNamespaceManager))
                 {
-                    XmlAttribute relatedProductAttribute = (XmlAttribute)(relatedProductNode.Attributes.GetNamedItem("Code"));
+                    var relatedProductAttribute = (XmlAttribute)(relatedProductNode.Attributes.GetNamedItem("Code"));
                     if (relatedProductAttribute != null)
                     {
                         string dependency = relatedProductAttribute.Value;
-                        if (availableProducts.Contains(dependency))
+                        if (availableProducts.TryGetValue(dependency, out Product product))
                         {
-                            foundDependencies.Add((Product)availableProducts[dependency]);
+                            foundDependencies.Add(product);
                         }
                         allDependencies.Add(dependency);
                     }
@@ -678,20 +671,20 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private void AddIncludes(Product p, Hashtable availableProducts)
+        private void AddIncludes(Product p, Dictionary<string, Product> availableProducts)
         {
             foreach (string relatedProductCode in SelectRelatedProducts(p, "IncludesProduct"))
             {
-                if (availableProducts.Contains(relatedProductCode))
+                if (availableProducts.TryGetValue(relatedProductCode, out Product product))
                 {
-                    p.Includes.Add((Product)availableProducts[relatedProductCode]);
+                    p.Includes.Add(product);
                 }
             }
         }
 
         private string[] SelectRelatedProducts(Product p, string nodeName)
         {
-            ArrayList list = new ArrayList();
+            var list = new List<string>();
 
             XmlNodeList relatedProducts = p.Node.SelectNodes(string.Format(CultureInfo.InvariantCulture, "{0}:Package/{1}:RelatedProducts/{2}:{3}", BOOTSTRAPPER_PREFIX, BOOTSTRAPPER_PREFIX, BOOTSTRAPPER_PREFIX, nodeName), _xmlNamespaceManager);
             if (relatedProducts != null)
@@ -706,9 +699,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
             }
 
-            string[] a = new string[list.Count];
-            list.CopyTo(a, 0);
-            return a;
+            return list.ToArray();
         }
 
         private XmlNodeList SelectEitherProducts(Product p)
@@ -717,19 +708,20 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return eitherProducts;
         }
 
-        private void OrderProducts(Hashtable availableProducts, Hashtable buildQueue)
+        private void OrderProducts(Dictionary<string, Product> availableProducts, Dictionary<string, Product> buildQueue)
         {
             bool loopDetected = false;
             _loopDependenciesWarnings = new BuildResults();
-            StringBuilder productsInLoop = new StringBuilder();
+            var productsInLoop = new StringBuilder();
+            var productsToRemove = new List<string>();
             while (buildQueue.Count > 0)
             {
-                List<string> productsToRemove = new List<string>();
+                productsToRemove.Clear();
                 foreach (Product p in buildQueue.Values)
                 {
                     if (p.Dependencies.Count == 0)
                     {
-                        _products.Add((Product)availableProducts[p.ProductCode]);
+                        _products.Add(availableProducts[p.ProductCode]);
                         RemoveDependency(buildQueue, p);
                         productsToRemove.Add(p.ProductCode);
                     }
@@ -750,9 +742,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 // of the first project in the queue;
                 if (buildQueue.Count > 0 && productsToRemove.Count == 0)
                 {
-                    IDictionaryEnumerator enumerator = buildQueue.GetEnumerator();
-                    enumerator.MoveNext();
-                    ((Product)enumerator.Value).Dependencies.RemoveAll(m => true);
+                    Product p = buildQueue.Values.First();
+                    p.Dependencies.RemoveAll(m => true);
                     loopDetected = true;
                 }
 
@@ -768,7 +759,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private void RemoveDependency(Hashtable availableProducts, Product product)
+        private static void RemoveDependency(Dictionary<string, Product> availableProducts, Product product)
         {
             foreach (Product p in availableProducts.Values)
             {
@@ -815,8 +806,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 if (fileExists)
                 {
-                    XmlTextReader xmlTextReader = new XmlTextReader(filePath);
-                    xmlTextReader.DtdProcessing = DtdProcessing.Ignore;
+                    var xmlTextReader = new XmlTextReader(filePath) { DtdProcessing = DtdProcessing.Ignore };
 
                     XmlReader xmlReader = xmlTextReader;
 
@@ -825,8 +815,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 #pragma warning disable 618 // Using XmlValidatingReader. TODO: We need to switch to using XmlReader.Create() with validation.
                         var validatingReader = new XmlValidatingReader(xmlReader);
 #pragma warning restore 618
-                        XmlReaderSettings xrSettings = new XmlReaderSettings();
-                        xrSettings.DtdProcessing = DtdProcessing.Ignore;
+                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                         using (XmlReader xr = XmlReader.Create(schemaPath, xrSettings))
                         {
                             try
@@ -884,7 +873,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     // Note that the xml document's default namespace must match the schema namespace
                     //   or none of our SelectNodes/SelectSingleNode calls will succeed
                     Debug.Assert(xmlDocument.DocumentElement != null &&
-                    string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal),
+                        string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal),
                         "'" + xmlDocument.DocumentElement.NamespaceURI + "' is not '" + schemaNamespace + "'...");
 
                     if ((xmlDocument.DocumentElement == null) ||
@@ -908,7 +897,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 string strBaseManifestFilename = System.IO.Path.Combine(strSubDirectoryFullPath, ROOT_MANIFEST_FILE);
                 string strBaseManifestSchemaFileName = System.IO.Path.Combine(SchemaPath, MANIFEST_FILE_SCHEMA);
 
-                ProductValidationResults productValidationResults = new ProductValidationResults(strBaseManifestFilename);
+                var productValidationResults = new ProductValidationResults(strBaseManifestFilename);
 
                 // open the XmlDocument for this product.xml
                 XmlDocument productDoc = LoadAndValidateXmlDocument(strBaseManifestFilename, false, strBaseManifestSchemaFileName, BOOTSTRAPPER_NAMESPACE, productValidationResults);
@@ -920,7 +909,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     if (baseNode != null)
                     {
                         // Get the ProductCode attribute for this product
-                        XmlAttribute productCodeAttribute = (XmlAttribute)(baseNode.Attributes.GetNamedItem("ProductCode"));
+                        var productCodeAttribute = (XmlAttribute)(baseNode.Attributes.GetNamedItem("ProductCode"));
                         if (productCodeAttribute != null)
                         {
                             // now add it to our full document if it's not already present
@@ -931,7 +920,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                             }
                             else
                             {
-                                productValidationResults = (ProductValidationResults)_validationResults[productCodeAttribute];
+                                _validationResults.TryGetValue(
+                                    productCodeAttribute.Value,
+                                    out productValidationResults);
                             }
 
                             // Fix-up the <PackageFiles> of the base node to include the SourcePath and TargetPath
@@ -953,7 +944,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                             {
                                 // The base node would get destroyed as we build-up this new node.
                                 // Thus, we want to use a copy of the baseNode
-                                XmlElement baseElement = (XmlElement)(_document.ImportNode(baseNode, true));
+                                var baseElement = (XmlElement)(_document.ImportNode(baseNode, true));
 
                                 string strLangManifestFilename = System.IO.Path.Combine(strLanguageDirectory, CHILD_MANIFEST_FILE);
                                 string strLangManifestSchemaFileName = System.IO.Path.Combine(SchemaPath, MANIFEST_FILE_SCHEMA);
@@ -966,7 +957,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                                     Debug.Assert(langDoc != null, "we couldn't load package.xml in '" + strLangManifestFilename + "'...?");
                                     if (langDoc == null)
+                                    {
                                         continue;
+                                    }
 
                                     XmlNode langNode = langDoc.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":Package", _xmlNamespaceManager);
                                     Debug.Assert(langNode != null, string.Format(CultureInfo.CurrentCulture, "Unable to find a package node in {0}", strLangManifestFilename));
@@ -984,8 +977,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                         {
                                             int nStartIndex = packagePath.Length;
 
-                                            if ((strLanguageDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
+                                            if ((strLanguageDirectory.ToCharArray())[nStartIndex] ==
+                                                System.IO.Path.DirectorySeparatorChar)
+                                            {
                                                 nStartIndex++;
+                                            }
                                             UpdatePackageFileNodes(packageFilesNodePackage, strLanguageDirectory, strSubDirectory);
 
                                             ReplacePackageFileAttributes(checksNode, "PackageFile", packageFilesNodePackage, "PackageFile", "OldName", "Name");
@@ -1010,7 +1006,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                                         foreach (XmlAttribute attribute in baseElement.Attributes)
                                         {
-                                            XmlAttribute convertedAttribute = (XmlAttribute)(mergeElement.OwnerDocument.ImportNode(attribute, false));
+                                            var convertedAttribute = (XmlAttribute)(mergeElement.OwnerDocument.ImportNode(attribute, false));
                                             MergeAttribute(mergeElement, convertedAttribute);
                                         }
 
@@ -1031,8 +1027,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                         AppendNode(baseElement, "RelatedProducts", mergeElement);
 
                                         // Create a unique identifier for this package
-                                        XmlAttribute cultureAttribute = (XmlAttribute)mergeElement.Attributes.GetNamedItem("Culture");
-                                        if (cultureAttribute != null && !String.IsNullOrEmpty(cultureAttribute.Value))
+                                        var cultureAttribute = (XmlAttribute)mergeElement.Attributes.GetNamedItem("Culture");
+                                        if (!String.IsNullOrEmpty(cultureAttribute?.Value))
                                         {
                                             string packageCode = productCodeAttribute.Value + "." + cultureAttribute.Value;
                                             AddAttribute(mergeElement, "PackageCode", packageCode);
@@ -1052,7 +1048,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                             if (packageAdded)
                             {
                                 rootElement.AppendChild(productNode);
-                                if (!_validationResults.Contains(productCodeAttribute.Value))
+                                if (!_validationResults.ContainsKey(productCodeAttribute.Value))
                                 {
                                     _validationResults.Add(productCodeAttribute.Value, productValidationResults);
                                 }
@@ -1069,7 +1065,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 Debug.Fail(ex.Message);
             }
-            catch (System.IO.IOException ex)
+            catch (IOException ex)
             {
                 Debug.Fail(ex.Message);
             }
@@ -1086,7 +1082,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             Product product = null;
             if (!String.IsNullOrEmpty(productCode))
             {
-                ProductValidationResults results = (ProductValidationResults)_validationResults[productCode];
+                _validationResults.TryGetValue(productCode, out ProductValidationResults results);
 
                 XmlNode packageFilesNode = node.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":Package/" + BOOTSTRAPPER_PREFIX + ":PackageFiles", _xmlNamespaceManager);
                 string copyAllPackageFiles = String.Empty;
@@ -1112,11 +1108,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return null;
         }
 
-        private Package CreatePackage(XmlNode node, Product product)
+        private static Package CreatePackage(XmlNode node, Product product)
         {
             string culture = ReadAttribute(node, "Culture");
 
-            XmlValidationResults results = null;
+            XmlValidationResults results;
             if (culture != null)
             {
                 results = product.GetPackageValidationResults(culture);
@@ -1144,20 +1140,22 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 // replace attributes on the node itself
                 XmlAttribute attrib = targetNode.Attributes[attributeName];
                 if (attrib != null && attrib.Value == oldValue)
+                {
                     attrib.Value = newValue;
+                }
             }
         }
 
-        private void ReplaceAttribute(XmlNode targetNode, string attributeName, string attributeValue)
+        private static void ReplaceAttribute(XmlNode targetNode, string attributeName, string attributeValue)
         {
             XmlAttribute attribute = targetNode.OwnerDocument.CreateAttribute(attributeName);
             attribute.Value = attributeValue;
             targetNode.Attributes.SetNamedItem(attribute);
         }
 
-        private void MergeAttribute(XmlNode targetNode, XmlAttribute attribute)
+        private static void MergeAttribute(XmlNode targetNode, XmlAttribute attribute)
         {
-            XmlAttribute targetAttribute = (XmlAttribute)(targetNode.Attributes.GetNamedItem(attribute.Name));
+            var targetAttribute = (XmlAttribute)(targetNode.Attributes.GetNamedItem(attribute.Name));
             if (targetAttribute == null)
             {
                 // This node does not already contain the attribute.  Add the parameter
@@ -1171,7 +1169,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
             foreach (XmlNode packageFileNode in packageFileNodeList)
             {
-                XmlAttribute nameAttribute = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("Name"));
+                var nameAttribute = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("Name"));
 
                 // the name attribute is required -- we can't do anything if it's not present
                 if (nameAttribute != null)
@@ -1314,12 +1312,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 XmlNodeList packageFileNodeList = node.SelectNodes("//" + BOOTSTRAPPER_PREFIX + ":*[@PackageFile]", _xmlNamespaceManager);
                 foreach (XmlNode currentNode in packageFileNodeList)
                 {
-                    XmlAttribute attribute = (XmlAttribute)(currentNode.Attributes.GetNamedItem("PackageFile"));
+                    var attribute = (XmlAttribute)(currentNode.Attributes.GetNamedItem("PackageFile"));
                     string strQuery = BOOTSTRAPPER_PREFIX + ":PackageFile[@Name='" + attribute.Value + "']";
                     XmlNode packageFileNode = packageFilesNode.SelectSingleNode(strQuery, _xmlNamespaceManager);
                     if (packageFileNode != null)
                     {
-                        XmlAttribute targetPathAttribute = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("TargetPath"));
+                        var targetPathAttribute = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("TargetPath"));
                         attribute.Value = targetPathAttribute.Value;
                     }
                 }
@@ -1329,8 +1327,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         private void ReplaceStrings(XmlNode node)
         {
             XmlNode stringsNode = node.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":Strings", _xmlNamespaceManager);
-            XmlNode stringNode;
-            XmlAttribute attribute;
 
             if (stringsNode != null)
             {
@@ -1356,8 +1352,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 XmlNodeList stringKeyNodeList = node.SelectNodes("//" + BOOTSTRAPPER_PREFIX + ":*[@String]", _xmlNamespaceManager);
                 foreach (XmlNode currentNode in stringKeyNodeList)
                 {
-                    attribute = (XmlAttribute)(currentNode.Attributes.GetNamedItem("String"));
-                    stringNode = stringsNode.SelectSingleNode(string.Format(CultureInfo.InvariantCulture, stringNodeLookupTemplate, attribute.Value), _xmlNamespaceManager);
+                    var attribute = (XmlAttribute)(currentNode.Attributes.GetNamedItem("String"));
+                    XmlNode stringNode = stringsNode.SelectSingleNode(string.Format(CultureInfo.InvariantCulture, stringNodeLookupTemplate, attribute.Value), _xmlNamespaceManager);
                     if (stringNode != null)
                     {
                         AddAttribute(currentNode, "Text", stringNode.InnerText);
@@ -1370,7 +1366,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private bool BuildPackages(BuildSettings settings, XmlElement configElement, ResourceUpdater resourceUpdater, ArrayList filesCopied, Hashtable eulas)
+        private bool BuildPackages(BuildSettings settings, XmlElement configElement, ResourceUpdater resourceUpdater, List<string> filesCopied, Dictionary<string, KeyValuePair<string, string>> eulas)
         {
             bool fSucceeded = true;
 
@@ -1421,11 +1417,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 XmlNode installChecksNode = node.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":InstallChecks", _xmlNamespaceManager);
                 foreach (XmlNode packageFileNode in packageFileNodes)
                 {
-                    XmlAttribute packageFileSource = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("SourcePath"));
-                    XmlAttribute packageFileDestination = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("TargetPath"));
-                    XmlAttribute packageFileName = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("Name"));
-                    XmlAttribute packageFileCopy = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("CopyOnBuild"));
-                    if (packageFileSource != null && eulaAttribute != null && !String.IsNullOrEmpty(eulaAttribute.Value) && packageFileSource.Value == eulaAttribute.Value)
+                    var packageFileSource = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("SourcePath"));
+                    var packageFileDestination = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("TargetPath"));
+                    var packageFileName = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("Name"));
+                    var packageFileCopy = (XmlAttribute)(packageFileNode.Attributes.GetNamedItem("CopyOnBuild"));
+                    if (packageFileSource != null && !String.IsNullOrEmpty(eulaAttribute?.Value) && packageFileSource.Value == eulaAttribute.Value)
                     {
                         // need to remove EULA from the package file list
                         XmlNode packageFilesNode = node.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":PackageFiles", _xmlNamespaceManager);
@@ -1437,8 +1433,16 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         (packageFileName != null))
                     {
                         // Calculate the hash of this file and add it to the PackageFileNode
-                        if (!AddVerificationInformation(packageFileNode, packageFileSource.Value, packageFileName.Value, builder, settings, _results))
+                        if (!AddVerificationInformation(
+                            packageFileNode,
+                            packageFileSource.Value,
+                            packageFileName.Value,
+                            builder,
+                            settings,
+                            _results))
+                        {
                             fSucceeded = false;
+                        }
                     }
 
                     if ((packageFileSource != null) && (packageFileDestination != null) &&
@@ -1456,8 +1460,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                             {
                                 if (!File.Exists(packageFileSource.Value))
                                 {
-                                    if (_results != null)
-                                        _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageResourceFileNotFound", packageFileSource.Value, builder.Name));
+                                    _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageResourceFileNotFound", packageFileSource.Value, builder.Name));
                                     fSucceeded = false;
                                     continue;
                                 }
@@ -1475,8 +1478,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                     {
                                         if (!File.Exists(packageFileSource.Value))
                                         {
-                                            if (_results != null)
-                                                _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageFileNotFound", packageFileDestination.Value, builder.Name));
+                                            _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageFileNotFound", packageFileDestination.Value, builder.Name));
                                             fSucceeded = false;
                                             continue;
                                         }
@@ -1486,29 +1488,25 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                     }
                                     catch (UnauthorizedAccessException ex)
                                     {
-                                        if (_results != null)
-                                            _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
+                                        _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
                                         fSucceeded = false;
                                         continue;
                                     }
                                     catch (IOException ex)
                                     {
-                                        if (_results != null)
-                                            _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
+                                        _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
                                         fSucceeded = false;
                                         continue;
                                     }
                                     catch (ArgumentException ex)
                                     {
-                                        if (_results != null)
-                                            _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
+                                        _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
                                         fSucceeded = false;
                                         continue;
                                     }
                                     catch (NotSupportedException ex)
                                     {
-                                        if (_results != null)
-                                            _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
+                                        _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.CopyPackageError", packageFileSource.Value, builder.Name, ex.Message));
                                         fSucceeded = false;
                                         continue;
                                     }
@@ -1521,7 +1519,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                                 // Add the file size to the PackageFileNode
                                 XmlAttribute sizeAttribute = packageFileNode.OwnerDocument.CreateAttribute("Size");
-                                FileInfo fi = new FileInfo(packageFileSource.Value);
+                                var fi = new FileInfo(packageFileSource.Value);
                                 sizeAttribute.Value = "" + (fi.Length.ToString(CultureInfo.InvariantCulture));
                                 MergeAttribute(packageFileNode, sizeAttribute);
                             }
@@ -1529,26 +1527,26 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     }
                 }
                 // Add the Eula attribute correctly
-                if (eulas != null && eulaAttribute != null && !String.IsNullOrEmpty(eulaAttribute.Value))
+                if (eulas != null && !String.IsNullOrEmpty(eulaAttribute?.Value))
                 {
                     if (File.Exists(eulaAttribute.Value))
                     {
-                        // eulas[GetFileHash(eulaAttribute.Value)] = eulaAttribute.Value;
                         string key = GetFileHash(eulaAttribute.Value);
-                        if (eulas.ContainsKey(key))
-                            eulaAttribute.Value = ((DictionaryEntry)eulas[key]).Key.ToString();
+                        if (eulas.TryGetValue(key, out KeyValuePair<string, string> eulaInfo))
+                        {
+                            eulaAttribute.Value = eulaInfo.Key;
+                        }
                         else
                         {
                             string configFileKey = string.Format(CultureInfo.InvariantCulture, "EULA{0}", eulas.Count);
-                            DictionaryEntry de = new DictionaryEntry(configFileKey, eulaAttribute.Value);
+                            var de = new KeyValuePair<string ,string>(configFileKey, eulaAttribute.ToString());
                             eulas[key] = de;
                             eulaAttribute.Value = configFileKey;
                         }
                     }
                     else
                     {
-                        if (_results != null)
-                            _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageResourceFileNotFound", eulaAttribute.Value, builder.Name));
+                        _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageResourceFileNotFound", eulaAttribute.Value, builder.Name));
                         fSucceeded = false;
                         continue;
                     }
@@ -1568,10 +1566,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             // create a new Product node for the passed-in product
             XmlNode productNode = _document.CreateElement("Product", BOOTSTRAPPER_NAMESPACE);
-            XmlAttribute sourceAttribute;
 
             // find the ProductCode attribute
-            sourceAttribute = (XmlAttribute)(node.Attributes.GetNamedItem("ProductCode"));
+            var sourceAttribute = (XmlAttribute)(node.Attributes.GetNamedItem("ProductCode"));
             Debug.Assert(sourceAttribute != null, "we should not be here if there is no ProductCode attribute");
 
             AddAttribute(productNode, "ProductCode", sourceAttribute.Value);
@@ -1581,17 +1578,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return productNode;
         }
 
-        private string ReadAttribute(XmlNode node, string strAttributeName)
+        private static string ReadAttribute(XmlNode node, string strAttributeName)
         {
-            XmlAttribute attribute = (XmlAttribute)(node.Attributes.GetNamedItem(strAttributeName));
+            var attribute = (XmlAttribute)(node.Attributes.GetNamedItem(strAttributeName));
 
-            if (attribute != null)
-                return attribute.Value;
-
-            return null;
+            return attribute?.Value;
         }
 
-        private void EnsureFolderExists(string strFolderPath)
+        private static void EnsureFolderExists(string strFolderPath)
         {
             if (!Directory.Exists(strFolderPath))
             {
@@ -1599,7 +1593,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private void ClearReadOnlyAttribute(string strFileName)
+        private static void ClearReadOnlyAttribute(string strFileName)
         {
             FileAttributes attribs = File.GetAttributes(strFileName);
             if ((attribs & FileAttributes.ReadOnly) != 0)
@@ -1609,21 +1603,23 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private string ByteArrayToString(byte[] byteArray)
+        private static string ByteArrayToString(byte[] byteArray)
         {
             if (byteArray == null) return null;
 
-            System.Text.StringBuilder output = new System.Text.StringBuilder(byteArray.Length);
+            var output = new StringBuilder(byteArray.Length);
             foreach (byte byteValue in byteArray)
+            {
                 output.Append(byteValue.ToString("X02", CultureInfo.InvariantCulture));
+            }
 
             return output.ToString();
         }
 
-        private string GetFileHash(string filePath)
+        private static string GetFileHash(string filePath)
         {
-            FileInfo fi = new System.IO.FileInfo(filePath);
-            String retVal = null;
+            var fi = new FileInfo(filePath);
+            String retVal;
 
             // Bootstrapper is always signed with the SHA-256 algorithm, no matter which version of
             // the .NET Framework we are targeting.  In ideal situations, bootstrapper files will be
@@ -1641,12 +1637,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         private void ReplaceAttributeString(XmlNode node, string attributeName, XmlNode stringsNode)
         {
             string stringNodeLookupTemplate = BOOTSTRAPPER_PREFIX + ":String[@Name='{0}']";
-            XmlAttribute attribute = (XmlAttribute)(node.Attributes.GetNamedItem(attributeName));
+            var attribute = (XmlAttribute)(node.Attributes.GetNamedItem(attributeName));
             if (attribute != null)
             {
                 XmlNode stringNode = stringsNode.SelectSingleNode(string.Format(CultureInfo.InvariantCulture, stringNodeLookupTemplate, attribute.Value), _xmlNamespaceManager);
                 if (stringNode != null)
+                {
                     attribute.Value = stringNode.InnerText;
+                }
             }
         }
 
@@ -1654,12 +1652,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             CultureInfo ci = Util.GetCultureInfoFromString(settings.Culture);
             CultureInfo fallbackCI = Util.GetCultureInfoFromString(settings.FallbackCulture);
-            Package package = null;
+            Package package;
 
             if (builder.Product.Packages.Count == 0)
             {
-                if (results != null)
-                    results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.ProductCultureNotFound", builder.Name));
+                results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.ProductCultureNotFound", builder.Name));
                 return null;
             }
 
@@ -1673,7 +1670,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 CultureInfo parentCulture = ci.Parent;
 
                 // Keep going up the chain of parents, stopping at the invariant culture
-                while (parentCulture != null && parentCulture != CultureInfo.InvariantCulture)
+                while (parentCulture != CultureInfo.InvariantCulture)
                 {
                     package = GetPackageForSettings_Helper(ci, parentCulture, builder, results, false);
                     if (package != null) return package;
@@ -1681,7 +1678,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     parentCulture = parentCulture.Parent;
                 }
             }
-
 
             if (fallbackCI != null)
             {
@@ -1709,15 +1705,19 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return builder.Product.Packages.Item(0);
         }
 
-        private Package GetPackageForSettings_Helper(CultureInfo culture, CultureInfo altCulture, ProductBuilder builder, BuildResults results, bool fShowWarning)
+        private static Package GetPackageForSettings_Helper(CultureInfo culture, CultureInfo altCulture, ProductBuilder builder, BuildResults results, bool fShowWarning)
         {
             if (altCulture == null)
+            {
                 return null;
+            }
             Package package = builder.Product.Packages.Package(altCulture.Name);
             if (package != null)
             {
-                if (fShowWarning && culture != null && results != null)
-                    results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingProductCulture", culture.Name, builder.Name, altCulture.Name));
+                if (fShowWarning && culture != null)
+                {
+                    results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingProductCulture", culture.Name, builder.Name, altCulture.Name));
+                }
                 return package;
             }
             return null;
@@ -1727,8 +1727,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             if (_cultures.Count == 0)
             {
-                if (_results != null)
-                    _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.NoResources"));
+                _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.NoResources"));
                 return false;
             }
 
@@ -1739,8 +1738,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
             if (stringsNode == null)
             {
-                if (_results != null)
-                    _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.NoStringsForCulture", resourcesNode.Attributes.GetNamedItem("Culture").Value));
+                _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.NoStringsForCulture", resourcesNode.Attributes.GetNamedItem("Culture").Value));
                 return false;
             }
 
@@ -1767,7 +1765,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 DumpXmlToFile(fontsNode, "fonts.cfg.xml");
                 DumpStringToFile(fontsConfig, "fonts.cfg", false);
                 if (codePage != -1)
+                {
                     resourceUpdater.AddStringResource(RESOURCE_TABLE, "CODEPAGE", codePage.ToString(CultureInfo.InvariantCulture));
+                }
             }
             return true;
         }
@@ -1776,9 +1776,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             CultureInfo ci = Util.GetCultureInfoFromString(settings.Culture);
             CultureInfo fallbackCI = Util.GetCultureInfoFromString(settings.FallbackCulture);
-            XmlNode cultureNode = null;
-
-
+            XmlNode cultureNode;
+            
             if (ci != null)
             {
                 // Work through the progression of parent cultures (up until but excluding the invariant culture) -> fallback culture -> parent fallback culture -> default culture -> parent default culture -> any available culture
@@ -1787,7 +1786,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 CultureInfo parentCulture = ci.Parent;
 
                 // Keep going up the chain of parents, stopping at the invariant culture
-                while (parentCulture != null && parentCulture != CultureInfo.InvariantCulture)
+                while (parentCulture != CultureInfo.InvariantCulture)
                 {
                     cultureNode = GetResourcesNodeForSettings_Helper(ci, parentCulture, results, ref codepage, false);
                     if (cultureNode != null) return cultureNode;
@@ -1817,34 +1816,36 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 if (cultureNode != null) return cultureNode;
             }
 
-            IEnumerator keys = _cultures.Keys.GetEnumerator();
-            keys.MoveNext();
-            string altCulture = (string)keys.Current;
-            if (ci != null && results != null)
-                results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingResourcesCulture", ci.Name, altCulture));
-            GetCodePage(altCulture, ref codepage);
-            return (XmlNode)_cultures[altCulture.ToLowerInvariant()];
+            KeyValuePair<string, XmlNode> altCulturePair = _cultures.FirstOrDefault();
+            if (ci != null)
+            {
+                results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingResourcesCulture", ci.Name, altCulturePair.Key));
+            }
+            GetCodePage(altCulturePair.Key, ref codepage);
+            return altCulturePair.Value;
         }
 
         private XmlNode GetResourcesNodeForSettings_Helper(CultureInfo culture, CultureInfo altCulture, BuildResults results, ref int codepage, bool fShowWarning)
         {
-            if (altCulture != null && _cultures.Contains(altCulture.Name.ToLowerInvariant()))
+            if (altCulture != null && _cultures.TryGetValue(altCulture.Name, out XmlNode cultureNode))
             {
-                if (fShowWarning && culture != null && results != null)
-                    results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingResourcesCulture", culture.Name, altCulture.Name));
+                if (fShowWarning && culture != null)
+                {
+                    results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingResourcesCulture", culture.Name, altCulture.Name));
+                }
 
                 codepage = altCulture.TextInfo.ANSICodePage;
-                return (XmlNode)_cultures[altCulture.Name.ToLowerInvariant()];
+                return cultureNode;
             }
 
             return null;
         }
 
-        private void GetCodePage(string culture, ref int codePage)
+        private static void GetCodePage(string culture, ref int codePage)
         {
             try
             {
-                System.Globalization.CultureInfo info = new System.Globalization.CultureInfo(culture);
+                var info = new CultureInfo(culture);
                 codePage = info.TextInfo.ANSICodePage;
             }
             catch (ArgumentException ex)
@@ -1869,7 +1870,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private XmlElement CreateApplicationElement(XmlElement configElement, BuildSettings settings)
+        private static XmlElement CreateApplicationElement(XmlElement configElement, BuildSettings settings)
         {
             XmlElement applicationElement = null;
 
@@ -1895,7 +1896,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return applicationElement;
         }
 
-        private void AddAttribute(XmlNode node, string attributeName, string attributeValue)
+        private static void AddAttribute(XmlNode node, string attributeName, string attributeValue)
         {
             XmlAttribute attrib = node.OwnerDocument.CreateAttribute(attributeName);
             attrib.Value = attributeValue;
@@ -1905,21 +1906,21 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         [SuppressMessage("Microsoft.Security.Xml", "CA3073: ReviewTrustedXsltUse.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3059: UseXmlReaderForXPathDocument.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3052: UseXmlResolver.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
-        private string XmlToConfigurationFile(XmlNode input)
+        public static string XmlToConfigurationFile(XmlNode input)
         {
-            using (XmlNodeReader reader = new XmlNodeReader(input))
+            using (var reader = new XmlNodeReader(input))
             {
                 Stream s = GetEmbeddedResourceStream(CONFIG_TRANSFORM);
-                XPathDocument d = new XPathDocument(s);
-                XslCompiledTransform xslc = new XslCompiledTransform();
+                var d = new XPathDocument(s);
+                var xslc = new XslCompiledTransform();
                 // Using the Trusted Xslt is fine as the style sheet comes from our own assembly.
                 xslc.Load(d, XsltSettings.TrustedXslt, new XmlUrlResolver());
 
-                XPathDocument xml = new XPathDocument(reader);
+                var xml = new XPathDocument(reader);
 
-                using (MemoryStream m = new MemoryStream())
+                using (var m = new MemoryStream())
                 {
-                    using (StreamWriter w = new StreamWriter(m))
+                    using (var w = new StreamWriter(m))
                     {
                         xslc.Transform(xml, null, w);
 
@@ -1938,7 +1939,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private Stream GetEmbeddedResourceStream(string name)
+        private static Stream GetEmbeddedResourceStream(string name)
         {
             Assembly a = Assembly.GetExecutingAssembly();
             Stream s = a.GetManifestResourceStream(String.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(BootstrapperBuilder).Namespace, name));
@@ -1946,18 +1947,13 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return s;
         }
 
-        private string GetAssemblyPath()
-        {
-            return System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        }
-
-        private void DumpXmlToFile(XmlNode node, string fileName)
+        private static void DumpXmlToFile(XmlNode node, string fileName)
         {
             if (s_logging)
             {
                 try
                 {
-                    using (XmlTextWriter xmlwriter = new XmlTextWriter(System.IO.Path.Combine(s_logPath, fileName), System.Text.Encoding.UTF8))
+                    using (var xmlwriter = new XmlTextWriter(System.IO.Path.Combine(s_logPath, fileName), Encoding.UTF8))
                     {
                         xmlwriter.Formatting = Formatting.Indented;
                         xmlwriter.Indentation = 4;
@@ -1992,13 +1988,13 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private void DumpStringToFile(string text, string fileName, bool append)
+        private static void DumpStringToFile(string text, string fileName, bool append)
         {
             if (s_logging)
             {
                 try
                 {
-                    using (StreamWriter fileWriter = new StreamWriter(System.IO.Path.Combine(s_logPath, fileName), append))
+                    using (var fileWriter = new StreamWriter(System.IO.Path.Combine(s_logPath, fileName), append))
                     {
                         fileWriter.Write(text);
                     }
@@ -2026,7 +2022,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private bool VerifyHomeSiteInformation(XmlNode packageFileNode, ProductBuilder builder, BuildSettings settings, BuildResults results)
+        private static bool VerifyHomeSiteInformation(XmlNode packageFileNode, ProductBuilder builder, BuildSettings settings, BuildResults results)
         {
             if (settings.ComponentsLocation != ComponentsLocation.HomeSite)
             {
@@ -2037,8 +2033,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
             if (homesiteAttribute == null && builder.Product.CopyAllPackageFiles != CopyAllFilesType.CopyAllFilesIfNotHomeSite)
             {
-                if (results != null)
-                    results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.PackageHomeSiteMissing", builder.Name));
+                results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.PackageHomeSiteMissing", builder.Name));
                 return false;
             }
 
@@ -2069,20 +2064,23 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 {
                     // Always use the PublicKey of the file on disk
                     if (publicKey != null)
+                    {
                         ReplaceAttribute(packageFileNode, PUBLICKEY_ATTRIBUTE, publicKey);
+                    }
                     else
                     {
                         // File on disk is not signed.  Remove the public key info, and make sure the hash is written instead
                         packageFileNode.Attributes.RemoveNamedItem(PUBLICKEY_ATTRIBUTE);
                         if (hashAttribute == null)
+                        {
                             AddAttribute(packageFileNode, HASH_ATTRIBUTE, GetFileHash(fileSource));
+                        }
                     }
 
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
                     if (publicKey == null || !publicKey.ToLowerInvariant().Equals(publicKeyAttribute.Value.ToLowerInvariant()))
                     {
-                        if (results != null)
-                            results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
+                        results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
                     }
                 }
                 if (hashAttribute != null)
@@ -2095,8 +2093,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
                     if (!fileHash.ToLowerInvariant().Equals(hashAttribute.Value.ToLowerInvariant()))
                     {
-                        if (results != null)
-                            results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", "Hash", builder.Name, fileSource));
+                        results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", "Hash", builder.Name, fileSource));
                     }
                 }
             }
@@ -2104,10 +2101,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 if (hashAttribute == null && publicKeyAttribute == null)
                 {
-                    if (results != null)
-                    {
-                        results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.MissingVerificationInformation", fileName, builder.Name));
-                    }
+                    results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.MissingVerificationInformation", fileName, builder.Name));
                     return false;
                 }
             }
@@ -2115,13 +2109,13 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return true;
         }
 
-        private string GetPublicKeyOfFile(string fileSource)
+        private static string GetPublicKeyOfFile(string fileSource)
         {
             if (File.Exists(fileSource))
             {
                 try
                 {
-                    X509Certificate cert = new X509Certificate(fileSource);
+                    var cert = new X509Certificate(fileSource);
                     string publicKey = cert.GetPublicKeyString();
                     return publicKey;
                 }
@@ -2134,7 +2128,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return null;
         }
 
-        private void ConvertChildsNodeToAttributes(XmlNode node)
+        private static void ConvertChildsNodeToAttributes(XmlNode node)
         {
             XmlNode childNode = node.FirstChild;
             while (childNode != null)
@@ -2157,18 +2151,18 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             string logPath = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 @"Microsoft\VisualStudio\" + VisualStudioConstants.CurrentVisualStudioVersion + @"\VSPLOG");
-            if (!Directory.Exists(logPath))
-                Directory.CreateDirectory(logPath);
+            Directory.CreateDirectory(logPath);
             return logPath;
         }
 
-        private Dictionary<string, Product> GetIncludedProducts(Product product)
+        private static Dictionary<string, Product> GetIncludedProducts(Product product)
         {
-            Dictionary<string, Product> includedProducts = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase);
-
-            // Add in this product in case there is a circular includes: 
-            // we won't continue to explore this product.  It will be removed later.
-            includedProducts.Add(product.ProductCode, product);
+            var includedProducts = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase)
+            {
+                // Add in this product in case there is a circular includes: 
+                // we won't continue to explore this product.  It will be removed later.
+                { product.ProductCode, product }
+            };
 
             // Recursively add included products 
             foreach (Product p in product.Includes)
@@ -2180,7 +2174,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return includedProducts;
         }
 
-        private void AddIncludedProducts(Product product, Dictionary<string, Product> includedProducts)
+        private static void AddIncludedProducts(Product product, Dictionary<string, Product> includedProducts)
         {
             if (!includedProducts.ContainsKey(product.ProductCode))
             {
@@ -2192,14 +2186,16 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
         }
 
-        private string MapLCIDToCultureName(int lcid)
+        private static string MapLCIDToCultureName(int lcid)
         {
             if (lcid == 0)
+            {
                 return Util.DefaultCultureInfo.Name;
+            }
 
             try
             {
-                CultureInfo ci = new CultureInfo(lcid);
+                var ci = new CultureInfo(lcid);
                 return ci.Name;
             }
             catch (ArgumentException)

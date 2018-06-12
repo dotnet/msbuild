@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Reflection;
 using System.Collections;
 using Microsoft.Build.Shared;
@@ -17,19 +16,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="searchPathElement"></param>
-        /// <param name="getAssemblyName"></param>
-        /// <param name="fileExists"></param>
         public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
         {
         }
 
-
         /// <summary>
         /// Resolve a reference to a specific file name.
         /// </summary>
         /// <param name="assemblyName">The assemblyname of the reference.</param>
+        /// <param name="sdkName"></param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
@@ -51,7 +47,6 @@ namespace Microsoft.Build.Tasks
             string hintPath,
             string assemblyFolderKey,
             ArrayList assembliesConsideredAndRejected,
-
             out string foundPath,
             out bool userRequestedSpecificFile
         )
@@ -68,20 +63,18 @@ namespace Microsoft.Build.Tasks
                     foundPath = rawFileNameCandidate;
                     return true;
                 }
-                else
+
+                if (assembliesConsideredAndRejected != null)
                 {
-                    if (assembliesConsideredAndRejected != null)
+                    var considered = new ResolutionSearchLocation
                     {
-                        ResolutionSearchLocation considered = null;
-                        considered = new ResolutionSearchLocation();
-                        considered.FileNameAttempted = rawFileNameCandidate;
-                        considered.SearchPath = searchPathElement;
-                        considered.Reason = NoMatchReason.NotAFileNameOnDisk;
-                        assembliesConsideredAndRejected.Add(considered);
-                    }
+                        FileNameAttempted = rawFileNameCandidate,
+                        SearchPath = searchPathElement,
+                        Reason = NoMatchReason.NotAFileNameOnDisk
+                    };
+                    assembliesConsideredAndRejected.Add(considered);
                 }
             }
-
 
             return false;
         }

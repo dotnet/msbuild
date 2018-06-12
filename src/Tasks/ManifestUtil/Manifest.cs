@@ -6,12 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Build.Shared;
@@ -24,17 +20,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public abstract class Manifest
     {
-        private AssemblyIdentity _assemblyIdentity = null;
-        private AssemblyReference[] _assemblyReferences = null;
-        private string _description = null;
-        private FileReference[] _fileReferences = null;
-        private string _sourcePath = null;
-        private Stream _inputStream = null;
-        private FileReferenceCollection _fileReferenceList = null;
-        private AssemblyReferenceCollection _assemblyReferenceList = null;
+        private AssemblyIdentity _assemblyIdentity;
+        private AssemblyReference[] _assemblyReferences;
+        private string _description;
+        private FileReference[] _fileReferences;
+        private string _sourcePath;
+        private Stream _inputStream;
+        private FileReferenceCollection _fileReferenceList;
+        private AssemblyReferenceCollection _assemblyReferenceList;
         private readonly OutputMessageCollection _outputMessages = new OutputMessageCollection();
-        private bool _treatUnfoundNativeAssembliesAsPrerequisites = false;
-        private bool _readOnly = false;
+        private bool _treatUnfoundNativeAssembliesAsPrerequisites;
+        private bool _readOnly;
 
         protected internal Manifest() // only internal classes can extend this class
         {
@@ -46,28 +42,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public AssemblyIdentity AssemblyIdentity
         {
-            get
-            {
-                if (_assemblyIdentity == null)
-                    _assemblyIdentity = new AssemblyIdentity();
-                return _assemblyIdentity;
-            }
-            set { _assemblyIdentity = value; }
+            get => _assemblyIdentity ?? (_assemblyIdentity = new AssemblyIdentity());
+            set => _assemblyIdentity = value;
         }
 
         /// <summary>
         /// Specifies the set of assemblies referenced by the manifest.
         /// </summary>
         [XmlIgnore]
-        public AssemblyReferenceCollection AssemblyReferences
-        {
-            get
-            {
-                if (_assemblyReferenceList == null)
-                    _assemblyReferenceList = new AssemblyReferenceCollection(_assemblyReferences);
-                return _assemblyReferenceList;
-            }
-        }
+        public AssemblyReferenceCollection AssemblyReferences => _assemblyReferenceList ??
+                                                                 (_assemblyReferenceList = new AssemblyReferenceCollection(_assemblyReferences));
 
         private void CollectionToArray()
         {
@@ -89,8 +73,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Description
         {
-            get { return _description; }
-            set { _description = value; }
+            get => _description;
+            set => _description = value;
         }
 
         /// <summary>
@@ -107,15 +91,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Specifies the set of files referenced by the manifest.
         /// </summary>
         [XmlIgnore]
-        public FileReferenceCollection FileReferences
-        {
-            get
-            {
-                if (_fileReferenceList == null)
-                    _fileReferenceList = new FileReferenceCollection(_fileReferences);
-                return _fileReferenceList;
-            }
-        }
+        public FileReferenceCollection FileReferences => _fileReferenceList ?? (_fileReferenceList = new FileReferenceCollection(_fileReferences));
 
         /// <summary>
         /// The input stream from which the manifest was read.
@@ -124,8 +100,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public Stream InputStream
         {
-            get { return _inputStream; }
-            set { _inputStream = value; }
+            get => _inputStream;
+            set => _inputStream = value;
         }
 
         internal virtual void OnAfterLoad()
@@ -142,10 +118,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Contains a collection of current error and warning messages.
         /// </summary>
         [XmlIgnore]
-        public OutputMessageCollection OutputMessages
-        {
-            get { return _outputMessages; }
-        }
+        public OutputMessageCollection OutputMessages => _outputMessages;
 
         /// <summary>
         /// Specifies whether the manifest is operating in read-only or read-write mode.
@@ -157,45 +130,59 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool ReadOnly
         {
-            get { return _readOnly; }
-            set { _readOnly = value; }
+            get => _readOnly;
+            set => _readOnly = value;
         }
 
-        private bool ResolveAssembly(AssemblyReference a, string[] searchPaths)
+        private static bool ResolveAssembly(AssemblyReference a, string[] searchPaths)
         {
             if (a == null)
+            {
                 return false;
+            }
 
             a.ResolvedPath = ResolvePath(a.SourcePath, searchPaths);
             if (!String.IsNullOrEmpty(a.ResolvedPath))
+            {
                 return true;
+            }
 
             if (a.AssemblyIdentity != null)
             {
                 a.ResolvedPath = a.AssemblyIdentity.Resolve(searchPaths);
                 if (!String.IsNullOrEmpty(a.ResolvedPath))
+                {
                     return true;
+                }
             }
 
             a.ResolvedPath = ResolvePath(a.TargetPath, searchPaths);
             if (!String.IsNullOrEmpty(a.ResolvedPath))
+            {
                 return true;
+            }
 
             return false;
         }
 
-        private bool ResolveFile(BaseReference f, string[] searchPaths)
+        private static bool ResolveFile(BaseReference f, string[] searchPaths)
         {
             if (f == null)
+            {
                 return false;
+            }
 
             f.ResolvedPath = ResolvePath(f.SourcePath, searchPaths);
             if (!String.IsNullOrEmpty(f.ResolvedPath))
+            {
                 return true;
+            }
 
             f.ResolvedPath = ResolvePath(f.TargetPath, searchPaths);
             if (!String.IsNullOrEmpty(f.ResolvedPath))
+            {
                 return true;
+            }
 
             return false;
         }
@@ -209,9 +196,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             string defaultDir = String.Empty;
             if (!String.IsNullOrEmpty(_sourcePath))
+            {
                 defaultDir = Path.GetDirectoryName(_sourcePath);
+            }
+
             if (!Path.IsPathRooted(defaultDir))
+            {
                 defaultDir = Path.Combine(Directory.GetCurrentDirectory(), defaultDir);
+            }
             string[] searchPaths = { defaultDir };
             ResolveFiles(searchPaths);
         }
@@ -225,7 +217,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public void ResolveFiles(string[] searchPaths)
         {
             if (searchPaths == null)
-                throw new ArgumentNullException("searchPaths");
+                throw new ArgumentNullException(nameof(searchPaths));
             CollectionToArray();
             ResolveFiles_1(searchPaths);
             ResolveFiles_2(searchPaths);
@@ -234,8 +226,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void ResolveFiles_1(string[] searchPaths)
         {
             if (_assemblyReferences != null)
+            {
                 foreach (AssemblyReference a in _assemblyReferences)
+                {
                     if (!a.IsPrerequisite || a.AssemblyIdentity == null)
+                    {
                         if (!ResolveAssembly(a, searchPaths))
                         {
                             if (_treatUnfoundNativeAssembliesAsPrerequisites && a.ReferenceType == AssemblyReferenceType.NativeAssembly)
@@ -250,17 +245,26 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                 // reporting the manifest is awkward and sometimes looks like a bug.
                                 // So we use the ReadOnly flag to tell the difference between the two cases...
                                 if (_readOnly)
-                                    OutputMessages.AddErrorMessage("GenerateManifest.ResolveFailedInReadOnlyMode", a.ToString(), this.ToString());
+                                {
+                                    OutputMessages.AddErrorMessage("GenerateManifest.ResolveFailedInReadOnlyMode", a.ToString(), ToString());
+                                }
                                 else
+                                {
                                     OutputMessages.AddErrorMessage("GenerateManifest.ResolveFailedInReadWriteMode", a.ToString());
+                                }
                             }
                         }
+                    }
+                }
+            }
         }
 
         private void ResolveFiles_2(string[] searchPaths)
         {
             if (_fileReferences != null)
+            {
                 foreach (FileReference f in _fileReferences)
+                {
                     if (!ResolveFile(f, searchPaths))
                     {
                         // When we're only reading a manifest (i.e. from ResolveNativeReference task), it's
@@ -269,44 +273,64 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         // reporting the manifest is awkward and sometimes looks like a bug.
                         // So we use the ReadOnly flag to tell the difference between the two cases...
                         if (_readOnly)
+                        {
                             OutputMessages.AddErrorMessage("GenerateManifest.ResolveFailedInReadOnlyMode", f.ToString(), this.ToString());
+                        }
                         else
+                        {
                             OutputMessages.AddErrorMessage("GenerateManifest.ResolveFailedInReadWriteMode", f.ToString());
+                        }
                     }
+                }
+            }
         }
 
-        private string ResolvePath(string path, string[] searchPaths)
+        private static string ResolvePath(string path, string[] searchPaths)
         {
             if (String.IsNullOrEmpty(path))
+            {
                 return null;
+            }
             if (Path.IsPathRooted(path))
             {
                 if (File.Exists(path))
+                {
                     return path;
-                else
-                    return null;
-            }
-            if (searchPaths == null)
+                }
                 return null;
+            }
+
+            if (searchPaths == null)
+            {
+                return null;
+            }
             foreach (string searchPath in searchPaths)
+            {
                 if (!String.IsNullOrEmpty(searchPath))
                 {
                     string resolvedPath = Path.Combine(searchPath, path);
                     resolvedPath = Path.GetFullPath(resolvedPath);
                     if (File.Exists(resolvedPath))
+                    {
                         return resolvedPath;
+                    }
                 }
+            }
             return null;
         }
 
         private void SortFiles()
         {
             CollectionToArray();
-            ReferenceComparer comparer = new ReferenceComparer();
+            var comparer = new ReferenceComparer();
             if (_assemblyReferences != null)
+            {
                 Array.Sort(_assemblyReferences, comparer);
+            }
             if (_fileReferences != null)
+            {
                 Array.Sort(_fileReferences, comparer);
+            }
         }
 
         /// <summary>
@@ -315,29 +339,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string SourcePath
         {
-            get { return _sourcePath; }
-            set { _sourcePath = value; }
+            get => _sourcePath;
+            set => _sourcePath = value;
         }
 
         public override string ToString()
         {
-            if (!String.IsNullOrEmpty(_sourcePath))
-                return _sourcePath;
-            else
-                return AssemblyIdentity.ToString();
+            return !String.IsNullOrEmpty(_sourcePath) ? _sourcePath : AssemblyIdentity.ToString();
         }
 
         internal bool TreatUnfoundNativeAssembliesAsPrerequisites
         {
-            get { return _treatUnfoundNativeAssembliesAsPrerequisites; }
-            set { _treatUnfoundNativeAssembliesAsPrerequisites = value; }
+            get => _treatUnfoundNativeAssembliesAsPrerequisites;
+            set => _treatUnfoundNativeAssembliesAsPrerequisites = value;
         }
 
         internal static void UpdateEntryPoint(string inputPath, string outputPath, string updatedApplicationPath, string applicationManifestPath, string targetFrameworkVersion)
         {
-            XmlDocument document = new XmlDocument();
-            XmlReaderSettings xrSettings = new XmlReaderSettings();
-            xrSettings.DtdProcessing = DtdProcessing.Ignore;
+            var document = new XmlDocument();
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
             using (XmlReader xr = XmlReader.Create(inputPath, xrSettings))
             {
                 document.Load(xr);
@@ -351,24 +371,29 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 codeBaseNode = document.SelectSingleNode(xpath, nsmgr);
                 if (codeBaseNode != null)
+                {
                     break;
+                }
             }
+
             if (codeBaseNode == null)
+            {
                 throw new InvalidOperationException(String.Format(System.Globalization.CultureInfo.InvariantCulture, "XPath not found: {0}", XPaths.codebasePaths[0]));
+            }
 
             codeBaseNode.Value = updatedApplicationPath;
 
             // update Public key token of application manifest
             XmlNode publicKeyTokenNode = ((XmlAttribute)codeBaseNode).OwnerElement.SelectSingleNode(XPaths.dependencyPublicKeyTokenAttribute, nsmgr);
             if (publicKeyTokenNode == null)
+            {
                 throw new InvalidOperationException(String.Format(System.Globalization.CultureInfo.InvariantCulture, "XPath not found: {0}", XPaths.dependencyPublicKeyTokenAttribute));
+            }
 
             publicKeyTokenNode.Value = appManifest.PublicKeyToken;
 
             // update hash of application manifest
-            string hash;
-            long size;
-            Util.GetFileInfo(applicationManifestPath, targetFrameworkVersion, out hash, out size);
+            Util.GetFileInfo(applicationManifestPath, targetFrameworkVersion, out string hash, out long size);
 
             // Hash node may not be present with optional signing
             XmlNode hashNode = ((XmlAttribute)codeBaseNode).OwnerElement.SelectSingleNode(XPaths.hashElement, nsmgr);
@@ -380,7 +405,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // update file size of application manifest
             XmlAttribute sizeAttribute = ((XmlAttribute)codeBaseNode).OwnerElement.Attributes[XmlUtil.TrimPrefix(XPaths.fileSizeAttribute)];
             if (sizeAttribute == null)
+            {
                 throw new InvalidOperationException(String.Format(System.Globalization.CultureInfo.InvariantCulture, "XPath not found: {0}", XPaths.fileSizeAttribute));
+            }
 
             sizeAttribute.Value = size.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
@@ -390,9 +417,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void UpdateAssemblyReference(AssemblyReference a, string targetFrameworkVersion)
         {
             if (a.IsVirtual)
+            {
                 return;
+            }
 
             if (a.AssemblyIdentity == null)
+            {
                 switch (a.ReferenceType)
                 {
                     case AssemblyReferenceType.ClickOnceManifest:
@@ -408,8 +438,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         a.AssemblyIdentity = AssemblyIdentity.FromFile(a.ResolvedPath);
                         break;
                 }
+            }
+
             if (!a.IsPrerequisite)
+            {
                 UpdateFileReference(a, targetFrameworkVersion);
+            }
 
             // If unspecified assembly type then let's figure out what it actually is...
             if (a.ReferenceType == AssemblyReferenceType.Unspecified)
@@ -423,9 +457,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 else if (!String.IsNullOrEmpty(a.ResolvedPath))
                 {
                     if (PathUtil.IsNativeAssembly(a.ResolvedPath))
+                    {
                         a.ReferenceType = AssemblyReferenceType.NativeAssembly;
+                    }
                     else
+                    {
                         a.ReferenceType = AssemblyReferenceType.ManagedAssembly;
+                    }
                 }
                 // there's one other way we can tell, Type="win32" references are always native...
                 else if (a.AssemblyIdentity != null && String.Equals(a.AssemblyIdentity.Type, "win32", StringComparison.OrdinalIgnoreCase))
@@ -438,10 +476,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static void UpdateFileReference(BaseReference f, string targetFrameworkVersion)
         {
             if (String.IsNullOrEmpty(f.ResolvedPath))
+            {
                 throw new FileNotFoundException(null, f.SourcePath);
+            }
+
             string hash;
             long size;
-
             if (string.IsNullOrEmpty(targetFrameworkVersion))
             {
                 Util.GetFileInfo(f.ResolvedPath, out hash, out size);
@@ -455,9 +495,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (String.IsNullOrEmpty(f.TargetPath))
             {
                 if (!String.IsNullOrEmpty(f.SourcePath))
+                {
                     f.TargetPath = BaseReference.GetDefaultTargetPath(f.SourcePath);
+                }
                 else
+                {
                     f.TargetPath = BaseReference.GetDefaultTargetPath(Path.GetFileName(f.ResolvedPath));
+                }
             }
         }
 
@@ -484,7 +528,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void UpdateFileInfoImpl(string targetFrameworkVersion)
         {
             if (_assemblyReferences != null)
+            {
                 foreach (AssemblyReference a in _assemblyReferences)
+                {
                     if (!String.IsNullOrEmpty(a.ResolvedPath)) // only check resolved items...
                     {
                         try
@@ -496,24 +542,30 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                 OutputMessages.AddErrorMessage("GenerateManifest.General", exception.Message);
                             }
                         }
-                        catch (System.Exception e)
+                        catch (Exception e)
                         {
                             OutputMessages.AddErrorMessage("GenerateManifest.General", e.Message);
                         }
                     }
+                }
+            }
             if (_fileReferences != null)
+            {
                 foreach (FileReference f in _fileReferences)
+                {
                     if (!String.IsNullOrEmpty(f.ResolvedPath)) // only check resolved items...
                     {
                         try
                         {
                             UpdateFileReference(f, targetFrameworkVersion);
                         }
-                        catch (System.Exception e)
+                        catch (Exception e)
                         {
                             OutputMessages.AddErrorMessage("GenerateManifest.General", e.Message);
                         }
                     }
+                }
+            }
         }
 
         /// <summary>
@@ -528,9 +580,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void ValidateReferences()
         {
             if (AssemblyReferences.Count <= 1)
+            {
                 return;
+            }
 
-            Dictionary<string, NGen<bool>> identityList = new Dictionary<string, NGen<bool>>();
+            var identityList = new Dictionary<string, NGen<bool>>();
             foreach (AssemblyReference assembly in AssemblyReferences)
             {
                 if (assembly.AssemblyIdentity != null)
@@ -551,38 +605,53 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 // Check that resolved assembly identity matches filename...
                 if (!assembly.IsPrerequisite)
+                {
                     if (assembly.AssemblyIdentity != null)
-                        if (!String.Equals(assembly.AssemblyIdentity.Name, Path.GetFileNameWithoutExtension(assembly.TargetPath), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!String.Equals(
+                            assembly.AssemblyIdentity.Name,
+                            Path.GetFileNameWithoutExtension(assembly.TargetPath),
+                            StringComparison.OrdinalIgnoreCase))
+                        {
                             OutputMessages.AddWarningMessage("GenerateManifest.IdentityFileNameMismatch", assembly.ToString(), assembly.AssemblyIdentity.Name, assembly.AssemblyIdentity.Name + Path.GetExtension(assembly.TargetPath));
+                        }
+                    }
+                }
             }
         }
-
-
 
         protected void ValidatePlatform()
         {
             foreach (AssemblyReference assembly in AssemblyReferences)
+            {
                 if (IsMismatchedPlatform(assembly))
+                {
                     OutputMessages.AddWarningMessage("GenerateManifest.PlatformMismatch", assembly.ToString());
+                }
+            }
         }
-
-
 
         // Determines whether the platform of the specified assembly reference is mismatched with the applicaion's platform.
         private bool IsMismatchedPlatform(AssemblyReference assembly)
         {
             // Never flag the "Microsoft.CommonLanguageRuntime" dependency as a mismatch...
             if (assembly.IsVirtual)
+            {
                 return false;
+            }
             // Can't tell anything if either of these are not resolved...
             if (AssemblyIdentity == null || assembly.AssemblyIdentity == null)
+            {
                 return false;
+            }
 
             if (AssemblyIdentity.IsNeutralPlatform)
             {
                 // If component is a native assembly then it is non-platform neutral by definition, so always flag as a mismatch...
                 if (assembly.ReferenceType == AssemblyReferenceType.NativeAssembly)
+                {
                     return true;
+                }
                 // Otherwise flag component as a mismatch only if it's not also platform neutral...
                 return !assembly.AssemblyIdentity.IsNeutralPlatform;
             }
@@ -594,7 +663,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     // If application IS NOT platform neutral but the component is, then component shouldn't be flagged as a mismatch...
                     if (assembly.AssemblyIdentity.IsNeutralPlatform)
+                    {
                         return false;
+                    }
                 }
 
                 // Either we are looking at the entry point assembly or the assembly is not platform neutral. 
@@ -611,8 +682,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlElement("AssemblyIdentity")]
         public AssemblyIdentity XmlAssemblyIdentity
         {
-            get { return _assemblyIdentity; }
-            set { _assemblyIdentity = value; }
+            get => _assemblyIdentity;
+            set => _assemblyIdentity = value;
         }
 
         [Browsable(false)]
@@ -620,8 +691,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlArray("AssemblyReferences")]
         public AssemblyReference[] XmlAssemblyReferences
         {
-            get { return _assemblyReferences; }
-            set { _assemblyReferences = value; }
+            get => _assemblyReferences;
+            set => _assemblyReferences = value;
         }
 
         [Browsable(false)]
@@ -629,8 +700,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Description")]
         public string XmlDescription
         {
-            get { return _description; }
-            set { _description = value; }
+            get => _description;
+            set => _description = value;
         }
 
         [Browsable(false)]
@@ -638,8 +709,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlArray("FileReferences")]
         public FileReference[] XmlFileReferences
         {
-            get { return _fileReferences; }
-            set { _fileReferences = value; }
+            get => _fileReferences;
+            set => _fileReferences = value;
         }
 
         [Browsable(false)]

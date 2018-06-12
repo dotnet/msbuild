@@ -13,18 +13,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     /// <summary>
     /// Describes base functionality common to both file and assembly references.
     /// </summary>
+    /// <remarks>Note derived classes are serialization formats. Do not rename or remove private members.</remarks>
     [ComVisible(false)]
     public abstract class BaseReference
     {
         private bool _includeHash = true;
-        private string _group = null;
-        private string _hash = null;
-        private string _hashAlgorithm = null;
-        private string _isOptional = null;
-        private string _resolvedPath = null;
-        private string _size = null;
-        private string _sourcePath = null;
-        private string _targetPath = null;
+        private string _group;
+        private string _hash;
+        private string _hashAlgorithm;
+        private string _isOptional;
+        private string _resolvedPath;
+        private string _size;
+        private string _sourcePath;
+        private string _targetPath;
 
         protected internal BaseReference() // only internal classes can extend this class
         {
@@ -39,21 +40,27 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static string GetDefaultTargetPath(string path)
         {
             if (String.IsNullOrEmpty(path))
+            {
                 return path;
+            }
 
             if (path.EndsWith(Constants.DeployFileExtension, StringComparison.OrdinalIgnoreCase))
+            {
                 path = path.Substring(0, path.Length - Constants.DeployFileExtension.Length);
+            }
 
             if (!Path.IsPathRooted(path))
+            {
                 return path;
-            else
-                return Path.GetFileName(path);
+            }
+
+            return Path.GetFileName(path);
         }
 
         internal bool IncludeHash
         {
-            get { return _includeHash; }
-            set { _includeHash = value; }
+            get => _includeHash;
+            set => _includeHash = value;
         }
 
         /// <summary>
@@ -62,8 +69,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Group
         {
-            get { return _group; }
-            set { _group = value; }
+            get => _group;
+            set => _group = value;
         }
 
         /// <summary>
@@ -75,10 +82,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get
             {
                 if (!IncludeHash)
+                {
                     return string.Empty;
+                }
                 return _hash;
             }
-            set { _hash = value; }
+            set => _hash = value;
         }
 
         /// <summary>
@@ -87,8 +96,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool IsOptional
         {
-            get { return ConvertUtil.ToBoolean(_isOptional); }
-            set { _isOptional = value ? "true" : null; } // NOTE: optional=false is implied, and Fusion prefers them to be unspecified
+            get => ConvertUtil.ToBoolean(_isOptional);
+            set => _isOptional = value ? "true" : null;
+            // NOTE: optional=false is implied, and Fusion prefers them to be unspecified
         }
 
         /// <summary>
@@ -97,8 +107,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string ResolvedPath
         {
-            get { return _resolvedPath; }
-            set { _resolvedPath = value; }
+            get => _resolvedPath;
+            set => _resolvedPath = value;
         }
 
         /// <summary>
@@ -107,8 +117,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public long Size
         {
-            get { return Convert.ToInt64(_size, CultureInfo.InvariantCulture); }
-            set { _size = Convert.ToString(value, CultureInfo.InvariantCulture); }
+            get => Convert.ToInt64(_size, CultureInfo.InvariantCulture);
+            set => _size = Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
         protected internal abstract string SortName { get; }
@@ -119,8 +129,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string SourcePath
         {
-            get { return _sourcePath; }
-            set { _sourcePath = value; }
+            get => _sourcePath;
+            set => _sourcePath = value;
         }
 
         /// <summary>
@@ -129,18 +139,26 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string TargetPath
         {
-            get { return _targetPath; }
-            set { _targetPath = value; }
+            get => _targetPath;
+            set => _targetPath = value;
         }
 
         public override string ToString()
         {
             if (!String.IsNullOrEmpty(_sourcePath))
+            {
                 return _sourcePath;
+            }
+
             if (!String.IsNullOrEmpty(_resolvedPath))
+            {
                 return _resolvedPath;
+            }
+
             if (!String.IsNullOrEmpty(_targetPath))
+            {
                 return _targetPath;
+            }
             return String.Empty;
         }
 
@@ -151,8 +169,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Group")]
         public string XmlGroup
         {
-            get { return _group; }
-            set { _group = value; }
+            get => _group;
+            set => _group = value;
         }
 
         [Browsable(false)]
@@ -160,8 +178,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Hash")]
         public string XmlHash
         {
-            get { return Hash; }
-            set { _hash = value; }
+            get => Hash;
+            set => _hash = value;
         }
 
         [Browsable(false)]
@@ -169,8 +187,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("HashAlg")]
         public string XmlHashAlgorithm
         {
-            get { return _hashAlgorithm; }
-            set { _hashAlgorithm = value; }
+            get => _hashAlgorithm;
+            set => _hashAlgorithm = value;
         }
 
         [Browsable(false)]
@@ -178,8 +196,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("IsOptional")]
         public string XmlIsOptional
         {
-            get { return _isOptional != null ? _isOptional.ToLower(CultureInfo.InvariantCulture) : null; }
-            set { _isOptional = value; }
+            get => _isOptional?.ToLower(CultureInfo.InvariantCulture);
+            set => _isOptional = value;
         }
 
         [Browsable(false)]
@@ -187,8 +205,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Path")]
         public string XmlPath
         {
-            get { return _targetPath; }
-            set { _targetPath = value; }
+            get => _targetPath;
+            set => _targetPath = value;
         }
 
         [Browsable(false)]
@@ -196,8 +214,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Size")]
         public string XmlSize
         {
-            get { return _size; }
-            set { _size = value; }
+            get => _size;
+            set => _size = value;
         }
 
         #endregion

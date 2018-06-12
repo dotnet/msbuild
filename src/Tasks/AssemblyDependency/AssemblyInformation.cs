@@ -2,22 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Reflection;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Reflection;
+using System.Text;
 
 using Microsoft.Build.Shared;
-using System.Text;
-using System.Runtime.Versioning;
 #if !FEATURE_ASSEMBLY_LOADFROM || MONO
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
 #endif
-using System.Collections.Generic;
 using Microsoft.Build.Tasks.AssemblyDependency;
 
 namespace Microsoft.Build.Tasks
@@ -28,15 +27,15 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal class AssemblyInformation : DisposableBase
     {
-        private AssemblyNameExtension[] _assemblyDependencies = null;
-        private string[] _assemblyFiles = null;
+        private AssemblyNameExtension[] _assemblyDependencies;
+        private string[] _assemblyFiles;
 #if FEATURE_ASSEMBLY_LOADFROM
-        private IMetaDataDispenser _metadataDispenser = null;
-        private IMetaDataAssemblyImport _assemblyImport = null;
+        private readonly IMetaDataDispenser _metadataDispenser;
+        private readonly IMetaDataAssemblyImport _assemblyImport;
         private static Guid s_importerGuid = new Guid(((GuidAttribute)Attribute.GetCustomAttribute(typeof(IMetaDataImport), typeof(GuidAttribute), false)).Value);
         private readonly Assembly _assembly;
 #endif
-        private string _sourceFile;
+        private readonly string _sourceFile;
         private FrameworkName _frameworkName;
 
 #if !FEATURE_ASSEMBLY_LOADFROM || MONO
@@ -65,7 +64,7 @@ namespace Microsoft.Build.Tasks
         internal AssemblyInformation(string sourceFile)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(sourceFile, "sourceFile");
+            ErrorUtilities.VerifyThrowArgumentNull(sourceFile, nameof(sourceFile));
             _sourceFile = sourceFile;
 
 #if FEATURE_ASSEMBLY_LOADFROM
@@ -147,7 +146,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Get the scatter files from the assembly metadata. 
         /// </summary>
-        /// <value></value>
         public string[] Files
         {
             get
@@ -221,7 +219,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static FrameworkName GetTargetFrameworkAttribute(string path)
         {
-            using (AssemblyInformation import = new AssemblyInformation(path))
+            using (var import = new AssemblyInformation(path))
             {
                 return import.FrameworkNameAttribute;
             }
@@ -291,7 +289,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        if (a.AttributeType.Equals(typeof(TargetFrameworkAttribute)))
+                        if (a.AttributeType == typeof(TargetFrameworkAttribute))
                         {
                             attr = a;
                             break;
@@ -313,20 +311,16 @@ namespace Microsoft.Build.Tasks
             FrameworkName frameworkAttribute = null;
             try
             {
-                IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
-                IntPtr data = IntPtr.Zero;
-                UInt32 valueLen = 0;
-                string frameworkNameAttribute = null;
-                UInt32 assemblyScope;
+                var import2 = (IMetaDataImport2)_assemblyImport;
 
-                _assemblyImport.GetAssemblyFromScope(out assemblyScope);
-                int hr = import2.GetCustomAttributeByName(assemblyScope, s_targetFrameworkAttribute, out data, out valueLen);
+                _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
+                int hr = import2.GetCustomAttributeByName(assemblyScope, s_targetFrameworkAttribute, out IntPtr data, out uint valueLen);
 
                 // get the AssemblyTitle
                 if (hr == NativeMethodsShared.S_OK)
                 {
                     // if an AssemblyTitle exists, parse the contents of the blob
-                    if (NativeMethods.TryReadMetadataString(_sourceFile, data, valueLen, out frameworkNameAttribute))
+                    if (NativeMethods.TryReadMetadataString(_sourceFile, data, valueLen, out string frameworkNameAttribute))
                     {
                         if (!String.IsNullOrEmpty(frameworkNameAttribute))
                         {
@@ -501,9 +495,14 @@ namespace Microsoft.Build.Tasks
             if (NativeMethodsShared.IsWindows)
             {
                 if (_assemblyImport != null)
+                {
                     Marshal.ReleaseComObject(_assemblyImport);
+                }
+
                 if (_metadataDispenser != null)
+                {
                     Marshal.ReleaseComObject(_metadataDispenser);
+                }
             }
         }
 #endif
@@ -518,9 +517,8 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_MSCOREE
             if (NativeMethodsShared.IsWindows)
             {
-                StringBuilder runtimeVersion = null;
-                uint hresult = 0;
-                uint actualBufferSize = 0;
+                StringBuilder runtimeVersion;
+                uint hresult;
 #if _DEBUG
                 // Just to make sure and exercise the code that doubles the size
                 // every time GetRequestedRuntimeInfo fails due to insufficient buffer size.
@@ -531,11 +529,11 @@ namespace Microsoft.Build.Tasks
                 do
                 {
                     runtimeVersion = new StringBuilder(bufferLength);
-                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out actualBufferSize);
+                    hresult = NativeMethods.GetFileVersion(path, runtimeVersion, bufferLength, out _);
                     bufferLength = bufferLength * 2;
                 } while (hresult == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
 
-                if (hresult == NativeMethodsShared.S_OK && runtimeVersion != null)
+                if (hresult == NativeMethodsShared.S_OK)
                 {
                     return runtimeVersion.ToString();
                 }
@@ -561,7 +559,7 @@ namespace Microsoft.Build.Tasks
         private AssemblyNameExtension[] ImportAssemblyDependencies()
         {
 #if FEATURE_ASSEMBLY_LOADFROM
-            ArrayList asmRefs = new ArrayList();
+            var asmRefs = new List<AssemblyNameExtension>();
 
             if (!NativeMethodsShared.IsWindows)
             {
@@ -569,12 +567,12 @@ namespace Microsoft.Build.Tasks
             }
 
             IntPtr asmRefEnum = IntPtr.Zero;
-            UInt32[] asmRefTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
-            UInt32 fetched;
+            var asmRefTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
             // Ensure the enum handle is closed.
             try
             {
                 // Enum chunks of refs in 16-ref blocks until we run out.
+                UInt32 fetched;
                 do
                 {
                     _assemblyImport.EnumAssemblyRefs(
@@ -586,21 +584,19 @@ namespace Microsoft.Build.Tasks
                     for (uint i = 0; i < fetched; i++)
                     {
                         // Determine the length of the string to contain the name first.
-                        IntPtr hashDataPtr, pubKeyPtr;
-                        UInt32 hashDataLength, pubKeyBytes, asmNameLength, flags;
                         _assemblyImport.GetAssemblyRefProps(
                             asmRefTokens[i],
-                            out pubKeyPtr,
-                            out pubKeyBytes,
+                            out IntPtr pubKeyPtr,
+                            out uint pubKeyBytes,
                             null,
                             0,
-                            out asmNameLength,
+                            out uint asmNameLength,
                             IntPtr.Zero,
-                            out hashDataPtr,
-                            out hashDataLength,
-                            out flags);
+                            out _,
+                            out _,
+                            out uint flags);
                         // Allocate assembly name buffer.
-                        char[] asmNameBuf = new char[asmNameLength + 1];
+                        var asmNameBuf = new char[asmNameLength + 1];
                         IntPtr asmMetaPtr = IntPtr.Zero;
                         // Ensure metadata structure is freed.
                         try
@@ -616,8 +612,8 @@ namespace Microsoft.Build.Tasks
                                 (uint)asmNameBuf.Length,
                                 out asmNameLength,
                                 asmMetaPtr,
-                                out hashDataPtr,
-                                out hashDataLength,
+                                out _,
+                                out _,
                                 out flags);
                             // Construct the assembly name and free metadata structure.
                             AssemblyNameExtension asmName = ConstructAssemblyName(
@@ -640,10 +636,12 @@ namespace Microsoft.Build.Tasks
             finally
             {
                 if (asmRefEnum != IntPtr.Zero)
+                {
                     _assemblyImport.CloseEnum(asmRefEnum);
+                }
             }
 
-            return (AssemblyNameExtension[])asmRefs.ToArray(typeof(AssemblyNameExtension));
+            return asmRefs.ToArray();
 #else
             CorePopulateMetadata();
             return _assemblyDependencies;
@@ -663,29 +661,26 @@ namespace Microsoft.Build.Tasks
             }
 
 #if FEATURE_ASSEMBLY_LOADFROM
-            ArrayList files = new ArrayList();
+            var files = new List<string>();
             IntPtr fileEnum = IntPtr.Zero;
-            UInt32[] fileTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
-            char[] fileNameBuf = new char[GENMAN_STRING_BUF_SIZE];
-            UInt32 fetched;
+            var fileTokens = new UInt32[GENMAN_ENUM_TOKEN_BUF_SIZE];
+            var fileNameBuf = new char[GENMAN_STRING_BUF_SIZE];
 
             // Ensure the enum handle is closed.
             try
             {
                 // Enum chunks of files until we run out.
+                UInt32 fetched;
                 do
                 {
                     _assemblyImport.EnumFiles(ref fileEnum, fileTokens, (uint)fileTokens.Length, out fetched);
 
                     for (uint i = 0; i < fetched; i++)
                     {
-                        IntPtr hashDataPtr;
-                        UInt32 fileNameLength, hashDataLength, fileFlags;
-
                         // Retrieve file properties.
                         _assemblyImport.GetFileProps(fileTokens[i],
-                            fileNameBuf, (uint)fileNameBuf.Length, out fileNameLength,
-                            out hashDataPtr, out hashDataLength, out fileFlags);
+                            fileNameBuf, (uint)fileNameBuf.Length, out uint fileNameLength,
+                            out _, out _, out _);
 
                         // Add file to file list.
                         string file = new string(fileNameBuf, 0, (int)(fileNameLength - 1));
@@ -696,10 +691,12 @@ namespace Microsoft.Build.Tasks
             finally
             {
                 if (fileEnum != IntPtr.Zero)
+                {
                     _assemblyImport.CloseEnum(fileEnum);
+                }
             }
 
-            return (string[])files.ToArray(typeof(string));
+            return files.ToArray();
 #else
             return Array.Empty<string>();
 #endif
@@ -710,7 +707,7 @@ namespace Microsoft.Build.Tasks
         /// Allocate assembly metadata structure buffer.
         /// </summary>
         /// <returns>Pointer to structure</returns>
-        private IntPtr AllocAsmMeta()
+        private static IntPtr AllocAsmMeta()
         {
             ASSEMBLYMETADATA asmMeta;
             asmMeta.usMajorVersion = asmMeta.usMinorVersion = asmMeta.usBuildNumber = asmMeta.usRevisionNumber = 0;
@@ -718,7 +715,7 @@ namespace Microsoft.Build.Tasks
             asmMeta.rOses = asmMeta.rpProcessors = IntPtr.Zero;
             // Allocate buffer for locale.
             asmMeta.rpLocale = Marshal.AllocCoTaskMem(GENMAN_LOCALE_BUF_SIZE * 2);
-            asmMeta.cchLocale = (uint)GENMAN_LOCALE_BUF_SIZE;
+            asmMeta.cchLocale = GENMAN_LOCALE_BUF_SIZE;
             // Convert to unmanaged structure.
             int size = Marshal.SizeOf<ASSEMBLYMETADATA>();
             IntPtr asmMetaPtr = Marshal.AllocCoTaskMem(size);
@@ -737,16 +734,21 @@ namespace Microsoft.Build.Tasks
         /// <param name="pubKeyBytes">Count of bytes in public key.</param>
         /// <param name="flags">Extra flags</param>
         /// <returns>The assembly name.</returns>
-        private AssemblyNameExtension ConstructAssemblyName(IntPtr asmMetaPtr, char[] asmNameBuf, UInt32 asmNameLength, IntPtr pubKeyPtr, UInt32 pubKeyBytes, UInt32 flags)
+        private static AssemblyNameExtension ConstructAssemblyName(IntPtr asmMetaPtr, char[] asmNameBuf, UInt32 asmNameLength, IntPtr pubKeyPtr, UInt32 pubKeyBytes, UInt32 flags)
         {
             // Marshal the assembly metadata back to a managed type.
             ASSEMBLYMETADATA asmMeta = (ASSEMBLYMETADATA)Marshal.PtrToStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
 
             // Construct the assembly name. (Note asmNameLength should/must be > 0.)
-            AssemblyName assemblyName = new AssemblyName();
-            assemblyName.Name = new string(asmNameBuf, 0, (int)asmNameLength - 1);
-            assemblyName.Version = new Version(asmMeta.usMajorVersion, asmMeta.usMinorVersion, asmMeta.usBuildNumber, asmMeta.usRevisionNumber);
-
+            var assemblyName = new AssemblyName
+            {
+                Name = new string(asmNameBuf, 0, (int) asmNameLength - 1),
+                Version = new Version(
+                    asmMeta.usMajorVersion,
+                    asmMeta.usMinorVersion,
+                    asmMeta.usBuildNumber,
+                    asmMeta.usRevisionNumber)
+            };
 
             // Set culture info.
             string locale = Marshal.PtrToStringUni(asmMeta.rpLocale);
@@ -759,9 +761,8 @@ namespace Microsoft.Build.Tasks
                 assemblyName.CultureInfo = CultureInfo.CreateSpecificCulture(String.Empty);
             }
 
-
             // Set public key or PKT.
-            byte[] publicKey = new byte[pubKeyBytes];
+            var publicKey = new byte[pubKeyBytes];
             Marshal.Copy(pubKeyPtr, publicKey, 0, (int)pubKeyBytes);
             if ((flags & (uint)CorAssemblyFlags.afPublicKey) != 0)
             {
@@ -780,12 +781,12 @@ namespace Microsoft.Build.Tasks
         /// Free the assembly metadata structure.
         /// </summary>
         /// <param name="asmMetaPtr">The pointer.</param>
-        private void FreeAsmMeta(IntPtr asmMetaPtr)
+        private static void FreeAsmMeta(IntPtr asmMetaPtr)
         {
             if (asmMetaPtr != IntPtr.Zero)
             {
                 // Marshal the assembly metadata back to a managed type.
-                ASSEMBLYMETADATA asmMeta = (ASSEMBLYMETADATA)Marshal.PtrToStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
+                var asmMeta = (ASSEMBLYMETADATA)Marshal.PtrToStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
                 // Free unmanaged memory.
                 Marshal.FreeCoTaskMem(asmMeta.rpLocale);
                 Marshal.DestroyStructure(asmMetaPtr, typeof(ASSEMBLYMETADATA));
@@ -817,7 +818,9 @@ namespace Microsoft.Build.Tasks
             using (var sr = new BinaryReader(File.OpenRead(path)))
             {
                 if (!File.Exists(path))
+                {
                     return string.Empty;
+                }
 
                 // This algorithm for getting the runtime version is based on
                 // the ECMA Standard 335: The Common Language Infrastructure (CLI)
@@ -837,8 +840,11 @@ namespace Microsoft.Build.Tasks
                     // and then the PE optional header followed by PE section headers.
                     // There must be room for all of that.
 
-                    if (sr.BaseStream.Length < PEHeaderPointerOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize)
+                    if (sr.BaseStream.Length < PEHeaderPointerOffset + 4 + PEHeaderSize + OptionalPEHeaderSize +
+                        SectionHeaderSize)
+                    {
                         return string.Empty;
+                    }
 
                     // The PE format starts with an MS-DOS stub of 128 bytes.
                     // At offset 0x3c in the DOS header is a 4-byte unsigned integer offset to the PE
@@ -847,15 +853,20 @@ namespace Microsoft.Build.Tasks
                     sr.BaseStream.Position = PEHeaderPointerOffset;
                     var peHeaderOffset = sr.ReadUInt32();
 
-                    if (peHeaderOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize >= sr.BaseStream.Length)
+                    if (peHeaderOffset + 4 + PEHeaderSize + OptionalPEHeaderSize + SectionHeaderSize >=
+                        sr.BaseStream.Length)
+                    {
                         return string.Empty;
+                    }
 
                     // The PE header is specified in section II.25.2
                     // Read the PE header signature
 
                     sr.BaseStream.Position = peHeaderOffset;
-                    if (!ReadBytes(sr, (byte)'P', (byte)'E', 0, 0))
+                    if (!ReadBytes(sr, (byte) 'P', (byte) 'E', 0, 0))
+                    {
                         return string.Empty;
+                    }
 
                     // The PE header immediately follows the signature
                     var peHeaderBase = peHeaderOffset + 4;
@@ -864,7 +875,9 @@ namespace Microsoft.Build.Tasks
                     sr.BaseStream.Position = peHeaderBase + 2;
                     var numberOfSections = sr.ReadUInt16();
                     if (numberOfSections > 96)
+                    {
                         return string.Empty; // There can't be more than 96 sections, something is wrong
+                    }
 
                     // Immediately after the PE Header is the PE Optional Header.
                     // This header is optional in the general PE spec, but always
@@ -891,14 +904,18 @@ namespace Microsoft.Build.Tasks
                         cliHeaderRvaOffset = optionalHeaderOffset + 224;
                     }
                     else
+                    {
                         return string.Empty;
+                    }
 
                     // Read the CLI header RVA
 
                     sr.BaseStream.Position = cliHeaderRvaOffset;
                     var cliHeaderRva = sr.ReadUInt32();
                     if (cliHeaderRva == 0)
+                    {
                         return string.Empty; // No CLI section
+                    }
 
                     // Immediately following the optional header is the Section
                     // Table, which contains a number of section headers.
@@ -938,7 +955,9 @@ namespace Microsoft.Build.Tasks
 
                     // CLI section not found
                     if (cliHeaderOffset == 0)
+                    {
                         return string.Empty;
+                    }
 
                     // The CLI header is specified in section II.25.3.3.
                     // It contains all of the runtime-specific data entries and other information.
@@ -950,7 +969,9 @@ namespace Microsoft.Build.Tasks
 
                     var metadataOffset = RvaToOffset(sections, metadataRva);
                     if (metadataOffset == 0)
+                    {
                         return string.Empty;
+                    }
 
                     // The metadata root is specified in section II.24.2.1
                     // The first 4 bytes contain a signature.
@@ -958,23 +979,30 @@ namespace Microsoft.Build.Tasks
 
                     sr.BaseStream.Position = metadataOffset;
                     if (!ReadBytes(sr, 0x42, 0x53, 0x4a, 0x42)) // Metadata root signature
+                    {
                         return string.Empty;
+                    }
 
                     // Read the version string length
                     sr.BaseStream.Position = metadataOffset + 12;
                     var length = sr.ReadInt32();
                     if (length > 255 || length <= 0 || sr.BaseStream.Position + length >= sr.BaseStream.Length)
+                    {
                         return string.Empty;
+                    }
 
                     // Read the version string
                     var v = Encoding.UTF8.GetString(sr.ReadBytes(length));
                     if (v.Length < 2 || v[0] != 'v')
+                    {
                         return string.Empty;
+                    }
 
                     // Make sure it is a version number
-                    Version version;
-                    if (!Version.TryParse(v.Substring(1), out version))
+                    if (!Version.TryParse(v.Substring(1), out _))
+                    {
                         return string.Empty;
+                    }
                     return v;
                 }
                 catch
@@ -987,11 +1015,14 @@ namespace Microsoft.Build.Tasks
 
         private static bool ReadBytes(BinaryReader r, params byte[] bytes)
         {
-            for (int n = 0; n < bytes.Length; n++)
+            foreach (byte b in bytes)
             {
-                if (bytes[n] != r.ReadByte())
+                if (b != r.ReadByte())
+                {
                     return false;
+                }
             }
+
             return true;
         }
 

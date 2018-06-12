@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
@@ -207,7 +206,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Parse the global properties into a hashtable.
-            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", Properties, out Hashtable propertiesTable))
+            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", Properties, out Dictionary<string, string> propertiesTable))
             {
                 return false;
             }
@@ -354,19 +353,19 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Build projects which have not been skipped. This will be done in parallel
         /// </summary>
-        private bool BuildProjectsInParallel(Hashtable propertiesTable, string[] undefinePropertiesArray, List<string[]> targetLists, bool success, bool[] skipProjects)
+        private bool BuildProjectsInParallel(Dictionary<string, string> propertiesTable, string[] undefinePropertiesArray, List<string[]> targetLists, bool success, bool[] skipProjects)
         {
             // There were some projects that were skipped so we need to recreate the
             // project array with those projects removed
-            var projectsToBuildArrayList = new List<ITaskItem>();
+            var projectsToBuildList = new List<ITaskItem>();
             for (int i = 0; i < Projects.Length; i++)
             {
                 if (!skipProjects[i])
                 {
-                    projectsToBuildArrayList.Add(Projects[i]);
+                    projectsToBuildList.Add(Projects[i]);
                 }
             }
-            ITaskItem[] projectToBuildInParallel = projectsToBuildArrayList.ToArray();
+            ITaskItem[] projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
             if (projectToBuildInParallel.Length > 0)
@@ -468,7 +467,7 @@ namespace Microsoft.Build.Tasks
         internal static bool ExecuteTargets
             (
             ITaskItem[] projects,
-            Hashtable propertiesTable,
+            Dictionary<string, string> propertiesTable,
             string[] undefineProperties,
             List<string[]> targetLists,
             bool stopOnFirstFailure,
@@ -489,7 +488,7 @@ namespace Microsoft.Build.Tasks
             var projectDirectory = new string[projects.Length];
             var projectNames = new string[projects.Length];
             var toolsVersions = new string[projects.Length];
-            var projectProperties = new IDictionary[projects.Length];
+            var projectProperties = new Dictionary<string, string>[projects.Length];
             var undefinePropertiesPerProject = new IList<string>[projects.Length];
 
             for (int i = 0; i < projectNames.Length; i++)
@@ -511,7 +510,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (!PropertyParser.GetTableWithEscaping
                              (log, ResourceUtilities.FormatResourceString("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(';'),
-                              out Hashtable preProjectPropertiesTable)
+                              out Dictionary<string, string> preProjectPropertiesTable)
                            )
                         {
                             return false;
@@ -552,25 +551,25 @@ namespace Microsoft.Build.Tasks
                     {
                         if (!PropertyParser.GetTableWithEscaping
                              (log, ResourceUtilities.FormatResourceString("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(';'),
-                              out Hashtable additionalProjectPropertiesTable)
+                              out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {
                             return false;
                         }
-                        Hashtable combinedTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                        var combinedTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         // First copy in the properties from the global table that not in the additional properties table
                         if (projectProperties[i] != null)
                         {
-                            foreach (DictionaryEntry entry in projectProperties[i])
+                            foreach (KeyValuePair<string, string> entry in projectProperties[i])
                             {
-                                if (!additionalProjectPropertiesTable.Contains(entry.Key))
+                                if (!additionalProjectPropertiesTable.ContainsKey(entry.Key))
                                 {
                                     combinedTable.Add(entry.Key, entry.Value);
                                 }
                             }
                         }
                         // Add all the additional properties
-                        foreach (DictionaryEntry entry in additionalProjectPropertiesTable)
+                        foreach (KeyValuePair<string, string> entry in additionalProjectPropertiesTable)
                         {
                             combinedTable.Add(entry.Key, entry.Value);
                         }
@@ -613,7 +612,7 @@ namespace Microsoft.Build.Tasks
                 {
                     for (int i = 0; i < projects.Length; i++)
                     {
-                        IEnumerable nonNullTargetList = targetList ?? targetOutputsPerProject[i].Keys;
+                        IEnumerable<string> nonNullTargetList = targetList ?? targetOutputsPerProject[i].Keys;
 
                         foreach (string targetName in nonNullTargetList)
                         {

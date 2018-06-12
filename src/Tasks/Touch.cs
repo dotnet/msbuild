@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -72,7 +71,7 @@ namespace Microsoft.Build.Tasks
 
             // Go through all files and touch 'em
             bool retVal = true;
-            var touchedItems = new ArrayList();
+            var touchedItems = new List<ITaskItem>();
             var touchedFilesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (ITaskItem file in Files)
@@ -114,7 +113,7 @@ namespace Microsoft.Build.Tasks
 
             // Now, set the property that indicates which items we touched.  Note that we
             // touch all the items 
-            TouchedFiles = (ITaskItem[])touchedItems.ToArray(typeof(ITaskItem));
+            TouchedFiles = touchedItems.ToArray();
             return retVal;
         }
 

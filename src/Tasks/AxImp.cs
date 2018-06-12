@@ -52,8 +52,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string ActiveXControlName
             {
-                get { return (string)Bag["ActiveXControlName"]; }
-                set { Bag["ActiveXControlName"] = value; }
+                get => (string)Bag[nameof(ActiveXControlName)];
+                set => Bag[nameof(ActiveXControlName)] = value;
             }
 
             /// <summary>
@@ -61,8 +61,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool GenerateSource
             {
-                get { return GetBoolParameterWithDefault("GenerateSource", false); }
-                set { Bag["GenerateSource"] = value; }
+                get => GetBoolParameterWithDefault(nameof(GenerateSource), false);
+                set => Bag[nameof(GenerateSource)] = value;
             }
 
             /// <summary>
@@ -70,8 +70,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool NoLogo
             {
-                get { return GetBoolParameterWithDefault("NoLogo", false); }
-                set { Bag["NoLogo"] = value; }
+                get => GetBoolParameterWithDefault(nameof(NoLogo), false);
+                set => Bag[nameof(NoLogo)] = value;
             }
 
             /// <summary>
@@ -79,8 +79,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string OutputAssembly
             {
-                get { return (string)Bag["OutputAssembly"]; }
-                set { Bag["OutputAssembly"] = value; }
+                get => (string)Bag[nameof(OutputAssembly)];
+                set => Bag[nameof(OutputAssembly)] = value;
             }
 
             /// <summary>
@@ -88,8 +88,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public string RuntimeCallableWrapperAssembly
             {
-                get { return (string)Bag["RuntimeCallableWrapperAssembly"]; }
-                set { Bag["RuntimeCallableWrapperAssembly"] = value; }
+                get => (string)Bag[nameof(RuntimeCallableWrapperAssembly)];
+                set => Bag[nameof(RuntimeCallableWrapperAssembly)] = value;
             }
 
             /// <summary>
@@ -97,8 +97,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool Silent
             {
-                get { return GetBoolParameterWithDefault("Silent", false); }
-                set { Bag["Silent"] = value; }
+                get => GetBoolParameterWithDefault(nameof(Silent), false);
+                set => Bag[nameof(Silent)] = value;
             }
 
             /// <summary>
@@ -106,8 +106,8 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public bool Verbose
             {
-                get { return GetBoolParameterWithDefault("Verbose", false); }
-                set { Bag["Verbose"] = value; }
+                get => GetBoolParameterWithDefault(nameof(Verbose), false);
+                set => Bag[nameof(Verbose)] = value;
             }
 
             #endregion // Properties
@@ -117,10 +117,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Returns the name of the tool to execute
             /// </summary>
-            protected override string ToolName
-            {
-                get { return "AxImp.exe"; }
-            }
+            protected override string ToolName => "AxImp.exe";
 
             /// <summary>
             /// Fills the provided CommandLineBuilderExtension with all the command line options used when

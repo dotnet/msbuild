@@ -4,10 +4,8 @@
 // <summary>Interface for tasks to communicate with the MSBuild engine.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.Framework
 {

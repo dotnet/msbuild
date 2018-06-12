@@ -3,11 +3,6 @@
 
 using System;
 using System.IO;
-using System.Diagnostics;
-using System.Resources;
-using System.Reflection;
-using System.Globalization;
-using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -20,47 +15,25 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class AssignTargetPath : TaskExtension
     {
-        /// <summary>
-        /// Construct.
-        /// </summary>
-        public AssignTargetPath()
-        {
-        }
-
         #region Properties
-
-        private string _rootFolder = null;
-        private ITaskItem[] _files = Array.Empty<ITaskItem>();
-        private ITaskItem[] _assignedFiles = null;
 
         /// <summary>
         /// The folder to make the links relative to.
         /// </summary>
         [Required]
-        public string RootFolder
-        {
-            get { return _rootFolder; }
-            set { _rootFolder = value; }
-        }
+        public string RootFolder { get; set; }
 
         /// <summary>
         /// The incoming list of files.
         /// </summary>
-        public ITaskItem[] Files
-        {
-            get { return _files; }
-            set { _files = value; }
-        }
+        public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// The resulting list of files.
         /// </summary>
         /// <value></value>
         [Output]
-        public ITaskItem[] AssignedFiles
-        {
-            get { return _assignedFiles; }
-        }
+        public ITaskItem[] AssignedFiles { get; private set; }
 
         #endregion
 
@@ -70,14 +43,14 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            _assignedFiles = new TaskItem[Files.Length];
+            AssignedFiles = new ITaskItem[Files.Length];
 
             if (Files.Length > 0)
             {
                 // Compose a file in the root folder.
                 // NOTE: at this point fullRootPath may or may not have a trailing
                 // slash because Path.GetFullPath() does not add or remove it
-                string fullRootPath = Path.GetFullPath(this.RootFolder);
+                string fullRootPath = Path.GetFullPath(RootFolder);
 
                 // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
                 fullRootPath = FileUtilities.EnsureTrailingSlash(fullRootPath);
@@ -104,7 +77,7 @@ namespace Microsoft.Build.Tasks
                     // If file has a link, use that.
                     string targetPath = link;
 
-                    if (link == null || link.Length == 0)
+                    if (string.IsNullOrEmpty(link))
                     {
                         if (// if the file path is relative
                             !Path.IsPathRooted(Files[i].ItemSpec) &&

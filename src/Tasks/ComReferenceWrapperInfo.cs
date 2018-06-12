@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Reflection;
 using Microsoft.Build.Shared;
 
@@ -12,14 +11,6 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal class ComReferenceWrapperInfo
     {
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        internal ComReferenceWrapperInfo()
-        {
-            // do nothing
-        }
-
         // path to the wrapper assembly
         internal string path;
 

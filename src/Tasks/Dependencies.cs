@@ -29,7 +29,6 @@ namespace Microsoft.Build.Tasks
             return (DependencyFile)dependencies[filename];
         }
 
-
         /// <summary>
         /// Add a new dependency file.
         /// </summary>
@@ -41,8 +40,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Remove new dependency file.
         /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
         internal void RemoveDependencyFile(string filename)
         {
             dependencies.Remove(filename);

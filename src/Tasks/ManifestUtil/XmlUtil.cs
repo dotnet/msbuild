@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
@@ -40,6 +39,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 newElement.Attributes.Append(newAttribute);
             }
             foreach (XmlNode node in element.ChildNodes)
+            {
                 if (node.NodeType == XmlNodeType.Element)
                 {
                     XmlElement childElement = CloneElementToDocument((XmlElement)node, document, namespaceURI);
@@ -50,6 +50,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     XmlComment childComment = document.CreateComment(((XmlComment)node).Data);
                     newElement.AppendChild(childComment);
                 }
+            }
             return newElement;
         }
 
@@ -75,7 +76,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XPathDocument(1) t={0}", Environment.TickCount - t2));
 
             int t3 = Environment.TickCount;
-            XslCompiledTransform xslc = new XslCompiledTransform();
+            var xslc = new XslCompiledTransform();
             // Using the Trusted Xslt is fine as the style sheet comes from our own assemblies.
             // This is similar to the prior this.GetType().Assembly/Evidence method that was used in the now depricated XslTransform.
             xslc.Load(d, XsltSettings.TrustedXslt, s_resolver);
@@ -83,7 +84,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             // Need to copy input stream because XmlReader will close it,
             // causing errors for later callers that access the same stream
-            MemoryStream clonedInput = new MemoryStream();
+            var clonedInput = new MemoryStream();
             Util.CopyStream(input, clonedInput);
 
             int t4 = Environment.TickCount;
@@ -103,8 +104,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
             }
 
-            MemoryStream m = new MemoryStream();
-            XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8);
+            var m = new MemoryStream();
+            var w = new XmlTextWriter(m, Encoding.UTF8);
             w.WriteStartDocument();
 
             int t5 = Environment.TickCount;

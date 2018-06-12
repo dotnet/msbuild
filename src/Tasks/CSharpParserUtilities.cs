@@ -1,13 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
 using System.Text;
-using System.Resources;
-using System.Reflection;
-
-using System.Collections;
 using Microsoft.Build.Shared.LanguageParser;
 
 namespace Microsoft.Build.Tasks
@@ -22,17 +17,17 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="binaryStream"></param>
         /// <returns></returns>
-        static internal ExtractedClassName GetFirstClassNameFullyQualified(Stream binaryStream)
+        internal static ExtractedClassName GetFirstClassNameFullyQualified(Stream binaryStream)
         {
             try
             {
-                CSharpTokenizer tokens = new CSharpTokenizer(binaryStream, /* forceANSI */ false);
+                var tokens = new CSharpTokenizer(binaryStream, /* forceANSI */ false);
                 return Extract(tokens);
             }
             catch (DecoderFallbackException)
             {
                 // There was no BOM and there are non UTF8 sequences. Fall back to ANSI.
-                CSharpTokenizer tokens = new CSharpTokenizer(binaryStream, /* forceANSI */ true);
+                var tokens = new CSharpTokenizer(binaryStream, /* forceANSI */ true);
                 return Extract(tokens);
             }
         }
@@ -41,12 +36,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Extract the class name.
         /// </summary>
-        /// <param name="tokens"></param>
-        /// <returns></returns>
         private static ExtractedClassName Extract(CSharpTokenizer tokens)
         {
-            ParseState state = new ParseState();
-            ExtractedClassName result = new ExtractedClassName();
+            var state = new ParseState();
+            var result = new ExtractedClassName();
 
             foreach (Token t in tokens)
             {

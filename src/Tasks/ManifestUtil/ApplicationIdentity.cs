@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -26,11 +25,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public ApplicationIdentity(string url, string deployManifestPath, string applicationManifestPath)
         {
             if (String.IsNullOrEmpty(url))
-                throw new ArgumentNullException("url");
+            {
+                throw new ArgumentNullException(nameof(url));
+            }
+
             if (String.IsNullOrEmpty(deployManifestPath))
-                throw new ArgumentNullException("deployManifestPath");
+            {
+                throw new ArgumentNullException(nameof(deployManifestPath));
+            }
+
             if (String.IsNullOrEmpty(applicationManifestPath))
-                throw new ArgumentNullException("applicationManifestPath");
+            {
+                throw new ArgumentNullException(nameof(applicationManifestPath));
+            }
             _url = url;
             _deployManifestIdentity = AssemblyIdentity.FromManifest(deployManifestPath);
             _applicationManifestIdentity = AssemblyIdentity.FromManifest(applicationManifestPath);
@@ -40,19 +47,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Initializes a new instance of the ApplicationIdentity class.
         /// </summary>
         /// <param name="url">The deployment provider URL for the ClickOnce deployment manifest.</param>
-		/// <param name="deployManifestPath">Assembly identity of the ClickOnce deployment manifest.</param>
-		/// <param name="applicationManifestPath">Assembly identity of the ClickOnce application manifest.</param>
+		/// <param name="deployManifestIdentity">Assembly identity of the ClickOnce deployment manifest.</param>
+		/// <param name="applicationManifestIdentity">Assembly identity of the ClickOnce application manifest.</param>
 		public ApplicationIdentity(string url, AssemblyIdentity deployManifestIdentity, AssemblyIdentity applicationManifestIdentity)
         {
             if (String.IsNullOrEmpty(url))
-                throw new ArgumentNullException("url");
-            if (deployManifestIdentity == null)
-                throw new ArgumentNullException("deployManifestIdentity");
-            if (applicationManifestIdentity == null)
-                throw new ArgumentNullException("applicationManifestIdentity");
+                throw new ArgumentNullException(nameof(url));
             _url = url;
-            _deployManifestIdentity = deployManifestIdentity;
-            _applicationManifestIdentity = applicationManifestIdentity;
+            _deployManifestIdentity = deployManifestIdentity ?? throw new ArgumentNullException(nameof(deployManifestIdentity));
+            _applicationManifestIdentity = applicationManifestIdentity ?? throw new ArgumentNullException(nameof(applicationManifestIdentity));
         }
 
         /// <summary>
@@ -72,7 +75,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 aname = _applicationManifestIdentity.GetFullName(AssemblyIdentity.FullNameFlags.ProcessorArchitecture | AssemblyIdentity.FullNameFlags.Type);
             }
-            return String.Format(CultureInfo.InvariantCulture, "{0}#{1}/{2}", _url, dname, aname);
+            return $"{_url}#{dname}/{aname}";
         }
     }
 }

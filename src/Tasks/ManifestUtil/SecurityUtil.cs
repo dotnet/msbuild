@@ -5,7 +5,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Deployment.Internal.CodeSigning;
@@ -33,7 +32,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     public static class SecurityUtilities
     {
         private const string PermissionSetsFolder = "PermissionSets";
-        private const string Everything = "Everything";
         private const string LocalIntranet = "LocalIntranet";
         private const string Internet = "Internet";
         private const string Custom = "Custom";
@@ -106,27 +104,27 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return includedPermissionSet.Copy();
             }
 
-            PermissionSet retSet = GetNamedPermissionSetFromZone(targetZone, dependencies, targetFrameworkMoniker);
+            PermissionSet retSet = GetNamedPermissionSetFromZone(targetZone, targetFrameworkMoniker);
 
             return retSet;
         }
 
-        private static PermissionSet GetNamedPermissionSetFromZone(string targetZone, ITaskItem[] dependencies, string targetFrameworkMoniker)
+        private static PermissionSet GetNamedPermissionSetFromZone(string targetZone, string targetFrameworkMoniker)
         {
             switch (targetZone)
             {
                 case LocalIntranet:
-                    return GetNamedPermissionSet(LocalIntranet, dependencies, targetFrameworkMoniker);
+                    return GetNamedPermissionSet(LocalIntranet, targetFrameworkMoniker);
                 case Internet:
-                    return GetNamedPermissionSet(Internet, dependencies, targetFrameworkMoniker);
+                    return GetNamedPermissionSet(Internet, targetFrameworkMoniker);
                 default:
-                    throw new ArgumentException(String.Empty /* no message */, "targetZone");
+                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
         }
 
-        private static PermissionSet GetNamedPermissionSet(string targetZone, ITaskItem[] dependencies, string targetFrameworkMoniker)
+        private static PermissionSet GetNamedPermissionSet(string targetZone, string targetFrameworkMoniker)
         {
-            FrameworkNameVersioning fn = null;
+            FrameworkNameVersioning fn;
 
             if (!string.IsNullOrEmpty(targetFrameworkMoniker))
             {
@@ -141,15 +139,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (majorVersion == Fx2MajorVersion)
             {
-                return SecurityUtilities.XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
+                return XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
             }
             else if (majorVersion == Fx3MajorVersion)
             {
-                return SecurityUtilities.XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
+                return XmlToPermissionSet((GetXmlElement(targetZone, majorVersion)));
             }
             else
             {
-                return SecurityUtilities.XmlToPermissionSet((GetXmlElement(targetZone, fn)));
+                return XmlToPermissionSet((GetXmlElement(targetZone, fn)));
             }
         }
 
@@ -167,7 +165,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 if (Directory.Exists(path))
                 {
                     string[] files = Directory.GetFiles(path, "*.xml");
-                    FileInfo[] filesInfo = new FileInfo[files.Length];
+                    var filesInfo = new FileInfo[files.Length];
 
                     int indexFound = -1;
 
@@ -187,30 +185,32 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                     if (indexFound != -1)
                     {
-                        string data = string.Empty;
                         FileInfo resultFile = filesInfo[indexFound];
                         using (FileStream fs = resultFile.OpenRead())
                         {
                             try
                             {
-                                StreamReader sr = new StreamReader(fs);
-                                data = sr.ReadToEnd(); // fs.Position value will be the length of the stream.
+                                var sr = new StreamReader(fs);
+                                string data = sr.ReadToEnd();
                                 if (!string.IsNullOrEmpty(data))
                                 {
-                                    XmlDocument doc = new XmlDocument();
-                                    XmlReaderSettings xrSettings = new XmlReaderSettings();
-                                    xrSettings.DtdProcessing = DtdProcessing.Ignore;
+                                    var doc = new XmlDocument();
+                                    var xrSettings =
+                                        new XmlReaderSettings
+                                        {
+                                            DtdProcessing = DtdProcessing.Ignore,
+                                            ConformanceLevel = ConformanceLevel.Auto
+                                        };
 
                                     // http://msdn.microsoft.com/en-us/library/h2344bs2(v=vs.110).aspx
                                     // PermissionSets do not conform to document level, which is the default setting.
-                                    xrSettings.ConformanceLevel = ConformanceLevel.Auto;
                                     try
                                     {
                                         fs.Position = 0; // Reset to 0 before using this stream in any other reader.
                                         using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                                         {
                                             doc.Load(xr);
-                                            return (XmlElement)doc.DocumentElement;
+                                            return doc.DocumentElement;
                                         }
                                     }
                                     catch (Exception)
@@ -234,8 +234,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlElement GetCurrentCLRPermissions(string targetZone)
         {
-            string resultInString = string.Empty;
-            SecurityZone zone = SecurityZone.NoZone;
+            SecurityZone zone;
             switch (targetZone)
             {
                 case LocalIntranet:
@@ -245,21 +244,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     zone = SecurityZone.Internet;
                     break;
                 default:
-                    throw new ArgumentException(String.Empty /* no message */, "targetZone");
+                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
 
-            Evidence evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
+            var evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
 
             PermissionSet sandbox = SecurityManager.GetStandardSandbox(evidence);
-            resultInString = sandbox.ToString();
+            string resultInString = sandbox.ToString();
 
             if (!string.IsNullOrEmpty(resultInString))
             {
-                XmlDocument doc = new XmlDocument();
+                var doc = new XmlDocument();
                 // CA3057: DoNotUseLoadXml. Suppressed since the xml being loaded is a string representation of the PermissionSet.
                 doc.LoadXml(resultInString);
 
-                return (XmlElement)doc.DocumentElement;
+                return doc.DocumentElement;
             }
 
             return null;
@@ -267,7 +266,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static XmlElement GetXmlElement(string targetZone, int majorVersion)
         {
-            XmlDocument doc = null;
+            XmlDocument doc;
 
             switch (majorVersion)
             {
@@ -278,13 +277,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     doc = CreateXmlDocV3(targetZone);
                     break;
                 default:
-                    throw new ArgumentException(String.Empty /* no message */, "majorVersion");
+                    throw new ArgumentException(String.Empty /* no message */, nameof(majorVersion));
             }
 
-            XmlElement rootElement = (XmlElement)doc.DocumentElement;
-
-            if (rootElement == null)
-                return null;
+            XmlElement rootElement = doc.DocumentElement;
 
             return rootElement;
         }
@@ -292,7 +288,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlDocument CreateXmlDocV2(string targetZone)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
 
             switch (targetZone)
             {
@@ -305,14 +301,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     doc.LoadXml(InternetPermissionSetXml);
                     return doc;
                 default:
-                    throw new ArgumentException(String.Empty /* no message */, "targetZone");
+                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
         }
 
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         private static XmlDocument CreateXmlDocV3(string targetZone)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
 
             switch (targetZone)
             {
@@ -325,79 +321,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     doc.LoadXml(InternetPermissionSetWithWPFXml);
                     return doc;
                 default:
-                    throw new ArgumentException(String.Empty /* no message */, "targetZone");
+                    throw new ArgumentException(String.Empty /* no message */, nameof(targetZone));
             }
-        }
-
-        private static string[] GetRegistryPermissionSetByName(string name)
-        {
-            string[] extensibleNamedPermissionSetRegistryInfo = null;
-            RegistryKey localMachineKey = Registry.LocalMachine;
-
-            using (RegistryKey versionIndependentFXKey = localMachineKey.OpenSubKey(@"Software\Microsoft\.NETFramework", false))
-            {
-                if (versionIndependentFXKey != null)
-                {
-                    using (RegistryKey namedPermissionSetsKey = versionIndependentFXKey.OpenSubKey(@"Security\Policy\Extensions\NamedPermissionSets", false))
-                    {
-                        if (namedPermissionSetsKey != null)
-                        {
-                            using (RegistryKey permissionSetKey = namedPermissionSetsKey.OpenSubKey(name, false))
-                            {
-                                if (permissionSetKey != null)
-                                {
-                                    string[] permissionKeys = permissionSetKey.GetSubKeyNames();
-                                    extensibleNamedPermissionSetRegistryInfo = new string[permissionKeys.Length];
-                                    for (int i = 0; i < permissionKeys.Length; i++)
-                                    {
-                                        using (RegistryKey permissionKey = permissionSetKey.OpenSubKey(permissionKeys[i], false))
-                                        {
-                                            string permissionXml = permissionKey.GetValue("Xml") as string;
-                                            extensibleNamedPermissionSetRegistryInfo[i] = permissionXml;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return extensibleNamedPermissionSetRegistryInfo;
-        }
-
-        private static PermissionSet RemoveNonReferencedPermissions(string[] setToFilter, ITaskItem[] dependencies)
-        {
-            PermissionSet retSet = new PermissionSet(PermissionState.None);
-            if (dependencies == null || setToFilter == null || setToFilter.Length == 0)
-                return retSet;
-
-            List<string> assemblyNameList = new List<string>();
-            foreach (ITaskItem dependency in dependencies)
-            {
-                AssemblyName dependentAssemblyName = AssemblyName.GetAssemblyName(dependency.ItemSpec);
-                assemblyNameList.Add(dependentAssemblyName.Name + ", " + dependentAssemblyName.Version.ToString());
-            }
-            SecurityElement retSetElement = retSet.ToXml();
-            foreach (string permissionXml in setToFilter)
-            {
-                if (!String.IsNullOrEmpty(permissionXml))
-                {
-                    string permissionAssemblyName;
-                    string className;
-                    string assemblyVersion;
-
-                    SecurityElement permission = SecurityElement.FromString(permissionXml);
-
-                    if (!ParseElementForAssemblyIdentification(permission, out className, out permissionAssemblyName, out assemblyVersion))
-                        continue;
-                    if (assemblyNameList.Contains(permissionAssemblyName + ", " + assemblyVersion))
-                    {
-                        retSetElement.AddChild(SecurityElement.FromString(permissionXml));
-                    }
-                }
-            }
-            retSet = new ReadOnlyPermissionSet(retSetElement);
-            return retSet;
         }
 
         internal static bool ParseElementForAssemblyIdentification(SecurityElement el,
@@ -421,7 +346,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             int commaIndex = fullClassName.IndexOf(',');
-            int namespaceClassNameLength;
 
             // If the classname is tagged with assembly information, find where
             // the assembly information begins.
@@ -431,10 +355,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return false;
             }
 
-            namespaceClassNameLength = commaIndex;
+            int namespaceClassNameLength = commaIndex;
             className = fullClassName.Substring(0, namespaceClassNameLength);
             String assemblyFullName = fullClassName.Substring(commaIndex + 1);
-            AssemblyName an = new AssemblyName(assemblyFullName);
+            var an = new AssemblyName(assemblyFullName);
             assemblyName = an.Name;
             assemblyVersion = an.Version.ToString();
             return true;
@@ -448,7 +372,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The converted permission set.</returns>
         public static PermissionSet IdentityListToPermissionSet(string[] ids)
         {
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             XmlElement permissionSetElement = document.CreateElement("PermissionSet");
             document.AppendChild(permissionSetElement);
             foreach (string id in ids)
@@ -470,8 +394,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SuppressMessage("Microsoft.Security.Xml", "CA3057: DoNotUseLoadXml.")]
         public static string[] PermissionSetToIdentityList(PermissionSet permissionSet)
         {
-            string psXml = permissionSet != null ? permissionSet.ToString() : "<PermissionSet/>";
-            XmlDocument psDocument = new XmlDocument();
+            string psXml = permissionSet?.ToString() ?? "<PermissionSet/>";
+            var psDocument = new XmlDocument();
             // CA3057: DoNotUseLoadXml.  Suppressed since 'psXml' is a trusted or a constant string.
             psDocument.LoadXml(psXml);
             return XmlToIdentityList(psDocument.DocumentElement);
@@ -481,11 +405,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static XmlDocument PermissionSetToXml(PermissionSet ps)
         {
             XmlDocument inputDocument = new XmlDocument();
-            string xml = (ps != null) ? ps.ToString() : "<PermissionSet/>";
+            string xml = ps?.ToString() ?? "<PermissionSet/>";
 
             // CA3057: DoNotUseLoadXml.  Suppressed since 'xml' is a trusted or a constant string.
             inputDocument.LoadXml(xml);
-            XmlDocument outputDocument = new XmlDocument();
+            var outputDocument = new XmlDocument();
             XmlElement psElement = XmlUtil.CloneElementToDocument(inputDocument.DocumentElement, outputDocument, XmlNamespaces.asmv2);
             outputDocument.AppendChild(psElement);
             return outputDocument;
@@ -514,10 +438,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 a = new string[nodes.Count];
                 int i = 0;
                 foreach (XmlNode node in nodes)
+                {
                     a[i++] = node.Value;
+                }
             }
             else
+            {
                 a = Array.Empty<string>();
+            }
             return a;
         }
 
@@ -529,11 +457,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static PermissionSet XmlToPermissionSet(XmlElement element)
         {
             if (element == null)
+            {
                 return null;
+            }
 
             SecurityElement se = XmlElementToSecurityElement(element);
             if (se == null)
+            {
                 return null;
+            }
 
             PermissionSet ps = new PermissionSet(PermissionState.None);
             try
@@ -572,19 +504,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
             if (String.IsNullOrEmpty(certThumbprint))
-                throw new ArgumentNullException("certThumbprint");
+            {
+                throw new ArgumentNullException(nameof(certThumbprint));
+            }
 
             X509Certificate2 cert = GetCert(certThumbprint);
-
             if (cert == null)
-                throw new ArgumentException(resources.GetString("CertNotInStore"), "certThumbprint");
+            {
+                throw new ArgumentException(resources.GetString("CertNotInStore"), nameof(certThumbprint));
+            }
 
             if (!String.IsNullOrEmpty(targetFrameworkVersion))
             {
                 Version targetVersion = Util.GetTargetFrameworkVersion(targetFrameworkVersion);
 
                 if (targetVersion == null)
+                {
                     throw new ArgumentException("TargetFrameworkVersion");
+                }
 
                 // SHA-256 digest can be parsed only with .NET 4.5 or higher.
                 bool isTargetFrameworkSha256Supported = targetVersion.CompareTo(s_dotNet45Version) >= 0;
@@ -635,13 +572,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static void SignFileInternal(X509Certificate2 cert, Uri timestampUrl, string path, bool targetFrameworkSupportsSha256, System.Resources.ResourceManager resources)
         {
             if (cert == null)
-                throw new ArgumentNullException("cert");
+            {
+                throw new ArgumentNullException(nameof(cert));
+            }
 
             if (String.IsNullOrEmpty(path))
-                throw new ArgumentNullException("path");
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
 
             if (!File.Exists(path))
+            {
                 throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path), path);
+            }
 
             bool useSha256 = UseSha256Algorithm(cert) && targetFrameworkSupportsSha256;
 
@@ -660,15 +603,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
                     try
                     {
-                        XmlDocument doc = new XmlDocument();
-                        doc.PreserveWhitespace = true;
-                        XmlReaderSettings xrSettings = new XmlReaderSettings();
-                        xrSettings.DtdProcessing = DtdProcessing.Ignore;
+                        var doc = new XmlDocument { PreserveWhitespace = true };
+                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                         using (XmlReader xr = XmlReader.Create(path, xrSettings))
                         {
                             doc.Load(xr);
                         }
-                        SignedCmiManifest2 manifest = new SignedCmiManifest2(doc, useSha256);
+                        var manifest = new SignedCmiManifest2(doc, useSha256);
                         CmiManifestSigner2 signer;
                         if (useSha256 && rsa is RSACryptoServiceProvider)
                         {
@@ -688,7 +629,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                     catch (Exception ex)
                     {
-                        int exceptionHR = System.Runtime.InteropServices.Marshal.GetHRForException(ex);
+                        int exceptionHR = Marshal.GetHRForException(ex);
                         if (exceptionHR == -2147012889 || exceptionHR == -2147012867)
                         {
                             throw new ApplicationException(resources.GetString("SecurityUtil.TimestampUrlNotFound"), ex);
@@ -699,14 +640,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-
-        private static void SignPEFile(X509Certificate2 cert, System.Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
+        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(GetPathToTool(resources), GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256));
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardError = true;
-            startInfo.RedirectStandardOutput = true;
+            var startInfo = new ProcessStartInfo(
+                GetPathToTool(resources),
+                GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256))
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardError = true,
+                RedirectStandardOutput = true
+            };
 
             Process signTool = null;
 
@@ -737,22 +681,26 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             finally
             {
-                if (signTool != null)
-                    signTool.Close();
+                signTool?.Close();
             }
         }
 
         internal static string GetCommandLineParameters(string certThumbprint, Uri timestampUrl, string path, bool useSha256)
         {
-            StringBuilder commandLine = new StringBuilder();
+            var commandLine = new StringBuilder();
             if (useSha256)
+            {
                 commandLine.Append(String.Format(CultureInfo.InvariantCulture, "sign /fd sha256 /sha1 {0} ", certThumbprint));
+            }
             else
             {
                 commandLine.Append(String.Format(CultureInfo.InvariantCulture, "sign /sha1 {0} ", certThumbprint));
             }
+
             if (timestampUrl != null)
+            {
                 commandLine.Append(String.Format(CultureInfo.InvariantCulture, "/t {0} ", timestampUrl.ToString()));
+            }
             commandLine.Append(string.Format(CultureInfo.InvariantCulture, "\"{0}\"", path));
             return commandLine.ToString();
         }
@@ -794,7 +742,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         internal static X509Certificate2 GetCert(string thumbprint)
         {
-            X509Store personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             try
             {
                 personalStore.Open(OpenFlags.ReadOnly);
@@ -813,7 +761,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static bool IsCertInStore(X509Certificate2 cert)
         {
-            X509Store personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             try
             {
                 personalStore.Open(OpenFlags.ReadOnly);

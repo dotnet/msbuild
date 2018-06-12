@@ -2,23 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
-using Microsoft.Build.Tasks;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal class MetadataReader : IDisposable
     {
-        private readonly string _path = null;
-        private StringDictionary _attributes = null;
+        private readonly string _path;
+        private StringDictionary _attributes;
 
-        private IMetaDataDispenser _metaDispenser = null;
-        private IMetaDataAssemblyImport _assemblyImport = null;
+        private IMetaDataDispenser _metaDispenser;
+        private IMetaDataAssemblyImport _assemblyImport;
 
         private static Guid s_importerGuid = GetGuidOfType(typeof(IMetaDataImport));
         private static Guid s_refidGuid = GetGuidOfType(typeof(IReferenceIdentity));
@@ -28,38 +24,34 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             _path = path;
             // Create the metadata dispenser and open scope on the source file.
             _metaDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-            object obj;
-            int hr = _metaDispenser.OpenScope(path, 0, ref s_importerGuid, out obj);
+            int hr = _metaDispenser.OpenScope(path, 0, ref s_importerGuid, out object obj);
             if (hr == 0)
+            {
                 _assemblyImport = (IMetaDataAssemblyImport)obj;
+            }
         }
 
         public static MetadataReader Create(string path)
         {
-            MetadataReader r = new MetadataReader(path);
-            if (r._assemblyImport != null)
-                return r;
-            else
-                return null;
+            var r = new MetadataReader(path);
+            return r._assemblyImport != null ? r : null;
         }
 
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.Build.Tasks.IMetaDataImport2.GetCustomAttributeByName(System.UInt32,System.String,System.IntPtr@,System.UInt32@)", Justification = "We verify the valueLen, we don't care what the return value is in this case")]
         public bool HasAssemblyAttribute(string name)
         {
-            UInt32 assemblyScope;
-            _assemblyImport.GetAssemblyFromScope(out assemblyScope);
+            _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
             IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
             IntPtr valuePtr = IntPtr.Zero;
-            UInt32 valueLen = 0;
-            import2.GetCustomAttributeByName(assemblyScope, name, out valuePtr, out valueLen);
+            import2.GetCustomAttributeByName(assemblyScope, name, out valuePtr, out uint valueLen);
             return valueLen != 0;
         }
 
-        public string Name { get { return Attributes["Name"]; } }
-        public string Version { get { return Attributes["Version"]; } }
-        public string PublicKeyToken { get { return Attributes["PublicKeyToken"]; } }
-        public string Culture { get { return Attributes["Culture"]; } }
-        public string ProcessorArchitecture { get { return Attributes["ProcessorArchitecture"]; } }
+        public string Name => Attributes[nameof(Name)];
+        public string Version => Attributes[nameof(Version)];
+        public string PublicKeyToken => Attributes[nameof(PublicKeyToken)];
+        public string Culture => Attributes[nameof(Culture)];
+        public string ProcessorArchitecture => Attributes[nameof(ProcessorArchitecture)];
 
         private StringDictionary Attributes
         {
@@ -70,7 +62,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     lock (this)
                     {
                         if (_attributes == null)
+                        {
                             ImportAttributes();
+                        }
                     }
                 }
 
@@ -81,9 +75,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public void Close()
         {
             if (_assemblyImport != null)
+            {
                 Marshal.ReleaseComObject(_assemblyImport);
+            }
+
             if (_metaDispenser != null)
+            {
                 Marshal.ReleaseComObject(_metaDispenser);
+            }
             _attributes = null;
             _metaDispenser = null;
             _assemblyImport = null;
@@ -103,16 +102,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             string culture = refid.GetAttribute(null, "culture");
             string processorArchitecture = refid.GetAttribute(null, "processorArchitecture");
             if (!String.IsNullOrEmpty(processorArchitecture))
+            {
                 processorArchitecture = processorArchitecture.ToLowerInvariant();
+            }
 
-            _attributes = new StringDictionary();
-            _attributes.Add("Name", name);
-            _attributes.Add("Version", version);
-            _attributes.Add("PublicKeyToken", publicKeyToken);
-            _attributes.Add("Culture", culture);
-            _attributes.Add("ProcessorArchitecture", processorArchitecture);
-
-            refid = null;
+            _attributes = new StringDictionary
+            {
+                { "Name", name },
+                { "Version", version },
+                { "PublicKeyToken", publicKeyToken },
+                { "Culture", culture },
+                { "ProcessorArchitecture", processorArchitecture }
+            };
         }
 
         void IDisposable.Dispose()
@@ -122,7 +123,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static Guid GetGuidOfType(Type type)
         {
-            GuidAttribute guidAttr = (GuidAttribute)Attribute.GetCustomAttribute(type, typeof(GuidAttribute), false);
+            var guidAttr = (GuidAttribute)Attribute.GetCustomAttribute(type, typeof(GuidAttribute), false);
             return new Guid(guidAttr.Value);
         }
 

@@ -21,7 +21,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public CommandLineBuilderExtension()
         {
-            
         }
 
         /// <summary>
@@ -30,15 +29,11 @@ namespace Microsoft.Build.Tasks
         public CommandLineBuilderExtension(bool quoteHyphensOnCommandLine, bool useNewLineSeparator)
             : base(quoteHyphensOnCommandLine, useNewLineSeparator)
         {
-            
         }
 
         /// <summary>
         /// Set a boolean switch iff its value exists and its value is 'true'.
         /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="bag"></param>
-        /// <param name="parameterName"></param>
         internal void AppendWhenTrue
             (
             string switchName,
@@ -62,9 +57,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set a boolean switch only if its value exists.
         /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="bag"></param>
-        /// <param name="parameterName"></param>
         internal void AppendPlusOrMinusSwitch
             (
             string switchName,
@@ -101,11 +93,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set a switch if its value exists by choosing from the input choices
         /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="bag"></param>
-        /// <param name="parameterName"></param>
-        /// <param name="choice1"></param>
-        /// <param name="choice2"></param>
         internal void AppendByChoiceSwitch
             (
             string switchName,
@@ -127,9 +114,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set an integer switch only if its value exists.
         /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="bag"></param>
-        /// <param name="parameterName"></param>
         internal void AppendSwitchWithInteger
             (
             string switchName,
@@ -150,9 +134,6 @@ namespace Microsoft.Build.Tasks
         /// Adds an aliased switch, used for ResGen:
         ///      /reference:Foo=System.Xml.dll
         /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="alias"></param>
-        /// <param name="parameter"></param>
         internal void AppendSwitchAliased(string switchName, string alias, string parameter)
         {
             AppendSwitchUnquotedIfNotNull(switchName, alias + "=");
@@ -209,9 +190,6 @@ namespace Microsoft.Build.Tasks
         /// Append a switch if 'parameter' is not null.
         /// Split on the characters provided.
         /// </summary>
-        /// <param name="switchName"></param>
-        /// <param name="parameters"></param>
-        /// <param name="quoteChars"></param>
         internal void AppendSwitchWithSplitting(string switchName, string parameter, string delimiter, params char[] splitOn)
         {
             if (parameter != null)
@@ -231,16 +209,14 @@ namespace Microsoft.Build.Tasks
         /// even if it contains the separators and white space only
         /// Split on the characters provided.
         /// </summary>
-        /// <param name="parameters"></param>
-        /// <param name="splitOn"></param>
         internal static bool IsParameterEmpty(string parameter, params char[] splitOn)
         {
             if (parameter != null)
             {
                 string[] splits = parameter.Split(splitOn, /* omitEmptyEntries */ StringSplitOptions.RemoveEmptyEntries);
-                for (int i = 0; i < splits.Length; ++i)
+                foreach (string s in splits)
                 {
-                    if (!String.IsNullOrEmpty(splits[i].Trim()))
+                    if (!String.IsNullOrEmpty(s.Trim()))
                     {
                         return false;
                     }
@@ -288,7 +264,7 @@ namespace Microsoft.Build.Tasks
                         {
                             string metadataValue = parameter.GetMetadata(metadataNames[i]);
 
-                            if ((metadataValue != null) && (metadataValue.Length > 0))
+                            if (!string.IsNullOrEmpty(metadataValue))
                             {
                                 // Treat attribute as a boolean flag?
                                 if (treatAsFlags == null || treatAsFlags[i] == false)
@@ -300,10 +276,7 @@ namespace Microsoft.Build.Tasks
                                 else
                                 {
                                     // A boolean flag.
-                                    bool flagSet = false;
-
-                                    flagSet = MetadataConversionUtilities.TryConvertItemMetadataToBool(parameter, metadataNames[i]);
-
+                                    bool flagSet = MetadataConversionUtilities.TryConvertItemMetadataToBool(parameter, metadataNames[i]);
                                     if (flagSet)
                                     {
                                         CommandLine.Append(',');

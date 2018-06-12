@@ -91,7 +91,6 @@ namespace Microsoft.Build.Tasks
             ArrayList assembliesConsideredAndRejected,
             out string foundPath,
             out bool userRequestedSpecificFile
-
         );
 
         /// <summary>
