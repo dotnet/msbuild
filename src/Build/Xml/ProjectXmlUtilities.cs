@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Construction;
 
@@ -82,17 +80,23 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void VerifyThrowProjectAttributeEitherMissingOrNotEmpty(XmlElementWithLocation xmlElement, string attributeName)
         {
-            XmlAttributeWithLocation attribute = xmlElement.GetAttributeWithLocation(attributeName);
+            VerifyThrowProjectAttributeEitherMissingOrNotEmpty(xmlElement, xmlElement.GetAttributeWithLocation(attributeName), attributeName);
+        }
 
+        /// <summary>
+        /// Verifies that if the attribute is present on the element, its value is not empty
+        /// </summary>
+        internal static void VerifyThrowProjectAttributeEitherMissingOrNotEmpty(XmlElementWithLocation xmlElement, XmlAttributeWithLocation attribute, string attributeName)
+        {
             ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
-                    attribute == null || attribute.Value.Length > 0,
-                    (attribute == null) ? null : attribute.Location,
-                    "InvalidAttributeValue",
-                    String.Empty,
-                    attributeName,
-                    xmlElement.Name
-                );
+            (
+                attribute == null || attribute.Value.Length > 0,
+                attribute?.Location,
+                "InvalidAttributeValue",
+                String.Empty,
+                attributeName,
+                xmlElement.Name
+            );
         }
 
         /// <summary>
@@ -132,22 +136,11 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Verify  that all attributes on the element are on the list of legal attributes
         /// </summary>
-        internal static void VerifyThrowProjectAttributes(XmlElementWithLocation element, string[] validAttributes)
+        internal static void VerifyThrowProjectAttributes(XmlElementWithLocation element, HashSet<string> validAttributes)
         {
             foreach (XmlAttributeWithLocation attribute in element.Attributes)
             {
-                bool valid = false;
-
-                for (int i = 0; i < validAttributes.Length; i++)
-                {
-                    if (String.Equals(attribute.Name, validAttributes[i], StringComparison.Ordinal))
-                    {
-                        valid = true;
-                        break;
-                    }
-                }
-
-                ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(valid, attribute);
+                ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(validAttributes.Contains(attribute.Name), attribute);
             }
         }
 

@@ -56,59 +56,36 @@ namespace Microsoft.Build.Internal
         internal const string frameworkToolsRoot = "MSBuildFrameworkToolsRoot";
 
         /// <summary>
-        /// Lookup for reserved property names
+        /// Lookup for reserved property names. Intentionally do not include MSBuildExtensionsPath* or MSBuildUserExtensionsPath in this list.  We need tasks to be able to override those.
         /// </summary>
-        private static HashSet<string> s_reservedProperties;
-
-        /// <summary>
-        /// Lock object, since this is a shared table, and concurrent evaluation must be safe
-        /// </summary>
-        private static Object s_locker = new Object();
-
-        /// <summary>
-        /// Intentionally do not include MSBuildExtensionsPath* or MSBuildUserExtensionsPath in this list.  We need tasks to be able to override those.
-        /// </summary>
-        private static HashSet<string> ReservedProperties
+        private static readonly HashSet<string> ReservedProperties = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default)
         {
-            get
-            {
-                lock (s_locker)
-                {
-                    if (s_reservedProperties == null)
-                    {
-                        s_reservedProperties = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+            projectDirectory,
+            projectDirectoryNoRoot,
+            projectFile,
+            projectExtension,
+            projectFullPath,
+            projectName,
 
-                        s_reservedProperties.Add(projectDirectory);
-                        s_reservedProperties.Add(projectDirectoryNoRoot);
-                        s_reservedProperties.Add(projectFile);
-                        s_reservedProperties.Add(projectExtension);
-                        s_reservedProperties.Add(projectFullPath);
-                        s_reservedProperties.Add(projectName);
+            thisFileDirectory,
+            thisFileDirectoryNoRoot,
+            thisFile,
+            thisFileExtension,
+            thisFileFullPath,
+            thisFileName,
 
-                        s_reservedProperties.Add(thisFileDirectory);
-                        s_reservedProperties.Add(thisFileDirectoryNoRoot);
-                        s_reservedProperties.Add(thisFile);
-                        s_reservedProperties.Add(thisFileExtension);
-                        s_reservedProperties.Add(thisFileFullPath);
-                        s_reservedProperties.Add(thisFileName);
-
-                        s_reservedProperties.Add(binPath);
-                        s_reservedProperties.Add(projectDefaultTargets);
-                        s_reservedProperties.Add(toolsPath);
-                        s_reservedProperties.Add(toolsVersion);
-                        s_reservedProperties.Add(msbuildRuntimeType);
-                        s_reservedProperties.Add(startupDirectory);
-                        s_reservedProperties.Add(buildNodeCount);
-                        s_reservedProperties.Add(lastTaskResult);
-                        s_reservedProperties.Add(programFiles32);
-                        s_reservedProperties.Add(assemblyVersion);
-                        s_reservedProperties.Add(version);
-                    }
-                }
-
-                return s_reservedProperties;
-            }
-        }
+            binPath,
+            projectDefaultTargets,
+            toolsPath,
+            toolsVersion,
+            msbuildRuntimeType,
+            startupDirectory,
+            buildNodeCount,
+            lastTaskResult,
+            programFiles32,
+            assemblyVersion,
+            version
+        };
 
         /// <summary>
         /// Indicates if the given property is a reserved property.

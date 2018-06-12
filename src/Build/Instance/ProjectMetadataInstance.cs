@@ -69,11 +69,11 @@ namespace Microsoft.Build.Execution
 
             if (allowItemSpecModifiers)
             {
-                ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[name] == null, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
             }
             else
             {
-                ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[name] == null && !FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name) && !FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "OM_ReservedName", name);
             }
 
             _name = name;

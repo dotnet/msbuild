@@ -541,7 +541,7 @@ namespace Microsoft.Build.Evaluation
 
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
-            ErrorUtilities.VerifyThrowInvalidOperation(XMakeElements.IllegalItemPropertyNames[name] == null, "CannotModifyReservedItemMetadata", name);
+            ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
 
             if (!propagateMetadataToSiblingItems)
