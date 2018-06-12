@@ -77,20 +77,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private string _cacheFilePath = Path.GetTempPath();
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public GetSDKReferenceFiles()
-        {
-            CacheFileFolderPath = Path.GetTempPath();
-            LogReferencesList = true;
-            LogRedistFilesList = true;
-            LogReferenceConflictBetweenSDKsAsWarning = true;
-            LogReferenceConflictWithinSDKAsWarning = false;
-            LogRedistConflictBetweenSDKsAsWarning = true;
-            LogRedistConflictWithinSDKAsWarning = false;
-        }
-
         #region Properties
 
         /// <summary>
@@ -140,13 +126,13 @@ namespace Microsoft.Build.Tasks
         /// Should the references found as part of resolving the sdk be logged.
         /// The default is true
         /// </summary>
-        public bool LogReferencesList { get; set; }
+        public bool LogReferencesList { get; set; } = true;
 
         /// <summary>
         /// Should the redist files found as part of resolving the sdk be logged.
         /// The default is true
         /// </summary>
-        public bool LogRedistFilesList { get; set; }
+        public bool LogRedistFilesList { get; set; } = true;
 
         /// <summary>
         /// The targetted SDK identifier.
@@ -198,8 +184,12 @@ namespace Microsoft.Build.Tasks
         /// Should conflicts between redist files across different referenced SDKs be logged as a message or a warning.
         /// The default is to log them as a warning.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDKs", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public bool LogRedistConflictBetweenSDKsAsWarning { get; set; }
+        [SuppressMessage(
+            "Microsoft.Naming",
+            "CA1709:IdentifiersShouldBeCasedCorrectly",
+            MessageId = "SDKs",
+            Justification = "Shipped this way in Dev11 Beta (go-live)")]
+        public bool LogRedistConflictBetweenSDKsAsWarning { get; set; } = true;
 
         /// <summary>
         /// Should conflicts between reference files within an SDK be logged as a message or a warning.
@@ -213,8 +203,12 @@ namespace Microsoft.Build.Tasks
         /// Should conflicts between reference files across different referenced SDKs be logged as a message or a warning.
         /// The default is to log them as a warning.
         /// </summary>
-        [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDKs", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        public bool LogReferenceConflictBetweenSDKsAsWarning { get; set; }
+        [SuppressMessage(
+            "Microsoft.Naming",
+            "CA1709:IdentifiersShouldBeCasedCorrectly",
+            MessageId = "SDKs",
+            Justification = "Shipped this way in Dev11 Beta (go-live)")]
+        public bool LogReferenceConflictBetweenSDKsAsWarning { get; set; } = true;
 
         /// <summary>
         /// Should we log exceptions which were hit when the cache file is being read and written to
@@ -669,7 +663,7 @@ namespace Microsoft.Build.Tasks
 
                 if (info == null || !sdkFilesCache.IsAssemblyListCacheFileUpToDate(sdkIdentity, sdkRoot, _cacheFilePath))
                 {
-                    info = sdkFilesCache.GetCacheFileInfoFromSDK(sdkIdentity, sdkRoot, GetReferencePathsFromManifest(sdk));
+                    info = sdkFilesCache.GetCacheFileInfoFromSDK(sdkRoot, GetReferencePathsFromManifest(sdk));
 
                     // On a background thread save the file to disk
                     var saveContext = new SaveContext(sdkIdentity, sdkRoot, info);
@@ -884,7 +878,7 @@ namespace Microsoft.Build.Tasks
             private readonly GetAssemblyName _getAssemblyName;
 
             /// <summary>
-            /// Get the image runtime version from a afile
+            /// Get the image runtime version from a file
             /// </summary>
             private readonly GetAssemblyRuntimeVersion _getRuntimeVersion;
 
@@ -930,9 +924,9 @@ namespace Microsoft.Build.Tasks
                     {
                         throw;
                     }
-
+//erik:
                     // Queue up for later logging, does not matter if the file is deleted or not
-                    _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceString("GetSDKReferenceFiles.ProblemReadingCacheFile", cacheFile, e.Message));
+                    _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceString("GetSDKReferenceFiles.ProblemReadingCacheFile", cacheFile, e.ToString()));
                 }
 
                 return null;
@@ -992,15 +986,15 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Get references from the paths provided, and populate the provided cache
             /// </summary>
-            internal SDKInfo GetCacheFileInfoFromSDK(string sdkIdentity, string sdkRootDirectory, string[] sdkManifestReferences)
+            internal SDKInfo GetCacheFileInfoFromSDK(string sdkRootDirectory, string[] sdkManifestReferences)
             {
                 var references = new ConcurrentDictionary<string, SdkReferenceInfo>(StringComparer.OrdinalIgnoreCase);
                 var directoryToFileList = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
                 var directoriesToHash = new List<string>();
 
-                var referenceDirectories = GetAllReferenceDirectories(sdkRootDirectory);
-                var redistDirectories = GetAllRedistDirectories(sdkRootDirectory);
+                IEnumerable<string> referenceDirectories = GetAllReferenceDirectories(sdkRootDirectory);
+                IEnumerable<string> redistDirectories = GetAllRedistDirectories(sdkRootDirectory);
 
                 directoriesToHash.AddRange(referenceDirectories);
                 directoriesToHash.AddRange(redistDirectories);
@@ -1017,7 +1011,7 @@ namespace Microsoft.Build.Tasks
 
                 PopulateRedistDictionaryFromPaths(directoryToFileList, redistDirectories);
 
-                var cacheInfo = new SDKInfo(references, directoryToFileList, FileUtilities.GetHexHash(sdkIdentity), FileUtilities.GetPathsHash(directoriesToHash));
+                var cacheInfo = new SDKInfo(references, directoryToFileList, FileUtilities.GetPathsHash(directoriesToHash));
                 return cacheInfo;
             }
 
@@ -1027,11 +1021,11 @@ namespace Microsoft.Build.Tasks
             private void PopulateReferencesDictionaryFromManifestPaths(ConcurrentDictionary<string, List<string>> referencesByDirectory, ConcurrentDictionary<string, SdkReferenceInfo> references, string[] sdkManifestReferences)
             {
                 // Sort by directory
-                var groupedByDirectory =
+                IEnumerable<IGrouping<string, string>> groupedByDirectory =
                     from reference in sdkManifestReferences
                     group reference by Path.GetDirectoryName(reference);
 
-                foreach (var group in groupedByDirectory)
+                foreach (IGrouping<string, string> group in groupedByDirectory)
                 {
                     referencesByDirectory.TryAdd(group.Key, group.ToList());
                 }
@@ -1049,7 +1043,7 @@ namespace Microsoft.Build.Tasks
                 referenceDirectories,
                 path =>
                 {
-                    List<string> files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly).ToList<string>();
+                    List<string> files = Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly).ToList();
                     referencesByDirectory.TryAdd(path, files);
 
                     Parallel.ForEach(files, filePath => { references.TryAdd(filePath, GetSDKReferenceInfo(filePath)); });
@@ -1216,22 +1210,22 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// The fusionName
             /// </summary>
-            public string FusionName { get; private set; }
+            public string FusionName { get; }
 
             /// <summary>
             /// Is the file a winmd or not
             /// </summary>
-            public bool IsWinMD { get; private set; }
+            public bool IsWinMD { get; }
 
             /// <summary>
             /// Is the file a managed winmd or not
             /// </summary>
-            public bool IsManagedWinmd { get; private set; }
+            public bool IsManagedWinmd { get; }
 
             /// <summary>
             /// What is the imageruntime information on it.
             /// </summary>
-            public string ImageRuntime { get; private set; }
+            public string ImageRuntime { get; }
 
             #endregion
         }
@@ -1253,33 +1247,27 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Constructor
             /// </summary>
-            public SDKInfo(ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata, ConcurrentDictionary<string, List<string>> directoryToFileList, string cacheFileSuffix, int cacheHash)
+            public SDKInfo(ConcurrentDictionary<string, SdkReferenceInfo> pathToReferenceMetadata, ConcurrentDictionary<string, List<string>> directoryToFileList, int cacheHash)
             {
                 PathToReferenceMetadata = pathToReferenceMetadata;
                 DirectoryToFileList = directoryToFileList;
-                Suffix = cacheFileSuffix;
                 Hash = cacheHash;
             }
 
             /// <summary>
             /// A dictionary which maps a file path to a structure that contain some metadata information about that file.
             /// </summary>
-            public ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get; private set; }
+            public ConcurrentDictionary<string, SdkReferenceInfo> PathToReferenceMetadata { get; }
 
             /// <summary>
             /// Dictionary which maps a directory to a list of file names within that directory. This is used to shortcut hitting the disk for the list of files inside of it.
             /// </summary>
-            public ConcurrentDictionary<string, List<string>> DirectoryToFileList { get; private set; }
-
-            /// <summary>
-            /// Suffix for the cache file
-            /// </summary>
-            public string Suffix { get; private set; }
+            public ConcurrentDictionary<string, List<string>> DirectoryToFileList { get; }
 
             /// <summary>
             /// Hashset
             /// </summary>
-            public int Hash { get; private set; }
+            public int Hash { get; }
 
             public static SDKInfo Deserialize(string cacheFile)
             {

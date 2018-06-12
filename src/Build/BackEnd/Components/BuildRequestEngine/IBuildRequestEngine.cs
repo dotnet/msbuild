@@ -6,9 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
@@ -128,10 +125,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the current engine status.
         /// </summary>
-        BuildRequestEngineStatus Status
-        {
-            get;
-        }
+        BuildRequestEngineStatus Status { get; }
         #endregion
 
         #region Methods

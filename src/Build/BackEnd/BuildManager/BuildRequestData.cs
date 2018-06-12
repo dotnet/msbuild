@@ -7,9 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
@@ -133,7 +130,7 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags, IEnumerable<string> propertiesToTransfer)
             : this(targetsToBuild, hostServices, flags)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectInstance, "projectInstance");
+            ErrorUtilities.VerifyThrowArgumentNull(projectInstance, nameof(projectInstance));
 
             foreach (string targetName in targetsToBuild)
             {
@@ -147,7 +144,7 @@ namespace Microsoft.Build.Execution
             ExplicitlySpecifiedToolsVersion = projectInstance.ExplicitToolsVersion;
             if (propertiesToTransfer != null)
             {
-                this.PropertiesToTransfer = new List<string>(propertiesToTransfer);
+                PropertiesToTransfer = new List<string>(propertiesToTransfer);
             }
         }
 
@@ -165,7 +162,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState, nameof(requestedProjectState));
 
-            this.RequestedProjectState = requestedProjectState;
+            RequestedProjectState = requestedProjectState;
         }
 
 
@@ -199,7 +196,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState, nameof(requestedProjectState));
 
-            this.RequestedProjectState = requestedProjectState;
+            RequestedProjectState = requestedProjectState;
         }
 
         /// <summary>
@@ -214,10 +211,10 @@ namespace Microsoft.Build.Execution
         public BuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, string toolsVersion, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
             : this(targetsToBuild, hostServices, flags)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, "projectFullPath");
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, "globalProperties");
+            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, nameof(projectFullPath));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
 
-            this.ProjectFullPath = FileUtilities.NormalizePath(projectFullPath);
+            ProjectFullPath = FileUtilities.NormalizePath(projectFullPath);
             TargetNames = (ICollection<string>)targetsToBuild.Clone();
             GlobalPropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
             foreach (KeyValuePair<string, string> propertyPair in globalProperties)
@@ -233,7 +230,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildRequestData(string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetsToBuild, "targetsToBuild");
+            ErrorUtilities.VerifyThrowArgumentNull(targetsToBuild, nameof(targetsToBuild));
 
             HostServices = hostServices;
             TargetNames = new List<string>(targetsToBuild);
@@ -248,103 +245,61 @@ namespace Microsoft.Build.Execution
         public ProjectInstance ProjectInstance
         {
             get;
-            private set;
         }
 
         /// <summary>The project file.</summary>
         /// <value>The project file to be built.</value>
-        public string ProjectFullPath
-        {
-            get;
-            internal set;
-        }
+        public string ProjectFullPath { get; internal set; }
 
         /// <summary>
         /// The name of the targets to build.
         /// </summary>
         /// <value>An array of targets in the project to be built.</value>
-        public ICollection<string> TargetNames
-        {
-            get;
-            private set;
-        }
+        public ICollection<string> TargetNames { get; }
 
         /// <summary>
         /// Extra flags for this BuildRequest.
         /// </summary>
-        public BuildRequestDataFlags Flags
-        {
-            get;
-            private set;
-        }
+        public BuildRequestDataFlags Flags { get; }
 
         /// <summary>
         /// The global properties to use.
         /// </summary>
         /// <value>The set of global properties to be used to build this request.</value>
-        public ICollection<ProjectPropertyInstance> GlobalProperties
-        {
-            get
-            {
-                return (GlobalPropertiesDictionary == null) ?
-                    (ICollection<ProjectPropertyInstance>)ReadOnlyEmptyCollection<ProjectPropertyInstance>.Instance :
-                    new ReadOnlyCollection<ProjectPropertyInstance>(GlobalPropertiesDictionary);
-            }
-        }
+        public ICollection<ProjectPropertyInstance> GlobalProperties => (GlobalPropertiesDictionary == null) ?
+            (ICollection<ProjectPropertyInstance>)ReadOnlyEmptyCollection<ProjectPropertyInstance>.Instance :
+            new ReadOnlyCollection<ProjectPropertyInstance>(GlobalPropertiesDictionary);
 
         /// <summary>
         /// The explicitly requested tools version to use.
         /// </summary>
-        public string ExplicitlySpecifiedToolsVersion
-        {
-            get;
-            private set;
-        }
+        public string ExplicitlySpecifiedToolsVersion { get; }
 
         /// <summary>
         /// Gets the HostServices object for this request.
         /// </summary>
-        public HostServices HostServices
-        {
-            get;
-            private set;
-        }
+        public HostServices HostServices { get; }
 
         /// <summary>
         /// Returns a list of properties to transfer out of proc for the build.
         /// </summary>
-        public IEnumerable<string> PropertiesToTransfer
-        {
-            get;
-            private set;
-        }
+        public IEnumerable<string> PropertiesToTransfer { get; }
 
         /// <summary>
         /// Returns the properties, items, and metadata that will be returned
         /// by this build.
         /// </summary>
-        public RequestedProjectState RequestedProjectState
-        {
-            get;
-            private set;
-        }
+        public RequestedProjectState RequestedProjectState { get; }
 
         /// <summary>
         /// Whether the tools version used originated from an explicit specification,
         /// for example from an MSBuild task or /tv switch.
         /// </summary>
-        internal bool ExplicitToolsVersionSpecified
-        {
-            get { return (ExplicitlySpecifiedToolsVersion != null); }
-        }
+        internal bool ExplicitToolsVersionSpecified => (ExplicitlySpecifiedToolsVersion != null);
 
         /// <summary>
         /// Returns the global properties as a dictionary.
         /// </summary>
-        internal PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary
-        {
-            get;
-            private set;
-        }
+        internal PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary { get; }
     }
 }

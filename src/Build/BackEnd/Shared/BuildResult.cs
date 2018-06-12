@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
@@ -213,14 +212,7 @@ namespace Microsoft.Build.Execution
             {
                 _requestException = exception ?? existingResults._requestException;
 
-                if (targetNames == null)
-                {
-                    _resultsByTarget = existingResults._resultsByTarget;
-                }
-                else
-                {
-                    _resultsByTarget = CreateTargetResultDictionaryWithContents(existingResults, targetNames);
-                }
+                _resultsByTarget = targetNames == null ? existingResults._resultsByTarget : CreateTargetResultDictionaryWithContents(existingResults, targetNames);
 
                 if (existingResults.OverallResult == BuildResultCode.Success || (additionalTargetsToCheck == null || additionalTargetsToCheck.Count == 0))
                 {
@@ -250,8 +242,7 @@ namespace Microsoft.Build.Execution
 
                     foreach (string additionalTarget in additionalTargetsToCheck)
                     {
-                        TargetResult targetResult;
-                        if (existingResults.ResultsByTarget.TryGetValue(additionalTarget, out targetResult))
+                        if (existingResults.ResultsByTarget.TryGetValue(additionalTarget, out TargetResult targetResult))
                         {
                             if (targetResult.ResultCode == TargetResultCode.Failure && !targetResult.TargetFailureDoesntCauseBuildFailure)
                             {
@@ -404,8 +395,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public ProjectInstance ProjectStateAfterBuild
         {
-            get { return _projectStateAfterBuild; }
-            set { _projectStateAfterBuild = value; }
+            get => _projectStateAfterBuild;
+            set => _projectStateAfterBuild = value;
         }
 
         /// <summary>
@@ -423,15 +414,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         Dictionary<string, string> IBuildResults.SavedEnvironmentVariables
         {
-            get
-            {
-                return _savedEnvironmentVariables;
-            }
+            get => _savedEnvironmentVariables;
 
-            set
-            {
-                _savedEnvironmentVariables = value;
-            }
+            set => _savedEnvironmentVariables = value;
         }
 
         /// <summary>
@@ -439,15 +424,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         string IBuildResults.SavedCurrentDirectory
         {
-            get
-            {
-                return _savedCurrentDirectory;
-            }
+            get => _savedCurrentDirectory;
 
-            set
-            {
-                _savedCurrentDirectory = value;
-            }
+            set => _savedCurrentDirectory = value;
         }
 
         /// <summary>
@@ -496,7 +475,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The results for the specified target</returns>
         /// <exception>KeyNotFoundException is returned if the specified target doesn't exist when reading this property.</exception>
         /// <exception>ArgumentException is returned if the specified target already has results.</exception>
-        public ITargetResult this[string target]
+        public TargetResult this[string target]
         {
             [DebuggerStepThrough]
             get
@@ -510,8 +489,8 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The results for the target.</param>
         public void AddResultsForTarget(string target, TargetResult result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(target, "target");
-            ErrorUtilities.VerifyThrowArgumentNull(result, "result");
+            ErrorUtilities.VerifyThrowArgumentNull(target, nameof(target));
+            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
             if (_resultsByTarget.ContainsKey(target))
             {
                 ErrorUtilities.VerifyThrow(_resultsByTarget[target].ResultCode == TargetResultCode.Skipped, "Items already exist for target {0}.", target);
@@ -526,11 +505,11 @@ namespace Microsoft.Build.Execution
         /// <param name="results">The results to merge in.</param>
         public void MergeResults(BuildResult results)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(results, "results");
+            ErrorUtilities.VerifyThrowArgumentNull(results, nameof(results));
             ErrorUtilities.VerifyThrow(results.ConfigurationId == ConfigurationId, "Result configurations don't match");
 
             // If we are merging with ourself or with a shallow clone, do nothing.
-            if (Object.ReferenceEquals(this, results) || Object.ReferenceEquals(_resultsByTarget, results._resultsByTarget))
+            if (ReferenceEquals(this, results) || ReferenceEquals(_resultsByTarget, results._resultsByTarget))
             {
                 return;
             }
@@ -581,7 +560,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _defaultTargets);
             translator.Translate(ref _circularDependency);
             translator.TranslateException(ref _requestException);
-            translator.TranslateDictionary<ConcurrentDictionary<string, TargetResult>, TargetResult>(ref _resultsByTarget, TargetResult.FactoryForDeserialization, CreateTargetResultDictionary);
+            translator.TranslateDictionary(ref _resultsByTarget, TargetResult.FactoryForDeserialization, CreateTargetResultDictionary);
             translator.Translate(ref _baseOverallResult);
             translator.Translate(ref _projectStateAfterBuild, ProjectInstance.FactoryForDeserialization);
             translator.Translate(ref _savedCurrentDirectory);
@@ -591,7 +570,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        static internal BuildResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildResult FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new BuildResult(translator);
         }
@@ -626,16 +605,20 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildResult Clone()
         {
-            BuildResult result = new BuildResult();
-            result._submissionId = _submissionId;
-            result._configurationId = _configurationId;
-            result._globalRequestId = _globalRequestId;
-            result._parentGlobalRequestId = _parentGlobalRequestId;
-            result._nodeRequestId = _nodeRequestId;
-            result._requestException = _requestException;
-            result._resultsByTarget = new ConcurrentDictionary<string, TargetResult>(_resultsByTarget, StringComparer.OrdinalIgnoreCase);
-            result._baseOverallResult = this.OverallResult == BuildResultCode.Success;
-            result._circularDependency = _circularDependency;
+            BuildResult result = new BuildResult
+            {
+                _submissionId = _submissionId,
+                _configurationId = _configurationId,
+                _globalRequestId = _globalRequestId,
+                _parentGlobalRequestId = _parentGlobalRequestId,
+                _nodeRequestId = _nodeRequestId,
+                _requestException = _requestException,
+                _resultsByTarget = new ConcurrentDictionary<string, TargetResult>(
+                    _resultsByTarget,
+                    StringComparer.OrdinalIgnoreCase),
+                _baseOverallResult = OverallResult == BuildResultCode.Success,
+                _circularDependency = _circularDependency
+            };
 
             return result;
         }
@@ -652,7 +635,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates the target result dictionary.
         /// </summary>
-        private ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionary(int capacity)
+        private static ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionary(int capacity)
         {
             return new ConcurrentDictionary<string, TargetResult>(1, capacity, StringComparer.OrdinalIgnoreCase);
         }
@@ -661,14 +644,13 @@ namespace Microsoft.Build.Execution
         /// Creates the target result dictionary and populates it with however many target results are 
         /// available given the list of targets passed. 
         /// </summary>
-        private ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionaryWithContents(BuildResult existingResults, string[] targetNames)
+        private static ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionaryWithContents(BuildResult existingResults, string[] targetNames)
         {
-            var resultsByTarget = CreateTargetResultDictionary(targetNames.Length);
+            ConcurrentDictionary<string, TargetResult> resultsByTarget = CreateTargetResultDictionary(targetNames.Length);
 
             foreach (string target in targetNames)
             {
-                TargetResult targetResult;
-                if (existingResults.ResultsByTarget.TryGetValue(target, out targetResult))
+                if (existingResults.ResultsByTarget.TryGetValue(target, out TargetResult targetResult))
                 {
                     resultsByTarget[target] = targetResult;
                 }

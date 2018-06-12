@@ -973,13 +973,13 @@ namespace Microsoft.Build.Execution
         public System.Threading.ThreadPriority BuildThreadPriority { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Globalization.CultureInfo Culture { get { throw null; } set { } }
         public string DefaultToolsVersion { get { throw null; } set { } }
-        public bool DetailedSummary { get { throw null; } set { } }
+        public bool DetailedSummary { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool DisableInProcNode { get { throw null; } set { } }
         public bool EnableNodeReuse { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> EnvironmentProperties { get { throw null; } }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> ForwardingLoggers { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } set { } }
-        public Microsoft.Build.Execution.HostServices HostServices { get { throw null; } set { } }
+        public Microsoft.Build.Execution.HostServices HostServices { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool LegacyThreadingSemantics { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> Loggers { get { throw null; } set { } }
         public bool LogInitialPropertiesAndItems { get { throw null; } set { } }
@@ -990,14 +990,14 @@ namespace Microsoft.Build.Execution
         public bool OnlyLogCriticalEvents { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings ProjectLoadSettings { get { throw null; } set { } }
         public bool ResetCaches { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public bool SaveOperatingEnvironment { get { throw null; } set { } }
+        public bool SaveOperatingEnvironment { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool ShutdownInProcNodeOnBuildFinish { get { throw null; } set { } }
-        public Microsoft.Build.Evaluation.ToolsetDefinitionLocations ToolsetDefinitionLocations { get { throw null; } set { } }
+        public Microsoft.Build.Evaluation.ToolsetDefinitionLocations ToolsetDefinitionLocations { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Evaluation.Toolset> Toolsets { get { throw null; } }
         public System.Globalization.CultureInfo UICulture { get { throw null; } set { } }
         public bool UseSynchronousLogging { get { throw null; } set { } }
-        public System.Collections.Generic.ISet<string> WarningsAsErrors { get { throw null; } set { } }
-        public System.Collections.Generic.ISet<string> WarningsAsMessages { get { throw null; } set { } }
+        public System.Collections.Generic.ISet<string> WarningsAsErrors { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Collections.Generic.ISet<string> WarningsAsMessages { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public Microsoft.Build.Execution.BuildParameters Clone() { throw null; }
         public Microsoft.Build.Evaluation.Toolset GetToolset(string toolsVersion) { throw null; }
     }
@@ -1040,7 +1040,7 @@ namespace Microsoft.Build.Execution
         public int ConfigurationId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Exception Exception { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public int GlobalRequestId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
-        public Microsoft.Build.Execution.ITargetResult this[string target] { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public Microsoft.Build.Execution.TargetResult this[string target] { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public int NodeRequestId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public Microsoft.Build.Execution.BuildResultCode OverallResult { get { throw null; } }
         public int ParentGlobalRequestId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
@@ -1061,7 +1061,7 @@ namespace Microsoft.Build.Execution
         internal BuildSubmission() { }
         public object AsyncContext { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Execution.BuildManager BuildManager { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public Microsoft.Build.Execution.BuildResult BuildResult { get { throw null; } set { } }
+        public Microsoft.Build.Execution.BuildResult BuildResult { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool IsCompleted { get { throw null; } }
         public int SubmissionId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public System.Threading.WaitHandle WaitHandle { get { throw null; } }

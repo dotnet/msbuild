@@ -6,10 +6,6 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Build.Shared;
-using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.BackEnd

@@ -31,8 +31,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="flags">Flags specified for the build request.</param>
         public FullyQualifiedBuildRequest(BuildRequestConfiguration config, string[] targets, bool resultsNeeded, BuildRequestDataFlags flags = BuildRequestDataFlags.None)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config, "config");
-            ErrorUtilities.VerifyThrowArgumentNull(targets, "targets");
+            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
+            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
 
             Config = config;
             Targets = targets;

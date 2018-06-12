@@ -5,12 +5,6 @@
 // <summary>Interface for node packets.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using Microsoft.Build.Framework;
-
 namespace Microsoft.Build.BackEnd
 {
     #region Enums
