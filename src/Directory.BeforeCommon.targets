@@ -48,6 +48,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_HANDLEREF</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_HTTP_LISTENER</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETCURRENTDIRECTORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETFULLPATH</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPES_FULL_DUPLEX</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR</DefineConstants>
