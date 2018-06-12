@@ -27,9 +27,6 @@
 
     <!-- Use the NuGet.targets that we bundle, since that is what we will install so we should be testing against that -->
     <Content Include="$(RepoRoot)nuget-support\tasks-targets\*" CopyToOutputDirectory="PreserveNewest" />
-
-    <!-- Include DependencyModel libraries. -->
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">
