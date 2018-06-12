@@ -946,8 +946,8 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     
-    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" />
-    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" />
+    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
