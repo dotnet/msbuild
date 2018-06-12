@@ -1681,6 +1681,10 @@
     <value>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</value>
     <comment></comment>
   </data>
+  <data name="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+    <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
+    <comment></comment>
+  </data>
   <!--
         The ResolveComReference message bucket is: MSB3281 - MSB3320
 

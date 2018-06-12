@@ -1442,6 +1442,11 @@
         <target state="translated">MSB3455: Nie można uruchomić programu ResGen.exe, ponieważ liczba znaków w wierszu polecenia ({0}) przekracza maksymalną dozwoloną długość polecenia. W celu rozwiązania tego problemu (1) usuń niepotrzebne odwołania do zestawów lub (2) skróć ścieżki do tych odwołań.</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">Lokalizacja klucza rejestru AssemblyFoldersEx: „{0}”</target>

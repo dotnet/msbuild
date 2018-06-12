@@ -1442,6 +1442,11 @@
         <target state="translated">MSB3455: Aplikaci ResGen.exe nelze spustit, protože délka příkazového řádku ({0} znaků) překračuje maximální délku příkazu. Tento problém můžete vyřešit tak, že (1) odeberete nepotřebné odkazy na sestavení nebo (2) zkrátíte cesty k těmto odkazům.</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">Umístění AssemblyFoldersEx: {0}</target>
