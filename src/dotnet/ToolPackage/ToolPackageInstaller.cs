@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -82,7 +83,7 @@ namespace Microsoft.DotNet.ToolPackage
                         }
 
                         Directory.CreateDirectory(packageRootDirectory.Value);
-                        Directory.Move(stageDirectory.Value, packageDirectory.Value);
+                        FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(stageDirectory.Value, packageDirectory.Value));
                         rollbackDirectory = packageDirectory.Value;
 
                         return new ToolPackageInstance(_store, packageId, version, packageDirectory);
