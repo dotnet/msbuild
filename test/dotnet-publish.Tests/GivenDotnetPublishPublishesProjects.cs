@@ -134,10 +134,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
-            new TestCommand(outputProgram)
-                .ExecuteWithCapturedOutput()
-                .Should().Pass()
-                     .And.HaveStdOutContaining("Hello World");
+            var command = new TestCommand(outputProgram);
+            command.Environment["DOTNET_ROOT"]= new RepoDirectoriesProvider().DotnetRoot;
+
+            command.ExecuteWithCapturedOutput()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World");
         }
 
         [Fact]
@@ -186,7 +190,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         private DirectoryInfo PublishApp(string testAppName, string rid, string mode, string args = null)
         {
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance($"PublishApp_{rid ?? "none"}_{mode ?? "none"}")
+                .CreateInstance($"PublishApp_{rid ?? "none"}_{mode ?? "none"}_{args ?? "none"}")
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
