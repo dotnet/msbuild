@@ -13,13 +13,6 @@ namespace Microsoft.Build.Tasks
     internal sealed class BadImageReferenceException : Exception
     {
         /// <summary>
-        /// Don't allow default construction.
-        /// </summary>
-        private BadImageReferenceException()
-        {
-        }
-
-        /// <summary>
         /// Construct
         /// </summary>
         internal BadImageReferenceException(string message, Exception innerException)

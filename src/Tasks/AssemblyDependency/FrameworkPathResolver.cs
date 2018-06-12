@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 using System.Collections;
 using Microsoft.Build.Shared;
 
@@ -14,19 +13,14 @@ namespace Microsoft.Build.Tasks
     internal class FrameworkPathResolver : Resolver
     {
         // Paths to FX folders.
-        private string[] _frameworkPaths;
+        private readonly string[] _frameworkPaths;
 
         // Table of information about framework assemblies.
-        private InstalledAssemblies _installedAssemblies;
+        private readonly InstalledAssemblies _installedAssemblies;
 
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="frameworkPaths">Paths to framework directories.</param>
-        /// <param name="installedAssemblies"></param>
-        /// <param name="searchPathElement"></param>
-        /// <param name="getAssemblyName"></param>
-        /// <param name="fileExists"></param>
         public FrameworkPathResolver(string[] frameworkPaths, InstalledAssemblies installedAssemblies, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
         {
@@ -34,11 +28,11 @@ namespace Microsoft.Build.Tasks
             _installedAssemblies = installedAssemblies;
         }
 
-
         /// <summary>
         /// Resolve a reference to a specific file name.
         /// </summary>
         /// <param name="assemblyName">The assemblyname of the reference.</param>
+        /// <param name="sdkName"></param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
@@ -60,7 +54,6 @@ namespace Microsoft.Build.Tasks
             string hintPath,
             string assemblyFolderKey,
             ArrayList assembliesConsideredAndRejected,
-
             out string foundPath,
             out bool userRequestedSpecificFile
         )
@@ -106,7 +99,7 @@ namespace Microsoft.Build.Tasks
                 {
                     for (int i = 0; i < assemblyEntries.Length; ++i)
                     {
-                        AssemblyNameExtension current = new AssemblyNameExtension(assemblyEntries[i].FullName);
+                        var current = new AssemblyNameExtension(assemblyEntries[i].FullName);
 
                         // If the current version is higher than the previously looked at.
                         if (current.Version != null && current.Version.CompareTo(assemblyNameToUse.Version) > 0)

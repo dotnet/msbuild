@@ -3,8 +3,6 @@
 
 using Microsoft.Win32;
 using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Resources;
@@ -14,21 +12,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal class ComImporter
     {
-        private readonly TypeLib _typeLib;
-        private readonly ComClass[] _comClasses;
         private readonly OutputMessageCollection _outputMessages;
         private readonly string _outputDisplayName;
         private readonly ResourceManager _resources = new ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", System.Reflection.Assembly.GetExecutingAssembly());
-        private bool _success = true;
 
         // These must be defined in sorted order!
-        private readonly static string[] s_knownImplementedCategories = new string[]
+        private static readonly string[] s_knownImplementedCategories =
         {
             "{02496840-3AC4-11cf-87B9-00AA006C8166}", //CATID_VBFormat
             "{02496841-3AC4-11cf-87B9-00AA006C8166}", //CATID_VBGetControl
             "{40FC6ED5-2438-11CF-A3DB-080036F12502}",
         };
-        private readonly static string[] s_knownSubKeys = new string[]
+        private static readonly string[] s_knownSubKeys =
         {
             "Control",
             "Programmable",
@@ -56,60 +51,57 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 IntPtr typeLibAttrPtr = IntPtr.Zero;
                 tlib.GetLibAttr(out typeLibAttrPtr);
-                TYPELIBATTR typeLibAttr = (TYPELIBATTR)Marshal.PtrToStructure(typeLibAttrPtr, typeof(TYPELIBATTR));
+                var typeLibAttr = (TYPELIBATTR)Marshal.PtrToStructure(typeLibAttrPtr, typeof(TYPELIBATTR));
                 tlib.ReleaseTLibAttr(typeLibAttrPtr);
                 Guid tlbid = typeLibAttr.guid;
 
-                string name, docString, helpFile;
-                int helpContext;
-                tlib.GetDocumentation(-1, out name, out docString, out helpContext, out helpFile);
+                tlib.GetDocumentation(-1, out _, out string docString, out _, out string helpFile);
                 string helpdir = Util.FilterNonprintableChars(helpFile); //Path.GetDirectoryName(helpFile);
 
-                _typeLib = new TypeLib(tlbid, new Version(typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum), helpdir, typeLibAttr.lcid, Convert.ToInt32(typeLibAttr.wLibFlags, CultureInfo.InvariantCulture));
+                TypeLib = new TypeLib(tlbid, new Version(typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum), helpdir, typeLibAttr.lcid, Convert.ToInt32(typeLibAttr.wLibFlags, CultureInfo.InvariantCulture));
 
-                List<ComClass> comClassList = new List<ComClass>();
+                var comClassList = new List<ComClass>();
                 int count = tlib.GetTypeInfoCount();
                 for (int i = 0; i < count; ++i)
                 {
-                    TYPEKIND tkind;
-                    tlib.GetTypeInfoType(i, out tkind);
+                    tlib.GetTypeInfoType(i, out TYPEKIND tkind);
                     if (tkind == TYPEKIND.TKIND_COCLASS)
                     {
-                        UCOMITypeInfo tinfo;
-                        tlib.GetTypeInfo(i, out tinfo);
+                        tlib.GetTypeInfo(i, out UCOMITypeInfo tinfo);
 
                         IntPtr tinfoAttrPtr = IntPtr.Zero;
                         tinfo.GetTypeAttr(out tinfoAttrPtr);
                         TYPEATTR tinfoAttr = (TYPEATTR)Marshal.PtrToStructure(tinfoAttrPtr, typeof(TYPEATTR));
                         tinfo.ReleaseTypeAttr(tinfoAttrPtr);
                         Guid clsid = tinfoAttr.guid;
-                        string sclsid = clsid.ToString("B");
 
-                        tlib.GetDocumentation(i, out name, out docString, out helpContext, out helpFile);
+                        tlib.GetDocumentation(i, out _, out docString, out _, out helpFile);
                         string description = Util.FilterNonprintableChars(docString);
 
                         ClassInfo info = GetRegisteredClassInfo(clsid);
                         if (info == null)
+                        {
                             continue;
+                        }
 
                         comClassList.Add(new ComClass(tlbid, clsid, info.Progid, info.ThreadingModel, description));
                     }
                 }
                 if (comClassList.Count > 0)
                 {
-                    _comClasses = comClassList.ToArray();
-                    _success = true;
+                    ComClasses = comClassList.ToArray();
+                    Success = true;
                 }
                 else
                 {
                     outputMessages.AddErrorMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.NoRegisteredClasses"));
-                    _success = false;
+                    Success = false;
                 }
             }
             else
             {
                 outputMessages.AddErrorMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.TypeLibraryLoadFailure"));
-                _success = false;
+                Success = false;
             }
 #pragma warning restore 618
         }
@@ -122,9 +114,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void CheckForUnknownSubKeys(RegistryKey key, string[] knownNames)
         {
             if (key.SubKeyCount > 0)
+            {
                 foreach (string name in key.GetSubKeyNames())
+                {
                     if (Array.BinarySearch(knownNames, name, StringComparer.OrdinalIgnoreCase) < 0)
+                    {
                         _outputMessages.AddWarningMessage("GenerateManifest.ComImport", _outputDisplayName, String.Format(CultureInfo.CurrentCulture, _resources.GetString("ComImporter.SubKeyNotImported"), key.Name + "\\" + name));
+                    }
+                }
+            }
         }
 
         private void CheckForUnknownValues(RegistryKey key)
@@ -135,9 +133,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void CheckForUnknownValues(RegistryKey key, string[] knownNames)
         {
             if (key.ValueCount > 0)
+            {
                 foreach (string name in key.GetValueNames())
-                    if (!String.IsNullOrEmpty(name) && Array.BinarySearch(knownNames, name, StringComparer.OrdinalIgnoreCase) < 0)
+                {
+                    if (!String.IsNullOrEmpty(name) && Array.BinarySearch(
+                            knownNames,
+                            name,
+                            StringComparer.OrdinalIgnoreCase) < 0)
+                    {
                         _outputMessages.AddWarningMessage("GenerateManifest.ComImport", _outputDisplayName, String.Format(CultureInfo.CurrentCulture, _resources.GetString("ComImporter.ValueNotImported"), key.Name + "\\@" + name));
+                    }
+                }
+            }
         }
 
         private ClassInfo GetRegisteredClassInfo(Guid clsid)
@@ -145,22 +152,30 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             ClassInfo info = null;
             RegistryKey userKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\CLASSES\\CLSID");
             if (GetRegisteredClassInfo(userKey, clsid, ref info))
+            {
                 return info;
+            }
             RegistryKey machineKey = Registry.ClassesRoot.OpenSubKey("CLSID");
             if (GetRegisteredClassInfo(machineKey, clsid, ref info))
+            {
                 return info;
+            }
             return null;
         }
 
         private bool GetRegisteredClassInfo(RegistryKey rootKey, Guid clsid, ref ClassInfo info)
         {
             if (rootKey == null)
+            {
                 return false;
+            }
 
             string sclsid = clsid.ToString("B");
             RegistryKey classKey = rootKey.OpenSubKey(sclsid);
             if (classKey == null)
+            {
                 return false;
+            }
 
             bool succeeded = true;
             string registeredPath = null;
@@ -180,7 +195,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
                 else if (String.Equals(subKeyName, "ProgID", StringComparison.OrdinalIgnoreCase))
                 {
-                    RegistryKey progidKey = classKey.OpenSubKey(subKeyName);
                     progid = (string)subKey.GetValue(null);
                     CheckForUnknownSubKeys(subKey);
                     CheckForUnknownValues(subKey);
@@ -197,7 +211,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 else
                 {
                     if (Array.BinarySearch(s_knownSubKeys, subKeyName, StringComparer.OrdinalIgnoreCase) < 0)
+                    {
                         _outputMessages.AddWarningMessage("GenerateManifest.ComImport", _outputDisplayName, String.Format(CultureInfo.CurrentCulture, _resources.GetString("ComImporter.SubKeyNotImported"), classKey.Name + "\\" + subKeyName));
+                    }
                 }
             }
 
@@ -207,24 +223,22 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 succeeded = false;
             }
 
-            info = new ClassInfo(progid, registeredPath, threadingModel);
+            info = new ClassInfo(progid, threadingModel);
             return succeeded;
         }
 
-        public bool Success { get { return _success; } }
-        public ComClass[] ComClasses { get { return _comClasses; } }
-        public TypeLib TypeLib { get { return _typeLib; } }
+        public bool Success { get; } = true;
 
+        public ComClass[] ComClasses { get; }
+        public TypeLib TypeLib { get; }
 
         private class ClassInfo
         {
             internal readonly string Progid;
-            internal readonly string RegisteredPath;
             internal readonly string ThreadingModel;
-            internal ClassInfo(string progid, string registeredPath, string threadingModel)
+            internal ClassInfo(string progid, string threadingModel)
             {
                 Progid = progid;
-                RegisteredPath = registeredPath;
                 ThreadingModel = threadingModel;
             }
         }

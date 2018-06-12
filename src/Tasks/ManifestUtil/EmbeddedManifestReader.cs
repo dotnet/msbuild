@@ -11,7 +11,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     internal class EmbeddedManifestReader
     {
         private static readonly IntPtr s_id1 = new IntPtr(1);
-        private Stream _manifest = null;
+        private Stream _manifest;
 
         private EmbeddedManifestReader(string path)
         {
@@ -20,28 +20,36 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 hModule = NativeMethods.LoadLibraryExW(path, IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
                 if (hModule == IntPtr.Zero)
+                {
                     return;
-                NativeMethods.EnumResNameProc callback = new NativeMethods.EnumResNameProc(EnumResNameCallback);
+                }
+                NativeMethods.EnumResNameProc callback = EnumResNameCallback;
                 NativeMethods.EnumResourceNames(hModule, NativeMethods.RT_MANIFEST, callback, IntPtr.Zero);
             }
             finally
             {
                 if (hModule != IntPtr.Zero)
+                {
                     NativeMethods.FreeLibrary(hModule);
+                }
             }
         }
 
         private bool EnumResNameCallback(IntPtr hModule, IntPtr pType, IntPtr pName, IntPtr param)
         {
             if (pName != s_id1)
+            {
                 return false; // only look for resources with ID=1
+            }
             IntPtr hResInfo = NativeMethods.FindResource(hModule, pName, NativeMethods.RT_MANIFEST);
             if (hResInfo == IntPtr.Zero)
+            {
                 return false; //continue looking
+            }
             IntPtr hResource = NativeMethods.LoadResource(hModule, hResInfo);
             NativeMethods.LockResource(hResource);
             uint bufsize = NativeMethods.SizeofResource(hModule, hResInfo);
-            byte[] buffer = new byte[bufsize];
+            var buffer = new byte[bufsize];
 
             Marshal.Copy(hResource, buffer, 0, buffer.Length);
             _manifest = new MemoryStream(buffer, false);
@@ -50,7 +58,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static Stream Read(string path)
         {
-            if (path == null) throw new ArgumentNullException("path");
+            if (path == null) throw new ArgumentNullException(nameof(path));
 
             if (!path.EndsWith(".manifest", StringComparison.Ordinal) && !path.EndsWith(".dll", StringComparison.Ordinal))
             {

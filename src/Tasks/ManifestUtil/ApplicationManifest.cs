@@ -16,35 +16,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     /// <summary>
     /// Describes a ClickOnce or native Win32 application manifest.
     /// </summary>
+    /// <remarks>
+    /// This is a serialization format, don't remove the private fields.
+    /// </remarks>
     [ComVisible(false)]
     [XmlRoot("ApplicationManifest")]
     public sealed class ApplicationManifest : AssemblyManifest
     {
-        private string _configFile = null;
-        private AssemblyIdentity _entryPointIdentity = null;
-        private AssemblyReference _entryPoint = null;
-        private string _entryPointParameters = null;
-        private string _entryPointPath = null;
-        private string _errorReportUrl = null;
-        private string _iconFile = null;
+        private string _configFile;
+        private AssemblyIdentity _entryPointIdentity;
+        private AssemblyReference _entryPoint;
+        private string _entryPointParameters;
+        private string _entryPointPath;
+        private string _errorReportUrl;
+        private string _iconFile;
         private bool _isClickOnceManifest = true;
-        private string _oSMajor = null;
-        private string _oSMinor = null;
-        private string _oSBuild = null;
-        private string _oSRevision = null;
-        private string _oSSupportUrl = null;
-        private string _oSDescription = null;
-        private TrustInfo _trustInfo = null;
-        private int _maxTargetPath = 0;
-        private bool _hostInBrowser = false;
-        private bool _useApplicationTrust = false;
-        private string _product = null;
-        private string _publisher = null;
-        private string _suiteName = null;
-        private string _supportUrl = null;
+        private string _oSMajor;
+        private string _oSMinor;
+        private string _oSBuild;
+        private string _oSRevision;
+        private string _oSSupportUrl;
+        private string _oSDescription;
+        private TrustInfo _trustInfo;
+        private int _maxTargetPath;
+        private bool _hostInBrowser;
+        private bool _useApplicationTrust;
+        private string _product;
+        private string _publisher;
+        private string _suiteName;
+        private string _supportUrl;
         private FileAssociation[] _fileAssociations;
-        private FileAssociationCollection _fileAssociationList = null;
-        private string _targetFrameworkVersion = null;
+        private FileAssociationCollection _fileAssociationList;
+        private string _targetFrameworkVersion;
 
         /// <summary>
         /// Initializes a new instance of the ApplicationManifest class.
@@ -56,7 +59,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <summary>
         /// Initializes a new instance of the ApplicationManifest class.
         /// </summary>
-        /// <param name="targetFrameworkMoniker"></param>
         public ApplicationManifest(string targetFrameworkVersion)
         {
             _targetFrameworkVersion = targetFrameworkVersion;
@@ -69,8 +71,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string ConfigFile
         {
-            get { return _configFile; }
-            set { _configFile = value; }
+            get => _configFile;
+            set => _configFile = value;
         }
 
         [XmlIgnore]
@@ -94,8 +96,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string TargetFrameworkVersion
         {
-            get { return _targetFrameworkVersion; }
-            set { _targetFrameworkVersion = value; }
+            get => _targetFrameworkVersion;
+            set => _targetFrameworkVersion = value;
         }
 
         /// <summary>
@@ -105,8 +107,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string ErrorReportUrl
         {
-            get { return _errorReportUrl; }
-            set { _errorReportUrl = value; }
+            get => _errorReportUrl;
+            set => _errorReportUrl = value;
         }
 
         // Make sure we have a CLR dependency, add it if not...
@@ -115,11 +117,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             AssemblyReference CLRPlatformAssembly = AssemblyReferences.Find(Constants.CLRPlatformAssemblyName);
             if (CLRPlatformAssembly == null)
             {
-                CLRPlatformAssembly = new AssemblyReference();
-                CLRPlatformAssembly.IsPrerequisite = true;
+                CLRPlatformAssembly = new AssemblyReference { IsPrerequisite = true };
                 AssemblyReferences.Add(CLRPlatformAssembly);
             }
-            if (CLRPlatformAssembly.AssemblyIdentity == null || String.IsNullOrEmpty(CLRPlatformAssembly.AssemblyIdentity.Version))
+            if (String.IsNullOrEmpty(CLRPlatformAssembly.AssemblyIdentity?.Version))
             {
                 CLRPlatformAssembly.AssemblyIdentity = new AssemblyIdentity(Constants.CLRPlatformAssemblyName, Util.GetClrVersion(_targetFrameworkVersion));
             }
@@ -128,7 +129,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void FixupEntryPoint()
         {
             if (_entryPoint == null)
+            {
                 _entryPoint = AssemblyReferences.Find(_entryPointIdentity);
+            }
         }
 
         // WinXP is required if app has any native assembly references or any RegFree COM definitions...
@@ -137,25 +140,26 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get
             {
                 foreach (FileReference f in FileReferences)
+                {
                     if (f.ComClasses != null || f.TypeLibs != null || f.ProxyStubs != null)
+                    {
                         return true;
+                    }
+                }
                 foreach (AssemblyReference a in AssemblyReferences)
+                {
                     if (a.ReferenceType == AssemblyReferenceType.NativeAssembly)
+                    {
                         return true;
+                    }
+                }
                 return false;
             }
         }
 
         [XmlIgnore]
-        public FileAssociationCollection FileAssociations
-        {
-            get
-            {
-                if (_fileAssociationList == null)
-                    _fileAssociationList = new FileAssociationCollection(_fileAssociations);
-                return _fileAssociationList;
-            }
-        }
+        public FileAssociationCollection FileAssociations => _fileAssociationList ??
+                                                             (_fileAssociationList = new FileAssociationCollection(_fileAssociations));
 
         /// <summary>
         /// If true, the application will run in IE using WPF's xbap application model.
@@ -163,8 +167,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool HostInBrowser
         {
-            get { return _hostInBrowser; }
-            set { _hostInBrowser = value; }
+            get => _hostInBrowser;
+            set => _hostInBrowser = value;
         }
 
         /// <summary>
@@ -176,8 +180,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string IconFile
         {
-            get { return _iconFile; }
-            set { _iconFile = value; }
+            get => _iconFile;
+            set => _iconFile = value;
         }
 
         /// <summary>
@@ -186,8 +190,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool IsClickOnceManifest
         {
-            get { return _isClickOnceManifest; }
-            set { _isClickOnceManifest = value; }
+            get => _isClickOnceManifest;
+            set => _isClickOnceManifest = value;
         }
 
 
@@ -201,29 +205,34 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public int MaxTargetPath
         {
-            get { return _maxTargetPath; }
-            set { _maxTargetPath = value; }
+            get => _maxTargetPath;
+            set => _maxTargetPath = value;
         }
 
         internal override void OnBeforeSave()
         {
             FixupEntryPoint();
             if (_isClickOnceManifest)
+            {
                 FixupClrVersion();
+            }
             base.OnBeforeSave();
-            if (_isClickOnceManifest && AssemblyIdentity != null && String.IsNullOrEmpty(AssemblyIdentity.PublicKeyToken))
+            if (_isClickOnceManifest && AssemblyIdentity != null &&
+                String.IsNullOrEmpty(AssemblyIdentity.PublicKeyToken))
+            {
                 AssemblyIdentity.PublicKeyToken = "0000000000000000";
+            }
             UpdateEntryPoint();
             AssemblyIdentity.Type = "win32"; // Activation on WinXP gold will fail if type="win32" attribute is not present
             if (String.IsNullOrEmpty(OSVersion))
             {
-                if (!WinXPRequired)
-                    OSVersion = Constants.OSVersion_Win9X;
-                else
-                    OSVersion = Constants.OSVersion_WinXP;
+                OSVersion = !WinXPRequired ? Constants.OSVersion_Win9X : Constants.OSVersion_WinXP;
             }
+
             if (_fileAssociationList != null)
+            {
                 _fileAssociations = _fileAssociationList.ToArray();
+            }
         }
 
         /// <summary>
@@ -232,8 +241,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string OSDescription
         {
-            get { return _oSDescription; }
-            set { _oSDescription = value; }
+            get => _oSDescription;
+            set => _oSDescription = value;
         }
 
         /// <summary>
@@ -242,8 +251,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string OSSupportUrl
         {
-            get { return _oSSupportUrl; }
-            set { _oSSupportUrl = value; }
+            get => _oSSupportUrl;
+            set => _oSSupportUrl = value;
         }
 
         /// <summary>
@@ -260,10 +269,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get
             {
                 if (String.IsNullOrEmpty(_oSMajor)) return null;
-                Version v = null;
+                Version v;
                 try
                 {
-                    v = new Version(String.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.{3}", _oSMajor, _oSMinor, _oSBuild, _oSRevision));
+                    v = new Version($"{_oSMajor}.{_oSMinor}.{_oSBuild}.{_oSRevision}");
                 }
                 catch (FormatException)
                 {
@@ -284,7 +293,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     Version v = new Version(value);
                     if (v.Build < 0 || v.Revision < 0)
+                    {
                         throw new FormatException();
+                    }
                     _oSMajor = v.Major.ToString("G", CultureInfo.InvariantCulture);
                     _oSMinor = v.Minor.ToString("G", CultureInfo.InvariantCulture);
                     _oSBuild = v.Build.ToString("G", CultureInfo.InvariantCulture);
@@ -301,8 +312,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Product
         {
-            get { return _product; }
-            set { _product = value; }
+            get => _product;
+            set => _product = value;
         }
 
         /// <summary>
@@ -313,8 +324,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Publisher
         {
-            get { return _publisher; }
-            set { _publisher = value; }
+            get => _publisher;
+            set => _publisher = value;
         }
 
         /// <summary>
@@ -324,8 +335,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string SuiteName
         {
-            get { return _suiteName; }
-            set { _suiteName = value; }
+            get => _suiteName;
+            set => _suiteName = value;
         }
 
         /// <summary>
@@ -335,8 +346,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string SupportUrl
         {
-            get { return _supportUrl; }
-            set { _supportUrl = value; }
+            get => _supportUrl;
+            set => _supportUrl = value;
         }
 
         /// <summary>
@@ -345,8 +356,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public TrustInfo TrustInfo
         {
-            get { return _trustInfo; }
-            set { _trustInfo = value; }
+            get => _trustInfo;
+            set => _trustInfo = value;
         }
 
         /// <summary>
@@ -355,8 +366,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool UseApplicationTrust
         {
-            get { return _useApplicationTrust; }
-            set { _useApplicationTrust = value; }
+            get => _useApplicationTrust;
+            set => _useApplicationTrust = value;
         }
 
         private void UpdateEntryPoint()
@@ -395,8 +406,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int t1 = Environment.TickCount;
             string outputFileName = Path.GetFileName(SourcePath);
-            Dictionary<string, ComInfo> clsidList = new Dictionary<string, ComInfo>();
-            Dictionary<string, ComInfo> tlbidList = new Dictionary<string, ComInfo>();
+            var clsidList = new Dictionary<string, ComInfo>();
+            var tlbidList = new Dictionary<string, ComInfo>();
 
             // Check for duplicate COM definitions in all dependent manifests...
             foreach (AssemblyReference assembly in AssemblyReferences)
@@ -412,17 +423,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                             {
                                 string key = comInfo.ClsId.ToLowerInvariant();
                                 if (!clsidList.ContainsKey(key))
+                                {
                                     clsidList.Add(key, comInfo);
+                                }
                                 else
+                                {
                                     OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "clsid", comInfo.ComponentFileName, comInfo.ClsId, comInfo.ManifestFileName, clsidList[key].ManifestFileName);
+                                }
                             }
                             if (!String.IsNullOrEmpty(comInfo.TlbId))
                             {
                                 string key = comInfo.TlbId.ToLowerInvariant();
                                 if (!tlbidList.ContainsKey(key))
+                                {
                                     tlbidList.Add(key, comInfo);
+                                }
                                 else
+                                {
                                     OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "tlbid", comInfo.ComponentFileName, comInfo.TlbId, comInfo.ManifestFileName, tlbidList[key].ManifestFileName);
+                                }
                             }
                         }
                     }
@@ -433,23 +452,35 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (FileReference file in FileReferences)
             {
                 if (file.ComClasses != null)
+                {
                     foreach (ComClass comClass in file.ComClasses)
                     {
                         string key = comClass.ClsId.ToLowerInvariant();
                         if (!clsidList.ContainsKey(key))
+                        {
                             clsidList.Add(key, new ComInfo(outputFileName, file.TargetPath, comClass.ClsId, null));
+                        }
                         else
+                        {
                             OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "clsid", file.ToString(), comClass.ClsId, outputFileName, clsidList[key].ManifestFileName);
+                        }
                     }
+                }
                 if (file.TypeLibs != null)
+                {
                     foreach (TypeLib typeLib in file.TypeLibs)
                     {
                         string key = typeLib.TlbId.ToLowerInvariant();
                         if (!tlbidList.ContainsKey(key))
+                        {
                             tlbidList.Add(key, new ComInfo(outputFileName, file.TargetPath, null, typeLib.TlbId));
+                        }
                         else
+                        {
                             OutputMessages.AddErrorMessage("GenerateManifest.DuplicateComDefinition", "tlbid", file.ToString(), typeLib.TlbId, outputFileName, tlbidList[key].ManifestFileName);
+                        }
                     }
+                }
             }
 
             Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifest.CheckForComDuplicates t={0}", Environment.TickCount - t1));
@@ -463,11 +494,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (!TrustInfo.IsFullTrust)
             {
-                XmlDocument document = new XmlDocument();
-
-                XmlReaderSettings xrs = new XmlReaderSettings();
-                xrs.DtdProcessing = DtdProcessing.Ignore;
-
+                var document = new XmlDocument();
+                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader xr = XmlReader.Create(configFile.ResolvedPath, xrs))
                 {
                     document.Load(xr);
@@ -475,7 +503,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
                 XmlNodeList nodes = document.SelectNodes(XPaths.configBindingRedirect, nsmgr);
                 if (nodes.Count > 0)
+                {
                     OutputMessages.AddWarningMessage("GenerateManifest.ConfigBindingRedirectsWithPartialTrust");
+                }
             }
         }
 
@@ -485,7 +515,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 bool isCorrectFileType = !String.IsNullOrEmpty(_entryPoint.TargetPath) && _entryPoint.TargetPath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
                 if (!isCorrectFileType)
+                {
                     OutputMessages.AddErrorMessage("GenerateManifest.InvalidEntryPoint", _entryPoint.ToString());
+                }
             }
         }
 
@@ -498,7 +530,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     OutputMessages.AddErrorMessage("GenerateManifest.FileAssociationsCountExceedsMaximum", Constants.MaxFileAssociationsCount.ToString(CultureInfo.CurrentUICulture));
                 }
 
-                Dictionary<string, FileAssociation> usedExtensions = new Dictionary<string, FileAssociation>(StringComparer.OrdinalIgnoreCase);
+                var usedExtensions = new Dictionary<string, FileAssociation>(StringComparer.OrdinalIgnoreCase);
                 foreach (FileAssociation fileAssociation in FileAssociations)
                 {
                     if (string.IsNullOrEmpty(fileAssociation.Extension) ||
@@ -561,8 +593,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             foreach (AssemblyReference assembly in AssemblyReferences)
             {
                 // Check that the assembly identity matches the filename for all local dependencies...
-                if (!assembly.IsPrerequisite && !String.Equals(assembly.AssemblyIdentity.Name, Path.GetFileNameWithoutExtension(assembly.TargetPath), StringComparison.OrdinalIgnoreCase))
+                if (!assembly.IsPrerequisite && !String.Equals(
+                        assembly.AssemblyIdentity.Name,
+                        Path.GetFileNameWithoutExtension(assembly.TargetPath),
+                        StringComparison.OrdinalIgnoreCase))
+                {
                     OutputMessages.AddErrorMessage("GenerateManifest.IdentityFileNameMismatch", assembly.ToString(), assembly.AssemblyIdentity.Name, assembly.AssemblyIdentity.Name + Path.GetExtension(assembly.TargetPath));
+                }
             }
         }
 
@@ -570,20 +607,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int t1 = Environment.TickCount;
             bool isPartialTrust = !TrustInfo.IsFullTrust;
-            Dictionary<string, NGen<bool>> targetPathList = new Dictionary<string, NGen<bool>>();
+            var targetPathList = new Dictionary<string, NGen<bool>>();
 
             foreach (AssemblyReference assembly in AssemblyReferences)
             {
                 // Check all resolved dependencies for partial trust apps...
                 if (isPartialTrust && (assembly != EntryPoint) && !String.IsNullOrEmpty(assembly.ResolvedPath))
+                {
                     ValidateReferenceForPartialTrust(assembly, TrustInfo);
+                }
 
                 // Check TargetPath for all local dependencies, ignoring any Prerequisites
                 if (!assembly.IsPrerequisite && !String.IsNullOrEmpty(assembly.TargetPath))
                 {
                     // Check target path does not exceed maximum...
                     if (_maxTargetPath > 0 && assembly.TargetPath.Length > _maxTargetPath)
+                    {
                         OutputMessages.AddWarningMessage("GenerateManifest.TargetPathTooLong", assembly.ToString(), _maxTargetPath.ToString(CultureInfo.CurrentCulture));
+                    }
 
                     // Check for two or more items with the same TargetPath...
                     string key = assembly.TargetPath.ToLowerInvariant();
@@ -601,24 +642,32 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     // Check assembly name does not exceed maximum...
                     if (_maxTargetPath > 0 && assembly.AssemblyIdentity.Name.Length > _maxTargetPath)
+                    {
                         OutputMessages.AddWarningMessage("GenerateManifest.TargetPathTooLong", assembly.AssemblyIdentity.Name, _maxTargetPath.ToString(CultureInfo.CurrentCulture));
+                    }
                 }
 
                 // Check that all prerequisites are strong named...
                 if (assembly.IsPrerequisite && !assembly.AssemblyIdentity.IsStrongName && !assembly.IsVirtual)
+                {
                     OutputMessages.AddErrorMessage("GenerateManifest.PrerequisiteNotSigned", assembly.ToString());
+                }
             }
             foreach (FileReference file in FileReferences)
             {
                 // Check that file is not an assembly...
                 if (!String.IsNullOrEmpty(file.ResolvedPath) && PathUtil.IsAssembly(file.ResolvedPath))
+                {
                     OutputMessages.AddWarningMessage("GenerateManifest.AssemblyAsFile", file.ToString());
+                }
 
                 if (!String.IsNullOrEmpty(file.TargetPath))
                 {
                     // Check target path does not exceed maximum...
                     if (_maxTargetPath > 0 && file.TargetPath.Length > _maxTargetPath)
+                    {
                         OutputMessages.AddWarningMessage("GenerateManifest.TargetPathTooLong", file.TargetPath, _maxTargetPath.ToString(CultureInfo.CurrentCulture));
+                    }
 
                     // Check for two or more items with the same TargetPath...
                     string key = file.TargetPath.ToLowerInvariant();
@@ -639,16 +688,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void ValidateReferenceForPartialTrust(AssemblyReference assembly, TrustInfo trustInfo)
         {
             if (trustInfo.IsFullTrust)
+            {
                 return;
+            }
             string path = assembly.ResolvedPath;
-            AssemblyAttributeFlags flags = new AssemblyAttributeFlags(path);
+            var flags = new AssemblyAttributeFlags(path);
 
             // if it's targeting v2.0 CLR then use the old logic to check for partial trust callers.
-            if (Util.CompareFrameworkVersions(this.TargetFrameworkVersion, Constants.TargetFrameworkVersion35) <= 0)
+            if (Util.CompareFrameworkVersions(TargetFrameworkVersion, Constants.TargetFrameworkVersion35) <= 0)
             {
                 if (assembly.IsPrimary && flags.IsSigned
-                    && !flags.HasAllowPartiallyTrustedCallersAttribute)
+                                       && !flags.HasAllowPartiallyTrustedCallersAttribute)
+                {
                     OutputMessages.AddWarningMessage("GenerateManifest.AllowPartiallyTrustedCallers", Path.GetFileNameWithoutExtension(path));
+                }
             }
             else
             {
@@ -657,19 +710,26 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     // if the binary is targeting v4.0 and it has the transparent attribute then we may allow partially trusted callers.
                     if (assembly.IsPrimary
                         && !(flags.HasAllowPartiallyTrustedCallersAttribute || flags.HasSecurityTransparentAttribute))
+                    {
                         OutputMessages.AddWarningMessage("GenerateManifest.AllowPartiallyTrustedCallers", Path.GetFileNameWithoutExtension(path));
+                    }
                 }
                 else
                 {
                     // if the binary is targeting v4.0 and it has the transparent attribute then we may allow partially trusted callers.
                     if (assembly.IsPrimary && flags.IsSigned
-                        && !(flags.HasAllowPartiallyTrustedCallersAttribute || flags.HasSecurityTransparentAttribute))
+                                           && !(flags.HasAllowPartiallyTrustedCallersAttribute ||
+                                                flags.HasSecurityTransparentAttribute))
+                    {
                         OutputMessages.AddWarningMessage("GenerateManifest.AllowPartiallyTrustedCallers", Path.GetFileNameWithoutExtension(path));
+                    }
                 }
             }
 
             if (flags.HasPrimaryInteropAssemblyAttribute || flags.HasImportedFromTypeLibAttribute)
+            {
                 OutputMessages.AddWarningMessage("GenerateManifest.UnmanagedCodePermission", Path.GetFileNameWithoutExtension(path));
+            }
         }
 
         #region " XmlSerializer "
@@ -679,8 +739,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("ConfigFile")]
         public string XmlConfigFile
         {
-            get { return _configFile; }
-            set { _configFile = value; }
+            get => _configFile;
+            set => _configFile = value;
         }
 
         [Browsable(false)]
@@ -688,8 +748,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlElement("EntryPointIdentity")]
         public AssemblyIdentity XmlEntryPointIdentity
         {
-            get { return _entryPointIdentity; }
-            set { _entryPointIdentity = value; }
+            get => _entryPointIdentity;
+            set => _entryPointIdentity = value;
         }
 
         [Browsable(false)]
@@ -697,8 +757,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("EntryPointParameters")]
         public string XmlEntryPointParameters
         {
-            get { return _entryPointParameters; }
-            set { _entryPointParameters = value; }
+            get => _entryPointParameters;
+            set => _entryPointParameters = value;
         }
 
         [Browsable(false)]
@@ -706,8 +766,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("EntryPointPath")]
         public string XmlEntryPointPath
         {
-            get { return _entryPointPath; }
-            set { _entryPointPath = value; }
+            get => _entryPointPath;
+            set => _entryPointPath = value;
         }
 
         [Browsable(false)]
@@ -715,8 +775,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("ErrorReportUrl")]
         public string XmlErrorReportUrl
         {
-            get { return _errorReportUrl; }
-            set { _errorReportUrl = value; }
+            get => _errorReportUrl;
+            set => _errorReportUrl = value;
         }
 
         [Browsable(false)]
@@ -724,8 +784,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlArray("FileAssociations")]
         public FileAssociation[] XmlFileAssociations
         {
-            get { return _fileAssociations; }
-            set { _fileAssociations = value; }
+            get => _fileAssociations;
+            set => _fileAssociations = value;
         }
 
         [Browsable(false)]
@@ -733,8 +793,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("HostInBrowser")]
         public string XmlHostInBrowser
         {
-            get { return Convert.ToString(_hostInBrowser, CultureInfo.InvariantCulture).ToLowerInvariant(); }
-            set { _hostInBrowser = ConvertUtil.ToBoolean(value); }
+            get => Convert.ToString(_hostInBrowser, CultureInfo.InvariantCulture).ToLowerInvariant();
+            set => _hostInBrowser = ConvertUtil.ToBoolean(value);
         }
 
         [Browsable(false)]
@@ -742,8 +802,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("IconFile")]
         public string XmlIconFile
         {
-            get { return _iconFile; }
-            set { _iconFile = value; }
+            get => _iconFile;
+            set => _iconFile = value;
         }
 
         [Browsable(false)]
@@ -751,8 +811,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("IsClickOnceManifest")]
         public string XmlIsClickOnceManifest
         {
-            get { return Convert.ToString(_isClickOnceManifest, CultureInfo.InvariantCulture).ToLowerInvariant(); }
-            set { _isClickOnceManifest = ConvertUtil.ToBoolean(value); }
+            get => Convert.ToString(_isClickOnceManifest, CultureInfo.InvariantCulture).ToLowerInvariant();
+            set => _isClickOnceManifest = ConvertUtil.ToBoolean(value);
         }
 
         [Browsable(false)]
@@ -760,8 +820,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("OSMajor")]
         public string XmlOSMajor
         {
-            get { return _oSMajor; }
-            set { _oSMajor = value; }
+            get => _oSMajor;
+            set => _oSMajor = value;
         }
 
         [Browsable(false)]
@@ -769,8 +829,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("OSMinor")]
         public string XmlOSMinor
         {
-            get { return _oSMinor; }
-            set { _oSMinor = value; }
+            get => _oSMinor;
+            set => _oSMinor = value;
         }
 
         [Browsable(false)]
@@ -778,8 +838,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("OSBuild")]
         public string XmlOSBuild
         {
-            get { return _oSBuild; }
-            set { _oSBuild = value; }
+            get => _oSBuild;
+            set => _oSBuild = value;
         }
 
         [Browsable(false)]
@@ -787,8 +847,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("OSRevision")]
         public string XmlOSRevision
         {
-            get { return _oSRevision; }
-            set { _oSRevision = value; }
+            get => _oSRevision;
+            set => _oSRevision = value;
         }
 
         [Browsable(false)]
@@ -796,8 +856,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("OSSupportUrl")]
         public string XmlOSSupportUrl
         {
-            get { return _oSSupportUrl; }
-            set { _oSSupportUrl = value; }
+            get => _oSSupportUrl;
+            set => _oSSupportUrl = value;
         }
 
         [Browsable(false)]
@@ -805,8 +865,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("OSDescription")]
         public string XmlOSDescription
         {
-            get { return _oSDescription; }
-            set { _oSDescription = value; }
+            get => _oSDescription;
+            set => _oSDescription = value;
         }
 
         [Browsable(false)]
@@ -814,8 +874,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Product")]
         public string XmlProduct
         {
-            get { return _product; }
-            set { _product = value; }
+            get => _product;
+            set => _product = value;
         }
 
         [Browsable(false)]
@@ -823,8 +883,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Publisher")]
         public string XmlPublisher
         {
-            get { return _publisher; }
-            set { _publisher = value; }
+            get => _publisher;
+            set => _publisher = value;
         }
 
         [Browsable(false)]
@@ -832,8 +892,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("SuiteName")]
         public string XmlSuiteName
         {
-            get { return _suiteName; }
-            set { _suiteName = value; }
+            get => _suiteName;
+            set => _suiteName = value;
         }
 
         [Browsable(false)]
@@ -841,8 +901,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("SupportUrl")]
         public string XmlSupportUrl
         {
-            get { return _supportUrl; }
-            set { _supportUrl = value; }
+            get => _supportUrl;
+            set => _supportUrl = value;
         }
 
         [Browsable(false)]
@@ -850,8 +910,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("UseApplicationTrust")]
         public string XmlUseApplicationTrust
         {
-            get { return Convert.ToString(_useApplicationTrust, CultureInfo.InvariantCulture).ToLowerInvariant(); }
-            set { _useApplicationTrust = ConvertUtil.ToBoolean(value); }
+            get => Convert.ToString(_useApplicationTrust, CultureInfo.InvariantCulture).ToLowerInvariant();
+            set => _useApplicationTrust = ConvertUtil.ToBoolean(value);
         }
 
         #endregion
@@ -864,7 +924,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             public readonly bool HasPrimaryInteropAssemblyAttribute;
             public readonly bool HasImportedFromTypeLibAttribute;
             public readonly bool HasSecurityTransparentAttribute;
-            public readonly bool HasSecurityRulesAttribute;
 
             public AssemblyAttributeFlags(string path)
             {
@@ -876,7 +935,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         HasSecurityTransparentAttribute = r.HasAssemblyAttribute("System.Security.SecurityTransparentAttribute");
                         HasPrimaryInteropAssemblyAttribute = r.HasAssemblyAttribute("System.Runtime.InteropServices.PrimaryInteropAssemblyAttribute");
                         HasImportedFromTypeLibAttribute = r.HasAssemblyAttribute("System.Runtime.InteropServices.ImportedFromTypeLibAttribute");
-                        HasSecurityRulesAttribute = r.HasAssemblyAttribute("System.Security.SecurityRulesAttribute");
                     }
             }
         }

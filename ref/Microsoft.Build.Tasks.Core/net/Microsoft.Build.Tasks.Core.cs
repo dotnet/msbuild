@@ -51,12 +51,12 @@ namespace Microsoft.Build.Tasks
     public partial class AspNetCompiler : Microsoft.Build.Tasks.ToolTaskExtension
     {
         public AspNetCompiler() { }
-        public bool AllowPartiallyTrustedCallers { get { throw null; } set { } }
-        public bool Clean { get { throw null; } set { } }
-        public bool Debug { get { throw null; } set { } }
-        public bool DelaySign { get { throw null; } set { } }
-        public bool FixedNames { get { throw null; } set { } }
-        public bool Force { get { throw null; } set { } }
+        public bool AllowPartiallyTrustedCallers { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Clean { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Debug { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool DelaySign { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool FixedNames { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Force { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string KeyContainer { get { throw null; } set { } }
         public string KeyFile { get { throw null; } set { } }
         public string MetabasePath { get { throw null; } set { } }
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkMoniker { get { throw null; } set { } }
         public string TargetPath { get { throw null; } set { } }
         protected override string ToolName { get { throw null; } }
-        public bool Updateable { get { throw null; } set { } }
+        public bool Updateable { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string VirtualPath { get { throw null; } set { } }
         protected internal override void AddCommandLineCommands(Microsoft.Build.Tasks.CommandLineBuilderExtension commandLine) { }
         public override bool Execute() { throw null; }
@@ -75,15 +75,15 @@ namespace Microsoft.Build.Tasks
     {
         public AssignCulture() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] AssignedFiles { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskItem[] AssignedFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] AssignedFilesWithCulture { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskItem[] AssignedFilesWithCulture { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] AssignedFilesWithNoCulture { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskItem[] AssignedFilesWithNoCulture { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] CultureNeutralAssignedFiles { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskItem[] CultureNeutralAssignedFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         [Microsoft.Build.Framework.RequiredAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] Files { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Files { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public partial class AssignLinkMetadata : Microsoft.Build.Tasks.TaskExtension
@@ -99,18 +99,18 @@ namespace Microsoft.Build.Tasks
         public AssignProjectConfiguration() { }
         public bool AddSyntheticProjectReferencesForSolutionDependencies { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] AssignedProjects { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] AssignedProjects { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string CurrentProject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public string CurrentProjectConfiguration { get { throw null; } set { } }
-        public string CurrentProjectPlatform { get { throw null; } set { } }
+        public string CurrentProjectConfiguration { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string CurrentProjectPlatform { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string DefaultToVcxPlatformMapping { get { throw null; } set { } }
-        public bool OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration { get { throw null; } set { } }
-        public string OutputType { get { throw null; } set { } }
-        public bool ResolveConfigurationPlatformUsingMappings { get { throw null; } set { } }
-        public bool ShouldUnsetParentConfigurationAndPlatform { get { throw null; } set { } }
-        public string SolutionConfigurationContents { get { throw null; } set { } }
+        public bool OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string OutputType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool ResolveConfigurationPlatformUsingMappings { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool ShouldUnsetParentConfigurationAndPlatform { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string SolutionConfigurationContents { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] UnassignedProjects { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] UnassignedProjects { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string VcxToDefaultPlatformMapping { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
@@ -118,10 +118,10 @@ namespace Microsoft.Build.Tasks
     {
         public AssignTargetPath() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] AssignedFiles { get { throw null; } }
-        public Microsoft.Build.Framework.ITaskItem[] Files { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] AssignedFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Framework.ITaskItem[] Files { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
-        public string RootFolder { get { throw null; } set { } }
+        public string RootFolder { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     [Microsoft.Build.Framework.RunInMTAAttribute]
@@ -148,9 +148,9 @@ namespace Microsoft.Build.Tasks
     public partial class CombinePath : Microsoft.Build.Tasks.TaskExtension
     {
         public CombinePath() { }
-        public string BasePath { get { throw null; } set { } }
+        public string BasePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] CombinedPaths { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] CombinedPaths { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] Paths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Tasks
     {
         public ConvertToAbsolutePath() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] AbsolutePaths { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] AbsolutePaths { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] Paths { get { throw null; } set { } }
         public override bool Execute() { throw null; }
@@ -198,11 +198,11 @@ namespace Microsoft.Build.Tasks
     public partial class CreateItem : Microsoft.Build.Tasks.TaskExtension
     {
         public CreateItem() { }
-        public string[] AdditionalMetadata { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] Exclude { get { throw null; } set { } }
+        public string[] AdditionalMetadata { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Exclude { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] Include { get { throw null; } set { } }
-        public bool PreserveExistingMetadata { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Include { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool PreserveExistingMetadata { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public abstract partial class CreateManifestResourceName : Microsoft.Build.Tasks.TaskExtension
@@ -210,13 +210,13 @@ namespace Microsoft.Build.Tasks
         protected System.Collections.Generic.Dictionary<string, Microsoft.Build.Framework.ITaskItem> itemSpecToTaskitem;
         protected CreateManifestResourceName() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] ManifestResourceNames { get { throw null; } }
-        public bool PrependCultureAsDirectory { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] ManifestResourceNames { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool PrependCultureAsDirectory { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] ResourceFiles { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] ResourceFilesWithManifestResourceNames { get { throw null; } set { } }
-        public string RootNamespace { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] ResourceFilesWithManifestResourceNames { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string RootNamespace { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected abstract string CreateManifestName(string fileName, string linkFileName, string rootNamespaceName, string dependentUponFileName, System.IO.Stream binaryStream);
         public override bool Execute() { throw null; }
         protected abstract bool IsSourceFile(string fileName);
@@ -226,7 +226,7 @@ namespace Microsoft.Build.Tasks
     {
         public CreateProperty() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public string[] Value { get { throw null; } set { } }
+        public string[] Value { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public string[] ValueSetByTask { get { throw null; } }
         public override bool Execute() { throw null; }
@@ -241,10 +241,10 @@ namespace Microsoft.Build.Tasks
     {
         public Delete() { }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] DeletedFiles { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] DeletedFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
         public Microsoft.Build.Framework.ITaskItem[] Files { get { throw null; } set { } }
-        public bool TreatErrorsAsWarnings { get { throw null; } set { } }
+        public bool TreatErrorsAsWarnings { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public void Cancel() { }
         public override bool Execute() { throw null; }
     }
@@ -367,14 +367,14 @@ namespace Microsoft.Build.Tasks
     public partial class FindUnderPath : Microsoft.Build.Tasks.TaskExtension
     {
         public FindUnderPath() { }
-        public Microsoft.Build.Framework.ITaskItem[] Files { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Files { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] InPath { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] InPath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] OutOfPath { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] OutOfPath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
-        public Microsoft.Build.Framework.ITaskItem Path { get { throw null; } set { } }
-        public bool UpdateToAbsolutePaths { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem Path { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool UpdateToAbsolutePaths { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public sealed partial class FormatUrl : Microsoft.Build.Tasks.TaskExtension
@@ -795,9 +795,9 @@ namespace Microsoft.Build.Tasks
     {
         public ReadLinesFromFile() { }
         [Microsoft.Build.Framework.RequiredAttribute]
-        public Microsoft.Build.Framework.ITaskItem File { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem File { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] Lines { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Lines { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public partial class RegisterAssembly : Microsoft.Build.Tasks.AppDomainIsolatedTaskExtension, System.Runtime.InteropServices.ITypeLibExporterNotifySink
@@ -1236,18 +1236,18 @@ namespace Microsoft.Build.Tasks
     public partial class WriteLinesToFile : Microsoft.Build.Tasks.TaskExtension
     {
         public WriteLinesToFile() { }
-        public string Encoding { get { throw null; } set { } }
+        public string Encoding { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.RequiredAttribute]
-        public Microsoft.Build.Framework.ITaskItem File { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] Lines { get { throw null; } set { } }
-        public bool Overwrite { get { throw null; } set { } }
+        public Microsoft.Build.Framework.ITaskItem File { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.ITaskItem[] Lines { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Overwrite { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool WriteOnlyWhenDifferent { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public partial class XamlTaskFactory : Microsoft.Build.Framework.ITaskFactory
     {
         public XamlTaskFactory() { }
-        public string FactoryName { get { throw null; } }
+        public string FactoryName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string TaskElementContents { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string TaskName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string TaskNamespace { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
@@ -1317,14 +1317,15 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         public Microsoft.Build.Tasks.Deployment.Bootstrapper.ProductCollection Products { get { throw null; } }
         public Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildResults Build(Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildSettings settings) { throw null; }
         public string[] GetOutputFolders(string[] productCodes, string culture, string fallbackCulture, Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation componentsLocation) { throw null; }
+        public static string XmlToConfigurationFile(System.Xml.XmlNode input) { throw null; }
     }
     public partial class BuildMessage : Microsoft.Build.Tasks.Deployment.Bootstrapper.IBuildMessage
     {
         internal BuildMessage() { }
-        public int HelpId { get { throw null; } }
-        public string HelpKeyword { get { throw null; } }
-        public string Message { get { throw null; } }
-        public Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildMessageSeverity Severity { get { throw null; } }
+        public int HelpId { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string HelpKeyword { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string Message { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildMessageSeverity Severity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     [System.Runtime.InteropServices.GuidAttribute("936D32F9-1A68-4d5e-98EA-044AC9A1AADA")]
@@ -1341,9 +1342,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     {
         internal BuildResults() { }
         public string[] ComponentFiles { get { throw null; } }
-        public string KeyFile { get { throw null; } }
+        public string KeyFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildMessage[] Messages { get { throw null; } }
-        public bool Succeeded { get { throw null; } }
+        public bool Succeeded { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     [System.Runtime.InteropServices.ClassInterfaceAttribute((System.Runtime.InteropServices.ClassInterfaceType)(0))]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -1351,19 +1352,19 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     public partial class BuildSettings : Microsoft.Build.Tasks.Deployment.Bootstrapper.IBuildSettings
     {
         public BuildSettings() { }
-        public string ApplicationFile { get { throw null; } set { } }
-        public string ApplicationName { get { throw null; } set { } }
-        public bool ApplicationRequiresElevation { get { throw null; } set { } }
-        public string ApplicationUrl { get { throw null; } set { } }
-        public Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation ComponentsLocation { get { throw null; } set { } }
-        public string ComponentsUrl { get { throw null; } set { } }
-        public bool CopyComponents { get { throw null; } set { } }
-        public int FallbackLCID { get { throw null; } set { } }
-        public int LCID { get { throw null; } set { } }
-        public string OutputPath { get { throw null; } set { } }
-        public Microsoft.Build.Tasks.Deployment.Bootstrapper.ProductBuilderCollection ProductBuilders { get { throw null; } }
-        public string SupportUrl { get { throw null; } set { } }
-        public bool Validate { get { throw null; } set { } }
+        public string ApplicationFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ApplicationName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool ApplicationRequiresElevation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ApplicationUrl { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation ComponentsLocation { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ComponentsUrl { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool CopyComponents { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int FallbackLCID { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int LCID { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string OutputPath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Tasks.Deployment.Bootstrapper.ProductBuilderCollection ProductBuilders { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string SupportUrl { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Validate { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     [System.Runtime.InteropServices.GuidAttribute("12F49949-7B60-49CD-B6A0-2B5E4A638AAF")]
@@ -1493,15 +1494,15 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     public partial class Product : Microsoft.Build.Tasks.Deployment.Bootstrapper.IProduct
     {
         public Product() { }
-        public Microsoft.Build.Tasks.Deployment.Bootstrapper.ProductCollection Includes { get { throw null; } }
+        public Microsoft.Build.Tasks.Deployment.Bootstrapper.ProductCollection Includes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string Name { get { throw null; } }
         public Microsoft.Build.Tasks.Deployment.Bootstrapper.ProductBuilder ProductBuilder { get { throw null; } }
-        public string ProductCode { get { throw null; } }
+        public string ProductCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     public partial class ProductBuilder : Microsoft.Build.Tasks.Deployment.Bootstrapper.IProductBuilder
     {
         internal ProductBuilder() { }
-        public Microsoft.Build.Tasks.Deployment.Bootstrapper.Product Product { get { throw null; } }
+        public Microsoft.Build.Tasks.Deployment.Bootstrapper.Product Product { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     [System.Runtime.InteropServices.ClassInterfaceAttribute((System.Runtime.InteropServices.ClassInterfaceType)(0))]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -2168,18 +2169,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     public sealed partial class OutputMessage
     {
         internal OutputMessage() { }
-        public string Name { get { throw null; } }
-        public string Text { get { throw null; } }
-        public Microsoft.Build.Tasks.Deployment.ManifestUtilities.OutputMessageType Type { get { throw null; } }
+        public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string Text { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Tasks.Deployment.ManifestUtilities.OutputMessageType Type { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public string[] GetArguments() { throw null; }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public sealed partial class OutputMessageCollection : System.Collections.IEnumerable
     {
         internal OutputMessageCollection() { }
-        public int ErrorCount { get { throw null; } }
+        public int ErrorCount { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Tasks.Deployment.ManifestUtilities.OutputMessage this[int index] { get { throw null; } }
-        public int WarningCount { get { throw null; } }
+        public int WarningCount { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public void Clear() { }
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
     }
@@ -2244,7 +2245,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public bool HasUnmanagedCodePermission { get { throw null; } }
         public bool IsFullTrust { get { throw null; } set { } }
         public System.Security.PermissionSet PermissionSet { get { throw null; } set { } }
-        public bool PreserveFullTrustPermissionSet { get { throw null; } set { } }
+        public bool PreserveFullTrustPermissionSet { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string SameSiteAccess { get { throw null; } set { } }
         public void Clear() { }
         public void Read(System.IO.Stream input) { }
@@ -2513,7 +2514,7 @@ namespace Microsoft.Build.Tasks.Xaml
     public partial class CommandLineGenerator
     {
         public CommandLineGenerator(Microsoft.Build.Framework.XamlTypes.Rule rule, System.Collections.Generic.Dictionary<string, object> parameterValues) { }
-        public string AdditionalOptions { get { throw null; } set { } }
+        public string AdditionalOptions { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string AlwaysAppend { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string CommandLineTemplate { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string GenerateCommandLine() { throw null; }
@@ -2522,30 +2523,30 @@ namespace Microsoft.Build.Tasks.Xaml
     {
         public CommandLineToolSwitch() { }
         public CommandLineToolSwitch(Microsoft.Build.Tasks.Xaml.CommandLineToolSwitchType toolType) { }
-        public bool AllowMultipleValues { get { throw null; } set { } }
+        public bool AllowMultipleValues { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool ArgumentRequired { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public System.Collections.Generic.ICollection<System.Tuple<string, bool>> Arguments { get { throw null; } set { } }
+        public System.Collections.Generic.ICollection<System.Tuple<string, bool>> Arguments { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool BooleanValue { get { throw null; } set { } }
-        public string Description { get { throw null; } set { } }
-        public string DisplayName { get { throw null; } set { } }
-        public string FallbackArgumentParameter { get { throw null; } set { } }
-        public string FalseSuffix { get { throw null; } set { } }
-        public bool IncludeInCommandLine { get { throw null; } set { } }
-        public bool IsValid { get { throw null; } set { } }
-        public string Name { get { throw null; } set { } }
+        public string Description { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string DisplayName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string FallbackArgumentParameter { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string FalseSuffix { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool IncludeInCommandLine { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool IsValid { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string Name { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public int Number { get { throw null; } set { } }
-        public System.Collections.Generic.LinkedList<System.Collections.Generic.KeyValuePair<string, string>> Overrides { get { throw null; } }
-        public System.Collections.Generic.LinkedList<string> Parents { get { throw null; } }
-        public bool Required { get { throw null; } set { } }
-        public string ReverseSwitchValue { get { throw null; } set { } }
-        public bool Reversible { get { throw null; } set { } }
-        public string Separator { get { throw null; } set { } }
+        public System.Collections.Generic.LinkedList<System.Collections.Generic.KeyValuePair<string, string>> Overrides { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Collections.Generic.LinkedList<string> Parents { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool Required { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ReverseSwitchValue { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Reversible { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string Separator { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string[] StringList { get { throw null; } set { } }
-        public string SwitchValue { get { throw null; } set { } }
+        public string SwitchValue { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public Microsoft.Build.Framework.ITaskItem[] TaskItemArray { get { throw null; } set { } }
-        public string TrueSuffix { get { throw null; } set { } }
-        public Microsoft.Build.Tasks.Xaml.CommandLineToolSwitchType Type { get { throw null; } set { } }
-        public string Value { get { throw null; } set { } }
+        public string TrueSuffix { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Tasks.Xaml.CommandLineToolSwitchType Type { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string Value { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public enum CommandLineToolSwitchType
     {
@@ -2566,12 +2567,12 @@ namespace Microsoft.Build.Tasks.Xaml
     public abstract partial class XamlDataDrivenToolTask : Microsoft.Build.Utilities.ToolTask
     {
         protected XamlDataDrivenToolTask(string[] switchOrderList, System.Resources.ResourceManager taskResources) { }
-        public virtual string[] AcceptableNonZeroExitCodes { get { throw null; } set { } }
-        protected internal System.Collections.Generic.Dictionary<string, Microsoft.Build.Tasks.Xaml.CommandLineToolSwitch> ActiveToolSwitches { get { throw null; } }
-        public System.Collections.Generic.Dictionary<string, Microsoft.Build.Tasks.Xaml.CommandLineToolSwitch> ActiveToolSwitchesValues { get { throw null; } set { } }
-        public string AdditionalOptions { get { throw null; } set { } }
+        public virtual string[] AcceptableNonZeroExitCodes { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        protected internal System.Collections.Generic.Dictionary<string, Microsoft.Build.Tasks.Xaml.CommandLineToolSwitch> ActiveToolSwitches { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public System.Collections.Generic.Dictionary<string, Microsoft.Build.Tasks.Xaml.CommandLineToolSwitch> ActiveToolSwitchesValues { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string AdditionalOptions { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string CommandLineTemplate { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        protected override System.Text.Encoding ResponseFileEncoding { get { throw null; } }
+        protected override System.Text.Encoding ResponseFileEncoding { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public void AddActiveSwitchToolValue(Microsoft.Build.Tasks.Xaml.CommandLineToolSwitch switchToAdd) { }
         public string CreateSwitchValue(string propertyName, string baseSwitch, string separator, System.Tuple<string, bool>[] arguments) { throw null; }
         public override bool Execute() { throw null; }

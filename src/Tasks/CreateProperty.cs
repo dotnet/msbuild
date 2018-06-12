@@ -2,14 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Diagnostics;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using System.Collections;
-using System.Globalization;
-using System.Reflection;
-using System.Resources;
 
 namespace Microsoft.Build.Tasks
 {
@@ -18,8 +11,6 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class CreateProperty : TaskExtension
     {
-        private string[] _prop;
-
         /// <summary>
         /// The in/out property value.
         /// </summary>
@@ -43,18 +34,7 @@ namespace Microsoft.Build.Tasks
         /// that is set to "Clean%3BBuild", which is not what the user wanted.
         /// </remarks>
         [Output]
-        public string[] Value
-        {
-            get
-            {
-                return _prop;
-            }
-
-            set
-            {
-                _prop = value;
-            }
-        }
+        public string[] Value { get; set; }
 
         /// <summary>
         /// This is to fool MSBuild into not doing its little TLDA trick whereby even if 
@@ -66,13 +46,7 @@ namespace Microsoft.Build.Tasks
         /// for people who want to know whether a particular target was up-to-date or not.
         /// </summary>
         [Output]
-        public string[] ValueSetByTask
-        {
-            get
-            {
-                return _prop;
-            }
-        }
+        public string[] ValueSetByTask => Value;
 
         /// <summary>
         /// Create the property. Since the input property is the same as the
@@ -81,9 +55,9 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            if (_prop == null)
+            if (Value == null)
             {
-                _prop = Array.Empty<string>();
+                Value = Array.Empty<string>();
             }
 
             return true;

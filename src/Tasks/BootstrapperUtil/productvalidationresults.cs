@@ -2,8 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Xml;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
@@ -12,11 +11,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     /// </summary>
     internal sealed class ProductValidationResults : XmlValidationResults
     {
-        private Hashtable _packageValidationResults;
+        private readonly Dictionary<string, XmlValidationResults> _packageValidationResults =
+            new Dictionary<string, XmlValidationResults>(StringComparer.Ordinal);
 
         public ProductValidationResults(string filePath) : base(filePath)
         {
-            _packageValidationResults = new Hashtable();
         }
 
         /// <summary>
@@ -26,7 +25,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// <param name="results">The vaue of the results to add.</param>
         public void AddPackageResults(string culture, XmlValidationResults results)
         {
-            if (!_packageValidationResults.Contains(culture))
+            if (!_packageValidationResults.ContainsKey(culture))
             {
                 _packageValidationResults.Add(culture, results);
             }
@@ -43,7 +42,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// <returns>The XmlValidationResults associated with the specified culture.</returns>
         public XmlValidationResults PackageResults(string culture)
         {
-            return (XmlValidationResults)_packageValidationResults[culture];
+            _packageValidationResults.TryGetValue(culture, out XmlValidationResults results);
+            return results;
         }
     }
 }

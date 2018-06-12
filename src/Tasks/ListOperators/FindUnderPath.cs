@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -15,68 +13,41 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class FindUnderPath : TaskExtension
     {
-        private bool _updateToAbsolutePaths = false;
-        private ITaskItem _path = null;
-        private ITaskItem[] _files = Array.Empty<TaskItem>();
-        private ITaskItem[] _inPath = null;
-        private ITaskItem[] _outOfPath = null;
-
         /// <summary>
         /// Filter based on whether items fall under this path or not.
         /// </summary>
         [Required]
-        public ITaskItem Path
-        {
-            get { return _path; }
-            set { _path = value; }
-        }
+        public ITaskItem Path { get; set; }
 
         /// <summary>
         /// Files to consider.
         /// </summary>
-        public ITaskItem[] Files
-        {
-            get { return _files; }
-            set { _files = value; }
-        }
+        public ITaskItem[] Files { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// Set to true if the paths of the output items should be updated to be absolute
         /// </summary>
-        public bool UpdateToAbsolutePaths
-        {
-            get { return _updateToAbsolutePaths; }
-            set { _updateToAbsolutePaths = value; }
-        }
+        public bool UpdateToAbsolutePaths { get; set; }
 
         /// <summary>
         /// Files that were inside of Path.
         /// </summary>
         [Output]
-        public ITaskItem[] InPath
-        {
-            get { return _inPath; }
-            set { _inPath = value; }
-        }
+        public ITaskItem[] InPath { get; set; }
 
         /// <summary>
         /// Files that were outside of Path.
         /// </summary>
         [Output]
-        public ITaskItem[] OutOfPath
-        {
-            get { return _outOfPath; }
-            set { _outOfPath = value; }
-        }
+        public ITaskItem[] OutOfPath { get; set; }
 
         /// <summary>
         /// Execute the task.
         /// </summary>
-        /// <returns></returns>
         public override bool Execute()
         {
-            ArrayList inPathList = new ArrayList();
-            ArrayList outOfPathList = new ArrayList();
+            var inPathList = new List<ITaskItem>();
+            var outOfPathList = new List<ITaskItem>();
 
             string conePath;
 
@@ -84,13 +55,13 @@ namespace Microsoft.Build.Tasks
             {
                 conePath =
                     OpportunisticIntern.InternStringIfPossible(
-                        System.IO.Path.GetFullPath(FileUtilities.FixFilePath(_path.ItemSpec)));
+                        System.IO.Path.GetFullPath(FileUtilities.FixFilePath(Path.ItemSpec)));
                 conePath = FileUtilities.EnsureTrailingSlash(conePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 Log.LogErrorWithCodeFromResources(null, "", 0, 0, 0, 0,
-                    "FindUnderPath.InvalidParameter", "Path", _path.ItemSpec, e.Message);
+                    "FindUnderPath.InvalidParameter", "Path", Path.ItemSpec, e.Message);
                 return false;
             }
 
@@ -120,7 +91,7 @@ namespace Microsoft.Build.Tasks
                     // If we should use the absolute path, update the item contents
                     // Since ItemSpec, which fullPath comes from, is unescaped, re-escape when setting
                     // item.ItemSpec, since the setter for ItemSpec expects an escaped value. 
-                    if (_updateToAbsolutePaths)
+                    if (UpdateToAbsolutePaths)
                     {
                         item.ItemSpec = EscapingUtilities.Escape(fullPath);
                     }
@@ -133,8 +104,8 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            InPath = (ITaskItem[])inPathList.ToArray(typeof(ITaskItem));
-            OutOfPath = (ITaskItem[])outOfPathList.ToArray(typeof(ITaskItem));
+            InPath = inPathList.ToArray();
+            OutOfPath = outOfPathList.ToArray();
             return true;
         }
     }
