@@ -115,9 +115,9 @@ namespace Microsoft.Build.Tasks
 
         protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
-            commandLine.AppendPlusOrMinusSwitch("/nostdlib", NoStandardLib);
-
             base.AddCommandLineCommands(commandLine);
+
+            commandLine.AppendPlusOrMinusSwitch("/nostdlib", NoStandardLib);
         }
     }
 
@@ -131,11 +131,11 @@ namespace Microsoft.Build.Tasks
 
         protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
+            base.AddCommandLineCommands(commandLine);
+
             commandLine.AppendSwitchIfTrue("/nostdlib", NoStandardLib);
             commandLine.AppendPlusOrMinusSwitch("/optionexplicit", OptionExplicit);
             commandLine.AppendSwitchIfNotNull("/rootnamespace:", RootNamespace);
-
-            base.AddCommandLineCommands(commandLine);
         }
     }
 }
