@@ -47,7 +47,9 @@ namespace Microsoft.DotNet.Cli
                               LocalizableStrings.CmdPackageDirectoryDescription,
                               Accept.ExactlyOneArgument()
                                     .With(name: LocalizableStrings.CmdPackageDirectory)
-                                    .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")));
+                                    .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")),
+                Create.Option("--interactive",
+                              LocalizableStrings.CmdInteractiveRestoreDescription));
         }
 
         public static IEnumerable<string> QueryNuGet(string match)

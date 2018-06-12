@@ -94,7 +94,12 @@ namespace Microsoft.DotNet.Cli
                     useShortOptions ? "-f|--force" : "--force",
                     LocalizableStrings.CmdForceRestoreOptionDescription,
                     Accept.NoArguments()
-                          .ForwardAs("-property:RestoreForce=true"))
+                          .ForwardAs("-property:RestoreForce=true")),
+                 Create.Option(
+                    "--interactive",
+                    showHelp ? LocalizableStrings.CmdInteractiveRestoreOptionDescription : string.Empty,
+                    Accept.NoArguments()
+                          .ForwardAs("-property:NuGetInteractive=true"))
             };
         }
     }

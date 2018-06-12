@@ -165,4 +165,7 @@
   <data name="CmdDGFileIOException" xml:space="preserve">
     <value>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</value>
   </data>
+  <data name="CmdInteractiveRestoreDescription" xml:space="preserve">
+    <value>Allow the command to block and require manual action to proceed.</value>
+  </data>
 </root>

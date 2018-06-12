@@ -169,4 +169,7 @@
     <value>Force all dependencies to be resolved even if the last restore was successful.
 This is equivalent to deleting project.assets.json.</value>
   </data>
+  <data name="CmdInteractiveRestoreOptionDescription" xml:space="preserve">
+    <value>Allow restore to block and require manual action to proceed.</value>
+  </data>
 </root>
