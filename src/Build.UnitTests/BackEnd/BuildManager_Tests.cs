@@ -827,14 +827,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Error Text='[fail]'/>
+    <Error Text='[errormessage]'/>
  </Target>
 </Project>
 ");
             BuildRequestData data = GetBuildRequestData(contents);
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
-            _logger.AssertLogContains("[fail]");
+            _logger.AssertLogContains("[errormessage]");
         }
 
         /// <summary>
@@ -849,7 +849,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                  <Target Name='test'>
                      <Message Text='[Message]' Importance='high'/>
                      <Warning Text='[warn]'/>	
-                     <Error Text='[fail]'/>
+                     <Error Text='[errormessage]'/>
                 </Target>
               </Project>
             ");
@@ -858,7 +858,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _parameters.OnlyLogCriticalEvents = true;
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
-            _logger.AssertLogContains("[fail]");
+            _logger.AssertLogContains("[errormessage]");
             _logger.AssertLogContains("[warn]");
             _logger.AssertLogDoesntContain("[message]");
             Assert.Equal(1, _logger.BuildStartedEvents.Count);
@@ -883,7 +883,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                  <Target Name='test'>
                      <Message Text='[message]' Importance='high'/>
                      <Warning Text='[warn]'/>	
-                     <Error Text='[fail]'/>
+                     <Error Text='[errormessage]'/>
                 </Target>
               </Project>
             ");
@@ -892,7 +892,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _parameters.OnlyLogCriticalEvents = false;
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
-            _logger.AssertLogContains("[fail]");
+            _logger.AssertLogContains("[errormessage]");
             _logger.AssertLogContains("[warn]");
             _logger.AssertLogContains("[message]");
             Assert.Equal(1, _logger.BuildStartedEvents.Count);
@@ -1278,7 +1278,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
-    <Message Text='[fail]'/>
+    <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
@@ -1298,7 +1298,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
-    <Message Text='[fail]'/>
+    <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
@@ -1320,7 +1320,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(60)) + @"'/>
-    <Message Text='[fail]'/>
+    <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
@@ -1335,7 +1335,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
-            _logger.AssertLogDoesntContain("[fail]");
+            _logger.AssertLogDoesntContain("[errormessage]");
         }
 
         /// <summary>
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(5)) + @"'/>
-    <Message Text='[fail]'/>
+    <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
@@ -1367,7 +1367,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
-            _logger.AssertLogDoesntContain("[fail]");
+            _logger.AssertLogDoesntContain("[errormessage]");
         }
 
 #if FEATURE_TASKHOST
@@ -1386,7 +1386,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
-    <Message Text='[fail]'/>
+    <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
@@ -1402,7 +1402,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
-            _logger.AssertLogDoesntContain("[fail]");
+            _logger.AssertLogDoesntContain("[errormessage]");
 
             // Task host should not have exited prematurely
             _logger.AssertLogDoesntContain("MSB4217");
@@ -1421,7 +1421,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
-    <Message Text='[fail]'/>
+    <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
@@ -1437,7 +1437,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
-            _logger.AssertLogDoesntContain("[fail]");
+            _logger.AssertLogDoesntContain("[errormessage]");
         }
 
 #if FEATURE_TASKHOST
@@ -1454,7 +1454,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
     <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
-    <Message Text='[fail]'/>
+    <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
-            _logger.AssertLogDoesntContain("[fail]");
+            _logger.AssertLogDoesntContain("[errormessage]");
 
             // Task host should not have exited prematurely
             _logger.AssertLogDoesntContain("MSB4217");
