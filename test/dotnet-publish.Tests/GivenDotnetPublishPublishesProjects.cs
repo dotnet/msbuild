@@ -135,7 +135,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
             var command = new TestCommand(outputProgram);
-            command.Environment["DOTNET_ROOT"]= new RepoDirectoriesProvider().DotnetRoot;
+            command.Environment[Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)"] = 
+                new RepoDirectoriesProvider().DotnetRoot;
 
             command.ExecuteWithCapturedOutput()
                 .Should()
