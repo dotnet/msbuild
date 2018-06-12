@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
-using System.Xml;
-using System.Globalization;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Shared
 {
@@ -36,12 +33,12 @@ namespace Microsoft.Build.Shared
         internal const string usingTaskBody = "Task";
         internal const string sdk = "Sdk";
 
-        internal static readonly char[] illegalTargetNameCharacters = new char[] { '$', '@', '(', ')', '%', '*', '?', '.' };
+        internal static readonly char[] InvalidTargetNameCharacters = { '$', '@', '(', ')', '%', '*', '?', '.' };
 
         // Names that cannot be used as property or item names because they are reserved
-        internal static readonly string[] illegalPropertyOrItemNames = new string[] {
-            //            XMakeElements.project, // "Project" is not reserved, because unfortunately ProjectReference items 
-            // already use it as metadata name.
+        internal static readonly HashSet<string> ReservedItemNames = new HashSet<string>
+        {
+            // XMakeElements.project, "Project" is not reserved, because unfortunately ProjectReference items already use it as metadata name.
             XMakeElements.visualStudioProject,
             XMakeElements.target,
             XMakeElements.propertyGroup,
@@ -50,37 +47,11 @@ namespace Microsoft.Build.Shared
             XMakeElements.usingTask,
             XMakeElements.projectExtensions,
             XMakeElements.onError,
-            //            XMakeElements.import, // "Import" items are used by Visual Basic projects
+            // XMakeElements.import "Import" items are used by Visual Basic projects
             XMakeElements.importGroup,
             XMakeElements.choose,
             XMakeElements.when,
             XMakeElements.otherwise
         };
-
-        // The set of XMake reserved item/property names (e.g. Choose, Message etc.)
-        private static Lazy<Hashtable> s_illegalItemOrPropertyNamesHashtable = new Lazy<Hashtable>(
-            () =>
-            {
-                var table = new Hashtable(illegalPropertyOrItemNames.Length);
-                foreach (string reservedName in illegalPropertyOrItemNames)
-                {
-                    table.Add(reservedName, string.Empty);
-                }
-
-                return table;
-            },
-            true /* only one thread can initialize */);
-
-        /// <summary>
-        /// Read-only internal accessor for the hashtable containing
-        /// MSBuild reserved item/property names (like "Choose", for example).
-        /// </summary>
-        internal static Hashtable IllegalItemPropertyNames
-        {
-            get
-            {
-                return s_illegalItemOrPropertyNamesHashtable.Value;
-            }
-        }
     }
 }

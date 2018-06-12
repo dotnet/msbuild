@@ -573,7 +573,7 @@ namespace Microsoft.Build.Internal
                     string environmentVariableName = environmentVariable.Key;
 
                     if (XmlUtilities.IsValidElementName(environmentVariableName) &&
-                        XMakeElements.IllegalItemPropertyNames[environmentVariableName] == null &&
+                        !XMakeElements.ReservedItemNames.Contains(environmentVariableName) &&
                         !ReservedPropertyNames.IsReservedProperty(environmentVariableName))
                     {
                         ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);

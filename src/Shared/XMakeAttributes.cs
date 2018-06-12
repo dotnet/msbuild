@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Xml;
-using System.Globalization;
 
 namespace Microsoft.Build.Shared
 {
@@ -94,26 +91,29 @@ namespace Microsoft.Build.Shared
         /////////////////////////////////////////////////////////////////////////////////////////////
         internal const string defaultXmlNamespace = "http://schemas.microsoft.com/developer/msbuild/2003";
 
+        private static readonly HashSet<string> KnownSpecialTaskAttributes = new HashSet<string> { condition, continueOnError, msbuildRuntime, msbuildArchitecture, xmlns };
+
+        private static readonly HashSet<string> KnownSpecialTaskAttributesIgnoreCase = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { condition, continueOnError, msbuildRuntime, msbuildArchitecture, xmlns };
+
+        private static readonly HashSet<string> KnownBatchingTargetAttributes = new HashSet<string> { name, condition, dependsOnTargets, beforeTargets, afterTargets };
+
+        private static readonly HashSet<string> ValidMSBuildRuntimeValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildRuntimeValues.clr2, MSBuildRuntimeValues.clr4, MSBuildRuntimeValues.currentRuntime, MSBuildRuntimeValues.any };
+
+        private static readonly HashSet<string> ValidMSBuildArchitectureValues = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { MSBuildArchitectureValues.x86, MSBuildArchitectureValues.x64, MSBuildArchitectureValues.currentArchitecture, MSBuildArchitectureValues.any };
+
         /// <summary>
         /// Returns true if and only if the specified attribute is one of the attributes that the engine specifically recognizes
         /// on a task and treats in a special way.
         /// </summary>
         /// <param name="attribute"></param>
         /// <returns>true, if given attribute is a reserved task attribute</returns>
-        internal static bool IsSpecialTaskAttribute
-        (
-            string attribute
-        )
+        internal static bool IsSpecialTaskAttribute(string attribute)
         {
             // Currently the known "special" attributes for a task are:
             //  Condition, ContinueOnError
             //
             // We want to match case-sensitively on all of them
-            return ((attribute == condition) ||
-                    (attribute == continueOnError) ||
-                    (attribute == msbuildRuntime) ||
-                    (attribute == msbuildArchitecture) ||
-                    (attribute == xmlns));
+            return KnownSpecialTaskAttributes.Contains(attribute);
         }
 
         /// <summary>
@@ -123,11 +123,7 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if the given attribute is reserved and badly cased</returns>
         internal static bool IsBadlyCasedSpecialTaskAttribute(string attribute)
         {
-            return (!IsSpecialTaskAttribute(attribute) &&
-                ((String.Compare(attribute, condition, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(attribute, continueOnError, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(attribute, msbuildRuntime, StringComparison.OrdinalIgnoreCase) == 0) ||
-                (String.Compare(attribute, msbuildArchitecture, StringComparison.OrdinalIgnoreCase) == 0)));
+            return !IsSpecialTaskAttribute(attribute) && KnownSpecialTaskAttributesIgnoreCase.Contains(attribute);
         }
 
         /// <summary>
@@ -137,11 +133,7 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if a target cannot batch on the given attribute</returns>
         internal static bool IsNonBatchingTargetAttribute(string attribute)
         {
-            return ((attribute == name) ||
-                    (attribute == condition) ||
-                    (attribute == dependsOnTargets) ||
-                    (attribute == beforeTargets) ||
-                    (attribute == afterTargets));
+            return KnownBatchingTargetAttributes.Contains(attribute);
         }
 
         /// <summary>
@@ -149,11 +141,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsValidMSBuildRuntimeValue(string runtime)
         {
-            return (runtime == null ||
-                    XMakeAttributes.MSBuildRuntimeValues.clr2.Equals(runtime, StringComparison.OrdinalIgnoreCase) ||
-                    XMakeAttributes.MSBuildRuntimeValues.clr4.Equals(runtime, StringComparison.OrdinalIgnoreCase) ||
-                    XMakeAttributes.MSBuildRuntimeValues.currentRuntime.Equals(runtime, StringComparison.OrdinalIgnoreCase) ||
-                    XMakeAttributes.MSBuildRuntimeValues.any.Equals(runtime, StringComparison.OrdinalIgnoreCase));
+            return runtime == null || ValidMSBuildRuntimeValues.Contains(runtime);
         }
 
         /// <summary>
@@ -161,11 +149,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool IsValidMSBuildArchitectureValue(string architecture)
         {
-            return (architecture == null ||
-                    XMakeAttributes.MSBuildArchitectureValues.x86.Equals(architecture, StringComparison.OrdinalIgnoreCase) ||
-                    XMakeAttributes.MSBuildArchitectureValues.x64.Equals(architecture, StringComparison.OrdinalIgnoreCase) ||
-                    XMakeAttributes.MSBuildArchitectureValues.currentArchitecture.Equals(architecture, StringComparison.OrdinalIgnoreCase) ||
-                    XMakeAttributes.MSBuildArchitectureValues.any.Equals(architecture, StringComparison.OrdinalIgnoreCase));
+            return architecture == null || ValidMSBuildArchitectureValues.Contains(architecture);
         }
 
         /// <summary>

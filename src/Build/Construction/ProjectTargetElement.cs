@@ -116,7 +116,7 @@ namespace Microsoft.Build.Construction
 
                 string unescapedValue = EscapingUtilities.UnescapeAll(value);
 
-                int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.illegalTargetNameCharacters);
+                int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
                 if (indexOfSpecialCharacter >= 0)
                 {
                     ErrorUtilities.ThrowArgument("OM_NameInvalid", unescapedValue, unescapedValue[indexOfSpecialCharacter]);
