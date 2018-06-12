@@ -298,10 +298,7 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                return new ReadOnlyCollection<ProjectTaskInstance>
-                    (
-                        new FilteringEnumerable<ProjectTargetInstanceChild, ProjectTaskInstance>(Children)
-                    );
+                return new ReadOnlyCollection<ProjectTaskInstance>(Children.OfType<ProjectTaskInstance>());
             }
         }
 
