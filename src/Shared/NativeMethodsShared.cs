@@ -542,7 +542,7 @@ namespace Microsoft.Build.Shared
             get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); }
 #endif
         }
-        
+
 #if MONO
         private static bool? _isOSX;
 #endif
@@ -1181,17 +1181,35 @@ namespace Microsoft.Build.Shared
         /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
         /// </summary>
         /// <returns></returns>
-        internal static string GetCurrentDirectory()
+        internal unsafe static string GetCurrentDirectory()
         {
+#if FEATURE_LEGACY_GETCURRENTDIRECTORY
             if (IsWindows)
             {
-                StringBuilder sb = new StringBuilder(MAX_PATH);
-                int pathLength = GetCurrentDirectory(MAX_PATH, sb);
-
-                return pathLength > 0 ? sb.ToString() : null;
+                int bufferSize = GetCurrentDirectoryAndAssertSuccess(0, null);
+                char* buffer = stackalloc char[bufferSize];
+                int pathLength = GetCurrentDirectoryAndAssertSuccess(bufferSize, buffer);
+                return new string(buffer, startIndex: 0, length: pathLength);
             }
-
+#endif
             return Directory.GetCurrentDirectory();
+        }
+
+        private unsafe static int GetCurrentDirectoryAndAssertSuccess(int nBufferLength, char* lpBuffer)
+        {
+            int pathLength = GetCurrentDirectory(nBufferLength, lpBuffer);
+            AssertNativeMethodSuccess(pathLength);
+            return pathLength;
+        }
+
+        internal static void AssertNativeMethodSuccess(int result)
+        {
+            bool isError = result == 0;
+            if (isError)
+            {
+                int code = Marshal.GetLastWin32Error();
+                ThrowExceptionForErrorCode(code);
+            }
         }
 
 #endregion
@@ -1276,7 +1294,7 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern int GetCurrentDirectory(int nBufferLength, [Out] StringBuilder lpBuffer);
+        internal unsafe static extern int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
