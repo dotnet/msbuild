@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
+using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge;
@@ -393,6 +394,14 @@ namespace Microsoft.TemplateEngine.Cli
                     foreach (string value in _settingsLoader.InstallUnitDescriptorCache.InstalledItems.Values)
                     {
                         Console.WriteLine($" {value}");
+
+                        if (_settingsLoader.InstallUnitDescriptorCache.Descriptors.TryGetValue(value, out IInstallUnitDescriptor descriptor))
+                        {
+                            if (descriptor.Details != null && descriptor.Details.TryGetValue("Version", out string versionValue))
+                            {
+                                Console.WriteLine($"    {LocalizableStrings.Version}", versionValue);
+                            }
+                        }
                     }
 
                     return CreationResultStatus.Success;
