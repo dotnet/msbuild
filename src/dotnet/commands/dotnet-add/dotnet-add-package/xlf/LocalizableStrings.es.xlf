@@ -82,6 +82,11 @@
         <target state="translated">No se puede generar un archivo temporal para el proyecto "{0}". No se puede agregar la referencia del paquete. Borre el directorio temporal e inténtelo de nuevo.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allow the command to block and require manual action to proceed.</source>
+        <target state="new">Allow the command to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -82,6 +82,11 @@
         <target state="translated">'{0}' projesi için bir geçici dosya oluşturulamıyor. Paket başvurusu eklenemiyor. Lütfen geçici dizini temizleyin ve yeniden deneyin.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allow the command to block and require manual action to proceed.</source>
+        <target state="new">Allow the command to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

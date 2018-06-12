@@ -82,6 +82,11 @@
         <target state="translated">Für das Projekt "{0}" kann keine temporäre Datei generiert werden. Ein Paketverweis kann nicht hinzugefügt werden. Löschen Sie das temporäre Verzeichnis, und versuchen Sie es noch mal.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allow the command to block and require manual action to proceed.</source>
+        <target state="new">Allow the command to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

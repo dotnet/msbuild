@@ -88,6 +88,11 @@ This is equivalent to deleting project.assets.json.</source>
         <target state="needs-review-translation">Définissez cet indicateur pour forcer la résolution de toutes les dépendances même si la dernière restauration a réussi. Cela équivaut à supprimer project.assets.json.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allow restore to block and require manual action to proceed.</source>
+        <target state="new">Allow restore to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

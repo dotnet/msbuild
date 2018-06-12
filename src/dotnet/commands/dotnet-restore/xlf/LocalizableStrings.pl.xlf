@@ -88,6 +88,11 @@ This is equivalent to deleting project.assets.json.</source>
         <target state="needs-review-translation">Ustaw tę flagę, aby wymusić rozstrzygnięcie wszystkich zależności nawet w przypadku, gdy ostatnie przywracanie się powiodło. Jest to równoważne usunięciu pliku project.assets.json.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allow restore to block and require manual action to proceed.</source>
+        <target state="new">Allow restore to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

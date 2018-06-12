@@ -88,6 +88,11 @@ This is equivalent to deleting project.assets.json.</source>
         <target state="needs-review-translation">このフラグを設定すると、最後に行われた復元が成功した場合でも強制的にすべての依存関係を解決します。これは、project.assets.json を削除することと同じです。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allow restore to block and require manual action to proceed.</source>
+        <target state="new">Allow restore to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

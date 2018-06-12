@@ -82,6 +82,11 @@
         <target state="translated">Não é possível gerar um arquivo temporário para o projeto '{0}'. Não é possível adicionar a referência do pacote. Limpe i diretório temporário e tente novamente.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allow the command to block and require manual action to proceed.</source>
+        <target state="new">Allow the command to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

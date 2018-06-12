@@ -88,6 +88,11 @@ This is equivalent to deleting project.assets.json.</source>
         <target state="needs-review-translation">Legen Sie dieses Flag fest, damit alle Abhängigkeiten aufgelöst werden, auch wenn die letzte Wiederherstellung erfolgreich war. Dies entspricht dem Löschen von "project.assets.json".</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allow restore to block and require manual action to proceed.</source>
+        <target state="new">Allow restore to block and require manual action to proceed.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
