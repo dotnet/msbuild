@@ -927,7 +927,6 @@
   <!-- For perf, do not add more references (that will be loaded in common scenarios) without good reason -->
   <!-- ==========================================================================================-->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
@@ -945,9 +944,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    
-    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" />
-    <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll" CopyToOutputDirectory="PreserveNewest" LinkBase="ref" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
@@ -983,4 +979,9 @@
     -->
     <Content Update="@(Content)" Pack="false" />
   </ItemGroup>
+
+  <Target Name="CopyMscorlib" AfterTargets="Build">
+    <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll" DestinationFolder="$(OutputPath)/ref" />
+    <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll" DestinationFolder="$(OutputPath)/ref" />
+  </Target>
 </Project>
