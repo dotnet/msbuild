@@ -1442,6 +1442,11 @@
         <target state="translated">MSB3455: コマンド ラインの文字数が {0} で、これはコマンドの最大長を超えているため、ResGen.exe を実行できない可能性があります。この問題を解決するには、次のいずれかを行ってください。(1) 不要なアセンブリ参照を削除する。(2) これらの参照へのパスを短くする。</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">AssemblyFoldersEx の場所:"{0}"</target>
