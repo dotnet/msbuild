@@ -2,7 +2,7 @@
   <PropertyGroup>
     <SdkBrandName>Microsoft .NET Core SDK - 2.1.202</SdkBrandName>
     <MSBuildExtensionsBrandName>.NET Standard Support for Visual Studio 2015</MSBuildExtensionsBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core Runtime - 2.0.7</SharedFrameworkBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core Runtime - 2.0.9</SharedFrameworkBrandName>
     <SharedHostBrandName>Microsoft .NET Core Host - 2.0.1</SharedHostBrandName>
     <HostFxrBrandName>Microsoft .NET Core Host FX Resolver - 2.0.0</HostFxrBrandName>
 
