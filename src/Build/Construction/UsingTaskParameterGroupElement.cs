@@ -8,6 +8,7 @@
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -64,10 +65,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                return new ReadOnlyCollection<ProjectUsingTaskParameterElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectUsingTaskParameterElement>(Children)
-                    );
+                return new ReadOnlyCollection<ProjectUsingTaskParameterElement>(Children.OfType<ProjectUsingTaskParameterElement>());
             }
         }
 

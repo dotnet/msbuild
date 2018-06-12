@@ -307,126 +307,81 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// The name is inconsistent to make it more understandable, per API review.
         /// </remarks>
-        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectChooseElement>(Children)
-        );
+        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectItemDefinitionGroupElement>(Children)
-        );
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(Children.OfType<ProjectItemDefinitionGroupElement>());
 
         /// <summary>
         /// Get a read-only collection of the child item definitions, if any, in all item definition groups anywhere in the project file.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectItemDefinitionElement>(AllChildren)
-        );
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(AllChildren.OfType<ProjectItemDefinitionElement>());
 
         /// <summary>
         /// Get a read-only collection over the child item groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectItemGroupElement>(Children)
-        );
+        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
 
         /// <summary>
         /// Get a read-only collection of the child items, if any, in all item groups anywhere in the project file.
         /// Not restricted to root item groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectItemElement>(AllChildren)
-        );
+        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(AllChildren.OfType<ProjectItemElement>());
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any.
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroups => new ReadOnlyCollection<ProjectImportGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectImportGroupElement>(Children)
-        );
+        public ICollection<ProjectImportGroupElement> ImportGroups => new ReadOnlyCollection<ProjectImportGroupElement>(Children.OfType<ProjectImportGroupElement>());
 
         /// <summary>
         /// Get a read-only collection of the child imports
         /// </summary>
-        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectImportElement>(AllChildren)
-        );
+        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(AllChildren.OfType<ProjectImportElement>());
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectPropertyGroupElement>(Children)
-        );
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
 
         /// <summary>
         /// Geta read-only collection of the child properties, if any, in all property groups anywhere in the project file.
         /// Not restricted to root property groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectPropertyElement>(AllChildren)
-        );
+        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(AllChildren.OfType<ProjectPropertyElement>());
 
         /// <summary>
         /// Get a read-only collection of the child targets
         /// </summary>
-        public ICollection<ProjectTargetElement> Targets => new ReadOnlyCollection<ProjectTargetElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectTargetElement>(Children)
-        );
+        public ICollection<ProjectTargetElement> Targets => new ReadOnlyCollection<ProjectTargetElement>(Children.OfType<ProjectTargetElement>());
 
         /// <summary>
         /// Get a read-only collection of the child usingtasks, if any
         /// </summary>
-        public ICollection<ProjectUsingTaskElement> UsingTasks => new ReadOnlyCollection<ProjectUsingTaskElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectUsingTaskElement>(Children)
-        );
+        public ICollection<ProjectUsingTaskElement> UsingTasks => new ReadOnlyCollection<ProjectUsingTaskElement>(Children.OfType<ProjectUsingTaskElement>());
 
         /// <summary>
         /// Get a read-only collection of the child item groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => new ReadOnlyCollection<ProjectItemGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectItemGroupElement>(ChildrenReversed)
-        );
+        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => new ReadOnlyCollection<ProjectItemGroupElement>(ChildrenReversed.OfType<ProjectItemGroupElement>());
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectItemDefinitionGroupElement>(ChildrenReversed)
-        );
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(ChildrenReversed.OfType<ProjectItemDefinitionGroupElement>());
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => new ReadOnlyCollection<ProjectImportGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectImportGroupElement>(ChildrenReversed)
-        );
+        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => new ReadOnlyCollection<ProjectImportGroupElement>(ChildrenReversed.OfType<ProjectImportGroupElement>());
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => new ReadOnlyCollection<ProjectPropertyGroupElement>
-        (
-            new FilteringEnumerable<ProjectElement, ProjectPropertyGroupElement>(ChildrenReversed)
-        );
+        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => new ReadOnlyCollection<ProjectPropertyGroupElement>(ChildrenReversed.OfType<ProjectPropertyGroupElement>());
 
         #endregion
 
