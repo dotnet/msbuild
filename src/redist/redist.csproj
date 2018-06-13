@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
-  <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
@@ -9,7 +8,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
-    <PublishDir>$(SdkOutputDirectory)</PublishDir>
+    <PublishDir>$(ToolsetOutputDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
 
@@ -28,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
+    <ProjectReference Include="..\tool_cli\tool_cli.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
 
@@ -86,19 +86,9 @@
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
 
-  <Target Name="PublishMSBuildExtensions"
-          DependsOnTargets="GenerateMSBuildExtensions"
+  <Target Name="PublishTargetExtensions"
           AfterTargets="Publish"
           BeforeTargets="GenerateCliRuntimeConfigurationFiles">
-    <ItemGroup>
-      <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
-        <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
-      </MSBuildExtensionsContent>
-    </ItemGroup>
-
-      <Copy SourceFiles="@(MSBuildExtensionsContent)"
-            DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
-
       <PropertyGroup>
         <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
       </PropertyGroup>
@@ -135,7 +125,7 @@
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
-          SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
+          SdkLayoutDirectory=$(ToolsetOutputDirectory)/Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);
           DependencyPackageVersion=%(BundledSdk.Version);
           PreviousStageDirectory=$(PreviousStageDirectory)
@@ -150,23 +140,22 @@
   </Target>
 
   <Target Name="ChmodPublishDir"
-          AfterTargets="PublishMSBuildExtensions"
+          AfterTargets="GenerateCliRuntimeConfigurationFiles"
           Condition=" '$(OSName)' != 'win' ">
 
-    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
-    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
-    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
+    <Exec Command="find $(ToolsetOutputDirectory) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(ToolsetOutputDirectory) -type f -exec chmod 644 {} \;" />
+    <Chmod Mode="755" Glob="$(ToolsetOutputDirectory)/FSharp/RunFsc.sh" />
   </Target>
 
-  <Target Name="SeparateSymbolsFromPublishDir"
-          AfterTargets="PublishMSBuildExtensions">
+  <Target Name="DeleteSymbolsFromPublishDir"
+          AfterTargets="GenerateCliRuntimeConfigurationFiles">
     <ItemGroup>
-      <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
-      <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
+      <PdbsToDelete Include="$(PublishDir)/**/*.pdb" />
+      <PdbsToDelete Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Move SourceFiles="@(PdbsToMove)"
-          DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Delete Files="@(PdbsToDelete)" />
   </Target>
 
   <Target Name="RetargetVSTestConsole"

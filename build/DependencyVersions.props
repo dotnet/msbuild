@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <DotNetCoreSdkLKGVersion>2.0.3-servicing-007050</DotNetCoreSdkLKGVersion>
+    <DotNetCoreSdkLKGVersion>2.2.100-preview1-008982</DotNetCoreSdkLKGVersion>
+    <DotnetCliInternalVersion>2.2.100-refac-refac-20180613-1</DotnetCliInternalVersion>
     <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview1-34355</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.2.0-preview1-26529-01</MicrosoftNETCoreAppPackageVersion>
@@ -50,7 +51,7 @@
     <MicrosoftNETTestSdkPackageVersion>15.8.0-preview-20180510-03</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
-    <MicrosoftDotNetCliUtilsPackageVersion>$(DotNetCoreSdkLKGVersion)</MicrosoftDotNetCliUtilsPackageVersion>
+    <MicrosoftDotNetCliUtilsPackageVersion>2.2.100-refac-20180613-1</MicrosoftDotNetCliUtilsPackageVersion>
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
   </PropertyGroup>

@@ -13,9 +13,6 @@
       <OutputDirectory>$(BaseOutputDirectory)/dotnet</OutputDirectory>
       <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/dotnetWithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
       <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
-      <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
-      <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
-      <FSharpDirectory>$(SdkOutputDirectory)/FSharp</FSharpDirectory>
       <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/int</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
@@ -29,6 +26,9 @@
       <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
       <DotNetCoreSdkLKGPublishDirectory>$(IntermediateDirectory)/SdkLKG</DotNetCoreSdkLKGPublishDirectory>
       <CLIPublishDirectory>$(IntermediateDirectory)/CLIPublish</CLIPublishDirectory>
+      <ToolsetOutputDirectory>$(IntermediateDirectory)/Toolset/sdk/$(SdkVersion)</ToolsetOutputDirectory>
+      <RoslynDirectory>$(ToolsetOutputDirectory)/Roslyn</RoslynDirectory>
+      <FSharpDirectory>$(ToolsetOutputDirectory)/FSharp</FSharpDirectory>
 
       <NextStagePropsPath>$(BaseOutputDirectory)/PreviousStage.props</NextStagePropsPath>
   </PropertyGroup>

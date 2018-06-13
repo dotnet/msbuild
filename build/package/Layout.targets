@@ -3,49 +3,29 @@
   <PropertyGroup>
     <LayoutDirectory>$(IntermediateDirectory)/layouts</LayoutDirectory>
     <SdkLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdk)</SdkLayoutOutputDirectory>
-    <SdkDebugLayoutOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkDebug)</SdkDebugLayoutOutputDirectory>
     <SdkLanguagePackOutputDirectory>$(LayoutDirectory)/$(ArtifactNameSdkLanguagePack)</SdkLanguagePackOutputDirectory>
-    <SatelliteAssemblies>*.resources.dll</SatelliteAssemblies>
   </PropertyGroup>
 
   <Target DependsOnTargets="Init" Name="SetupLayoutInputsOutputs" >
     <!-- Set up Items with Layout Input Files -->
     <ItemGroup>
-      <SdkLayoutInput Include="$(OutputDirectory)/sdk/**/*" />
+      <ToolsetLayoutInput Include="$(ToolsetOutputDirectory)/**/*" />
       <SdkDebugLayoutInput Include="$(SymbolsDirectory)/sdk/**/*" />
-      <SdkLanguagePackInput Include="$(OutputDirectory)/sdk/**/$(SatelliteAssemblies)" />
+      <ToolsetLanguagePackInput Include="$(ToolsetOutputDirectory)/**/*.resources.dll" />
     </ItemGroup>
-
-    <MakeRelative
-      Path1="$(OutputDirectory)/"
-      Path2="%(SdkLayoutInput.Identity)" >
-      <Output TaskParameter="RelativePath" ItemName="SdkRelativeOutputFiles" />
-    </MakeRelative>
-    <MakeRelative
-      Path1="$(OutputDirectory)/"
-      Path2="%(SdkLanguagePackInput.Identity)" >
-      <Output TaskParameter="RelativePath" ItemName="SdkLanguagePackRelativeOutputFiles" />
-    </MakeRelative>
 
     <!-- Set up Items Defining Layouts for easy change -->
     <ItemGroup>
       <LayoutDefinition Include="Sdk">
-        <InputFiles>@(SdkLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkRelativeOutputFiles -> '$(SdkLayoutOutputDirectory)/%(Identity)')</OutputFiles>
+        <InputFiles>@(ToolsetLayoutInput)</InputFiles>
+        <OutputFiles>@(ToolsetLayoutInput -> '$(SdkLayoutOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdk)</NameWithVersion>
         <Name>$(ArtifactNameSdk)</Name>
       </LayoutDefinition>
 
-      <LayoutDefinition Include="Debug">
-        <InputFiles>@(SdkDebugLayoutInput)</InputFiles>
-        <OutputFiles>@(SdkDebugRelativeOutputFiles -> '$(SdkDebugLayoutOutputDirectory)/%(Identity)')</OutputFiles>
-        <NameWithVersion>$(ArtifactNameWithVersionSdkDebug)</NameWithVersion>
-        <Name>$(ArtifactNameSdkDebug)</Name>
-      </LayoutDefinition>
-
       <LayoutDefinition Include="SdkLanguagePack">
-        <InputFiles>@(SdkLanguagePackInput)</InputFiles>
-        <OutputFiles>@(SdkLanguagePackRelativeOutputFiles -> '$(SdkLanguagePackOutputDirectory)/%(Identity)')</OutputFiles>
+        <InputFiles>@(ToolsetLanguagePackInput)</InputFiles>
+        <OutputFiles>@(ToolsetLanguagePackInput -> '$(SdkLanguagePackOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')</OutputFiles>
         <NameWithVersion>$(ArtifactNameWithVersionSdkLanguagePack)</NameWithVersion>
         <Name>$(ArtifactNameSdkLanguagePack)</Name>
       </LayoutDefinition>
@@ -57,7 +37,7 @@
           Inputs="@(LayoutDefinition -> '%(InputFiles)')"
           Outputs="@(LayoutDefinition -> '%(OutputFiles)')" >
 
-    <!-- Copy Files to layout directories based on defintiions -->
+    <!-- Copy Files to layout directories based on definitions -->
     <Copy SourceFiles="%(LayoutDefinition.InputFiles)"
           DestinationFiles="%(LayoutDefinition.OutputFiles)"
           SkipUnchangedFiles="true" />

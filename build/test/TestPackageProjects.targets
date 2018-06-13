@@ -20,25 +20,6 @@
 
   <Target Name="SetupTestPackageProjectBaseData">
     <ItemGroup>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep"
-                              Condition=" '$(IsDesktopAvailable)' == 'True' " >
-        <Name>PackageWithFakeNativeDep</Name>
-        <ProjectName>PackageWithFakeNativeDep.csproj</ProjectName>
-        <IsTool>False</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
-        <Clean>True</Clean>
-      </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-context-test">
-        <Name>dotnet-dependency-context-test</Name>
-        <ProjectName>dotnet-dependency-context-test.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
-        <Clean>True</Clean>
-      </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-tool-invoker">
         <Name>dotnet-dependency-tool-invoker</Name>
         <ProjectName>dotnet-dependency-tool-invoker.csproj</ProjectName>

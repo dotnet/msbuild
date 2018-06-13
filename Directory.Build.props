@@ -42,7 +42,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
-  <Import Project="build/MSBuildExtensions.props" />
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
 
@@ -57,7 +56,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <Import Project="build/AzureInfo.props" />
     <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/BundledCLI.props" />
     <Import Project="build/DotnetCoreSdkLKG.props" />
 
     <Import Project="build/GenerateResxSource.targets" />
