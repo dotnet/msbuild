@@ -2750,8 +2750,8 @@
         MSB3951 - MSB3960  Tasks: GetFileHash and VerifyFileHash
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
-  <data name="VerifyFileHash.InvalidInputParameters" xml:space="preserve">
-    <value>MSB3951: Invalid input parameters. Either Hash or HashBase64 must be specified, but not both.</value>
+  <data name="FileHash.UnrecognizedHashEncoding" xml:space="preserve">
+    <value>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</value>
     <comment>{StrBegin="MSB3951: "}</comment>
   </data>
   <data name="VerifyFileHash.HashMismatch" xml:space="preserve">
@@ -2759,7 +2759,7 @@
     <comment>{StrBegin="MSB3952: "}</comment>
   </data>
   <data name="FileHash.UnrecognizedHashAlgorithm" xml:space="preserve">
-    <value>MSB3953: Unrecognized hash algorithm name '{0}'.</value>
+    <value>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</value>
     <comment>{StrBegin="MSB3953: "}</comment>
   </data>
   <data name="FileHash.FileNotFound" xml:space="preserve">

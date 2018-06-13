@@ -336,6 +336,7 @@
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
     <Compile Include="FileIO\GetFileHash.cs" />
+    <Compile Include="FileIO\HashEncoding.cs" />
     <Compile Include="FileIO\VerifyFileHash.cs" />
     <Compile Include="FileState.cs" />
     <Compile Include="Copy.cs">

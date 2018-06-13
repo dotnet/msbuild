@@ -21,30 +21,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void VerifyFileChecksum_FailsForMissingInputs()
+        public void VerifyFileChecksum_FailsForUnknownHashEncoding()
         {
             new VerifyFileHash
             {
                 File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
                 BuildEngine = _mockEngine,
                 Algorithm = "SHA256",
-            }
-            .Execute()
-            .ShouldBeFalse();
-
-            _mockEngine.Log.ShouldContain("MSB3951");
-        }
-
-        [Fact]
-        public void VerifyFileChecksum_FailsForConflictingInputs()
-        {
-            new VerifyFileHash
-            {
-                File = Path.Combine(AppContext.BaseDirectory, "TestResources", "lorem.bin"),
-                BuildEngine = _mockEngine,
-                Algorithm = "SHA256",
-                Hash ="xyz",
-                HashBase64 = "xyz",
+                HashEncoding = "red",
             }
             .Execute()
             .ShouldBeFalse();
@@ -105,30 +89,15 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [MemberData(nameof(TestBinary.GetLorem), MemberType = typeof(TestBinary))]
-        public void VerifyFileChecksum_Hex_Pass(TestBinary testBinary)
+        public void VerifyFileChecksum_Pass(TestBinary testBinary)
         {
             VerifyFileHash task = new VerifyFileHash
             {
                 File = testBinary.FilePath,
                 BuildEngine = _mockEngine,
                 Algorithm = testBinary.HashAlgorithm,
-                Hash = testBinary.Base16FileHash,
-            };
-
-            task.Execute().ShouldBeTrue();
-        }
-
-
-        [Theory]
-        [MemberData(nameof(TestBinary.GetLorem), MemberType = typeof(TestBinary))]
-        public void VerifyFileChecksum_Base64_Pass(TestBinary testBinary)
-        {
-            VerifyFileHash task = new VerifyFileHash
-            {
-                File = testBinary.FilePath,
-                BuildEngine = _mockEngine,
-                Algorithm = testBinary.HashAlgorithm,
-                HashBase64 = testBinary.Base64FileHash,
+                Hash = testBinary.FileHash,
+                HashEncoding = testBinary.HashEncoding,
             };
 
             task.Execute().ShouldBeTrue();

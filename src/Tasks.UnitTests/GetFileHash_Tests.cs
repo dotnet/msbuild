@@ -35,6 +35,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void GetFileHash_FailsForUnknownHashEncoding()
+        {
+            GetFileHash task = new GetFileHash
+            {
+                Files = new[] { new TaskItem(TestBinary.LoremFilePath) },
+                BuildEngine = _mockEngine,
+                HashEncoding = "blue",
+            };
+            task.Execute().ShouldBeFalse();
+            _mockEngine.Log.ShouldContain("MSB3951");
+        }
+
+        [Fact]
         public void GetFileHash_FailsForMissingFile()
         {
             GetFileHash task = new GetFileHash
@@ -55,10 +68,10 @@ namespace Microsoft.Build.UnitTests
                 Files = new[] { new TaskItem(testBinary.FilePath) },
                 BuildEngine = _mockEngine,
                 Algorithm = testBinary.HashAlgorithm,
+                HashEncoding = testBinary.HashEncoding,
             };
             task.Execute().ShouldBeTrue();
-            task.Hash.ShouldBe(testBinary.Base16FileHash);
-            task.HashBase64.ShouldBe(testBinary.Base64FileHash);
+            task.Hash.ShouldBe(testBinary.FileHash);
         }
 
         [Theory]
@@ -74,12 +87,12 @@ namespace Microsoft.Build.UnitTests
                 },
                 BuildEngine = _mockEngine,
                 Algorithm = testBinary.HashAlgorithm,
+                HashEncoding = testBinary.HashEncoding,
             };
 
             task.Execute().ShouldBeTrue();
             task.Items.Length.ShouldBe(2);
-            task.Items.ShouldAllBe(i => string.Equals(testBinary.Base16FileHash, i.GetMetadata("FileHash"), StringComparison.Ordinal));
-            task.Items.ShouldAllBe(i => string.Equals(testBinary.Base64FileHash, i.GetMetadata("FileHashBase64"), StringComparison.Ordinal));
+            task.Items.ShouldAllBe(i => string.Equals(testBinary.FileHash, i.GetMetadata("FileHash"), StringComparison.Ordinal));
         }
     }
 }

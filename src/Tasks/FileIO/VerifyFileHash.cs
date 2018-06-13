@@ -20,28 +20,23 @@ namespace Microsoft.Build.Tasks
         public string File { get; set; }
 
         /// <summary>
-        /// The hasing algorithm to use. Allowed values: SHA256, SHA384, SHA512. Default = SHA256
+        /// The expected hash of the file.
         /// </summary>
-        public string Algorithm { get; set; } = GetFileHash.DefaultFileHashAlgorithm;
-
-        /// <summary>
-        /// The expected hash of the file in hex.
-        /// </summary>
+        [Required]
         public string Hash { get; set; }
 
         /// <summary>
-        /// The expected hash of the file in base64.
+        /// The encoding format of <see cref="Hash"/>. Defaults to "hex".
         /// </summary>
-        public string HashBase64 { get; set; }
+        public string HashEncoding { get; set; } = GetFileHash._hashEncodingHex;
+
+        /// <summary>
+        /// The hasing algorithm to use. Allowed values: SHA256, SHA384, SHA512. Default = SHA256
+        /// </summary>
+        public string Algorithm { get; set; } = GetFileHash._defaultFileHashAlgorithm;
 
         public override bool Execute()
         {
-            if (!(string.IsNullOrEmpty(Hash) ^ string.IsNullOrEmpty(HashBase64)))
-            {
-                Log.LogErrorFromResources("VerifyFileHash.InvalidInputParameters");
-                return false;
-            }
-
             if (!System.IO.File.Exists(File))
             {
                 Log.LogErrorFromResources("FileHash.FileNotFound", File);
@@ -54,25 +49,35 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            byte[] hash = GetFileHash.ComputeHash(Algorithm, File);
-            if (!string.IsNullOrEmpty(Hash))
+            if (!GetFileHash.TryParseHashEncoding(HashEncoding, out var encoding))
             {
-                var actualHash = ConversionUtilities.ConvertByteArrayToHex(hash);
-                if (!string.Equals(actualHash, Hash, StringComparison.OrdinalIgnoreCase))
-                {
-                    Log.LogErrorFromResources("VerifyFileHash.HashMismatch", File, Algorithm, Hash, actualHash);
-                    return false;
-                }
+                Log.LogErrorFromResources("FileHash.UnrecognizedHashEncoding", HashEncoding);
+                return false;
             }
-            else
+
+            byte[] hash = GetFileHash.ComputeHash(Algorithm, File);
+            bool hashesMatch;
+            switch (encoding)
             {
-                byte[] expectedHash = Convert.FromBase64String(HashBase64);
-                if (!expectedHash.SequenceEqual(hash))
-                {
-                    var actualHash = Convert.ToBase64String(hash);
-                    Log.LogErrorFromResources("VerifyFileHash.HashMismatch", File, Algorithm, HashBase64, actualHash);
-                    return false;
-                }
+                case Tasks.HashEncoding.Hex:
+                    var actualHash = ConversionUtilities.ConvertByteArrayToHex(hash);
+                    hashesMatch = string.Equals(actualHash, Hash, StringComparison.OrdinalIgnoreCase);
+                    break;
+                case Tasks.HashEncoding.Base64:
+                    byte[] expectedHash = Convert.FromBase64String(Hash);
+                    hashesMatch = expectedHash.SequenceEqual(hash);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            if (!hashesMatch)
+            {
+                var actualHash = encoding == Tasks.HashEncoding.Hex
+                    ? ConversionUtilities.ConvertByteArrayToHex(hash)
+                    : Convert.ToBase64String(hash);
+                Log.LogErrorFromResources("VerifyFileHash.HashMismatch", File, Algorithm, Hash, actualHash);
+                return false;
             }
 
             return !Log.HasLoggedErrors;

@@ -15,7 +15,9 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed class GetFileHash : TaskExtension
     {
-        internal const string DefaultFileHashAlgorithm = "SHA256";
+        internal const string _defaultFileHashAlgorithm = "SHA256";
+        internal const string _hashEncodingHex = "hex";
+        internal const string _hashEncodingBase64 = "base64";
 
         /// <summary>
         /// The files to be hashed.
@@ -26,29 +28,23 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The algorithm. Allowed values: SHA256, SHA384, SHA512. Default = SHA256.
         /// </summary>
-        public string Algorithm { get; set; } = DefaultFileHashAlgorithm;
+        public string Algorithm { get; set; } = _defaultFileHashAlgorithm;
 
         /// <summary>
-        /// The metadata name where the hash is store in each item. File hash is in hex. Defaults to "FileHash".
+        /// The metadata name where the hash is stored in each item. Defaults to "FileHash".
         /// </summary>
         public string MetadataName { get; set; } = "FileHash";
 
         /// <summary>
-        /// The metadata name where the base64 encoded hash is store in each item. File hash is in hex. Defaults to "FileHashBase64".
+        /// The encoding to use for generated hashs. Defaults to "hex". Allowed values = "hex", "base64"
         /// </summary>
-        public string MetadataNameBase64 { get; set; } = "FileHashBase64";
+        public string HashEncoding { get; set; } = _hashEncodingHex;
 
         /// <summary>
-        /// The hash of the file in hex. This is only set if there was one item group passed in.
+        /// The hash of the file. This is only set if there was one item group passed in.
         /// </summary>
         [Output]
         public string Hash { get; set; }
-
-        /// <summary>
-        /// The hash of the file base64 encoded. This is only set if there was one item group passed in.
-        /// </summary>
-        [Output]
-        public string HashBase64 { get; set; }
 
         /// <summary>
         /// The input files with additional metadata set to include the file hash.
@@ -64,18 +60,30 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            if (!TryParseHashEncoding(HashEncoding, out var encoding))
+            {
+                Log.LogErrorFromResources("FileHash.UnrecognizedHashEncoding", HashEncoding);
+                return false;
+            }
+
             foreach (var file in Files)
             {
                 if (!File.Exists(file.ItemSpec))
                 {
                     Log.LogErrorFromResources("FileHash.FileNotFound", file.ItemSpec);
-                    continue;
                 }
+            }
 
+            if (Log.HasLoggedErrors)
+            {
+                return false;
+            }
+
+            foreach (var file in Files)
+            {
                 var hash = ComputeHash(Algorithm, file.ItemSpec);
                 file.SetMetadata("FileHashAlgoritm", Algorithm);
-                file.SetMetadata(MetadataName, ConversionUtilities.ConvertByteArrayToHex(hash));
-                file.SetMetadata(MetadataNameBase64, Convert.ToBase64String(hash));
+                file.SetMetadata(MetadataName, EncodeHash(encoding, hash));
             }
 
             Items = Files;
@@ -83,10 +91,44 @@ namespace Microsoft.Build.Tasks
             if (Files.Length == 1)
             {
                 Hash = Files[0].GetMetadata(MetadataName);
-                HashBase64 = Files[0].GetMetadata(MetadataNameBase64);
             }
 
             return !Log.HasLoggedErrors;
+        }
+
+        internal string EncodeHash(HashEncoding encoding, byte[] hash)
+        {
+            switch (encoding)
+            {
+                case Tasks.HashEncoding.Hex:
+                    return ConversionUtilities.ConvertByteArrayToHex(hash);
+                case Tasks.HashEncoding.Base64:
+                    return Convert.ToBase64String(hash);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        internal static bool TryParseHashEncoding(string value, out HashEncoding encoding)
+        {
+            encoding = default(HashEncoding);
+
+            if (string.IsNullOrEmpty(value))
+            {
+                return false;
+            }
+
+            switch (value.ToLowerInvariant())
+            {
+                case _hashEncodingHex:
+                    encoding = Tasks.HashEncoding.Hex;
+                    return true;
+                case _hashEncodingBase64:
+                    encoding = Tasks.HashEncoding.Base64;
+                    return true;
+            }
+
+            return false;
         }
 
         internal static bool SupportsAlgorithm(string algorithmName) => _supportedAlgorithms.Contains(algorithmName);

@@ -407,9 +407,14 @@
         <note>{StrBegin="MSB3954: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
-        <source>MSB3953: Unrecognized hash algorithm name '{0}'.</source>
-        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'.</target>
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
+        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
         <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashEncoding">
+        <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
+        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
@@ -2477,11 +2482,6 @@
         <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
         <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
         <note>{StrBegin="MSB3952: "}</note>
-      </trans-unit>
-      <trans-unit id="VerifyFileHash.InvalidInputParameters">
-        <source>MSB3951: Invalid input parameters. Either Hash or HashBase64 must be specified, but not both.</source>
-        <target state="new">MSB3951: Invalid input parameters. Either Hash or HashBase64 must be specified, but not both.</target>
-        <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
