@@ -22,7 +22,7 @@
   <Import Project="$(WebSdkRoot)/Publish/obj/Publish.csproj.nuget.g.targets" Condition="Exists('$(WebSdkRoot)/Publish/obj/Publish.csproj.nuget.g.targets')" />
   -->
     <ItemGroup>
-      <SignedPackages Include="$(SignedPackagesPath)/**/*.nupkg" />
+      <SignedPackages Include="$(SignedPackagesPath)/**/*.nupkg" ManifestArtifactData="NonShipping=true" />
     </ItemGroup>
 
   <Target Name="Publish"
