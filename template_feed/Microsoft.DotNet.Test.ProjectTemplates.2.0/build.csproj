@@ -10,7 +10,6 @@
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <OutputPath>$(TemplatesFolder)</OutputPath>
     <EnableDefaultItems>False</EnableDefaultItems>
-    <BaseIntermediateOutputPath Condition="'$(DotNetBuildFromSource)' != 'true'">$(MSBuildThisFileDirectory)..\..\artifacts\scratch</BaseIntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Remove="Microsoft.NETCore.App" />
