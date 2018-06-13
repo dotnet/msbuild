@@ -17,6 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             IList<ITemplateParameter> filteredParams = parameterDefinitions
                 .Where(x => x.Priority != TemplateParameterPriority.Implicit
                         && !hiddenParams.Contains(x.Name)
+                        && string.Equals(x.Type, "parameter", StringComparison.OrdinalIgnoreCase)
                         && !string.Equals(x.Name, "type", StringComparison.OrdinalIgnoreCase)
                         && !string.Equals(x.Name, "language", StringComparison.OrdinalIgnoreCase)
                         && (showImplicitlyHiddenParams || x.DataType != "choice" || x.Choices.Count > 1 || (parametersToAlwaysShow?.Contains(x.Name) ?? false))).ToList();    // for filtering "tags"

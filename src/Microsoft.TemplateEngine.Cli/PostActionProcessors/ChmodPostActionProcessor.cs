@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Newtonsoft.Json.Linq;
 
@@ -40,15 +39,15 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 foreach (string file in values)
                 {
-                    System.Diagnostics.Process commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
+                    Process commandResult = System.Diagnostics.Process.Start(new ProcessStartInfo
                     {
                         RedirectStandardError = false,
                         RedirectStandardOutput = false,
                         UseShellExecute = true,
                         CreateNoWindow = false,
                         WorkingDirectory = outputBasePath,
-                        FileName = "chmod",
-                        Arguments = $"{entry.Key} {file}"
+                        FileName = "/bin/sh",
+                        Arguments = $"-c \"chmod {entry.Key} {file}\""
                     });
 
                     commandResult.WaitForExit();
