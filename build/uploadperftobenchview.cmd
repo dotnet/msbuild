@@ -72,6 +72,7 @@ py "%perfWorkingDirectory%\Microsoft.BenchView.JSONFormat\tools\submission.py" "
                     --type "%runType%" ^
                     --config-name "%configuration%" ^
                     --config Configuration "%configuration%" ^
+                    --config OS "%OS%" ^
                     --architecture "%architecture%" ^
                     --machinepool "perfsnake" ^
                     -o "%perfWorkingDirectory%\submission.json"

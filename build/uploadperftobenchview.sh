@@ -100,6 +100,7 @@ python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/submission
                     --type "$runType" \
                     --config-name "$configuration" \
                     --config Configuration "$configuration" \
+                    --config OS "$OS" \
                     --architecture "$architecture" \
                     --machinepool "perfsnake" \
                     -o "$perfWorkingDirectory/submission.json" || { echo Failed to create: "$perfWorkingDirectory/submission.json" && exit 1 ; }
