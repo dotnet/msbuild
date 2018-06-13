@@ -96,7 +96,7 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors;
         }
 
-        internal string EncodeHash(HashEncoding encoding, byte[] hash)
+        internal static string EncodeHash(HashEncoding encoding, byte[] hash)
         {
             switch (encoding)
             {
@@ -110,28 +110,10 @@ namespace Microsoft.Build.Tasks
         }
 
         internal static bool TryParseHashEncoding(string value, out HashEncoding encoding)
-        {
-            encoding = default(HashEncoding);
+            => Enum.TryParse<HashEncoding>(value, /*ignoreCase:*/ true, out encoding);
 
-            if (string.IsNullOrEmpty(value))
-            {
-                return false;
-            }
-
-            switch (value.ToLowerInvariant())
-            {
-                case _hashEncodingHex:
-                    encoding = Tasks.HashEncoding.Hex;
-                    return true;
-                case _hashEncodingBase64:
-                    encoding = Tasks.HashEncoding.Base64;
-                    return true;
-            }
-
-            return false;
-        }
-
-        internal static bool SupportsAlgorithm(string algorithmName) => _supportedAlgorithms.Contains(algorithmName);
+        internal static bool SupportsAlgorithm(string algorithmName)
+            => _supportedAlgorithms.Contains(algorithmName);
 
         internal static byte[] ComputeHash(string algorithmName, string filePath)
         {

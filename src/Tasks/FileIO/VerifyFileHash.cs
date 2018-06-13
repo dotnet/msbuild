@@ -56,26 +56,12 @@ namespace Microsoft.Build.Tasks
             }
 
             byte[] hash = GetFileHash.ComputeHash(Algorithm, File);
-            bool hashesMatch;
-            switch (encoding)
+            string actualHash = GetFileHash.EncodeHash(encoding, hash);
+            var comparison = encoding == Tasks.HashEncoding.Hex
+                ? StringComparison.OrdinalIgnoreCase
+                : StringComparison.Ordinal;
+            if (!string.Equals(actualHash, Hash, comparison))
             {
-                case Tasks.HashEncoding.Hex:
-                    var actualHash = ConversionUtilities.ConvertByteArrayToHex(hash);
-                    hashesMatch = string.Equals(actualHash, Hash, StringComparison.OrdinalIgnoreCase);
-                    break;
-                case Tasks.HashEncoding.Base64:
-                    byte[] expectedHash = Convert.FromBase64String(Hash);
-                    hashesMatch = expectedHash.SequenceEqual(hash);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-
-            if (!hashesMatch)
-            {
-                var actualHash = encoding == Tasks.HashEncoding.Hex
-                    ? ConversionUtilities.ConvertByteArrayToHex(hash)
-                    : Convert.ToBase64String(hash);
                 Log.LogErrorFromResources("VerifyFileHash.HashMismatch", File, Algorithm, Hash, actualHash);
                 return false;
             }
