@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Cli.PostActionProcessors;
 using Microsoft.TemplateEngine.Edge.Template;
@@ -17,23 +18,26 @@ namespace Microsoft.TemplateEngine.Cli
         private readonly TemplateCreationResult _creationResult;
         private readonly IEngineEnvironmentSettings _environment;
         private readonly AllowPostActionsSetting _canRunScripts;
+        private readonly bool _isDryRun;
 
-        public PostActionDispatcher(IEngineEnvironmentSettings environment, TemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus)
+        public PostActionDispatcher(IEngineEnvironmentSettings environment, TemplateCreationResult creationResult, AllowPostActionsSetting canRunStatus, bool isDryRun)
         {
             _environment = environment;
             _creationResult = creationResult;
             _canRunScripts = canRunStatus;
+            _isDryRun = isDryRun;
         }
 
         public void Process(Func<string> inputGetter)
         {
-            if (_creationResult.ResultInfo.PostActions.Count > 0)
+            IReadOnlyList<IPostAction> postActions = _creationResult.ResultInfo?.PostActions ?? _creationResult.CreationEffects.CreationResult.PostActions;
+            if (postActions.Count > 0)
             {
                 Reporter.Output.WriteLine();
                 Reporter.Output.WriteLine(LocalizableStrings.ProcessingPostActions);
             }
 
-            foreach (IPostAction action in _creationResult.ResultInfo.PostActions)
+            foreach (IPostAction action in postActions)
             {
                 IPostActionProcessor actionProcessor = null;
 
@@ -50,7 +54,7 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else if (actionProcessor is ProcessStartPostActionProcessor)
                 {
-                    if (_canRunScripts == AllowPostActionsSetting.No)
+                    if (_canRunScripts == AllowPostActionsSetting.No || _isDryRun)
                     {
                         DisplayInstructionsForAction(action);
                         result = false; // post action didn't run, it's an error in the sense that continue on error sees it.
@@ -67,7 +71,21 @@ namespace Microsoft.TemplateEngine.Cli
                 }
                 else
                 {
-                    result = ProcessAction(action, actionProcessor);
+                    if (!_isDryRun)
+                    {
+                        result = ProcessAction(action, actionProcessor);
+                    }
+                    else
+                    {
+                        Reporter.Output.WriteLine(LocalizableStrings.ActionWouldHaveBeenTakenAutomatically);
+
+                        if (!string.IsNullOrWhiteSpace(action.Description))
+                        {
+                            Reporter.Output.WriteLine("  " + action.Description);
+                            result = true;
+                        }
+                    }
+
                     if (!result && !string.IsNullOrEmpty(action.ManualInstructions))
                     {
                         Reporter.Output.WriteLine(LocalizableStrings.PostActionFailedInstructionHeader);

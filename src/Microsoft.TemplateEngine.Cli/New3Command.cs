@@ -244,7 +244,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, templateMatchDetails.GetValidTemplateParameters(), _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified, _commandInput.BaselineName).ConfigureAwait(false);
+                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, templateMatchDetails.GetValidTemplateParameters(), _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified, _commandInput.BaselineName, _commandInput.IsDryRun).ConfigureAwait(false);
             }
             catch (ContentGenerationException cx)
             {
@@ -267,9 +267,20 @@ namespace Microsoft.TemplateEngine.Cli
             switch (instantiateResult.Status)
             {
                 case CreationResultStatus.Success:
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+                    if (!_commandInput.IsDryRun)
+                    {
+                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+                    }
+                    else
+                    {
+                        Reporter.Output.WriteLine(LocalizableStrings.FileActionsWouldHaveBeenTaken);
+                        foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
+                        {
+                            Reporter.Output.WriteLine($"  {change.ChangeKind}: {change.TargetRelativePath}");
+                        }
+                    }
 
-                    if(!string.IsNullOrEmpty(template.ThirdPartyNotices))
+                    if (!string.IsNullOrEmpty(template.ThirdPartyNotices))
                     {
                         Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, template.ThirdPartyNotices));
                     }
@@ -339,7 +350,7 @@ namespace Microsoft.TemplateEngine.Cli
                 scriptRunSettings = AllowPostActionsSetting.Prompt;
             }
 
-            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult, scriptRunSettings);
+            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult, scriptRunSettings, _commandInput.IsDryRun);
             postActionDispatcher.Process(_inputGetter);
         }
 

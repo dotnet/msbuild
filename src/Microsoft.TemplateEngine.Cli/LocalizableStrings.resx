@@ -607,4 +607,13 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="SwitchWithoutValueDefaultFootnote" xml:space="preserve">
     <value>* Indicates the value used if the switch is provided without a value.</value>
   </data>
+  <data name="DryRunDescription" xml:space="preserve">
+    <value>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</value>
+  </data>
+  <data name="ActionWouldHaveBeenTakenAutomatically" xml:space="preserve">
+    <value>Action would have been taken automatically:</value>
+  </data>
+  <data name="FileActionsWouldHaveBeenTaken" xml:space="preserve">
+    <value>File actions would have been taken:</value>
+  </data>
 </root>

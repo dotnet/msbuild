@@ -222,6 +222,8 @@ namespace Microsoft.TemplateEngine.Cli.CommandParsing
 
         public IList<string> ToUninstallList => _parseResult.GetArgumentListAtPath(new[] { _commandName, "uninstall" })?.ToList();
 
+        public bool IsDryRun => _parseResult.HasAppliedOption(new[] { _commandName, "dry-run" });
+
         public bool IsForceFlagSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "force" });
 
         public bool IsHelpFlagSpecified => _parseResult.HasAppliedOption(new[] { _commandName, "help" });
