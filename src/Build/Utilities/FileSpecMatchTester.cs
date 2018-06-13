@@ -58,12 +58,11 @@ namespace Microsoft.Build.Internal
             string wildcardDirectoryPart = null;
             string filenamePart = null;
 
-            FileMatcher.SplitFileSpec(
+            FileMatcher.Default.SplitFileSpec(
                 unescapedFileSpec,
                 out fixedDirPart,
                 out wildcardDirectoryPart,
-                out filenamePart,
-                FileMatcher.s_defaultGetFileSystemEntries);
+                out filenamePart);
 
             if (FileUtilities.PathIsInvalid(fixedDirPart))
             {
@@ -83,12 +82,11 @@ namespace Microsoft.Build.Internal
             bool isRecursive;
             bool isLegal;
 
-            FileMatcher.GetFileSpecInfoWithRegexObject(
+            FileMatcher.Default.GetFileSpecInfoWithRegexObject(
                 recombinedFileSpec,
                 out regex,
                 out isRecursive,
-                out isLegal,
-                FileMatcher.s_defaultGetFileSystemEntries);
+                out isLegal);
 
             return isLegal ? regex : null;
         }

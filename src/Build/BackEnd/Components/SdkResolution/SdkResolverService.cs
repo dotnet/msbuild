@@ -81,6 +81,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _resolverStateBySubmission.TryRemove(submissionId, out _);
         }
 
+        public virtual void ClearCaches()
+        {
+            _resolverStateBySubmission.Clear();
+        }
+
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {

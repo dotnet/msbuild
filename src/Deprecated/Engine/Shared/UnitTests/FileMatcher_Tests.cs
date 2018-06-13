@@ -567,7 +567,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(workingPath);
                 Directory.CreateDirectory(workingPathSubfolder);
 
-                files = FileMatcher.GetFiles(workingPath, offendingPattern);
+                files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
             }
             finally
             {
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(workingPath);
                 File.WriteAllText(fileName, "Hello there.");
-                files = FileMatcher.GetFiles(workingPath, offendingPattern);
+                files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
             }
             finally
             {
@@ -620,7 +620,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(workingPath);
                 Directory.CreateDirectory(workingPathSubdir);
                 File.AppendAllText(workingPathSubdirBing, "y");
-                files = FileMatcher.GetFiles(workingPath, offendingPattern);
+                files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
             }
             finally
             {
@@ -1298,7 +1298,7 @@ namespace Microsoft.Build.UnitTests
                 bool shouldBeRecursive
             )
             {
-                FileMatcher.Result match = FileMatcher.FileMatch(filespec, fileToMatch);
+                FileMatcher.Result match = FileMatcher.Default.FileMatch(filespec, fileToMatch);
 
                 if (!match.isLegalFileSpec)
                 {

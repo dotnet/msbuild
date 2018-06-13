@@ -140,13 +140,13 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FileMatcher.HasWildcards(i.ItemSpec))
                     {
-                        string[] files = FileMatcher.GetFiles(null /* use current directory */, i.ItemSpec);
+                        string[] files = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
                         foreach (string file in files)
                         {
                             TaskItem newItem = new TaskItem(i) { ItemSpec = file };
 
                             // Compute the RecursiveDir portion.
-                            FileMatcher.Result match = FileMatcher.FileMatch(i.ItemSpec, file);
+                            FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
                             if (match.isLegalFileSpec && match.isMatch)
                             {
                                 if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))

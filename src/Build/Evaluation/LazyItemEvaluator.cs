@@ -13,6 +13,9 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
@@ -44,12 +47,9 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Cache used for caching IO operation results
-        /// </summary>
-        private readonly ConcurrentDictionary<string, ImmutableArray<string>> _entriesCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
+        protected EngineFileUtilities EngineFileUtilities { get; }
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler)
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
             _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
@@ -58,6 +58,8 @@ namespace Microsoft.Build.Evaluation
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
+
+            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(evaluationContext.FileSystem, evaluationContext.FileEntryExpansionCache));
         }
 
         private ImmutableList<I> GetItems(string itemType)

@@ -2062,7 +2062,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             foreach (
                                 var resultantItem in
-                                EngineFileUtilities.GetFileListEscaped(
+                                EngineFileUtilities.Default.GetFileListEscaped(
                                     item.ProjectDirectory,
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))

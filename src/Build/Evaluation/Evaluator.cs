@@ -6,7 +6,9 @@
 //-----------------------------------------------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -35,6 +37,7 @@ using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
@@ -217,8 +220,8 @@ namespace Microsoft.Build.Evaluation
             EvaluationContext evaluationContext,
             bool profileEvaluation)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data, "data");
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, "projectRootElementCache");
+            ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
 
             // Create containers for the evaluation results
             data.InitializeForEvaluation(toolsetProvider);
@@ -243,7 +246,7 @@ namespace Microsoft.Build.Evaluation
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
-            _evaluationContext = evaluationContext;
+            _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
         }
 
@@ -424,7 +427,7 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.Default.GetFileListEscaped(rootDirectory, includeSplitEscaped);
 
                         if (includeSplitFilesEscaped.Length > 0)
                         {
@@ -754,7 +757,7 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
                     // comment next line to turn off lazy Evaluation
-                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler);
+                    lazyEvaluator = new LazyItemEvaluator<P, I, M, D>(_data, _itemFactory, _evaluationLoggingContext, _evaluationProfiler, _evaluationContext);
 
                     // Pass3: evaluate project items
                     foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
@@ -1536,7 +1539,7 @@ namespace Microsoft.Build.Evaluation
                         (
                             _expander.ExpandIntoStringLeaveEscaped(itemElement.Update, ExpanderOptions.ExpandPropertiesAndItems, itemElement.Location)
                         )
-                        .SelectMany(i => EngineFileUtilities.GetFileListEscaped(_projectRootElement.DirectoryPath, i))
+                        .SelectMany(i => EngineFileUtilities.Default.GetFileListEscaped(_projectRootElement.DirectoryPath, i))
                         .Select(EscapingUtilities.UnescapeAll));
 
             var itemsToUpdate = _data.GetItems(itemElement.ItemType).Where(i => expandedItemSet.Contains(i.EvaluatedInclude)).ToList();
@@ -1567,7 +1570,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (string excludeSplit in excludeSplits)
                     {
-                        string[] excludeSplitFiles = EngineFileUtilities.GetFileListEscaped(_projectRootElement.DirectoryPath, excludeSplit);
+                        string[] excludeSplitFiles = EngineFileUtilities.Default.GetFileListEscaped(_projectRootElement.DirectoryPath, excludeSplit);
 
                         foreach (string excludeSplitFile in excludeSplitFiles)
                         {
@@ -2202,7 +2205,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true);
+                    importFilesEscaped = EngineFileUtilities.Default.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {

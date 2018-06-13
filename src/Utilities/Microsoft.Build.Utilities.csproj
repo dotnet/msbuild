@@ -168,6 +168,27 @@
     <Compile Include="..\Shared\Traits.cs">
       <Link>Shared\Traits.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\FileSystem\FileSystemFactory.cs">
+	<Link>FileSystem\FileSystemFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\IFileSystemAbstraction.cs">
+	<Link>FileSystem\IFileSystemAbstraction.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\ManagedFileSystem.cs">
+	<Link>FileSystem\ManagedFileSystem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\NativeWin32Exception.cs">
+	<Link>FileSystem\NativeWin32Exception.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\SafeFileHandle.cs">
+	<Link>FileSystem\SafeFileHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\WindowsFileSystem.cs">
+	<Link>FileSystem\WindowsFileSystem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\WindowsNative.cs">
+    	<Link>FileSystem\WindowsNative.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>

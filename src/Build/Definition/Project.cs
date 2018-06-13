@@ -2494,7 +2494,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                FileMatcher.Result match = FileMatcher.FileMatch(existingIncludePiece, unevaluatedInclude);
+                FileMatcher.Result match = FileMatcher.Default.FileMatch(existingIncludePiece, unevaluatedInclude);
 
                 if (match.isLegalFileSpec && match.isMatch)
                 {
