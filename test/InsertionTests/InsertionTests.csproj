@@ -30,8 +30,7 @@
           TemplateFillInPackageName=%(BundledDotnetTools.Identity);
           TemplateFillInPackageVersion=%(BundledDotnetTools.Version);
           PreviousStageDirectory=$(PreviousStageDirectory);
-          DotnetToolsLayoutDirectory=$(testAssetSourceRoot);
-          DotnetToolsRestoreProjectStyle=DotnetToolReference
+          DotnetToolsLayoutDirectory=$(testAssetSourceRoot)
         </Properties>
       </TestDotnetTools>
     </ItemGroup>

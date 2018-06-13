@@ -54,6 +54,8 @@
                      Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.swr"
                      Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+      <ForPublishing Include="$(PackagesDirectory)/nuGetPackagesArchive.lzma"
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
     </ItemGroup>
 
     <ItemGroup>
