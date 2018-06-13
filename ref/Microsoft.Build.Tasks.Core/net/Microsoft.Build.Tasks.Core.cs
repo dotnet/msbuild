@@ -570,6 +570,20 @@ namespace Microsoft.Build.Tasks
         public Microsoft.Build.Framework.ITaskItem[] AssemblyFiles { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+    public sealed partial class GetFileHash : Microsoft.Build.Tasks.TaskExtension
+    {
+        public GetFileHash() { }
+        public string Algorithm { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] Files { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public string Hash { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string HashEncoding { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.OutputAttribute]
+        public Microsoft.Build.Framework.ITaskItem[] Items { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string MetadataName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public override bool Execute() { throw null; }
+    }
     public partial class GetFrameworkPath : Microsoft.Build.Tasks.TaskExtension
     {
         public GetFrameworkPath() { }
@@ -1185,6 +1199,17 @@ namespace Microsoft.Build.Tasks
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem OutputManifest { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string TargetFrameworkVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public override bool Execute() { throw null; }
+    }
+    public sealed partial class VerifyFileHash : Microsoft.Build.Tasks.TaskExtension
+    {
+        public VerifyFileHash() { }
+        public string Algorithm { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string File { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        [Microsoft.Build.Framework.RequiredAttribute]
+        public string Hash { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string HashEncoding { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public override bool Execute() { throw null; }
     }
     public sealed partial class Warning : Microsoft.Build.Tasks.TaskExtension
