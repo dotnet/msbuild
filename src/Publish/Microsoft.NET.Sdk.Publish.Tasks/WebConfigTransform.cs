@@ -10,7 +10,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public static class WebConfigTransform
     {
-        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool isPortable, string extension, string aspNetCoreHostingModel)
+        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreHostingModel)
         {
             const string HandlersElementName = "handlers";
             const string aspNetCoreElementName = "aspNetCore";
@@ -22,7 +22,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             var webServerSection = GetOrCreateChild(webConfig.Root, "system.webServer");
 
             TransformHandlers(GetOrCreateChild(webServerSection, HandlersElementName));
-            TransformAspNetCore(GetOrCreateChild(webServerSection, aspNetCoreElementName), appName, configureForAzure, isPortable, extension, aspNetCoreHostingModel);
+            TransformAspNetCore(GetOrCreateChild(webServerSection, aspNetCoreElementName), appName, configureForAzure, useAppHost, extension, aspNetCoreHostingModel);
 
             // make sure that the aspNetCore element is after handlers element
             var aspNetCoreElement = webServerSection.Element(HandlersElementName)
@@ -55,21 +55,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             SetAttributeValueIfEmpty(aspNetCoreElement, "resourceType", "Unspecified");
         }
 
-        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool isPortable, string extension, string aspNetCoreHostingModel)
+        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreHostingModel)
         {
             // Forward slashes currently work neither in AspNetCoreModule nor in dotnet so they need to be
             // replaced with backwards slashes when the application is published on a non-Windows machine
             var appPath = Path.Combine(".", appName).Replace("/", "\\");
-            var originalExtension = Path.GetExtension(appPath);
             RemoveLauncherArgs(aspNetCoreElement);
 
-            if (!isPortable)
+            if (useAppHost || string.Equals(Path.GetExtension(appPath), ".exe", StringComparison.OrdinalIgnoreCase))
             {
                 appPath = Path.ChangeExtension(appPath, !string.IsNullOrWhiteSpace(extension) ? extension : null);
-            }
-
-            if (!isPortable || string.Equals(originalExtension, ".exe", StringComparison.OrdinalIgnoreCase))
-            {
                 aspNetCoreElement.SetAttributeValue("processPath", appPath);
             }
             else

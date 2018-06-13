@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -14,7 +15,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.WebJobs
         [Required]
         public string TargetPath { get; set; }
         [Required]
-        public bool IsPortable { get; set; }
+        public bool UseAppHost { get; set; }
         public string ExecutableExtension { get; set; }
 
         public override bool Execute()
@@ -23,8 +24,9 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.WebJobs
             if (!isRunCommandFilePresent)
             {
                 string appName = Path.GetFileName(TargetPath);
+
                 string command = $"dotnet {appName}";
-                if (!IsPortable)
+                if (UseAppHost || string.Equals(Path.GetExtension(TargetPath), ".exe", StringComparison.OrdinalIgnoreCase))
                 {
                     command = Path.ChangeExtension(appName, !string.IsNullOrWhiteSpace(ExecutableExtension) ? ExecutableExtension : null);
                 }
