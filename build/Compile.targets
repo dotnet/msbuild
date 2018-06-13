@@ -9,6 +9,10 @@
     <RemoveDir Directories="$(OutputDirectory)" />
     <MakeDir Directories="$(OutputDirectory)"/>
 
+    <!-- Compile CLI -->
+    <MSBuild Projects="$(SrcDirectory)/dotnet/dotnet.csproj"
+             Targets="Build" />
+
     <!-- Publish DotNet -->
     <MSBuild Projects="$(SrcDirectory)/redist/redist.csproj"
              Targets="Publish" />
