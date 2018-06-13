@@ -391,15 +391,39 @@ namespace Microsoft.TemplateEngine.Cli
                     Console.WriteLine();
                     Console.WriteLine(LocalizableStrings.InstalledItems);
 
-                    foreach (string value in _settingsLoader.InstallUnitDescriptorCache.InstalledItems.Values)
+                    foreach (KeyValuePair<Guid, string> entry in _settingsLoader.InstallUnitDescriptorCache.InstalledItems)
                     {
-                        Console.WriteLine($" {value}");
+                        Console.WriteLine($"  {entry.Value}");
 
-                        if (_settingsLoader.InstallUnitDescriptorCache.Descriptors.TryGetValue(value, out IInstallUnitDescriptor descriptor))
+                        if (_settingsLoader.InstallUnitDescriptorCache.Descriptors.TryGetValue(entry.Value, out IInstallUnitDescriptor descriptor))
                         {
                             if (descriptor.Details != null && descriptor.Details.TryGetValue("Version", out string versionValue))
                             {
-                                Console.WriteLine($"    {LocalizableStrings.Version}", versionValue);
+                                Console.WriteLine($"    {LocalizableStrings.Version} {versionValue}");
+                            }
+                        }
+
+                        HashSet<string> displayStrings = new HashSet<string>(StringComparer.Ordinal);
+
+                        foreach (TemplateInfo info in _settingsLoader.UserTemplateCache.TemplateInfo.Where(x => x.ConfigMountPointId == entry.Key))
+                        {
+                            string str = $"      {info.Name} ({info.ShortName})";
+
+                            if (info.Tags != null && info.Tags.TryGetValue("language", out ICacheTag languageTag))
+                            {
+                                str += " " + string.Join(", ", languageTag.ChoicesAndDescriptions.Select(x => x.Key));
+                            }
+
+                            displayStrings.Add(str);
+                        }
+
+                        if (displayStrings.Count > 0)
+                        {
+                            Console.WriteLine($"    {LocalizableStrings.Templates}:");
+
+                            foreach (string displayString in displayStrings)
+                            {
+                                Console.WriteLine(displayString);
                             }
                         }
                     }
@@ -791,8 +815,9 @@ namespace Microsoft.TemplateEngine.Cli
         {
             Reporter.Output.WriteLine(LocalizableStrings.CommandDescription);
             Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.Version, GitInfo.PackageVersion));
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CommitHash, GitInfo.CommitHash));
+            int targetLength = Math.Max(LocalizableStrings.Version.Length, LocalizableStrings.CommitHash.Length);
+            Reporter.Output.WriteLine($" {LocalizableStrings.Version.PadRight(targetLength)} {GitInfo.PackageVersion}");
+            Reporter.Output.WriteLine($" {LocalizableStrings.CommitHash.PadRight(targetLength)} {GitInfo.CommitHash}");
         }
 
         private static bool ValidateLocaleFormat(string localeToCheck)

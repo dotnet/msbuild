@@ -555,7 +555,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Commit Hash: {0}.
+        ///   Looks up a localized string similar to Commit Hash:.
         /// </summary>
         public static string CommitHash {
             get {
@@ -875,7 +875,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the language of the template to create..
+        ///   Looks up a localized string similar to Filters templates based on language and specifies the language of the template to create..
         /// </summary>
         public static string LanguageParameter {
             get {
@@ -1479,7 +1479,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Version:     {0}.
+        ///   Looks up a localized string similar to Version:.
         /// </summary>
         public static string Version {
             get {

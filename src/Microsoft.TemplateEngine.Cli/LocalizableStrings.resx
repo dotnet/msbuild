@@ -554,10 +554,10 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Some partially matched templates may not support these input switches:</value>
   </data>
   <data name="CommitHash" xml:space="preserve">
-    <value> Commit Hash: {0}</value>
+    <value>Commit Hash:</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value> Version:     {0}</value>
+    <value>Version:</value>
   </data>
   <data name="InstalledItems" xml:space="preserve">
     <value>Currently installed items:</value>
