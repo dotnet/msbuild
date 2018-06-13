@@ -9,7 +9,7 @@
     <DotnetSqlCachePackageVersion>2.1.0</DotnetSqlCachePackageVersion>
     <DotnetUserSecretsPackageVersion>2.1.0</DotnetUserSecretsPackageVersion>
     <DotnetWatchPackageVersion>2.1.0</DotnetWatchPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.1.0</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.1.1-servicing-26605-02</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.8.0-preview-000086</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
