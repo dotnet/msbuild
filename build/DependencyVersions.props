@@ -30,7 +30,7 @@
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta3</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates20PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
-    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3</MicrosoftDotNetTestProjectTemplates20PackageVersion>
+    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3-20180614-1775839</MicrosoftDotNetTestProjectTemplates20PackageVersion>
     <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta3</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
