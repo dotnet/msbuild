@@ -22,6 +22,11 @@
         <target state="new">NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</target>
         <note>{StrBegin="NETSDK1068: "}</note>
       </trans-unit>
+      <trans-unit id="NETFrameworkToNonBuiltInNETStandard">
+        <source>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</source>
+        <target state="new">NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</target>
+        <note>{StrBegin="NETSDK1069: "}</note>
+      </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
         <target state="needs-review-translation">Le projet '{0}' cible '{2}'. Il ne peut pas être référencé par un projet qui cible '{1}'.</target>

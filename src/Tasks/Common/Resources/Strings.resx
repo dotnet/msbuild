@@ -393,4 +393,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</value>
     <comment>{StrBegin="NETSDK1068: "}</comment>
   </data>
+  <data name="NETFrameworkToNonBuiltInNETStandard" xml:space="preserve">
+    <value>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</value>
+    <comment>{StrBegin="NETSDK1069: "}</comment>
+  </data>
 </root>
