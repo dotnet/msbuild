@@ -1,5 +1,7 @@
 ﻿<Project Sdk="RoslynTools.RepoToolset">
 
+  <Import Project="..\FileSystemSources.props" />
+
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
@@ -208,30 +210,6 @@
     </Compile>
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\FileSystems.cs">
-      <Link>FileSystem\FileSystems.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\IFileSystem.cs">
-      <Link>FileSystem\IFileSystem.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\ManagedFileSystem.cs">
-      <Link>FileSystem\ManagedFileSystem.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\MSBuildOnWindowsFileSystem.cs">
-      <Link>FileSystem\MSBuildOnWindowsFileSystem.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\NativeWin32Exception.cs">
-      <Link>FileSystem\NativeWin32Exception.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\SafeFileHandle.cs">
-      <Link>FileSystem\SafeFileHandle.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\WindowsFileSystem.cs">
-      <Link>FileSystem\WindowsFileSystem.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileSystem\WindowsNative.cs">
-      <Link>FileSystem\WindowsNative.cs</Link>
     </Compile>
     <Compile Include="AppConfig\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
