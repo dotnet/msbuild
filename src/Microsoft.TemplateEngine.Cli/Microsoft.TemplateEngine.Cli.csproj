@@ -20,6 +20,8 @@
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="0.1.1-alpha-167" />
     <PackageReference Include="System.Diagnostics.Process" Version="4.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.0" PrivateAssets="All" />
+    <DotNetCliToolReference Include="dotnet-sourcelink" Version="2.8.0" />
   </ItemGroup>
 
   <ItemGroup>
