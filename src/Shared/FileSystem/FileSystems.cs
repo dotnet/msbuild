@@ -6,13 +6,13 @@ using System;
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>
-    /// Factory for <see cref="IFileSystemAbstraction"/>
+    /// Factory for <see cref="IFileSystem"/>
     /// </summary>
     internal static class FileSystems
     {
-        public static IFileSystemAbstraction Default = GetFileSystem();
+        public static IFileSystem Default = GetFileSystem();
 
-        private static IFileSystemAbstraction GetFileSystem()
+        private static IFileSystem GetFileSystem()
         {
             if (NativeMethodsShared.IsWindows)
             {

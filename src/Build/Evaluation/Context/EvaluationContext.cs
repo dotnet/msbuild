@@ -35,7 +35,7 @@ namespace Microsoft.Build.Evaluation.Context
         internal SharingPolicy Policy { get; }
 
         internal virtual ISdkResolverService SdkResolverService { get; } = new CachingSdkResolverService();
-        internal IFileSystemAbstraction FileSystem { get; } = ManagedFileSystem.Singleton();
+        internal IFileSystem FileSystem { get; } = ManagedFileSystem.Singleton();
 
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.

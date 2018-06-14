@@ -171,8 +171,8 @@
     <Compile Include="..\Shared\FileSystem\FileSystems.cs">
       <Link>FileSystem\FileSystems.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileSystem\IFileSystemAbstraction.cs">
-      <Link>FileSystem\IFileSystemAbstraction.cs</Link>
+    <Compile Include="..\Shared\FileSystem\IFileSystem.cs">
+      <Link>FileSystem\IFileSystem.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileSystem\ManagedFileSystem.cs">
       <Link>FileSystem\ManagedFileSystem.cs</Link>

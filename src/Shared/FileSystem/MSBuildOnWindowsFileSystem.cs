@@ -9,7 +9,7 @@ namespace Microsoft.Build.Shared.FileSystem
     /// <summary>
     /// Implementation of file system operations directly over the dot net managed layer
     /// </summary>
-    internal sealed class MSBuildOnWindowsFileSystem : IFileSystemAbstraction
+    internal sealed class MSBuildOnWindowsFileSystem : IFileSystem
     {
         private static readonly MSBuildOnWindowsFileSystem Instance = new MSBuildOnWindowsFileSystem();
 

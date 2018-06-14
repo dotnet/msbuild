@@ -10,7 +10,7 @@ namespace Microsoft.Build.Shared.FileSystem
     /// Abstracts away some file system operations
     /// </summary>
     /// TODO: This interface has only enumeration and existence related methods. Consider extending it to include other file system operations.
-    internal interface IFileSystemAbstraction
+    internal interface IFileSystem
     {
         /// <summary>
         /// Returns an enumerable collection of file names that match a search pattern in a specified path, and optionally searches subdirectories.

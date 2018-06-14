@@ -63,7 +63,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         public static FileMatcher Default = new FileMatcher(FileSystems.Default, null);
 
-        public FileMatcher(IFileSystemAbstraction fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileEntryExpansionCache = null) : this(
+        public FileMatcher(IFileSystem fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileEntryExpansionCache = null) : this(
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
                 entityType,
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory">If true the project directory should be stripped</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns></returns>
-        private static ImmutableArray<string> GetAccessibleFileSystemEntries(IFileSystemAbstraction fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        private static ImmutableArray<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
             path = FileUtilities.FixFilePath(path);
             switch (entityType)
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>An immutable array of matching file system entries (can be empty).</returns>
-        private static ImmutableArray<string> GetAccessibleFilesAndDirectories(IFileSystemAbstraction fileSystem, string path, string pattern)
+        private static ImmutableArray<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
         {
             if (Directory.Exists(path))
             {
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Shared
         /// <returns>Files that can be accessed.</returns>
         private static ImmutableArray<string> GetAccessibleFiles
         (
-            IFileSystemAbstraction fileSystem,
+            IFileSystem fileSystem,
             string path,
             string filespec,     // can be null
             string projectDirectory,
@@ -336,7 +336,7 @@ namespace Microsoft.Build.Shared
         /// <returns>Accessible directories.</returns>
         private static ImmutableArray<string> GetAccessibleDirectories
         (
-            IFileSystemAbstraction fileSystem,
+            IFileSystem fileSystem,
             string path,
             string pattern
         )
