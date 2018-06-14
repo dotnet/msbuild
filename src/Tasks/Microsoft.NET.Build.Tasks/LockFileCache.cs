@@ -14,9 +14,9 @@ namespace Microsoft.NET.Build.Tasks
     internal class LockFileCache
     {
         private IBuildEngine4 _buildEngine;
-        private TaskLoggingHelper _log;
+        private Logger _log;
 
-        public LockFileCache(Task task)
+        public LockFileCache(TaskBase task)
         {
             _buildEngine = task.BuildEngine4;
             _log = task.Log;
@@ -107,28 +107,27 @@ namespace Microsoft.NET.Build.Tasks
         // Non-errors are not logged today, but push them to the build log in case they are in the future.
         private sealed class ThrowOnLockFileLoadError : LoggerBase
         {
-            private TaskLoggingHelper _log;
+            private Logger _log;
 
-            public ThrowOnLockFileLoadError(TaskLoggingHelper log)
+            public ThrowOnLockFileLoadError(Logger log)
             {
                 _log = log;
             }
 
             public override void Log(ILogMessage message)
             {
-                switch (message.Level)
+                if (message.Level == LogLevel.Error)
                 {
-                    case LogLevel.Error:
-                        throw new BuildErrorException(message.Message);
-
-                    case LogLevel.Warning:
-                        _log.LogWarning(message.Message);
-                        break;
-
-                    default:
-                        _log.LogMessage(message.Message);
-                        break;
+                    throw new BuildErrorException(
+                        string.Format(Strings.ErrorReadingAssetsFile, message.Message));
                 }
+
+                _log.Log(
+                    new Message(
+                        level: message.Level == LogLevel.Warning ? MessageLevel.Warning : MessageLevel.NormalImportance,
+                        code: message.Code == NuGetLogCode.Undefined ? default : message.Code.ToString(),
+                        file: message.ProjectPath,
+                        text: message.Message));
             }
 
             public override System.Threading.Tasks.Task LogAsync(ILogMessage message)

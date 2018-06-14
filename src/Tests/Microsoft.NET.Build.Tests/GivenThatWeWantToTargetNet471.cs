@@ -41,14 +41,9 @@ namespace Microsoft.NET.Build.Tests
             "System.Xml.XPath.XDocument.dll"
         };
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_builds_a_net471_app()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App",
@@ -67,6 +62,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -77,14 +73,9 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_builds_a_net471_app_referencing_netstandard20()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App_Referencing_NetStandard20",
@@ -112,6 +103,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -125,14 +117,9 @@ namespace Microsoft.NET.Build.Tests
             }.Concat(net471Shims));
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_does_not_include_facades_from_nuget_packages()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471_NuGetFacades",
@@ -153,6 +140,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -170,14 +158,9 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_includes_shims_when_net471_app_references_netstandard16()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App_Referencing_NetStandard16",
@@ -205,6 +188,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -219,14 +203,9 @@ namespace Microsoft.NET.Build.Tests
             }.Concat(net471Shims));
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_does_not_include_shims_when_app_references_471_library_and_461_library()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App_Referencing_Net471Library",
@@ -262,6 +241,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -276,14 +256,9 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_contains_shims_if_override_property_is_set()
         {
-            //  https://github.com/dotnet/sdk/issues/1625
-            if (!Net471ReferenceAssembliesAreInstalled())
-            {
-                return;
-            }
             var testProject = new TestProject()
             {
                 Name = "Net471App",
@@ -304,6 +279,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And.NotHaveStdOutContaining("MSB3277") // MSB3277: Found conflicts between different versions of the same dependent assembly that could not be resolved.
+                .And.NotHaveStdOutContaining("MSB3243") // MSB3243: No way to resolve conflict between...
                 .And.NotHaveStdOutContaining("Could not determine");
 
             var outputDirectory = buildCommand.GetOutputDirectory(testProject.TargetFrameworks);
@@ -313,20 +289,6 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.exe.config", // We have now added binding redirects so we should expect a config flag to be dropped to the output directory.
             }.Concat(net471Shims));
-        }
-
-        static bool Net471ReferenceAssembliesAreInstalled()
-        {
-            // The version of the MSBuild libraries we are referencing doesn't have an enum value for .NET 4.7.1. So we use the MSBuild API to find 
-            // the path to the 4.6.1 reference assemblies, and locate the 4.7.1 reference assemblies relative to that.
-            var net461referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version461);
-            if (net461referenceAssemblies == null)
-            {
-                //  4.6.1 reference assemblies not found, assume that 4.7.1 isn't available either
-                return false;
-            }
-            var net471referenceAssemblies = Path.Combine(new DirectoryInfo(net461referenceAssemblies).Parent.FullName, "v4.7.1");
-            return Directory.Exists(net471referenceAssemblies);
         }
     }
 }

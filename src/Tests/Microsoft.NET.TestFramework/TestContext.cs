@@ -21,7 +21,7 @@ namespace Microsoft.NET.TestFramework
 
         public string NuGetExePath { get; set; }
 
-        public string BuildVersion { get; set; }
+        public string SdkVersion { get; set; }
 
         public ToolsetInfo ToolsetUnderTest { get; set; }
 
@@ -71,13 +71,37 @@ namespace Microsoft.NET.TestFramework
             Environment.SetEnvironmentVariable("DOTNET_MULTILEVEL_LOOKUP", "0");
 
             TestContext testContext = new TestContext();
+            
+            bool runAsTool = false;
+            if (Directory.Exists(Path.Combine(AppContext.BaseDirectory, "Assets")))
+            {
+                runAsTool = true;
+                testContext.TestAssetsDirectory = Path.Combine(AppContext.BaseDirectory, "Assets", "TestProjects");
+            }
+            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_SDK_TEST_AS_TOOL")))
+            {
+                //  Pretend to run as a tool, but use the test assets found in the repo
+                //  This allows testing most of the "tests as global tool" behavior by setting an environment
+                //  variable instead of packing the test, and installing it as a global tool.
+                runAsTool = true;
+                
+                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
+            }
 
-            // This is dependent on the current artifacts layout:
-            // * $(RepoRoot)/artifacts/$(Configuration)/tmp
-            // * $(RepoRoot)/artifacts/$(Configuration)/bin/Tests/$(MSBuildProjectName)
-            testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "tmp"));
+            if (runAsTool)
+            {
+                testContext.TestExecutionDirectory = Path.Combine(Path.GetTempPath(), "dotnetSdkTests");
+                
+            }
+            else
+            {
+                // This is dependent on the current artifacts layout:
+                // * $(RepoRoot)/artifacts/$(Configuration)/tmp
+                // * $(RepoRoot)/artifacts/$(Configuration)/bin/Tests/$(MSBuildProjectName)
+                testContext.TestExecutionDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "tmp"));
 
-            testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
+                testContext.TestAssetsDirectory = FindFolderInTree(Path.Combine("src", "Assets", "TestProjects"), AppContext.BaseDirectory);
+            }
 
             string repoRoot = null;
             string repoConfiguration = null;
@@ -86,7 +110,7 @@ namespace Microsoft.NET.TestFramework
             {
                 repoRoot = commandLine.SDKRepoPath;
             }
-            else if (!commandLine.NoRepoInference)
+            else if (!commandLine.NoRepoInference && !runAsTool)
             {
                 repoRoot = GetRepoRoot();
 
@@ -98,7 +122,7 @@ namespace Microsoft.NET.TestFramework
             }
 
             string artifactsDir = Environment.GetEnvironmentVariable("DOTNET_SDK_ARTIFACTS_DIR");
-            if (string.IsNullOrEmpty(artifactsDir))
+            if (string.IsNullOrEmpty(artifactsDir) && !string.IsNullOrEmpty(repoRoot))
             {
                 artifactsDir = Path.Combine(repoRoot, "artifacts");
             }
@@ -111,21 +135,18 @@ namespace Microsoft.NET.TestFramework
             }
             else
             {
-                var nugetFolder = FindOrCreateFolderInTree(".nuget", AppContext.BaseDirectory);
+                var nugetFolder = FindFolderInTree(".nuget", AppContext.BaseDirectory, false)
+                    ?? Path.Combine(testContext.TestExecutionDirectory, ".nuget");
+                
 
                 testContext.NuGetFallbackFolder = Path.Combine(nugetFolder, "NuGetFallbackFolder");
                 testContext.NuGetExePath = Path.Combine(nugetFolder, $"nuget{Constants.ExeSuffix}");
                 testContext.NuGetCachePath = Path.Combine(nugetFolder, "packages");
             }
 
-            if (commandLine.BuildVersion != null)
+            if (commandLine.SdkVersion != null)
             {
-                testContext.BuildVersion = commandLine.BuildVersion;
-            }
-            else
-            {
-                var assemblyInformationalVersion = (AssemblyInformationalVersionAttribute)(Attribute.GetCustomAttribute(typeof(TestContext).Assembly, typeof(AssemblyInformationalVersionAttribute)));
-                testContext.BuildVersion = assemblyInformationalVersion.InformationalVersion;
+                testContext.SdkVersion = commandLine.SdkVersion;
             }
 
             testContext.ToolsetUnderTest = ToolsetInfo.Create(repoRoot, artifactsDir, repoConfiguration, commandLine);

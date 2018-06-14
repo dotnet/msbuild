@@ -282,22 +282,25 @@ namespace Microsoft.NET.Build.Tasks
 
             foreach (var item in _logMessages)
             {
-                string message = item.ItemSpec;
-                string severity = item.GetMetadata(MetadataKeys.Severity);
-                string code = item.GetMetadata(MetadataKeys.DiagnosticCode);
+                Log.Log(
+                    new Message(
+                        text: item.ItemSpec,
+                        level: GetMessageLevel(item.GetMetadata(MetadataKeys.Severity)),
+                        code: item.GetMetadata(MetadataKeys.DiagnosticCode),
+                        file: ProjectPath));
+            }
+        }
 
-                switch (severity)
-                {
-                    case nameof(LogLevel.Error):
-                        Log.LogError(null, code, null, ProjectPath, 0, 0, 0, 0, message);
-                        break;
-                    case nameof(LogLevel.Warning):
-                        Log.LogWarning(null, code, null, ProjectPath, 0, 0, 0, 0, message);
-                        break;
-                    default:
-                        Log.LogMessage(null, code, null, ProjectPath, 0, 0, 0, 0, message);
-                        break;
-                }
+        private static MessageLevel GetMessageLevel(string severity)
+        {
+            switch (severity)
+            {
+                case nameof(LogLevel.Error):
+                    return MessageLevel.Error;
+                case nameof(LogLevel.Warning):
+                    return MessageLevel.Warning;
+                default:
+                    return MessageLevel.NormalImportance;
             }
         }
 
@@ -724,6 +727,16 @@ namespace Microsoft.NET.Build.Tasks
                     return;
                 }
 
+                //  Keep track of Framework assemblies that we've already written items for,
+                //  in order to only create one item for each Framework assembly.
+                //  This means that if multiple packages have a dependency on the same
+                //  Framework assembly, we will no longer emit separate items for each one.
+                //  This should make the logs a lot cleaner and easier to understand,
+                //  and may improve perf.  If you really want to know all the packages
+                //  that brought in a framework assembly, you can look in the assets
+                //  file.
+                var writtenFrameworkAssemblies = new HashSet<string>(StringComparer.Ordinal);
+
                 foreach (var library in _compileTimeTarget.Libraries)
                 {
                     if (!library.IsPackage())
@@ -733,7 +746,10 @@ namespace Microsoft.NET.Build.Tasks
 
                     foreach (string frameworkAssembly in library.FrameworkAssemblies)
                     {
-                        WriteItem(frameworkAssembly, library);
+                        if (writtenFrameworkAssemblies.Add(frameworkAssembly))
+                        {
+                            WriteItem(frameworkAssembly, library);
+                        }
                     }
                 }
             }

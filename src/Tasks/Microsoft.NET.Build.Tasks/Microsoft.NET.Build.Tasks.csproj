@@ -16,9 +16,10 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <OutDirName>Sdks\$(PackageId)\tools</OutDirName>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <!-- MSBuild Task DLLs need to be versioned with every build -->
@@ -127,6 +128,6 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

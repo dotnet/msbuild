@@ -3,406 +3,348 @@
   <file datatype="xml" source-language="en" target-language="tr" original="../Strings.resx">
     <body>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
-        <source>At least one possible target framework must be specified.</source>
-        <target state="translated">En az bir olası hedef çerçeve belirtilmelidir.</target>
-        <note />
+        <source>NETSDK1001: At least one possible target framework must be specified.</source>
+        <target state="needs-review-translation">En az bir olası hedef çerçeve belirtilmelidir.</target>
+        <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
+        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
+        <target state="new">NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</target>
+        <note>{StrBegin="NETSDK1066: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotUseSelfContainedWithoutAppHost">
+        <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
+        <target state="new">NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</target>
+        <note>{StrBegin="NETSDK1067: "}</note>
+      </trans-unit>
+      <trans-unit id="FrameworkDependentAppHostRequiresVersion21">
+        <source>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</source>
+        <target state="new">NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</target>
+        <note>{StrBegin="NETSDK1068: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
-        <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="translated">'{0}' projesi, '{2}' çerçevesini hedefliyor. Bu projeye '{1}' çerçevesini hedefleyen bir proje tarafından başvurulamaz.</target>
-        <note />
+        <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
+        <target state="needs-review-translation">'{0}' projesi, '{2}' çerçevesini hedefliyor. Bu projeye '{1}' çerçevesini hedefleyen bir proje tarafından başvurulamaz.</target>
+        <note>{StrBegin="NETSDK1002: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
-        <source>Invalid framework name: '{0}'.</source>
-        <target state="translated">Geçersiz çerçeve adı: '{0}'.</target>
-        <note />
+        <source>NETSDK1003: Invalid framework name: '{0}'.</source>
+        <target state="needs-review-translation">Geçersiz çerçeve adı: '{0}'.</target>
+        <note>{StrBegin="NETSDK1003: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
-        <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">'{0}' varlık dosyası bulunamadı. Bu dosyayı oluşturmak için, NuGet paketi geri yükleme işlemi gerçekleştirin.</target>
-        <note />
+        <source>NETSDK1004: Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
+        <target state="needs-review-translation">'{0}' varlık dosyası bulunamadı. Bu dosyayı oluşturmak için, NuGet paketi geri yükleme işlemi gerçekleştirin.</target>
+        <note>{StrBegin="NETSDK1004: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="translated">'{0}' varlık dosyasında '{1}' için hedef yok. Geri yüklemenin çalıştırıldığından ve '{2}' öğesinin projeniz için TargetFrameworks’e eklendiğinden emin olun.</target>
-        <note />
+        <source>NETSDK1005: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="needs-review-translation">'{0}' varlık dosyasında '{1}' için hedef yok. Geri yüklemenin çalıştırıldığından ve '{2}' öğesinin projeniz için TargetFrameworks’e eklendiğinden emin olun.</target>
+        <note>{StrBegin="NETSDK1005: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
-        <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">'{0}' varlık dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
-        <note />
+        <source>NETSDK1006: Assets file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="needs-review-translation">'{0}' varlık dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
+        <note>{StrBegin="NETSDK1006: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
-        <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="translated">'{0}' için proje bilgisi bulunamıyor. Bu durum, eksik bir proje başvurusu olduğunu gösteriyor olabilir.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
-        <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="translated">'{0}' içerik dosyası beklenen üst paket bilgilerini içermiyor.</target>
-        <note />
+        <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
+        <target state="needs-review-translation">'{0}' için proje bilgisi bulunamıyor. Bu durum, eksik bir proje başvurusu olduğunu gösteriyor olabilir.</target>
+        <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
-        <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="translated">'{1}' öğesi '{2}' üzerinde '{0}' meta verileri eksik.</target>
-        <note />
+        <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
+        <target state="needs-review-translation">'{1}' öğesi '{2}' üzerinde '{0}' meta verileri eksik.</target>
+        <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
-        <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="translated">'{1}' içinde tanınmayan ön işlemci belirteci: '{0}'.</target>
-        <note />
+        <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
+        <target state="needs-review-translation">'{1}' içinde tanınmayan ön işlemci belirteci: '{0}'.</target>
+        <note>{StrBegin="NETSDK1009: "}</note>
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
-        <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="translated">Önceden işlenen içeriği kullanabilmesi için '{0}' görevine, '{1}' parametresine ilişkin bir değer verilmelidir.</target>
-        <note />
+        <source>NETSDK1010: The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
+        <target state="needs-review-translation">Önceden işlenen içeriği kullanabilmesi için '{0}' görevine, '{1}' parametresine ilişkin bir değer verilmelidir.</target>
+        <note>{StrBegin="NETSDK1010: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
-        <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="translated">'{0}' projesindeki varlıklar kullanılıyor, ancak '{1}' içinde karşılık gelen bir MSBuild proje yolu bulunamadı.</target>
-        <note />
+        <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
+        <target state="needs-review-translation">'{0}' projesindeki varlıklar kullanılıyor, ancak '{1}' içinde karşılık gelen bir MSBuild proje yolu bulunamadı.</target>
+        <note>{StrBegin="NETSDK1011: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
-        <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="translated">'{0}' için beklenmeyen dosya türü. Tür, hem '{1}' hem de '{2}'.</target>
-        <note />
+        <source>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
+        <target state="needs-review-translation">'{0}' için beklenmeyen dosya türü. Tür, hem '{1}' hem de '{2}'.</target>
+        <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
-        <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="translated">'{0}' TargetFramework değeri tanınmadı. Yanlış yazılmış olabilir. Sorun bundan kaynaklanmıyorsa, TargetFrameworkIdentifier ve/veya TargetFrameworkVersion özelliklerinin açık bir şekilde belirtilmesi gerekir.</target>
-        <note />
+        <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
+        <target state="needs-review-translation">'{0}' TargetFramework değeri tanınmadı. Yanlış yazılmış olabilir. Sorun bundan kaynaklanmıyorsa, TargetFrameworkIdentifier ve/veya TargetFrameworkVersion özelliklerinin açık bir şekilde belirtilmesi gerekir.</target>
+        <note>{StrBegin="NETSDK1013: "}</note>
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
-        <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="translated">'{0}' için içerik öğesi, '{1}' değerini ayarlıyor ancak '{2}' veya '{3}' sağlamıyor.</target>
-        <note />
+        <source>NETSDK1014: Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
+        <target state="needs-review-translation">'{0}' için içerik öğesi, '{1}' değerini ayarlıyor ancak '{2}' veya '{3}' sağlamıyor.</target>
+        <note>{StrBegin="NETSDK1014: "}</note>
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
-        <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="translated">'{0}' ön işlemci belirtecine birden fazla değer verildi. Değer olarak '{1}' seçiliyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
-        <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="translated">'{0}' uydu bütünleştirilmiş kodu yayılırken hatalar oluştu.</target>
-        <note />
+        <source>NETSDK1015: The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
+        <target state="needs-review-translation">'{0}' ön işlemci belirtecine birden fazla değer verildi. Değer olarak '{1}' seçiliyor.</target>
+        <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
-        <source>Unable to find resolved path for '{0}'.</source>
-        <target state="translated">'{0}' için çözümlenmiş yol bulunamıyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
-        <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="translated">Sürüm numarası olmayan, beklenmeyen bağımlılık: '{0}'.</target>
-        <note />
+        <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
+        <target state="needs-review-translation">'{0}' için çözümlenmiş yol bulunamıyor.</target>
+        <note>{StrBegin="NETSDK1016: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
-        <source>Asset preprocessor must be configured before assets are processed.</source>
-        <target state="translated">Varlıkların işlenebilmesi için varlık ön işlemcisi yapılandırılmalıdır.</target>
-        <note />
+        <source>NETSDK1017: Asset preprocessor must be configured before assets are processed.</source>
+        <target state="needs-review-translation">Varlıkların işlenebilmesi için varlık ön işlemcisi yapılandırılmalıdır.</target>
+        <note>{StrBegin="NETSDK1017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
-        <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="translated">Geçersiz NuGet sürüm dizesi: '{0}'.</target>
-        <note />
+        <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
+        <target state="needs-review-translation">Geçersiz NuGet sürüm dizesi: '{0}'.</target>
+        <note>{StrBegin="NETSDK1018: "}</note>
       </trans-unit>
-      <trans-unit id="DOTNET1011">
-        <source>Framework not installed: {0} in {1}</source>
-        <target state="translated">Çerçeve yüklenmedi: {1} içinde {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1012">
-        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="translated">Başvuru bütünleştirilmiş kodları dizini belirtilmedi. DOTNET_REFERENCE_ASSEMBLIES_PATH ortam değişkenini kullanarak konumu ayarlayabilirsiniz.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1013">
-        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="translated">Aşağıdaki bağımlılıklar 'platform' türüyle işaretlendi ancak yalnızca bir bağımlılık bu türe sahip olabilir: {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1014">
-        <source>Failed to read lock file</source>
-        <target state="translated">Kilit dosyası okunamadı</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1017">
-        <source>Project file does not exist '{0}'.</source>
-        <target state="translated">Proje dosyası yok: '{0}'.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1001">
-        <source>The dependency '{0}' could not be resolved.</source>
-        <target state="translated">'{0}' bağımlılığı çözülemedi.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1002">
-        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="translated">'{1}' projesi içindeki '{0}' bağımlılığı '{2}' çerçevesini desteklemiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1006">
-        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">{0}. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' komutunu çalıştırın.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1007">
-        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="translated">Belirtilen bağımlılık '{0}' ancak '{1}' alındı.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1008">
-        <source>{0} is an unsupported framework.</source>
-        <target state="translated">{0} çerçevesi desteklenmiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1009">
-        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">Beklenen varlık dosyası yok. Yeni bir varlık dosyası oluşturmak için 'dotnet restore' komutunu çalıştırın.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1010">
-        <source>The dependency type was changed</source>
-        <target state="translated">Bağımlılık türü değiştirildi</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1011">
-        <source>The dependency target '{0}' is unsupported.</source>
-        <target state="translated">Bağımlılık hedefi ('{0}') desteklenmiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1012">
-        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">Bağımlılık çakışması. '{0}' '{1}' bekliyordu ancak '{2}' alındı</target>
-        <note />
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="needs-review-translation">{0} çerçevesi desteklenmiyor.</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
-        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Daha fazla bilgi için bkz. {4}. Yinelenen öğeler: {3}</target>
-        <note />
+        <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
+        <target state="needs-review-translation">Yinelenen '{0}' öğeleri eklendi. .NET SDK, proje dizininizdeki '{0}' öğelerini varsayılan olarak içeriyor. Bu öğeleri proje dosyanızdan kaldırabilir veya bunları proje dosyanıza açıkça dahil etmek istiyorsanız '{1}' özelliğini '{2}' olarak ayarlayabilirsiniz. Daha fazla bilgi için bkz. {4}. Yinelenen öğeler: {3}</target>
+        <note>{StrBegin="NETSDK1022: "}</note>
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
-        <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">Projenize '{0}' için bir paket başvurusu eklendi. .NET SDK bu pakete örtük olarak başvuruyor; buna projenizden başvurmanız genellikle gerekli değildir. Daha fazla bilgi için bkz. {1}</target>
-        <note />
+        <source>NETSDK1023: A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
+        <target state="needs-review-translation">Projenize '{0}' için bir paket başvurusu eklendi. .NET SDK bu pakete örtük olarak başvuruyor; buna projenizden başvurmanız genellikle gerekli değildir. Daha fazla bilgi için bkz. {1}</target>
+        <note>{StrBegin="NETSDK1023: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
-        <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="translated">{0} Paket Kökü, Çözümlenmiş kitaplık {1} için yanlışlıkla verildi</target>
-        <note />
+        <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
+        <target state="needs-review-translation">{0} Paket Kökü, Çözümlenmiş kitaplık {1} için yanlışlıkla verildi</target>
+        <note>{StrBegin="NETSDK1020: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
-        <source>More than one file found for {0}</source>
-        <target state="translated">{0} için birden fazla dosya bulundu</target>
-        <note />
+        <source>NETSDK1021: More than one file found for {0}</source>
+        <target state="needs-review-translation">{0} için birden fazla dosya bulundu</target>
+        <note>{StrBegin="NETSDK1021: "}</note>
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
-        <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <target state="translated">'{0}' klasörü zaten var, klasörü silin veya farklı bir ComposeWorkingDir değeri belirtin</target>
-        <note />
+        <source>NETSDK1024: Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
+        <target state="needs-review-translation">'{0}' klasörü zaten var, klasörü silin veya farklı bir ComposeWorkingDir değeri belirtin</target>
+        <note>{StrBegin="NETSDK1024: "}</note>
       </trans-unit>
       <trans-unit id="ParsingFiles">
-        <source>Parsing the Files : '{0}'</source>
-        <target state="translated">Dosyalar ayrıştırılıyor: '{0}'</target>
-        <note />
+        <source>NETSDK1026: Parsing the Files : '{0}'</source>
+        <target state="needs-review-translation">Dosyalar ayrıştırılıyor: '{0}'</target>
+        <note>{StrBegin="NETSDK1026: "}</note>
       </trans-unit>
       <trans-unit id="PackageInfoLog">
-        <source>Package Name='{0}', Version='{1}' was parsed</source>
-        <target state="translated">Paket Adı='{0}', Sürüm='{1}' ayrıştırıldı</target>
-        <note />
+        <source>NETSDK1027: Package Name='{0}', Version='{1}' was parsed</source>
+        <target state="needs-review-translation">Paket Adı='{0}', Sürüm='{1}' ayrıştırıldı</target>
+        <note>{StrBegin="NETSDK1027: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
-        <source>Specify a RuntimeIdentifier</source>
-        <target state="translated">Bir RuntimeIdentifier belirtin</target>
-        <note />
+        <source>NETSDK1028: Specify a RuntimeIdentifier</source>
+        <target state="needs-review-translation">Bir RuntimeIdentifier belirtin</target>
+        <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
-        <source>The target manifest {0} provided is of not the correct format</source>
-        <target state="translated">Belirtilen hedef bildirimi {0} doğru biçimde değil</target>
-        <note />
+        <source>NETSDK1025: WRThe target manifest {0} provided is of not the correct format</source>
+        <target state="needs-review-translation">Belirtilen hedef bildirimi {0} doğru biçimde değil</target>
+        <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
-        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="translated">'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama konak yürütülebiliri olarak kullanılamıyor.</target>
-        <note />
+        <source>NETSDK1029: Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="needs-review-translation">'{0}', uygulama adının yazılacağı yeri işaretlemesi için beklenen yer tutucu bayt dizisini ('{1}') içermediğinden uygulama konak yürütülebiliri olarak kullanılamıyor.</target>
+        <note>{StrBegin="NETSDK1029: "}</note>
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
-        <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
-        <note />
+        <source>NETSDK1030: Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="needs-review-translation">Belirtilen dosya adı ('{0})' 1024 bayttan uzun</target>
+        <note>{StrBegin="NETSDK1030: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
-        <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">Bir RuntimeIdentifier belirtilmeden, bağımsız çalışan uygulama derlenmesi veya yayımlanması desteklenmez. Lütfen bir RuntimeIdentifier belirtin veya SelfContained değerini false olarak ayarlayın.</target>
-        <note />
+        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
+        <target state="needs-review-translation">Bir RuntimeIdentifier belirtilmeden, bağımsız çalışan uygulama derlenmesi veya yayımlanması desteklenmez. Lütfen bir RuntimeIdentifier belirtin veya SelfContained değerini false olarak ayarlayın.</target>
+        <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
-        <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="translated">AssemblyVersion '{1}', '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</target>
-        <note />
+        <source>NETSDK1033: Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
+        <target state="needs-review-translation">AssemblyVersion '{1}', '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</target>
+        <note>{StrBegin="NETSDK1033: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
-        <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="translated">'{1}' dosya sürümü '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</target>
-        <note />
+        <source>NETSDK1034: Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
+        <target state="needs-review-translation">'{1}' dosya sürümü '{2}' değerinden büyük olduğundan '{0}' seçiliyor.</target>
+        <note>{StrBegin="NETSDK1034: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
-        <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="translated">Bir platform öğesi olduğu için '{0}' seçiliyor.</target>
-        <note />
+        <source>NETSDK1035: Choosing '{0}' because it is a platform item.</source>
+        <target state="needs-review-translation">Bir platform öğesi olduğu için '{0}' seçiliyor.</target>
+        <note>{StrBegin="NETSDK1035: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
-        <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="translated">Tercih edilen bir paketten geldiği için '{0}' seçiliyor.</target>
-        <note />
+        <source>NETSDK1036: Choosing '{0}' because it comes from a package that is preferred.</source>
+        <target state="needs-review-translation">Tercih edilen bir paketten geldiği için '{0}' seçiliyor.</target>
+        <note>{StrBegin="NETSDK1036: "}</note>
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
-        <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="translated">Dosya ve bütünleştirilmiş kod sürümlerinin eşit olması nedeniyle kazanan belirlenemedi.</target>
-        <note />
+        <source>NETSDK1037: Could not determine winner due to equal file and assembly versions.</source>
+        <target state="needs-review-translation">Dosya ve bütünleştirilmiş kod sürümlerinin eşit olması nedeniyle kazanan belirlenemedi.</target>
+        <note>{StrBegin="NETSDK1037: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
-        <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="translated">'{0}' mevcut olmadığından kazanan belirlenemedi.</target>
-        <note />
+        <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
+        <target state="needs-review-translation">'{0}' mevcut olmadığından kazanan belirlenemedi.</target>
+        <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
-        <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="translated">'{0}' bir dosya sürümüne sahip olmadığından kazanan belirlenemedi.</target>
-        <note />
+        <source>NETSDK1039: Could not determine a winner because '{0}' has no file version.</source>
+        <target state="needs-review-translation">'{0}' bir dosya sürümüne sahip olmadığından kazanan belirlenemedi.</target>
+        <note>{StrBegin="NETSDK1039: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
-        <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="translated">'{0}' bir bütünleştirilmiş kod olmadığından kazanan belirlenemedi.</target>
-        <note />
+        <source>NETSDK1040: Could not determine a winner because '{0}' is not an assembly.</source>
+        <target state="needs-review-translation">'{0}' bir bütünleştirilmiş kod olmadığından kazanan belirlenemedi.</target>
+        <note>{StrBegin="NETSDK1040: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict">
-        <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="translated">'{0}' ile '{1}' arasında çakışmayla karşılaşıldı.</target>
-        <note />
+        <source>NETSDK1041: Encountered conflict between '{0}' and '{1}'.</source>
+        <target state="needs-review-translation">'{0}' ile '{1}' arasında çakışmayla karşılaşıldı.</target>
+        <note>{StrBegin="NETSDK1041: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
-        <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="translated">'{0}' mevcut olmadığından buradan PlatformManifest yüklenemedi.</target>
-        <note />
+        <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
+        <target state="needs-review-translation">'{0}' mevcut olmadığından buradan PlatformManifest yüklenemedi.</target>
+        <note>{StrBegin="NETSDK1042: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
-        <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="translated">'{0}' içindeki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. Satırlar {2} biçiminde olmalıdır.</target>
-        <note />
+        <source>NETSDK1043: Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
+        <target state="needs-review-translation">'{0}' içindeki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. Satırlar {2} biçiminde olmalıdır.</target>
+        <note>{StrBegin="NETSDK1043: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
-        <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="translated">'{0}' konumundaki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. {2} '{3}' geçersizdi.</target>
-        <note />
+        <source>NETSDK1044: Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
+        <target state="needs-review-translation">'{0}' konumundaki {1} satırından PlatformManifest ayrıştırılırken hata oluştu. {2} '{3}' geçersizdi.</target>
+        <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
-        <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="translated">Geçerli .NET SDK’sı {0} {1} sürümünü hedeflemeyi desteklemiyor. {0} {2} veya daha düşük bir sürümü hedefleyin veya {0} {1} destekleyen bir .NET SDK’sı kullanın.</target>
-        <note />
+        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
+        <target state="needs-review-translation">Geçerli .NET SDK’sı {0} {1} sürümünü hedeflemeyi desteklemiyor. {0} {2} veya daha düşük bir sürümü hedefleyin veya {0} {1} destekleyen bir .NET SDK’sı kullanın.</target>
+        <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="translated">'{0}' varlık dosyasında '{1}' için hedef yok. Geri yüklemenin çalıştırıldığından ve '{2}' öğesinin projeniz için TargetFrameworks’e eklendiğinden emin olun. Ayrıca '{3}' öğesini projenizin RuntimeIdentifiers’ına eklemeniz gerekebilir.</target>
-        <note />
+        <source>NETSDK1047: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="needs-review-translation">'{0}' varlık dosyasında '{1}' için hedef yok. Geri yüklemenin çalıştırıldığından ve '{2}' öğesinin projeniz için TargetFrameworks’e eklendiğinden emin olun. Ayrıca '{3}' öğesini projenizin RuntimeIdentifiers’ına eklemeniz gerekebilir.</target>
+        <note>{StrBegin="NETSDK1047: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
-        <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="translated">'{0}' TargetFramework değeri geçerli değil. Çoklu hedefleme için 'TargetFrameworks' özelliğini kullanın.</target>
-        <note />
+        <source>NETSDK1046: The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
+        <target state="needs-review-translation">'{0}' TargetFramework değeri geçerli değil. Çoklu hedefleme için 'TargetFrameworks' özelliğini kullanın.</target>
+        <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
-        <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">GenerateRuntimeConfigurationFiles için 'AdditionalProbingPaths' belirtildi ancak 'RuntimeConfigDevPath' boş olduğundan atlanıyor.</target>
-        <note />
+        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="needs-review-translation">GenerateRuntimeConfigurationFiles için 'AdditionalProbingPaths' belirtildi ancak 'RuntimeConfigDevPath' boş olduğundan atlanıyor.</target>
+        <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
-        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
-        <target state="translated">Çözümlenen dosyada hatalı görüntü var, meta veri yok veya dosya erişilemez durumda. {0} {1}</target>
-        <note />
+        <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
+        <target state="needs-review-translation">Çözümlenen dosyada hatalı görüntü var, meta veri yok veya dosya erişilemez durumda. {0} {1}</target>
+        <note>{StrBegin="NETSDK1049: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
-        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="translated">Bu proje tarafından kullanılan Microsoft.NET.Sdk, .NET Standard 1.5 veya üzeri kitaplıkları desteklemek için yeterli değil. Lütfen .NET Core SDK 2.0 veya sonraki bir sürümü yükleyin.</target>
-        <note />
+        <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
+        <target state="needs-review-translation">Bu proje tarafından kullanılan Microsoft.NET.Sdk, .NET Standard 1.5 veya üzeri kitaplıkları desteklemek için yeterli değil. Lütfen .NET Core SDK 2.0 veya sonraki bir sürümü yükleyin.</target>
+        <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
-        <target state="translated">RuntimeIdentifier platformu '{0}' ile PlatformTarget '{1}' uyumlu olmalıdır.</target>
-        <note />
+        <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="needs-review-translation">RuntimeIdentifier platformu '{0}' ile PlatformTarget '{1}' uyumlu olmalıdır.</target>
+        <note>{StrBegin="NETSDK1032: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
-        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
-        <target state="translated">FrameworkList '{0}' öğesinden ayrıştırılırken hata oluştu.  {1} '{2}' geçersizdi.</target>
-        <note />
+        <source>NETSDK1051: Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="needs-review-translation">FrameworkList '{0}' öğesinden ayrıştırılırken hata oluştu.  {1} '{2}' geçersizdi.</target>
+        <note>{StrBegin="NETSDK1051: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkListPathNotRooted">
-        <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">'{0}' çerçeve listesi dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
-        <note />
+        <source>NETSDK1052: Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="needs-review-translation">'{0}' çerçeve listesi dosya yolunun kökü belirtilmemiş. Yalnızca tam yollar desteklenir.</target>
+        <note>{StrBegin="NETSDK1052: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
-        <source>Pack as tool does not support self contained.</source>
-        <target state="translated">Araç olarak paketleme kendi kendini kapsamayı desteklemiyor.</target>
-        <note />
+        <source>NETSDK1053: Pack as tool does not support self contained.</source>
+        <target state="needs-review-translation">Araç olarak paketleme kendi kendini kapsamayı desteklemiyor.</target>
+        <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedRuntimeIdentifier">
-        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
-        <target state="translated">Proje '{0}' çalışma zamanını hedefliyor ancak çalışma zamanına özgü herhangi bir paketi çözümlemedi. Bu çalışma zamanı hedef çerçeve tarafından desteklenmiyor olabilir.</target>
-        <note />
+        <source>NETSDK1056: Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="needs-review-translation">Proje '{0}' çalışma zamanını hedefliyor ancak çalışma zamanına özgü herhangi bir paketi çözümlemedi. Bu çalışma zamanı hedef çerçeve tarafından desteklenmiyor olabilir.</target>
+        <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
-        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
-        <target state="translated">.NET Core SDK’nın önizleme sürümüyle çalışıyorsunuz. SDK sürümünü geçerli projedeki bir global.json dosyası aracılığıyla tanımlayabilirsiniz. Daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=869452</target>
-        <note />
+        <source>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="needs-review-translation">.NET Core SDK’nın önizleme sürümüyle çalışıyorsunuz. SDK sürümünü geçerli projedeki bir global.json dosyası aracılığıyla tanımlayabilirsiniz. Daha fazla bilgi edinmek için bkz. https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
-        <source>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
-        <target state="translated">ItemSpecToUse parametresi için geçersiz değer: '{0}'. Bu özellik boş olmalı veya 'Left' veya 'Right' olarak ayarlanmalıdır</target>
-        <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
+        <source>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
+        <target state="needs-review-translation">ItemSpecToUse parametresi için geçersiz değer: '{0}'. Bu özellik boş olmalı veya 'Left' veya 'Right' olarak ayarlanmalıdır</target>
+        <note>{StrBegin="NETSDK1058: "}
+The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
         <target state="needs-review-translation">'{0}' başvurusuna yönelik DotNetCliToolReference kullanımı kalktı ve bu projeden kaldırılabilir. Bu araç varsayılan olarak .NET Core SDK’sında paketlenmiştir.</target>
-        <note />
+        <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
-        <source>Error reading assets file: {0}</source>
-        <target state="translated">Varlıklar dosyası okunurken hata: {0}</target>
-        <note />
+        <source>NETSDK1060: Error reading assets file: {0}</source>
+        <target state="needs-review-translation">Varlıklar dosyası okunurken hata: {0}</target>
+        <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
-        <source>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
-        <target state="translated">Proje {0} sürümü {1} kullanılarak geri yüklendi ancak geçerli ayarlarla bunun yerine {2} sürümü kullanılır. Bu sorunu çözmek için, geri yükleme işleminde ve derleme ya da yayımlama gibi sonraki işlemlerde aynı ayarların kullanıldığından emin olun. Genellikle RuntimeIdentifier özelliği derleme veya yayımlama sırasında ayarlanır ancak geri yükleme sırasında ayarlanmazsa bu durum oluşabilir.</target>
-        <note>{0} - Package Identifier for platform package
+        <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
+        <target state="needs-review-translation">Proje {0} sürümü {1} kullanılarak geri yüklendi ancak geçerli ayarlarla bunun yerine {2} sürümü kullanılır. Bu sorunu çözmek için, geri yükleme işleminde ve derleme ya da yayımlama gibi sonraki işlemlerde aynı ayarların kullanıldığından emin olun. Genellikle RuntimeIdentifier özelliği derleme veya yayımlama sırasında ayarlanır ancak geri yükleme sırasında ayarlanmazsa bu durum oluşabilir.</target>
+        <note>{StrBegin="NETSDK1061: "}
+{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotSet">
-        <source>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">Proje varlıkları dosyasının yolu ayarlanmadı. Bu dosyayı oluşturmak için, NuGet paketi geri yükleme işlemi gerçekleştirin.</target>
-        <note />
+        <source>NETSDK1063: The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
+        <target state="needs-review-translation">Proje varlıkları dosyasının yolu ayarlanmadı. Bu dosyayı oluşturmak için, NuGet paketi geri yükleme işlemi gerçekleştirin.</target>
+        <note>{StrBegin="NETSDK1063: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
-        <source>only supports .NET Core.</source>
-        <target state="translated">yalnızca .NET Core desteklenir.</target>
-        <note />
+        <source>NETSDK1054: only supports .NET Core.</source>
+        <target state="needs-review-translation">yalnızca .NET Core desteklenir.</target>
+        <note>{StrBegin="NETSDK1054: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
-        <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
-        <target state="translated">DotnetTool, netcoreapp2.1’den daha düşük hedef çerçeveleri desteklemez.</target>
-        <note />
+        <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
+        <target state="needs-review-translation">DotnetTool, netcoreapp2.1’den daha düşük hedef çerçeveleri desteklemez.</target>
+        <note>{StrBegin="NETSDK1055: "}</note>
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache">
-        <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="translated">G/Ç hatasından dolayı paket varlıkları önbelleği kullanılamıyor. Bu, aynı proje paralel olarak birden fazla kez derlendiğinden dolayı oluşabilir. Performans düşebilir, ancak derleme sonucu etkilenmez.</target>
-        <note />
+        <source>NETSDK1062: Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
+        <target state="needs-review-translation">G/Ç hatasından dolayı paket varlıkları önbelleği kullanılamıyor. Bu, aynı proje paralel olarak birden fazla kez derlendiğinden dolayı oluşabilir. Performans düşebilir, ancak derleme sonucu etkilenmez.</target>
+        <note>{StrBegin="NETSDK1062: "}</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
-        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
-        <note />
+        <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note>{StrBegin="NETSDK1064: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotFindApphostForRid">
+        <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
+        <target state="new">NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</target>
+        <note>{StrBegin="NETSDK1065: "}</note>
       </trans-unit>
     </body>
   </file>

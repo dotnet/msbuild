@@ -3,406 +3,348 @@
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
       <trans-unit id="AtLeastOneTargetFrameworkMustBeSpecified">
-        <source>At least one possible target framework must be specified.</source>
-        <target state="translated">가능한 대상 프레임워크를 하나 이상 지정해야 합니다.</target>
-        <note />
+        <source>NETSDK1001: At least one possible target framework must be specified.</source>
+        <target state="needs-review-translation">가능한 대상 프레임워크를 하나 이상 지정해야 합니다.</target>
+        <note>{StrBegin="NETSDK1001: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
+        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
+        <target state="new">NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</target>
+        <note>{StrBegin="NETSDK1066: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotUseSelfContainedWithoutAppHost">
+        <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
+        <target state="new">NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</target>
+        <note>{StrBegin="NETSDK1067: "}</note>
+      </trans-unit>
+      <trans-unit id="FrameworkDependentAppHostRequiresVersion21">
+        <source>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</source>
+        <target state="new">NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</target>
+        <note>{StrBegin="NETSDK1068: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
-        <source>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
-        <target state="translated">'{0}' 프로젝트가 '{2}'을(를) 대상으로 합니다. '{1}'을(를) 대상으로 하는 프로젝트에서 참조할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
+        <target state="needs-review-translation">'{0}' 프로젝트가 '{2}'을(를) 대상으로 합니다. '{1}'을(를) 대상으로 하는 프로젝트에서 참조할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1002: "}</note>
       </trans-unit>
       <trans-unit id="InvalidFrameworkName">
-        <source>Invalid framework name: '{0}'.</source>
-        <target state="translated">프레임워크 이름 '{0}'이(가) 잘못되었습니다.</target>
-        <note />
+        <source>NETSDK1003: Invalid framework name: '{0}'.</source>
+        <target state="needs-review-translation">프레임워크 이름 '{0}'이(가) 잘못되었습니다.</target>
+        <note>{StrBegin="NETSDK1003: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotFound">
-        <source>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">자산 파일 '{0}'을(를) 찾을 수 없습니다. NuGet 패키지 복원을 실행하여 이 파일을 생성하세요.</target>
-        <note />
+        <source>NETSDK1004: Assets file '{0}' not found. Run a NuGet package restore to generate this file.</source>
+        <target state="needs-review-translation">자산 파일 '{0}'을(를) 찾을 수 없습니다. NuGet 패키지 복원을 실행하여 이 파일을 생성하세요.</target>
+        <note>{StrBegin="NETSDK1004: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileMissingTarget">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
-        <target state="translated">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. 복원이 실행되었으며 프로젝트의 TargetFrameworks에 '{2}'을(를) 포함했는지 확인하세요.</target>
-        <note />
+        <source>NETSDK1005: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</source>
+        <target state="needs-review-translation">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. 복원이 실행되었으며 프로젝트의 TargetFrameworks에 '{2}'을(를) 포함했는지 확인하세요.</target>
+        <note>{StrBegin="NETSDK1005: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFilePathNotRooted">
-        <source>Assets file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">자산 파일 경로 '{0}'이(가) 루트에서 시작하지 않습니다. 전체 경로만 지원됩니다.</target>
-        <note />
+        <source>NETSDK1006: Assets file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="needs-review-translation">자산 파일 경로 '{0}'이(가) 루트에서 시작하지 않습니다. 전체 경로만 지원됩니다.</target>
+        <note>{StrBegin="NETSDK1006: "}</note>
       </trans-unit>
       <trans-unit id="CannotFindProjectInfo">
-        <source>Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
-        <target state="translated">'{0}'에 대한 프로젝트 정보를 찾을 수 없습니다. 프로젝트 참조가 없음을 나타낼 수 있습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ContentFileDoesNotContainExpectedParentPackageInformation">
-        <source>Content file '{0}' does not contain expected parent package information.</source>
-        <target state="translated">콘텐츠 파일 '{0}'에 필요한 부모 패키지 정보가 없습니다.</target>
-        <note />
+        <source>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</source>
+        <target state="needs-review-translation">'{0}'에 대한 프로젝트 정보를 찾을 수 없습니다. 프로젝트 참조가 없음을 나타낼 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1007: "}</note>
       </trans-unit>
       <trans-unit id="MissingItemMetadata">
-        <source>Missing '{0}' metadata on '{1}' item '{2}'.</source>
-        <target state="translated">'{1}' 항목 '{2}'에 '{0}' 메타데이터가 없습니다.</target>
-        <note />
+        <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
+        <target state="needs-review-translation">'{1}' 항목 '{2}'에 '{0}' 메타데이터가 없습니다.</target>
+        <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
-        <source>Unrecognized preprocessor token '{0}' in '{1}'.</source>
-        <target state="translated">'{1}'에서 전처리기 토큰 '{0}'을(를) 인식할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
+        <target state="needs-review-translation">'{1}'에서 전처리기 토큰 '{0}'을(를) 인식할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1009: "}</note>
       </trans-unit>
       <trans-unit id="ContentPreproccessorParameterRequired">
-        <source>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
-        <target state="translated">전처리된 콘텐츠를 사용하려면 '{0}' 작업에서 '{1}' 매개 변수의 값을 지정해야 합니다.</target>
-        <note />
+        <source>NETSDK1010: The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</source>
+        <target state="needs-review-translation">전처리된 콘텐츠를 사용하려면 '{0}' 작업에서 '{1}' 매개 변수의 값을 지정해야 합니다.</target>
+        <note>{StrBegin="NETSDK1010: "}</note>
       </trans-unit>
       <trans-unit id="ProjectAssetsConsumedWithoutMSBuildProjectPath">
-        <source>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
-        <target state="translated">'{0}' 프로젝트의 자산이 사용되었지만, '{1}'에서 해당 MSBuild 프로젝트 경로를 찾을 수 없습니다.</target>
-        <note />
+        <source>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</source>
+        <target state="needs-review-translation">'{0}' 프로젝트의 자산이 사용되었지만, '{1}'에서 해당 MSBuild 프로젝트 경로를 찾을 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1011: "}</note>
       </trans-unit>
       <trans-unit id="UnexpectedFileType">
-        <source>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
-        <target state="translated">'{0}'에 대해 예기치 않은 파일 형식입니다. 형식이 '{1}'인 동시에 '{2}'입니다.</target>
-        <note />
+        <source>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</source>
+        <target state="needs-review-translation">'{0}'에 대해 예기치 않은 파일 형식입니다. 형식이 '{1}'인 동시에 '{2}'입니다.</target>
+        <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
       <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
-        <source>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
-        <target state="translated">TargetFramework 값 '{0}'을(를) 인식하지 못했습니다. 철자가 틀렸을 수 있습니다. 그렇지 않은 경우 TargetFrameworkIdentifier 및/또는 TargetFrameworkVersion 속성을 명시적으로 지정해야 합니다.</target>
-        <note />
+        <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
+        <target state="needs-review-translation">TargetFramework 값 '{0}'을(를) 인식하지 못했습니다. 철자가 틀렸을 수 있습니다. 그렇지 않은 경우 TargetFrameworkIdentifier 및/또는 TargetFrameworkVersion 속성을 명시적으로 지정해야 합니다.</target>
+        <note>{StrBegin="NETSDK1013: "}</note>
       </trans-unit>
       <trans-unit id="ContentItemDoesNotProvideOutputPath">
-        <source>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
-        <target state="translated">{0}'의 콘텐츠 항목이 '{1}'을(를) 설정하지만, '{2}' 또는 '{3}'을(를) 제공하지 않습니다.</target>
-        <note />
+        <source>NETSDK1014: Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</source>
+        <target state="needs-review-translation">{0}'의 콘텐츠 항목이 '{1}'을(를) 설정하지만, '{2}' 또는 '{3}'을(를) 제공하지 않습니다.</target>
+        <note>{StrBegin="NETSDK1014: "}</note>
       </trans-unit>
       <trans-unit id="DuplicatePreprocessorToken">
-        <source>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
-        <target state="translated">전처리기 토큰 '{0}'의 값이 두 개 이상 지정되었습니다. '{1}'을(를) 값으로 선택합니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ErrorsOccurredWhenEmittingSatelliteAssembly">
-        <source>Errors occured when emitting satellite assembly '{0}'.</source>
-        <target state="translated">위성 어셈블리 '{0}'을(를) 내보내는 동안 오류가 발생했습니다.</target>
-        <note />
+        <source>NETSDK1015: The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</source>
+        <target state="needs-review-translation">전처리기 토큰 '{0}'의 값이 두 개 이상 지정되었습니다. '{1}'을(를) 값으로 선택합니다.</target>
+        <note>{StrBegin="NETSDK1015: "}</note>
       </trans-unit>
       <trans-unit id="UnableToFindResolvedPath">
-        <source>Unable to find resolved path for '{0}'.</source>
-        <target state="translated">'{0}'에 대해 확인된 경로를 찾을 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnexpectedDependencyWithNoVersionNumber">
-        <source>Unexpected dependency '{0}' with no version number.</source>
-        <target state="translated">버전 번호가 없는 예기치 않은 종속성 '{0}'입니다.</target>
-        <note />
+        <source>NETSDK1016: Unable to find resolved path for '{0}'.</source>
+        <target state="needs-review-translation">'{0}'에 대해 확인된 경로를 찾을 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1016: "}</note>
       </trans-unit>
       <trans-unit id="AssetPreprocessorMustBeConfigured">
-        <source>Asset preprocessor must be configured before assets are processed.</source>
-        <target state="translated">자산을 처리하려면 먼저 자산 전처리기를 구성해야 합니다.</target>
-        <note />
+        <source>NETSDK1017: Asset preprocessor must be configured before assets are processed.</source>
+        <target state="needs-review-translation">자산을 처리하려면 먼저 자산 전처리기를 구성해야 합니다.</target>
+        <note>{StrBegin="NETSDK1017: "}</note>
       </trans-unit>
       <trans-unit id="InvalidNuGetVersionString">
-        <source>Invalid NuGet version string: '{0}'.</source>
-        <target state="translated">NuGet 버전 문자열 '{0}'이(가) 잘못되었습니다.</target>
-        <note />
+        <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
+        <target state="needs-review-translation">NuGet 버전 문자열 '{0}'이(가) 잘못되었습니다.</target>
+        <note>{StrBegin="NETSDK1018: "}</note>
       </trans-unit>
-      <trans-unit id="DOTNET1011">
-        <source>Framework not installed: {0} in {1}</source>
-        <target state="translated">{0} 프레임워크가 {1}에 설치되지 않았습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1012">
-        <source>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</source>
-        <target state="translated">참조 어셈블리 디렉터리가 지정되지 않았습니다. DOTNET_REFERENCE_ASSEMBLIES_PATH 환경 변수를 사용하여 위치를 설정할 수 있습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1013">
-        <source>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</source>
-        <target state="translated">다음 종속성이 '플랫폼' 유형으로 표시되었지만, 하나의 종속성만 다음 유형을 가질 수 있습니다. {0}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1014">
-        <source>Failed to read lock file</source>
-        <target state="translated">잠금 파일 읽기 실패</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DOTNET1017">
-        <source>Project file does not exist '{0}'.</source>
-        <target state="translated">프로젝트 파일에 '{0}'이(가) 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1001">
-        <source>The dependency '{0}' could not be resolved.</source>
-        <target state="translated">'{0}' 종속성을 확인할 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1002">
-        <source>The dependency '{0}' in project '{1}' does not support framework '{2}'.</source>
-        <target state="translated">'{1}' 프로젝트의 '{0}' 종속성이 '{2}' 프레임워크를 지원하지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1006">
-        <source>{0}. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">{0}. 새 자산 파일을 생성하려면 'dotnet restore'를 실행하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1007">
-        <source>Dependency specified was '{0}' but ended up with '{1}'.</source>
-        <target state="translated">지정된 종속성은 '{0}'인데 '{1}'(으)로 끝납니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1008">
-        <source>{0} is an unsupported framework.</source>
-        <target state="translated">{0}은(는) 지원되지 않는 프레임워크입니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1009">
-        <source>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</source>
-        <target state="translated">예상되는 자산 파일이 없습니다. 새 자산 파일을 생성하려면 'dotnet restore'를 실행하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1010">
-        <source>The dependency type was changed</source>
-        <target state="translated">종속성 유형이 변경되었습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1011">
-        <source>The dependency target '{0}' is unsupported.</source>
-        <target state="translated">'{0}' 종속성 대상은 지원되지 않습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NU1012">
-        <source>Dependency conflict. '{0}' expected '{1}' but received '{2}'</source>
-        <target state="translated">종속성 충돌이 발생했습니다. '{0}'에서 '{1}'을(를) 예상했지만 '{2}'을(를) 수신했습니다.</target>
-        <note />
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="needs-review-translation">{0}은(는) 지원되지 않는 프레임워크입니다.</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
-        <source>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
-        <target state="translated">{0}' 중복 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 해당 항목을 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 자세한 내용은 {4}을(를) 참조하세요. 중복 항목은 다음과 같습니다. {3}</target>
-        <note />
+        <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
+        <target state="needs-review-translation">{0}' 중복 항목이 포함되었습니다. .NET SDK에는 기본적으로 프로젝트 디렉터리의 '{0}' 항목이 포함됩니다. 프로젝트 파일에서 이러한 항목을 제거하거나, 프로젝트 파일에 해당 항목을 명시적으로 포함하려면 '{1}' 속성을 '{2}'(으)로 설정할 수 있습니다. 자세한 내용은 {4}을(를) 참조하세요. 중복 항목은 다음과 같습니다. {3}</target>
+        <note>{StrBegin="NETSDK1022: "}</note>
       </trans-unit>
       <trans-unit id="PackageReferenceOverrideWarning">
-        <source>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
-        <target state="translated">'{0}'에 대한 PackageReference가 프로젝트에 포함되어 있습니다. 이 패키지는 .NET SDK에서 암시적으로 참조되며, 일반적으로 사용자가 프로젝트에서 참조할 필요가 없습니다. 자세한 내용은 {1}을(를) 참조하세요.</target>
-        <note />
+        <source>NETSDK1023: A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</source>
+        <target state="needs-review-translation">'{0}'에 대한 PackageReference가 프로젝트에 포함되어 있습니다. 이 패키지는 .NET SDK에서 암시적으로 참조되며, 일반적으로 사용자가 프로젝트에서 참조할 필요가 없습니다. 자세한 내용은 {1}을(를) 참조하세요.</target>
+        <note>{StrBegin="NETSDK1023: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectPackageRoot">
-        <source>Package Root {0} was incorrectly given for Resolved library {1}</source>
-        <target state="translated">패키지 루트 {0}이(가) 확인된 라이브러리 {1}에 대해 잘못 지정되었습니다.</target>
-        <note />
+        <source>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</source>
+        <target state="needs-review-translation">패키지 루트 {0}이(가) 확인된 라이브러리 {1}에 대해 잘못 지정되었습니다.</target>
+        <note>{StrBegin="NETSDK1020: "}</note>
       </trans-unit>
       <trans-unit id="MultipleFilesResolved">
-        <source>More than one file found for {0}</source>
-        <target state="translated">{0}에 대해 두 개 이상의 파일을 찾았습니다.</target>
-        <note />
+        <source>NETSDK1021: More than one file found for {0}</source>
+        <target state="needs-review-translation">{0}에 대해 두 개 이상의 파일을 찾았습니다.</target>
+        <note>{StrBegin="NETSDK1021: "}</note>
       </trans-unit>
       <trans-unit id="FolderAlreadyExists">
-        <source>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
-        <target state="translated">'{0}' 폴더가 이미 있습니다. 삭제하거나 다른 ComposeWorkingDir을 제공하세요.</target>
-        <note />
+        <source>NETSDK1024: Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</source>
+        <target state="needs-review-translation">'{0}' 폴더가 이미 있습니다. 삭제하거나 다른 ComposeWorkingDir을 제공하세요.</target>
+        <note>{StrBegin="NETSDK1024: "}</note>
       </trans-unit>
       <trans-unit id="ParsingFiles">
-        <source>Parsing the Files : '{0}'</source>
-        <target state="translated">파일 구문 분석: '{0}'</target>
-        <note />
+        <source>NETSDK1026: Parsing the Files : '{0}'</source>
+        <target state="needs-review-translation">파일 구문 분석: '{0}'</target>
+        <note>{StrBegin="NETSDK1026: "}</note>
       </trans-unit>
       <trans-unit id="PackageInfoLog">
-        <source>Package Name='{0}', Version='{1}' was parsed</source>
-        <target state="translated">패키지 이름='{0}', 버전='{1}'이(가) 구문 분석되었습니다.</target>
-        <note />
+        <source>NETSDK1027: Package Name='{0}', Version='{1}' was parsed</source>
+        <target state="needs-review-translation">패키지 이름='{0}', 버전='{1}'이(가) 구문 분석되었습니다.</target>
+        <note>{StrBegin="NETSDK1027: "}</note>
       </trans-unit>
       <trans-unit id="RuntimeIdentifierWasNotSpecified">
-        <source>Specify a RuntimeIdentifier</source>
-        <target state="translated">RuntimeIdentifier 지정</target>
-        <note />
+        <source>NETSDK1028: Specify a RuntimeIdentifier</source>
+        <target state="needs-review-translation">RuntimeIdentifier 지정</target>
+        <note>{StrBegin="NETSDK1028: "}</note>
       </trans-unit>
       <trans-unit id="IncorrectTargetFormat">
-        <source>The target manifest {0} provided is of not the correct format</source>
-        <target state="translated">제공한 대상 매니페스트 {0}이(가) 올바른 형식이 아닙니다.</target>
-        <note />
+        <source>NETSDK1025: WRThe target manifest {0} provided is of not the correct format</source>
+        <target state="needs-review-translation">제공한 대상 매니페스트 {0}이(가) 올바른 형식이 아닙니다.</target>
+        <note>{StrBegin="NETSDK1025: "}</note>
       </trans-unit>
       <trans-unit id="AppHostHasBeenModified">
-        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
-        <target state="translated">응용 프로그램 이름이 기록되는 위치를 표시하는 '{1}' 예상 자리 표시자 바이트 시퀀스가 포함되지 않아서 '{0}'을(를) 응용 프로그램 호스트 실행 파일로 사용할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1029: Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="needs-review-translation">응용 프로그램 이름이 기록되는 위치를 표시하는 '{1}' 예상 자리 표시자 바이트 시퀀스가 포함되지 않아서 '{0}'을(를) 응용 프로그램 호스트 실행 파일로 사용할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1029: "}</note>
       </trans-unit>
       <trans-unit id="FileNameIsTooLong">
-        <source>Given file name '{0}' is longer than 1024 bytes</source>
-        <target state="translated">제공한 파일 이름 '{0}'이(가) 1024바이트보다 깁니다.</target>
-        <note />
+        <source>NETSDK1030: Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="needs-review-translation">제공한 파일 이름 '{0}'이(가) 1024바이트보다 깁니다.</target>
+        <note>{StrBegin="NETSDK1030: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveSelfContainedWithoutRuntimeIdentifier">
-        <source>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
-        <target state="translated">RuntimeIdentifier를 지정하지 않으면 자체 포함 응용 프로그램의 빌드 또는 게시가 지원되지 않습니다. RuntimeIdentifier를 지정하거나 SelfContained를 false로 설정하세요.</target>
-        <note />
+        <source>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</source>
+        <target state="needs-review-translation">RuntimeIdentifier를 지정하지 않으면 자체 포함 응용 프로그램의 빌드 또는 게시가 지원되지 않습니다. RuntimeIdentifier를 지정하거나 SelfContained를 false로 설정하세요.</target>
+        <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingAssemblyVersion">
-        <source>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
-        <target state="translated">AssemblyVersion '{1}'이(가) '{2}'보다 크기 때문에 '{0}'을(를) 선택합니다.</target>
-        <note />
+        <source>NETSDK1033: Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</source>
+        <target state="needs-review-translation">AssemblyVersion '{1}'이(가) '{2}'보다 크기 때문에 '{0}'을(를) 선택합니다.</target>
+        <note>{StrBegin="NETSDK1033: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingFileVersion">
-        <source>Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
-        <target state="translated">파일 버전 '{1}'이(가) '{2}'보다 크기 때문에 '{0}'을(를) 선택합니다.</target>
-        <note />
+        <source>NETSDK1034: Choosing '{0}' because file version '{1}' is greater than '{2}'.</source>
+        <target state="needs-review-translation">파일 버전 '{1}'이(가) '{2}'보다 크기 때문에 '{0}'을(를) 선택합니다.</target>
+        <note>{StrBegin="NETSDK1034: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingPlatformItem">
-        <source>Choosing '{0}' because it is a platform item.</source>
-        <target state="translated">플랫폼 항목이기 때문에 '{0}'을(를) 선택합니다.</target>
-        <note />
+        <source>NETSDK1035: Choosing '{0}' because it is a platform item.</source>
+        <target state="needs-review-translation">플랫폼 항목이기 때문에 '{0}'을(를) 선택합니다.</target>
+        <note>{StrBegin="NETSDK1035: "}</note>
       </trans-unit>
       <trans-unit id="ChoosingPreferredPackage">
-        <source>Choosing '{0}' because it comes from a package that is preferred.</source>
-        <target state="translated">기본 설정되는 패키지에 있기 때문에 '{0}'을(를) 선택합니다.</target>
-        <note />
+        <source>NETSDK1036: Choosing '{0}' because it comes from a package that is preferred.</source>
+        <target state="needs-review-translation">기본 설정되는 패키지에 있기 때문에 '{0}'을(를) 선택합니다.</target>
+        <note>{StrBegin="NETSDK1036: "}</note>
       </trans-unit>
       <trans-unit id="ConflictCouldNotDetermineWinner">
-        <source>Could not determine winner due to equal file and assembly versions.</source>
-        <target state="translated">동일한 파일 및 어셈블리 버전으로 인해 적용되는 내용을 확인할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1037: Could not determine winner due to equal file and assembly versions.</source>
+        <target state="needs-review-translation">동일한 파일 및 어셈블리 버전으로 인해 적용되는 내용을 확인할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1037: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_DoesntExist">
-        <source>Could not determine winner because '{0}' does not exist.</source>
-        <target state="translated">'{0}'이(가) 존재하지 않기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1038: Could not determine winner because '{0}' does not exist.</source>
+        <target state="needs-review-translation">'{0}'이(가) 존재하지 않기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_FileVersion">
-        <source>Could not determine a winner because '{0}' has no file version.</source>
-        <target state="translated">'{0}'에 파일 버전이 없기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1039: Could not determine a winner because '{0}' has no file version.</source>
+        <target state="needs-review-translation">'{0}'에 파일 버전이 없기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1039: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotDetermineWinner_NotAnAssembly">
-        <source>Could not determine a winner because '{0}' is not an assembly.</source>
-        <target state="translated">'{0}'이(가) 어셈블리가 아니기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1040: Could not determine a winner because '{0}' is not an assembly.</source>
+        <target state="needs-review-translation">'{0}'이(가) 어셈블리가 아니기 때문에 적용되는 내용을 확인할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1040: "}</note>
       </trans-unit>
       <trans-unit id="EncounteredConflict">
-        <source>Encountered conflict between '{0}' and '{1}'.</source>
-        <target state="translated">'{0}'과(와) '{1}' 사이에 충돌이 발생했습니다.</target>
-        <note />
+        <source>NETSDK1041: Encountered conflict between '{0}' and '{1}'.</source>
+        <target state="needs-review-translation">'{0}'과(와) '{1}' 사이에 충돌이 발생했습니다.</target>
+        <note>{StrBegin="NETSDK1041: "}</note>
       </trans-unit>
       <trans-unit id="CouldNotLoadPlatformManifest">
-        <source>Could not load PlatformManifest from '{0}' because it did not exist.</source>
-        <target state="translated">PlatformManifest가 존재하지 않기 때문에 '{0}'에서 로드할 수 없습니다.</target>
-        <note />
+        <source>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</source>
+        <target state="needs-review-translation">PlatformManifest가 존재하지 않기 때문에 '{0}'에서 로드할 수 없습니다.</target>
+        <note>{StrBegin="NETSDK1042: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifest">
-        <source>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
-        <target state="translated">'{0}' 줄 {1}에서 PlatformManifest를 구문 분석하는 중 오류가 발생했습니다. 줄이 {2} 형식이어야 합니다.</target>
-        <note />
+        <source>NETSDK1043: Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</source>
+        <target state="needs-review-translation">'{0}' 줄 {1}에서 PlatformManifest를 구문 분석하는 중 오류가 발생했습니다. 줄이 {2} 형식이어야 합니다.</target>
+        <note>{StrBegin="NETSDK1043: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingPlatformManifestInvalidValue">
-        <source>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
-        <target state="translated">'{0}' 줄 {1}에서 PlatformManifest를 구문 분석하는 중 오류가 발생했습니다. {2} '{3}'이(가) 잘못되었습니다.</target>
-        <note />
+        <source>NETSDK1044: Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</source>
+        <target state="needs-review-translation">'{0}' 줄 {1}에서 PlatformManifest를 구문 분석하는 중 오류가 발생했습니다. {2} '{3}'이(가) 잘못되었습니다.</target>
+        <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
-        <source>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
-        <target state="translated">현재 .NET SDK에서는 {0} {1}을(를) 대상으로 하는 것을 지원하지 않습니다. {0} {2} 이하를 대상으로 하거나 {0} {1}을(를) 지원하는 .NET SDK 버전을 사용하세요.</target>
-        <note />
+        <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
+        <target state="needs-review-translation">현재 .NET SDK에서는 {0} {1}을(를) 대상으로 하는 것을 지원하지 않습니다. {0} {2} 이하를 대상으로 하거나 {0} {1}을(를) 지원하는 .NET SDK 버전을 사용하세요.</target>
+        <note>{StrBegin="NETSDK1045: "}</note>
       </trans-unit>
       <trans-unit id="AssetsFileMissingRuntimeIdentifier">
-        <source>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
-        <target state="translated">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. 복원이 실행되었으며 프로젝트의 TargetFrameworks에 '{2}'을(를) 포함했는지 확인하세요. 프로젝트의 RuntimeIdentifiers에 '{3}'을(를) 포함해야 할 수도 있습니다.</target>
-        <note />
+        <source>NETSDK1047: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</source>
+        <target state="needs-review-translation">자산 파일 '{0}'에 '{1}'의 대상이 없습니다. 복원이 실행되었으며 프로젝트의 TargetFrameworks에 '{2}'을(를) 포함했는지 확인하세요. 프로젝트의 RuntimeIdentifiers에 '{3}'을(를) 포함해야 할 수도 있습니다.</target>
+        <note>{StrBegin="NETSDK1047: "}</note>
       </trans-unit>
       <trans-unit id="TargetFrameworkWithSemicolon">
-        <source>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
-        <target state="translated">TargetFramework 값 '{0}'이(가) 잘못되었습니다. 여러 대상을 지정하려면 'TargetFrameworks' 속성을 대신 사용하세요.</target>
-        <note />
+        <source>NETSDK1046: The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</source>
+        <target state="needs-review-translation">TargetFramework 값 '{0}'이(가) 잘못되었습니다. 여러 대상을 지정하려면 'TargetFrameworks' 속성을 대신 사용하세요.</target>
+        <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
       <trans-unit id="SkippingAdditionalProbingPaths">
-        <source>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
-        <note />
+        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="needs-review-translation">GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
+        <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
-        <source>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
-        <target state="translated">확인된 파일의 이미지가 잘못되었거나, 메타데이터가 없거나, 파일 자체에 액세스할 수 없습니다. {0} {1}</target>
-        <note />
+        <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
+        <target state="needs-review-translation">확인된 파일의 이미지가 잘못되었거나, 메타데이터가 없거나, 파일 자체에 액세스할 수 없습니다. {0} {1}</target>
+        <note>{StrBegin="NETSDK1049: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedSDKVersionForNetStandard20">
-        <source>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
-        <target state="translated">이 프로젝트에서 사용하는 Microsoft.NET.Sdk 버전은 .NET Standard 1.5 이상을 대상으로 하는 라이브러리에 대한 참조를 지원할 수 없습니다. .NET Core SDK 버전 2.0 이상을 설치하세요.</target>
-        <note />
+        <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
+        <target state="needs-review-translation">이 프로젝트에서 사용하는 Microsoft.NET.Sdk 버전은 .NET Standard 1.5 이상을 대상으로 하는 라이브러리에 대한 참조를 지원할 수 없습니다. .NET Core SDK 버전 2.0 이상을 설치하세요.</target>
+        <note>{StrBegin="NETSDK1050: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
-        <source>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
-        <target state="translated">RuntimeIdentifier 플랫폼 '{0}'과(와) PlatformTarget '{1}'은(는) 호환되어야 합니다.</target>
-        <note />
+        <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
+        <target state="needs-review-translation">RuntimeIdentifier 플랫폼 '{0}'과(와) PlatformTarget '{1}'은(는) 호환되어야 합니다.</target>
+        <note>{StrBegin="NETSDK1032: "}</note>
       </trans-unit>
       <trans-unit id="ErrorParsingFrameworkListInvalidValue">
-        <source>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
-        <target state="translated">'{0}'의 FrameworkList를 구문 분석하는 동안 오류가 발생했습니다. {1} '{2}'이(가) 잘못되었습니다.</target>
-        <note />
+        <source>NETSDK1051: Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</source>
+        <target state="needs-review-translation">'{0}'의 FrameworkList를 구문 분석하는 동안 오류가 발생했습니다. {1} '{2}'이(가) 잘못되었습니다.</target>
+        <note>{StrBegin="NETSDK1051: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkListPathNotRooted">
-        <source>Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
-        <target state="translated">프레임워크 목록 파일 경로 '{0}'이(가) 루트에서 시작하지 않습니다. 전체 경로만 지원됩니다.</target>
-        <note />
+        <source>NETSDK1052: Framework list file path '{0}' is not rooted. Only full paths are supported.</source>
+        <target state="needs-review-translation">프레임워크 목록 파일 경로 '{0}'이(가) 루트에서 시작하지 않습니다. 전체 경로만 지원됩니다.</target>
+        <note>{StrBegin="NETSDK1052: "}</note>
       </trans-unit>
       <trans-unit id="PackAsToolCannotSupportSelfContained">
-        <source>Pack as tool does not support self contained.</source>
-        <target state="translated">도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
-        <note />
+        <source>NETSDK1053: Pack as tool does not support self contained.</source>
+        <target state="needs-review-translation">도구로서 팩은 자체 포함을 지원하지 않습니다.</target>
+        <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedRuntimeIdentifier">
-        <source>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
-        <target state="translated">프로젝트가 런타임 '{0}'을(를) 대상으로 하지만 런타임 관련 패키지를 확인하지 않았습니다. 이 런타임은 대상 프레임워크에서 지원되지 않을 수 있습니다.</target>
-        <note />
+        <source>NETSDK1056: Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</source>
+        <target state="needs-review-translation">프로젝트가 런타임 '{0}'을(를) 대상으로 하지만 런타임 관련 패키지를 확인하지 않았습니다. 이 런타임은 대상 프레임워크에서 지원되지 않을 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
-        <source>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
-        <target state="translated">.NET Core SDK의 미리 보기 버전으로 작업하고 있습니다. 현재 프로젝트의 global.json 파일을 통해 SDK 버전을 정의할 수 있습니다. 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869452를 참조하세요.</target>
-        <note />
+        <source>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="needs-review-translation">.NET Core SDK의 미리 보기 버전으로 작업하고 있습니다. 현재 프로젝트의 global.json 파일을 통해 SDK 버전을 정의할 수 있습니다. 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869452를 참조하세요.</target>
+        <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
-        <source>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
-        <target state="translated">ItemSpecToUse 매개 변수 값이 잘못되었습니다. '{0}'. 이 속성은 비워 두거나 'Left' 또는 'Right'로 설정해야 합니다.</target>
-        <note>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
+        <source>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</source>
+        <target state="needs-review-translation">ItemSpecToUse 매개 변수 값이 잘못되었습니다. '{0}'. 이 속성은 비워 두거나 'Left' 또는 'Right'로 설정해야 합니다.</target>
+        <note>{StrBegin="NETSDK1058: "}
+The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</note>
       </trans-unit>
       <trans-unit id="ProjectContainsObsoleteDotNetCliTool">
-        <source>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
+        <source>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</source>
         <target state="needs-review-translation">DotNetCliToolReference를 사용한 '{0}' 참조는 사용되지 않으며 이 프로젝트에서 제거할 수 있습니다. 이도구는 .NET Core SDK에 기본적으로 포함되어 있습니다.</target>
-        <note />
+        <note>{StrBegin="NETSDK1059: "}</note>
       </trans-unit>
       <trans-unit id="ErrorReadingAssetsFile">
-        <source>Error reading assets file: {0}</source>
-        <target state="translated">자산 파일 {0}을(를) 읽는 동안 오류가 발생했습니다.</target>
-        <note />
+        <source>NETSDK1060: Error reading assets file: {0}</source>
+        <target state="needs-review-translation">자산 파일 {0}을(를) 읽는 동안 오류가 발생했습니다.</target>
+        <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
-        <source>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
-        <target state="translated">프로젝트는 {0} 버전 {1}을(를) 사용하여 복원되었지만, 현재 설정에서는 버전 {2}이(가) 대신 사용됩니다. 이 문제를 해결하려면 복원 및 빌드나 게시 같은 후속 작업에 동일한 설정을 사용하세요. 일반적으로 이 문제는 복원 중에는 RuntimeIdentifier 속성이 설정되지 않았는데 빌드나 게시 중 RuntimeIdentifier 속성이 설정된 경우에 발생할 수 있습니다.</target>
-        <note>{0} - Package Identifier for platform package
+        <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
+        <target state="needs-review-translation">프로젝트는 {0} 버전 {1}을(를) 사용하여 복원되었지만, 현재 설정에서는 버전 {2}이(가) 대신 사용됩니다. 이 문제를 해결하려면 복원 및 빌드나 게시 같은 후속 작업에 동일한 설정을 사용하세요. 일반적으로 이 문제는 복원 중에는 RuntimeIdentifier 속성이 설정되지 않았는데 빌드나 게시 중 RuntimeIdentifier 속성이 설정된 경우에 발생할 수 있습니다.</target>
+        <note>{StrBegin="NETSDK1061: "}
+{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</note>
       </trans-unit>
       <trans-unit id="AssetsFileNotSet">
-        <source>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
-        <target state="translated">프로젝트 자산 파일에 대한 경로가 설정되지 않았습니다. NuGet 패키지 복원을 실행하여 이 파일을 생성하세요.</target>
-        <note />
+        <source>NETSDK1063: The path to the project assets file was not set. Run a NuGet package restore to generate this file.</source>
+        <target state="needs-review-translation">프로젝트 자산 파일에 대한 경로가 설정되지 않았습니다. NuGet 패키지 복원을 실행하여 이 파일을 생성하세요.</target>
+        <note>{StrBegin="NETSDK1063: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolOnlySupportNetcoreapp">
-        <source>only supports .NET Core.</source>
-        <target state="translated">.NET Core만 지원합니다.</target>
-        <note />
+        <source>NETSDK1054: only supports .NET Core.</source>
+        <target state="needs-review-translation">.NET Core만 지원합니다.</target>
+        <note>{StrBegin="NETSDK1054: "}</note>
       </trans-unit>
       <trans-unit id="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21">
-        <source>DotnetTool does not support target framework lower than netcoreapp2.1.</source>
-        <target state="translated">DotnetTool가 netcoreapp2.1보다 낮은 대상 프레임워크를 지원하지 않습니다.</target>
-        <note />
+        <source>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</source>
+        <target state="needs-review-translation">DotnetTool가 netcoreapp2.1보다 낮은 대상 프레임워크를 지원하지 않습니다.</target>
+        <note>{StrBegin="NETSDK1055: "}</note>
       </trans-unit>
       <trans-unit id="UnableToUsePackageAssetsCache">
-        <source>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
-        <target state="translated">I/O 오류로 인해 패키지 자산 캐시를 사용할 수 없습니다. 동일한 프로젝트가 두 번 이상 동시에 빌드되면 이 오류가 발생합니다. 성능이 저하될 수 있지만 빌드 결과는 영향을 받지 않습니다.</target>
-        <note />
+        <source>NETSDK1062: Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</source>
+        <target state="needs-review-translation">I/O 오류로 인해 패키지 자산 캐시를 사용할 수 없습니다. 동일한 프로젝트가 두 번 이상 동시에 빌드되면 이 오류가 발생합니다. 성능이 저하될 수 있지만 빌드 결과는 영향을 받지 않습니다.</target>
+        <note>{StrBegin="NETSDK1062: "}</note>
       </trans-unit>
       <trans-unit id="PackageNotFound">
-        <source>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
-        <target state="new">Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
-        <note />
+        <source>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</source>
+        <target state="new">NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</target>
+        <note>{StrBegin="NETSDK1064: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotFindApphostForRid">
+        <source>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</source>
+        <target state="new">NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</target>
+        <note>{StrBegin="NETSDK1065: "}</note>
       </trans-unit>
     </body>
   </file>

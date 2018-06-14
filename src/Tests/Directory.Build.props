@@ -3,8 +3,7 @@
 <Project>
 
   <PropertyGroup>
-    <!-- Add the imported props file -->
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileDirectory)..\Directory.Build.props</MSBuildAllProjects>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
   <Import Project="..\Directory.Build.props" />

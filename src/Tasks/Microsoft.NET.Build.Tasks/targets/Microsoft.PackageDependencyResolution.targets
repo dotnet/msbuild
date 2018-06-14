@@ -414,8 +414,12 @@ Copyright (c) .NET Foundation. All rights reserved.
       <Reference Include="@(ResolvedFrameworkAssemblies)" />
     </ItemGroup>
     
+    <!-- If there are any references from a NuGet package that match a simple reference which
+         would resolve to a framework assembly, then update the NuGet references to use the
+         simple name as the ItemSpec.  This will prevent the VS project system from marking
+         a reference with a warning.  See https://github.com/dotnet/sdk/issues/1499 -->
     <JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="FileName" LeftMetadata="*"
-               Right="@(Reference)" RightKey="" RightMetadata="*">
+               Right="@(Reference)" RightKey="" RightMetadata="">
       <Output TaskParameter="JoinResult" ItemName="_JoinedResolvedCompileFileDefinitions" />
     </JoinItems>
 

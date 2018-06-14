@@ -12,7 +12,7 @@
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions.Json" Version="$(FluentAssertionsJsonVersion)" />
@@ -28,11 +28,11 @@
 
   <ItemGroup>
     <Compile Include="**\*.cs" />
+    <Compile Include="..\..\Tests\Common\Program.UnitTests.cs" />
     <Compile Include="..\Microsoft.NET.Build.Tasks.UnitTests\Mocks\MockBuildEngine.cs" />
     <Compile Include="..\Microsoft.NET.Build.Tasks.UnitTests\Mocks\MockTaskItem.cs" />
-    <Compile Include="..\..\Tests\Common\CommandLine\TestCommandLine.Default.cs" />
   </ItemGroup>
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
-
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  
 </Project>

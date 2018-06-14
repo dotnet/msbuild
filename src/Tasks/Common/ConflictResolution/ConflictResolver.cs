@@ -6,27 +6,33 @@ using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace Microsoft.NET.Build.Tasks.ConflictResolution
 {
-    //  The conflict resolver finds conflicting items, and if there are any of them it reports the "losing" item via the foundConflict callback
-    internal class ConflictResolver<TConflictItem> where TConflictItem : class, IConflictItem
-    {
-        private Dictionary<string, TConflictItem> winningItemsByKey = new Dictionary<string, TConflictItem>();
-        private ILog log;
-        private PackageRank packageRank;
-        private PackageOverrideResolver<TConflictItem> packageOverrideResolver;
+    internal delegate void ConflictCallback<T>(T winner, T loser);
 
-        public ConflictResolver(PackageRank packageRank, PackageOverrideResolver<TConflictItem> packageOverrideResolver, ILog log)
+    //  The conflict resolver finds conflicting items, and if there are any of them it reports the "losing" item via the foundConflict callback
+    internal class ConflictResolver<TConflictItem> : IDisposable where TConflictItem : class, IConflictItem
+    {
+        private Dictionary<string, TConflictItem> _winningItemsByKey = new Dictionary<string, TConflictItem>();
+        private Logger _log;
+        private PackageRank _packageRank;
+        private PackageOverrideResolver<TConflictItem> _packageOverrideResolver;
+        private Dictionary<string, List<TConflictItem>> _unresolvedConflictItems = new Dictionary<string, List<TConflictItem>>(StringComparer.Ordinal);
+
+        //  Callback for unresolved conflicts, currently just used as a test hook
+        public Action<TConflictItem> UnresolvedConflictHandler { get; set; }
+
+        public ConflictResolver(PackageRank packageRank, PackageOverrideResolver<TConflictItem> packageOverrideResolver, Logger log)
         {
-            this.log = log;
-            this.packageRank = packageRank;
-            this.packageOverrideResolver = packageOverrideResolver;
+            this._log = log;
+            this._packageRank = packageRank;
+            this._packageOverrideResolver = packageOverrideResolver;
         }
 
         public void ResolveConflicts(IEnumerable<TConflictItem> conflictItems, Func<TConflictItem, string> getItemKey,
-            Action<TConflictItem> foundConflict, bool commitWinner = true,
-            Action<TConflictItem> unresolvedConflict = null)
+            ConflictCallback<TConflictItem> foundConflict, bool commitWinner = true)
         {
             if (conflictItems == null)
             {
@@ -44,18 +50,31 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                 TConflictItem existingItem;
 
-                if (winningItemsByKey.TryGetValue(itemKey, out existingItem))
+                if (_winningItemsByKey.TryGetValue(itemKey, out existingItem))
                 {
                     // a conflict was found, determine the winner.
-                    var winner = ResolveConflict(existingItem, conflictItem);
+                    var winner = ResolveConflict(existingItem, conflictItem, logUnresolvedConflicts: false);
 
                     if (winner == null)
                     {
-                        // no winner, skip it.
-                        // don't add to conflict list and just use the existing item for future conflicts.
+                        //  No winner.  Keep track of the conflictItem, so that if a subsequent
+                        //  item wins for this key, both items (for which there was no winner when
+                        //  compared to each other) can be counted as conflicts and removed from
+                        //  the corresponding list.
 
-                        //  Report unresolved conflict (currently just used as a test hook)
-                        unresolvedConflict?.Invoke(conflictItem);
+                        List<TConflictItem> unresolvedConflictsForKey;
+                        if (!_unresolvedConflictItems.TryGetValue(itemKey, out unresolvedConflictsForKey))
+                        {
+                            unresolvedConflictsForKey = new List<TConflictItem>();
+                            _unresolvedConflictItems[itemKey] = unresolvedConflictsForKey;
+
+                            //  This is the first time we hit an unresolved conflict for this key, so
+                            //  add the existing item to the unresolved conflicts list
+                            unresolvedConflictsForKey.Add(existingItem);
+                        }
+
+                        //  Add the new item to the unresolved conflicts list
+                        unresolvedConflictsForKey.Add(conflictItem);
 
                         continue;
                     }
@@ -66,30 +85,69 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                         // replace existing item
                         if (commitWinner)
                         {
-                            winningItemsByKey[itemKey] = conflictItem;
+                            _winningItemsByKey[itemKey] = conflictItem;
                         }
                         else
                         {
-                            winningItemsByKey.Remove(itemKey);
+                            _winningItemsByKey.Remove(itemKey);
                         }
                         loser = existingItem;
-
                     }
 
-                    foundConflict(loser);
+                    foundConflict(winner, loser);
+
+                    //  If there were any other items that tied with the loser, report them as conflicts here
+                    List<TConflictItem> previouslyUnresolvedConflicts;
+                    if (_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts))
+                    {
+                        //  Skip the first item in the list of items that had unresolved conflicts, as it should
+                        //  be the same as the losing item which was just reported.
+                        foreach (var previouslyUnresolvedItem in previouslyUnresolvedConflicts.Skip(1))
+                        {
+                            //  Call ResolveConflict with the new winner and item that previously had an unresolved
+                            //  conflict, so that the correct message will be logged recording that the winner
+                            //  won and why
+                            ResolveConflict(winner, previouslyUnresolvedItem, logUnresolvedConflicts: true);
+
+                            foundConflict(winner, previouslyUnresolvedItem);
+                        }
+                        _unresolvedConflictItems.Remove(itemKey);
+                    }
                 }
                 else if (commitWinner)
                 {
-                    winningItemsByKey[itemKey] = conflictItem;
+                    _winningItemsByKey[itemKey] = conflictItem;
                 }
+            }
+        }
+
+        public void Dispose()
+        {
+            //  Report unresolved conflict items that didn't end up losing subsequently
+            foreach (var itemKey in _unresolvedConflictItems.Keys)
+            {
+                //  Report the first item as an unresolved conflict
+                var firstItem = _unresolvedConflictItems[itemKey][0];
+                UnresolvedConflictHandler?.Invoke(firstItem);
+
+                //  For subsequent items, report them as unresolved conflicts, and log a message
+                //  that they were an unresolved conflict with the first item
+                foreach (var unresolvedConflictItem in _unresolvedConflictItems[itemKey].Skip(1))
+                {
+                    UnresolvedConflictHandler?.Invoke(unresolvedConflictItem);
+
+                    //  Call ResolveConflict to generate the right log message about the unresolved conflict
+                    ResolveConflict(firstItem, unresolvedConflictItem, logUnresolvedConflicts: true);
+                }
+
             }
         }
 
         readonly string SENTENCE_SPACING = "  ";
 
-        private TConflictItem ResolveConflict(TConflictItem item1, TConflictItem item2)
+        private TConflictItem ResolveConflict(TConflictItem item1, TConflictItem item2, bool logUnresolvedConflicts)
         {
-            var winner = packageOverrideResolver.Resolve(item1, item2);
+            var winner = _packageOverrideResolver.Resolve(item1, item2);
             if (winner != null)
             {
                 return winner;
@@ -111,10 +169,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
             if (!exists1 || !exists2)
             {
-                string fileMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_DoesntExist,
-                    !exists1 ? item1.DisplayName : item2.DisplayName);
+                if (logUnresolvedConflicts)
+                {
+                    string fileMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_DoesntExist,
+                        !exists1 ? item1.DisplayName : item2.DisplayName);
 
-                log.LogMessage(fileMessage);
+                    _log.LogMessage(fileMessage);
+                }
                 return null;
             }
 
@@ -124,11 +185,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             // if only one is missing version stop: something is wrong when we have a conflict between assembly and non-assembly
             if (assemblyVersion1 == null ^ assemblyVersion2 == null)
             {
-                var nonAssembly = assemblyVersion1 == null ? item1.DisplayName : item2.DisplayName;
-                string assemblyMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_NotAnAssembly,
-                    nonAssembly);
-                
-                log.LogMessage(assemblyMessage);
+                if (logUnresolvedConflicts)
+                {
+                    var nonAssembly = assemblyVersion1 == null ? item1.DisplayName : item2.DisplayName;
+                    string assemblyMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_NotAnAssembly,
+                        nonAssembly);
+
+                    _log.LogMessage(assemblyMessage);
+                }
                 return null;
             }
 
@@ -157,7 +221,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     winningVersion,
                     losingVersion);
 
-                log.LogMessage(assemblyMessage);
+                _log.LogMessage(assemblyMessage);
 
                 if (assemblyVersion1 > assemblyVersion2)
                 {
@@ -176,9 +240,12 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             // if only one is missing version
             if (fileVersion1 == null ^ fileVersion2 == null)
             {
-                var nonVersion = fileVersion1 == null ? item1.DisplayName : item2.DisplayName;
-                string fileVersionMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_FileVersion,
-                    nonVersion);
+                if (logUnresolvedConflicts)
+                {
+                    var nonVersion = fileVersion1 == null ? item1.DisplayName : item2.DisplayName;
+                    string fileVersionMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.CouldNotDetermineWinner_FileVersion,
+                        nonVersion);
+                }
                 return null;
             }
 
@@ -206,7 +273,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     winningVersion,
                     losingVersion);
 
-                log.LogMessage(fileVersionMessage);
+                _log.LogMessage(fileVersionMessage);
 
                 if (fileVersion1 > fileVersion2)
                 {
@@ -219,14 +286,14 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 }
             }
 
-            var packageRank1 = packageRank.GetPackageRank(item1.PackageId);
-            var packageRank2 = packageRank.GetPackageRank(item2.PackageId);
+            var packageRank1 = _packageRank.GetPackageRank(item1.PackageId);
+            var packageRank2 = _packageRank.GetPackageRank(item2.PackageId);
 
             if (packageRank1 < packageRank2)
             {
                 string packageRankMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPreferredPackage,
                     item1.DisplayName);
-                log.LogMessage(packageRankMessage);
+                _log.LogMessage(packageRankMessage);
                 return item1;
             }
 
@@ -244,7 +311,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             {
                 string platformMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPlatformItem,
                     item1.DisplayName);
-                log.LogMessage(platformMessage);
+                _log.LogMessage(platformMessage);
                 return item1;
             }
 
@@ -252,13 +319,16 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             {
                 string platformMessage = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ChoosingPlatformItem,
                     item2.DisplayName);
-                log.LogMessage(platformMessage);
+                _log.LogMessage(platformMessage);
                 return item2;
             }
 
-            string message = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ConflictCouldNotDetermineWinner);
+            if (logUnresolvedConflicts)
+            {
+                string message = conflictMessage + SENTENCE_SPACING + string.Format(CultureInfo.CurrentCulture, Strings.ConflictCouldNotDetermineWinner);
 
-            log.LogMessage(message);
+                _log.LogMessage(message);
+            }
             return null;
         }
     }

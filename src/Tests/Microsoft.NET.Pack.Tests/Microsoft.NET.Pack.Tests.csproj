@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,8 +12,12 @@
     <OutDirName>Tests\$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
+  <PropertyGroup>
+    <PackageId>testSdkPack</PackageId>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(MicrosoftDotNetCliUtilsVersion)" />
@@ -31,6 +35,6 @@
     <EmbeddedResource Include="**\*.resx" Exclude="$(GlobalExclude)" />
   </ItemGroup>
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
 </Project>

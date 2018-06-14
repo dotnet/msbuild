@@ -79,7 +79,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (framework == null)
             {
-                Log.LogError(Strings.InvalidFrameworkName, framework);
+                Log.LogError(Strings.InvalidFrameworkName, framework.ToString());
             }
 
             return framework;

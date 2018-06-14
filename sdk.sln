@@ -42,56 +42,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{22AB674F-ED9
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tasks", "Tasks", "{1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{09AD2F74-FAB2-40C8-B524-3319C3112690}"
-	ProjectSection(SolutionItems) = preProject
-		src\Tasks\Common\BuildErrorException.cs = src\Tasks\Common\BuildErrorException.cs
-		src\Tasks\Common\DiagnosticMessageSeverity.cs = src\Tasks\Common\DiagnosticMessageSeverity.cs
-		src\Tasks\Common\DiagnosticsHelper.cs = src\Tasks\Common\DiagnosticsHelper.cs
-		src\Tasks\Common\FileUtilities.cs = src\Tasks\Common\FileUtilities.cs
-		src\Tasks\Common\FileUtilities.MetadataReader.cs = src\Tasks\Common\FileUtilities.MetadataReader.cs
-		src\Tasks\Common\ILog.cs = src\Tasks\Common\ILog.cs
-		src\Tasks\Common\ItemUtilities.cs = src\Tasks\Common\ItemUtilities.cs
-		src\Tasks\Common\MessageBase.cs = src\Tasks\Common\MessageBase.cs
-		src\Tasks\Common\MetadataKeys.cs = src\Tasks\Common\MetadataKeys.cs
-		src\Tasks\Common\MSBuildLog.cs = src\Tasks\Common\MSBuildLog.cs
-		src\Tasks\Common\NETSdkError.cs = src\Tasks\Common\NETSdkError.cs
-		src\Tasks\Common\NuGetUtils.cs = src\Tasks\Common\NuGetUtils.cs
-		src\Tasks\Common\TaskBase.cs = src\Tasks\Common\TaskBase.cs
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{7D6CD7B6-0237-40DD-9911-44FF22292131}"
-	ProjectSection(SolutionItems) = preProject
-		src\Tasks\Common\Resources\Strings.resx = src\Tasks\Common\Resources\Strings.resx
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xlf", "xlf", "{C6E91BB1-658C-4E10-9DBA-1C10B7558EFB}"
-	ProjectSection(SolutionItems) = preProject
-		src\Tasks\Common\Resources\xlf\Strings.cs.xlf = src\Tasks\Common\Resources\xlf\Strings.cs.xlf
-		src\Tasks\Common\Resources\xlf\Strings.de.xlf = src\Tasks\Common\Resources\xlf\Strings.de.xlf
-		src\Tasks\Common\Resources\xlf\Strings.es.xlf = src\Tasks\Common\Resources\xlf\Strings.es.xlf
-		src\Tasks\Common\Resources\xlf\Strings.fr.xlf = src\Tasks\Common\Resources\xlf\Strings.fr.xlf
-		src\Tasks\Common\Resources\xlf\Strings.it.xlf = src\Tasks\Common\Resources\xlf\Strings.it.xlf
-		src\Tasks\Common\Resources\xlf\Strings.ja.xlf = src\Tasks\Common\Resources\xlf\Strings.ja.xlf
-		src\Tasks\Common\Resources\xlf\Strings.ko.xlf = src\Tasks\Common\Resources\xlf\Strings.ko.xlf
-		src\Tasks\Common\Resources\xlf\Strings.pl.xlf = src\Tasks\Common\Resources\xlf\Strings.pl.xlf
-		src\Tasks\Common\Resources\xlf\Strings.pt-BR.xlf = src\Tasks\Common\Resources\xlf\Strings.pt-BR.xlf
-		src\Tasks\Common\Resources\xlf\Strings.ru.xlf = src\Tasks\Common\Resources\xlf\Strings.ru.xlf
-		src\Tasks\Common\Resources\xlf\Strings.tr.xlf = src\Tasks\Common\Resources\xlf\Strings.tr.xlf
-		src\Tasks\Common\Resources\xlf\Strings.zh-Hans.xlf = src\Tasks\Common\Resources\xlf\Strings.zh-Hans.xlf
-		src\Tasks\Common\Resources\xlf\Strings.zh-Hant.xlf = src\Tasks\Common\Resources\xlf\Strings.zh-Hant.xlf
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ConflictResolution", "ConflictResolution", "{B012211C-E8EB-4BA5-B100-D1EAB5ED316E}"
-	ProjectSection(SolutionItems) = preProject
-		src\Tasks\Common\ConflictResolution\ConflictItem.cs = src\Tasks\Common\ConflictResolution\ConflictItem.cs
-		src\Tasks\Common\ConflictResolution\ConflictResolver.cs = src\Tasks\Common\ConflictResolution\ConflictResolver.cs
-		src\Tasks\Common\ConflictResolution\MetadataNames.cs = src\Tasks\Common\ConflictResolution\MetadataNames.cs
-		src\Tasks\Common\ConflictResolution\MSBuildUtilities.cs = src\Tasks\Common\ConflictResolution\MSBuildUtilities.cs
-		src\Tasks\Common\ConflictResolution\PackageRank.cs = src\Tasks\Common\ConflictResolution\PackageRank.cs
-		src\Tasks\Common\ConflictResolution\PlatformManifestReader.cs = src\Tasks\Common\ConflictResolution\PlatformManifestReader.cs
-		src\Tasks\Common\ConflictResolution\ResolvePackageFileConflicts.cs = src\Tasks\Common\ConflictResolution\ResolvePackageFileConflicts.cs
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Build.Extensions.Tasks", "src\Tasks\Microsoft.NET.Build.Extensions.Tasks\Microsoft.NET.Build.Extensions.Tasks.csproj", "{61C31F8E-FE7C-47CC-B21C-3DEE499AD6F5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.Build.Extensions.Tasks.UnitTests", "src\Tasks\Microsoft.NET.Build.Extensions.Tasks.UnitTests\Microsoft.NET.Build.Extensions.Tasks.UnitTests.csproj", "{6ADADB58-92D3-438C-8D97-F495B59A83C0}"
@@ -129,6 +79,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CommandLine", "CommandLine"
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.NET.ToolPack.Tests", "src\Tests\Microsoft.NET.ToolPack.Tests\Microsoft.NET.ToolPack.Tests.csproj", "{6F72FAA2-4E46-4382-940A-4F0290E070E2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelemetryStdOutLogger", "src\Tests\TelemetryStdOutLogger\TelemetryStdOutLogger.csproj", "{E740A596-2CAE-476C-8062-49705C3A9CF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -188,16 +140,16 @@ Global
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E740A596-2CAE-476C-8062-49705C3A9CF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1FEED16D-E07D-47C1-BB4C-56CD9F42B53B} = {22AB674F-ED91-4FBC-BFEE-8A1E82F9F05E}
-		{09AD2F74-FAB2-40C8-B524-3319C3112690} = {1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}
-		{7D6CD7B6-0237-40DD-9911-44FF22292131} = {09AD2F74-FAB2-40C8-B524-3319C3112690}
-		{C6E91BB1-658C-4E10-9DBA-1C10B7558EFB} = {7D6CD7B6-0237-40DD-9911-44FF22292131}
-		{B012211C-E8EB-4BA5-B100-D1EAB5ED316E} = {09AD2F74-FAB2-40C8-B524-3319C3112690}
 		{61C31F8E-FE7C-47CC-B21C-3DEE499AD6F5} = {1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}
 		{6ADADB58-92D3-438C-8D97-F495B59A83C0} = {1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}
 		{9CFC1EB5-8CF4-41D3-B91D-7D88B52F0B07} = {1FEED16D-E07D-47C1-BB4C-56CD9F42B53B}
@@ -214,6 +166,7 @@ Global
 		{CAF71BDC-7B7D-4A43-AB8C-E440A1E4F108} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 		{7C6A88D0-DBCC-4933-A92D-A0AC133DD5FC} = {5293658E-96D2-421F-A789-D0B6BA129570}
 		{6F72FAA2-4E46-4382-940A-4F0290E070E2} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
+		{E740A596-2CAE-476C-8062-49705C3A9CF0} = {580D1AE7-AA8F-4912-8B76-105594E00B3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB8F26CE-4DE6-433F-B32A-79183020BBD6}

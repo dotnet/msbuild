@@ -16,18 +16,15 @@ namespace Microsoft.NET.TestFramework
     {
         private readonly string _testAssetRoot;
 
-        public string BuildVersion { get; }
-
         private List<string> _projectFiles;
 
         public string TestRoot => Path;
 
-        internal TestAsset(string testDestination, string buildVersion) : base(testDestination)
+        internal TestAsset(string testDestination, string sdkVersion) : base(testDestination, sdkVersion)
         {
-            BuildVersion = buildVersion;
         }
 
-        internal TestAsset(string testAssetRoot, string testDestination, string buildVersion) : base(testDestination)
+        internal TestAsset(string testAssetRoot, string testDestination, string sdkVersion) : base(testDestination, sdkVersion)
         {
             if (string.IsNullOrEmpty(testAssetRoot))
             {
@@ -35,7 +32,6 @@ namespace Microsoft.NET.TestFramework
             }
 
             _testAssetRoot = testAssetRoot;
-            BuildVersion = buildVersion;
         }
 
         internal void FindProjectFiles()
@@ -79,8 +75,6 @@ namespace Microsoft.NET.TestFramework
                 {
                     var project = XDocument.Load(srcFile);
 
-                    SetSdkVersion(project);
-
                     using (var file = File.CreateText(destFile))
                     {
                         project.Save(file);
@@ -122,18 +116,6 @@ namespace Microsoft.NET.TestFramework
             }
             return this;
             
-        }
-
-        public void SetSdkVersion(XDocument project)
-        {
-            var ns = project.Root.Name.Namespace;
-
-            project
-                .Descendants(ns + "PackageReference")
-                .FirstOrDefault(pr => pr.Attribute("Include")?.Value == "Microsoft.NET.Sdk")
-                ?.Element(ns + "Version")
-                ?.SetValue($"[{BuildVersion}]");
-
         }
 
         public RestoreCommand GetRestoreCommand(ITestOutputHelper log, string relativePath = "")

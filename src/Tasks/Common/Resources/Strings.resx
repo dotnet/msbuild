@@ -118,247 +118,279 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AtLeastOneTargetFrameworkMustBeSpecified" xml:space="preserve">
-    <value>At least one possible target framework must be specified.</value>
+    <value>NETSDK1001: At least one possible target framework must be specified.</value>
+    <comment>{StrBegin="NETSDK1001: "}</comment>
   </data>
   <data name="NoCompatibleTargetFramework" xml:space="preserve">
-    <value>Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</value>
+    <value>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</value>
+    <comment>{StrBegin="NETSDK1002: "}</comment>
   </data>
   <data name="InvalidFrameworkName" xml:space="preserve">
-    <value>Invalid framework name: '{0}'.</value>
+    <value>NETSDK1003: Invalid framework name: '{0}'.</value>
+    <comment>{StrBegin="NETSDK1003: "}</comment>
   </data>
   <data name="AssetsFileNotFound" xml:space="preserve">
-    <value>Assets file '{0}' not found. Run a NuGet package restore to generate this file.</value>
+    <value>NETSDK1004: Assets file '{0}' not found. Run a NuGet package restore to generate this file.</value>
+    <comment>{StrBegin="NETSDK1004: "}</comment>
   </data>
   <data name="AssetsFileMissingTarget" xml:space="preserve">
-    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</value>
+    <value>NETSDK1005: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project.</value>
+    <comment>{StrBegin="NETSDK1005: "}</comment>
   </data>
   <data name="AssetsFilePathNotRooted" xml:space="preserve">
-    <value>Assets file path '{0}' is not rooted. Only full paths are supported.</value>
+    <value>NETSDK1006: Assets file path '{0}' is not rooted. Only full paths are supported.</value>
+    <comment>{StrBegin="NETSDK1006: "}</comment>
   </data>
   <data name="CannotFindProjectInfo" xml:space="preserve">
-    <value>Cannot find project info for '{0}'. This can indicate a missing project reference.</value>
-  </data>
-  <data name="ContentFileDoesNotContainExpectedParentPackageInformation" xml:space="preserve">
-    <value>Content file '{0}' does not contain expected parent package information.</value>
+    <value>NETSDK1007: Cannot find project info for '{0}'. This can indicate a missing project reference.</value>
+    <comment>{StrBegin="NETSDK1007: "}</comment>
   </data>
   <data name="MissingItemMetadata" xml:space="preserve">
-    <value>Missing '{0}' metadata on '{1}' item '{2}'.</value>
+    <value>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</value>
+    <comment>{StrBegin="NETSDK1008: "}</comment>
   </data>
   <data name="UnrecognizedPreprocessorToken" xml:space="preserve">
-    <value>Unrecognized preprocessor token '{0}' in '{1}'.</value>
+    <value>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</value>
+    <comment>{StrBegin="NETSDK1009: "}</comment>
   </data>
   <data name="ContentPreproccessorParameterRequired" xml:space="preserve">
-    <value>The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</value>
+    <value>NETSDK1010: The '{0}' task must be given a value for parameter '{1}' in order to consume preprocessed content.</value>
+    <comment>{StrBegin="NETSDK1010: "}</comment>
   </data>
   <data name="ProjectAssetsConsumedWithoutMSBuildProjectPath" xml:space="preserve">
-    <value>Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</value>
+    <value>NETSDK1011: Assets are consumed from project '{0}', but no corresponding MSBuild project path was  found in '{1}'.</value>
+    <comment>{StrBegin="NETSDK1011: "}</comment>
   </data>
   <data name="UnexpectedFileType" xml:space="preserve">
-    <value>Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</value>
+    <value>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</value>
+    <comment>{StrBegin="NETSDK1012: "}</comment>
   </data>
   <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
-    <value>The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</value>
+    <value>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</value>
+    <comment>{StrBegin="NETSDK1013: "}</comment>
   </data>
   <data name="ContentItemDoesNotProvideOutputPath" xml:space="preserve">
-    <value>Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</value>
+    <value>NETSDK1014: Content item for '{0}' sets '{1}', but does not provide  '{2}' or '{3}'.</value>
+    <comment>{StrBegin="NETSDK1014: "}</comment>
   </data>
   <data name="DuplicatePreprocessorToken" xml:space="preserve">
-    <value>The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</value>
-  </data>
-  <data name="ErrorsOccurredWhenEmittingSatelliteAssembly" xml:space="preserve">
-    <value>Errors occured when emitting satellite assembly '{0}'.</value>
+    <value>NETSDK1015: The preprocessor token '{0}' has been given more than one value. Choosing '{1}' as the value.</value>
+    <comment>{StrBegin="NETSDK1015: "}</comment>
   </data>
   <data name="UnableToFindResolvedPath" xml:space="preserve">
-    <value>Unable to find resolved path for '{0}'.</value>
-  </data>
-  <data name="UnexpectedDependencyWithNoVersionNumber" xml:space="preserve">
-    <value>Unexpected dependency '{0}' with no version number.</value>
+    <value>NETSDK1016: Unable to find resolved path for '{0}'.</value>
+    <comment>{StrBegin="NETSDK1016: "}</comment>
   </data>
   <data name="AssetPreprocessorMustBeConfigured" xml:space="preserve">
-    <value>Asset preprocessor must be configured before assets are processed.</value>
+    <value>NETSDK1017: Asset preprocessor must be configured before assets are processed.</value>
+    <comment>{StrBegin="NETSDK1017: "}</comment>
   </data>
   <data name="InvalidNuGetVersionString" xml:space="preserve">
-    <value>Invalid NuGet version string: '{0}'.</value>
+    <value>NETSDK1018: Invalid NuGet version string: '{0}'.</value>
+    <comment>{StrBegin="NETSDK1018: "}</comment>
   </data>
-  <data name="DOTNET1011" xml:space="preserve">
-    <value>Framework not installed: {0} in {1}</value>
-  </data>
-  <data name="DOTNET1012" xml:space="preserve">
-    <value>The reference assemblies directory was not specified. You can set the location using the DOTNET_REFERENCE_ASSEMBLIES_PATH environment variable.</value>
-  </data>
-  <data name="DOTNET1013" xml:space="preserve">
-    <value>The following dependencies are marked with type 'platform', however only one dependency can have this type: {0}</value>
-  </data>
-  <data name="DOTNET1014" xml:space="preserve">
-    <value>Failed to read lock file</value>
-  </data>
-  <data name="DOTNET1017" xml:space="preserve">
-    <value>Project file does not exist '{0}'.</value>
-  </data>
-  <data name="NU1001" xml:space="preserve">
-    <value>The dependency '{0}' could not be resolved.</value>
-  </data>
-  <data name="NU1002" xml:space="preserve">
-    <value>The dependency '{0}' in project '{1}' does not support framework '{2}'.</value>
-  </data>
-  <data name="NU1006" xml:space="preserve">
-    <value>{0}. Please run 'dotnet restore' to generate a new asset file.</value>
-  </data>
-  <data name="NU1007" xml:space="preserve">
-    <value>Dependency specified was '{0}' but ended up with '{1}'.</value>
-  </data>
-  <data name="NU1008" xml:space="preserve">
-    <value>{0} is an unsupported framework.</value>
-  </data>
-  <data name="NU1009" xml:space="preserve">
-    <value>The expected asset file does not exist. Please run 'dotnet restore' to generate a new asset file.</value>
-  </data>
-  <data name="NU1010" xml:space="preserve">
-    <value>The dependency type was changed</value>
-  </data>
-  <data name="NU1011" xml:space="preserve">
-    <value>The dependency target '{0}' is unsupported.</value>
-  </data>
-  <data name="NU1012" xml:space="preserve">
-    <value>Dependency conflict. '{0}' expected '{1}' but received '{2}'</value>
+  <data name="UnsupportedFramework" xml:space="preserve">
+    <value>NETSDK1019: {0} is an unsupported framework.</value>
+    <comment>{StrBegin="NETSDK1019: "}</comment>
   </data>
   <data name="IncorrectPackageRoot" xml:space="preserve">
-    <value>Package Root {0} was incorrectly given for Resolved library {1}</value>
+    <value>NETSDK1020: Package Root {0} was incorrectly given for Resolved library {1}</value>
+    <comment>{StrBegin="NETSDK1020: "}</comment>
   </data>
   <data name="MultipleFilesResolved" xml:space="preserve">
-    <value>More than one file found for {0}</value>
+    <value>NETSDK1021: More than one file found for {0}</value>
+    <comment>{StrBegin="NETSDK1021: "}</comment>
   </data>
   <data name="DuplicateItemsError" xml:space="preserve">
-    <value>Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</value>
+    <value>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</value>
+    <comment>{StrBegin="NETSDK1022: "}</comment>
   </data>
   <data name="PackageReferenceOverrideWarning" xml:space="preserve">
-    <value>A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</value>
+    <value>NETSDK1023: A PackageReference for '{0}' was included in your project. This package is implicitly referenced by the .NET SDK and you do not typically need to reference it from your project. For more information, see {1}</value>
+    <comment>{StrBegin="NETSDK1023: "}</comment>
   </data>
   <data name="FolderAlreadyExists" xml:space="preserve">
-    <value>Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+    <value>NETSDK1024: Folder '{0}' already exists either delete it or provide a different ComposeWorkingDir</value>
+    <comment>{StrBegin="NETSDK1024: "}</comment>
   </data>
   <data name="IncorrectTargetFormat" xml:space="preserve">
-    <value>The target manifest {0} provided is of not the correct format</value>
+    <value>NETSDK1025: WRThe target manifest {0} provided is of not the correct format</value>
+    <comment>{StrBegin="NETSDK1025: "}</comment>
   </data>
   <data name="ParsingFiles" xml:space="preserve">
-    <value>Parsing the Files : '{0}'</value>
+    <value>NETSDK1026: Parsing the Files : '{0}'</value>
+    <comment>{StrBegin="NETSDK1026: "}</comment>
   </data>
   <data name="PackageInfoLog" xml:space="preserve">
-    <value>Package Name='{0}', Version='{1}' was parsed</value>
+    <value>NETSDK1027: Package Name='{0}', Version='{1}' was parsed</value>
+    <comment>{StrBegin="NETSDK1027: "}</comment>
   </data>
   <data name="RuntimeIdentifierWasNotSpecified" xml:space="preserve">
-    <value>Specify a RuntimeIdentifier</value>
+    <value>NETSDK1028: Specify a RuntimeIdentifier</value>
+    <comment>{StrBegin="NETSDK1028: "}</comment>
   </data>
   <data name="AppHostHasBeenModified" xml:space="preserve">
-    <value>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</value>
+    <value>NETSDK1029: Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</value>
+    <comment>{StrBegin="NETSDK1029: "}</comment>
   </data>
   <data name="FileNameIsTooLong" xml:space="preserve">
-    <value>Given file name '{0}' is longer than 1024 bytes</value>
+    <value>NETSDK1030: Given file name '{0}' is longer than 1024 bytes</value>
+    <comment>{StrBegin="NETSDK1030: "}</comment>
   </data>
   <data name="CannotHaveSelfContainedWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+    <value>NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</value>
+    <comment>{StrBegin="NETSDK1031: "}</comment>
   </data>
   <data name="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget" xml:space="preserve">
-    <value>The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</value>
+    <value>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</value>
+    <comment>{StrBegin="NETSDK1032: "}</comment>
   </data>
   <data name="ChoosingAssemblyVersion" xml:space="preserve">
-    <value>Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
+    <value>NETSDK1033: Choosing '{0}' because AssemblyVersion '{1}' is greater than '{2}'.</value>
+    <comment>{StrBegin="NETSDK1033: "}</comment>
   </data>
   <data name="ChoosingFileVersion" xml:space="preserve">
-    <value>Choosing '{0}' because file version '{1}' is greater than '{2}'.</value>
+    <value>NETSDK1034: Choosing '{0}' because file version '{1}' is greater than '{2}'.</value>
+    <comment>{StrBegin="NETSDK1034: "}</comment>
   </data>
   <data name="ChoosingPlatformItem" xml:space="preserve">
-    <value>Choosing '{0}' because it is a platform item.</value>
+    <value>NETSDK1035: Choosing '{0}' because it is a platform item.</value>
+    <comment>{StrBegin="NETSDK1035: "}</comment>
   </data>
   <data name="ChoosingPreferredPackage" xml:space="preserve">
-    <value>Choosing '{0}' because it comes from a package that is preferred.</value>
+    <value>NETSDK1036: Choosing '{0}' because it comes from a package that is preferred.</value>
+    <comment>{StrBegin="NETSDK1036: "}</comment>
   </data>
   <data name="ConflictCouldNotDetermineWinner" xml:space="preserve">
-    <value>Could not determine winner due to equal file and assembly versions.</value>
+    <value>NETSDK1037: Could not determine winner due to equal file and assembly versions.</value>
+    <comment>{StrBegin="NETSDK1037: "}</comment>
   </data>
   <data name="CouldNotDetermineWinner_DoesntExist" xml:space="preserve">
-    <value>Could not determine winner because '{0}' does not exist.</value>
+    <value>NETSDK1038: Could not determine winner because '{0}' does not exist.</value>
+    <comment>{StrBegin="NETSDK1001: "}</comment>
   </data>
   <data name="CouldNotDetermineWinner_FileVersion" xml:space="preserve">
-    <value>Could not determine a winner because '{0}' has no file version.</value>
+    <value>NETSDK1039: Could not determine a winner because '{0}' has no file version.</value>
+    <comment>{StrBegin="NETSDK1039: "}</comment>
   </data>
   <data name="CouldNotDetermineWinner_NotAnAssembly" xml:space="preserve">
-    <value>Could not determine a winner because '{0}' is not an assembly.</value>
+    <value>NETSDK1040: Could not determine a winner because '{0}' is not an assembly.</value>
+    <comment>{StrBegin="NETSDK1040: "}</comment>
   </data>
   <data name="EncounteredConflict" xml:space="preserve">
-    <value>Encountered conflict between '{0}' and '{1}'.</value>
+    <value>NETSDK1041: Encountered conflict between '{0}' and '{1}'.</value>
+    <comment>{StrBegin="NETSDK1041: "}</comment>
   </data>
   <data name="CouldNotLoadPlatformManifest" xml:space="preserve">
-    <value>Could not load PlatformManifest from '{0}' because it did not exist.</value>
+    <value>NETSDK1042: Could not load PlatformManifest from '{0}' because it did not exist.</value>
+    <comment>{StrBegin="NETSDK1042: "}</comment>
   </data>
   <data name="ErrorParsingPlatformManifest" xml:space="preserve">
-    <value>Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</value>
+    <value>NETSDK1043: Error parsing PlatformManifest from '{0}' line {1}.  Lines must have the format {2}.</value>
+    <comment>{StrBegin="NETSDK1043: "}</comment>
   </data>
   <data name="ErrorParsingPlatformManifestInvalidValue" xml:space="preserve">
-    <value>Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</value>
+    <value>NETSDK1044: Error parsing PlatformManifest from '{0}' line {1}.  {2} '{3}' was invalid.</value>
+    <comment>{StrBegin="NETSDK1044: "}</comment>
   </data>
   <data name="UnsupportedTargetFrameworkVersion" xml:space="preserve">
-    <value>The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
+    <value>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</value>
+    <comment>{StrBegin="NETSDK1045: "}</comment>
   </data>
   <data name="TargetFrameworkWithSemicolon" xml:space="preserve">
-    <value>The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</value>
+    <value>NETSDK1046: The TargetFramework value '{0}' is not valid. To multi-target, use the 'TargetFrameworks' property instead.</value>
+    <comment>{StrBegin="NETSDK1046: "}</comment>
   </data>
   <data name="AssetsFileMissingRuntimeIdentifier" xml:space="preserve">
-    <value>Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
+    <value>NETSDK1047: Assets file '{0}' doesn't have a target for '{1}'. Ensure that restore has run and that you have included '{2}' in the TargetFrameworks for your project. You may also need to include '{3}' in your project's RuntimeIdentifiers.</value>
+    <comment>{StrBegin="NETSDK1047: "}</comment>
   </data>
   <data name="SkippingAdditionalProbingPaths" xml:space="preserve">
-    <value>'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</value>
+    <value>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</value>
+    <comment>{StrBegin="NETSDK1048: "}</comment>
   </data>
   <data name="GetDependsOnNETStandardFailedWithException" xml:space="preserve">
-    <value>Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</value>
+    <value>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</value>
+    <comment>{StrBegin="NETSDK1049: "}</comment>
   </data>
   <data name="UnsupportedSDKVersionForNetStandard20" xml:space="preserve">
-    <value>The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</value>
+    <value>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</value>
+    <comment>{StrBegin="NETSDK1050: "}</comment>
   </data>
   <data name="ErrorParsingFrameworkListInvalidValue" xml:space="preserve">
-    <value>Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</value>
+    <value>NETSDK1051: Error parsing FrameworkList from '{0}'.  {1} '{2}' was invalid.</value>
+    <comment>{StrBegin="NETSDK1051: "}</comment>
   </data>
   <data name="FrameworkListPathNotRooted" xml:space="preserve">
-    <value>Framework list file path '{0}' is not rooted. Only full paths are supported.</value>
+    <value>NETSDK1052: Framework list file path '{0}' is not rooted. Only full paths are supported.</value>
+    <comment>{StrBegin="NETSDK1052: "}</comment>
   </data>
   <data name="PackAsToolCannotSupportSelfContained" xml:space="preserve">
-    <value>Pack as tool does not support self contained.</value>
+    <value>NETSDK1053: Pack as tool does not support self contained.</value>
+    <comment>{StrBegin="NETSDK1001: "}</comment>
   </data>
   <data name="DotnetToolOnlySupportNetcoreapp" xml:space="preserve">
-    <value>only supports .NET Core.</value>
+    <value>NETSDK1054: only supports .NET Core.</value>
+    <comment>{StrBegin="NETSDK1054: "}</comment>
   </data>
   <data name="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21" xml:space="preserve">
-    <value>DotnetTool does not support target framework lower than netcoreapp2.1.</value>
+    <value>NETSDK1055: DotnetTool does not support target framework lower than netcoreapp2.1.</value>
+    <comment>{StrBegin="NETSDK1055: "}</comment>
   </data>
   <data name="UnsupportedRuntimeIdentifier" xml:space="preserve">
-    <value>Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</value>
+    <value>NETSDK1056: Project is targeting runtime '{0}' but did not resolve any runtime-specific packages. This runtime may not be supported by the target framework.</value>
+    <comment>{StrBegin="NETSDK1056: "}</comment>
   </data>
   <data name="UsingPreviewSdkWarning" xml:space="preserve">
-    <value>You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</value>
+    <value>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</value>
+    <comment>{StrBegin="NETSDK1057: "}</comment>
   </data>
   <data name="InvalidItemSpecToUse" xml:space="preserve">
-    <value>Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</value>
-    <comment>The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</comment>
+    <value>NETSDK1058: Invalid value for ItemSpecToUse parameter: '{0}'.  This property must be blank or set to 'Left' or 'Right'</value>
+    <comment>{StrBegin="NETSDK1058: "}
+The following are names of parameters or literal values and should not be translated: ItemSpecToUse, Left, Right</comment>
   </data>
   <data name="ProjectContainsObsoleteDotNetCliTool" xml:space="preserve">
-    <value>The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</value>
+    <value>NETSDK1059: The tool '{0}' is now included in the .NET Core SDK. Information on resolving this warning is available at (https://aka.ms/dotnetclitools-in-box).</value>
+    <comment>{StrBegin="NETSDK1059: "}</comment>
   </data>
   <data name="ErrorReadingAssetsFile" xml:space="preserve">
-    <value>Error reading assets file: {0}</value>
+    <value>NETSDK1060: Error reading assets file: {0}</value>
+    <comment>{StrBegin="NETSDK1060: "}</comment>
   </data>
   <data name="MismatchedPlatformPackageVersion" xml:space="preserve">
-    <value>The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</value>
-    <comment>{0} - Package Identifier for platform package
+    <value>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</value>
+    <comment>{StrBegin="NETSDK1061: "}
+{0} - Package Identifier for platform package
 {1} - Restored version of platform package
 {2} - Current version of platform package</comment>
   </data>
   <data name="UnableToUsePackageAssetsCache" xml:space="preserve">
-    <value>Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</value>
+    <value>NETSDK1062: Unable to use package assets cache due to I/O error. This can occur when the same project is built more than once in parallel. Performance may be degraded, but the build result will not be impacted.</value>
+    <comment>{StrBegin="NETSDK1062: "}</comment>
   </data>
   <data name="AssetsFileNotSet" xml:space="preserve">
-    <value>The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
+    <value>NETSDK1063: The path to the project assets file was not set. Run a NuGet package restore to generate this file.</value>
+    <comment>{StrBegin="NETSDK1063: "}</comment>
   </data>
   <data name="PackageNotFound" xml:space="preserve">
-    <value>Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</value>
+    <value>NETSDK1064: Package {0}, version {1} was not found. It might have been deleted since NuGet restore. Otherwise, NuGet restore might have only partially completed, which might have been due to maximum path length restrictions.</value>
+    <comment>{StrBegin="NETSDK1064: "}</comment>
+  </data>
+  <data name="CannotFindApphostForRid" xml:space="preserve">
+    <value>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</value>
+    <comment>{StrBegin="NETSDK1065: "}</comment>
+  </data>
+  <data name="CannotUseAppHostWithoutRuntimeIdentifier" xml:space="preserve">
+    <value>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</value>
+    <comment>{StrBegin="NETSDK1066: "}</comment>
+  </data>
+  <data name="CannotUseSelfContainedWithoutAppHost" xml:space="preserve">
+    <value>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</value>
+    <comment>{StrBegin="NETSDK1067: "}</comment>
+  </data>
+  <data name="FrameworkDependentAppHostRequiresVersion21" xml:space="preserve">
+    <value>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</value>
+    <comment>{StrBegin="NETSDK1068: "}</comment>
   </data>
 </root>

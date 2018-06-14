@@ -13,7 +13,7 @@
     <PublishOutputToSymStore>false</PublishOutputToSymStore>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="$(FluentAssertionsVersion)" />
@@ -36,7 +36,7 @@
 
   <Import Project="SetupTestRoot.targets" />
 
-  <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 
   <PropertyGroup>
     <_DotNetSdkVersionFile>$(IntermediateOutputPath)\DotNetSdkVersion.g.cs</_DotNetSdkVersionFile>

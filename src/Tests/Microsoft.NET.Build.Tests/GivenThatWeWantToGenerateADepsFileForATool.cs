@@ -141,7 +141,20 @@ class Program
 
             var args = new List<string>();
 
-            string generateDepsProjectDirectoryPath = Path.Combine(TestContext.Current.ToolsetUnderTest.SdksPath, "Microsoft.NET.Sdk", "targets", "GenerateDeps");
+
+            string currentToolsetSdksPath;
+            if (TestContext.Current.ToolsetUnderTest.SdksPath == null)
+            {
+                //  We don't have an overridden path to the SDKs, so figure out which version of the SDK we're using and
+                //  calculate the path based on that
+                string dotnetSdkDir = TestContext.Current.ToolsetUnderTest.GetDotnetSdkDir(Log);
+                currentToolsetSdksPath = Path.Combine(dotnetSdkDir, "Sdks");
+            }
+            else
+            {
+                currentToolsetSdksPath = TestContext.Current.ToolsetUnderTest.SdksPath;
+            }
+            string generateDepsProjectDirectoryPath = Path.Combine(currentToolsetSdksPath, "Microsoft.NET.Sdk", "targets", "GenerateDeps");
             string generateDepsProjectFileName = "GenerateDeps.proj";
 
             args.Add($"/p:ProjectAssetsFile=\"{toolAssetsFilePath}\"");

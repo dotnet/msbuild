@@ -365,7 +365,8 @@ public static class {project.Name}
             string correctHttpReference;
             if (useFacades)
             {
-                correctHttpReference = Path.Combine(TestContext.Current.ToolsetUnderTest.BuildExtensionsMSBuildPath, @"net461\lib\System.Net.Http.dll");
+                string microsoftNETBuildExtensionsPath = TestContext.Current.ToolsetUnderTest.GetMicrosoftNETBuildExtensionsPath(Log);
+                correctHttpReference = Path.Combine(microsoftNETBuildExtensionsPath, @"net461\lib\System.Net.Http.dll");
             }
             else
             {
@@ -458,6 +459,62 @@ public static class {project.Name}
             // make sure both cases were encountered
             frameworkReferenceCount.Should().BeGreaterThan(0);
             extensionReferenceCount.Should().BeGreaterThan(0);
+        }
+
+        [FullMSBuildOnlyFact]
+        public void It_tolerates_newline_in_hint_path()
+        {
+            string hintPath = BuildReferencedBuildAndReturnOutputDllPath();
+
+            TestProject project = new TestProject()
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net462",
+                IsSdkProject = true
+            };
+
+            TestAsset testAsset = _testAssetsManager.CreateTestProject(project, "SimpleNamesWithHintPathsWithNewLines")
+                .WithProjectChanges((path, p) =>
+                {
+                    XNamespace ns = p.Root.Name.Namespace;
+
+                    var itemGroup = new XElement(ns + "ItemGroup");
+                    p.Root.Add(itemGroup);
+
+                    itemGroup.Add(
+                        new XElement(ns + "Reference",
+                            new XAttribute("Include", "System.Net.Http"),
+                            new XElement("HintPath", $"   {Environment.NewLine}{hintPath}   {Environment.NewLine}")));
+                })
+                .Restore(Log, project.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, project.Name));
+            var msbuildBuildCommand = new MSBuildCommand(Log, "Build", buildCommand.FullPathProjectFile);
+            msbuildBuildCommand.Execute().Should().Pass()
+                .And.NotHaveStdOutContaining("Illegal characters in path");
+        }
+
+        private string BuildReferencedBuildAndReturnOutputDllPath()
+        {
+            TestProject referencedProject = new TestProject()
+            {
+                Name = "NETFrameworkLibrary",
+                TargetFrameworks = "net462",
+                IsSdkProject = true
+            };
+
+            TestAsset referencedTestAsset = _testAssetsManager
+                .CreateTestProject(referencedProject, "SimpleNamesWithHintPathsWithNewLinesReferenced")
+                .Restore(Log, referencedProject.Name);
+
+            var referencedbuildCommand =
+                new BuildCommand(Log, Path.Combine(referencedTestAsset.TestRoot, referencedProject.Name));
+
+            referencedbuildCommand.Execute();
+
+            DirectoryInfo outputDirectory = referencedbuildCommand.GetOutputDirectory(
+                referencedProject.TargetFrameworks);
+            return new FileInfo(Path.Combine(outputDirectory.FullName, referencedProject.Name + ".dll")).FullName;
         }
     }
 }
