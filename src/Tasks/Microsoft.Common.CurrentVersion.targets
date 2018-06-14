@@ -3959,7 +3959,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
     <ItemGroup>
-      <_DeploymentReferencePaths Include="@(ReferencePath)">
+      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
     </ItemGroup>
