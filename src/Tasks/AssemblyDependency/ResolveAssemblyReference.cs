@@ -2953,8 +2953,8 @@ namespace Microsoft.Build.Tasks
         {
             return Execute
             (
-                new FileExists(FileUtilities.FileExistsNoThrow),
-                new DirectoryExists(FileUtilities.DirectoryExistsNoThrow),
+                new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
+                new DirectoryExists(p => FileUtilities.DirectoryExistsNoThrow(p)),
                 new GetDirectories(Directory.GetDirectories),
                 new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
                 new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),

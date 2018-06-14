@@ -227,7 +227,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, FileUtilities.FileExistsNoThrow);
+            return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
         }
 
         /// <summary>

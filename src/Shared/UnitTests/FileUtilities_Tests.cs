@@ -536,14 +536,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         public void FileOrDirectoryExistsNoThrow()
         {
+            var isWindows = NativeMethodsShared.IsWindows;
+
             Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow("||"));
-            Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow("c:\\doesnot_exist"));
-            Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow("c:\\"));
+            Assert.Equal(false, FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\doesnot_exist" : "/doesnot_exist"));
+            Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(isWindows ? @"c:\" : "/"));
             Assert.Equal(true, FileUtilities.FileOrDirectoryExistsNoThrow(Path.GetTempPath()));
 
             string path = null;

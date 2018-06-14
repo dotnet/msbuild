@@ -173,7 +173,7 @@ namespace Microsoft.Build.Tasks
                         // get an assemblyname from the string representation of the sentinel assembly name
                         var sentinelAssemblyName = new AssemblyNameExtension(NET35SP1SentinelAssemblyName);
 
-                        string path = GlobalAssemblyCache.GetLocation(sentinelAssemblyName, SystemProcessorArchitecture.MSIL, runtimeVersion => "v2.0.50727", new Version("2.0.57027"), false, new FileExists(FileUtilities.FileExistsNoThrow), GlobalAssemblyCache.pathFromFusionName, GlobalAssemblyCache.gacEnumerator, false);
+                        string path = GlobalAssemblyCache.GetLocation(sentinelAssemblyName, SystemProcessorArchitecture.MSIL, runtimeVersion => "v2.0.50727", new Version("2.0.57027"), false, new FileExists(p => FileUtilities.FileExistsNoThrow(p)), GlobalAssemblyCache.pathFromFusionName, GlobalAssemblyCache.gacEnumerator, false);
                         s_net35SP1SentinelAssemblyFound = !String.IsNullOrEmpty(path);
                     }
 

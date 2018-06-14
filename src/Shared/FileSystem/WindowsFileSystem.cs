@@ -55,47 +55,24 @@ namespace Microsoft.Build.Shared.FileSystem
         /// <inheritdoc/>
         public bool DirectoryExists(string path)
         {
-            return FileOrDirectoryExists(FileArtifactType.Directory, path);
+            return NativeMethodsShared.DirectoryExistsWindows(path);
         }
 
         /// <inheritdoc/>
         public bool FileExists(string path)
         {
-            return FileOrDirectoryExists(FileArtifactType.File, path);
+            return NativeMethodsShared.FileExistsWindows(path);
         }
 
         /// <inheritdoc/>
         public bool DirectoryEntryExists(string path)
         {
-            return FileOrDirectoryExists(FileArtifactType.FileOrDirectory, path);
+            return NativeMethodsShared.FileOrDirectoryExistsWindows(path);
         }
 
         public void ClearCaches()
         {
         }
-
-        private static bool FileOrDirectoryExists(FileArtifactType fileArtifactType, string path)
-        {
-            WindowsNative.Win32FindData findResult;
-            using (var findHandle = WindowsNative.FindFirstFileW(path, out findResult))
-            {
-                // Any error is interpreted as a file not found. This matches the managed Directory.Exists and File.Exists behavior
-                if (findHandle.IsInvalid)
-                {
-                    return false;
-                }
-
-                if (fileArtifactType == FileArtifactType.FileOrDirectory)
-                {
-                    return true;
-                }
-
-                var isDirectory = (findResult.DwFileAttributes & FileAttributes.Directory) != 0;
-
-                return !(fileArtifactType == FileArtifactType.Directory ^ isDirectory);
-            }
-        }
-
         private static IEnumerable<string> EnumerateFileOrDirectories(
             string directoryPath,
             FileArtifactType fileArtifactType,

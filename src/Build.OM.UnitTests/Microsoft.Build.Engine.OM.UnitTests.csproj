@@ -1,5 +1,7 @@
 <Project Sdk="RoslynTools.RepoToolset">
 
+  <Import Project="..\FileSystemSources.props" />
+
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
