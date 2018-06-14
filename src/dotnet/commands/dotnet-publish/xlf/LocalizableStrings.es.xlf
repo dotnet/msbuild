@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Plataforma de destino para la que se publica. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="needs-review-translation">Plataforma de destino para la que se publica. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -23,13 +23,13 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to place the published artifacts.</source>
-        <target state="translated">Directorio de salida en el que se ubicarán los artefactos publicados.</target>
+        <source>The output directory to place the published artifacts in.</source>
+        <target state="needs-review-translation">Directorio de salida en el que se ubicarán los artefactos publicados.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
-        <source>manifest.xml</source>
-        <target state="translated">manifest.xml</target>
+        <source>MANIFEST</source>
+        <target state="needs-review-translation">manifest.xml</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -38,13 +38,26 @@
         <note />
       </trans-unit>
       <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publica el tiempo de ejecución de .NET Core con su aplicación para que no sea necesario instalarlo en la máquina de destino. Si se especifica un identificador de tiempo de ejecución, se toma como predeterminado el valor "true".</target>
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Publica el tiempo de ejecución de .NET Core con su aplicación para que no sea necesario instalarlo en la máquina de destino. Si se especifica un identificador de tiempo de ejecución, se toma como predeterminado el valor "true".</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">No compile el proyecto antes de publicarlo. Implica --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish for. This is used when creating self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="new">The target runtime to publish for. This is used when creating self-contained deployment.
+The default is to publish a framework-dependent application.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

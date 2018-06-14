@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to uninstall.</source>
-        <target state="translated">要解除安裝之工具的 NuGet 套件識別碼。</target>
+        <source>The NuGet Package Id of the tool to uninstall.</source>
+        <target state="needs-review-translation">要解除安裝之工具的 NuGet 套件識別碼。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstalls a tool.</source>
-        <target state="translated">將工具解除安裝。</target>
+        <source>Uninstall a tool from the current development environment.</source>
+        <target state="needs-review-translation">將工具解除安裝。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Uninstall user wide.</source>
-        <target state="translated">為全部使用者解除安裝。</target>
+        <source>Uninstall the tool from the current user's tools directory.</source>
+        <target state="needs-review-translation">為全部使用者解除安裝。</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -52,11 +52,6 @@
         <target state="translated">請指定全域選項 (--global) 或工具路徑選項 (--tool-path) 兩者之一。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool was previously installed.</source>
-        <target state="translated">先前安裝工具所在的位置。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
         <target state="translated">(--global) 與工具路徑選項 (--tool-path) 衝突。請只指定其中一個選項。</target>
@@ -65,6 +60,16 @@
       <trans-unit id="InvalidToolPathOption">
         <source>Tool path '{0}' does not exist.</source>
         <target state="translated">工具路徑 {0} 不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to uninstall.</source>
+        <target state="new">The directory containing the tool to uninstall.</target>
         <note />
       </trans-unit>
     </body>

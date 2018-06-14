@@ -88,15 +88,14 @@ namespace Microsoft.DotNet.Cli
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
-            var cliFallbackFolderPathCalculator = new CliFolderPathCalculator();
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
-            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel(cliFallbackFolderPathCalculator))
+            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel())
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
-                new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
+                new FirstTimeUseNoticeSentinel())
             {
                 IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = disposableFirstTimeUseNoticeSentinel;
-                IAspNetCertificateSentinel aspNetCertificateSentinel = new AspNetCertificateSentinel(cliFallbackFolderPathCalculator);
+                IAspNetCertificateSentinel aspNetCertificateSentinel = new AspNetCertificateSentinel();
                 IFileSentinel toolPathSentinel = new FileSentinel(
                     new FilePath(
                         Path.Combine(
@@ -141,6 +140,15 @@ namespace Microsoft.DotNet.Cli
                             command = "help";
                         }
 
+                        var environmentProvider = new EnvironmentProvider();
+
+                        bool generateAspNetCertificate =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
+                        bool printTelemetryMessage =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_PRINT_TELEMETRY_MESSAGE", true);
+                        bool skipFirstRunExperience =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
+
                         topLevelCommandParserResult = new TopLevelCommandParserResult(command);
                         var hasSuperUserAccess = false;
                         if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
@@ -149,15 +157,25 @@ namespace Microsoft.DotNet.Cli
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
                             toolPathSentinel = new NoOpFileSentinel(exists: false);
                             hasSuperUserAccess = true;
+
+                            // When running through a native installer, we want the cache expansion to happen, so
+                            // we need to override this.
+                            skipFirstRunExperience = false;
                         }
+
+                        var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
+                            generateAspNetCertificate,
+                            printTelemetryMessage,
+                            skipFirstRunExperience);
 
                         ConfigureDotNetForFirstTimeUse(
                             nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
-                            cliFallbackFolderPathCalculator,
-                            hasSuperUserAccess);
+                            hasSuperUserAccess,
+                            dotnetFirstRunConfiguration,
+                            environmentProvider);
 
                         break;
                     }
@@ -221,21 +239,18 @@ namespace Microsoft.DotNet.Cli
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
-            CliFolderPathCalculator cliFolderPathCalculator,
-            bool hasSuperUserAccess)
+            bool hasSuperUserAccess,
+            DotnetFirstRunConfiguration dotnetFirstRunConfiguration,
+            IEnvironmentProvider environmentProvider)
         {
-            var environmentProvider = new EnvironmentProvider();
-
             using (PerfTrace.Current.CaptureTiming())
             {
                 var nugetPackagesArchiver = new NuGetPackagesArchiver();
-                var environmentPath =
-                    EnvironmentPathFactory.CreateEnvironmentPath(cliFolderPathCalculator, hasSuperUserAccess, environmentProvider);
+                var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
                 var nugetCachePrimer = new NuGetCachePrimer(
                     nugetPackagesArchiver,
-                    nugetCacheSentinel,
-                    cliFolderPathCalculator);
+                    nugetCacheSentinel);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                     nugetCachePrimer,
@@ -244,9 +259,9 @@ namespace Microsoft.DotNet.Cli
                     aspNetCertificateSentinel,
                     aspnetCertificateGenerator,
                     toolPathSentinel,
-                    environmentProvider,
+                    dotnetFirstRunConfiguration,
                     Reporter.Output,
-                    cliFolderPathCalculator.CliFallbackFolderPath,
+                    CliFolderPathCalculator.CliFallbackFolderPath,
                     environmentPath);
 
                 dotnetConfigurer.Configure();

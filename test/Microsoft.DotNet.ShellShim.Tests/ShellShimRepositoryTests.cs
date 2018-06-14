@@ -45,6 +45,27 @@ namespace Microsoft.DotNet.ShellShim.Tests
             stdOut.Should().Contain("Hello World");
         }
 
+        // Reproduce https://github.com/dotnet/cli/issues/9319
+        [Fact]
+        public void GivenAnExecutableAndRelativePathToShimPathItCanGenerateShimFile()
+        {
+            var outputDll = MakeHelloWorldExecutableDll("GivenAnExecutableAndRelativePath");
+            // To reproduce the bug, dll need to be nested under the shim
+            var parentPathAsShimPath = outputDll.GetDirectoryPath().GetParentPath().GetParentPath().Value;
+            var relativePathToShim = Path.GetRelativePath(
+                Directory.GetCurrentDirectory(),
+                parentPathAsShimPath);
+
+            ShellShimRepository shellShimRepository = ConfigBasicTestDependecyShellShimRepository(relativePathToShim);
+            var shellCommandName = nameof(ShellShimRepositoryTests) + Path.GetRandomFileName();
+
+            shellShimRepository.CreateShim(outputDll, shellCommandName);
+
+            var stdOut = ExecuteInShell(shellCommandName, relativePathToShim);
+
+            stdOut.Should().Contain("Hello World");
+        }
+
         private static ShellShimRepository ConfigBasicTestDependecyShellShimRepository(string pathToShim)
         {
             string stage2AppHostTemplateDirectory = GetAppHostTemplateFromStage2();
@@ -473,13 +494,19 @@ namespace Microsoft.DotNet.ShellShim.Tests
             return stage2AppHostTemplateDirectory;
         }
 
-        private static FilePath MakeHelloWorldExecutableDll()
+        private static FilePath MakeHelloWorldExecutableDll(string instanceName = null)
         {
             const string testAppName = "TestAppSimple";
             const string emptySpaceToTestSpaceInPath = " ";
             const string directoryNamePostFix = "Test";
+
+            if (instanceName == null)
+            {
+                instanceName = testAppName + emptySpaceToTestSpaceInPath + directoryNamePostFix;
+            }
+
             TestAssetInstance testInstance = TestAssets.Get(testAppName)
-                .CreateInstance(testAppName + emptySpaceToTestSpaceInPath + directoryNamePostFix)
+                .CreateInstance(instanceName)
                 .UseCurrentRuntimeFrameworkVersion()
                 .WithRestoreFiles()
                 .WithBuildFiles();

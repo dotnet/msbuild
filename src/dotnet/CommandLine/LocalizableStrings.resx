@@ -133,7 +133,7 @@
     <value>Response file '{0}' doesn't exist.</value>
   </data>
   <data name="ShowHelpInfo" xml:space="preserve">
-    <value>Show help information</value>
+    <value>Show command line help.</value>
   </data>
   <data name="ShowVersionInfo" xml:space="preserve">
     <value>Show version information</value>

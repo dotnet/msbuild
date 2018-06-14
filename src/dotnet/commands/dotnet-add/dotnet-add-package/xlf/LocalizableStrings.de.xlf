@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Package reference Command</source>
-        <target state="translated">.NET Add-Befehl für Paketverweise</target>
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="needs-review-translation">.NET Add-Befehl für Paketverweise</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -18,28 +18,28 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Adds reference only when targeting a specific framework.</source>
-        <target state="translated">Fügt nur bei Verwendung eines bestimmten Zielframeworks einen Verweis hinzu.</target>
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Fügt nur bei Verwendung eines bestimmten Zielframeworks einen Verweis hinzu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Fügt ohne Durchführen einer Wiederherstellungsvorschau und einer Kompatibilitätsprüfung einen Verweis hinzu.</target>
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="needs-review-translation">Fügt ohne Durchführen einer Wiederherstellungsvorschau und einer Kompatibilitätsprüfung einen Verweis hinzu.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="translated">Gibt NuGet-Paketquellen für die Wiederherstellung an.</target>
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="needs-review-translation">Gibt NuGet-Paketquellen für die Wiederherstellung an.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restores the packages to the specified directory.</source>
-        <target state="translated">Stellt die Pakete im angegebenen Verzeichnis wieder her.</target>
+        <source>The directory to restore packages to.</source>
+        <target state="needs-review-translation">Stellt die Pakete im angegebenen Verzeichnis wieder her.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>Version for the package to be added.</source>
-        <target state="translated">Version für das Paket, das hinzugefügt werden soll.</target>
+        <source>The version of the package to add.</source>
+        <target state="needs-review-translation">Version für das Paket, das hinzugefügt werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -63,8 +63,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
-        <source>PACKAGE_DIRECTORY</source>
-        <target state="translated">PACKAGE_DIRECTORY</target>
+        <source>PACKAGE_DIR</source>
+        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

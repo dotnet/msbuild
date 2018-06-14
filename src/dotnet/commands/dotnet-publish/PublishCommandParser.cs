@@ -14,7 +14,9 @@ namespace Microsoft.DotNet.Cli
             CreateWithRestoreOptions.Command(
                 "publish",
                 LocalizableStrings.AppDescription,
-                Accept.ZeroOrMoreArguments(),
+                Accept.ZeroOrMoreArguments()
+                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                            description: CommonLocalizableStrings.ProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
@@ -22,9 +24,9 @@ namespace Microsoft.DotNet.Cli
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
                         .ForwardAsSingle(o => $"-property:PublishDir={o.Arguments.Single()}")),
-                CommonOptions.FrameworkOption(),
-                CommonOptions.RuntimeOption(),
-                CommonOptions.ConfigurationOption(),
+                CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
+                CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
+                CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--manifest",

@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppFullName" xml:space="preserve">
-    <value>.NET Add Package reference Command</value>
+    <value>Add a NuGet package reference to the project.</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Command to add package reference</value>
@@ -130,19 +130,19 @@
     <value>Please specify one package reference to add.</value>
   </data>
   <data name="CmdFrameworkDescription" xml:space="preserve">
-    <value>Adds reference only when targeting a specific framework.</value>
+    <value>Add the reference only when targeting a specific framework.</value>
   </data>
   <data name="CmdNoRestoreDescription" xml:space="preserve">
-    <value>Adds reference without performing restore preview and compatibility check.</value>
+    <value>Add the reference without performing restore preview and compatibility check.</value>
   </data>
   <data name="CmdSourceDescription" xml:space="preserve">
-    <value>Specifies NuGet package sources to use during the restore.</value>
+    <value>The NuGet package source to use during the restore.</value>
   </data>
   <data name="CmdPackageDirectoryDescription" xml:space="preserve">
-    <value>Restores the packages to the specified directory.</value>
+    <value>The directory to restore packages to.</value>
   </data>
   <data name="CmdVersionDescription" xml:space="preserve">
-    <value>Version for the package to be added.</value>
+    <value>The version of the package to add.</value>
   </data>
   <data name="CmdDGFileException" xml:space="preserve">
     <value>Unable to create dependency graph file for project '{0}'. Cannot add package reference.</value>
@@ -160,7 +160,7 @@
     <value>SOURCE</value>
   </data>
   <data name="CmdPackageDirectory" xml:space="preserve">
-    <value>PACKAGE_DIRECTORY</value>
+    <value>PACKAGE_DIR</value>
   </data>
   <data name="CmdDGFileIOException" xml:space="preserve">
     <value>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</value>

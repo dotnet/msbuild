@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tools.Remove
         protected override string CommandName => "remove";
         protected override string FullCommandNameLocalized => LocalizableStrings.NetRemoveCommand;
         protected override string ArgumentName => Constants.ProjectArgumentName;
-        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
+        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>

@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to uninstall.</source>
-        <target state="translated">NuGet-Paket-ID des Tools, das deinstalliert werden soll.</target>
+        <source>The NuGet Package Id of the tool to uninstall.</source>
+        <target state="needs-review-translation">NuGet-Paket-ID des Tools, das deinstalliert werden soll.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstalls a tool.</source>
-        <target state="translated">Hiermit wird ein Tool deinstalliert.</target>
+        <source>Uninstall a tool from the current development environment.</source>
+        <target state="needs-review-translation">Hiermit wird ein Tool deinstalliert.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Uninstall user wide.</source>
-        <target state="translated">Benutzerweite Deinstallation.</target>
+        <source>Uninstall the tool from the current user's tools directory.</source>
+        <target state="needs-review-translation">Benutzerweite Deinstallation.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -52,11 +52,6 @@
         <target state="translated">Geben Sie entweder die globale Option (--global) oder die Toolpfadoption (--tool-path) an.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool was previously installed.</source>
-        <target state="translated">Speicherort, an dem das Tool zuvor installiert wurde.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
         <target state="translated">(--global) verursacht einen Konflikt mit der Toolpfadoption (--tool-path). Geben Sie nur eine der beiden Optionen an.</target>
@@ -65,6 +60,16 @@
       <trans-unit id="InvalidToolPathOption">
         <source>Tool path '{0}' does not exist.</source>
         <target state="translated">Der Toolpfad "{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to uninstall.</source>
+        <target state="new">The directory containing the tool to uninstall.</target>
         <note />
       </trans-unit>
     </body>

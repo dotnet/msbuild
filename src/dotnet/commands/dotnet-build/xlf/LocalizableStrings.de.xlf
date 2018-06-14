@@ -13,23 +13,38 @@
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="translated">Legen Sie dieses Flag fest, um Projekt-zu-Projekt-Verweise zu ignorieren und nur das Stammprojekt zu erstellen.</target>
+        <source>Do not build project-to-project references and only build the specified project.</source>
+        <target state="needs-review-translation">Legen Sie dieses Flag fest, um Projekt-zu-Projekt-Verweise zu ignorieren und nur das Stammprojekt zu erstellen.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Disables incremental build.</source>
-        <target state="translated">Deaktiviert die inkrementelle Erstellung.</target>
+        <source>Do not use incremental building.</source>
+        <target state="needs-review-translation">Deaktiviert die inkrementelle Erstellung.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to place built artifacts.</source>
-        <target state="translated">Ausgabeverzeichnis, in dem erstellte Artefakte abgelegt werden.</target>
+        <source>The output directory to place built artifacts in.</source>
+        <target state="needs-review-translation">Ausgabeverzeichnis, in dem erstellte Artefakte abgelegt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to build for. The target framework must also be specified in the project file.</source>
+        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to build for.</source>
+        <target state="new">The target runtime to build for.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

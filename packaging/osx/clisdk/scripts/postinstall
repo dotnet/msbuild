@@ -8,9 +8,6 @@ PACKAGE=$1
 INSTALL_DESTINATION=$2
 INSTALL_TEMP_HOME=/tmp/dotnet-installer
 
-# A temporary fix for the permissions issue(s)
-chmod -R 755 $INSTALL_DESTINATION
-
 first_run() {
     $INSTALL_DESTINATION/dotnet exec $INSTALL_DESTINATION/sdk/%SDK_VERSION%/dotnet.dll internal-reportinstallsuccess "$1" > /dev/null 2>&1 || true
 }
