@@ -61,7 +61,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
         /// </summary>
-        public static FileMatcher Default = new FileMatcher(FileSystemFactory.GetFileSystem(), null);
+        public static FileMatcher Default = new FileMatcher(FileSystems.Default, null);
 
         public FileMatcher(IFileSystemAbstraction fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileEntryExpansionCache = null) : this(
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(

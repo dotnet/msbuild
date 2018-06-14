@@ -209,14 +209,17 @@
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\FileSystem\FileSystemFactory.cs">
-      <Link>FileSystem\FileSystemFactory.cs</Link>
+    <Compile Include="..\Shared\FileSystem\FileSystems.cs">
+      <Link>FileSystem\FileSystems.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileSystem\IFileSystemAbstraction.cs">
       <Link>FileSystem\IFileSystemAbstraction.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileSystem\ManagedFileSystem.cs">
       <Link>FileSystem\ManagedFileSystem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\MSBuildOnWindowsFileSystem.cs">
+      <Link>FileSystem\MSBuildOnWindowsFileSystem.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileSystem\NativeWin32Exception.cs">
       <Link>FileSystem\NativeWin32Exception.cs</Link>
