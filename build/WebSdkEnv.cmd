@@ -13,7 +13,7 @@ if not defined DOTNET_INSTALL_DIR (
 )
 
 if not defined DOTNET_VERSION (
-    set DOTNET_VERSION=2.1.300-preview2-008248
+    set DOTNET_VERSION=2.1.300
 )
 
 if not defined FeedTasksPackage (
