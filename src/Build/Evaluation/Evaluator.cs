@@ -1141,7 +1141,8 @@ namespace Microsoft.Build.Evaluation
                 projectUsingTaskElement,
                 _data.TaskRegistry,
                 _expander,
-                ExpanderOptions.ExpandPropertiesAndItems
+                ExpanderOptions.ExpandPropertiesAndItems,
+                _evaluationContext.FileSystem
                 );
         }
 
