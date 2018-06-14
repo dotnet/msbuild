@@ -23,14 +23,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.WebJobs
             bool isRunCommandFilePresent = File.Exists(Path.Combine(ProjectDirectory, RunCommandFile));
             if (!isRunCommandFilePresent)
             {
-                string appName = Path.GetFileName(TargetPath);
-
-                string command = $"dotnet {appName}";
-                if (UseAppHost || string.Equals(Path.GetExtension(TargetPath), ".exe", StringComparison.OrdinalIgnoreCase))
-                {
-                    command = Path.ChangeExtension(appName, !string.IsNullOrWhiteSpace(ExecutableExtension) ? ExecutableExtension : null);
-                }
-
+                string command = WebJobsCommandGenerator.RunCommand(TargetPath, UseAppHost, ExecutableExtension);
                 File.WriteAllText(Path.Combine(WebJobsDirectory, RunCommandFile), command);
             }
 
