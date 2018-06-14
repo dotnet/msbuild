@@ -12,6 +12,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 
 
@@ -115,7 +116,8 @@ namespace Microsoft.Build.UnitTests
                                     ExpanderOptions.ExpandAll,
                                     null,
                                     Directory.GetCurrentDirectory(),
-                                    ElementLocation.EmptyLocation
+                                    ElementLocation.EmptyLocation,
+                                    FileSystems.Default
                                 );
 
             value = tree.Evaluate(state);
@@ -339,7 +341,8 @@ namespace Microsoft.Build.UnitTests
                                        ExpanderOptions.ExpandAll,
                                        conditionedProperties,
                                        Directory.GetCurrentDirectory(),
-                                       ElementLocation.EmptyLocation
+                                       ElementLocation.EmptyLocation,
+                                       FileSystems.Default
                                    );
 
             List<string> properties = null;
@@ -452,7 +455,8 @@ namespace Microsoft.Build.UnitTests
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
-                        ElementLocation.EmptyLocation
+                        ElementLocation.EmptyLocation,
+                        FileSystems.Default
                     );
             }
 
@@ -489,7 +493,8 @@ namespace Microsoft.Build.UnitTests
                             ExpanderOptions.ExpandAll,
                             null,
                             Directory.GetCurrentDirectory(),
-                            ElementLocation.EmptyLocation
+                            ElementLocation.EmptyLocation,
+                            FileSystems.Default
                         );
                 }
                 tree.Evaluate(state);

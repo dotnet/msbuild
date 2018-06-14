@@ -17,6 +17,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MessageImportance = Microsoft.Build.Framework.MessageImportance;
@@ -360,8 +361,8 @@ namespace Microsoft.Build.BackEnd
                 _requestEntry.ProjectRootDirectory,
                 _target.ConditionLocation,
                 projectLoggingContext.LoggingService,
-                projectLoggingContext.BuildEventContext
-                );
+                projectLoggingContext.BuildEventContext,
+                FileSystems.Default);
 
             if (!condition)
             {
@@ -626,8 +627,7 @@ namespace Microsoft.Build.BackEnd
                                  requestEntry.ProjectRootDirectory,
                                  _target.KeepDuplicateOutputsLocation,
                                  projectLoggingContext.LoggingService,
-                                 projectLoggingContext.BuildEventContext
-                                 );
+                                 projectLoggingContext.BuildEventContext, FileSystems.Default);
 
                         // NOTE: we need to gather the outputs in batches, because the output specification may reference item metadata
                         // Also, we are using the baseLookup, which has possibly had changes made to it since the project started.  Because of this, the
@@ -718,8 +718,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.ProjectRootDirectory,
                     errorTargetInstance.ConditionLocation,
                     projectLoggingContext.LoggingService,
-                    projectLoggingContext.BuildEventContext
-                );
+                    projectLoggingContext.BuildEventContext, FileSystems.Default);
 
                 if (condition)
                 {

@@ -21,6 +21,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -4336,7 +4337,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
                     null,
-                    new BuildEventContext(1, 2, 3, 4));
+                    new BuildEventContext(1, 2, 3, 4),
+                    FileSystems.Default);
                 Assert.True(false, "Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
             }
             catch (InvalidProjectFileException e)
@@ -4354,7 +4356,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Directory.GetCurrentDirectory(),
                 MockElementLocation.Instance,
                 null,
-                new BuildEventContext(1, 2, 3, 4)));
+                new BuildEventContext(1, 2, 3, 4),
+                FileSystems.Default));
         }
 
         /// <summary>

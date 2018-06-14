@@ -15,6 +15,7 @@ namespace Microsoft.Build.Evaluation
     using ElementLocation = Microsoft.Build.Construction.ElementLocation;
     using Microsoft.Build.Execution;
     using Microsoft.Build.Shared;
+    using Microsoft.Build.Shared.FileSystem;
 
     internal static class ConditionEvaluator
     {
@@ -169,7 +170,7 @@ namespace Microsoft.Build.Evaluation
         /// This method is thread safe and is called from engine and task execution module threads
         /// </summary>
         internal static bool EvaluateCondition<P, I>
-        (
+            (
             string condition,
             ParserOptions options,
             Expander<P, I> expander,
@@ -178,12 +179,23 @@ namespace Microsoft.Build.Evaluation
             ElementLocation elementLocation,
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
-            ProjectRootElementCache projectRootElementCache = null
-        )
+            IFileSystem fileSystem,
+            ProjectRootElementCache projectRootElementCache = null)
             where P : class, IProperty
             where I : class, IItem
         {
-            return EvaluateConditionCollectingConditionedProperties(condition, options, expander, expanderOptions, null /* do not collect conditioned properties */, evaluationDirectory, elementLocation, loggingServices, buildEventContext, projectRootElementCache);
+            return EvaluateConditionCollectingConditionedProperties(
+                condition,
+                options,
+                expander,
+                expanderOptions,
+                null /* do not collect conditioned properties */,
+                evaluationDirectory,
+                elementLocation,
+                loggingServices,
+                buildEventContext,
+                fileSystem,
+                projectRootElementCache);
         }
 
         /// <summary>
@@ -204,6 +216,7 @@ namespace Microsoft.Build.Evaluation
             ElementLocation elementLocation,
             ILoggingService loggingServices,
             BuildEventContext buildEventContext,
+            IFileSystem fileSystem,
             ProjectRootElementCache projectRootElementCache = null
         )
             where P : class, IProperty
@@ -249,7 +262,15 @@ namespace Microsoft.Build.Evaluation
 
             bool result;
 
-            var state = new ConditionEvaluationState<P, I>(condition, expander, expanderOptions, conditionedPropertiesTable, evaluationDirectory, elementLocation, projectRootElementCache);
+            var state = new ConditionEvaluationState<P, I>(
+                condition,
+                expander,
+                expanderOptions,
+                conditionedPropertiesTable,
+                evaluationDirectory,
+                elementLocation,
+                fileSystem,
+                projectRootElementCache);
 
             // We are evaluating this expression now and it can cache some state for the duration,
             // so we don't want multiple threads working on the same expression
@@ -273,7 +294,9 @@ namespace Microsoft.Build.Evaluation
             return result;
         }
 
-        private static ExpressionTreeForCurrentOptionsWithSize FlushCacheIfLargerThanThreshold(ParserOptions options, ExpressionTreeForCurrentOptionsWithSize cachedExpressionTreesForCurrentOptions)
+        private static ExpressionTreeForCurrentOptionsWithSize FlushCacheIfLargerThanThreshold(
+            ParserOptions options,
+            ExpressionTreeForCurrentOptionsWithSize cachedExpressionTreesForCurrentOptions)
         {
             if (cachedExpressionTreesForCurrentOptions.OptimisticSize > 3000)
             {
@@ -311,55 +334,42 @@ namespace Microsoft.Build.Evaluation
 
         internal interface IConditionEvaluationState
         {
-            string Condition
-            {
-                get;
-            }
+            string Condition { get; }
 
-            string EvaluationDirectory
-            {
-                get;
-            }
+            string EvaluationDirectory { get; }
 
-            ElementLocation ElementLocation
-            {
-                get;
-            }
+            ElementLocation ElementLocation { get; }
 
             /// <summary>
-            /// Table of conditioned properties and their values.
-            /// Used to populate configuration lists in some project systems.
-            /// If this is null, as it is for command line builds, conditioned properties
-            /// are not recorded.
+            ///     Table of conditioned properties and their values.
+            ///     Used to populate configuration lists in some project systems.
+            ///     If this is null, as it is for command line builds, conditioned properties
+            ///     are not recorded.
             /// </summary>
-            Dictionary<string, List<string>> ConditionedPropertiesInProject
-            {
-                get;
-            }
+            Dictionary<string, List<string>> ConditionedPropertiesInProject { get; }
 
             /// <summary>
-            /// May return null if the expression would expand to non-empty and it broke out early.
-            /// Otherwise, returns the correctly expanded expression.
+            ///     May return null if the expression would expand to non-empty and it broke out early.
+            ///     Otherwise, returns the correctly expanded expression.
             /// </summary>
             string ExpandIntoStringBreakEarly(string expression);
 
             /// <summary>
-            /// Expands the specified expression into a list of TaskItem's.
+            ///     Expands the specified expression into a list of TaskItem's.
             /// </summary>
             IList<TaskItem> ExpandIntoTaskItems(string expression);
 
             /// <summary>
-            /// Expands the specified expression into a string.
+            ///     Expands the specified expression into a string.
             /// </summary>
             string ExpandIntoString(string expression);
 
             /// <summary>
-            /// PRE cache
+            ///     PRE cache
             /// </summary>
-            ProjectRootElementCache LoadedProjectsCache
-            {
-                get;
-            }
+            ProjectRootElementCache LoadedProjectsCache { get; }
+
+            IFileSystem FileSystem { get; }
         }
 
         /// <summary>
@@ -383,6 +393,8 @@ namespace Microsoft.Build.Evaluation
 
             public ElementLocation ElementLocation { get; }
 
+            public IFileSystem FileSystem { get; }
+
             /// <summary>
             /// Table of conditioned properties and their values.
             /// Used to populate configuration lists in some project systems.
@@ -396,7 +408,6 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public ProjectRootElementCache LoadedProjectsCache { get; }
 
-
             internal ConditionEvaluationState
                 (
                 string condition,
@@ -405,6 +416,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<string>> conditionedPropertiesInProject,
                 string evaluationDirectory,
                 ElementLocation elementLocation,
+                IFileSystem fileSystem,
                 ProjectRootElementCache projectRootElementCache = null
                 )
             {
@@ -420,6 +432,7 @@ namespace Microsoft.Build.Evaluation
                 EvaluationDirectory = evaluationDirectory;
                 ElementLocation = elementLocation;
                 LoadedProjectsCache = projectRootElementCache;
+                FileSystem = fileSystem;
             }
 
             /// <summary>

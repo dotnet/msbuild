@@ -30,6 +30,7 @@ using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
@@ -1766,7 +1767,16 @@ namespace Microsoft.Build.Execution
         {
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this);
 
-            bool result = ConditionEvaluator.EvaluateCondition<ProjectPropertyInstance, ProjectItemInstance>(condition, ParserOptions.AllowPropertiesAndItemLists, expander, ExpanderOptions.ExpandPropertiesAndItems, Directory, ProjectFileLocation, null /* no logging service */, BuildEventContext.Invalid);
+            bool result = ConditionEvaluator.EvaluateCondition(
+                condition,
+                ParserOptions.AllowPropertiesAndItemLists,
+                expander,
+                ExpanderOptions.ExpandPropertiesAndItems,
+                Directory,
+                ProjectFileLocation,
+                null /* no logging service */,
+                BuildEventContext.Invalid,
+                FileSystems.Default);
 
             return result;
         }

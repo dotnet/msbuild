@@ -50,7 +50,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (var item in list)
                     {
-                        if (item == null || !(state.LoadedProjectsCache?.TryGet(item) != null || FileUtilities.FileOrDirectoryExistsNoThrow(item)))
+                        if (item == null || !(state.LoadedProjectsCache?.TryGet(item) != null || FileUtilities.FileOrDirectoryExistsNoThrow(item, state.FileSystem)))
                         {
                             return false;
                         }

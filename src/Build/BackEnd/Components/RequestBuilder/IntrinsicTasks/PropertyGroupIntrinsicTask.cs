@@ -10,7 +10,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.FileSystem;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 
@@ -68,8 +68,8 @@ namespace Microsoft.Build.BackEnd
                             Project.Directory,
                             property.ConditionLocation,
                             LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext
-                            );
+                            LoggingContext.BuildEventContext,
+                            FileSystems.Default);
 
                         if (condition)
                         {

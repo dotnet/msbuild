@@ -7,6 +7,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -435,7 +436,8 @@ namespace Microsoft.Build.UnitTests
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
-                    ElementLocation.EmptyLocation
+                    ElementLocation.EmptyLocation,
+                    FileSystems.Default
                     );
 
             Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
@@ -461,7 +463,8 @@ namespace Microsoft.Build.UnitTests
                     ExpanderOptions.ExpandAll,
                     null,
                     Directory.GetCurrentDirectory(),
-                    ElementLocation.EmptyLocation
+                    ElementLocation.EmptyLocation,
+                    FileSystems.Default
                     );
 
             Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
@@ -494,7 +497,8 @@ namespace Microsoft.Build.UnitTests
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
-                        ElementLocation.EmptyLocation
+                        ElementLocation.EmptyLocation,
+                        FileSystems.Default
                         );
 
                 var value = tree.Evaluate(state);
