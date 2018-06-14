@@ -28,7 +28,7 @@
 
     <!-- Disable asset target fallback warning globally since it does not work transitively on NoWarn of individual packages -->
     <!-- Since we disabled the implict fallback to net461, this will only kick in when we have an explicit fallback and we don't need to be warned about it doing what we asked it to do. -->
-    <NoWarn>NU1701</NoWarn>
+    <NoWarn>NU1701;NU5104</NoWarn>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
