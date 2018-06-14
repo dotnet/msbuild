@@ -76,11 +76,8 @@ namespace Microsoft.Build.Shared.FileSystem
 
         private static bool FileOrDirectoryExists(FileArtifactType fileArtifactType, string path)
         {
-            // The path gets normalized so we always use backslashes
-            path = NormalizePathToWindowsStyle(path);
-
             WindowsNative.Win32FindData findResult;
-            using (var findHandle = WindowsNative.FindFirstFileW(path.TrimEnd('\\'), out findResult))
+            using (var findHandle = WindowsNative.FindFirstFileW(path, out findResult))
             {
                 // Any error is interpreted as a file not found. This matches the managed Directory.Exists and File.Exists behavior
                 if (findHandle.IsInvalid)
@@ -106,10 +103,6 @@ namespace Microsoft.Build.Shared.FileSystem
             SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             var enumeration = new List<string>();
-
-            // The search pattern and path gets normalized so we always use backslashes
-            searchPattern = NormalizePathToWindowsStyle(searchPattern);
-            directoryPath = NormalizePathToWindowsStyle(directoryPath);
 
             var result = CustomEnumerateDirectoryEntries(
                 directoryPath,
@@ -137,7 +130,7 @@ namespace Microsoft.Build.Shared.FileSystem
             SearchOption searchOption,
             ICollection<string> result)
         {
-            var searchDirectoryPath = Path.Combine(directoryPath.TrimEnd('\\'), "*");
+            var searchDirectoryPath = Path.Combine(directoryPath, "*");
 
             WindowsNative.Win32FindData findResult;
             using (var findHandle = WindowsNative.FindFirstFileW(searchDirectoryPath, out findResult))
@@ -228,21 +221,6 @@ namespace Microsoft.Build.Shared.FileSystem
                     }
                 }
             }
-        }
-
-        private static string NormalizePathToWindowsStyle(string path)
-        {
-            // We make sure all paths are under max path, in some cases
-            // the native functions used are slightly more resilient to
-            // max path issues, but we want to mimic the managed implementation
-            // at this regard
-            if (path?.Length > WindowsNative.MaxPath)
-            {
-                throw new PathTooLongException(
-                    $"The path '${path}' exceeds the length limit of '${WindowsNative.MaxPath}' characters.");
-            }
-
-            return path?.Replace("/", "\\");
         }
     }
 }
