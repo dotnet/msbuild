@@ -62,7 +62,7 @@
 [cmdletbinding()]
 param(
    [string]$Channel="master",
-   [string]$Version="2.1.300-preview2-008248",
+   [string]$Version="2.1.300",
    [string]$InstallDir="<auto>",
    [string]$Architecture="<auto>",
    [switch]$SharedRuntime,

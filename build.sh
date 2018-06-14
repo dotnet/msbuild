@@ -11,7 +11,7 @@ done
 REPOROOT="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$REPOROOT/scripts/common/_prettyprint.sh"
-export DOTNET_VERSION=2.1.300-preview2-008248
+export DOTNET_VERSION=2.1.300
 if [ -n "$DotNetCoreSdkDir" ]
 then
     export DOTNET_VERSION=$( ${DotNetCoreSdkDir}/dotnet --version )
@@ -33,7 +33,7 @@ then
     [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
     DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
-    curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.1.300-preview2-008248
+    curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.1.300
 
     curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
     [ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461
