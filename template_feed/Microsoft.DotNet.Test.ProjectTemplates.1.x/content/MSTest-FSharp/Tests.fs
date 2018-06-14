@@ -1,4 +1,4 @@
-namespace Company.TestProject1
+﻿namespace Company.TestProject1
 
 open System
 open Microsoft.VisualStudio.TestTools.UnitTesting
