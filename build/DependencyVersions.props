@@ -59,16 +59,16 @@
     <SharedHostVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedHostVersion>
     <HostFxrVersion>$(MicrosoftNETCoreAppPackageVersion)</HostFxrVersion>
 
-    <AspNetCoreTemplatePackageVersion>2.0.8</AspNetCoreTemplatePackageVersion>
+    <AspNetCoreTemplatePackageVersion>2.0.9</AspNetCoreTemplatePackageVersion>
     <!-- This should either be timestamped or notimestamp as appropriate.
     AspNetCoreRelease is only used if the value of this property is "timestamped" -->
     <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
 
     <!--BranchName and AspNetCoreVersion will not always be the same-->
-    <AspNetCoreBranchName>2.0.8</AspNetCoreBranchName>
+    <AspNetCoreBranchName>2.0.9</AspNetCoreBranchName>
     <AspNetCoreRelease>rtm</AspNetCoreRelease>
-    <AspNetCoreVersion>2.0.8</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>10026</AspNetCoreRuntimePackageTimestamp>
+    <AspNetCoreVersion>2.0.9</AspNetCoreVersion>
+    <AspNetCoreRuntimePackageTimestamp>10029</AspNetCoreRuntimePackageTimestamp>
     <CurrentAspNetCoreRuntimeVersion Condition="'$(AspNetCoreRuntimePackageFlavor)'=='notimestamp'">$(AspNetCoreVersion)</CurrentAspNetCoreRuntimeVersion>
     <CurrentAspNetCoreRuntimeVersion Condition="'$(AspNetCoreRuntimePackageFlavor)'!='notimestamp'">$(AspNetCoreVersion)-$(AspNetCoreRelease)-$(AspNetCoreRuntimePackageTimestamp)</CurrentAspNetCoreRuntimeVersion>
 
@@ -82,6 +82,7 @@
       This list should be sorted most recent version to oldest.
     -->
     <AspNetCoreRuntimeStoreVersion Include="$(CurrentAspNetCoreRuntimeVersion)" />
+    <AspNetCoreRuntimeStoreVersion Include="2.0.8" />
     <AspNetCoreRuntimeStoreVersion Include="2.0.7" />
     <AspNetCoreRuntimeStoreVersion Include="2.0.6" />
     <AspNetCoreRuntimeStoreVersion Include="2.0.5" />
