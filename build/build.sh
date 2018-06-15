@@ -23,6 +23,7 @@ restore=false
 sign=false
 projects=''
 test=false
+perf=false
 verbosity='minimal'
 properties=''
 
@@ -119,7 +120,7 @@ while (($# > 0)); do
       test=true
       shift 1
       ;;
-    --Perf)
+    --perf)
       perf=true
       shift 1
       ;;

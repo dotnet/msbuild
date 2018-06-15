@@ -14,7 +14,7 @@ def static getBuildJobName(def configuration, def os) {
     return configuration.toLowerCase() + '_' + os.toLowerCase()
 }
 
-// Setup SDK performance tests runs
+// Setup SDK performance tests runs on Windows
 [true, false].each { isPR ->
     ['Windows_NT'].each { os ->
       ['Release'].each { config ->
@@ -54,7 +54,7 @@ def static getBuildJobName(def configuration, def os) {
             }
 
             def archiveSettings = new ArchivalSettings()
-            archiveSettings.addFiles("artifacts/${config}/TestResults/Performance/**")
+            archiveSettings.addFiles("artifacts/${config}/TestResults/Performance/**") 
             archiveSettings.setAlwaysArchive()
             Utilities.addArchival(newJob, archiveSettings)
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
@@ -92,6 +92,79 @@ def static getBuildJobName(def configuration, def os) {
     }
 }
 
+// Setup SDK performance tests runs on Linux
+[true, false].each { isPR ->
+    ['Ubuntu_16.04'].each { os ->
+      ['Release'].each { config ->
+        ['x64'].each { arch ->
+            def jobName = "SDK_Perf_${os}_${arch}"
+            def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
+            def perfWorkingDirectory = "\${WORKSPACE}/artifacts/${config}/TestResults/Performance"
+
+                // Set the label.
+                label('ubuntu_1604_clr_perf')
+                wrappers {
+                    credentialsBinding {
+                        string('BV_UPLOAD_SAS_TOKEN', 'CoreCLR Perf BenchView Sas')
+                    }
+                }
+
+                if (isPR) {
+                    parameters {
+                        stringParam('BenchviewCommitName', '\${ghprbPullTitle}', 'The name that you will be used to build the full title of a run in Benchview.  The final name will be of the form SDK <private|rolling> BenchviewCommitName')
+                    }
+                }
+
+                def runType = isPR ? 'private' : 'rolling'
+
+                steps {
+                   // Build solution and run the performance tests
+                   shell("./build.sh --configuration ${config} --ci --perf /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
+
+                   // Upload perf results to BenchView
+                   shell("export perfWorkingDirectory=${perfWorkingDirectory}\n" +
+                   "export configuration=${config}\n" +
+                   "export architecture=${arch}\n" +
+                   "export OS=${os}\n" +
+                   "export runType=${runType}\n" +
+                   "./build/uploadperftobenchview.sh")
+                }
+            }
+
+            Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+
+            newJob.with {
+                logRotator {
+                    artifactDaysToKeep(30)
+                    daysToKeep(30)
+                    artifactNumToKeep(200)
+                    numToKeep(200)
+                }
+                wrappers {
+                    timeout {
+                        absolute(240)
+                    }
+                }
+            }
+
+            if (isPR) {
+                TriggerBuilder builder = TriggerBuilder.triggerOnPullRequest()
+                builder.setGithubContext("${os} ${arch} SDK Perf Tests")
+
+                builder.triggerOnlyOnComment()
+                //Phrase is "test Ubuntu_16.04 x64 SDK Perf Tests"
+                builder.setCustomTriggerPhrase("(?i).*test\\W+${os}\\W+${arch}\\W+sdk\\W+perf\\W+tests.*")
+                builder.triggerForBranch(branch)
+                builder.emitTrigger(newJob)
+            }
+            else {
+                TriggerBuilder builder = TriggerBuilder.triggerOnCommit()
+                builder.emitTrigger(newJob)
+            }
+        }
+      }
+    }
+}
 
 Utilities.createHelperJob(this, project, branch,
     "Welcome to the ${project} Perf help",
