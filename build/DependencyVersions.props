@@ -4,6 +4,7 @@
     <MicrosoftAspNetCoreAllPackageVersion>2.1.1-rtm-30818</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
     <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.1.0</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreMvcPackageVersion>2.1.1</MicrosoftAspNetCoreMvcPackageVersion>
     <DotnetEfPackageVersion>2.1.1-rtm-30818</DotnetEfPackageVersion>
     <DotnetDevCertsPackageVersion>2.1.0</DotnetDevCertsPackageVersion>
     <DotnetSqlCachePackageVersion>2.1.0</DotnetSqlCachePackageVersion>
