@@ -22,7 +22,7 @@
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
-    <MicrosoftNETSdkPackageVersion>2.1.400-preview-63010-01</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>2.1.400-preview-63014-01</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>2.1.300</MicrosoftNETSdkWebPackageVersion>
