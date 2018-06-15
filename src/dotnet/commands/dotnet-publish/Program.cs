@@ -39,6 +39,37 @@ namespace Microsoft.DotNet.Tools.Publish
 
             var appliedPublishOption = result["dotnet"]["publish"];
 
+            if (appliedPublishOption.HasOption("mode") && appliedPublishOption.HasOption("self-contained"))
+            {
+                throw new GracefulException(LocalizableStrings.PublishModeAndSelfContainedOptionsConflict);
+            }
+
+            var mode = appliedPublishOption.ValueOrDefault<string>("mode");
+            switch (mode)
+            {
+                case null:
+                    break;
+
+                case PublishCommandParser.SelfContainedMode:
+                    msbuildArgs.Add("-p:SelfContained=true");
+                    break;
+
+                case PublishCommandParser.FxDependentMode:
+                    msbuildArgs.Add("-p:SelfContained=false");
+                    break;
+
+                case PublishCommandParser.FxDependentNoExeMode:
+                    msbuildArgs.Add("-p:SelfContained=false");
+                    msbuildArgs.Add("-p:UseAppHost=false");
+                    break;
+
+                default:
+                    throw new GracefulException(
+                        string.Format(
+                            LocalizableStrings.UnsupportedPublishMode,
+                            mode));
+            }
+
             msbuildArgs.AddRange(appliedPublishOption.OptionValuesToBeForwarded());
 
             msbuildArgs.AddRange(appliedPublishOption.Arguments);
