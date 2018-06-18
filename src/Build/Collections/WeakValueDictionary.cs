@@ -5,9 +5,7 @@
 // <summary>Dictionary that does not prevent values from being garbage collected.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
@@ -25,7 +23,7 @@ namespace Microsoft.Build.Collections
         /// The dictionary used internally to store the keys and values.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private Dictionary<K, WeakReference<V>> _dictionary;
+        private readonly Dictionary<K, WeakReference<V>> _dictionary;
 
         /// <summary>
         /// Improvised capacity. See comment in item setter.
@@ -54,10 +52,7 @@ namespace Microsoft.Build.Collections
         /// Some entries may represent keys or values that have already been garbage collected.
         /// To clean these out call <see cref="Scavenge"/>.
         /// </summary>
-        public int Count
-        {
-            get { return _dictionary.Count; }
-        }
+        public int Count => _dictionary.Count;
 
         /// <summary>
         /// Return keys
@@ -66,11 +61,11 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                List<K> keys = new List<K>();
+                var keys = new List<K>();
 
                 foreach (KeyValuePair<K, WeakReference<V>> pair in _dictionary)
                 {
-                    if (pair.Value != null && pair.Value.Target != null)
+                    if (pair.Value?.Target != null)
                     {
                         keys.Add(pair.Key);
                     }
@@ -150,8 +145,7 @@ namespace Microsoft.Build.Collections
         /// </remarks>
         public bool Contains(K key)
         {
-            V value;
-            bool contained = TryGetValue(key, out value);
+            bool contained = TryGetValue(key, out _);
             return contained;
         }
 
@@ -165,8 +159,7 @@ namespace Microsoft.Build.Collections
         /// </remarks>
         public bool TryGetValue(K key, out V value)
         {
-            WeakReference<V> wrappedValue;
-            bool result = _dictionary.TryGetValue(key, out wrappedValue);
+            bool result = _dictionary.TryGetValue(key, out WeakReference<V> wrappedValue);
 
             if (!result)
             {

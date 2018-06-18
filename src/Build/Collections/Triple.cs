@@ -5,9 +5,6 @@
 // <summary>A struct of three objects</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -18,53 +15,30 @@ namespace Microsoft.Build.Collections
     /// <typeparam name="C">Type of third object</typeparam>
     internal struct Triple<A, B, C>
     {
-        /// <summary>
-        /// First 
-        /// </summary>
-        private A _first;
-
-        /// <summary>
-        /// Second
-        /// </summary>
-        private B _second;
-
-        /// <summary>
-        /// Third
-        /// </summary>
-        private C _third;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public Triple(A first, B second, C third)
         {
-            _first = first;
-            _second = second;
-            _third = third;
+            First = first;
+            Second = second;
+            Third = third;
         }
 
         /// <summary>
         /// First
         /// </summary>
-        public A First
-        {
-            get { return _first; }
-        }
+        public A First { get; }
 
         /// <summary>
         /// Second
         /// </summary>
-        public B Second
-        {
-            get { return _second; }
-        }
+        public B Second { get; }
 
         /// <summary>
         /// Third
         /// </summary>
-        public C Third
-        {
-            get { return _third; }
-        }
+        public C Third { get; }
     }
 }

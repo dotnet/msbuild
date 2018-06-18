@@ -33,8 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         public ProjectCollection_Tests(ITestOutputHelper outputHelper)
         {
-            this.TestOutput = outputHelper;
-
+            TestOutput = outputHelper;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
@@ -72,11 +71,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(path);
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject(path);
-                Assert.Equal(true, Object.ReferenceEquals(project, project2));
+                Assert.Equal(true, ReferenceEquals(project, project2));
             }
             finally
             {
-                File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -98,11 +100,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.Save(path);
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject(path);
-                Assert.Equal(true, object.ReferenceEquals(project, project2));
+                Assert.Equal(true, ReferenceEquals(project, project2));
             }
             finally
             {
-                File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -124,11 +129,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.Save(path);
 
                 Project project2 = collection.LoadProject(path);
-                Assert.Equal(true, object.ReferenceEquals(project, project2));
+                Assert.Equal(true, ReferenceEquals(project, project2));
             }
             finally
             {
-                File.Delete(path);
+                if (path != null) File.Delete(path);
             }
         }
 
@@ -139,11 +144,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddProjectOnSetName()
         {
-            Project project = new Project();
-            project.FullPath = "c:\\x";
-
+            var project = new Project { FullPath = "c:\\x" };
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\x");
-            Assert.Equal(true, object.ReferenceEquals(project, project2));
+            Assert.Equal(true, ReferenceEquals(project, project2));
         }
 
         /// <summary>
@@ -158,7 +161,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 path = CreateProjectFile();
 
-                ProjectCollection collection = new ProjectCollection();
+                var collection = new ProjectCollection();
                 collection.SetGlobalProperty("p", "v");
                 Project project = collection.LoadProject(path);
 
@@ -166,7 +169,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -194,7 +200,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -222,7 +231,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -234,7 +246,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             XmlReader reader = CreateProjectXmlReader();
 
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("p", "v");
 
             Project project = collection.LoadProject(reader);
@@ -250,7 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             XmlReader reader = CreateProjectXmlReader();
 
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("p", "v");
 
             Project project = collection.LoadProject(reader, ObjectModelHelpers.MSBuildDefaultToolsVersion);
@@ -264,10 +276,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GlobalPropertyInheritProjectConstructor()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("p", "v");
 
-            Project project = new Project(collection);
+            var project = new Project(collection);
 
             Assert.Equal("v", project.GlobalProperties["p"]);
         }
@@ -287,13 +299,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 xml.Save(path);
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
 
-                Project result = ProjectCollection.GlobalProjectCollection.LoadProject(path);
+                ProjectCollection.GlobalProjectCollection.LoadProject(path);
 
                 Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
             }
             finally
             {
-                File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -303,15 +318,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void GetLoadedProjectWrongCollection()
         {
-            Project project1 = new Project();
-            project1.FullPath = "c:\\1";
+            var project1 = new Project { FullPath = "c:\\1" };
 
-            ProjectCollection collection = new ProjectCollection();
-            Project project2 = new Project(collection);
-            project2.FullPath = "c:\\1";
+            var collection = new ProjectCollection();
+            var project2 = new Project(collection) { FullPath = "c:\\1" };
 
-            Assert.Equal(true, object.ReferenceEquals(project2, collection.LoadProject("c:\\1")));
-            Assert.Equal(false, object.ReferenceEquals(project1, collection.LoadProject("c:\\1")));
+            Assert.Equal(true, ReferenceEquals(project2, collection.LoadProject("c:\\1")));
+            Assert.Equal(false, ReferenceEquals(project1, collection.LoadProject("c:\\1")));
         }
 
         /// <summary>
@@ -332,16 +345,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project1 = collection1.LoadProject(path);
                 Project project1b = collection1.LoadProject(path);
 
-                Assert.Equal(true, object.ReferenceEquals(project1.Xml, project1b.Xml));
+                Assert.Equal(true, ReferenceEquals(project1.Xml, project1b.Xml));
 
                 ProjectCollection collection2 = new ProjectCollection();
                 Project project2 = collection2.LoadProject(path);
 
-                Assert.Equal(false, object.ReferenceEquals(project1.Xml, project2.Xml));
+                Assert.Equal(false, ReferenceEquals(project1.Xml, project2.Xml));
             }
             finally
             {
-                File.Delete(path);
+                if (path != null)
+                {
+                    File.Delete(path);
+                }
             }
         }
 
@@ -353,14 +369,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                Project project = new Project();
-                project.FullPath = "c:\\x";
-
-                Project project2 = new Project();
-                project2.FullPath = "c:\\x";
-            }
-           );
+                _ = new Project { FullPath = "c:\\x" };
+                _ = new Project { FullPath = "c:\\x" };
+            });
         }
+
         /// <summary>
         /// Validates that when loading two projects with nominally different global properties, but that match when we take 
         /// into account the ProjectCollection's global properties, we get the pre-existing project if one exists. 
@@ -368,8 +381,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void TwoProjectsEquivalentWhenOneInheritsFromProjectCollection()
         {
-            Project project = new Project();
-            project.FullPath = "c:\\1";
+            var project = new Project { FullPath = "c:\\1" };
 
             // Set a global property on the project collection -- this should be passed on to all 
             // loaded projects. 
@@ -378,10 +390,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal("Debug", project.GlobalProperties["Configuration"]);
 
             // now create a global properties dictionary to pass to a new project 
-            Dictionary<string, string> globals = new Dictionary<string, string>();
+            var globals = new Dictionary<string, string> { { "Configuration", "Debug" } };
 
-            globals.Add("Configuration", "Debug");
-            Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", globals, null);
+            ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", globals, null);
 
             Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
         }
@@ -395,18 +406,22 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectRootElement xml = ProjectRootElement.Create();
             string projectDirectory = NativeMethodsShared.IsWindows ? "c:\\1" : "/l";
 
-            Dictionary<string, string> globalProperties1 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            globalProperties1.Add("p", "v1");
-            Project project1 = new Project(xml, globalProperties1, ObjectModelHelpers.MSBuildDefaultToolsVersion);
-            project1.FullPath = projectDirectory;
+            var globalProperties1 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "p", "v1" } };
+            var project1 =
+                new Project(xml, globalProperties1, ObjectModelHelpers.MSBuildDefaultToolsVersion)
+                {
+                    FullPath = projectDirectory
+                };
 
-            Dictionary<string, string> globalProperties2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            globalProperties2.Add("p", "v2");
-            Project project2 = new Project(xml, globalProperties2, ObjectModelHelpers.MSBuildDefaultToolsVersion);
-            project2.FullPath = projectDirectory;
+            var globalProperties2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "p", "v2" } };
+            var project2 =
+                new Project(xml, globalProperties2, ObjectModelHelpers.MSBuildDefaultToolsVersion)
+                {
+                    FullPath = projectDirectory
+                };
 
-            Assert.Equal(true, object.ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties1, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
-            Assert.Equal(true, object.ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties2, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
+            Assert.Equal(true, ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties1, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
+            Assert.Equal(true, ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties2, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
 
             List<Project> projects = Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
@@ -423,8 +438,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void TwoProjectsDistinguishedByGlobalPropertiesOnly_ProjectOverridesProjectCollection()
         {
-            Project project = new Project();
-            project.FullPath = "c:\\1";
+            var project = new Project { FullPath = "c:\\1" };
 
             // Set a global property on the project collection -- this should be passed on to all 
             // loaded projects. 
@@ -436,10 +450,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetGlobalProperty("MyProperty", "MyValue");
 
             // now create a global properties dictionary to pass to a new project 
-            Dictionary<string, string> project2Globals = new Dictionary<string, string>();
+            var project2Globals =
+                new Dictionary<string, string> { { "Configuration", "Release" }, { "Platform", "Win32" } };
 
-            project2Globals.Add("Configuration", "Release");
-            project2Globals.Add("Platform", "Win32");
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", project2Globals, null);
 
             Assert.Equal("Release", project2.GlobalProperties["Configuration"]);
@@ -492,13 +505,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectRootElement xml = ProjectRootElement.Create();
 
-            Project project1 = new Project(xml, null, "2.0");
-            project1.FullPath = "c:\\1";
+            var project1 = new Project(xml, null, "2.0") { FullPath = "c:\\1" };
 
-            Project project2 = new Project(xml, null, ObjectModelHelpers.MSBuildDefaultToolsVersion);
-            project2.FullPath = "c:\\1";
-            Assert.Equal(true, object.ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, "2.0")));
-            Assert.Equal(true, object.ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
+            var project2 = new Project(xml, null, ObjectModelHelpers.MSBuildDefaultToolsVersion) { FullPath = "c:\\1" };
+            Assert.Equal(true, ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, "2.0")));
+            Assert.Equal(true, ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
         }
 
         /// <summary>
@@ -508,18 +519,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReloadProjectWithInvalidToolsVersionInFile()
         {
-            string content = @"
+            const string content = @"
                     <Project ToolsVersion='bogus' xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'/>
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
-            project.FullPath = "c:\\123.proj";
+            var project = new Project(XmlReader.Create(new StringReader(content))) { FullPath = "c:\\123.proj" };
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
-            Assert.True(object.ReferenceEquals(project, project2));
+            Assert.True(ReferenceEquals(project, project2));
         }
 
         /// <summary>
@@ -529,18 +539,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReloadProjectWithProjectToolsVersionDifferentFromEffectiveToolsVersion()
         {
-            string content = @"
+            const string content = @"
                     <Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <Target Name='t'/>
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
-            project.FullPath = "c:\\123.proj";
+            var project = new Project(XmlReader.Create(new StringReader(content))) { FullPath = "c:\\123.proj" };
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
-            Assert.True(object.ReferenceEquals(project, project2));
+            Assert.True(ReferenceEquals(project, project2));
         }
 
         /// <summary>
@@ -551,15 +560,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ChangingGlobalPropertiesUpdatesCollection()
         {
             ProjectCollection collection = new ProjectCollection();
-            Project project = new Project(collection);
-            project.FullPath = "c:\\x"; // load into collection
+            var project = new Project(collection) { FullPath = "c:\\x" };
             project.SetGlobalProperty("p", "v1"); // should update collection
 
-            Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            globalProperties.Add("p", "v1");
+            var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "p", "v1" } };
             Project newProject = collection.LoadProject("c:\\x", globalProperties, null);
 
-            Assert.Equal(true, object.ReferenceEquals(project, newProject));
+            Assert.Equal(true, ReferenceEquals(project, newProject));
         }
 
         /// <summary>
@@ -569,9 +576,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SettingGlobalPropertiesOnCollectionUpdatesProjects()
         {
-            ProjectCollection collection = new ProjectCollection();
-            Project project1 = new Project(collection);
-            project1.FullPath = "c:\\y"; // load into collection
+            var collection = new ProjectCollection();
+            var project1 = new Project(collection) { FullPath = "c:\\y" };
+            // load into collection
             Assert.Equal(0, project1.GlobalProperties.Count);
 
             collection.SetGlobalProperty("g1", "v1");
@@ -581,8 +588,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(2, project1.GlobalProperties.Count);
 
             collection.RemoveGlobalProperty("g2");
-            Project project2 = new Project(collection);
-            project2.FullPath = "c:\\x"; // load into collection
+            var project2 = new Project(collection) { FullPath = "c:\\x" };
 
             Assert.Equal(1, project1.GlobalProperties.Count);
             Assert.Equal("v1", project2.GlobalProperties["g1"]);
@@ -598,9 +604,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SettingGlobalPropertiesOnCollectionUpdatesProjects2()
         {
-            ProjectCollection collection = new ProjectCollection();
-            Project project1 = new Project(collection);
-            project1.FullPath = "c:\\y"; // load into collection
+            var collection = new ProjectCollection();
+            var project1 = new Project(collection) { FullPath = "c:\\y" };
+            // load into collection
             project1.SetGlobalProperty("g1", "v0");
             Helpers.ClearDirtyFlag(project1.Xml);
 
@@ -620,9 +626,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemovingGlobalPropertiesOnCollectionUpdatesProjects()
         {
-            ProjectCollection collection = new ProjectCollection();
-            Project project1 = new Project(collection);
-            project1.FullPath = "c:\\y"; // load into collection
+            var collection = new ProjectCollection();
+            var project1 = new Project(collection) { FullPath = "c:\\y" };
             Assert.Equal(0, project1.GlobalProperties.Count);
 
             Helpers.ClearDirtyFlag(project1.Xml);
@@ -632,8 +637,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Assert.Equal(true, project1.IsDirty);
 
-            Project project2 = new Project(collection);
-            project2.FullPath = "c:\\x"; // load into collection
+            var project2 = new Project(collection) { FullPath = "c:\\x" };
 
             Assert.Equal(true, project2.IsDirty);
 
@@ -667,11 +671,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemovingGlobalPropertiesOnCollectionUpdatesProjects2()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.SetGlobalProperty("g1", "v1");
 
-            Project project1 = new Project(collection);
-            project1.FullPath = "c:\\y"; // load into collection
+            var project1 = new Project(collection) { FullPath = "c:\\y" };
             project1.SetGlobalProperty("g1", "v0"); // mask collection property
             Helpers.ClearDirtyFlag(project1.Xml);
 
@@ -687,8 +690,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void UnloadProject()
         {
-            Project project = new Project();
-            project.FullPath = "c:\\x"; // load into collection
+            var project = new Project { FullPath = "c:\\x" };
 
             Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
 
@@ -704,8 +706,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void UnloadProjectXml()
         {
-            Project project = new Project();
-            project.FullPath = "c:\\x"; // load into collection
+            var project = new Project { FullPath = "c:\\x" };
             ProjectRootElement xml = project.Xml;
 
             // Unload the evaluation project, and then the XML.
@@ -733,14 +734,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                Project project = new Project();
-                project.FullPath = "c:\\x"; // load into collection
+                var project = new Project { FullPath = "c:\\x" };
 
                 // Attempt to unload the xml before unloading the project evaluation.
                 ProjectCollection.GlobalProjectCollection.UnloadProject(project.Xml);
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Unloading project XML while it is in use should result in an exception.
         /// </summary>
@@ -749,11 +749,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
-                Project mainProject = new Project();
-                mainProject.FullPath = "c:\\main"; // load into collection
+                var mainProject = new Project { FullPath = "c:\\main" };
 
-                Project importProject = new Project();
-                importProject.FullPath = "c:\\import"; // load into collection
+                var importProject = new Project { FullPath = "c:\\import" };
                 ProjectRootElement importedXml = importProject.Xml;
 
                 // Import into main project
@@ -776,20 +774,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
            );
         }
+
         /// <summary>
         /// Renaming a project should correctly update the project collection's set of loaded projects.
         /// </summary>
         [Fact]
         public void RenameProject()
         {
-            Project project = new Project();
-            project.FullPath = "c:\\x"; // load into collection
+            var project = new Project { FullPath = "c:\\x" };
 
             project.FullPath = "c:\\y";
 
             Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
 
-            Assert.Equal(true, object.ReferenceEquals(project, Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects)[0]));
+            Assert.Equal(true, ReferenceEquals(project, Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects)[0]));
 
             ProjectCollection.GlobalProjectCollection.UnloadProject(project); // should not throw
 
@@ -802,8 +800,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RenameProjectAndVerifyStillContainsProjectCollectionGlobalProperties()
         {
-            Project project = new Project();
-            project.FullPath = "c:\\1";
+            var project = new Project { FullPath = "c:\\1" };
 
             // Set a global property on the project collection -- this should be passed on to all 
             // loaded projects. 
@@ -843,8 +840,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                File.Delete(file1);
-                File.Delete(file2);
+                if (file1 != null) File.Delete(file1);
+                if (file2 != null) File.Delete(file2);
             }
         }
 
@@ -863,11 +860,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 file1 = FileUtilities.GetTemporaryFile();
                 file2 = FileUtilities.GetTemporaryFile();
 
-                Project project = new Project();
+                var project = new Project();
                 project.Save(file1);
                 project.ProjectCollection.UnloadProject(project);
 
-                ProjectCollection collection = new ProjectCollection();
+                var collection = new ProjectCollection();
 
                 Project project2 = collection.LoadProject(file1);
                 collection.UnloadProject(project2);
@@ -879,8 +876,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                File.Delete(file1);
-                File.Delete(file2);
+                if (file1 != null) File.Delete(file1);
+                if (file2 != null) File.Delete(file2);
             }
         }
 
@@ -899,13 +896,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 file1 = FileUtilities.GetTemporaryFile();
                 file2 = FileUtilities.GetTemporaryFile();
 
-                Project project = new Project();
+                var project = new Project();
                 project.Save(file1);
                 project.ProjectCollection.UnloadProject(project);
 
-                ProjectCollection collection = new ProjectCollection();
+                var collection = new ProjectCollection();
 
-                Project project2 = collection.LoadProject(file1);
+                collection.LoadProject(file1);
                 collection.UnloadAllProjects();
 
                 Project project3 = collection.LoadProject(file1);
@@ -915,8 +912,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             finally
             {
-                File.Delete(file1);
-                File.Delete(file2);
+                if (file1 != null) File.Delete(file1);
+                if (file2 != null) File.Delete(file2);
             }
         }
 
@@ -926,10 +923,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddToolset()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.RemoveAllToolsets();
 
-            Toolset toolset = new Toolset("x", "c:\\y", collection, null);
+            var toolset = new Toolset("x", "c:\\y", collection, null);
             collection.AddToolset(toolset);
 
             Assert.Equal(toolset, collection.GetToolset("x"));
@@ -946,11 +943,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddTwoToolsets()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.RemoveAllToolsets();
 
-            Toolset toolset1 = new Toolset("x", "c:\\y", collection, null);
-            Toolset toolset2 = new Toolset("y", "c:\\z", collection, null);
+            var toolset1 = new Toolset("x", "c:\\y", collection, null);
+            var toolset2 = new Toolset("y", "c:\\z", collection, null);
 
             collection.AddToolset(toolset1);
             collection.AddToolset(toolset2);
@@ -970,11 +967,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ReplaceToolset()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.RemoveAllToolsets();
 
-            Toolset toolset1 = new Toolset("x", "c:\\y", collection, null);
-            Toolset toolset2 = new Toolset("x", "c:\\z", collection, null);
+            var toolset1 = new Toolset("x", "c:\\y", collection, null);
+            var toolset2 = new Toolset("x", "c:\\z", collection, null);
 
             collection.AddToolset(toolset1);
             collection.AddToolset(toolset2);
@@ -995,21 +992,21 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.AddToolset(null);
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Remove a toolset
         /// </summary>
         [Fact]
         public void RemoveToolset()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
 
-            Toolset toolset1 = new Toolset("x", "c:\\y", collection, null);
-            Toolset toolset2 = new Toolset("y", "c:\\z", collection, null);
+            var toolset1 = new Toolset("x", "c:\\y", collection, null);
+            var toolset2 = new Toolset("y", "c:\\z", collection, null);
 
-            int initial = Helpers.MakeList<Toolset>(collection.Toolsets).Count;
+            int initial = Helpers.MakeList(collection.Toolsets).Count;
 
             collection.AddToolset(toolset1);
             collection.AddToolset(toolset2);
@@ -1017,7 +1014,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Equal(true, collection.RemoveToolset("x"));
             Assert.Equal(false, collection.ContainsToolset("x"));
 
-            Assert.Equal(1, Helpers.MakeList<Toolset>(collection.Toolsets).Count - initial);
+            Assert.Equal(1, Helpers.MakeList(collection.Toolsets).Count - initial);
         }
 
         /// <summary>
@@ -1026,7 +1023,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveNonexistentToolset()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             Assert.Equal(false, collection.RemoveToolset("nonexistent"));
         }
 
@@ -1039,9 +1036,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.RemoveToolset(null);
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Attempt to remove an empty string toolsversion
         /// </summary>
@@ -1051,9 +1048,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<ArgumentException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.RemoveToolset(String.Empty);
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Current default from registry is 2.0 if 2.0 is installed
         /// </summary>
@@ -1066,7 +1063,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 return;
             }
 
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
 #if STANDALONEBUILD
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
 #else
@@ -1091,7 +1088,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 return;
             }
 
-            ProjectCollection collection = new ProjectCollection(null, null, ToolsetDefinitionLocations.Registry);
+            var collection = new ProjectCollection(null, null, ToolsetDefinitionLocations.Registry);
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
         }
 
@@ -1104,9 +1101,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<ArgumentException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.DefaultToolsVersion = String.Empty;
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Error setting default tools version to a toolset that does not exist
         /// </summary>
@@ -1116,16 +1113,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Throws<InvalidOperationException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.DefaultToolsVersion = "nonexistent";
-            }
-           );
+            });
         }
+
         /// <summary>
         /// Set default tools version; subsequent projects should use it 
         /// </summary>
         [Fact]
         public void SetDefaultToolsVersion()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             collection.AddToolset(new Toolset("x", @"c:\y", collection, null));
 
             collection.DefaultToolsVersion = "x";
@@ -1138,7 +1135,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), null, null, collection);
+            var project = new Project(XmlReader.Create(new StringReader(content)), null, null, collection);
 
             // ... and after all that, we end up defaulting to the current ToolsVersion instead.  There's a way 
             // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and 
@@ -1153,7 +1150,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectCollectionChangedEvent()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             bool dirtyRaised = false;
             ProjectCollectionChangedState expectedChange = ProjectCollectionChangedState.Loggers;
             collection.ProjectCollectionChanged +=
@@ -1198,7 +1195,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // Verify HostServices changes raise the event.
             expectedChange = ProjectCollectionChangedState.HostServices;
             dirtyRaised = false;
-            collection.HostServices = new Execution.HostServices();
+            collection.HostServices = new HostServices();
             Assert.True(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Loggers;
@@ -1208,7 +1205,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             expectedChange = ProjectCollectionChangedState.Loggers;
             dirtyRaised = false;
-            collection.RegisterLoggers(new Microsoft.Build.Framework.ILogger[] { new MockLogger(), new MockLogger() });
+            collection.RegisterLoggers(new Build.Framework.ILogger[] { new MockLogger(), new MockLogger() });
             Assert.True(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Loggers;
@@ -1245,7 +1242,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             // Verify if the project, project collection and the value we are setting in the project collection are all the same
             // then the projects value for the property should not change and no event should be fired.
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             XmlReader reader = CreateProjectXmlReader();
             Project project = collection.LoadProject(reader, ObjectModelHelpers.MSBuildDefaultToolsVersion);
             project.SetProperty("a", "1");
@@ -1269,7 +1266,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("a", "1");
             collection.SetGlobalProperty("a", "1");
             VerifyProjectCollectionEvents(collection, true, "2");
-            project.GetPropertyValue("a").Equals("2", StringComparison.OrdinalIgnoreCase);
+            Assert.True(project.GetPropertyValue("a").Equals("2", StringComparison.OrdinalIgnoreCase));
 
             // Verify if the project, project collection have the same value but a new value is set in the project collection
             // then the projects value for the property should be change and an event should be fired.
@@ -1279,7 +1276,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("a", "1");
             collection.SetGlobalProperty("a", "(x86)");
             VerifyProjectCollectionEvents(collection, true, "%28x86%29");
-            project.GetPropertyValue("a").Equals("%28x86%29", StringComparison.OrdinalIgnoreCase);
+            Assert.True(project.GetPropertyValue("a").Equals("%28x86%29", StringComparison.OrdinalIgnoreCase));
 
             // Verify if the project has one value and project collection and the property we are setting on the project collection have the same value
             // then the projects value for the property should be change but no event should be fired
@@ -1290,7 +1287,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.SetGlobalProperty("a", "1");
 
             VerifyProjectCollectionEvents(collection, false, "1");
-            project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase);
+            Assert.True(project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase));
 
             // Verify if the project and the property being set have one value but the project collection has another
             // then the projects value for the property should not change and event should be fired
@@ -1300,7 +1297,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("a", "1");
             collection.SetGlobalProperty("a", "2");
             VerifyProjectCollectionEvents(collection, true, "1");
-            project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase);
+            Assert.True(project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase));
 
             // item is added to project collection for the first time. Make sure it is added to the project and an event is fired.
             collection = new ProjectCollection();
@@ -1308,7 +1305,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project = collection.LoadProject(reader, ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             VerifyProjectCollectionEvents(collection, true, "1");
-            project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase);
+            Assert.True(project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -1317,7 +1314,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectXmlChangedEvent()
         {
-            ProjectCollection collection = new ProjectCollection();
+            var collection = new ProjectCollection();
             ProjectRootElement pre = null;
             bool dirtyRaised = false;
             collection.ProjectXmlChanged +=
@@ -1325,7 +1322,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     Assert.Same(collection, sender);
                     Assert.Same(pre, e.ProjectXml);
-                    this.TestOutput.WriteLine(e.Reason ?? String.Empty);
+                    TestOutput.WriteLine(e.Reason ?? String.Empty);
                     dirtyRaised = true;
                 };
             Assert.False(dirtyRaised);
@@ -1376,8 +1373,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectChangedEvent()
         {
-            ProjectCollection collection = new ProjectCollection();
-            ProjectRootElement pre = null;
+            var collection = new ProjectCollection();
             Project project = null;
             bool dirtyRaised = false;
             collection.ProjectChanged +=
@@ -1389,7 +1385,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 };
             Assert.False(dirtyRaised);
 
-            pre = ProjectRootElement.Create(collection);
+            ProjectRootElement pre = ProjectRootElement.Create(collection);
             project = new Project(pre, null, null, collection);
 
             // all these should still pass with disableMarkDirty set
@@ -1457,7 +1453,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Create an XmlReader around an empty project file content
         /// </summary>
-        private XmlReader CreateProjectXmlReader()
+        private static XmlReader CreateProjectXmlReader()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
             XmlReader reader = XmlReader.Create(new StringReader(xml.RawXml));
@@ -1467,7 +1463,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Verify that when a property is set on the project collection that the correct events are fired.
         /// </summary>
-        private void VerifyProjectCollectionEvents(ProjectCollection collection, bool expectEventRaised, string propertyValue)
+        private static void VerifyProjectCollectionEvents(ProjectCollection collection, bool expectEventRaised, string propertyValue)
         {
             bool raisedEvent = false;
             ProjectCollectionChangedState expectedChange = ProjectCollectionChangedState.Loggers;

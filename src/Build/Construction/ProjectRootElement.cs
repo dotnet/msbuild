@@ -16,7 +16,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -28,7 +27,6 @@ using Microsoft.Internal.Performance;
 using Microsoft.VisualStudio.Profiler;
 #endif
 #endif
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
@@ -91,21 +89,9 @@ namespace Microsoft.Build.Construction
         /// Saving to or loading from a provided stream reader does not modify this value, only saving to or loading from disk.
         /// The actual value is meaningless (since the counter is shared with all projects) --
         /// it should only be compared to a stored value.
-        /// Immediately after loading from disk, this has the same value as <see cref="_version">version</see>.
+        /// Immediately after loading from disk, this has the same value as <see cref="Version">version</see>.
         /// </summary>
         private int _versionOnDisk;
-
-        /// <summary>
-        /// Current version number of this object.
-        /// Used to figure whether this object is dirty for saving, or projects evaluated from
-        /// this object need to be re-evaluated.
-        /// The actual value is meaningless (since the counter is shared with all projects) --
-        /// it should only be compared to a stored value.
-        /// </summary>
-        /// <remarks>
-        /// Set this only through <see cref="MarkDirty(string, string)"/>.
-        /// </remarks>
-        private int _version;
 
         /// <summary>
         /// The encoding of the project that was (if applicable) loaded off disk, and that will be used to save the project.
@@ -147,11 +133,6 @@ namespace Microsoft.Build.Construction
         private DateTime _lastWriteTimeWhenRead;
 
         /// <summary>
-        /// The cache in which this project root element is stored.
-        /// </summary>
-        private readonly ProjectRootElementCache _projectRootElementCache;
-
-        /// <summary>
         /// Reason it was last marked dirty; unlocalized, for debugging
         /// </summary>
         private string _dirtyReason = "first created project {0}";
@@ -169,13 +150,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectRootElement(XmlReader xmlReader, ProjectRootElementCache projectRootElementCache, bool isExplicitlyLoaded,
             bool preserveFormatting)
-            : base()
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlReader, "xmlReader");
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, "projectRootElementCache");
+            ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
 
-            this.IsExplicitlyLoaded = isExplicitlyLoaded;
-            _projectRootElementCache = projectRootElementCache;
+            IsExplicitlyLoaded = isExplicitlyLoaded;
+            ProjectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
             IncrementVersion();
 
@@ -190,16 +170,14 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectRootElement(ProjectRootElementCache projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, "projectRootElementCache");
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
 
-            _projectRootElementCache = projectRootElementCache;
+            ProjectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
             IncrementVersion();
 
-            XmlDocumentWithLocation document = new XmlDocumentWithLocation();
-
-            XmlReaderSettings xrs = new XmlReaderSettings();
-            xrs.DtdProcessing = DtdProcessing.Ignore;
+            var document = new XmlDocumentWithLocation();
+            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
             var emptyProjectFile = string.Format(EmptyProjectFileContent,
                 (projectFileOptions & NewProjectFileOptions.IncludeXmlDeclaration) != 0 ? EmptyProjectFileXmlDeclaration : string.Empty,
@@ -221,15 +199,14 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectRootElement(string path, ProjectRootElementCache projectRootElementCache,
             bool preserveFormatting)
-            : base()
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
             ErrorUtilities.VerifyThrowInternalRooted(path);
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, "projectRootElementCache");
-            _projectRootElementCache = projectRootElementCache;
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ProjectRootElementCache = projectRootElementCache;
 
             IncrementVersion();
-            _versionOnDisk = _version;
+            _versionOnDisk = Version;
             _timeLastChangedUtc = DateTime.UtcNow;
 
             XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting);
@@ -248,12 +225,11 @@ namespace Microsoft.Build.Construction
         /// Do not make public: we do not wish to expose particular XML API's.
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCache projectRootElementCache)
-            : base()
         {
-            ErrorUtilities.VerifyThrowArgumentNull(document, "document");
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, "projectRootElementCache");
+            ErrorUtilities.VerifyThrowArgumentNull(document, nameof(document));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
 
-            _projectRootElementCache = projectRootElementCache;
+            ProjectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
             IncrementVersion();
 
@@ -268,7 +244,6 @@ namespace Microsoft.Build.Construction
         /// Do not make public: we do not wish to expose particular XML API's.
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document)
-            : base()
         {
             ProjectParser.Parse(document, this);
         }
@@ -289,15 +264,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override string Condition
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
-            }
+            get => null;
+            set => ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
         }
 
         #region ChildEnumerators
@@ -411,14 +379,11 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public string FullPath
         {
-            get
-            {
-                return _projectFileLocation?.File;
-            }
+            get => _projectFileLocation?.File;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, "value");
+                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
 
                 string oldFullPath = _projectFileLocation?.File;
 
@@ -441,11 +406,11 @@ namespace Microsoft.Build.Construction
 
                 if (oldFullPath == null)
                 {
-                    _projectRootElementCache.AddEntry(this);
+                    ProjectRootElementCache.AddEntry(this);
                 }
                 else
                 {
-                    _projectRootElementCache.RenameEntry(oldFullPath, this);
+                    ProjectRootElementCache.RenameEntry(oldFullPath, this);
                 }
 
                 OnAfterProjectRename?.Invoke(oldFullPath);
@@ -468,7 +433,7 @@ namespace Microsoft.Build.Construction
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
                 if (_encoding == null)
                 {
-                    XmlDeclaration declaration = XmlDocument.FirstChild as XmlDeclaration;
+                    var declaration = XmlDocument.FirstChild as XmlDeclaration;
 
                     if (declaration?.Encoding.Length > 0)
                     {
@@ -595,9 +560,9 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                using (StringWriter stringWriter = new EncodingStringWriter(Encoding))
+                using (var stringWriter = new EncodingStringWriter(Encoding))
                 {
-                    using (ProjectWriter projectWriter = new ProjectWriter(stringWriter))
+                    using (var projectWriter = new ProjectWriter(stringWriter))
                     {
                         projectWriter.Initialize(XmlDocument);
                         XmlDocument.Save(projectWriter);
@@ -638,7 +603,7 @@ namespace Microsoft.Build.Construction
         /// 
         /// We're assuming we don't have over 2 billion edits.
         /// </remarks>
-        public int Version => _version;
+        public int Version { get; private set; }
 
         /// <summary>
         /// The time that this object was last changed. If it hasn't
@@ -709,16 +674,12 @@ namespace Microsoft.Build.Construction
         /// Internal code that wants to set this to true should call <see cref="MarkAsExplicitlyLoaded"/>.
         /// The setter is private to make it more difficult to downgrade an existing PRE to an implicitly loaded state, which should never happen.
         /// </remarks>
-        internal bool IsExplicitlyLoaded
-        {
-            get;
-            private set;
-        }
+        internal bool IsExplicitlyLoaded { get; private set; }
 
         /// <summary>
         /// Retrieves the root element cache with which this root element is associated.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache => _projectRootElementCache;
+        internal ProjectRootElementCache ProjectRootElementCache { get; }
 
         /// <summary>
         /// Gets a value indicating whether this PRE is known by its containing collection.
@@ -732,11 +693,7 @@ namespace Microsoft.Build.Construction
         /// for targets without Returns attributes changes from using the Outputs to 
         /// returning nothing by default. 
         /// </summary>
-        internal bool ContainsTargetsWithReturnsAttribute
-        {
-            get;
-            set;
-        }
+        internal bool ContainsTargetsWithReturnsAttribute { get; set; }
 
         /// <summary>
         /// Gets the ProjectExtensions child, if any, otherwise null.
@@ -787,7 +744,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(ProjectCollection projectCollection, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             return Create(projectCollection.ProjectRootElementCache, projectFileOptions);
         }
@@ -826,11 +783,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(string path, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
-            ProjectRootElement projectRootElement = new ProjectRootElement(projectCollection.ProjectRootElementCache, newProjectFileOptions);
-            projectRootElement.FullPath = path;
+            var projectRootElement = new ProjectRootElement(
+                projectCollection.ProjectRootElementCache,
+                newProjectFileOptions) { FullPath = path };
 
             return projectRootElement;
         }
@@ -862,7 +820,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(XmlReader xmlReader, ProjectCollection projectCollection, bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             return new ProjectRootElement(xmlReader, projectCollection.ProjectRootElementCache, true /*Explicitly loaded*/,
                 preserveFormatting);
@@ -895,8 +853,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             path = FileUtilities.NormalizePath(path);
 
@@ -915,7 +873,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
             return TryOpen(path, ProjectCollection.GlobalProjectCollection);
         }
@@ -952,8 +910,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             path = FileUtilities.NormalizePath(path);
 
@@ -969,7 +927,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement AddImport(string project)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(project, "project");
+            ErrorUtilities.VerifyThrowArgumentLength(project, nameof(project));
 
             ProjectImportGroupElement importGroupToAddTo =
                 ImportGroupsReversed.FirstOrDefault(importGroup => importGroup.Condition.Length <= 0);
@@ -1103,7 +1061,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemDefinitionElement AddItemDefinition(string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, "itemType");
+            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
 
             ProjectItemDefinitionGroupElement itemDefinitionGroupToAddTo = null;
 
@@ -1548,7 +1506,7 @@ namespace Microsoft.Build.Construction
                 // to force a save if the Encoding changed from UTF8 with BOM to UTF8 w/o BOM (for example).
                 if (HasUnsavedChanges || !Equals(saveEncoding, Encoding))
                 {
-                    using (ProjectWriter projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
+                    using (var projectWriter = new ProjectWriter(_projectFileLocation.File, saveEncoding))
                     {
                         projectWriter.Initialize(XmlDocument);
                         XmlDocument.Save(projectWriter);
@@ -1611,7 +1569,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public void Save(TextWriter writer)
         {
-            using (ProjectWriter projectWriter = new ProjectWriter(writer))
+            using (var projectWriter = new ProjectWriter(writer))
             {
                 projectWriter.Initialize(XmlDocument);
                 XmlDocument.Save(projectWriter);
@@ -1626,7 +1584,7 @@ namespace Microsoft.Build.Construction
         /// <returns>The cloned element.</returns>
         public ProjectRootElement DeepClone()
         {
-            return (ProjectRootElement)this.DeepClone(this, null);
+            return (ProjectRootElement)DeepClone(this, null);
         }
 
         /// <summary>
@@ -1652,8 +1610,8 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInvalidOperation(File.Exists(path), "FileToReloadFromDoesNotExist", path);
 
-            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting => LoadDocument(path, shouldPreserveFormatting);
-            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
+            XmlDocumentWithLocation DocumentProducer(bool shouldPreserveFormatting) => LoadDocument(path, shouldPreserveFormatting);
+            ReloadFrom(DocumentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
 
         /// <summary>
@@ -1677,16 +1635,16 @@ namespace Microsoft.Build.Construction
         /// </param>
         public void ReloadFrom(XmlReader reader, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
-            Func<bool, XmlDocumentWithLocation> documentProducer = shouldPreserveFormatting =>
+            XmlDocumentWithLocation DocumentProducer(bool shouldPreserveFormatting)
             {
-                var document =  LoadDocument(reader, shouldPreserveFormatting);
+                var document = LoadDocument(reader, shouldPreserveFormatting);
 
-                document.FullPath = this.FullPath;
+                document.FullPath = FullPath;
 
                 return document;
-            };
+            }
 
-            ReloadFrom(documentProducer, throwIfUnsavedChanges, preserveFormatting);
+            ReloadFrom(DocumentProducer, throwIfUnsavedChanges, preserveFormatting);
         }
 
         private void ReloadFrom(Func<bool, XmlDocumentWithLocation> documentProducer, bool throwIfUnsavedChanges, bool? preserveFormatting)
@@ -1703,7 +1661,7 @@ namespace Microsoft.Build.Construction
             // and thus most strings would get reused
             //this.XmlDocument.ClearAnyCachedStrings();
 
-            this.RemoveAllChildren();
+            RemoveAllChildren();
 
             ProjectParser.Parse(document, this);
 
@@ -1776,8 +1734,7 @@ namespace Microsoft.Build.Construction
 
             ProjectRootElement projectRootElement = projectRootElementCache.Get(
                 fullPath,
-                (path, cache) => CreateProjectFromPath(path, globalProperties, toolsVersion, cache,
-                                    preserveFormatting: false),
+                (path, cache) => CreateProjectFromPath(path, cache, preserveFormatting: false),
                 isExplicitlyLoaded,
                 // don't care about formatting, reuse whatever is there
                 preserveFormatting: null);
@@ -1824,13 +1781,13 @@ namespace Microsoft.Build.Construction
             _timeLastChangedUtc = DateTime.UtcNow;
 
             var changedEventArgs = new ProjectXmlChangedEventArgs(this, reason, param);
-            var projectXmlChanged = OnProjectXmlChanged;
+            EventHandler<ProjectXmlChangedEventArgs> projectXmlChanged = OnProjectXmlChanged;
             projectXmlChanged?.Invoke(this, changedEventArgs);
 
             // Only bubble this event up if the cache knows about this PRE.
-            if (this.IsMemberOfProjectCollection)
+            if (IsMemberOfProjectCollection)
             {
-                _projectRootElementCache.OnProjectRootElementDirtied(this, changedEventArgs);
+                ProjectRootElementCache.OnProjectRootElementDirtied(this, changedEventArgs);
             }
         }
 
@@ -1840,13 +1797,13 @@ namespace Microsoft.Build.Construction
         /// <param name="project">The dirtied project.</param>
         internal void MarkProjectDirty(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, "project");
+            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
 
             // Only bubble this event up if the cache knows about this PRE, which is equivalent to
             // whether this PRE has a path.
             if (_projectFileLocation != null)
             {
-                _projectRootElementCache.OnProjectDirtied(project, new ProjectChangedEventArgs(project));
+                ProjectRootElementCache.OnProjectDirtied(project, new ProjectChangedEventArgs(project));
             }
         }
 
@@ -1897,9 +1854,7 @@ namespace Microsoft.Build.Construction
         {
             foreach (string sdk in sdks.Split(';').Select(i => i.Trim()))
             {
-                SdkReference sdkReference;
-
-                if (!SdkReference.TryParse(sdk, out sdkReference))
+                if (!SdkReference.TryParse(sdk, out SdkReference sdkReference))
                 {
                     ProjectErrorUtilities.ThrowInvalidProject(sdkLocation, "InvalidSdkFormat", sdks);
                 }
@@ -1970,7 +1925,7 @@ namespace Microsoft.Build.Construction
         /// <param name="owner">The factory to use for creating the new instance.</param>
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return ProjectRootElement.Create(owner._projectRootElementCache);
+            return Create(owner.ProjectRootElementCache);
         }
 
         /// <summary>
@@ -2006,8 +1961,6 @@ namespace Microsoft.Build.Construction
         private static ProjectRootElement CreateProjectFromPath
             (
                 string projectFile,
-                IDictionary<string, string> globalProperties,
-                string toolsVersion,
                 ProjectRootElementCache projectRootElementCache,
                 bool preserveFormatting
             )
@@ -2063,7 +2016,7 @@ namespace Microsoft.Build.Construction
                     string beginProjectLoad = String.Format(CultureInfo.CurrentCulture, "Load Project {0} From File - Start", fullPath);
                     DataCollection.CommentMarkProfile(8806, beginProjectLoad);
 #endif
-                    using (var xtr = XmlReaderExtension.Create(fullPath))
+                    using (XmlReaderExtension xtr = XmlReaderExtension.Create(fullPath))
                     {
                         _encoding = xtr.Encoding;
                         document.Load(xtr.Reader);
@@ -2086,11 +2039,7 @@ namespace Microsoft.Build.Construction
                         throw;
                     }
 
-                    XmlException xmlException = ex as XmlException;
-
-                    BuildEventFileInfo fileInfo;
-
-                    fileInfo = xmlException != null
+                    BuildEventFileInfo fileInfo = ex is XmlException xmlException
                         ? new BuildEventFileInfo(fullPath, xmlException)
                         : new BuildEventFileInfo(fullPath);
 
@@ -2113,7 +2062,7 @@ namespace Microsoft.Build.Construction
         /// May throw InvalidProjectFileException.
         /// Never returns null.
         /// </summary>
-        private XmlDocumentWithLocation LoadDocument(XmlReader reader, bool preserveFormatting)
+        private static XmlDocumentWithLocation LoadDocument(XmlReader reader, bool preserveFormatting)
         {
             var document = new XmlDocumentWithLocation {PreserveWhitespace = preserveFormatting};
 
@@ -2137,7 +2086,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void IncrementVersion()
         {
-            _version = Interlocked.Increment(ref s_globalVersionCounter);
+            Version = Interlocked.Increment(ref s_globalVersionCounter);
         }
 
         private void ThrowIfUnsavedChanges(bool throwIfUnsavedChanges)

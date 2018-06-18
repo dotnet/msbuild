@@ -5,16 +5,12 @@
 // <summary>Definition of ProjectWhenElement class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -30,7 +26,7 @@ namespace Microsoft.Build.Construction
         internal ProjectWhenElement(XmlElement xmlElement, ProjectChooseElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -45,35 +41,18 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get an enumerator over any child chooses
         /// </summary>
-        public ICollection<ProjectChooseElement> ChooseElements
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
-            }
-        }
+        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
 
         /// <summary>
         /// Get an enumerator over any child item groups
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
-            }
-        }
+        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
 
         /// <summary>
         /// Get an enumerator over any child property groups
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
-            }
-        }
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
+
         #endregion
 
         /// <summary>
@@ -84,8 +63,7 @@ namespace Microsoft.Build.Construction
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.when);
 
-            ProjectWhenElement when = new ProjectWhenElement(element, containingProject);
-            when.Condition = condition;
+            var when = new ProjectWhenElement(element, containingProject) { Condition = condition };
 
             return when;
         }
@@ -103,7 +81,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateWhenElement(this.Condition);
+            return owner.CreateWhenElement(Condition);
         }
     }
 }

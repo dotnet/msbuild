@@ -6,12 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
-using System.Collections;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Collections
 {
@@ -39,7 +34,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal WeakReference(T target)
         {
-            ErrorUtilities.VerifyThrowInternalNull(target, "target");
+            ErrorUtilities.VerifyThrowInternalNull(target, nameof(target));
 
             _weakReference = new WeakReference(target);
             _hashcode = target.GetHashCode();
@@ -50,10 +45,7 @@ namespace Microsoft.Build.Collections
         /// If it returns null, its value may have been collected, or it may actually "wrap" null.
         /// To distinguish these cases, compare the WeakReference object itself to WeakReference.Null.
         /// </summary>
-        internal T Target
-        {
-            get { return (T)_weakReference.Target; }
-        }
+        internal T Target => (T)_weakReference.Target;
 
         /// <summary>
         /// Returns the hashcode of the wrapped target.

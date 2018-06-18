@@ -1,4 +1,11 @@
-﻿using Microsoft.Build.Internal;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+//-----------------------------------------------------------------------
+// </copyright>
+// <summary>Definition of ProjectSdkElement class.</summary>
+//-----------------------------------------------------------------------
+
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Construction
@@ -15,7 +22,7 @@ namespace Microsoft.Build.Construction
             ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -30,7 +37,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Name
         {
-            get { return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkName); }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkName);
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdkName);
@@ -44,7 +51,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Version
         {
-            get { return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion); }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkVersion);
             set
             {
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdkVersion, value);
@@ -57,7 +64,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string MinimumVersion
         {
-            get { return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion); }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdkMinimumVersion);
             set
             {
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.sdkMinimumVersion, value);

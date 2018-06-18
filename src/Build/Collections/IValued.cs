@@ -18,9 +18,6 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns some value of a thing
         /// </summary>
-        string EscapedValue
-        {
-            get;
-        }
+        string EscapedValue { get; }
     }
 }

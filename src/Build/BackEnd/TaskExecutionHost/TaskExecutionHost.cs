@@ -8,8 +8,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,12 +45,6 @@ namespace Microsoft.Build.BackEnd
         /// Time interval in miliseconds between subsequent warnings that a non-cancelable task has not finished
         /// </summary>
         private const int CancelWarningWaitInterval = 15000;
-
-        /// <summary>
-        /// Whether to log task input parameters.  Can either be set through an environment variable 
-        /// or by the BuildParameters.
-        /// </summary>
-        private bool _logTaskInputs;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -110,23 +102,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ItemBucket _batchBucket;
 
-        // Items used to execute the task
-
-        /// <summary>
-        /// The task type retrieved from the assembly.
-        /// </summary>
-        private TaskFactoryWrapper _taskFactoryWrapper;
-
-        /// <summary>
-        /// The instantiated task class.
-        /// </summary>
-        private ITask _taskInstance;
-
-        /// <summary>
-        /// The continueOnError flag
-        /// </summary>
-        private bool _continueOnError;
-
         /// <summary>
         /// Set to true if the execution has been cancelled.
         /// </summary>
@@ -135,7 +110,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Event which is signalled when a task is not executing.  Used for cancellation.
         /// </summary>
-        private ManualResetEvent _taskExecutionIdle = new ManualResetEvent(true);
+        private readonly ManualResetEvent _taskExecutionIdle = new ManualResetEvent(true);
 
         /// <summary>
         /// The task items that we remoted across the appdomain boundary
@@ -147,12 +122,12 @@ namespace Microsoft.Build.BackEnd
         /// We need access to the build component host so that we can get at the 
         /// task host node provider when running a task wrapped by TaskHostTask
         /// </summary>
-        private IBuildComponentHost _buildComponentHost;
+        private readonly IBuildComponentHost _buildComponentHost;
 
         /// <summary>
         /// The set of intrinsic tasks mapped for this process.
         /// </summary>
-        private Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Constructor
@@ -160,15 +135,15 @@ namespace Microsoft.Build.BackEnd
         internal TaskExecutionHost(IBuildComponentHost host)
         {
             _buildComponentHost = host;
-            if (host != null && host.BuildParameters != null)
+            if (host?.BuildParameters != null)
             {
-                _logTaskInputs = host.BuildParameters.LogTaskInputs;
+                LogTaskInputs = host.BuildParameters.LogTaskInputs;
             }
 
             // If this is false, check the environment variable to see if it's there:
-            if (!_logTaskInputs)
+            if (!LogTaskInputs)
             {
-                _logTaskInputs = (Environment.GetEnvironmentVariable("MSBUILDLOGTASKINPUTS") == "1");
+                LogTaskInputs = (Environment.GetEnvironmentVariable("MSBUILDLOGTASKINPUTS") == "1");
             }
         }
 
@@ -192,71 +167,34 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag to determine whether or not to log task inputs.
         /// </summary>
-        public bool LogTaskInputs
-        {
-            get
-            {
-                return _logTaskInputs;
-            }
-        }
+        public bool LogTaskInputs { get; }
 
         /// <summary>
         /// The associated project.
         /// </summary>
-        ProjectInstance ITaskExecutionHost.ProjectInstance
-        {
-            get
-            {
-                return _projectInstance;
-            }
-        }
+        ProjectInstance ITaskExecutionHost.ProjectInstance => _projectInstance;
 
         /// <summary>
         /// Gets the task instance
         /// </summary>
-        internal ITask TaskInstance
-        {
-            get
-            {
-                return _taskInstance;
-            }
-        }
+        internal ITask TaskInstance { get; private set; }
 
         /// <summary>
         /// FOR UNIT TESTING ONLY
         /// </summary>
-        internal TaskFactoryWrapper _UNITTESTONLY_TaskFactoryWrapper
-        {
-            get
-            {
-                return _taskFactoryWrapper;
-            }
-
-            set
-            {
-                _taskFactoryWrapper = value;
-            }
-        }
+        internal TaskFactoryWrapper _UNITTESTONLY_TaskFactoryWrapper { get; set; }
 
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// App domain configuration.
         /// </summary>
-        internal AppDomainSetup AppDomainSetup
-        {
-            get;
-            set;
-        }
+        internal AppDomainSetup AppDomainSetup { get; set; }
 #endif
 
         /// <summary>
         /// Whether or not this is out-of-proc.
         /// </summary>
-        internal bool IsOutOfProc
-        {
-            get;
-            set;
-        }
+        internal bool IsOutOfProc { get; set; }
 
         /// <summary>
         /// Implementation of IDisposable
@@ -283,14 +221,13 @@ namespace Microsoft.Build.BackEnd
             _targetLoggingContext = loggingContext;
             _taskName = taskName;
             _taskLocation = taskLocation;
-            _cancellationTokenRegistration = cancellationToken.Register(this.Cancel);
+            _cancellationTokenRegistration = cancellationToken.Register(Cancel);
             _taskHost = taskHost;
-            _continueOnError = continueOnError;
             _taskExecutionIdle.Set();
 #if FEATURE_APPDOMAIN
-            this.AppDomainSetup = appDomainSetup;
+            AppDomainSetup = appDomainSetup;
 #endif
-            this.IsOutOfProc = isOutOfProc;
+            IsOutOfProc = isOutOfProc;
         }
 
         /// <summary>
@@ -299,24 +236,24 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the task is found in the task registry false if otherwise.</returns>
         TaskRequirements? ITaskExecutionHost.FindTask(IDictionary<string, string> taskIdentityParameters)
         {
-            if (_taskFactoryWrapper == null)
+            if (_UNITTESTONLY_TaskFactoryWrapper == null)
             {
-                _taskFactoryWrapper = FindTaskInRegistry(taskIdentityParameters);
+                _UNITTESTONLY_TaskFactoryWrapper = FindTaskInRegistry(taskIdentityParameters);
             }
 
-            if (_taskFactoryWrapper == null)
+            if (_UNITTESTONLY_TaskFactoryWrapper == null)
             {
                 return null;
             }
 
             TaskRequirements requirements = TaskRequirements.None;
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
+            if (_UNITTESTONLY_TaskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute())
             {
                 requirements = requirements | TaskRequirements.RequireSTAThread;
             }
 
-            if (_taskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
+            if (_UNITTESTONLY_TaskFactoryWrapper.TaskFactoryLoadedType.HasLoadInSeparateAppDomainAttribute())
             {
                 requirements = requirements | TaskRequirements.RequireSeparateAppDomain;
 
@@ -333,13 +270,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         bool ITaskExecutionHost.InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "loggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(batchBucket, "batchBucket");
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
+            ErrorUtilities.VerifyThrowArgumentNull(batchBucket, nameof(batchBucket));
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
 
-            if (_taskFactoryWrapper == null)
+            if (_UNITTESTONLY_TaskFactoryWrapper == null)
             {
                 return false;
             }
@@ -353,21 +290,21 @@ namespace Microsoft.Build.BackEnd
             if (null == _resolver)
             {
                 _resolver = new TaskEngineAssemblyResolver();
-                _resolver.Initialize(_taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyFile);
+                _resolver.Initialize(_UNITTESTONLY_TaskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyFile);
                 _resolver.InstallHandler();
             }
 #endif
 
             // We instantiate a new task object for each batch
-            _taskInstance = InstantiateTask(taskIdentityParameters);
+            TaskInstance = InstantiateTask(taskIdentityParameters);
 
-            if (_taskInstance == null)
+            if (TaskInstance == null)
             {
                 return false;
             }
 
-            _taskInstance.BuildEngine = _buildEngine;
-            _taskInstance.HostObject = _taskHost;
+            TaskInstance.BuildEngine = _buildEngine;
+            TaskInstance.HostObject = _taskHost;
 
             return true;
         }
@@ -379,20 +316,20 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
         bool ITaskExecutionHost.SetTaskParameters(IDictionary<string, Tuple<string, ElementLocation>> parameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameters, "parameters");
+            ErrorUtilities.VerifyThrowArgumentNull(parameters, nameof(parameters));
 
             bool taskInitialized = true;
 
             // Get the properties that exist on this task.  We need to gather all of the ones that are marked
             // "required" so that we can keep track of whether or not they all get set.
-            Dictionary<string, string> setParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var setParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             IDictionary<string, string> requiredParameters = GetNamesOfPropertiesWithRequiredAttribute();
 
             // look through all the attributes of the task element
             foreach (KeyValuePair<string, Tuple<string, ElementLocation>> parameter in parameters)
             {
                 bool taskParameterSet = false;  // Did we actually call the setter on this task parameter?
-                bool success = false;
+                bool success;
 
                 try
                 {
@@ -452,13 +389,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True of the outputs were gathered successfully, false otherwise.</returns>
         bool ITaskExecutionHost.GatherTaskOutputs(string parameterName, ElementLocation parameterLocation, bool outputTargetIsItem, string outputTargetName)
         {
-            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Need a taskFactoryWrapper to retrieve outputs from.");
+            ErrorUtilities.VerifyThrow(_UNITTESTONLY_TaskFactoryWrapper != null, "Need a taskFactoryWrapper to retrieve outputs from.");
 
             bool gatheredGeneratedOutputsSuccessfully = true;
 
             try
             {
-                TaskPropertyInfo parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                TaskPropertyInfo parameter = _UNITTESTONLY_TaskFactoryWrapper.GetProperty(parameterName);
 
                 // flag an error if we find a parameter that has no .NET property equivalent
                 ProjectErrorUtilities.VerifyThrowInvalidProject
@@ -473,7 +410,7 @@ namespace Microsoft.Build.BackEnd
                 // output parameters must have their corresponding .NET properties marked with the Output attribute
                 ProjectErrorUtilities.VerifyThrowInvalidProject
                 (
-                    _taskFactoryWrapper.GetNamesOfPropertiesWithOutputAttribute.ContainsKey(parameterName),
+                    _UNITTESTONLY_TaskFactoryWrapper.GetNamesOfPropertiesWithOutputAttribute.ContainsKey(parameterName),
                     parameterLocation,
                     "UnmarkedOutputTaskParameter",
                     parameter.Name,
@@ -485,13 +422,13 @@ namespace Microsoft.Build.BackEnd
 
                 if (TaskParameterTypeVerifier.IsAssignableToITask(type))
                 {
-                    ITaskItem[] outputs = GetItemOutputs(parameter, parameterLocation);
+                    ITaskItem[] outputs = GetItemOutputs(parameter);
                     GatherTaskItemOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation);
                 }
                 else if (TaskParameterTypeVerifier.IsValueTypeOutputParameter(type))
                 {
-                    string[] outputs = GetValueOutputs(parameter, parameterLocation);
-                    GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, parameter, outputs, parameterLocation);
+                    string[] outputs = GetValueOutputs(parameter);
+                    GatherArrayStringAndValueOutputs(outputTargetIsItem, outputTargetName, outputs, parameterLocation);
                 }
                 else
                 {
@@ -542,7 +479,7 @@ namespace Microsoft.Build.BackEnd
                     "FailedToRetrieveTaskOutputs",
                     _taskName,
                     parameterName,
-                    e.InnerException.Message
+                    e.InnerException?.Message
                 );
             }
             catch (Exception e)
@@ -574,14 +511,14 @@ namespace Microsoft.Build.BackEnd
         {
             try
             {
-                if (_taskFactoryWrapper != null && _taskInstance != null)
+                if (_UNITTESTONLY_TaskFactoryWrapper != null && TaskInstance != null)
                 {
-                    _taskFactoryWrapper.TaskFactory.CleanupTask(_taskInstance);
+                    _UNITTESTONLY_TaskFactoryWrapper.TaskFactory.CleanupTask(TaskInstance);
                 }
             }
             finally
             {
-                _taskInstance = null;
+                TaskInstance = null;
             }
         }
 
@@ -598,14 +535,14 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            _taskFactoryWrapper = null;
+            _UNITTESTONLY_TaskFactoryWrapper = null;
 
             // We must null this out because it could be a COM object (or any other ref-counted object) which needs to
             // be released.
             _taskHost = null;
             CleanupCancellationToken();
 
-            ErrorUtilities.VerifyThrow(_taskInstance == null, "Task Instance should be null");
+            ErrorUtilities.VerifyThrow(TaskInstance == null, "Task Instance should be null");
         }
 
         /// <summary>
@@ -628,7 +565,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                taskReturnValue = _taskInstance.Execute();
+                taskReturnValue = TaskInstance.Execute();
             }
             finally
             {
@@ -684,7 +621,7 @@ namespace Microsoft.Build.BackEnd
             // This will prevent the current and any future tasks from running on this TaskExecutionHost, because we don't reset the cancelled flag.
             _cancelled = true;
 
-            ITask currentInstance = _taskInstance;
+            ITask currentInstance = TaskInstance;
             ICancelableTask cancellableTask = null;
             if (currentInstance != null)
             {
@@ -750,7 +687,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Called on the local side.
         /// </summary>
-        private bool SetTaskItemParameter(TaskPropertyInfo parameter, ITaskItem item, ElementLocation parameterLocation)
+        private bool SetTaskItemParameter(TaskPropertyInfo parameter, ITaskItem item)
         {
             return InternalSetTaskParameter(parameter, item);
         }
@@ -758,7 +695,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Called on the local side.
         /// </summary>
-        private bool SetValueParameter(TaskPropertyInfo parameter, Type parameterType, string expandedParameterValue, ElementLocation parameterLocation)
+        private bool SetValueParameter(TaskPropertyInfo parameter, Type parameterType, string expandedParameterValue)
         {
             if (parameterType == typeof(bool))
             {
@@ -849,24 +786,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RecordItemForDisconnectIfNecessary(TaskItem item)
         {
-            if (_remotedTaskItems != null)
-            {
-                // remember that we need to disconnect this item
-                _remotedTaskItems.Add(item);
-            }
+            // remember that we need to disconnect this item
+            _remotedTaskItems?.Add(item);
         }
 
         /// <summary>
         /// Gets the outputs (as an array of ITaskItem) from the specified output parameter.
         /// </summary>
-        private ITaskItem[] GetItemOutputs(TaskPropertyInfo parameter, ElementLocation parameterLocation)
+        private ITaskItem[] GetItemOutputs(TaskPropertyInfo parameter)
         {
-            object outputs = _taskFactoryWrapper.GetPropertyValue(_taskInstance, parameter);
+            object outputs = _UNITTESTONLY_TaskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
 
-            ITaskItem[] taskItemOutputs = outputs as ITaskItem[];
-            if (null == taskItemOutputs)
+            if (!(outputs is ITaskItem[] taskItemOutputs))
             {
-                taskItemOutputs = new ITaskItem[] { (ITaskItem)outputs };
+                taskItemOutputs = new[] { (ITaskItem)outputs };
             }
 
             return taskItemOutputs;
@@ -875,18 +808,18 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the outputs (as an array of string values) from the specified output parameter.
         /// </summary>
-        private string[] GetValueOutputs(TaskPropertyInfo parameter, ElementLocation parameterLocation)
+        private string[] GetValueOutputs(TaskPropertyInfo parameter)
         {
-            object outputs = _taskFactoryWrapper.GetPropertyValue(_taskInstance, parameter);
+            object outputs = _UNITTESTONLY_TaskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
 
-            Array convertibleOutputs = parameter.PropertyType.IsArray ? (Array)outputs : new object[] { outputs };
+            Array convertibleOutputs = parameter.PropertyType.IsArray ? (Array)outputs : new[] { outputs };
 
             if (convertibleOutputs == null)
             {
                 return null;
             }
 
-            string[] stringOutputs = new string[convertibleOutputs.Length];
+            var stringOutputs = new string[convertibleOutputs.Length];
             for (int i = 0; i < convertibleOutputs.Length; i++)
             {
                 object output = convertibleOutputs.GetValue(i);
@@ -920,8 +853,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The Type of the task, or null if it was not found.</returns>
         private TaskFactoryWrapper FindTaskInRegistry(IDictionary<string, string> taskIdentityParameters)
         {
-            TaskFactoryWrapper returnClass;
-            if (!_intrinsicTasks.TryGetValue(_taskName, out returnClass))
+            if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
             {
                 returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, true /* exact match */, _targetLoggingContext, _taskLocation);
                 if (null == returnClass)
@@ -946,14 +878,12 @@ namespace Microsoft.Build.BackEnd
                                         _projectInstance.TaskRegistry.Toolset.ToolsPath
                                     );
 
-                                return returnClass;
+                                return null;
                             }
                         }
 
                         string usingTaskRuntime = null;
                         string usingTaskArchitecture = null;
-                        string taskRuntime = null;
-                        string taskArchitecture = null;
 
                         if (returnClass.FactoryIdentityParameters != null)
                         {
@@ -961,8 +891,8 @@ namespace Microsoft.Build.BackEnd
                             returnClass.FactoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out usingTaskArchitecture);
                         }
 
-                        taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out taskRuntime);
-                        taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out taskArchitecture);
+                        taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
+                        taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
 
                         _targetLoggingContext.LogError
                             (
@@ -1005,25 +935,23 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                AssemblyTaskFactory assemblyTaskFactory = _taskFactoryWrapper.TaskFactory as AssemblyTaskFactory;
-                if (assemblyTaskFactory != null)
+                if (_UNITTESTONLY_TaskFactoryWrapper.TaskFactory is AssemblyTaskFactory assemblyTaskFactory)
                 {
                     task = assemblyTaskFactory.CreateTaskInstance(_taskLocation, _taskLoggingContext, _buildComponentHost, taskIdentityParameters,
 #if FEATURE_APPDOMAIN
-                        this.AppDomainSetup,
+                        AppDomainSetup,
 #endif
-                        this.IsOutOfProc);
+                        IsOutOfProc);
                 }
                 else
                 {
                     TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
+                    ITaskFactory2 taskFactory2 = _UNITTESTONLY_TaskFactoryWrapper.TaskFactory as ITaskFactory2;
                     try
                     {
-                        ITaskFactory2 taskFactory2 = _taskFactoryWrapper.TaskFactory as ITaskFactory2;
-
                         if (taskFactory2 == null)
                         {
-                            task = _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                            task = _UNITTESTONLY_TaskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
                         }
                         else
                         {
@@ -1045,7 +973,7 @@ namespace Microsoft.Build.BackEnd
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureErrorInvalidCast",
                     _taskName,
-                    _taskFactoryWrapper.TaskFactory.FactoryName,
+                    _UNITTESTONLY_TaskFactoryWrapper.TaskFactory.FactoryName,
                     e.Message
                 );
             }
@@ -1058,8 +986,8 @@ namespace Microsoft.Build.BackEnd
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureError",
                     _taskName,
-                    _taskFactoryWrapper.TaskFactory.FactoryName,
-                    Environment.NewLine + e.InnerException.ToString()
+                    _UNITTESTONLY_TaskFactoryWrapper.TaskFactory.FactoryName,
+                    Environment.NewLine + e.InnerException
                 );
             }
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
@@ -1075,7 +1003,7 @@ namespace Microsoft.Build.BackEnd
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureError",
                     _taskName,
-                    _taskFactoryWrapper.TaskFactory.FactoryName,
+                    _UNITTESTONLY_TaskFactoryWrapper.TaskFactory.FactoryName,
                     e.Message
                 );
             }
@@ -1101,7 +1029,7 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 // check if the task has a .NET property corresponding to the parameter
-                TaskPropertyInfo parameter = _taskFactoryWrapper.GetProperty(parameterName);
+                TaskPropertyInfo parameter = _UNITTESTONLY_TaskFactoryWrapper.GetProperty(parameterName);
 
                 if (parameter != null)
                 {
@@ -1206,7 +1134,7 @@ namespace Microsoft.Build.BackEnd
         {
             taskParameterSet = false;
 
-            bool success = false;
+            bool success;
 
             try
             {
@@ -1242,7 +1170,7 @@ namespace Microsoft.Build.BackEnd
 
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
 
-                        success = SetTaskItemParameter(parameter, finalTaskItems[0], parameterLocation);
+                        success = SetTaskItemParameter(parameter, finalTaskItems[0]);
 
                         taskParameterSet = true;
                     }
@@ -1258,7 +1186,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        success = SetValueParameter(parameter, parameterType, expandedParameterValue, parameterLocation);
+                        success = SetValueParameter(parameter, parameterType, expandedParameterValue);
                         taskParameterSet = true;
                     }
                 }
@@ -1317,7 +1245,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(parameterValue != null, "Didn't expect null parameterValue in InitializeTaskVectorParameter");
 
             taskParameterSet = false;
-            bool success = false;
+            bool success;
             IList<TaskItem> finalTaskItems = _batchBucket.Expander.ExpandIntoTaskItemsLeaveEscaped(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
 
             // If there were no items, don't change the parameter's value.  EXCEPT if it's marked as a required 
@@ -1348,7 +1276,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         private bool InternalSetTaskParameter(TaskPropertyInfo parameter, IList parameterValue)
         {
-            if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && parameterValue.Count > 0)
+            if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && parameterValue.Count > 0)
             {
                 string parameterText = ResourceUtilities.GetResourceString("TaskParameterPrefix");
                 parameterText = ItemGroupLoggingHelper.GetParameterText(parameterText, parameter.Name, parameterValue);
@@ -1370,7 +1298,7 @@ namespace Microsoft.Build.BackEnd
             bool success = false;
 
             // Logging currently enabled only by an env var.
-            if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
+            if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
             {
                 // If the type is a list, we already logged the parameters
                 if (!(parameterValue is IList))
@@ -1383,7 +1311,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                _taskFactoryWrapper.SetPropertyValue(_taskInstance, parameter, parameterValue);
+                _UNITTESTONLY_TaskFactoryWrapper.SetPropertyValue(TaskInstance, parameter, parameterValue);
                 success = true;
             }
             catch (LoggerException)
@@ -1447,7 +1375,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             ProjectItemInstance newItem;
 
-                            ProjectItemInstance.TaskItem outputAsProjectItem = output as ProjectItemInstance.TaskItem;
+                            TaskItem outputAsProjectItem = output as TaskItem;
                             string parameterLocationEscaped = EscapingUtilities.EscapeWithCaching(parameterLocation.File);
 
                             if (outputAsProjectItem != null)
@@ -1460,9 +1388,7 @@ namespace Microsoft.Build.BackEnd
                             }
                             else
                             {
-                                ITaskItem2 outputAsITaskItem2 = output as ITaskItem2;
-
-                                if (outputAsITaskItem2 != null)
+                                if (output is ITaskItem2 outputAsITaskItem2)
                                 {
                                     // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping. 
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
@@ -1490,7 +1416,7 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
+                    if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
                         string parameterText = ItemGroupLoggingHelper.GetParameterText(
                             ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"),
@@ -1520,9 +1446,7 @@ namespace Microsoft.Build.BackEnd
                                 joinedOutputs.Append(';');
                             }
 
-                            ITaskItem2 outputAsITaskItem2 = output as ITaskItem2;
-
-                            if (outputAsITaskItem2 != null)
+                            if (output is ITaskItem2 outputAsITaskItem2)
                             {
                                 joinedOutputs.Append(outputAsITaskItem2.EvaluatedIncludeEscaped);
                             }
@@ -1536,7 +1460,7 @@ namespace Microsoft.Build.BackEnd
                     if (joinedOutputs != null)
                     {
                         var outputString = joinedOutputs.ToString();
-                        if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                        if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
                             _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
                         }
@@ -1550,7 +1474,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gather task outputs in array form
         /// </summary>
-        private void GatherArrayStringAndValueOutputs(bool outputTargetIsItem, string outputTargetName, TaskPropertyInfo parameter, string[] outputs, ElementLocation parameterLocation)
+        private void GatherArrayStringAndValueOutputs(bool outputTargetIsItem, string outputTargetName, string[] outputs, ElementLocation parameterLocation)
         {
             // if the task has generated outputs (if it didn't, don't do anything)            
             if (outputs != null)
@@ -1561,17 +1485,14 @@ namespace Microsoft.Build.BackEnd
                     foreach (string output in outputs)
                     {
                         // if individual outputs in the array are null, ignore them
-                        if (output != null)
+                        // attempting to put an empty string into an item is a no-op.
+                        if (output?.Length > 0)
                         {
-                            // attempting to put an empty string into an item is a no-op.
-                            if (output.Length > 0)
-                            {
-                                _batchBucket.Lookup.AddNewItem(new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output), EscapingUtilities.Escape(parameterLocation.File)));
-                            }
+                            _batchBucket.Lookup.AddNewItem(new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output), EscapingUtilities.Escape(parameterLocation.File)));
                         }
                     }
 
-                    if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
+                    if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents && outputs.Length > 0)
                     {
                         string parameterText = ItemGroupLoggingHelper.GetParameterText(ResourceUtilities.GetResourceString("OutputItemParameterMessagePrefix"), outputTargetName, outputs);
                         _taskLoggingContext.LogCommentFromText(MessageImportance.Low, parameterText);
@@ -1604,7 +1525,7 @@ namespace Microsoft.Build.BackEnd
                     if (joinedOutputs != null)
                     {
                         var outputString = joinedOutputs.ToString();
-                        if (_logTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                        if (LogTaskInputs && !_taskLoggingContext.LoggingService.OnlyLogCriticalEvents)
                         {
                             _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
                         }
@@ -1622,12 +1543,12 @@ namespace Microsoft.Build.BackEnd
         /// <returns>Gets a list of properties which are required.</returns>
         private IDictionary<string, string> GetNamesOfPropertiesWithRequiredAttribute()
         {
-            ErrorUtilities.VerifyThrow(_taskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
+            ErrorUtilities.VerifyThrow(_UNITTESTONLY_TaskFactoryWrapper != null, "Expected taskFactoryWrapper to not be null");
             IDictionary<string, string> requiredParameters = null;
 
             try
             {
-                requiredParameters = _taskFactoryWrapper.GetNamesOfPropertiesWithRequiredAttribute;
+                requiredParameters = _UNITTESTONLY_TaskFactoryWrapper.GetNamesOfPropertiesWithRequiredAttribute;
             }
             catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
@@ -1650,9 +1571,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void DisplayCancelWaitMessage()
         {
-            string warningCode;
-            string helpKeyword;
-            string message = ResourceUtilities.FormatResourceString(out warningCode, out helpKeyword, "UnableToCancelTask", _taskName);
+            string message = ResourceUtilities.FormatResourceString(out string warningCode, out string helpKeyword, "UnableToCancelTask", _taskName);
             try
             {
                 _taskLoggingContext.LogWarningFromText(null, warningCode, helpKeyword, new BuildEventFileInfo(_taskLocation), message);

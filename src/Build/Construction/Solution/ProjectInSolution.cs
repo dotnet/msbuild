@@ -92,29 +92,17 @@ namespace Microsoft.Build.Construction
         private const char cleanCharacter = '_';
 
         #endregion
-
         #region Member data
-
-        private SolutionProjectType _projectType;      // For example, KnownToBeMSBuildFormat, VCProject, WebProject, etc.
-        private string _projectName;          // For example, "WindowsApplication1"
         private string _relativePath;         // Relative from .SLN file.  For example, "WindowsApplication1\WindowsApplication1.csproj"
-        private string _projectGuid;          // The unique Guid assigned to this project or SLN folder.
-        private List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
-        private ArrayList _projectReferences; // A list of strings representing the guids of referenced projects.
-                                              // This is only used for VC/Venus projects
-        private string _parentProjectGuid;    // If this project (or SLN folder) is within a SLN folder, this is the Guid of the parent SLN folder.
+        private readonly List<string> _dependencies;     // A list of strings representing the Guids of the dependent projects.
         private string _uniqueProjectName;    // For example, "MySlnFolder\MySubSlnFolder\WindowsApplication1"
-        private Hashtable _aspNetConfigurations;    // Key is configuration name, value is [struct] AspNetCompilerParameters
-        private SolutionFile _parentSolution; // The parent solution for this project
-        private string _targetFrameworkMoniker; // used for website projects, since they don't have a project file in which the
-                                                // target framework is stored.  Defaults to .NETFX 3.5
 
         /// <summary>
         /// The project configuration in given solution configuration
         /// K: full solution configuration name (cfg + platform)
         /// V: project configuration 
         /// </summary>
-        private Dictionary<string, ProjectConfigurationInSolution> _projectConfigurations;
+        private readonly Dictionary<string, ProjectConfigurationInSolution> _projectConfigurations;
 
         #endregion
 
@@ -122,21 +110,21 @@ namespace Microsoft.Build.Construction
 
         internal ProjectInSolution(SolutionFile solution)
         {
-            _projectType = SolutionProjectType.Unknown;
-            _projectName = null;
+            ProjectType = SolutionProjectType.Unknown;
+            ProjectName = null;
             _relativePath = null;
-            _projectGuid = null;
+            ProjectGuid = null;
             _dependencies = new List<string>();
-            _projectReferences = new ArrayList();
-            _parentProjectGuid = null;
+            ProjectReferences = new ArrayList();
+            ParentProjectGuid = null;
             _uniqueProjectName = null;
-            _parentSolution = solution;
+            ParentSolution = solution;
 
             // default to .NET Framework 3.5 if this is an old solution that doesn't explicitly say.
-            _targetFrameworkMoniker = ".NETFramework,Version=v3.5";
+            TargetFrameworkMoniker = ".NETFramework,Version=v3.5";
 
             // This hashtable stores a AspNetCompilerParameters struct for each configuration name supported.
-            _aspNetConfigurations = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            AspNetConfigurations = new Hashtable(StringComparer.OrdinalIgnoreCase);
 
             _projectConfigurations = new Dictionary<string, ProjectConfigurationInSolution>(StringComparer.OrdinalIgnoreCase);
         }
@@ -148,11 +136,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// This project's name
         /// </summary>
-        public string ProjectName
-        {
-            get { return _projectName; }
-            internal set { _projectName = value; }
-        }
+        public string ProjectName { get; internal set; }
 
         /// <summary>
         /// The path to this project file, relative to the solution location
@@ -168,7 +152,7 @@ namespace Microsoft.Build.Construction
                 _relativePath = value;
 #else
                 _relativePath = FileUtilities.MaybeAdjustFilePath(value,
-                                                    baseDirectory:this.ParentSolution.SolutionFileDirectory ?? String.Empty);
+                                                    baseDirectory:ParentSolution.SolutionFileDirectory ?? String.Empty);
 #endif
             }
         }
@@ -176,103 +160,60 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Returns the absolute path for this project
         /// </summary>
-        public string AbsolutePath
-        {
-            get
-            {
-                return Path.Combine(this.ParentSolution.SolutionFileDirectory, this.RelativePath);
-            }
-        }
+        public string AbsolutePath => Path.Combine(ParentSolution.SolutionFileDirectory, RelativePath);
 
         /// <summary>
         /// The unique guid associated with this project, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form
         /// </summary>
-        public string ProjectGuid
-        {
-            get { return _projectGuid; }
-            internal set { _projectGuid = value; }
-        }
+        public string ProjectGuid { get; internal set; }
 
         /// <summary>
         /// The guid, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form, of this project's 
         /// parent project, if any. 
         /// </summary>
-        public string ParentProjectGuid
-        {
-            get { return _parentProjectGuid; }
-            internal set { _parentProjectGuid = value; }
-        }
+        public string ParentProjectGuid { get; internal set; }
 
         /// <summary>
         /// List of guids, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form, mapping to projects 
         /// that this project has a build order dependency on, as defined in the solution file. 
         /// </summary>
-        public IReadOnlyList<string> Dependencies
-        {
-            get { return _dependencies.AsReadOnly(); }
-        }
+        public IReadOnlyList<string> Dependencies => _dependencies.AsReadOnly();
 
         /// <summary>
         /// Configurations for this project, keyed off the configuration's full name, e.g. "Debug|x86"
         /// </summary>
-        public IReadOnlyDictionary<string, ProjectConfigurationInSolution> ProjectConfigurations
-        {
-            get { return new ReadOnlyDictionary<string, ProjectConfigurationInSolution>(_projectConfigurations); }
-        }
+        public IReadOnlyDictionary<string, ProjectConfigurationInSolution> ProjectConfigurations =>
+            new ReadOnlyDictionary<string, ProjectConfigurationInSolution>(_projectConfigurations);
 
         /// <summary>
         /// Extension of the project file, if any
         /// </summary>
-        internal string Extension
-        {
-            get
-            {
-                return Path.GetExtension(_relativePath);
-            }
-        }
+        internal string Extension => Path.GetExtension(_relativePath);
 
         /// <summary>
         /// This project's type.
         /// </summary>
-        public SolutionProjectType ProjectType
-        {
-            get { return _projectType; }
-            set { _projectType = value; }
-        }
+        public SolutionProjectType ProjectType { get; set; }
 
         /// <summary>
         /// Only applies to websites -- for other project types, references are 
         /// either specified as Dependencies above, or as ProjectReferences in the
         /// project file, which the solution doesn't have insight into. 
         /// </summary>
-        internal ArrayList ProjectReferences
-        {
-            get { return _projectReferences; }
-        }
+        internal ArrayList ProjectReferences { get; }
 
-        internal SolutionFile ParentSolution
-        {
-            get { return _parentSolution; }
-            set { _parentSolution = value; }
-        }
+        internal SolutionFile ParentSolution { get; set; }
 
-        internal Hashtable AspNetConfigurations
-        {
-            get { return _aspNetConfigurations; }
-            set { _aspNetConfigurations = value; }
-        }
+        // Key is configuration name, value is [struct] AspNetCompilerParameters
+        internal Hashtable AspNetConfigurations { get; set; }
 
-        internal string TargetFrameworkMoniker
-        {
-            get { return _targetFrameworkMoniker; }
-            set { _targetFrameworkMoniker = value; }
-        }
+        internal string TargetFrameworkMoniker { get; set; }
 
         #endregion
 
         #region Methods
 
-        private bool _checkedIfCanBeMSBuildProjectFile = false;
+        private bool _checkedIfCanBeMSBuildProjectFile;
         private bool _canBeMSBuildProjectFile;
         private string _canBeMSBuildProjectFileErrorMessage;
 
@@ -313,12 +254,10 @@ namespace Microsoft.Build.Construction
             try
             {
                 // Read project thru a XmlReader with proper setting to avoid DTD processing
-                XmlReaderSettings xrSettings = new XmlReaderSettings();
-                xrSettings.DtdProcessing = DtdProcessing.Ignore;
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var projectDocument = new XmlDocument();
 
-                XmlDocument projectDocument = new XmlDocument();
-
-                using (XmlReader xmlReader = XmlReader.Create(this.AbsolutePath, xrSettings))
+                using (XmlReader xmlReader = XmlReader.Create(AbsolutePath, xrSettings))
                 {
                     // Load the project file and get the first node    
                     projectDocument.Load(xmlReader);
@@ -407,9 +346,9 @@ namespace Microsoft.Build.Construction
             if (_uniqueProjectName == null)
             {
                 // EtpSubProject and Venus projects have names that are already unique.  No need to prepend the SLN folder.
-                if ((this.ProjectType == SolutionProjectType.WebProject) || (this.ProjectType == SolutionProjectType.EtpSubProject))
+                if ((ProjectType == SolutionProjectType.WebProject) || (ProjectType == SolutionProjectType.EtpSubProject))
                 {
-                    _uniqueProjectName = CleanseProjectName(this.ProjectName);
+                    _uniqueProjectName = CleanseProjectName(ProjectName);
                 }
                 else
                 {
@@ -419,20 +358,19 @@ namespace Microsoft.Build.Construction
                     // and tack on trailing backslash.
                     string uniqueName = String.Empty;
 
-                    if (this.ParentProjectGuid != null)
+                    if (ParentProjectGuid != null)
                     {
-                        ProjectInSolution proj;
-                        if (!this.ParentSolution.ProjectsByGuid.TryGetValue(this.ParentProjectGuid, out proj))
+                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution proj))
                         {
                             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
-                                new BuildEventFileInfo(_parentSolution.FullPath), "SolutionParseNestedProjectError");
+                                new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectError");
                         }
 
                         uniqueName = proj.GetUniqueProjectName() + "\\";
                     }
 
                     // Now tack on our own project name, and cache it in the ProjectInSolution object for future quick access.
-                    _uniqueProjectName = CleanseProjectName(uniqueName + this.ProjectName);
+                    _uniqueProjectName = CleanseProjectName(uniqueName + ProjectName);
                 }
             }
 
@@ -444,7 +382,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void UpdateUniqueProjectName(string newUniqueName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newUniqueName, "newUniqueName");
+            ErrorUtilities.VerifyThrowArgumentLength(newUniqueName, nameof(newUniqueName));
 
             _uniqueProjectName = newUniqueName;
         }
@@ -454,7 +392,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <param name="projectName">The name to be cleansed</param>
         /// <returns>string</returns>
-        static private string CleanseProjectName(string projectName)
+        private static string CleanseProjectName(string projectName)
         {
             ErrorUtilities.VerifyThrow(projectName != null, "Null strings not allowed.");
 
@@ -467,7 +405,7 @@ namespace Microsoft.Build.Construction
             }
 
             // This is where we're going to work on the final string to return to the caller.
-            StringBuilder cleanProjectName = new StringBuilder(projectName);
+            var cleanProjectName = new StringBuilder(projectName);
 
             // Replace each unclean character with a clean one            
             foreach (char uncleanChar in s_charsToCleanse)
@@ -484,7 +422,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <param name="uniqueProjectName">The unique name for the project</param>
         /// <returns>string</returns>
-        static internal string DisambiguateProjectTargetName(string uniqueProjectName)
+        internal static string DisambiguateProjectTargetName(string uniqueProjectName)
         {
             // Test our unique project name against those names that collide with Solution
             // entry point targets

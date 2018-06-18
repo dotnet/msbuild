@@ -33,10 +33,10 @@ namespace Microsoft.Build.Construction
     public sealed partial class ProjectConfigurationInSolution
     {
         internal ProjectConfigurationInSolution() { }
-        public string ConfigurationName { get { throw null; } }
-        public string FullName { get { throw null; } }
-        public bool IncludeInBuild { get { throw null; } }
-        public string PlatformName { get { throw null; } }
+        public string ConfigurationName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string FullName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public bool IncludeInBuild { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string PlatformName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     public abstract partial class ProjectElement : Microsoft.Build.Framework.IProjectElement
     {
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Construction
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Construction.ProjectElement> AllChildren { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectElement> Children { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectElement> ChildrenReversed { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
-        public int Count { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public int Count { [System.Diagnostics.DebuggerStepThroughAttribute, System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement FirstChild { [System.Diagnostics.DebuggerStepThroughAttribute, System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectElement LastChild { [System.Diagnostics.DebuggerStepThroughAttribute, System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public void AppendChild(Microsoft.Build.Construction.ProjectElement child) { }
@@ -114,11 +114,11 @@ namespace Microsoft.Build.Construction
         internal ProjectInSolution() { }
         public string AbsolutePath { get { throw null; } }
         public System.Collections.Generic.IReadOnlyList<string> Dependencies { get { throw null; } }
-        public string ParentProjectGuid { get { throw null; } }
+        public string ParentProjectGuid { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public System.Collections.Generic.IReadOnlyDictionary<string, Microsoft.Build.Construction.ProjectConfigurationInSolution> ProjectConfigurations { get { throw null; } }
-        public string ProjectGuid { get { throw null; } }
-        public string ProjectName { get { throw null; } }
-        public Microsoft.Build.Construction.SolutionProjectType ProjectType { get { throw null; } set { } }
+        public string ProjectGuid { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string ProjectName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public Microsoft.Build.Construction.SolutionProjectType ProjectType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public string RelativePath { get { throw null; } }
     }
     [System.Diagnostics.DebuggerDisplayAttribute("{ItemType} #Metadata={Count} Condition={Condition}")]
@@ -275,7 +275,7 @@ namespace Microsoft.Build.Construction
         public string TreatAsLocalProperty { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } [System.Diagnostics.DebuggerStepThroughAttribute]set { } }
         public Microsoft.Build.Construction.ElementLocation TreatAsLocalPropertyLocation { get { throw null; } }
         public System.Collections.Generic.ICollection<Microsoft.Build.Construction.ProjectUsingTaskElement> UsingTasks { get { throw null; } }
-        public int Version { get { throw null; } }
+        public int Version { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Construction.ProjectImportElement AddImport(string project) { throw null; }
         public Microsoft.Build.Construction.ProjectImportGroupElement AddImportGroup() { throw null; }
         public Microsoft.Build.Construction.ProjectItemElement AddItem(string itemType, string include) { throw null; }
@@ -463,9 +463,9 @@ namespace Microsoft.Build.Construction
     public sealed partial class SolutionConfigurationInSolution
     {
         internal SolutionConfigurationInSolution() { }
-        public string ConfigurationName { get { throw null; } }
-        public string FullName { get { throw null; } }
-        public string PlatformName { get { throw null; } }
+        public string ConfigurationName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string FullName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string PlatformName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     public sealed partial class SolutionFile
     {
@@ -706,7 +706,7 @@ namespace Microsoft.Build.Evaluation
         public partial class ProjectAddedToProjectCollectionEventArgs : System.EventArgs
         {
             public ProjectAddedToProjectCollectionEventArgs(Microsoft.Build.Construction.ProjectRootElement element) { }
-            public Microsoft.Build.Construction.ProjectRootElement ProjectRootElement { get { throw null; } }
+            public Microsoft.Build.Construction.ProjectRootElement ProjectRootElement { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         }
     }
     public partial class ProjectCollectionChangedEventArgs : System.EventArgs

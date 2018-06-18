@@ -59,10 +59,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag to determine whether or not to log task inputs.
         /// </summary>
-        bool LogTaskInputs
-        {
-            get;
-        }
+        bool LogTaskInputs { get; }
 
         /// <summary>
         /// Initialize the host with the objects required to communicate with the host process.
