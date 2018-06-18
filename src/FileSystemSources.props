@@ -1,28 +1,7 @@
 <Project>
     <ItemGroup>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\FileSystems.cs">
-        <Link>FileSystem\FileSystems.cs</Link>
-      </Compile>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\IFileSystem.cs">
-        <Link>FileSystem\IFileSystem.cs</Link>
-      </Compile>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\ManagedFileSystem.cs">
-        <Link>FileSystem\ManagedFileSystem.cs</Link>
-      </Compile>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\MSBuildOnWindowsFileSystem.cs">
-        <Link>FileSystem\MSBuildOnWindowsFileSystem.cs</Link>
-      </Compile>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\NativeWin32Exception.cs">
-        <Link>FileSystem\NativeWin32Exception.cs</Link>
-      </Compile>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\SafeFileHandle.cs">
-        <Link>FileSystem\SafeFileHandle.cs</Link>
-      </Compile>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\WindowsFileSystem.cs">
-        <Link>FileSystem\WindowsFileSystem.cs</Link>
-      </Compile>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\WindowsNative.cs">
-        <Link>FileSystem\WindowsNative.cs</Link>
+      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\*.cs">
+        <Link>FileSystem\%(Filename).cs</Link>
       </Compile>
     </ItemGroup>
 </Project>
