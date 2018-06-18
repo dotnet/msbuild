@@ -44,13 +44,14 @@ namespace Microsoft.Build.Collections
         /// Backing dictionary
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private readonly RetrievableEntryHashSet<T> _properties = new RetrievableEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
+        private readonly RetrievableEntryHashSet<T> _properties;
 
         /// <summary>
         /// Creates empty dictionary
         /// </summary>
         public PropertyDictionary()
         {
+            _properties = new RetrievableEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
