@@ -1266,7 +1266,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("a", "1");
             collection.SetGlobalProperty("a", "1");
             VerifyProjectCollectionEvents(collection, true, "2");
-            Assert.True(project.GetPropertyValue("a").Equals("2", StringComparison.OrdinalIgnoreCase));
 
             // Verify if the project, project collection have the same value but a new value is set in the project collection
             // then the projects value for the property should be change and an event should be fired.
@@ -1276,7 +1275,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("a", "1");
             collection.SetGlobalProperty("a", "(x86)");
             VerifyProjectCollectionEvents(collection, true, "%28x86%29");
-            Assert.True(project.GetPropertyValue("a").Equals("%28x86%29", StringComparison.OrdinalIgnoreCase));
 
             // Verify if the project has one value and project collection and the property we are setting on the project collection have the same value
             // then the projects value for the property should be change but no event should be fired
@@ -1287,7 +1285,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.SetGlobalProperty("a", "1");
 
             VerifyProjectCollectionEvents(collection, false, "1");
-            Assert.True(project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase));
 
             // Verify if the project and the property being set have one value but the project collection has another
             // then the projects value for the property should not change and event should be fired
@@ -1297,15 +1294,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.SetProperty("a", "1");
             collection.SetGlobalProperty("a", "2");
             VerifyProjectCollectionEvents(collection, true, "1");
-            Assert.True(project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase));
 
             // item is added to project collection for the first time. Make sure it is added to the project and an event is fired.
             collection = new ProjectCollection();
             reader = CreateProjectXmlReader();
             project = collection.LoadProject(reader, ObjectModelHelpers.MSBuildDefaultToolsVersion);
-
             VerifyProjectCollectionEvents(collection, true, "1");
-            Assert.True(project.GetPropertyValue("a").Equals("1", StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
