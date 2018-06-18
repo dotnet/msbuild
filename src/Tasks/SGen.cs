@@ -253,9 +253,10 @@ namespace Microsoft.Build.Tasks
                 // Append the references, if any.
                 if (References != null)
                 {
-                    foreach (string reference in References)
+                    if (References.Length > 0)
                     {
-                        commandLineBuilder.AppendSwitchIfNotNull("/reference:", reference);
+                        //Appending references if 
+                        commandLineBuilder.AppendSwitchIfNotNull("/r:", string.Join(",", References));
                     }
                 }
 
