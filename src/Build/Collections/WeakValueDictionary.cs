@@ -158,9 +158,7 @@ namespace Microsoft.Build.Collections
         /// </remarks>
         public bool TryGetValue(K key, out V value)
         {
-            bool result = _dictionary.TryGetValue(key, out WeakReference<V> wrappedValue);
-
-            if (!result)
+            if (!_dictionary.TryGetValue(key, out WeakReference<V> wrappedValue))
             {
                 value = null;
                 return false;
