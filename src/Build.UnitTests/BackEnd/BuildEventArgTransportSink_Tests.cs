@@ -132,20 +132,19 @@ namespace Microsoft.Build.UnitTests.Logging
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = PacketProcessor;
-            var weakTransportDelegateReference = new WeakReference<SendDataDelegate>(transportDelegate);
+            var weakTransportDelegateReference = new WeakReference(transportDelegate);
             var transportSink = new BuildEventArgTransportSink(transportDelegate);
 
             transportSink.ShutDown();
 
-            Assert.True(weakTransportDelegateReference.TryGetTarget(out SendDataDelegate sendData));
-            Assert.NotNull(sendData);
+            Assert.NotNull(weakTransportDelegateReference.Target);
             transportDelegate = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
             // Expected shutdown to null out the sendData delegate, the two garbage collections
             // should have collected the sendDataDelegate causing the weak reference to die.
-            Assert.False(weakTransportDelegateReference.TryGetTarget(out _));  // " Expected delegate to be dead"
+            Assert.Null(weakTransportDelegateReference.Target);  // " Expected delegate to be dead"
         }
 
         /// <summary>
