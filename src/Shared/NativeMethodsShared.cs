@@ -1493,15 +1493,5 @@ namespace Microsoft.Build.Shared
         }
 
 #endregion
-
-#region helper methods
-
-        internal static bool FileExists(string path)
-        {
-            WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-            return GetFileAttributesEx(path, 0, ref data);
-        }
-
-#endregion
     }
 }

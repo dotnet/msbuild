@@ -11,7 +11,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -88,6 +87,13 @@ namespace Microsoft.Build.Shared
 #if !CLR2COMPATIBILITY
         private static ConcurrentDictionary<string, bool> FileExistenceCache = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 #endif
+
+        private enum GetFileAttributesResult
+        {
+            Directory,
+            Error,
+            File,
+        }
 
         /// <summary>
         /// Retrieves the MSBuild runtime cache directory
@@ -260,12 +266,6 @@ namespace Microsoft.Build.Shared
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, "path");
             string fullPath = GetFullPath(path);
-#if FEATURE_LEGACY_GETFULLPATH
-            if (NativeMethodsShared.IsWindows)
-            {
-                return fullPath;
-            }
-#endif
             return FixFilePath(fullPath);
         }
 
@@ -290,18 +290,21 @@ namespace Microsoft.Build.Shared
                 char* buffer = stackalloc char[bufferSize];
                 int fullPathLength = GetFullPathAndAssertSuccess(path, bufferSize, buffer, IntPtr.Zero);
                 // Avoid creating new strings unnecessarily
-                string fullPath = AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
+                string uncheckedFullPath = AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
+                AssertMaxPathLimits(uncheckedFullPath);
 
                 // We really don't care about extensions here, but Path.HasExtension provides a great way to
                 // invoke the CLR's invalid path checks (these are independent of path length)
-                Path.HasExtension(fullPath);
+                Path.HasExtension(uncheckedFullPath);
 
                 // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
                 // and security checks for strings like \\?\GlobalRoot
-                return IsUNCPath(fullPath) ? Path.GetFullPath(fullPath) : fullPath;
+                return IsUNCPath(uncheckedFullPath) ? Path.GetFullPath(uncheckedFullPath) : uncheckedFullPath;
             }
 #endif
-            return Path.GetFullPath(path);
+            string fullPath = Path.GetFullPath(path);
+            AssertMaxPathLimits(fullPath);
+            return fullPath;
         }
 
         private unsafe static int GetFullPathAndAssertSuccess(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
@@ -309,6 +312,14 @@ namespace Microsoft.Build.Shared
             int pathLength = NativeMethodsShared.GetFullPathName(target, bufferLength, buffer, mustBeZero);
             NativeMethodsShared.AssertNativeMethodSuccess(pathLength);
             return pathLength;
+        }
+
+        private static void AssertMaxPathLimits(string path)
+        {
+            if (IsPathTooLong(path))
+            {
+                throw new System.IO.PathTooLongException();
+            }
         }
 
         /// <summary>
@@ -723,25 +734,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// A variation of Path.IsRooted that not throw any IO exception.
-        /// </summary>
-        internal static bool IsRootedNoThrow(string path)
-        {
-            bool result;
-
-            try
-            {
-                result = Path.IsPathRooted(FixFilePath(path));
-            }
-            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
-            {
-                result = false;
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Gets a file info object for the specified file path. If the file path
         /// is invalid, or is a directory, or cannot be accessed, or does not exist,
         /// it returns null rather than throwing or returning a FileInfo around a non-existent file.
@@ -786,31 +778,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool DirectoryExistsNoThrow(string fullPath)
         {
-            fullPath = AttemptToShortenPath(fullPath);
-            if (NativeMethodsShared.IsWindows)
-            {
-                NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = false;
-
-                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-                if (success)
-                {
-                    return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0);
-                }
-
-                return false;
-            }
-            else
-            {
-                try
-                {
-                    return Directory.Exists(fullPath);
-                }
-                catch
-                {
-                    return false;
-                }
-            }
+            return GetFileAttributes(fullPath) == GetFileAttributesResult.Directory;
         }
 
         /// <summary>
@@ -820,29 +788,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool FileExistsNoThrow(string fullPath)
         {
-            fullPath = AttemptToShortenPath(fullPath);
-            if (NativeMethodsShared.IsWindows)
-            {
-                NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = false;
-
-                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-                if (success)
-                {
-                    return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0);
-                }
-
-                return false;
-            }
-
-            try
-            {
-                return File.Exists(fullPath);
-            }
-            catch
-            {
-                return false;
-            }
+            return GetFileAttributes(fullPath) == GetFileAttributesResult.File;
         }
 
         /// <summary>
@@ -853,33 +799,29 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool FileOrDirectoryExistsNoThrow(string fullPath)
         {
-            fullPath = AttemptToShortenPath(fullPath);
-            if (NativeMethodsShared.IsWindows)
+#if !CLR2COMPATIBILITY
+            if (NativeMethodsShared.IsWindows && Traits.Instance.CacheFileExistence)
             {
-#if !CLR2COMPATIBILITY
-                if (Traits.Instance.CacheFileExistence)
-                {
-                    // Possible future improvement: make sure file existence caching happens only at evaluation time, and maybe only within a build session. https://github.com/Microsoft/msbuild/issues/2306
-                    return FileExistenceCache.GetOrAdd(fullPath, NativeMethodsShared.FileExists);
-                }
-                else
-                {
-#endif
-                    return NativeMethodsShared.FileExists(fullPath);
-#if !CLR2COMPATIBILITY
-                }
-#endif
+                fullPath = AttemptToShortenPath(fullPath);
+                // Possible future improvement: make sure file existence caching happens only at evaluation time, and maybe only within a build session. https://github.com/Microsoft/msbuild/issues/2306
+                return FileExistenceCache.GetOrAdd(fullPath, (string path) => GetFileAttributes(path) != GetFileAttributesResult.Error);
             }
-            else
+#endif
+            return GetFileAttributes(fullPath) != GetFileAttributesResult.Error;
+        }
+
+        private static GetFileAttributesResult GetFileAttributes(string fullPath)
+        {
+            fullPath = AttemptToShortenPath(fullPath);
+            try
             {
-                try
-                {
-                    return File.Exists(fullPath) || Directory.Exists(fullPath);
-                }
-                catch
-                {
-                    return false;
-                }
+                FileAttributes attributes = File.GetAttributes(fullPath);
+                bool isDirectory = (attributes & FileAttributes.Directory) != 0;
+                return isDirectory ? GetFileAttributesResult.Directory : GetFileAttributesResult.File;
+            }
+            catch
+            {
+                return GetFileAttributesResult.Error;
             }
         }
 
@@ -991,8 +933,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string AttemptToShortenPath(string path)
         {
-            // >= not > because MAX_PATH assumes a trailing null
-            if (path.Length >= NativeMethodsShared.MAX_PATH || IsPathTooLongIfRooted(path))
+            if (IsPathTooLong(path) || IsPathTooLongIfRooted(path))
             {
                 // Attempt to make it shorter -- perhaps there are some \..\ elements
                 path = GetFullPathNoThrow(path);
@@ -1000,9 +941,33 @@ namespace Microsoft.Build.Shared
             return FixFilePath(path);
         }
 
+        private static bool IsPathTooLong(string path)
+        {
+            // >= not > because MAX_PATH assumes a trailing null
+            return path.Length >= (int)NativeMethodsShared.OSMaxPathLimit;
+        }
+
         private static bool IsPathTooLongIfRooted(string path)
         {
-            return !IsRootedNoThrow(path) && Directory.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= NativeMethodsShared.MAX_PATH;
+            bool hasMaxPath = NativeMethodsShared.OSMaxPathLimit != NativeMethodsShared.MaxPathLimits.None;
+            int maxPath = (int)NativeMethodsShared.OSMaxPathLimit;
+            // >= not > because MAX_PATH assumes a trailing null
+            return hasMaxPath && !IsRootedNoThrow(path) && NativeMethodsShared.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
+        }
+
+        /// <summary>
+        /// A variation of Path.IsRooted that not throw any IO exception.
+        /// </summary>
+        private static bool IsRootedNoThrow(string path)
+        {
+            try
+            {
+                return Path.IsPathRooted(FixFilePath(path));
+            }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+            {
+                return false;
+            }
         }
 
         /// <summary>
