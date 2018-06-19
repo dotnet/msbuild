@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        private static string[] _globProjects =
+        private static string[] _projectsWithGlobs =
         {
             @"<Project>
                 <ItemGroup>
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
-        public void ContextPinsGlobExpansionCache(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        public void ContextCachesGlopExpansions(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
             var projectDirectory = _env.DefaultTestDirectory.FolderPath;
 
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                _globProjects,
+                _projectsWithGlobs,
                 context,
                 project =>
                 {
@@ -220,10 +220,73 @@ namespace Microsoft.Build.UnitTests.Definition
                 );
         }
 
+        private static string[] _projectsWithConditions =
+        {
+            @"<Project>
+                <PropertyGroup Condition=`Exists('0.cs')`>
+                    <p>val</p>
+                </PropertyGroup>
+            </Project>",
+
+            @"<Project>
+                <PropertyGroup Condition=`Exists('0.cs')`>
+                    <p>val</p>
+                </PropertyGroup>
+            </Project>",
+        };
+
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        public void ContextCachesExistenceChecksInConditions(EvaluationContext.SharingPolicy policy)
+        {
+            var projectDirectory = _env.DefaultTestDirectory.FolderPath;
+
+            _env.SetCurrentDirectory(projectDirectory);
+
+            var context = EvaluationContext.Create(policy);
+
+            var theFile = Path.Combine(projectDirectory, "0.cs");
+            File.WriteAllText(theFile, "");
+
+            var evaluationCount = 0;
+
+            EvaluateProjects(
+                _projectsWithConditions,
+                context,
+                project =>
+                {
+                    evaluationCount++;
+
+                    if (File.Exists(theFile))
+                    {
+                        File.Delete(theFile);
+                    }
+
+                    if (evaluationCount == 1)
+                    {
+                        project.GetPropertyValue("p").ShouldBe("val");
+                    }
+                    else
+                        switch (policy)
+                        {
+                            case EvaluationContext.SharingPolicy.Shared:
+                                project.GetPropertyValue("p").ShouldBe("val");
+                                break;
+                            case EvaluationContext.SharingPolicy.Isolated:
+                                project.GetPropertyValue("p").ShouldBeEmpty();
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
+                        }
+                }
+                );
+        }
+
         /// <summary>
         /// Should be at least two test projects to test cache visibility between projects
         /// </summary>
-        private void EvaluateProjects(string[] projectContents, EvaluationContext context, Action<Project> projectAction)
+        private void EvaluateProjects(string[] projectContents, EvaluationContext context, Action<Project> afterEvaluationAction)
         {
             var collection = _env.CreateProjectCollection().Collection;
 
@@ -240,7 +303,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         LoadSettings = ProjectLoadSettings.IgnoreMissingImports
                     });
 
-                projectAction?.Invoke(project);
+                afterEvaluationAction?.Invoke(project);
 
                 projects.Add(project);
             }
@@ -250,7 +313,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 project.AddItem("a", "b");
                 project.ReevaluateIfNecessary(context);
 
-                projectAction?.Invoke(project);
+                afterEvaluationAction?.Invoke(project);
             }
         }
     }
