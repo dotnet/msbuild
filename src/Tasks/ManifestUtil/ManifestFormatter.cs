@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
-using System.Xml.Serialization;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -16,15 +15,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int t1 = Environment.TickCount;
 
-            XmlTextReader r = new XmlTextReader(input);
-            r.DtdProcessing = DtdProcessing.Ignore;
-            r.WhitespaceHandling = WhitespaceHandling.None;
+            var r = new XmlTextReader(input)
+            {
+                DtdProcessing = DtdProcessing.Ignore,
+                WhitespaceHandling = WhitespaceHandling.None
+            };
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(r.NameTable);
 
-            MemoryStream m = new MemoryStream();
-            XmlTextWriter w = new XmlTextWriter(m, Encoding.UTF8);
-            w.Formatting = Formatting.Indented;
-            w.Indentation = 2;
+            var m = new MemoryStream();
+            var w = new XmlTextWriter(m, Encoding.UTF8)
+            {
+                Formatting = Formatting.Indented,
+                Indentation = 2
+            };
             w.WriteStartDocument();
 
             while (r.Read())
@@ -42,11 +45,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                 string attributeQName = XmlUtil.GetQName(r, nsmgr);
                                 string xpath = elementQName + "/@" + attributeQName;
                                 // Filter out language="*"
-                                if ((xpath.Equals(XPaths.languageAttribute1, StringComparison.Ordinal) || xpath.Equals(XPaths.languageAttribute2, StringComparison.Ordinal)) && String.Equals(r.Value, "*", StringComparison.Ordinal))
+                                if ((xpath.Equals(XPaths.languageAttribute1, StringComparison.Ordinal) || xpath.Equals(
+                                         XPaths.languageAttribute2,
+                                         StringComparison.Ordinal)) && String.Equals(
+                                        r.Value,
+                                        "*",
+                                        StringComparison.Ordinal))
+                                {
                                     continue;
+                                }
                                 // Filter out attributes with empty values if attribute is on the list...
-                                if (String.IsNullOrEmpty(r.Value) && Array.BinarySearch(XPaths.emptyAttributeList, xpath) >= 0)
+                                if (String.IsNullOrEmpty(r.Value) &&
+                                    Array.BinarySearch(XPaths.emptyAttributeList, xpath) >= 0)
+                                {
                                     continue;
+                                }
                                 w.WriteAttributeString(r.Prefix, r.LocalName, r.NamespaceURI, r.Value);
                             }
 
@@ -54,7 +67,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
 
                         if (r.IsEmptyElement)
+                        {
                             w.WriteEndElement();
+                        }
 
                         break;
 

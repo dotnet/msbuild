@@ -7,14 +7,10 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -125,7 +121,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             string redistCommonConfigurationNeutral = Path.Combine(redistDirectoryCommonConfigNeutral, "D.dll");
             string redistCommonConfigurationNeutralDupe = Path.Combine(redistDirectoryCommonConfigNeutral, "A.dll");
 
-
             File.WriteAllText(testWinMDNeutralWinXML, "TestXml");
             File.WriteAllText(testWinMD, "TestWinmd");
             File.WriteAllText(testWinMD64, "TestWinmd");
@@ -227,8 +222,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Fact]
         public void PassReferenceWithNoReferenceDirectory()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             ITaskItem item = new TaskItem("C:\\SDKDoesNotExist");
             item.SetMetadata("ExpandReferenceAssemblies", "true");
@@ -246,7 +241,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal(0, t.RedistFiles.Length);
         }
 
-
         private delegate IList<string> GetSDKFolders(string sdkRoot);
         private delegate IList<string> GetSDKFolders2(string sdkRoot, string configuration, string architecture);
 
@@ -257,8 +251,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void GetSDKReferenceFolders()
         {
-            GetSDKFolders getReferenceFolders = new GetSDKFolders(ToolLocationHelper.GetSDKReferenceFolders);
-            GetSDKFolders2 getReferenceFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKReferenceFolders);
+            var getReferenceFolders = new GetSDKFolders(ToolLocationHelper.GetSDKReferenceFolders);
+            var getReferenceFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKReferenceFolders);
 
             VerifySDKFolders(getReferenceFolders, getReferenceFolders2, "References", _sdkDirectory);
         }
@@ -293,8 +287,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void GetSDKRedistFolders()
         {
-            GetSDKFolders getRedistFolders = new GetSDKFolders(ToolLocationHelper.GetSDKRedistFolders);
-            GetSDKFolders2 getRedistFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKRedistFolders);
+            var getRedistFolders = new GetSDKFolders(ToolLocationHelper.GetSDKRedistFolders);
+            var getRedistFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKRedistFolders);
 
             VerifySDKFolders(getRedistFolders, getRedistFolders2, "Redist", _sdkDirectory);
         }
@@ -306,8 +300,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void GetSDKDesignTimeFolders()
         {
-            GetSDKFolders getDesignTimeFolders = new GetSDKFolders(ToolLocationHelper.GetSDKDesignTimeFolders);
-            GetSDKFolders2 getDesignTimeFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKDesignTimeFolders);
+            var getDesignTimeFolders = new GetSDKFolders(ToolLocationHelper.GetSDKDesignTimeFolders);
+            var getDesignTimeFolders2 = new GetSDKFolders2(ToolLocationHelper.GetSDKDesignTimeFolders);
 
             VerifySDKFolders(getDesignTimeFolders, getDesignTimeFolders2, "DesignTime", _sdkDirectory);
         }
@@ -318,8 +312,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Fact]
         public void PassNoSDKReferences()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
             bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, FileUtilities.FileExistsNoThrow);
@@ -336,8 +330,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Fact]
         public void PassReferenceWithExpandFalse()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -361,8 +355,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Fact]
         public void PassReferenceWithCopyRedistFalse()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -388,8 +382,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalTrue()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
             ITaskItem item = new TaskItem(_sdkDirectory);
@@ -454,8 +448,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyNoCopyWhenReferenceOnlyIsTrue()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -512,8 +506,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-windows-failing")]
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalFalse()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -565,8 +559,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Fact]
         public void VerifyCacheFileNames()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -632,8 +626,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyReferencesLogged()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -681,8 +675,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyReferencesLoggedFilterOutWinmd()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -727,8 +721,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogErrorWhenNoConfiguration()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -751,8 +745,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogErrorWhenNoArchitecture()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -777,8 +771,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void VerifyReferencesLoggedAmd64()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -829,8 +823,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyReferencesLoggedX64()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -881,8 +875,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyLogReferencesFalse()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -917,8 +911,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistFalse()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -983,8 +977,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistTrue()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1015,8 +1009,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistTrueX64()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1048,8 +1042,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void VerifyRedistFilesLogRedistTrueAmd64()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1080,8 +1074,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogNoWarningForReferenceConflictWithinSDK()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1109,8 +1103,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogWarningForReferenceConflictWithinSDK()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1139,8 +1133,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogNoWarningForRedistConflictWithinSDK()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1167,8 +1161,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogWarningForRedistConflictWithinSDK()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1196,8 +1190,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogReferenceAndRedistConflictBetweenSdks()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1242,8 +1236,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogReferenceAndRedistConflictBetweenSdksDueToCustomTargetPath()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1285,8 +1279,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void LogReferenceAndRedistConflictBetweenSdksNowarning()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 
@@ -1316,7 +1310,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             Assert.Equal(6, t.RedistFiles.Length);
             Assert.Equal(0, engine.Warnings);
 
-
             string redistWinner = Path.Combine(_sdkDirectory, "Redist\\Retail\\Neutral\\B.pri");
             string redistVictim = Path.Combine(_sdkDirectory2, "Redist\\Retail\\X86\\B.pri");
             string referenceWinner = Path.Combine(_sdkDirectory, "References\\Retail\\Neutral\\B.WinMD");
@@ -1333,8 +1326,8 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         [Trait("Category", "mono-osx-failing")]
         public void TwoSDKSConflictRedistButDifferentTargetPaths()
         {
-            MockEngine engine = new MockEngine(_output);
-            GetSDKReferenceFiles t = new GetSDKReferenceFiles();
+            var engine = new MockEngine(_output);
+            var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
 

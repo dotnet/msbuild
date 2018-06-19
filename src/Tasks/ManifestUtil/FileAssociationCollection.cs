@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -11,19 +10,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class FileAssociationCollection : IEnumerable
     {
-        private List<FileAssociation> _list = new List<FileAssociation>();
+        private readonly List<FileAssociation> _list = new List<FileAssociation>();
 
         internal FileAssociationCollection(FileAssociation[] fileAssociations)
         {
             if (fileAssociations == null)
+            {
                 return;
+            }
             _list.AddRange(fileAssociations);
         }
 
-        public FileAssociation this[int index]
-        {
-            get { return _list[index]; }
-        }
+        public FileAssociation this[int index] => _list[index];
 
         public void Add(FileAssociation fileAssociation)
         {
@@ -35,10 +33,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             _list.Clear();
         }
 
-        public int Count
-        {
-            get { return _list.Count; }
-        }
+        public int Count => _list.Count;
 
         public IEnumerator GetEnumerator()
         {

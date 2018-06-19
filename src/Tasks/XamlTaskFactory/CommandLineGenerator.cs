@@ -28,44 +28,36 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// The list of active switches in the order they should be emitted.
         /// </summary>
-        private IEnumerable<string> _switchOrderList;
+        private readonly IEnumerable<string> _switchOrderList;
 
         /// <summary>
         /// The dictionary that holds all set switches
         /// The string is the name of the property, and the CommandLineToolSwitch holds all of the relevant information
         /// i.e., switch, boolean value, type, etc.
         /// </summary>
-        private Dictionary<string, CommandLineToolSwitch> _activeCommandLineToolSwitches = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Any additional options (as a literal string) that may have been specified in the project file
-        /// We eventually want to get rid of this
-        /// </summary>
-        private string _additionalOptions = String.Empty;
+        private readonly Dictionary<string, CommandLineToolSwitch> _activeCommandLineToolSwitches = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Creates a generator that generates a command-line based on the specified Xaml file and parameters.
         /// </summary>
         public CommandLineGenerator(Rule rule, Dictionary<string, Object> parameterValues)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(rule, "rule");
-            ErrorUtilities.VerifyThrowArgumentNull(parameterValues, "parameterValues");
+            ErrorUtilities.VerifyThrowArgumentNull(rule, nameof(rule));
+            ErrorUtilities.VerifyThrowArgumentNull(parameterValues, nameof(parameterValues));
 
             // Parse the Xaml file
-            TaskParser parser = new TaskParser();
+            var parser = new TaskParser();
             bool success = parser.ParseXamlDocument(rule);
             ErrorUtilities.VerifyThrow(success, "Unable to parse specified file or contents.");
 
             // Generate the switch order list
             _switchOrderList = parser.SwitchOrderList;
 
-            _activeCommandLineToolSwitches = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
             foreach (Property property in parser.Properties)
             {
-                Object value = null;
-                if (parameterValues.TryGetValue(property.Name, out value))
+                if (parameterValues.TryGetValue(property.Name, out object value))
                 {
-                    CommandLineToolSwitch switchToAdd = new CommandLineToolSwitch();
+                    var switchToAdd = new CommandLineToolSwitch();
                     if (!String.IsNullOrEmpty(property.Reversible) && String.Equals(property.Reversible, "true", StringComparison.OrdinalIgnoreCase))
                     {
                         switchToAdd.Reversible = true;
@@ -190,45 +182,26 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Accessor for the additional options string.
+        /// Any additional options (as a literal string) that may have been specified in the project file
         /// </summary>
-        public string AdditionalOptions
-        {
-            get
-            {
-                return _additionalOptions;
-            }
-
-            set
-            {
-                _additionalOptions = value;
-            }
-        }
+        public string AdditionalOptions { get; set; } = String.Empty;
 
         /// <summary>
         /// The template which, if set, will be used to govern formatting of the command line(s)
         /// </summary>
-        public string CommandLineTemplate
-        {
-            get;
-            set;
-        }
+        public string CommandLineTemplate { get; set; }
 
         /// <summary>
         /// The string to append to the end of a non-templated commandline.
         /// </summary>
-        public string AlwaysAppend
-        {
-            get;
-            set;
-        }
+        public string AlwaysAppend { get; set; }
 
         /// <summary>
         /// Generate the command-line
         /// </summary>
         public string GenerateCommandLine()
         {
-            CommandLineBuilder commandLineBuilder = new CommandLineBuilder(true /* quote hyphens */);
+            var commandLineBuilder = new CommandLineBuilder(true /* quote hyphens */);
 
             if (!String.IsNullOrEmpty(CommandLineTemplate))
             {
@@ -252,9 +225,9 @@ namespace Microsoft.Build.Tasks.Xaml
         internal void BuildAdditionalArgs(CommandLineBuilder cmdLine)
         {
             // We want additional options to be last so that this can always override other flags.
-            if ((cmdLine != null) && !String.IsNullOrEmpty(_additionalOptions))
+            if ((cmdLine != null) && !String.IsNullOrEmpty(AdditionalOptions))
             {
-                cmdLine.AppendSwitch(_additionalOptions);
+                cmdLine.AppendSwitch(AdditionalOptions);
             }
         }
 
@@ -397,9 +370,9 @@ namespace Microsoft.Build.Tasks.Xaml
         /// e.g., AdditionalIncludeDirectores = "@(Files)" where Files has File1, File2, and File3, the switch
         /// /IFile1 /IFile2 /IFile3 or the switch /IFile1;File2;File3 is emitted (the latter case has a separator
         /// ";" specified)</remarks>
-        private void EmitStringArraySwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
+        private static void EmitStringArraySwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
         {
-            List<string> stringList = new List<string>(commandLineToolSwitch.StringList.Length);
+            var stringList = new List<string>(commandLineToolSwitch.StringList.Length);
             for (int i = 0; i < commandLineToolSwitch.StringList.Length; ++i)
             {
                 // Make sure the file doesn't contain escaped " (\")
@@ -443,7 +416,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Substitute the value for the switch into the switch value where the [value] string is found, if it exists.
         /// </summary>
-        private bool PerformSwitchValueSubstition(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch, string switchValue)
+        private static bool PerformSwitchValueSubstition(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch, string switchValue)
         {
             Regex regex = new Regex(@"\[value]", RegexOptions.IgnoreCase);
             Match match = regex.Match(commandLineToolSwitch.SwitchValue);
@@ -475,7 +448,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <remarks>For integer switches (e.g., WarningLevel), the CommandLineToolSwitchName is emitted
         /// with the appropriate integer appended, as well as any arguments
         /// e.g., WarningLevel = "4" will emit /W4</remarks>
-        private void EmitIntegerSwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
+        private static void EmitIntegerSwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
         {
             if (commandLineToolSwitch.IsValid)
             {
@@ -556,8 +529,7 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 foreach (Tuple<string, bool> arg in arguments)
                 {
-                    CommandLineToolSwitch argSwitch;
-                    if (_activeCommandLineToolSwitches.TryGetValue(arg.Item1, out argSwitch))
+                    if (_activeCommandLineToolSwitches.TryGetValue(arg.Item1, out CommandLineToolSwitch argSwitch))
                     {
                         if (!String.IsNullOrEmpty(retVal))
                         {
@@ -584,7 +556,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         /// <remarks>A boolean switch is emitted if it is set to true. If it set to false, nothing is emitted.
         /// e.g. nologo = "true" will emit /Og, but nologo = "false" will emit nothing.</remarks>
-        private void EmitBooleanSwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
+        private static void EmitBooleanSwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
         {
             if (commandLineToolSwitch.BooleanValue)
             {
@@ -609,7 +581,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <remarks>A reversible boolean switch will emit a certain switch if set to true, but emit that
         /// exact same switch with a flag appended on the end if set to false.
         /// e.g., GlobalOptimizations = "true" will emit /Og, and GlobalOptimizations = "false" will emit /Og-</remarks>
-        private void EmitReversibleBooleanSwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
+        private static void EmitReversibleBooleanSwitch(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch)
         {
             // if the value is set to true, append whatever the TrueSuffix is set to.
             // Otherwise, append whatever the FalseSuffix is set to.

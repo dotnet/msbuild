@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 
 namespace Microsoft.Build.Tasks
 {
@@ -43,8 +42,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// returns true if refType equals primaryortlbimp, which is basically an unknown reference type
         /// </summary>
-        /// <param name="refType"></param>
-        /// <returns></returns>
         internal static bool IsPiaOrTlbImp(string refType)
         {
             return (string.Compare(refType, ComReferenceTypes.primaryortlbimp, StringComparison.OrdinalIgnoreCase) == 0);

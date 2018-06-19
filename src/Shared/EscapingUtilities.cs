@@ -35,8 +35,7 @@ namespace Microsoft.Build.Shared
             string escapedString
         )
         {
-            bool throwAwayBool;
-            return UnescapeAll(escapedString, out throwAwayBool);
+            return UnescapeAll(escapedString, out bool _);
         }
 
         private static bool IsHexDigit(char character)

@@ -113,7 +113,7 @@ namespace Microsoft.Build.Evaluation
             string evaluatedIncludeBeforeWildcardExpansion = EscapingUtilities.UnescapeAll(evaluatedIncludeBeforeWildcardExpansionEscaped);
             string evaluatedInclude = EscapingUtilities.UnescapeAll(evaluatedIncludeEscaped);
 
-            FileMatcher.Result match = FileMatcher.FileMatch(evaluatedIncludeBeforeWildcardExpansion, evaluatedInclude);
+            FileMatcher.Result match = FileMatcher.Default.FileMatch(evaluatedIncludeBeforeWildcardExpansion, evaluatedInclude);
 
             if (match.isLegalFileSpec && match.isMatch)
             {

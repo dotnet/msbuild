@@ -49,7 +49,7 @@ namespace Microsoft.Build.Utilities
                         }
                         else
                         {
-                            files = FileMatcher.GetFiles(null, i.ItemSpec);
+                            files = FileMatcher.Default.GetFiles(null, i.ItemSpec);
                         }
 
                         foreach (string file in files)

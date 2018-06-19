@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
+        internal static void AssertItems(string[] expectedItems, ICollection<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
             var converteditems = items.Select(i => (TestItem) new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, converteditems, expectedDirectMetadata, normalizeSlashes);

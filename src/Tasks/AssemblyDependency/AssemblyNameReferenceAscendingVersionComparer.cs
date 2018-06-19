@@ -3,15 +3,16 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Compare the two AssemblyNameReferences by version number.
     /// </summary>
-    sealed internal class AssemblyNameReferenceAscendingVersionComparer : IComparer
+    internal sealed class AssemblyNameReferenceAscendingVersionComparer : IComparer<AssemblyNameReference>
     {
-        internal readonly static IComparer comparer = new AssemblyNameReferenceAscendingVersionComparer();
+        internal static readonly IComparer<AssemblyNameReference> comparer = new AssemblyNameReferenceAscendingVersionComparer();
 
         /// <summary>
         /// Private construct so there's only one instance.
@@ -23,14 +24,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Compare the two AssemblyNameReferences by version number.
         /// </summary>
-        /// <param name="o1"></param>
-        /// <param name="o2"></param>
-        /// <returns></returns>
-        public int Compare(object o1, object o2)
+        public int Compare(AssemblyNameReference i1, AssemblyNameReference i2)
         {
-            AssemblyNameReference i1 = (AssemblyNameReference)o1;
-            AssemblyNameReference i2 = (AssemblyNameReference)o2;
-
             Version v1 = i1.assemblyName.Version;
             Version v2 = i2.assemblyName.Version;
 

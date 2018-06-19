@@ -2,11 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reflection;
 using System.Collections;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -36,11 +33,11 @@ namespace Microsoft.Build.Tasks
             _getAssemblyPathInGac = getAssemblyPathInGac;
         }
 
-
         /// <summary>
         /// Resolve a reference to a specific file name.
         /// </summary>
         /// <param name="assemblyName">The assembly name object of the assembly.</param>
+        /// <param name="sdkName"></param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
@@ -85,16 +82,17 @@ namespace Microsoft.Build.Tasks
                     // Record this as a location that was considered.
                     if (assembliesConsideredAndRejected != null)
                     {
-                        ResolutionSearchLocation considered = new ResolutionSearchLocation();
-                        considered.FileNameAttempted = assemblyName.FullName;
-                        considered.SearchPath = searchPathElement;
-                        considered.AssemblyName = assemblyName;
-                        considered.Reason = NoMatchReason.NotInGac;
+                        var considered = new ResolutionSearchLocation
+                        {
+                            FileNameAttempted = assemblyName.FullName,
+                            SearchPath = searchPathElement,
+                            AssemblyName = assemblyName,
+                            Reason = NoMatchReason.NotInGac
+                        };
                         assembliesConsideredAndRejected.Add(considered);
                     }
                 }
             }
-
 
             return false;
         }

@@ -23,29 +23,9 @@ namespace Microsoft.Build.Tasks.Xaml
         // ---------------------------------------------
 
         /// <summary>
-        /// The base class for the task
-        /// </summary>
-        private const string BaseClass = "DataDrivenToolTask";
-
-        /// <summary>
-        /// The namespace for the task.
-        /// </summary>
-        private const string NamespaceOfGeneratedTask = "MyDataDrivenTasks";
-
-        /// <summary>
         /// The property for the tool name.
         /// </summary>
         private const string ToolNamePropertyName = "ToolName";
-
-        /// <summary>
-        /// The property for the tool exe.
-        /// </summary>
-        private const string ToolExePropertyName = "ToolExe";
-
-        /// <summary>
-        /// The field for the tool exe.
-        /// </summary>
-        private const string ToolExeFieldName = "toolExe";
 
         /// <summary>
         /// IsOn
@@ -58,11 +38,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string IsOff = "false";
 
         /// <summary>
-        /// AlwaysType
-        /// </summary>
-        private const string AlwaysType = "always";
-
-        /// <summary>
         /// The value attribute.
         /// </summary>
         private const string ValueAttribute = "value";
@@ -70,11 +45,6 @@ namespace Microsoft.Build.Tasks.Xaml
         // --------------------
         // ToolSwitchType types
         // --------------------
-
-        /// <summary>
-        /// The always type
-        /// </summary>
-        private const string TypeAlways = "always";
 
         /// <summary>
         /// The boolean type
@@ -95,21 +65,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The string array type
         /// </summary>
         private const string TypeStringArray = "StringArray";
-
-        /// <summary>
-        /// The file type
-        /// </summary>
-        private const string TypeFile = "File";
-
-        /// <summary>
-        /// The directory type
-        /// </summary>
-        private const string TypeDirectory = "Directory";
-
-        /// <summary>
-        /// The ITaskItem type
-        /// </summary>
-        private const string TypeITaskItem = "ITaskItem";
 
         /// <summary>
         /// The ITaskItemArray type
@@ -140,16 +95,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private const string TypeToolSwitchType = "CommandLineToolSwitchType";
 
-        /// <summary>
-        /// The AlwaysAppend type.
-        /// </summary>
-        private const string TypeAlwaysAppend = "AlwaysAppend";
-
-        /// <summary>
-        /// The ArgumentRelation type.
-        /// </summary>
-        private const string TypeArgumentRelation = "CommandLineArgumentRelation";
-
         // ----------------
         // Common variables
         // ----------------
@@ -165,11 +110,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string DictionaryOfSwitches = "ActiveToolSwitches";
 
         /// <summary>
-        /// The ActiveToolSwitchesValues property.
-        /// </summary>
-        private const string DictionaryOfSwitchesValues = "ActiveToolSwitchesValues";
-
-        /// <summary>
         /// The switchMap field.
         /// </summary>
         private const string SwitchMap = "switchMap";
@@ -179,29 +119,14 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private const string MultiValues = "AllowMultipleValues";
 
-        /// <summary>
-        /// The relation field.
-        /// </summary>
-        private const string Relation = "relation";
-
         // --------------
         // Common methods
         // --------------
 
         /// <summary>
-        /// The Add method.
-        /// </summary>
-        private const string AddMethod = "Add";
-
-        /// <summary>
         /// The AddLast method.
         /// </summary>
         private const string AddLastMethod = "AddLast";
-
-        /// <summary>
-        /// The AlwaysAppend method.
-        /// </summary>
-        private const string AppendAlwaysMethod = "AlwaysAppend";
 
         /// <summary>
         /// The ValidateInteger method.
@@ -214,11 +139,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string ReadSwitchMapMethod = "ReadSwitchMap2";
 
         /// <summary>
-        /// The Remove method.
-        /// </summary>
-        private const string RemoveMethod = "Remove";
-
-        /// <summary>
         /// The IsPropertySet method.
         /// </summary>
         private const string IsPropertySetMethod = "IsPropertySet";
@@ -227,11 +147,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The IsSwitchValueSet method.
         /// </summary>
         private const string IsSwitchValueSetMethod = "IsSwitchValueSet";
-
-        /// <summary>
-        /// The EnsureTrailingSlash method.
-        /// </summary>
-        private const string EnsureTrailingSlashMethod = "EnsureTrailingSlash";
 
         /// <summary>
         /// The AddDefaultsToActiveSwitchList method.
@@ -252,11 +167,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The ReplaceToolSwitch method.
         /// </summary>
         private const string ReplaceToolSwitchMethod = "ReplaceToolSwitch";
-
-        /// <summary>
-        /// The AddActiveSwitchToolValue method.
-        /// </summary>
-        private const string AddActiveSwitchToolValueMethod = "AddActiveSwitchToolValue";
 
         /// <summary>
         /// The Overrides method.
@@ -281,11 +191,6 @@ namespace Microsoft.Build.Tasks.Xaml
         /// The FileName property
         /// </summary>
         private const string FileNameProperty = "Value";
-
-        /// <summary>
-        /// The TaskItem property
-        /// </summary>
-        private const string TaskItemProperty = "TaskItem";
 
         /// <summary>
         /// The TaskItemArray property
@@ -333,11 +238,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string ArgumentProperty = "ArgumentParameter";
 
         /// <summary>
-        /// The ArgumentRequired property
-        /// </summary>
-        private const string ArgumentRequiredProperty = "ArgumentRequired";
-
-        /// <summary>
         /// The Required property
         /// </summary>
         private const string PropertyRequiredProperty = "Required";
@@ -368,11 +268,6 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string RequiredProperty = "Required";
 
         /// <summary>
-        /// The ArgumentRelationList property
-        /// </summary>
-        private const string ArgumentRelationList = "ArgumentRelationList";
-
-        /// <summary>
         /// The DisplayName property
         /// </summary>
         private const string DisplayNameProperty = "DisplayName";
@@ -393,41 +288,21 @@ namespace Microsoft.Build.Tasks.Xaml
         private const string IsValidProperty = "IsValid";
 
         /// <summary>
-        /// The Type property
-        /// </summary>
-        private const string TypeProperty = "Type";
-
-        /// <summary>
         /// Types to ignore.
         /// </summary>
-        private string[] _propertiesTypesToIgnore = { "AdditionalOptions", "CommandLineTemplate" };
+        private static readonly string[] PropertiesTypesToIgnore = { "AdditionalOptions", "CommandLineTemplate" };
 
         #endregion
 
         /// <summary>
-        /// The current platform.
-        /// </summary>
-        private string _platform = String.Empty;
-
-        /// <summary>
-        /// The number of errors that occurred while parsing the xml file or generating the code
-        /// </summary>
-        private int _errorCount;
-
-        /// <summary>
-        /// The errors that occurred while parsing the xml file or generating the code
-        /// </summary>
-        private LinkedList<string> _errorLog = new LinkedList<string>();
-
-        /// <summary>
         /// The xml parsers
         /// </summary>
-        private TaskParser _taskParser = new TaskParser();
+        private readonly TaskParser _taskParser = new TaskParser();
 
         /// <summary>
         /// The relations parser
         /// </summary>
-        private RelationsParser _relationsParser = new RelationsParser();
+        private readonly RelationsParser _relationsParser = new RelationsParser();
 
         #region Constructor
 
@@ -442,11 +317,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// When set to true, the generated code will include comments.
         /// </summary>
-        public bool GenerateComments
-        {
-            get;
-            set;
-        }
+        public bool GenerateComments { get; set; }
 
         /// <summary>
         /// Constructor that takes a parser
@@ -461,13 +332,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// The platform
         /// </summary>
-        private string Platform
-        {
-            get
-            {
-                return _platform;
-            }
-        }
+        private string Platform { get; } = String.Empty;
 
         #region Generate code methods
 
@@ -476,10 +341,10 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal void RemovePropertiesWithIgnoredTypes(LinkedList<Property> propertyList)
         {
-            LinkedList<Property> propertyToIgnoreList = new LinkedList<Property>();
+            var propertyToIgnoreList = new LinkedList<Property>();
             foreach (Property property in propertyList)
             {
-                foreach (string propertyToIgnore in _propertiesTypesToIgnore)
+                foreach (string propertyToIgnore in PropertiesTypesToIgnore)
                 {
                     if (String.Equals(property.Name, propertyToIgnore, StringComparison.OrdinalIgnoreCase))
                     {
@@ -502,9 +367,9 @@ namespace Microsoft.Build.Tasks.Xaml
             try
             {
                 // set up the class namespace
-                CodeCompileUnit compileUnit = new CodeCompileUnit();
-                CodeNamespace dataDrivenToolTaskNamespace = new CodeNamespace(_taskParser.Namespace);
-                CodeTypeDeclaration taskClass = new CodeTypeDeclaration(_taskParser.GeneratedTaskName);
+                var compileUnit = new CodeCompileUnit();
+                var dataDrivenToolTaskNamespace = new CodeNamespace(_taskParser.Namespace);
+                var taskClass = new CodeTypeDeclaration(_taskParser.GeneratedTaskName);
 
                 if (GenerateComments)
                 {
@@ -562,20 +427,31 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             if (_taskParser.DefaultSet.Count > 0)
             {
-                CodeMemberMethod addToActiveSwitchList = new CodeMemberMethod();
-                addToActiveSwitchList.Name = AddDefaultsToActiveSwitchList;
-                addToActiveSwitchList.Attributes = MemberAttributes.Family | MemberAttributes.Override;
-                foreach (Property Property in _taskParser.DefaultSet)
+                var addToActiveSwitchList = new CodeMemberMethod
                 {
-                    CodeConditionStatement removeExisting = new CodeConditionStatement();
-                    removeExisting.Condition = new CodeBinaryOperatorExpression(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), IsPropertySetMethod), new CodeSnippetExpression(SurroundWithQuotes(Property.Name))), CodeBinaryOperatorType.IdentityEquality, new CodeSnippetExpression("false"));
-                    if (Property.Type == PropertyType.Boolean)
+                    Name = AddDefaultsToActiveSwitchList,
+                    Attributes = MemberAttributes.Family | MemberAttributes.Override
+                };
+                foreach (Property property in _taskParser.DefaultSet)
+                {
+                    var removeExisting = new CodeConditionStatement
                     {
-                        removeExisting.TrueStatements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression(Property.Name), new CodeSnippetExpression(Property.DefaultValue)));
+                        Condition = new CodeBinaryOperatorExpression(
+                            new CodeMethodInvokeExpression(
+                                new CodeMethodReferenceExpression(
+                                    new CodeThisReferenceExpression(),
+                                    IsPropertySetMethod),
+                                new CodeSnippetExpression(SurroundWithQuotes(property.Name))),
+                            CodeBinaryOperatorType.IdentityEquality,
+                            new CodeSnippetExpression("false"))
+                    };
+                    if (property.Type == PropertyType.Boolean)
+                    {
+                        removeExisting.TrueStatements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression(property.Name), new CodeSnippetExpression(property.DefaultValue)));
                     }
                     else
                     {
-                        removeExisting.TrueStatements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression(Property.Name), new CodeSnippetExpression(SurroundWithQuotes(Property.DefaultValue))));
+                        removeExisting.TrueStatements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression(property.Name), new CodeSnippetExpression(SurroundWithQuotes(property.DefaultValue))));
                     }
                     addToActiveSwitchList.Statements.Add(removeExisting);
                 }
@@ -600,14 +476,16 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             if (_taskParser.FallbackSet.Count > 0)
             {
-                CodeMemberMethod addToActiveSwitchList = new CodeMemberMethod();
-                addToActiveSwitchList.Name = AddFallbacksToActiveSwitchList;
-                addToActiveSwitchList.Attributes = MemberAttributes.Family | MemberAttributes.Override;
+                var addToActiveSwitchList = new CodeMemberMethod
+                {
+                    Name = AddFallbacksToActiveSwitchList,
+                    Attributes = MemberAttributes.Family | MemberAttributes.Override
+                };
                 foreach (KeyValuePair<string, string> fallbackParameter in _taskParser.FallbackSet)
                 {
-                    CodeConditionStatement removeExisting = new CodeConditionStatement();
-                    CodeMethodInvokeExpression isPropertySet = new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), IsPropertySetMethod, new CodeSnippetExpression(SurroundWithQuotes(fallbackParameter.Value)));
-                    CodeBinaryOperatorExpression propertyNotSet = new CodeBinaryOperatorExpression(new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), IsPropertySetMethod, new CodeSnippetExpression(SurroundWithQuotes(fallbackParameter.Key))), CodeBinaryOperatorType.ValueEquality, new CodeSnippetExpression(IsOff));
+                    var removeExisting = new CodeConditionStatement();
+                    var isPropertySet = new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), IsPropertySetMethod, new CodeSnippetExpression(SurroundWithQuotes(fallbackParameter.Value)));
+                    var propertyNotSet = new CodeBinaryOperatorExpression(new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), IsPropertySetMethod, new CodeSnippetExpression(SurroundWithQuotes(fallbackParameter.Key))), CodeBinaryOperatorType.ValueEquality, new CodeSnippetExpression(IsOff));
                     removeExisting.Condition = new CodeBinaryOperatorExpression(propertyNotSet, CodeBinaryOperatorType.BooleanAnd, isPropertySet);
                     removeExisting.TrueStatements.Add(new CodeAssignStatement(new CodeVariableReferenceExpression(fallbackParameter.Key), new CodeVariableReferenceExpression(fallbackParameter.Value)));
                     addToActiveSwitchList.Statements.Add(removeExisting);
@@ -635,14 +513,18 @@ namespace Microsoft.Build.Tasks.Xaml
                 if (!String.Equals(property.Name, ImportType, StringComparison.OrdinalIgnoreCase))
                 {
                     if (!ContainsCurrentPlatform(property))
+                    {
                         continue;
+                    }
 
-                    CodeAttributeDeclarationCollection collection = new CodeAttributeDeclarationCollection();
-                    CodeMemberProperty propertyName = new CodeMemberProperty();
-                    propertyName.Name = property.Name;
-                    propertyName.HasGet = true;
-                    propertyName.HasSet = true;
-                    propertyName.Attributes = MemberAttributes.Public;
+                    var collection = new CodeAttributeDeclarationCollection();
+                    var propertyName = new CodeMemberProperty
+                    {
+                        Name = property.Name,
+                        HasGet = true,
+                        HasSet = true,
+                        Attributes = MemberAttributes.Public
+                    };
 
                     // check to see if the property has a default value set
                     if (!String.IsNullOrEmpty(property.DefaultValue))
@@ -710,7 +592,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// Generates an assignment statment for the setters of properties, where the rhs is a string
         /// e.g., switchToAdd.Name = "Optimizations";
         /// </summary>
-        private void GenerateAssignPropertyToString(CodeMemberProperty propertyName, string property, string value)
+        private static void GenerateAssignPropertyToString(CodeMemberProperty propertyName, string property, string value)
         {
             if (!String.IsNullOrEmpty(value))
             {
@@ -723,7 +605,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// Generates an assignment statment for the setters of properties, where the rhs is an expression
         /// e.g., switchToAdd.ArgumentRequired = true;
         /// </summary>
-        private void GenerateAssignPropertyToValue(CodeMemberProperty propertyName, string property, CodeExpression value)
+        private static void GenerateAssignPropertyToValue(CodeMemberProperty propertyName, string property, CodeExpression value)
         {
             ErrorUtilities.VerifyThrow(value != null, "NullValue", property);
             CodeAssignStatement setStatement = new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(SwitchToAdd), property), value);
@@ -734,7 +616,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// Generates an assignment for the toolswitch, with a prefix included
         /// i.e., switchToAdd.ToolSwitchName = "/Ox";
         /// </summary>
-        private void GenerateAssignToolSwitch(CodeMemberProperty propertyName, string property, string prefix, string toolSwitchName)
+        private static void GenerateAssignToolSwitch(CodeMemberProperty propertyName, string property, string prefix, string toolSwitchName)
         {
             if (!String.IsNullOrEmpty(toolSwitchName))
             {
@@ -760,8 +642,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             // get statements
             propertyName.Type = new CodeTypeReference(returnType);
-            CodeConditionStatement isSet = new CodeConditionStatement();
-            isSet.Condition = new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), "IsPropertySet", new CodeExpression[] { new CodeSnippetExpression(SurroundWithQuotes(property.Name)) });
+            var isSet = new CodeConditionStatement
+            {
+                Condition = new CodeMethodInvokeExpression(
+                    new CodeThisReferenceExpression(),
+                    "IsPropertySet",
+                    new CodeSnippetExpression(SurroundWithQuotes(property.Name)))
+            };
             isSet.TrueStatements.Add(new CodeMethodReturnStatement(new CodePropertyReferenceExpression(new CodeArrayIndexerExpression(new CodeVariableReferenceExpression(DictionaryOfSwitches), new CodeVariableReferenceExpression(SurroundWithQuotes(property.Name))), valueName)));
             if (property.Type == PropertyType.Boolean)
             {
@@ -778,7 +665,7 @@ namespace Microsoft.Build.Tasks.Xaml
             propertyName.GetStatements.Add(isSet);
 
             // set statements
-            CodeVariableDeclarationStatement createNewToolSwitch = new CodeVariableDeclarationStatement(new CodeTypeReference(TypeToolSwitch), SwitchToAdd, new CodeObjectCreateExpression(TypeToolSwitch, new CodeExpression[] { new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(TypeToolSwitchType), type) }));
+            var createNewToolSwitch = new CodeVariableDeclarationStatement(new CodeTypeReference(TypeToolSwitch), SwitchToAdd, new CodeObjectCreateExpression(TypeToolSwitch, new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(TypeToolSwitchType), type)));
             propertyName.SetStatements.Add(createNewToolSwitch);
             if (!String.IsNullOrEmpty(property.Reversible) && String.Equals(property.Reversible, IsOn, StringComparison.OrdinalIgnoreCase))
             {
@@ -789,8 +676,13 @@ namespace Microsoft.Build.Tasks.Xaml
             GenerateAssignPropertyToString(propertyName, SeparatorProperty, property.Separator);
             GenerateAssignPropertyToString(propertyName, DisplayNameProperty, property.DisplayName);
             GenerateAssignPropertyToString(propertyName, DescriptionProperty, property.Description);
-            if (!String.IsNullOrEmpty(property.Required) && String.Equals(property.Required, IsOn, StringComparison.OrdinalIgnoreCase))
+            if (!String.IsNullOrEmpty(property.Required) && String.Equals(
+                    property.Required,
+                    IsOn,
+                    StringComparison.OrdinalIgnoreCase))
+            {
                 GenerateAssignPropertyToValue(propertyName, RequiredProperty, new CodeSnippetExpression(property.Required));
+            }
             GenerateAssignPropertyToString(propertyName, FallbackProperty, property.Fallback);
             GenerateAssignPropertyToString(propertyName, FalseSuffixProperty, property.FalseSuffix);
             GenerateAssignPropertyToString(propertyName, TrueSuffixProperty, property.TrueSuffix);
@@ -805,7 +697,7 @@ namespace Microsoft.Build.Tasks.Xaml
 
             if (property.IncludeInCommandLine)
             {
-                CodeAssignStatement setInclude = new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(SwitchToAdd), "IncludeInCommandLine"), new CodePrimitiveExpression(true));
+                var setInclude = new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(SwitchToAdd), "IncludeInCommandLine"), new CodePrimitiveExpression(true));
                 propertyName.SetStatements.Add(setInclude);
             }
 
@@ -826,7 +718,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Generates standart set statements for properties.
         /// </summary>
-        private void GenerateCommonSetStatements(Property property, CodeMemberProperty propertyName, string referencedProperty)
+        private static void GenerateCommonSetStatements(CodeMemberProperty propertyName, string referencedProperty)
         {
             if (referencedProperty != null)
             {
@@ -834,7 +726,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 propertyName.SetStatements.Add(setValue);
             }
 
-            propertyName.SetStatements.Add(new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), ReplaceToolSwitchMethod, new CodeExpression[] { new CodeSnippetExpression(SwitchToAdd) }));
+            propertyName.SetStatements.Add(new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), ReplaceToolSwitchMethod, new CodeSnippetExpression(SwitchToAdd)));
         }
 
         /// <summary>
@@ -842,19 +734,21 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void GenerateITaskItemArray(Property property, CodeMemberProperty propertyName)
         {
-            CodeTypeReference ctr = new CodeTypeReference();
-            ctr.BaseType = "ITaskItem";
-            ctr.ArrayRank = 1;
+            var ctr = new CodeTypeReference
+            {
+                BaseType = "ITaskItem",
+                ArrayRank = 1
+            };
             GenerateCommon(property, propertyName, TypeITaskItemArray, typeof(Array), TaskItemArrayProperty);
             propertyName.Type = ctr;
-            CodeAssignStatement setToolName = new CodeAssignStatement(
-              new CodePropertyReferenceExpression(
-                  new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
-                  new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
+            var setToolName = new CodeAssignStatement(
+                new CodePropertyReferenceExpression(
+                    new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
+                    new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
             propertyName.SetStatements.Add(setToolName);
 
             GenerateAssignToolSwitch(propertyName, SwitchValueProperty, property.Prefix, property.SwitchName);
-            GenerateCommonSetStatements(property, propertyName, TaskItemArrayProperty);
+            GenerateCommonSetStatements(propertyName, TaskItemArrayProperty);
         }
 
         /// <summary>
@@ -885,22 +779,22 @@ namespace Microsoft.Build.Tasks.Xaml
                 parameters = new CodeExpression[] { new CodeSnippetExpression(SurroundWithQuotes(name)), new CodeSnippetExpression("Int32.MinValue"), new CodeSnippetExpression("Int32.MaxValue"), new CodePropertySetValueReferenceExpression() };
             }
 
-            CodeMethodReferenceExpression validateInt = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), ValidateIntegerMethod);
+            var validateInt = new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), ValidateIntegerMethod);
 
-            CodeConditionStatement isValid = new CodeConditionStatement();
-            isValid.Condition = new CodeMethodInvokeExpression(validateInt, parameters);
+            var isValid =
+                new CodeConditionStatement { Condition = new CodeMethodInvokeExpression(validateInt, parameters) };
             isValid.TrueStatements.Add(new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(SwitchToAdd), IsValidProperty), new CodeSnippetExpression(IsOn)));
             isValid.FalseStatements.Add(new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(SwitchToAdd), IsValidProperty), new CodeSnippetExpression(IsOff)));
             propertyName.SetStatements.Add(isValid);
 
-            CodeAssignStatement setToolName = new CodeAssignStatement(
+            var setToolName = new CodeAssignStatement(
                   new CodePropertyReferenceExpression(
                       new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
                       new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
             propertyName.SetStatements.Add(setToolName);
 
             GenerateAssignToolSwitch(propertyName, SwitchValueProperty, property.Prefix, property.SwitchName);
-            GenerateCommonSetStatements(property, propertyName, NumberProperty);
+            GenerateCommonSetStatements(propertyName, NumberProperty);
         }
 
         /// <summary>
@@ -913,13 +807,13 @@ namespace Microsoft.Build.Tasks.Xaml
             GenerateAssignToolSwitch(propertyName, SwitchValueProperty, property.Prefix, property.SwitchName);
             GenerateAssignToolSwitch(propertyName, ReverseSwitchValueProperty, property.Prefix, property.ReverseSwitchName);
 
-            CodeAssignStatement setToolName = new CodeAssignStatement(
-            new CodePropertyReferenceExpression(
-                new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
-                new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
+            var setToolName = new CodeAssignStatement(
+                new CodePropertyReferenceExpression(
+                    new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
+                    new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
             propertyName.SetStatements.Add(setToolName);
 
-            GenerateCommonSetStatements(property, propertyName, BooleanValueProperty);
+            GenerateCommonSetStatements(propertyName, BooleanValueProperty);
         }
 
         /// <summary>
@@ -928,21 +822,20 @@ namespace Microsoft.Build.Tasks.Xaml
         private void GenerateStrings(Property property, CodeMemberProperty propertyName)
         {
             GenerateCommon(property, propertyName, TypeString, typeof(string), FileNameProperty);
-            string propertyToReceiveValue = null;
+            string propertyToReceiveValue;
 
             // if there are no enums, the value is the fileName, otherwise, the value is the enum's name
             if (property.Values.Count > 0)
             {
-                CodeVariableDeclarationStatement createArray = new CodeVariableDeclarationStatement("Tuple<string, string, Tuple<string, bool>[]>[]", SwitchMap);
-                List<CodeExpression> codeExpressions = new List<CodeExpression>();
+                var createArray = new CodeVariableDeclarationStatement("Tuple<string, string, Tuple<string, bool>[]>[]", SwitchMap);
+                var codeExpressions = new List<CodeExpression>();
 
-                CodeTypeReference temporaryArrayType = new CodeTypeReference(typeof(string));
                 foreach (Value val in property.Values)
                 {
                     if (ContainsCurrentPlatform(val.SwitchName))
                     {
                         // Create the array of argument expressions.                        
-                        List<CodeObjectCreateExpression> argumentInitializers = new List<CodeObjectCreateExpression>(val.Arguments.Count);
+                        var argumentInitializers = new List<CodeObjectCreateExpression>(val.Arguments.Count);
                         foreach (Argument arg in val.Arguments)
                         {
                             argumentInitializers.Add(new CodeObjectCreateExpression(new CodeTypeReference("Tuple<string, bool>"),
@@ -951,7 +844,7 @@ namespace Microsoft.Build.Tasks.Xaml
                         }
 
                         // Now create the entry for the switch itself.
-                        CodeObjectCreateExpression valueExpression = new CodeObjectCreateExpression(new CodeTypeReference("Tuple<string, string, Tuple<string, bool>[]>"),
+                        var valueExpression = new CodeObjectCreateExpression(new CodeTypeReference("Tuple<string, string, Tuple<string, bool>[]>"),
                             new CodeSnippetExpression(SurroundWithQuotes(val.Name)),
                             val.SwitchName != String.Empty ? new CodeSnippetExpression(SurroundWithQuotes(val.Prefix + val.SwitchName)) : new CodeSnippetExpression(SurroundWithQuotes("")),
                             new CodeArrayCreateExpression(new CodeTypeReference("Tuple<string, bool>"), argumentInitializers.ToArray()));
@@ -961,45 +854,44 @@ namespace Microsoft.Build.Tasks.Xaml
                 }
 
                 // Initialize the switch array
-                CodeArrayCreateExpression initializeArray = new CodeArrayCreateExpression("Tuple<string, string, Tuple<string, bool>[]>[]", codeExpressions.ToArray());
+                var initializeArray = new CodeArrayCreateExpression("Tuple<string, string, Tuple<string, bool>[]>[]", codeExpressions.ToArray());
                 createArray.InitExpression = initializeArray;
                 propertyName.SetStatements.Add(createArray);
 
                 // Create an index variable to hold the entry in the array we matched
-                CodeVariableDeclarationStatement indexDecl = new CodeVariableDeclarationStatement(typeof(int), "i", new CodeMethodInvokeExpression(
+                var indexDecl = new CodeVariableDeclarationStatement(typeof(int), "i", new CodeMethodInvokeExpression(
                             new CodeThisReferenceExpression(), ReadSwitchMapMethod,
-                            new CodeExpression[] { new CodeSnippetExpression(SurroundWithQuotes(property.Name)),
-                                new CodeVariableReferenceExpression(SwitchMap),
-                                new CodeVariableReferenceExpression(ValueAttribute) }));
+                            new CodeSnippetExpression(SurroundWithQuotes(property.Name)),
+                            new CodeVariableReferenceExpression(SwitchMap),
+                            new CodeVariableReferenceExpression(ValueAttribute)));
                 propertyName.SetStatements.Add(indexDecl);
 
-
                 // Set the switch value from the index into the array
-                CodeAssignStatement setToolSwitchNameGoodIndex = new CodeAssignStatement(
+                var setToolSwitchNameGoodIndex = new CodeAssignStatement(
                     new CodePropertyReferenceExpression(
                         new CodeVariableReferenceExpression(SwitchToAdd), SwitchValueProperty),
                         new CodePropertyReferenceExpression(new CodeArrayIndexerExpression(new CodeVariableReferenceExpression("switchMap"), new CodeVariableReferenceExpression("i")), "Item2"));
 
                 // Set the arguments
-                CodeAssignStatement setArgumentsGoodIndex = new CodeAssignStatement(
+                var setArgumentsGoodIndex = new CodeAssignStatement(
                     new CodePropertyReferenceExpression(
                         new CodeVariableReferenceExpression(SwitchToAdd), "Arguments"),
                         new CodePropertyReferenceExpression(new CodeArrayIndexerExpression(new CodeVariableReferenceExpression("switchMap"), new CodeVariableReferenceExpression("i")), "Item3"));
 
                 // Set the switch value from the index into the array
-                CodeAssignStatement setToolSwitchNameBadIndex = new CodeAssignStatement(
+                var setToolSwitchNameBadIndex = new CodeAssignStatement(
                     new CodePropertyReferenceExpression(
                         new CodeVariableReferenceExpression(SwitchToAdd), SwitchValueProperty),
                         new CodePrimitiveExpression(String.Empty));
 
                 // Set the arguments
-                CodeAssignStatement setArgumentsBadIndex = new CodeAssignStatement(
+                var setArgumentsBadIndex = new CodeAssignStatement(
                     new CodePropertyReferenceExpression(
                         new CodeVariableReferenceExpression(SwitchToAdd), "Arguments"),
                        new CodePrimitiveExpression(null));
 
                 // Create a CodeConditionStatement that tests a boolean value named boolean.
-                CodeConditionStatement conditionalStatement = new CodeConditionStatement(
+                var conditionalStatement = new CodeConditionStatement(
                     // The condition to test.
                     new CodeVariableReferenceExpression("i >= 0"),
                     // The statements to execute if the condition evaluates to true.
@@ -1009,14 +901,14 @@ namespace Microsoft.Build.Tasks.Xaml
 
                 propertyName.SetStatements.Add(conditionalStatement);
                 // Set the separator
-                CodeAssignStatement setSeparator = new CodeAssignStatement(
+                var setSeparator = new CodeAssignStatement(
                     new CodePropertyReferenceExpression(
                         new CodeVariableReferenceExpression(SwitchToAdd), "Separator"),
                         new CodeSnippetExpression(SurroundWithQuotes(property.Separator)));
                 propertyName.SetStatements.Add(setSeparator);
 
                 // Set the tool name
-                CodeAssignStatement setToolName = new CodeAssignStatement(
+                var setToolName = new CodeAssignStatement(
                     new CodePropertyReferenceExpression(
                         new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
                         new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
@@ -1027,7 +919,7 @@ namespace Microsoft.Build.Tasks.Xaml
             }
             else
             {
-                CodeAssignStatement setToolName = new CodeAssignStatement(
+                var setToolName = new CodeAssignStatement(
                     new CodePropertyReferenceExpression(
                         new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
                         new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
@@ -1039,14 +931,12 @@ namespace Microsoft.Build.Tasks.Xaml
                 GenerateAssignToolSwitch(propertyName, ReverseSwitchValueProperty, property.Prefix, property.ReverseSwitchName);
             }
 
-            GenerateCommonSetStatements(property, propertyName, propertyToReceiveValue);
+            GenerateCommonSetStatements(propertyName, propertyToReceiveValue);
         }
 
         /// <summary>
         /// Returns true if the property refers to the current platform.
         /// </summary>
-        /// <param name="property"></param>
-        /// <returns></returns>
         private bool ContainsCurrentPlatform(Property property)
         {
             if (Platform == null)
@@ -1057,7 +947,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 bool containsCurrentPlatform = false;
                 foreach (Value val in property.Values)
                 {
-                    containsCurrentPlatform = ContainsCurrentPlatform(val.SwitchName) ? true : containsCurrentPlatform;
+                    containsCurrentPlatform = ContainsCurrentPlatform(val.SwitchName) || containsCurrentPlatform;
                 }
                 return containsCurrentPlatform;
             }
@@ -1116,10 +1006,10 @@ namespace Microsoft.Build.Tasks.Xaml
                         propertyName.SetStatements.Add(new CodeMethodInvokeExpression(
                             new CodeFieldReferenceExpression(
                                 new CodeVariableReferenceExpression(SwitchToAdd), Overrides), AddLastMethod,
-                                        new CodeExpression[] { new CodeObjectCreateExpression(
-                                            new CodeTypeReference(TypeKeyValuePairStrings), new CodeExpression[] {
-                                                new CodeSnippetExpression(SurroundWithQuotes(rel.SwitchValue)),
-                                                new CodeSnippetExpression(SurroundWithQuotes(overrided))})}));
+                                    new CodeObjectCreateExpression(
+                                        new CodeTypeReference(TypeKeyValuePairStrings),
+                                        new CodeSnippetExpression(SurroundWithQuotes(rel.SwitchValue)),
+                                        new CodeSnippetExpression(SurroundWithQuotes(overrided)))));
                     }
                 }
 
@@ -1133,10 +1023,10 @@ namespace Microsoft.Build.Tasks.Xaml
                             propertyName.SetStatements.Add(new CodeMethodInvokeExpression(
                                 new CodeFieldReferenceExpression(
                                     new CodeVariableReferenceExpression(SwitchToAdd), Overrides), AddLastMethod,
-                                            new CodeExpression[] {  new CodeObjectCreateExpression(
-                                                new CodeTypeReference(TypeKeyValuePairStrings), new CodeExpression[] {
-                                                    new CodeSnippetExpression(SurroundWithQuotes(rel.SwitchValue)) ,
-                                                    new CodeSnippetExpression(SurroundWithQuotes(overrided))})}));
+                                new CodeObjectCreateExpression(
+                                    new CodeTypeReference(TypeKeyValuePairStrings),
+                                    new CodeSnippetExpression(SurroundWithQuotes(rel.SwitchValue)),
+                                    new CodeSnippetExpression(SurroundWithQuotes(overrided)))));
                         }
                     }
                 }
@@ -1149,9 +1039,11 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void GenerateStringArrays(Property property, CodeMemberProperty propertyName)
         {
-            CodeTypeReference ctr = new CodeTypeReference();
-            ctr.BaseType = "System.String";
-            ctr.ArrayRank = 1;
+            var ctr = new CodeTypeReference
+            {
+                BaseType = "System.String",
+                ArrayRank = 1
+            };
             GenerateCommon(property, propertyName, TypeStringArray, typeof(Array), StringListProperty);
             propertyName.Type = ctr;
             GenerateAssignToolSwitch(propertyName, SwitchValueProperty, property.Prefix, property.SwitchName);
@@ -1160,7 +1052,7 @@ namespace Microsoft.Build.Tasks.Xaml
                        new CodeVariableReferenceExpression(SwitchToAdd), NameProperty),
                        new CodeSnippetExpression(SurroundWithQuotes(property.Name)));
             propertyName.SetStatements.Add(setToolName);
-            GenerateCommonSetStatements(property, propertyName, StringListProperty);
+            GenerateCommonSetStatements(propertyName, StringListProperty);
         }
 
         /// <summary>
@@ -1168,14 +1060,16 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void GenerateToolNameProperty(CodeTypeDeclaration taskClass)
         {
-            CodeMemberProperty toolNameAccessor = new CodeMemberProperty();
-            toolNameAccessor.Name = ToolNamePropertyName;
-            toolNameAccessor.HasGet = true;
-            toolNameAccessor.HasSet = false;
-            toolNameAccessor.Attributes = MemberAttributes.Override | MemberAttributes.Family;
-            toolNameAccessor.Type = new CodeTypeReference(typeof(string));
+            var toolNameAccessor = new CodeMemberProperty
+            {
+                Name = ToolNamePropertyName,
+                HasGet = true,
+                HasSet = false,
+                Attributes = MemberAttributes.Override | MemberAttributes.Family,
+                Type = new CodeTypeReference(typeof(string))
+            };
 
-            string commentContent = null;
+            string commentContent;
 
             if (GenerateComments)
             {
@@ -1200,9 +1094,9 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// This method generates the code that appears at the top of each class (that imports other libraries)
         /// </summary>
-        private void GenerateImports(CodeNamespace codeNamespace)
+        private static void GenerateImports(CodeNamespace codeNamespace)
         {
-            string[] imports = new string[]
+            string[] imports =
             {
                 "System",
                 "System.Globalization",
@@ -1226,25 +1120,24 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void GenerateConstructor(CodeTypeDeclaration taskClass)
         {
-            CodeConstructor defaultConstructor = new CodeConstructor();
-            defaultConstructor.Attributes = MemberAttributes.Public;
+            var defaultConstructor = new CodeConstructor { Attributes = MemberAttributes.Public };
 
             // new System.Resources.ResourceManager("Microsoft.Build.NativeTasks.Strings", System.Reflection.Assembly.GetExecutingAssembly()))
-            CodeTypeReference resourceManagerType = new CodeTypeReference("System.Resources.ResourceManager");
-            CodeSnippetExpression resourceNamespaceString = new CodeSnippetExpression(SurroundWithQuotes(_taskParser.ResourceNamespace));
-            CodeTypeReferenceExpression systemReflectionAssembly = new CodeTypeReferenceExpression("System.Reflection.Assembly");
-            CodeMethodReferenceExpression getExecutingAssemblyReference = new CodeMethodReferenceExpression(systemReflectionAssembly, "GetExecutingAssembly");
-            CodeMethodInvokeExpression getExecutingAssembly = new CodeMethodInvokeExpression(getExecutingAssemblyReference);
-            CodeObjectCreateExpression resourceManager = new CodeObjectCreateExpression(resourceManagerType, new CodeExpression[] { resourceNamespaceString, getExecutingAssembly });
+            var resourceManagerType = new CodeTypeReference("System.Resources.ResourceManager");
+            var resourceNamespaceString = new CodeSnippetExpression(SurroundWithQuotes(_taskParser.ResourceNamespace));
+            var systemReflectionAssembly = new CodeTypeReferenceExpression("System.Reflection.Assembly");
+            var getExecutingAssemblyReference = new CodeMethodReferenceExpression(systemReflectionAssembly, "GetExecutingAssembly");
+            var getExecutingAssembly = new CodeMethodInvokeExpression(getExecutingAssemblyReference);
+            var resourceManager = new CodeObjectCreateExpression(resourceManagerType, resourceNamespaceString, getExecutingAssembly);
 
-            CodeTypeReference switchOrderArrayType = new CodeTypeReference(new CodeTypeReference("System.String"), 1);
-            List<CodeExpression> valueExpressions = new List<CodeExpression>();
+            var switchOrderArrayType = new CodeTypeReference(new CodeTypeReference("System.String"), 1);
+            var valueExpressions = new List<CodeExpression>();
             foreach (string switchName in _taskParser.SwitchOrderList)
             {
                 valueExpressions.Add(new CodeSnippetExpression(SurroundWithQuotes(switchName)));
             }
 
-            CodeArrayCreateExpression arrayExpression = new CodeArrayCreateExpression(switchOrderArrayType, valueExpressions.ToArray());
+            var arrayExpression = new CodeArrayCreateExpression(switchOrderArrayType, valueExpressions.ToArray());
             defaultConstructor.BaseConstructorArgs.Add(arrayExpression);
             defaultConstructor.BaseConstructorArgs.Add(resourceManager);
 
@@ -1267,31 +1160,34 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             if (_relationsParser.SwitchRelationsList.Count > 0)
             {
-                CodeMemberMethod addValidateRelationsMethod = new CodeMemberMethod();
-                addValidateRelationsMethod.Name = ValidateRelationsMethod;
-                addValidateRelationsMethod.Attributes = MemberAttributes.Family | MemberAttributes.Override;
+                var addValidateRelationsMethod = new CodeMemberMethod
+                {
+                    Name = ValidateRelationsMethod,
+                    Attributes = MemberAttributes.Family | MemberAttributes.Override
+                };
 
                 foreach (KeyValuePair<string, SwitchRelations> switchRelations in _relationsParser.SwitchRelationsList)
                 {
                     if (switchRelations.Value.Requires.Count > 0)
                     {
-                        CodeConditionStatement checkRequired = new CodeConditionStatement();
-
-                        checkRequired.Condition = null;
-
+                        var checkRequired = new CodeConditionStatement { Condition = null };
+                        
                         foreach (string required in switchRelations.Value.Requires)
                         {
                             if (checkRequired.Condition != null)
+                            {
                                 checkRequired.Condition = new CodeBinaryOperatorExpression(
-                                checkRequired.Condition, CodeBinaryOperatorType.BooleanAnd, new CodeBinaryOperatorExpression(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), IsSwitchValueSetMethod), new CodeSnippetExpression(SurroundWithQuotes(required))), CodeBinaryOperatorType.IdentityEquality, new CodeSnippetExpression("false")));
+                                    checkRequired.Condition, CodeBinaryOperatorType.BooleanAnd, new CodeBinaryOperatorExpression(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), IsSwitchValueSetMethod), new CodeSnippetExpression(SurroundWithQuotes(required))), CodeBinaryOperatorType.IdentityEquality, new CodeSnippetExpression("false")));
+                            }
                             else
+                            {
                                 checkRequired.Condition = new CodeBinaryOperatorExpression(new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(new CodeThisReferenceExpression(), IsSwitchValueSetMethod), new CodeSnippetExpression(SurroundWithQuotes(required))), CodeBinaryOperatorType.IdentityEquality, new CodeSnippetExpression("false"));
+                            }
                         }
 
                         checkRequired.TrueStatements.Add(new CodeMethodInvokeExpression
                             (new CodeThisReferenceExpression(), "RemoveSwitchToolBasedOnValue",
-                              new CodeExpression[]{new CodeSnippetExpression(SurroundWithQuotes(switchRelations.Key)),
-                              }));
+                            new CodeSnippetExpression(SurroundWithQuotes(switchRelations.Key))));
 
                         addValidateRelationsMethod.Statements.Add(checkRequired);
                     }
@@ -1319,14 +1215,14 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void LogError(string messageResourceName, params object[] messageArgs)
         {
-            _errorLog.AddLast(ResourceUtilities.FormatResourceString(messageResourceName, messageArgs));
-            _errorCount++;
+            ErrorLog.AddLast(ResourceUtilities.FormatResourceString(messageResourceName, messageArgs));
+            ErrorCount++;
         }
 
         /// <summary>
         /// Puts a string inside two quotes
         /// </summary>
-        private string SurroundWithQuotes(string unformattedText)
+        private static string SurroundWithQuotes(string unformattedText)
         {
             if (String.IsNullOrEmpty(unformattedText))
             {
@@ -1343,23 +1239,11 @@ namespace Microsoft.Build.Tasks.Xaml
         /// <summary>
         /// Returns the number of errors encountered
         /// </summary>
-        internal int ErrorCount
-        {
-            get
-            {
-                return _errorCount;
-            }
-        }
+        internal int ErrorCount { get; private set; }
 
         /// <summary>
         /// Returns the log of errors
         /// </summary>
-        internal LinkedList<string> ErrorLog
-        {
-            get
-            {
-                return _errorLog;
-            }
-        }
+        internal LinkedList<string> ErrorLog { get; } = new LinkedList<string>();
     }
 }

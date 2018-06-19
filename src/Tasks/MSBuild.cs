@@ -3,9 +3,7 @@
 
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -42,54 +40,13 @@ namespace Microsoft.Build.Tasks
             Build
         }
 
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public MSBuild()
-        {
-        }
-
         #region Properties
 
-        // projects to build
-        private ITaskItem[] _projects = null;
-        // A list of targets to build.  This is an optional parameter.  If it's omitted,
-        // the default targets are built.
-        private string[] _targets = null;
-        // A list of property name/value pairs to apply as global properties to the child project.
-        // Each string in this array should be of the form:  "propname=propvalue"
-        private string[] _properties = null;
-
-        /// <summary>
-        /// A semicolon-delimited list of global properties to undefine
-        /// </summary>
-        private string _undefineProperties = null;
-
         // outputs of all built targets
-        private ArrayList _targetOutputs = new ArrayList();
-        // indicates if the paths of target output items should be rebased relative to the calling project
-        private bool _rebaseOutputs = false;
-        // Indicates that we should stop building remaining projects as soon as one fails to build.
-        // The default is that we chug ahead despite failures.
-        private bool _stopOnFirstFailure = false;
-        // When this is true, instead of calling the engine once to build all the targets (for each project),
-        // we would call the engine once per target (for each project).  The benefit of this is that
-        // if one target fails, you can still continue with the remaining targets.
-        private bool _runEachTargetSeparately = false;
-        // When this is true we call the engine with all the projects at once instead of
-        // calling the engine once per project
-        private bool _buildInParallel = false;
-        // If true the project will be unloaded once the  operation is completed
-        private bool _unloadProjectsOnCompletion = false;
-        // If true the cache will be checked for the result and the result will be stored if the operation 
-        // is run
-        private bool _useResultsCache = true;
+        private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
+
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
         private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
-        // Value of ToolsVersion to use when building projects passed to this task.
-        private string _toolsVersion = null;
-        // Should Targets, Properties (+ properties as project metadata) be un-escaped before processing
-        private string[] _targetAndPropertyListSeparators = null;
 
         /// <summary>
         /// A list of property name/value pairs to apply as global properties to 
@@ -106,198 +63,74 @@ namespace Microsoft.Build.Tasks
         ///     <MSBuild
         ///         Properties="@(OutputPathItem->'TargetPath=%(Identity)')" />
         /// </remarks>
-        public string[] Properties
-        {
-            get
-            {
-                return _properties;
-            }
-
-            set
-            {
-                _properties = value;
-            }
-        }
+        public string[] Properties { get; set; }
 
         /// <summary>
         /// Gets or sets the set of global properties to remove.
         /// </summary>
-        public string RemoveProperties
-        {
-            get
-            {
-                return _undefineProperties;
-            }
-
-            set
-            {
-                _undefineProperties = value;
-            }
-        }
+        public string RemoveProperties { get; set; }
 
         /// <summary>
         /// The targets to build in each project specified by the <see cref="Projects"/> property.
         /// </summary>
         /// <value>Array of target names.</value>
-        public string[] Targets
-        {
-            get
-            {
-                return _targets;
-            }
-
-            set
-            {
-                _targets = value;
-            }
-        }
+        public string[] Targets { get; set; }
 
         /// <summary>
         /// The projects to build.
         /// </summary>
         /// <value>Array of project items.</value>
         [Required]
-        public ITaskItem[] Projects
-        {
-            get
-            {
-                return _projects;
-            }
-
-            set
-            {
-                _projects = value;
-            }
-        }
+        public ITaskItem[] Projects { get; set; }
 
         /// <summary>
         /// Outputs of the targets built in each project.
         /// </summary>
         /// <value>Array of output items.</value>
         [Output]
-        public ITaskItem[] TargetOutputs
-        {
-            get
-            {
-                return (ITaskItem[])_targetOutputs.ToArray(typeof(ITaskItem));
-            }
-        }
+        public ITaskItem[] TargetOutputs => _targetOutputs.ToArray();
 
         /// <summary>
         /// Indicates if the paths of target output items should be rebased relative to the calling project.
         /// </summary>
         /// <value>true, if target output item paths should be rebased</value>
-        public bool RebaseOutputs
-        {
-            get
-            {
-                return _rebaseOutputs;
-            }
-
-            set
-            {
-                _rebaseOutputs = value;
-            }
-        }
+        public bool RebaseOutputs { get; set; }
 
         /// <summary>
         /// Forces the task to stop building the remaining projects as soon as any of
         /// them fail.
         /// </summary>
-        public bool StopOnFirstFailure
-        {
-            get
-            {
-                return _stopOnFirstFailure;
-            }
-
-            set
-            {
-                _stopOnFirstFailure = value;
-            }
-        }
+        public bool StopOnFirstFailure { get; set; }
 
         /// <summary>
         /// When this is true, instead of calling the engine once to build all the targets (for each project),
         /// we would call the engine once per target (for each project).  The benefit of this is that
         /// if one target fails, you can still continue with the remaining targets.
         /// </summary>
-        public bool RunEachTargetSeparately
-        {
-            get
-            {
-                return _runEachTargetSeparately;
-            }
-
-            set
-            {
-                _runEachTargetSeparately = value;
-            }
-        }
+        public bool RunEachTargetSeparately { get; set; }
 
         /// <summary>
         /// Value of ToolsVersion to use when building projects passed to this task.
         /// </summary>
-        public string ToolsVersion
-        {
-            get
-            {
-                return _toolsVersion;
-            }
-
-            set
-            {
-                _toolsVersion = value;
-            }
-        }
+        public string ToolsVersion { get; set; }
 
         /// <summary>
         /// When this is true we call the engine with all the projects at once instead of 
         /// calling the engine once per project
         /// </summary>
-        public bool BuildInParallel
-        {
-            get
-            {
-                return _buildInParallel;
-            }
-            set
-            {
-                _buildInParallel = value;
-            }
-        }
+        public bool BuildInParallel { get; set; }
 
         /// <summary>
         /// If true the project will be unloaded once the operation is completed
         /// </summary>
-        public bool UnloadProjectsOnCompletion
-        {
-            get
-            {
-                return _unloadProjectsOnCompletion;
-            }
-            set
-            {
-                _unloadProjectsOnCompletion = value;
-            }
-        }
+        public bool UnloadProjectsOnCompletion { get; set; }
 
         /// <summary>
         /// If true the cached result will be returned if present and a if MSBuild
         /// task is run its result will be cached in a scope (ProjectFileName, GlobalProperties)[TargetNames]
         /// as a list of build items
         /// </summary>
-        public bool UseResultsCache
-        {
-            get
-            {
-                return _useResultsCache;
-            }
-            set
-            {
-                _useResultsCache = value;
-            }
-        }
+        public bool UseResultsCache { get; set; } = true;
 
         /// <summary>
         /// When this is true, project files that do not exist on the disk will be skipped. By default,
@@ -337,14 +170,7 @@ namespace Microsoft.Build.Tasks
                 {
                     ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
                     bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
-                    if (originalSkipValue)
-                    {
-                        _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Skip;
-                    }
-                    else
-                    {
-                        _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
-                    }
+                    _skipNonexistentProjects = originalSkipValue ? SkipNonexistentProjectsBehavior.Skip : SkipNonexistentProjectsBehavior.Error;
                 }
             }
         }
@@ -354,17 +180,7 @@ namespace Microsoft.Build.Tasks
         /// will be un-escaped before processing. e.g. %3B (an escaped ';') in the string for any of them will 
         /// be treated as if it were an un-escaped ';'
         /// </summary>
-        public string[] TargetAndPropertyListSeparators
-        {
-            get
-            {
-                return _targetAndPropertyListSeparators;
-            }
-            set
-            {
-                _targetAndPropertyListSeparators = value;
-            }
-        }
+        public string[] TargetAndPropertyListSeparators { get; set; }
 
         #endregion
 
@@ -384,27 +200,26 @@ namespace Microsoft.Build.Tasks
             }
 
             // We have been asked to unescape all escaped characters before processing
-            if (this.TargetAndPropertyListSeparators != null && this.TargetAndPropertyListSeparators.Length > 0)
+            if (TargetAndPropertyListSeparators != null && TargetAndPropertyListSeparators.Length > 0)
             {
                 ExpandAllTargetsAndProperties();
             }
 
             // Parse the global properties into a hashtable.
-            Hashtable propertiesTable;
-            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", this.Properties, out propertiesTable))
+            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", Properties, out Dictionary<string, string> propertiesTable))
             {
                 return false;
             }
 
             // Parse out the properties to undefine, if any.
             string[] undefinePropertiesArray = null;
-            if (!String.IsNullOrEmpty(_undefineProperties))
+            if (!String.IsNullOrEmpty(RemoveProperties))
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
-                undefinePropertiesArray = _undefineProperties.Split(new char[] { ';' });
+                undefinePropertiesArray = RemoveProperties.Split(';');
                 foreach (string property in undefinePropertiesArray)
                 {
-                    Log.LogMessageFromText(String.Format(CultureInfo.InvariantCulture, "  {0}", property), MessageImportance.Low);
+                    Log.LogMessageFromText($"  {property}", MessageImportance.Low);
                 }
             }
 
@@ -412,9 +227,9 @@ namespace Microsoft.Build.Tasks
             // If we are in single proc mode and stopOnFirstFailure is true, we cannot build in parallel because 
             // building in parallel sends all of the projects to the engine at once preventing us from not sending
             // any more projects after the first failure. Therefore, to preserve compatibility with whidbey if we are in this situation disable buildInParallel.
-            if (!isRunningMultipleNodes && _stopOnFirstFailure && _buildInParallel)
+            if (!isRunningMultipleNodes && StopOnFirstFailure && BuildInParallel)
             {
-                _buildInParallel = false;
+                BuildInParallel = false;
                 Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NotBuildingInParallel");
             }
 
@@ -423,7 +238,7 @@ namespace Microsoft.Build.Tasks
             // All project files will be submitted to the engine all at once, this mean there is no stopping for failures between projects.
             // When RunEachTargetSeparately is false, all targets will be submitted to the engine at once, this means there is no way to stop between target failures.
             // therefore the first failure seen will be the only failure seen.
-            if (isRunningMultipleNodes && _buildInParallel && _stopOnFirstFailure && !_runEachTargetSeparately)
+            if (isRunningMultipleNodes && BuildInParallel && StopOnFirstFailure && !RunEachTargetSeparately)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.NoStopOnFirstFailure");
             }
@@ -432,15 +247,13 @@ namespace Microsoft.Build.Tasks
             // string[] represents a set of target names to build.  Depending on the value 
             // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
             // the targets together, or we call the engine separately for each target.
-            ArrayList targetLists = CreateTargetLists(this.Targets, this.RunEachTargetSeparately);
-
+            List<string[]> targetLists = CreateTargetLists(Targets, RunEachTargetSeparately);
 
             bool success = true;
             ITaskItem[] singleProject = null;
             bool[] skipProjects = null;
 
-
-            if (_buildInParallel)
+            if (BuildInParallel)
             {
                 skipProjects = new bool[Projects.Length];
                 for (int i = 0; i < skipProjects.Length; i++)
@@ -463,7 +276,7 @@ namespace Microsoft.Build.Tasks
 
                 string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
 
-                if (_stopOnFirstFailure && !success)
+                if (StopOnFirstFailure && !success)
                 {
                     // Inform the user that we skipped the remaining projects because StopOnFirstFailure=true.
                     Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingProjects");
@@ -484,7 +297,7 @@ namespace Microsoft.Build.Tasks
 
                     // If we are building in parallel we want to only make one call to
                     // ExecuteTargets once we verified that all projects exist
-                    if (!_buildInParallel)
+                    if (!BuildInParallel)
                     {
                         singleProject[0] = project;
 
@@ -499,8 +312,8 @@ namespace Microsoft.Build.Tasks
                                 BuildEngine3,
                                 Log,
                                 _targetOutputs,
-                                _useResultsCache,
-                                _unloadProjectsOnCompletion,
+                                UseResultsCache,
+                                UnloadProjectsOnCompletion,
                                 ToolsVersion
                                 )
                            )
@@ -529,7 +342,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // We need to build all the projects that were not skipped
-            if (_buildInParallel)
+            if (BuildInParallel)
             {
                 success = BuildProjectsInParallel(propertiesTable, undefinePropertiesArray, targetLists, success, skipProjects);
             }
@@ -540,20 +353,19 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Build projects which have not been skipped. This will be done in parallel
         /// </summary>
-        private bool BuildProjectsInParallel(Hashtable propertiesTable, string[] undefinePropertiesArray, ArrayList targetLists, bool success, bool[] skipProjects)
+        private bool BuildProjectsInParallel(Dictionary<string, string> propertiesTable, string[] undefinePropertiesArray, List<string[]> targetLists, bool success, bool[] skipProjects)
         {
-            ITaskItem[] projectToBuildInParallel = Projects;
             // There were some projects that were skipped so we need to recreate the
             // project array with those projects removed
-            List<ITaskItem> projectsToBuildArrayList = new List<ITaskItem>();
+            var projectsToBuildList = new List<ITaskItem>();
             for (int i = 0; i < Projects.Length; i++)
             {
                 if (!skipProjects[i])
                 {
-                    projectsToBuildArrayList.Add(Projects[i]);
+                    projectsToBuildList.Add(Projects[i]);
                 }
             }
-            projectToBuildInParallel = projectsToBuildArrayList.ToArray();
+            ITaskItem[] projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
             if (projectToBuildInParallel.Length > 0)
@@ -569,8 +381,8 @@ namespace Microsoft.Build.Tasks
                                 BuildEngine3,
                                 Log,
                                 _targetOutputs,
-                                _useResultsCache,
-                                _unloadProjectsOnCompletion,
+                                UseResultsCache,
+                                UnloadProjectsOnCompletion,
                                 ToolsVersion
                                 )
                            )
@@ -586,65 +398,59 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ExpandAllTargetsAndProperties()
         {
-            List<string> expandedProperties = new List<string>();
-            List<string> expandedTargets = new List<string>();
+            var expandedProperties = new List<string>();
+            var expandedTargets = new List<string>();
 
-            if (this.Properties != null)
+            if (Properties != null)
             {
                 // Expand all properties
-                for (int n = 0; n < this.Properties.Length; n++)
+                foreach (string t in Properties)
                 {
                     // Split each property according to the separators
-                    string[] expandedPropertyValues = this.Properties[n].Split(this.TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedPropertyValues = t.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+
                     // Add the resultant properties to the final list
                     foreach (string property in expandedPropertyValues)
                     {
                         expandedProperties.Add(property);
                     }
                 }
-                this.Properties = expandedProperties.ToArray();
+
+                Properties = expandedProperties.ToArray();
             }
 
-            if (this.Targets != null)
+            if (Targets != null)
             {
                 // Expand all targets
-                for (int n = 0; n < this.Targets.Length; n++)
+                foreach (string t in Targets)
                 {
                     // Split each target according to the separators
-                    string[] expandedTargetValues = this.Targets[n].Split(this.TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedTargetValues = t.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+
                     // Add the resultant targets to the final list
                     foreach (string target in expandedTargetValues)
                     {
                         expandedTargets.Add(target);
                     }
                 }
-                this.Targets = expandedTargets.ToArray();
+
+                Targets = expandedTargets.ToArray();
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="targets"></param>
-        /// <param name="runEachTargetSeparately"></param>
-        /// <returns></returns>
-        internal static ArrayList CreateTargetLists
-            (
-            string[] targets,
-            bool runEachTargetSeparately
-            )
+        internal static List<string[]> CreateTargetLists(string[] targets, bool runEachTargetSeparately)
         {
             // This is a list of string[].  That is, each element in the list is a string[].  Each
             // string[] represents a set of target names to build.  Depending on the value 
             // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
             // the targets together, or we call the engine separately for each target.
-            ArrayList targetLists = new ArrayList();
-            if ((runEachTargetSeparately) && (targets != null) && (targets.Length > 0))
+            var targetLists = new List<string[]>(runEachTargetSeparately ? targets.Length : 1);
+            if (runEachTargetSeparately && targets.Length > 0)
             {
                 // Separate target invocations for each individual target.
                 foreach (string targetName in targets)
                 {
-                    targetLists.Add(new string[1] { targetName });
+                    targetLists.Add(new[] { targetName });
                 }
             }
             else
@@ -657,21 +463,18 @@ namespace Microsoft.Build.Tasks
             return targetLists;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         /// <returns>True if the operation was successful</returns>
         internal static bool ExecuteTargets
             (
             ITaskItem[] projects,
-            Hashtable propertiesTable,
+            Dictionary<string, string> propertiesTable,
             string[] undefineProperties,
-            ArrayList targetLists,
+            List<string[]> targetLists,
             bool stopOnFirstFailure,
             bool rebaseOutputs,
             IBuildEngine3 buildEngine,
             TaskLoggingHelper log,
-            ArrayList targetOutputs,
+            List<ITaskItem> targetOutputs,
             bool useResultsCache,
             bool unloadProjectsOnCompletion,
             string toolsVersion
@@ -682,12 +485,11 @@ namespace Microsoft.Build.Tasks
             // We don't log a message about the project and targets we're going to
             // build, because it'll all be in the immediately subsequent ProjectStarted event.
 
-            string[] projectDirectory = new string[projects.Length];
-            string[] projectNames = new string[projects.Length];
-            string[] toolsVersions = new string[projects.Length];
-            IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
-            IDictionary[] projectProperties = new IDictionary[projects.Length];
-            List<string>[] undefinePropertiesPerProject = new List<string>[projects.Length];
+            var projectDirectory = new string[projects.Length];
+            var projectNames = new string[projects.Length];
+            var toolsVersions = new string[projects.Length];
+            var projectProperties = new Dictionary<string, string>[projects.Length];
+            var undefinePropertiesPerProject = new IList<string>[projects.Length];
 
             for (int i = 0; i < projectNames.Length; i++)
             {
@@ -702,15 +504,13 @@ namespace Microsoft.Build.Tasks
                     projectNames[i] = projects[i].ItemSpec;
                     toolsVersions[i] = toolsVersion;
 
-
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
-                        Hashtable preProjectPropertiesTable;
                         if (!PropertyParser.GetTableWithEscaping
                              (log, ResourceUtilities.FormatResourceString("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(';'),
-                              out preProjectPropertiesTable)
+                              out Dictionary<string, string> preProjectPropertiesTable)
                            )
                         {
                             return false;
@@ -728,7 +528,7 @@ namespace Microsoft.Build.Tasks
                     string projectUndefineProperties = projects[i].GetMetadata("UndefineProperties");
                     if (!String.IsNullOrEmpty(projectUndefineProperties))
                     {
-                        string[] propertiesToUndefine = projectUndefineProperties.Split(new char[] { ';' });
+                        string[] propertiesToUndefine = projectUndefineProperties.Split(';');
                         if (undefinePropertiesPerProject[i] == null)
                         {
                             undefinePropertiesPerProject[i] = new List<string>(propertiesToUndefine.Length);
@@ -740,7 +540,7 @@ namespace Microsoft.Build.Tasks
                             foreach (string property in propertiesToUndefine)
                             {
                                 undefinePropertiesPerProject[i].Add(property);
-                                log.LogMessageFromText(String.Format(CultureInfo.InvariantCulture, "  {0}", property), MessageImportance.Low);
+                                log.LogMessageFromText($"  {property}", MessageImportance.Low);
                             }
                         }
                     }
@@ -749,28 +549,27 @@ namespace Microsoft.Build.Tasks
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
-                        Hashtable additionalProjectPropertiesTable;
                         if (!PropertyParser.GetTableWithEscaping
                              (log, ResourceUtilities.FormatResourceString("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(';'),
-                              out additionalProjectPropertiesTable)
+                              out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {
                             return false;
                         }
-                        Hashtable combinedTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                        var combinedTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         // First copy in the properties from the global table that not in the additional properties table
                         if (projectProperties[i] != null)
                         {
-                            foreach (DictionaryEntry entry in projectProperties[i])
+                            foreach (KeyValuePair<string, string> entry in projectProperties[i])
                             {
-                                if (!additionalProjectPropertiesTable.Contains(entry.Key))
+                                if (!additionalProjectPropertiesTable.ContainsKey(entry.Key))
                                 {
                                     combinedTable.Add(entry.Key, entry.Value);
                                 }
                             }
                         }
                         // Add all the additional properties
-                        foreach (DictionaryEntry entry in additionalProjectPropertiesTable)
+                        foreach (KeyValuePair<string, string> entry in additionalProjectPropertiesTable)
                         {
                             combinedTable.Add(entry.Key, entry.Value);
                         }
@@ -800,13 +599,12 @@ namespace Microsoft.Build.Tasks
                 // Send the project off to the build engine.  By passing in null to the 
                 // first param, we are indicating that the project to build is the same
                 // as the *calling* project file.
-                bool currentTargetResult = true;
 
                 BuildEngineResult result =
                     buildEngine.BuildProjectFilesInParallel(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */);
 
-                currentTargetResult = result.Result;
-                targetOutputsPerProject = result.TargetOutputsPerProject;
+                bool currentTargetResult = result.Result;
+                IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = result.TargetOutputsPerProject;
                 success = success && currentTargetResult;
 
                 // If the engine was able to satisfy the build request
@@ -814,13 +612,13 @@ namespace Microsoft.Build.Tasks
                 {
                     for (int i = 0; i < projects.Length; i++)
                     {
-                        IEnumerable nonNullTargetList = (targetList != null) ? targetList : targetOutputsPerProject[i].Keys;
+                        IEnumerable<string> nonNullTargetList = targetList ?? targetOutputsPerProject[i].Keys;
 
                         foreach (string targetName in nonNullTargetList)
                         {
                             if (targetOutputsPerProject[i].ContainsKey(targetName))
                             {
-                                ITaskItem[] outputItemsFromTarget = (ITaskItem[])targetOutputsPerProject[i][targetName];
+                                ITaskItem[] outputItemsFromTarget = targetOutputsPerProject[i][targetName];
 
                                 foreach (ITaskItem outputItemFromTarget in outputItemsFromTarget)
                                 {

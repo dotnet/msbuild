@@ -80,7 +80,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- The FrameworkPathOverride is required for the inproc visual basic compiler to initialize when targeting target frameworks less than 4.0. If .net 2.0 is not installed then the property value above will not provide the location
              of mscorlib. This is also true if the build author overrides this property to some other directory which does not contain mscorlib.dll. In the case we cannot find mscorlib.dll at the correct location
              we need to find a directory which does contain mscorlib to allow the inproc compiler to initialize and give us the chance to show certain dialogs in the IDE (which only happen after initialization).-->
-    <FrameworkPathOverride Condition="'$(EnableFrameworkPathOverride)' != 'false' And '$(FrameworkPathOverride)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToStandardLibraries($(TargetFrameworkIdentifier), $(TargetFrameworkVersion), $(TargetFrameworkProfile), $(PlatformTarget), $(TargetFrameworkRootPath)))</FrameworkPathOverride>
+    <FrameworkPathOverride Condition="'$(EnableFrameworkPathOverride)' != 'false' And '$(FrameworkPathOverride)' == ''">$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToStandardLibraries($(TargetFrameworkIdentifier), $(TargetFrameworkVersion), $(TargetFrameworkProfile), $(PlatformTarget), $(TargetFrameworkRootPath), $(TargetFrameworkFallbackSearchPaths)))</FrameworkPathOverride>
     <FrameworkPathOverride Condition="'$(EnableFrameworkPathOverride)' != 'false' And !Exists('$(FrameworkPathOverride)\mscorlib.dll')">$(MSBuildFrameworkToolsPath)</FrameworkPathOverride>
   </PropertyGroup>
 
@@ -1180,6 +1180,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Condition="'$(TargetFrameworkMoniker)' != '' and ('$(_TargetFrameworkDirectories)' == '' or '$(_FullFrameworkReferenceAssemblyPaths)' == '')"
         TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
         RootPath="$(TargetFrameworkRootPath)"
+        TargetFrameworkFallbackSearchPaths="$(TargetFrameworkFallbackSearchPaths)"
         BypassFrameworkInstallChecks="$(BypassFrameworkInstallChecks)"
         >
       <Output TaskParameter="ReferenceAssemblyPaths" PropertyName="_TargetFrameworkDirectories"/>
@@ -3958,7 +3959,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
     <ItemGroup>
-      <_DeploymentReferencePaths Include="@(ReferencePath)">
+      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
     </ItemGroup>

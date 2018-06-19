@@ -356,6 +356,21 @@
         <target state="translated">作業ディレクトリ "{0}" が存在しません。</target>
         <note>No error code because an error will be prefixed.</note>
       </trans-unit>
+      <trans-unit id="FileHash.FileNotFound">
+        <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
+        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3954: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
+        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
+        <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashEncoding">
+        <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
+        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <note>{StrBegin="MSB3951: "}</note>
+      </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
         <target state="translated">"{0}" が見つかりました。</target>
@@ -866,7 +881,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.ExcludedPermissionsNotSupported">
         <source>MSB3133: The ExcludePermissions property is deprecated. The permission set requested by the application has been set to the permissions defined in Internet or Local Intranet zone. To continue using a custom Permission Set, define your custom permission set in the Security Page of the Project Designer.</source>
-        <target state="translated">MSB3133: ExcludePermissions プロパティは使用しないでください。アプリケーションによって要求されたアクセス許可セットが、インターネットまたはローカル イントラネット ゾーンで定義されたアクセス許可に設定されています。カスタム アクセス許可セットを使用して続行するには、プロジェクト デザイナーの [セキュリティ] ページでカスタム アクセス許可セットを定義します。</target>
+        <target state="translated">MSB3133: ExcludePermissions プロパティは非推奨です。アプリケーションによって要求されたアクセス許可セットが、インターネットまたはローカル イントラネット ゾーンで定義されたアクセス許可に設定されています。カスタム アクセス許可セットを使用して続行するには、プロジェクト デザイナーの [セキュリティ] ページでカスタム アクセス許可セットを定義します。</target>
         <note>{StrBegin="MSB3133: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.KnownTargetZoneCannotHaveAdditionalPermissionType">
@@ -1138,7 +1153,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.BadImageFormat">
         <source>MSB3574: Did not recognize "{0}" as a managed assembly.</source>
-        <target state="translated">MSB3574: "{0}" はマネージ アセンブリとして認識されませんでした。</target>
+        <target state="translated">MSB3574: "{0}" はマネージド アセンブリとして認識されませんでした。</target>
         <note>{StrBegin="MSB3574: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteAssembly">
@@ -1213,7 +1228,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MissingFile">
         <source>MSB3819: Cannot find assembly "{0}", which may contain managed resources that need to be included in this app package.  Please ensure that this assembly exists.</source>
-        <target state="translated">MSB3819: アセンブリ "{0}" が見つかりません。このアセンブリには、アプリケーション パッケージに含める必要があるマネージ リソースが含まれている可能性があります。このアセンブリが存在することを確認してください。</target>
+        <target state="translated">MSB3819: アセンブリ "{0}" が見つかりません。このアセンブリには、アプリケーション パッケージに含める必要があるマネージド リソースが含まれている可能性があります。このアセンブリが存在することを確認してください。</target>
         <note>{StrBegin="MSB3819: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PathTooLong">
@@ -1441,6 +1456,11 @@
         <source>MSB3455: ResGen.exe may not run because the command line is {0} characters long, which exceeds the maximum length of the command. To fix this problem, please either (1) remove unnecessary assembly references, or (2) make the paths to those references shorter.</source>
         <target state="translated">MSB3455: コマンド ラインの文字数が {0} で、これはコマンドの最大長を超えているため、ResGen.exe を実行できない可能性があります。この問題を解決するには、次のいずれかを行ってください。(1) 不要なアセンブリ参照を削除する。(2) これらの参照へのパスを短くする。</target>
         <note>{StrBegin="MSB3455: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
@@ -2186,9 +2206,9 @@
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
         <source>Project reference "{0}" has not been resolved.</source>
-        <target state="translated">プロジェクト参照 "{0}" は解決されませんでした。</target>
+        <target state="needs-review-translation">プロジェクト参照 "{0}" は解決されませんでした。</target>
         <note>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </note>
@@ -2360,42 +2380,42 @@
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="new">Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <target state="translated">"{2}" パラメーターがプロジェクトで "{3}" に設定されているため、またファイルのサイズとタイムスタンプが一致するため、ファイル "{0}" からファイル "{1}" に解凍しませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
-        <target state="new">MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</target>
+        <target state="translated">MSB3931: ディレクトリ "{0}" への解凍は、そのディレクトリを作成できなかったため、失敗しました。{1}</target>
         <note>{StrBegin="MSB3931: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotExtractFile">
         <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
-        <target state="new">MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</target>
+        <target state="translated">MSB3936: ファイル "{0}" を "{1}" に解凍して開くことができませんでした。{2}</target>
         <note>{StrBegin="MSB3936: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
         <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
-        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</target>
+        <target state="translated">MSB3935: 解凍先のファイル "{1}" が読み取り専用で、書き込み可能にすることができないため、ファイル "{0}" を解凍できませんでした。{2}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
         <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
-        <target state="new">MSB3933: Failed to open zip file "{0}".  {1}</target>
+        <target state="translated">MSB3933: zip ファイル "{0}" を開くことができませんでした。{1}</target>
         <note>{StrBegin="MSB3933: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
         <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
-        <target state="new">MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <target state="translated">MSB3934: ファイル "{0}" を "{1}" に解凍できませんでした。解凍先が宛先ディレクトリの外側です。</target>
         <note>{StrBegin="MSB3934: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorFileDoesNotExist">
         <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
-        <target state="new">MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</target>
+        <target state="translated">MSB3932: ファイルが存在しないか、アクセスできないため、ファイル "{0}" を解凍できませんでした。</target>
         <note>{StrBegin="MSB3932: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.FileComment">
         <source>Unzipping file "{0}" to "{1}".</source>
-        <target state="new">Unzipping file "{0}" to "{1}".</target>
+        <target state="translated">ファイル "{0}" を "{1}" に解凍しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
@@ -2412,6 +2432,11 @@
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
         <target state="translated">"{1}" は "{0}" パラメーターに対して無効な値です。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.HashMismatch">
+        <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
+        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
@@ -3115,22 +3140,22 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.Comment">
         <source>Zipping directory "{0}" to "{1}".</source>
-        <target state="new">Zipping directory "{0}" to "{1}".</target>
+        <target state="translated">ディレクトリ "{0}" を "{1}" に zip 圧縮しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
         <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
-        <target state="new">MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB3941: ディレクトリが存在しないか、アクセスできないため、ディレクトリ "{0}" を zip 圧縮できませんでした。</target>
         <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
         <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
-        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</target>
+        <target state="translated">MSB3943: ディレクトリ "{0}" をファイル "{1}" に zip 圧縮できませんでした。{2}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">
         <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
-        <target state="new">MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <target state="translated">MSB3942: 既に存在するため、zip ファイル "{0}" を作成できませんでした。そのファイルを削除するか、名前を変更して、もう一度お試しください。</target>
         <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>

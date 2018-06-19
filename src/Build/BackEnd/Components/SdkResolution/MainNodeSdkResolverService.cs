@@ -64,6 +64,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _cachedSdkResolver.ClearCache(submissionId);
         }
 
+        public override void ClearCaches()
+        {
+            _cachedSdkResolver.ClearCaches();
+        }
+
         /// <inheritdoc cref="INodePacketHandler.PacketReceived"/>
         public override void PacketReceived(int node, INodePacket packet)
         {

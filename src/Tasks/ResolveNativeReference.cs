@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
@@ -95,12 +97,12 @@ namespace Microsoft.Build.Tasks
             bool retValue = true;
             int reference;
 
-            var containingReferenceFilesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
-            var containedPrerequisiteAssembliesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
-            var containedComComponentsTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
-            var containedTypeLibrariesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
-            var containedLooseTlbFilesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
-            var containedLooseEtcFilesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            var containingReferenceFilesTable = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
+            var containedPrerequisiteAssembliesTable = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
+            var containedComComponentsTable = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
+            var containedTypeLibrariesTable = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
+            var containedLooseTlbFilesTable = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
+            var containedLooseEtcFilesTable = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
 
             for (reference = 0; reference < NativeReferences.GetLength(0); reference++)
             {
@@ -154,28 +156,22 @@ namespace Microsoft.Build.Tasks
 
             IComparer itemSpecComparer = new ItemSpecComparerClass();
 
-            ContainingReferenceFiles = new ITaskItem[containingReferenceFilesTable.Count];
-            containingReferenceFilesTable.Values.CopyTo(ContainingReferenceFiles, 0);
+            ContainingReferenceFiles = containingReferenceFilesTable.Values.ToArray();
             Array.Sort(ContainingReferenceFiles, itemSpecComparer);
 
-            ContainedPrerequisiteAssemblies = new ITaskItem[containedPrerequisiteAssembliesTable.Count];
-            containedPrerequisiteAssembliesTable.Values.CopyTo(ContainedPrerequisiteAssemblies, 0);
+            ContainedPrerequisiteAssemblies = containedPrerequisiteAssembliesTable.Values.ToArray();
             Array.Sort(ContainedPrerequisiteAssemblies, itemSpecComparer);
 
-            ContainedComComponents = new ITaskItem[containedComComponentsTable.Count];
-            containedComComponentsTable.Values.CopyTo(ContainedComComponents, 0);
+            ContainedComComponents = containedComComponentsTable.Values.ToArray();
             Array.Sort(ContainedComComponents, itemSpecComparer);
 
-            ContainedTypeLibraries = new ITaskItem[containedTypeLibrariesTable.Count];
-            containedTypeLibrariesTable.Values.CopyTo(ContainedTypeLibraries, 0);
+            ContainedTypeLibraries = containedTypeLibrariesTable.Values.ToArray();
             Array.Sort(ContainedTypeLibraries, itemSpecComparer);
 
-            ContainedLooseTlbFiles = new ITaskItem[containedLooseTlbFilesTable.Count];
-            containedLooseTlbFilesTable.Values.CopyTo(ContainedLooseTlbFiles, 0);
+            ContainedLooseTlbFiles = containedLooseTlbFilesTable.Values.ToArray();
             Array.Sort(ContainedLooseTlbFiles, itemSpecComparer);
 
-            ContainedLooseEtcFiles = new ITaskItem[containedLooseEtcFilesTable.Count];
-            containedLooseEtcFilesTable.Values.CopyTo(ContainedLooseEtcFiles, 0);
+            ContainedLooseEtcFiles = containedLooseEtcFilesTable.Values.ToArray();
             Array.Sort(ContainedLooseEtcFiles, itemSpecComparer);
 
             return retValue;
@@ -187,7 +183,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper manifest resolution method. Cracks the manifest and extracts the different elements from it.
         /// </summary>
-        internal bool ExtractFromManifest(ITaskItem taskItem, string path, Hashtable containingReferenceFilesTable, Hashtable containedPrerequisiteAssembliesTable, Hashtable containedComComponentsTable, Hashtable containedTypeLibrariesTable, Hashtable containedLooseTlbFilesTable, Hashtable containedLooseEtcFilesTable)
+        internal bool ExtractFromManifest(
+            ITaskItem taskItem,
+            string path,
+            Dictionary<string, ITaskItem> containingReferenceFilesTable,
+            Dictionary<string, ITaskItem> containedPrerequisiteAssembliesTable,
+            Dictionary<string, ITaskItem> containedComComponentsTable,
+            Dictionary<string, ITaskItem> containedTypeLibrariesTable,
+            Dictionary<string, ITaskItem> containedLooseTlbFilesTable,
+            Dictionary<string, ITaskItem> containedLooseEtcFilesTable)
         {
             Log.LogMessageFromResources(MessageImportance.Low, "ResolveNativeReference.Comment", path);
 
@@ -215,7 +219,7 @@ namespace Microsoft.Build.Tasks
 
                 bool isClickOnceApp = manifest is ApplicationManifest applicationManifest && applicationManifest.IsClickOnceManifest;
                 // ClickOnce application manifest should not be added as native reference, but we should open and process it.        
-                if (containingReferenceFilesTable.ContainsKey(path) == false && !isClickOnceApp)
+                if (!containingReferenceFilesTable.ContainsKey(path) && !isClickOnceApp)
                 {
                     ITaskItem itemNativeReferenceFile = new TaskItem();
                     itemNativeReferenceFile.ItemSpec = path;
@@ -246,7 +250,7 @@ namespace Microsoft.Build.Tasks
                         {
                             string id = assemblyref.AssemblyIdentity.GetFullName(AssemblyIdentity.FullNameFlags.All);
                             // add the assembly to the prerequisites list, if it's not already there
-                            if (containedPrerequisiteAssembliesTable.ContainsKey(id) == false)
+                            if (!containedPrerequisiteAssembliesTable.ContainsKey(id))
                             {
                                 ITaskItem item = new TaskItem();
                                 item.ItemSpec = id;
@@ -267,7 +271,7 @@ namespace Microsoft.Build.Tasks
                         }
 
                         // add the loose file to the outputs list, if it's not already there
-                        if (containedLooseEtcFilesTable.ContainsKey(fileref.ResolvedPath) == false)
+                        if (!containedLooseEtcFilesTable.ContainsKey(fileref.ResolvedPath))
                         {
                             ITaskItem itemLooseEtcFile = new TaskItem();
                             itemLooseEtcFile.ItemSpec = fileref.ResolvedPath;
@@ -284,7 +288,7 @@ namespace Microsoft.Build.Tasks
                             foreach (ComClass comclass in fileref.ComClasses)
                             {
                                 // add the comclass to the outputs list, if it's not already there
-                                if (containedComComponentsTable.ContainsKey(comclass.ClsId) == false)
+                                if (!containedComComponentsTable.ContainsKey(comclass.ClsId))
                                 {
                                     ITaskItem itemComClass = new TaskItem();
                                     itemComClass.ItemSpec = comclass.ClsId;
@@ -298,7 +302,7 @@ namespace Microsoft.Build.Tasks
                             foreach (TypeLib typelib in fileref.TypeLibs)
                             {
                                 // add the typelib to the outputs list, if it's not already there
-                                if (containedTypeLibrariesTable.ContainsKey(typelib.TlbId) == false)
+                                if (!containedTypeLibrariesTable.ContainsKey(typelib.TlbId))
                                 {
                                     ITaskItem itemTypeLib = new TaskItem();
                                     itemTypeLib.ItemSpec = typelib.TlbId;
@@ -314,7 +318,7 @@ namespace Microsoft.Build.Tasks
                             }
 
                             // add the loose TLB file to the outputs list, if it's not already there
-                            if (containedLooseTlbFilesTable.Contains(fileref.ResolvedPath) == false)
+                            if (!containedLooseTlbFilesTable.ContainsKey(fileref.ResolvedPath))
                             {
                                 ITaskItem itemLooseTlbFile = new TaskItem();
                                 itemLooseTlbFile.ItemSpec = fileref.ResolvedPath;

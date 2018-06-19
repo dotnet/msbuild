@@ -25,6 +25,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         void ClearCache(int submissionId);
 
         /// <summary>
+        /// Clear the entire cache
+        /// </summary>
+        void ClearCaches();
+
+        /// <summary>
         ///  Resolves the full path to the specified SDK.
         /// </summary>
         /// <param name="submissionId">The build submission ID that the resolution request is for.</param>

@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .cs file). May be null</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <returns>Returns the manifest name</returns>
-        override protected string CreateManifestName
+        protected override string CreateManifestName
         (
             string fileName,
             string linkFileName,
@@ -36,9 +36,8 @@ namespace Microsoft.Build.Tasks
             Stream binaryStream
         )
         {
-            ITaskItem item = null;
             string culture = null;
-            if (fileName != null && itemSpecToTaskitem.TryGetValue(fileName, out item))
+            if (fileName != null && itemSpecToTaskitem.TryGetValue(fileName, out ITaskItem item))
             {
                 culture = item.GetMetadata("Culture");
             }
@@ -49,7 +48,7 @@ namespace Microsoft.Build.Tasks
                 override of a method declared in the base class, but its convenient 
                 to expose a static version anyway for unittesting purposes.
             */
-            return CreateCSharpManifestResourceName.CreateManifestNameImpl
+            return CreateManifestNameImpl
             (
                 fileName,
                 linkFileName,
@@ -58,7 +57,7 @@ namespace Microsoft.Build.Tasks
                 dependentUponFileName,
                 culture,
                 binaryStream,
-                this.Log
+                Log
             );
         }
 
@@ -92,7 +91,7 @@ namespace Microsoft.Build.Tasks
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
             string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
-            if (embeddedFileName == null || embeddedFileName.Length == 0)
+            if (string.IsNullOrEmpty(embeddedFileName))
             {
                 embeddedFileName = FileUtilities.FixFilePath(fileName);
             }
@@ -106,24 +105,24 @@ namespace Microsoft.Build.Tasks
                 info.culture = culture;
             }
 
-            StringBuilder manifestName = new StringBuilder();
+            var manifestName = new StringBuilder();
             if (binaryStream != null)
             {
                 // Resource depends on a form. Now, get the form's class name fully 
                 // qualified with a namespace.
                 ExtractedClassName result = CSharpParserUtilities.GetFirstClassNameFullyQualified(binaryStream);
 
-                if (result.IsInsideConditionalBlock && log != null)
+                if (result.IsInsideConditionalBlock)
                 {
-                    log.LogWarningWithCodeFromResources("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective", dependentUponFileName, embeddedFileName);
+                    log?.LogWarningWithCodeFromResources("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective", dependentUponFileName, embeddedFileName);
                 }
 
-                if (result.Name != null && result.Name.Length > 0)
+                if (!string.IsNullOrEmpty(result.Name))
                 {
                     manifestName.Append(result.Name);
 
                     // Append the culture if there is one.        
-                    if (info.culture != null && info.culture.Length > 0)
+                    if (!string.IsNullOrEmpty(info.culture))
                     {
                         manifestName.Append(".").Append(info.culture);
                     }
@@ -136,14 +135,14 @@ namespace Microsoft.Build.Tasks
             {
                 // If Rootnamespace was null, then it wasn't set from the project resourceFile.
                 // Empty namespaces are allowed.
-                if ((rootNamespace != null) && (rootNamespace.Length > 0))
+                if (!string.IsNullOrEmpty(rootNamespace))
                 {
                     manifestName.Append(rootNamespace).Append(".");
                 }
 
                 // Replace spaces in the directory name with underscores. Needed for compatibility with Everett.
                 // Note that spaces in the file name itself are preserved.
-                string everettCompatibleDirectoryName = CreateManifestResourceName.MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
+                string everettCompatibleDirectoryName = MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
 
                 // only strip extension for .resx and .restext files
 
@@ -163,7 +162,7 @@ namespace Microsoft.Build.Tasks
                     manifestName.Replace(Path.AltDirectorySeparatorChar, '.');
 
                     // Append the culture if there is one.        
-                    if (info.culture != null && info.culture.Length > 0)
+                    if (!string.IsNullOrEmpty(info.culture))
                     {
                         manifestName.Append(".").Append(info.culture);
                     }
@@ -185,7 +184,7 @@ namespace Microsoft.Build.Tasks
                     if (prependCultureAsDirectory)
                     {
                         // Prepend the culture as a subdirectory if there is one.        
-                        if (info.culture != null && info.culture.Length > 0)
+                        if (!string.IsNullOrEmpty(info.culture))
                         {
                             manifestName.Insert(0, Path.DirectorySeparatorChar);
                             manifestName.Insert(0, info.culture);
@@ -202,7 +201,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="fileName">Name of the candidate source file.</param>
         /// <returns>True, if this is a validate source file.</returns>
-        override protected bool IsSourceFile(string fileName)
+        protected override bool IsSourceFile(string fileName)
         {
             string extension = Path.GetExtension(fileName);
             return (String.Compare(extension, ".cs", StringComparison.OrdinalIgnoreCase) == 0);

@@ -42,10 +42,10 @@ namespace Microsoft.Build.Tasks
             Critical = 1000
         }
 
-        const string RestartManagerDll = "rstrtmgr.dll";
+        private const string RestartManagerDll = "rstrtmgr.dll";
 
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        static extern int RmRegisterResources(uint pSessionHandle,
+        private static extern int RmRegisterResources(uint pSessionHandle,
             uint nFiles,
             string[] rgsFilenames,
             uint nApplications,
@@ -54,14 +54,14 @@ namespace Microsoft.Build.Tasks
             string[] rgsServiceNames);
 
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        static extern int RmStartSession(out uint pSessionHandle,
+        private static extern int RmStartSession(out uint pSessionHandle,
             int dwSessionFlags, StringBuilder strSessionKey);
 
         [DllImport(RestartManagerDll)]
-        static extern int RmEndSession(uint pSessionHandle);
+        private static extern int RmEndSession(uint pSessionHandle);
 
         [DllImport(RestartManagerDll, CharSet = CharSet.Unicode)]
-        static extern int RmGetList(uint dwSessionHandle,
+        public static extern int RmGetList(uint dwSessionHandle,
             out uint pnProcInfoNeeded,
             ref uint pnProcInfo,
             [In, Out] RM_PROCESS_INFO[] rgAffectedApps,
@@ -163,14 +163,14 @@ namespace Microsoft.Build.Tasks
                 TerminalServicesSessionId = (int)processInfo.TSSessionId;
             }
 
-            public int ProcessId { get; private set; }
-            public DateTime StartTime { get; private set; }
-            public string ApplicationName { get; private set; }
-            public string ServiceShortName { get; private set; }
-            public ApplicationType ApplicationType { get; private set; }
-            public ApplicationStatus ApplicationStatus { get; private set; }
-            public int TerminalServicesSessionId { get; private set; }
-            public bool Restartable { get; private set; }
+            public int ProcessId { get; }
+            public DateTime StartTime { get; }
+            public string ApplicationName { get; }
+            public string ServiceShortName { get; }
+            public ApplicationType ApplicationType { get; }
+            public ApplicationStatus ApplicationStatus { get; }
+            public int TerminalServicesSessionId { get; }
+            public bool Restartable { get; }
 
             public override int GetHashCode()
             {
@@ -181,8 +181,7 @@ namespace Microsoft.Build.Tasks
 
             public override bool Equals(object obj)
             {
-                var other = obj as ProcessInfo;
-                if (other != null)
+                if (obj is ProcessInfo other)
                 {
                     return other.ProcessId == ProcessId && other.StartTime == StartTime;
                 }
@@ -203,24 +202,29 @@ namespace Microsoft.Build.Tasks
         internal static IEnumerable<ProcessInfo> GetLockingProcessInfos(params string[] paths)
         {
             if (paths == null)
-                throw new ArgumentNullException("paths");
+            {
+                throw new ArgumentNullException(nameof(paths));
+            }
 
             const int maxRetries = 6;
 
             // See http://blogs.msdn.com/b/oldnewthing/archive/2012/02/17/10268840.aspx.
             var key = new StringBuilder(new string('\0', CCH_RM_SESSION_KEY + 1));
 
-            uint handle;
-            int res = RmStartSession(out handle, 0, key);
+            int res = RmStartSession(out uint handle, 0, key);
             if (res != 0)
+            {
                 throw GetException(res, "RmStartSession", "Failed to begin restart manager session.");
+            }
 
             try
             {
                 string[] resources = paths;
                 res = RmRegisterResources(handle, (uint)resources.Length, resources, 0, null, 0, null);
                 if (res != 0)
+                {
                     throw GetException(res, "RmRegisterResources", "Could not register resources.");
+                }
 
                 //
                 // Obtain the list of affected applications/services.
@@ -242,13 +246,14 @@ namespace Microsoft.Build.Tasks
                 do
                 {
                     uint lpdwRebootReasons = (uint)RM_REBOOT_REASON.RmRebootReasonNone;
-                    uint pnProcInfoNeeded;
-                    res = RmGetList(handle, out pnProcInfoNeeded, ref pnProcInfo, rgAffectedApps, ref lpdwRebootReasons);
+                    res = RmGetList(handle, out uint pnProcInfoNeeded, ref pnProcInfo, rgAffectedApps, ref lpdwRebootReasons);
                     if (res == 0)
                     {
                         // If pnProcInfo == 0, then there is simply no locking process (found), in this case rgAffectedApps is "null".
                         if (pnProcInfo == 0)
+                        {
                             return Enumerable.Empty<ProcessInfo>();
+                        }
 
                         var lockInfos = new List<ProcessInfo>((int)pnProcInfo);
                         for (int i = 0; i < pnProcInfo; i++)
@@ -259,7 +264,9 @@ namespace Microsoft.Build.Tasks
                     }
 
                     if (res != ERROR_MORE_DATA)
-                        throw GetException(res, "RmGetList", string.Format("Failed to get entries (retry {0}).", retry));
+                    {
+                        throw GetException(res, "RmGetList", $"Failed to get entries (retry {retry}).");
+                    }
 
                     pnProcInfo = pnProcInfoNeeded;
                     rgAffectedApps = new RM_PROCESS_INFO[pnProcInfo];
@@ -310,11 +317,11 @@ namespace Microsoft.Build.Tasks
                     reason = "No Restart Manager session exists for the handle supplied.";
                     break;
                 default:
-                    reason = string.Format("0x{0:x8}", res);
+                    reason = $"0x{res:x8}";
                     break;
             }
 
-            throw new Win32Exception(res, string.Format("{0} ({1}() error {2}: {3})", message, apiName, res, reason));
+            throw new Win32Exception(res, $"{message} ({apiName}() error {res}: {reason})");
         }
     }
 }

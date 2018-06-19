@@ -2,14 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Reflection;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -33,8 +25,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Compare by assembly name.
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
         public int CompareTo(AssemblyNameReference other)
         {
             return assemblyName.CompareTo(other.assemblyName);
@@ -43,9 +33,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct a new AssemblyNameReference.
         /// </summary>
-        /// <param name="assemblyName"></param>
-        /// <param name="reference"></param>
-        /// <returns></returns>
         public static AssemblyNameReference Create(AssemblyNameExtension assemblyName, Reference reference)
         {
             AssemblyNameReference result;

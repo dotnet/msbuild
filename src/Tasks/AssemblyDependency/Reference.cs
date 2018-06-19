@@ -2,14 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Collections;
-using System.Reflection;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
-using System.Runtime.Versioning;
 
 namespace Microsoft.Build.Tasks
 {
@@ -23,13 +24,12 @@ namespace Microsoft.Build.Tasks
         /// A hash table is used to remove duplicates.
         /// All source items that inspired this reference (possibly indirectly through a dependency chain).
         /// </summary>
-        private Hashtable _sourceItems = new Hashtable(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, ITaskItem> _sourceItems = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Hashtable of Key=Reference, Value=Irrelevent.
-        /// A list of unique dependies.
+        /// A list of unique dependencies.
         /// </summary>
-        private Hashtable _dependees = new Hashtable();
+        private HashSet<Reference> _dependees = new HashSet<Reference>();
 
         /// <summary>
         /// Hashset of Reference which depend on this reference
@@ -43,68 +43,37 @@ namespace Microsoft.Build.Tasks
         private string[] _scatterFiles = Array.Empty<string>();
 
         /// <summary>
-        /// ArrayList of Exception.
         /// Any errors that occurred while resolving or finding dependencies on this item.
         /// </summary>
-        private ArrayList _errors = new ArrayList();
+        private List<Exception> _errors = new List<Exception>();
 
         /// <summary>
-        /// ArrayList of string.
         /// Contains any file extension that are related to this file. Pdbs and xmls are related.
         /// This is an extension string starting with "."
         /// </summary>
-        private ArrayList _relatedFileExtensions = new ArrayList();
+        private List<string> _relatedFileExtensions = new List<string>();
 
         /// <summary>
-        /// ArrayList of string.
         /// Contains satellite files for this reference.
         /// This file path is relative to the location of the reference.
         /// </summary>
-        private ArrayList _satelliteFiles = new ArrayList();
+        private List<string> _satelliteFiles = new List<string>();
 
         /// <summary>
-        /// ArrayList of string.
-        /// Contains serializaion assembly files for this reference.
+        /// Contains serialization assembly files for this reference.
         /// This file path is relative to the location of the reference.
         /// </summary>
-        private ArrayList _serializationAssemblyFiles = new ArrayList();
-
-        /// <summary>
-        /// The list of assemblies that were consider for matching but that 
-        /// didn't pan out because they didn't match exactly.
-        /// </summary>
-        private ArrayList _assembliesConsideredAndRejected = new ArrayList();
-
-        /// <summary>
-        /// The searchpath location that the reference was found at.
-        /// </summary>
-        private string _resolvedSearchPath = String.Empty;
-
-        /// <summary>
-        /// This is the reference that won against this reference in the conflict contest.
-        /// </summary>
-        private AssemblyNameExtension _conflictVictorName = null;
-
-        /// <summary>
-        /// The reason this reference lost
-        /// </summary>
-        private ConflictLossReason _conflictLossReason = ConflictLossReason.DidntLose;
+        private List<string> _serializationAssemblyFiles = new List<string>();
 
         /// <summary>
         /// AssemblyNames of references that lost collision conflicts with this reference.
         /// </summary>
-        private ArrayList _conflictVictims = new ArrayList();
+        private List<AssemblyNameExtension> _conflictVictims = new List<AssemblyNameExtension>();
 
         /// <summary>
         /// These are the versions (type UnificationVersion) that were unified from.
         /// </summary>
         private Dictionary<string, UnificationVersion> _preUnificationVersions = new Dictionary<string, UnificationVersion>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// If 'true' then the path that this item points to is known to be a bad image.
-        /// This item shouldn't be passed to compilers and so forth. 
-        /// </summary>
-        private bool _isBadImage = false;
 
         /// <summary>
         /// The original source item, as passed into the task that is directly associated
@@ -134,84 +103,9 @@ namespace Microsoft.Build.Tasks
         private string _fullPathWithoutExtension = String.Empty;
 
         /// <summary>
-        /// Whether this assembly came from the project. If 'false' then this reference was deduced 
-        /// through the reference resolution process.
-        /// </summary>
-        private bool _isPrimary = false;
-
-        /// <summary>
-        /// Whether or not this reference will be installed on the target machine.
-        /// </summary>
-        private bool _isPrerequisite = false;
-
-        /// <summary>
-        /// Whether or not this reference is a redist root.
-        /// </summary>
-        private bool? _isRedistRoot = null;
-
-        /// <summary>
-        /// The redist name for this reference (if any).
-        /// </summary>
-        private string _redistName = null;
-
-        /// <summary>
-        /// Whether this reference should be copied to the local 'bin' dir or not and the reason this flag
-        /// was set that way.
-        /// </summary>
-        private CopyLocalState _copyLocalState = CopyLocalState.Undecided;
-
-        /// <summary>
-        /// Whether or not we still need to find dependencies for this reference.
-        /// </summary>
-        private bool _dependenciesFound = false;
-
-        /// <summary>
-        /// This is the HintPath from the source item. This is used to resolve the assembly.
-        /// </summary>
-        private string _hintPath = "";
-
-        /// <summary>
         /// The list of expected extensions.
         /// </summary>
-        private ArrayList _expectedExtensions = null;
-
-        /// <summary>
-        /// Whether or not the exact specific version is required.
-        /// Note that simple names like "MySimpleAssemblyName" will need to match exactly.
-        /// That is, no version that has other information will be accepted.
-        /// </summary>
-        private bool _wantSpecificVersion = true;
-
-        /// <summary>
-        /// Whether or not the types from this reference need to be embedded into the target assembly
-        /// </summary>
-        private bool _embedInteropTypes = false;
-
-        /// <summary>
-        /// This is the key that was passed in to the reference through the &lt;AssemblyFolderKey&gt; metadata.
-        /// </summary>
-        private string _assemblyFolderKey = String.Empty;
-
-        /// <summary>
-        /// This will be true if the user requested a specific file. We know this when the file was resolved
-        /// by hintpath or if it was resolve as a raw file name for example.
-        /// </summary>
-        private bool _userRequestedSpecificFile = false;
-
-        /// <summary>
-        /// Version of the references
-        /// </summary>
-        private Version _referenceVersion = null;
-
-        /// <summary>
-        /// A set of properties which are useful to log the correct information for why this reference was not resolved.
-        /// </summary>
-        private ExclusionListProperties _exclusionListProperties = new ExclusionListProperties();
-
-        /// <summary>
-        /// Is the reference a native winMD file. This means it has a image runtime of WindowsRuntime and not CLR.
-        /// </summary>
-        private bool _winMDFile;
+        private List<string> _expectedExtensions;
 
         /// <summary>
         ///  Is the file a managed winmd file. That means it has both windows runtime and CLR in the imageruntime string.
@@ -222,12 +116,6 @@ namespace Microsoft.Build.Tasks
         /// The imageruntime version for this reference. 
         /// </summary>
         private string _imageRuntimeVersion;
-
-
-        /// <summary>
-        /// If the reference has an SDK name metadata this will contain that string.
-        /// </summary>
-        private string _sdkName = String.Empty;
 
         /// <summary>
         /// Set containing the names the reference was remapped from
@@ -249,11 +137,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private GetAssemblyRuntimeVersion _getRuntimeVersion;
 
-        /// <summary>
-        /// The frameworkName the reference was built against
-        /// </summary>
-        private FrameworkName _frameworkName;
-
         internal Reference(IsWinMDFile isWinMDFile, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion)
         {
             _isWinMDFile = isWinMDFile;
@@ -266,7 +149,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void AddSourceItem(ITaskItem sourceItem)
         {
-            bool sourceItemAlreadyInList = _sourceItems.Contains(sourceItem.ItemSpec);
+            bool sourceItemAlreadyInList = _sourceItems.ContainsKey(sourceItem.ItemSpec);
             if (!sourceItemAlreadyInList)
             {
                 _sourceItems[sourceItem.ItemSpec] = sourceItem;
@@ -284,7 +167,6 @@ namespace Microsoft.Build.Tasks
                 AddSourceItem(sourceItem);
             }
         }
-
 
         /// <summary>
         /// We have had our source item list updated, we need to propagate this change to any of our dependencies so they have the new information.
@@ -306,7 +188,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ICollection GetSourceItems()
         {
-            return (ICollection)_sourceItems.Values;
+            return _sourceItems.Values;
         }
 
         /// <summary>
@@ -329,16 +211,16 @@ namespace Microsoft.Build.Tasks
 
             dependee.AddDependency(this);
 
-            if (_dependees[dependee] == null)
+            if (!_dependees.Contains(dependee))
             {
-                _dependees[dependee] = String.Empty;
+                _dependees.Add(dependee);
 
                 // When a new dependee is added, this is a new place where a reference might be resolved.
                 // Reset this item so it will be re-resolved if possible.
                 if (IsUnresolvable)
                 {
-                    _errors = new ArrayList();
-                    _assembliesConsideredAndRejected = new ArrayList();
+                    _errors = new List<Exception>();
+                    AssembliesConsideredAndRejected = new ArrayList();
                 }
             }
         }
@@ -346,7 +228,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// A dependee may be removed because it or its dependee's are in the black list
         /// </summary>
-        /// <param name="dependeeToRemove"></param>
         internal void RemoveDependee(Reference dependeeToRemove)
         {
             _dependees.Remove(dependeeToRemove);
@@ -367,7 +248,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ICollection GetDependees()
         {
-            return (ICollection)_dependees.Keys;
+            return _dependees.ToList();
         }
 
         /// <summary>
@@ -402,7 +283,7 @@ namespace Microsoft.Build.Tasks
         {
             if (_expectedExtensions == null)
             {
-                _expectedExtensions = new ArrayList();
+                _expectedExtensions = new List<string>();
             }
             else
             {
@@ -425,53 +306,31 @@ namespace Microsoft.Build.Tasks
                 // Use the default.
                 return allowedAssemblyExtensions;
             }
-            return (string[])_expectedExtensions.ToArray(typeof(string));
+            return _expectedExtensions.ToArray();
         }
 
         /// <summary>
         /// Whether the name needs to match exactly or just the simple name part needs to match.
         /// </summary>
         /// <value></value>
-        internal bool WantSpecificVersion
-        {
-            get { return _wantSpecificVersion; }
-        }
+        internal bool WantSpecificVersion { get; private set; } = true;
 
         /// <summary>
         /// Whether types need to be embedded into the target assembly
         /// </summary>
         /// <value></value>
-        internal bool EmbedInteropTypes
-        {
-            get { return _embedInteropTypes; }
-            set { _embedInteropTypes = value; }
-        }
+        internal bool EmbedInteropTypes { get; set; } = false;
 
         /// <summary>
         /// This will be true if the user requested a specific file. We know this when the file was resolved
         /// by hintpath or if it was resolve as a raw file name for example.
         /// </summary>
-        internal bool UserRequestedSpecificFile
-        {
-            get { return _userRequestedSpecificFile; }
-            set { _userRequestedSpecificFile = value; }
-        }
+        internal bool UserRequestedSpecificFile { get; set; } = false;
 
         /// <summary>
         /// The version number of this reference
         /// </summary>
-        internal Version ReferenceVersion
-        {
-            get
-            {
-                return _referenceVersion;
-            }
-
-            set
-            {
-                _referenceVersion = value;
-            }
-        }
+        internal Version ReferenceVersion { get; set; } = null;
 
         /// <summary>
         /// True if the assembly was found to be in the GAC.
@@ -489,20 +348,14 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return string.Equals(_resolvedSearchPath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(ResolvedSearchPath, AssemblyResolutionConstants.gacSentinel, StringComparison.OrdinalIgnoreCase);
             }
         }
 
         /// <summary>
         /// Set of properties for this reference used to log why this reference could not be resolved.
         /// </summary>
-        internal ExclusionListProperties ExclusionListLoggingProperties
-        {
-            get
-            {
-                return _exclusionListProperties;
-            }
-        }
+        internal ExclusionListProperties ExclusionListLoggingProperties { get; } = new ExclusionListProperties();
 
         /// <summary>
         /// Determines if a given reference or its parent primary references have specific version metadata set to true.
@@ -517,7 +370,7 @@ namespace Microsoft.Build.Tasks
             // this saves us from having to read the metadata from our item again.
             if (IsPrimary)
             {
-                hasSpecificVersionMetadata = _wantSpecificVersion;
+                hasSpecificVersionMetadata = WantSpecificVersion;
             }
             else
             {
@@ -546,7 +399,7 @@ namespace Microsoft.Build.Tasks
         {
             if (e is BadImageReferenceException)
             {
-                _isBadImage = true;
+                IsBadImage = true;
             }
             _errors.Add(e);
         }
@@ -557,7 +410,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The collection of resolution errors.</returns>
         internal ICollection GetErrors()
         {
-            return (ICollection)_errors;
+            return _errors;
         }
 
         /// <summary>
@@ -565,7 +418,7 @@ namespace Microsoft.Build.Tasks
         /// Related files always live in the same directory as the reference.
         /// Examples include, MyAssembly.pdb and MyAssembly.xml
         /// </summary>
-        /// <param name="filename">This is the filename extension.</param>
+        /// <param name="filenameExtension">This is the filename extension.</param>
         internal void AddRelatedFileExtension(string filenameExtension)
         {
 #if _DEBUG
@@ -580,9 +433,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>The collection of related file extensions.</returns>
         internal ICollection GetRelatedFileExtensions()
         {
-            return (ICollection)_relatedFileExtensions;
+            return _relatedFileExtensions;
         }
-
 
         /// <summary>
         /// Add a new satellite file
@@ -614,7 +466,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The collection of satellit files.</returns>
         internal ICollection GetSatelliteFiles()
         {
-            return (ICollection)_satelliteFiles;
+            return _satelliteFiles;
         }
 
         /// <summary>
@@ -623,7 +475,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>The collection of serialization assembly files.</returns>
         internal ICollection GetSerializationAssemblyFiles()
         {
-            return (ICollection)_serializationAssemblyFiles;
+            return _serializationAssemblyFiles;
         }
 
         /// <summary>
@@ -646,19 +498,19 @@ namespace Microsoft.Build.Tasks
                     if (_fullPath == null || _fullPath.Length == 0)
                     {
                         _scatterFiles = Array.Empty<string>();
-                        _satelliteFiles = new ArrayList();
-                        _serializationAssemblyFiles = new ArrayList();
-                        _assembliesConsideredAndRejected = new ArrayList();
-                        _resolvedSearchPath = String.Empty;
+                        _satelliteFiles = new List<string>();
+                        _serializationAssemblyFiles = new List<string>();
+                        AssembliesConsideredAndRejected = new ArrayList();
+                        ResolvedSearchPath = String.Empty;
                         _preUnificationVersions = new Dictionary<string, UnificationVersion>(StringComparer.OrdinalIgnoreCase);
-                        _isBadImage = false;
-                        _dependenciesFound = false;
-                        _userRequestedSpecificFile = false;
-                        _winMDFile = false;
+                        IsBadImage = false;
+                        DependenciesFound = false;
+                        UserRequestedSpecificFile = false;
+                        IsWinMDFile = false;
                     }
                     else if (NativeMethodsShared.IsWindows)
                     {
-                        _winMDFile = _isWinMDFile(_fullPath, _getRuntimeVersion, _fileExists, out _imageRuntimeVersion, out _isManagedWinMDFile);
+                        IsWinMDFile = _isWinMDFile(_fullPath, _getRuntimeVersion, _fileExists, out _imageRuntimeVersion, out _isManagedWinMDFile);
                     }
                 }
             }
@@ -667,7 +519,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The directory that this assembly lives in.
         /// </summary>
-        /// <value></value>
         internal string DirectoryName
         {
             get
@@ -703,7 +554,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The full path to the assembly but without an extension on the file namee
         /// </summary>
-        /// <value></value>
         internal string FullPathWithoutExtension
         {
             get
@@ -721,59 +571,35 @@ namespace Microsoft.Build.Tasks
         /// This is the HintPath from the source item. This is used to resolve the assembly.
         /// </summary>
         /// <value>The hint path to this assembly.</value>
-        internal string HintPath
-        {
-            get { return _hintPath; }
-            set { _hintPath = value; }
-        }
+        internal string HintPath { get; set; } = "";
 
         /// <summary>
         /// This is the key that was passed in to the reference through the &lt;AssemblyFolderKey&gt; metadata.
         /// </summary>
         /// <value>The &lt;AssemblyFolderKey&gt; value.</value>
-        internal string AssemblyFolderKey
-        {
-            get { return _assemblyFolderKey; }
-            set { _assemblyFolderKey = value; }
-        }
+        internal string AssemblyFolderKey { get; set; } = String.Empty;
 
         /// <summary>
         /// Whether this assembly came from the project. If 'false' then this reference was deduced 
         /// through the reference resolution process.
         /// </summary>
         /// <value>'true' if this reference is a primary assembly.</value>
-        internal bool IsPrimary
-        {
-            get { return _isPrimary; }
-        }
+        internal bool IsPrimary { get; private set; } = false;
 
         /// <summary>
         /// Whether or not this reference will be installed on the target machine.
         /// </summary>
-        internal bool IsPrerequisite
-        {
-            set { _isPrerequisite = value; }
-            get { return _isPrerequisite; }
-        }
+        internal bool IsPrerequisite { set; get; } = false;
 
         /// <summary>
         /// Whether or not this reference is a redist root.
         /// </summary>
-        internal bool? IsRedistRoot
-        {
-            set { _isRedistRoot = value; }
-            get { return _isRedistRoot; }
-        }
+        internal bool? IsRedistRoot { set; get; } = null;
 
         /// <summary>
         /// The redist name for this reference (if any)
         /// </summary>
-        internal string RedistName
-        {
-            set { _redistName = value; }
-            get { return _redistName; }
-        }
-
+        internal string RedistName { set; get; } = null;
 
         /// <summary>
         /// The original source item, as passed into the task that is directly associated
@@ -784,9 +610,9 @@ namespace Microsoft.Build.Tasks
             get
             {
                 ErrorUtilities.VerifyThrow(
-                    !(_isPrimary && _primarySourceItem == null), "A primary reference must have a primary source item.");
+                    !(IsPrimary && _primarySourceItem == null), "A primary reference must have a primary source item.");
                 ErrorUtilities.VerifyThrow(
-                    (_isPrimary || _primarySourceItem == null), "Only a primary reference can have a primary source item.");
+                    (IsPrimary || _primarySourceItem == null), "Only a primary reference can have a primary source item.");
 
                 return _primarySourceItem;
             }
@@ -797,10 +623,7 @@ namespace Microsoft.Build.Tasks
         /// This item shouldn't be passed to compilers and so forth. 
         /// </summary>
         /// <value>'true' if this reference points to a bad image.</value>
-        internal bool IsBadImage
-        {
-            get { return _isBadImage; }
-        }
+        internal bool IsBadImage { get; private set; } = false;
 
         /// <summary>
         ///  If true, then this item conflicted with another item and lost.
@@ -816,7 +639,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add a conflict victim to this reference
         /// </summary>
-        /// <param name="victim"></param>
         internal void AddConflictVictim(AssemblyNameExtension victim)
         {
             _conflictVictims.Add(victim);
@@ -827,35 +649,23 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal AssemblyNameExtension[] GetConflictVictims()
         {
-            return (AssemblyNameExtension[])_conflictVictims.ToArray(typeof(AssemblyNameExtension));
+            return _conflictVictims.ToArray();
         }
 
         /// <summary>
         ///  The name of the assembly that won over this reference.
         /// </summary>
-        internal AssemblyNameExtension ConflictVictorName
-        {
-            get { return _conflictVictorName; }
-            set { _conflictVictorName = value; }
-        }
+        internal AssemblyNameExtension ConflictVictorName { get; set; } = null;
 
         /// <summary>
         ///  The reason why this reference lost to another reference.
         /// </summary>
-        internal ConflictLossReason ConflictLossExplanation
-        {
-            get { return _conflictLossReason; }
-            set { _conflictLossReason = value; }
-        }
+        internal ConflictLossReason ConflictLossExplanation { get; set; } = ConflictLossReason.DidntLose;
 
         /// <summary>
         /// Is the file a WinMDFile.
         /// </summary>
-        internal bool IsWinMDFile
-        {
-            get { return _winMDFile; }
-            set { _winMDFile = value; }
-        }
+        internal bool IsWinMDFile { get; set; }
 
         /// <summary>
         /// Is the file a Managed.
@@ -943,10 +753,7 @@ namespace Microsoft.Build.Tasks
         /// was set that way.
         /// </summary>
         /// <value>The current copy-local state.</value>
-        internal CopyLocalState CopyLocal
-        {
-            get { return _copyLocalState; }
-        }
+        internal CopyLocalState CopyLocal { get; private set; } = CopyLocalState.Undecided;
 
         /// <summary>
         /// Whether the reference should be CopyLocal. For the reason, see CopyLocalState.
@@ -956,7 +763,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return CopyLocalStateUtility.IsCopyLocal(_copyLocalState);
+                return CopyLocalStateUtility.IsCopyLocal(CopyLocal);
             }
         }
 
@@ -987,70 +794,43 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Whether or not we still need to find dependencies for this reference.
         /// </summary>
-        internal bool DependenciesFound
-        {
-            get { return _dependenciesFound; }
-            set { _dependenciesFound = value; }
-        }
+        internal bool DependenciesFound { get; set; } = false;
 
         /// <summary>
         /// If the reference has an SDK name metadata this will contain that string.
         /// </summary>
-        internal string SDKName
-        {
-            get
-            {
-                return _sdkName;
-            }
-        }
+        internal string SDKName { get; private set; } = String.Empty;
 
         /// <summary>
         /// Add some records to the table of assemblies that were considered and then rejected.
         /// </summary>
         internal void AddAssembliesConsideredAndRejected(ArrayList assembliesConsideredAndRejectedToAdd)
         {
-            _assembliesConsideredAndRejected.AddRange(assembliesConsideredAndRejectedToAdd);
+            AssembliesConsideredAndRejected.AddRange(assembliesConsideredAndRejectedToAdd);
         }
 
         /// <summary>
         /// Returns a collection of strings. Each string is the full path to an assembly that was 
         /// considered for resolution but then rejected because it wasn't a complete match.
         /// </summary>
-        internal ArrayList AssembliesConsideredAndRejected
-        {
-            get { return _assembliesConsideredAndRejected; }
-        }
+        internal ArrayList AssembliesConsideredAndRejected { get; private set; } = new ArrayList();
 
         /// <summary>
         /// The searchpath location that the reference was found at.
         /// </summary>
-        internal string ResolvedSearchPath
-        {
-            get { return _resolvedSearchPath; }
-            set { _resolvedSearchPath = value; }
-        }
+        internal string ResolvedSearchPath { get; set; } = String.Empty;
 
         /// <summary>
         /// FrameworkName attribute on this reference
         /// </summary>
-        internal FrameworkName FrameworkNameAttribute
-        {
-            get { return _frameworkName; }
-            set
-            {
-                _frameworkName = value;
-            }
-        }
+        internal FrameworkName FrameworkNameAttribute { get; set; }
 
         /// <summary>
         /// Indicates that the reference is primary and has ExternallyResolved=true metadata to denote that 
         /// it was resolved by an external system (commonly from nuget). Such a system has already provided a
         /// resolved closure as primary references and therefore we can skip the expensive closure walk.
-        internal bool ExternallyResolved
-        {
-            get;
-            private set;
-        }
+        /// </summary>
+        internal bool ExternallyResolved { get; private set; }
 
         /// <summary>
         /// Make this reference an assembly that is a dependency of 'sourceReference'
@@ -1063,16 +843,16 @@ namespace Microsoft.Build.Tasks
         /// <param name="sourceReference">The source reference that this reference will be dependent on</param>
         internal void MakeDependentAssemblyReference(Reference sourceReference)
         {
-            _copyLocalState = CopyLocalState.Undecided;
+            CopyLocal = CopyLocalState.Undecided;
 
             // This is a true dependency, so its not primary.
-            _isPrimary = false;
+            IsPrimary = false;
 
             // This is an assembly file, so we'll need to find dependencies later.
             DependenciesFound = false;
 
             // Dependencies must always be specific version.
-            _wantSpecificVersion = true;
+            WantSpecificVersion = true;
 
             // Add source items from the original item.
             AddSourceItems(sourceReference.GetSourceItems());
@@ -1086,7 +866,7 @@ namespace Microsoft.Build.Tasks
         /// This is a refrence that is an assembly and is primary.
         /// </summary>
         /// <param name="sourceItem">The source item.</param>
-        /// <param name="wantSpecificVersion">Whether the version needs to match exactly or loosely.</param>
+        /// <param name="wantSpecificVersionValue">Whether the version needs to match exactly or loosely.</param>
         /// <param name="executableExtension">The filename extension that the resulting assembly must have.</param>
         internal void MakePrimaryAssemblyReference
         (
@@ -1095,15 +875,15 @@ namespace Microsoft.Build.Tasks
             string executableExtension
         )
         {
-            _copyLocalState = CopyLocalState.Undecided;
+            CopyLocal = CopyLocalState.Undecided;
 
             // This is a primary reference.
-            _isPrimary = true;
+            IsPrimary = true;
 
             // This is the source item (from the list passed into the task) that
             // originally created this reference.
             _primarySourceItem = sourceItem;
-            _sdkName = sourceItem.GetMetadata("SDKName");
+            SDKName = sourceItem.GetMetadata("SDKName");
 
             if (executableExtension != null && executableExtension.Length > 0)
             {
@@ -1112,7 +892,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // The specific version indicator.
-            _wantSpecificVersion = wantSpecificVersionValue;
+            WantSpecificVersion = wantSpecificVersionValue;
 
             // This is an assembly file, so we'll need to find dependencies later.
             DependenciesFound = false;
@@ -1183,20 +963,20 @@ namespace Microsoft.Build.Tasks
             // If this item was unresolvable, then copy-local is false.
             if (IsUnresolvable)
             {
-                _copyLocalState = CopyLocalState.NoBecauseUnresolved;
+                CopyLocal = CopyLocalState.NoBecauseUnresolved;
                 return;
             }
 
             if (EmbedInteropTypes)
             {
-                _copyLocalState = CopyLocalState.NoBecauseEmbedded;
+                CopyLocal = CopyLocalState.NoBecauseEmbedded;
                 return;
             }
 
             // If this item was a conflict victim, then it should not be copy-local.
             if (IsConflictVictim)
             {
-                _copyLocalState = CopyLocalState.NoBecauseConflictVictim;
+                CopyLocal = CopyLocalState.NoBecauseConflictVictim;
                 return;
             }
 
@@ -1213,7 +993,7 @@ namespace Microsoft.Build.Tasks
 
                 if (found)
                 {
-                    _copyLocalState = result
+                    CopyLocal = result
                         ? CopyLocalState.YesBecauseReferenceItemHadMetadata
                         : CopyLocalState.NoBecauseReferenceItemHadMetadata;
                     return;
@@ -1225,12 +1005,12 @@ namespace Microsoft.Build.Tasks
                 // has Private=false, then this dependency should false too.
                 bool privateTrueFound = false;
                 bool privateFalseFound = false;
-                foreach (DictionaryEntry entry in _sourceItems)
+                foreach (ITaskItem item in _sourceItems.Values)
                 {
                     bool found;
                     bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool
                         (
-                            (ITaskItem)entry.Value,
+                            item,
                             ItemMetadataNames.privateMetadata,
                             out found
                         );
@@ -1254,7 +1034,7 @@ namespace Microsoft.Build.Tasks
 
                 if (privateFalseFound && !privateTrueFound)
                 {
-                    _copyLocalState = CopyLocalState.NoBecauseReferenceItemHadMetadata;
+                    CopyLocal = CopyLocalState.NoBecauseReferenceItemHadMetadata;
                     return;
                 }
             }
@@ -1262,14 +1042,14 @@ namespace Microsoft.Build.Tasks
             // If the item was determined to be an prereq assembly.
             if (IsPrerequisite && !UserRequestedSpecificFile)
             {
-                _copyLocalState = CopyLocalState.NoBecausePrerequisite;
+                CopyLocal = CopyLocalState.NoBecausePrerequisite;
                 return;
             }
 
             // Items in the frameworks directory shouldn't be copy-local
             if (IsFrameworkFile(_fullPath, frameworkPaths))
             {
-                _copyLocalState = CopyLocalState.NoBecauseFrameworkFile;
+                CopyLocal = CopyLocalState.NoBecauseFrameworkFile;
                 return;
             }
 
@@ -1280,9 +1060,9 @@ namespace Microsoft.Build.Tasks
                 bool foundSourceItemNotInGac = false;
 
                 // Go through all of the parent source items and check to see if they were found in the GAC
-                foreach (DictionaryEntry entry in _sourceItems)
+                foreach (string key in _sourceItems.Keys)
                 {
-                    AssemblyNameExtension primaryAssemblyName = referenceTable.GetReferenceFromItemSpec((string)entry.Key);
+                    AssemblyNameExtension primaryAssemblyName = referenceTable.GetReferenceFromItemSpec(key);
                     Reference primaryReference = referenceTable.GetReference(primaryAssemblyName);
 
                     if (doNotCopyLocalIfInGac)
@@ -1312,7 +1092,7 @@ namespace Microsoft.Build.Tasks
                 // All parent source items were found in the GAC.
                 if (!foundSourceItemNotInGac)
                 {
-                    _copyLocalState = CopyLocalState.NoBecauseParentReferencesFoundInGAC;
+                    CopyLocal = CopyLocalState.NoBecauseParentReferencesFoundInGAC;
                     return;
                 }
             }
@@ -1327,19 +1107,19 @@ namespace Microsoft.Build.Tasks
 
                 if (FoundInGac.Value)
                 {
-                    _copyLocalState = CopyLocalState.NoBecauseReferenceFoundInGAC;
+                    CopyLocal = CopyLocalState.NoBecauseReferenceFoundInGAC;
                     return;
                 }
             }
 
             if (ResolvedFromGac)
             {
-                _copyLocalState = CopyLocalState.NoBecauseReferenceResolvedFromGAC;
+                CopyLocal = CopyLocalState.NoBecauseReferenceResolvedFromGAC;
                 return;
             }
 
             //  It was resolved locally, so copy it.
-            _copyLocalState = CopyLocalState.YesBecauseOfHeuristic;
+            CopyLocal = CopyLocalState.YesBecauseOfHeuristic;
         }
 
         /// <summary>
@@ -1360,63 +1140,25 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal class ExclusionListProperties
         {
-            #region Fields
-            /// <summary>
-            /// What is the highest version of an assembly found in the current redist list for the targeted framework
-            /// </summary>
-            private Version _highestVersionInRedist;
-
-            /// <summary>
-            /// Delegate which will log the reason the assembly was not resolved
-            /// </summary>
-            private ReferenceTable.LogExclusionReason _exclusionReasonLogDelegate;
-
-            /// <summary>
-            /// What is the target framework moniker of the highest redist list on the system.
-            /// </summary>
-            private string _highestRedistListMonkier;
-
             /// <summary>
             /// Is this reference in an exclusion list
             /// </summary>
-            private bool _isInExclusionList;
-            #endregion
-
-            /// <summary>
-            /// Is this reference in an exclusion list
-            /// </summary>
-            internal bool IsInExclusionList
-            {
-                get { return _isInExclusionList; }
-                set { _isInExclusionList = value; }
-            }
+            internal bool IsInExclusionList { get; set; }
 
             /// <summary>
             /// What is the highest version of this assembly in the current redist list
             /// </summary>
-            internal Version HighestVersionInRedist
-            {
-                get { return _highestVersionInRedist; }
-                set { _highestVersionInRedist = value; }
-            }
+            internal Version HighestVersionInRedist { get; set; }
 
             /// <summary>
             /// What is the highest versioned redist list on the machine
             /// </summary>
-            internal string HighestRedistListMonkier
-            {
-                get { return _highestRedistListMonkier; }
-                set { _highestRedistListMonkier = value; }
-            }
+            internal string HighestRedistListMonkier { get; set; }
 
             /// <summary>
             /// Delegate which logs the reason for not resolving a reference
             /// </summary>
-            internal Microsoft.Build.Tasks.ReferenceTable.LogExclusionReason ExclusionReasonLogDelegate
-            {
-                get { return _exclusionReasonLogDelegate; }
-                set { _exclusionReasonLogDelegate = value; }
-            }
+            internal ReferenceTable.LogExclusionReason ExclusionReasonLogDelegate { get; set; }
         }
     }
 }

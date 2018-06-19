@@ -3,7 +3,7 @@
 
 using System;
 using System.Globalization;
-
+using System.Text;
 using error = Microsoft.Build.Shared.ErrorUtilities;
 
 namespace Microsoft.Build.Shared
@@ -36,6 +36,22 @@ namespace Microsoft.Build.Shared
                 error.VerifyThrowArgument(false, "Shared.CannotConvertStringToBool", parameterValue);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Returns a hex representation of a byte array.
+        /// </summary>
+        /// <param name="bytes">The bytes to convert</param>
+        /// <returns>A string byte types formated as X2.</returns>
+        internal static string ConvertByteArrayToHex(byte[] bytes)
+        {
+            var sb = new StringBuilder();
+            foreach (var b in bytes)
+            {
+                sb.AppendFormat("{0:X2}", b);
+            }
+
+            return sb.ToString();
         }
 
         /// <summary>

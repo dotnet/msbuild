@@ -35,8 +35,6 @@ using System.Reflection;
 using System.Globalization;
 using System.Diagnostics.CodeAnalysis;
 
-using Microsoft.Build.Shared;
-
 /*
   Plan for the future:
   Ideally we will be able to change the property getters here to use a
@@ -85,26 +83,16 @@ namespace Microsoft.Build.Tasks
         // Save the strings for better doc comments.
         internal sealed class ResourceData
         {
-            private Type _type;
-            private String _valueAsString;
-
             internal ResourceData(Type type, String valueAsString)
             {
-                _type = type;
-                _valueAsString = valueAsString;
+                Type = type;
+                ValueAsString = valueAsString;
             }
 
-            internal Type Type
-            {
-                get { return _type; }
-            }
+            internal Type Type { get; }
 
-            internal String ValueAsString
-            {
-                get { return _valueAsString; }
-            }
+            internal String ValueAsString { get; }
         }
-
 
         internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
         {
@@ -114,18 +102,22 @@ namespace Microsoft.Build.Tasks
         internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
         {
             if (resourceList == null)
-                throw new ArgumentNullException("resourceList");
+            {
+                throw new ArgumentNullException(nameof(resourceList));
+            }
 
-            Dictionary<String, ResourceData> resourceTypes = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
+            var resourceTypes = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
             foreach (DictionaryEntry de in resourceList)
             {
-                ResXDataNode node = de.Value as ResXDataNode;
+                var node = de.Value as ResXDataNode;
                 ResourceData data;
                 if (node != null)
                 {
                     string keyname = (string)de.Key;
                     if (keyname != node.Name)
+                    {
                         throw new ArgumentException(SR.GetString(SR.MismatchedResourceName, keyname, node.Name));
+                    }
 
                     String typeName = node.GetValueTypeName((AssemblyName[])null);
                     Type type = Type.GetType(typeName);
@@ -137,8 +129,8 @@ namespace Microsoft.Build.Tasks
                     // If the object is null, we don't have a good way of guessing the
                     // type.  Use Object.  This will be rare after WinForms gets away
                     // from their resource pull model in Whidbey M3.
-                    Type type = (de.Value == null) ? typeof(Object) : de.Value.GetType();
-                    data = new ResourceData(type, de.Value == null ? null : de.Value.ToString());
+                    Type type = de.Value?.GetType() ?? typeof(Object);
+                    data = new ResourceData(type, de.Value?.ToString());
                 }
                 resourceTypes.Add((String)de.Key, data);
             }
@@ -152,22 +144,24 @@ namespace Microsoft.Build.Tasks
         private static CodeCompileUnit InternalCreate(Dictionary<String, ResourceData> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
         {
             if (baseName == null)
-                throw new ArgumentNullException("baseName");
+            {
+                throw new ArgumentNullException(nameof(baseName));
+            }
             if (codeProvider == null)
-                throw new ArgumentNullException("codeProvider");
+            {
+                throw new ArgumentNullException(nameof(codeProvider));
+            }
 
             // Keep a list of errors describing known strings that couldn't be
             // fixed up (like "4"), as well as listing all duplicate resources that
             // were fixed up to the same name (like "A B" and "A-B" both going to
             // "A_B").
-            ArrayList errors = new ArrayList(0);
+            var errors = new List<string>();
 
             // Verify the resource names are valid property names, and they don't
             // conflict.  This includes checking for language-specific keywords,
             // translating spaces to underscores, etc.
-            SortedList cleanedResourceList;
-            Hashtable reverseFixupTable;
-            cleanedResourceList = VerifyResourceNames(resourceList, codeProvider, errors, out reverseFixupTable);
+            SortedList<string, ResourceData> cleanedResourceList = VerifyResourceNames(resourceList, codeProvider, errors, out Dictionary<string, string> reverseFixupTable);
 
             // Verify the class name is legal.
             String className = baseName;
@@ -176,10 +170,15 @@ namespace Microsoft.Build.Tasks
             {
                 String fixedClassName = VerifyResourceName(className, codeProvider);
                 if (fixedClassName != null)
+                {
                     className = fixedClassName;
+                }
             }
+
             if (!codeProvider.IsValidIdentifier(className))
+            {
                 throw new ArgumentException(SR.GetString(SR.InvalidIdentifier, className));
+            }
 
             // If we have a namespace, verify the namespace is legal, 
             // attempting to fix it up if needed.
@@ -189,25 +188,27 @@ namespace Microsoft.Build.Tasks
                 {
                     String fixedNamespace = VerifyResourceName(generatedCodeNamespace, codeProvider, true);
                     if (fixedNamespace != null)
+                    {
                         generatedCodeNamespace = fixedNamespace;
+                    }
                 }
                 // Note we cannot really ensure that the generated code namespace
                 // is a valid identifier, as namespaces can have '.' and '::', but
                 // identifiers cannot.
             }
 
-            CodeCompileUnit ccu = new CodeCompileUnit();
+            var ccu = new CodeCompileUnit();
             ccu.ReferencedAssemblies.Add("System.dll");
 
             ccu.UserData.Add("AllowLateBound", false);
             ccu.UserData.Add("RequireVariableDeclaration", true);
 
-            CodeNamespace ns = new CodeNamespace(generatedCodeNamespace);
+            var ns = new CodeNamespace(generatedCodeNamespace);
             ns.Imports.Add(new CodeNamespaceImport("System"));
             ccu.Namespaces.Add(ns);
 
             // Generate class
-            CodeTypeDeclaration srClass = new CodeTypeDeclaration(className);
+            var srClass = new CodeTypeDeclaration(className);
             ns.Types.Add(srClass);
             AddGeneratedCodeAttributeforMember(srClass);
 
@@ -217,42 +218,47 @@ namespace Microsoft.Build.Tasks
             srClass.Comments.Add(new CodeCommentStatement(DocCommentSummaryStart, true));
             srClass.Comments.Add(new CodeCommentStatement(SR.GetString(SR.ClassDocComment), true));
 
-            CodeCommentStatement comment = new CodeCommentStatement(SR.GetString(SR.ClassComments1), true);
+            var comment = new CodeCommentStatement(SR.GetString(SR.ClassComments1), true);
             srClass.Comments.Add(comment);
             comment = new CodeCommentStatement(SR.GetString(SR.ClassComments3), true);
             srClass.Comments.Add(comment);
 
             srClass.Comments.Add(new CodeCommentStatement(DocCommentSummaryEnd, true));
-            CodeTypeReference debuggerAttrib = new CodeTypeReference(typeof(System.Diagnostics.DebuggerNonUserCodeAttribute));
-            debuggerAttrib.Options = CodeTypeReferenceOptions.GlobalReference;
+            var debuggerAttrib =
+                new CodeTypeReference(typeof(System.Diagnostics.DebuggerNonUserCodeAttribute))
+                {
+                    Options = CodeTypeReferenceOptions.GlobalReference
+                };
             srClass.CustomAttributes.Add(new CodeAttributeDeclaration(debuggerAttrib));
 
-            CodeTypeReference compilerGenedAttrib = new CodeTypeReference(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute));
-            compilerGenedAttrib.Options = CodeTypeReferenceOptions.GlobalReference;
+            var compilerGenedAttrib =
+                new CodeTypeReference(typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute))
+                {
+                    Options = CodeTypeReferenceOptions.GlobalReference
+                };
             srClass.CustomAttributes.Add(new CodeAttributeDeclaration(compilerGenedAttrib));
 
             // Figure out some basic restrictions to the code generation
             bool useStatic = internalClass || codeProvider.Supports(GeneratorSupport.PublicStaticMembers);
-            bool supportsTryCatch = codeProvider.Supports(GeneratorSupport.TryCatchStatements);
-            EmitBasicClassMembers(srClass, generatedCodeNamespace, baseName, resourcesNamespace, internalClass, useStatic, supportsTryCatch);
+            EmitBasicClassMembers(srClass, generatedCodeNamespace, baseName, resourcesNamespace, internalClass, useStatic);
 
             // Now for each resource, add a property
-            foreach (DictionaryEntry entry in cleanedResourceList)
+            foreach (KeyValuePair<string, ResourceData> entry in cleanedResourceList)
             {
-                String propertyName = (String)entry.Key;
-                // The resourceName will be the original value, before fixups,
-                // if any.
-                String resourceName = (String)reverseFixupTable[propertyName];
-                if (resourceName == null)
+                String propertyName = entry.Key;
+                // The resourceName will be the original value, before fixups, if any.
+                if (reverseFixupTable.TryGetValue(propertyName, out string resourceName))
+                {
                     resourceName = propertyName;
-                bool r = DefineResourceFetchingProperty(propertyName, resourceName, (ResourceData)entry.Value, srClass, internalClass, useStatic);
+                }
+                bool r = DefineResourceFetchingProperty(propertyName, resourceName, entry.Value, srClass, internalClass, useStatic);
                 if (!r)
                 {
-                    errors.Add(entry.Key);
+                    errors.Add(propertyName);
                 }
             }
 
-            unmatchable = (String[])errors.ToArray(typeof(String));
+            unmatchable = errors.ToArray();
 
             // Validate the generated class now
             CodeGenerator.ValidateIdentifiers(ccu);
@@ -269,7 +275,9 @@ namespace Microsoft.Build.Tasks
         internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
         {
             if (resxFile == null)
-                throw new ArgumentNullException("resxFile");
+            {
+                throw new ArgumentNullException(nameof(resxFile));
+            }
 
             // Read the resources from a ResX file into a dictionary - name & type name
             Dictionary<String, ResourceData> resourceList = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
@@ -278,11 +286,11 @@ namespace Microsoft.Build.Tasks
                 rr.UseResXDataNodes = true;
                 foreach (DictionaryEntry de in rr)
                 {
-                    ResXDataNode node = (ResXDataNode)de.Value;
+                    var node = (ResXDataNode)de.Value;
                     String typeName = node.GetValueTypeName((AssemblyName[])null);
                     Type type = Type.GetType(typeName);
                     String valueAsString = node.GetValue((AssemblyName[])null).ToString();
-                    ResourceData data = new ResourceData(type, valueAsString);
+                    var data = new ResourceData(type, valueAsString);
                     resourceList.Add((String)de.Key, data);
                 }
             }
@@ -295,10 +303,10 @@ namespace Microsoft.Build.Tasks
 
         private static void AddGeneratedCodeAttributeforMember(CodeTypeMember typeMember)
         {
-            CodeAttributeDeclaration generatedCodeAttrib = new CodeAttributeDeclaration(new CodeTypeReference(typeof(System.CodeDom.Compiler.GeneratedCodeAttribute)));
+            var generatedCodeAttrib = new CodeAttributeDeclaration(new CodeTypeReference(typeof(GeneratedCodeAttribute)));
             generatedCodeAttrib.AttributeType.Options = CodeTypeReferenceOptions.GlobalReference;
-            CodeAttributeArgument toolArg = new CodeAttributeArgument(new CodePrimitiveExpression(typeof(StronglyTypedResourceBuilder).FullName));
-            CodeAttributeArgument versionArg = new CodeAttributeArgument(new CodePrimitiveExpression(MSBuildConstants.CurrentAssemblyVersion));
+            var toolArg = new CodeAttributeArgument(new CodePrimitiveExpression(typeof(StronglyTypedResourceBuilder).FullName));
+            var versionArg = new CodeAttributeArgument(new CodePrimitiveExpression(MSBuildConstants.CurrentAssemblyVersion));
 
             generatedCodeAttrib.Arguments.Add(toolArg);
             generatedCodeAttrib.Arguments.Add(versionArg);
@@ -307,7 +315,7 @@ namespace Microsoft.Build.Tasks
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")]
-        private static void EmitBasicClassMembers(CodeTypeDeclaration srClass, String nameSpace, String baseName, String resourcesNamespace, bool internalClass, bool useStatic, bool supportsTryCatch)
+        private static void EmitBasicClassMembers(CodeTypeDeclaration srClass, String nameSpace, String baseName, String resourcesNamespace, bool internalClass, bool useStatic)
         {
             const String tmpVarName = "temp";
             String resMgrCtorParam;
@@ -319,7 +327,7 @@ namespace Microsoft.Build.Tasks
                 else
                     resMgrCtorParam = baseName;
             }
-            else if ((nameSpace != null) && (nameSpace.Length > 0))
+            else if (!string.IsNullOrEmpty(nameSpace))
             {
                 resMgrCtorParam = nameSpace + '.' + baseName;
             }
@@ -328,7 +336,7 @@ namespace Microsoft.Build.Tasks
                 resMgrCtorParam = baseName;
             }
 
-            CodeAttributeDeclaration suppressMessageAttrib = new CodeAttributeDeclaration(new CodeTypeReference(typeof(System.Diagnostics.CodeAnalysis.SuppressMessageAttribute)));
+            var suppressMessageAttrib = new CodeAttributeDeclaration(new CodeTypeReference(typeof(SuppressMessageAttribute)));
             suppressMessageAttrib.AttributeType.Options = CodeTypeReferenceOptions.GlobalReference;
             suppressMessageAttrib.Arguments.Add(new CodeAttributeArgument(new CodePrimitiveExpression("Microsoft.Performance")));
             suppressMessageAttrib.Arguments.Add(new CodeAttributeArgument(new CodePrimitiveExpression("CA1811:AvoidUncalledPrivateCode")));
@@ -343,15 +351,17 @@ namespace Microsoft.Build.Tasks
             srClass.Members.Add(ctor);
 
             // Emit _resMgr field.
-            CodeTypeReference ResMgrCodeTypeReference = new CodeTypeReference(typeof(ResourceManager), CodeTypeReferenceOptions.GlobalReference);
-            CodeMemberField field = new CodeMemberField(ResMgrCodeTypeReference, ResMgrFieldName);
-            field.Attributes = MemberAttributes.Private;
+            var ResMgrCodeTypeReference = new CodeTypeReference(typeof(ResourceManager), CodeTypeReferenceOptions.GlobalReference);
+            var field = new CodeMemberField(ResMgrCodeTypeReference, ResMgrFieldName)
+            {
+                Attributes = MemberAttributes.Private
+            };
             if (useStatic)
                 field.Attributes |= MemberAttributes.Static;
             srClass.Members.Add(field);
 
             // Emit _resCulture field, and leave it set to null.
-            CodeTypeReference CultureTypeReference = new CodeTypeReference(typeof(CultureInfo), CodeTypeReferenceOptions.GlobalReference);
+            var CultureTypeReference = new CodeTypeReference(typeof(CultureInfo), CodeTypeReferenceOptions.GlobalReference);
             field = new CodeMemberField(CultureTypeReference, CultureInfoFieldName);
             field.Attributes = MemberAttributes.Private;
             if (useStatic)
@@ -373,17 +383,19 @@ namespace Microsoft.Build.Tasks
                 resMgr.Attributes |= MemberAttributes.Static;
 
             // Mark the ResMgr property as advanced
-            CodeTypeReference editorBrowsableStateTypeRef = new CodeTypeReference(typeof(System.ComponentModel.EditorBrowsableState));
-            editorBrowsableStateTypeRef.Options = CodeTypeReferenceOptions.GlobalReference;
+            var editorBrowsableStateTypeRef =
+                new CodeTypeReference(typeof(System.ComponentModel.EditorBrowsableState))
+                {
+                    Options = CodeTypeReferenceOptions.GlobalReference
+                };
 
-            CodeAttributeArgument editorBrowsableStateAdvanced = new CodeAttributeArgument(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(editorBrowsableStateTypeRef), "Advanced"));
-            CodeAttributeDeclaration editorBrowsableAdvancedAttribute = new CodeAttributeDeclaration("System.ComponentModel.EditorBrowsableAttribute",
-                                                                                                     new CodeAttributeArgument[] { editorBrowsableStateAdvanced });
+            var editorBrowsableStateAdvanced = new CodeAttributeArgument(new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(editorBrowsableStateTypeRef), "Advanced"));
+            var editorBrowsableAdvancedAttribute = new CodeAttributeDeclaration("System.ComponentModel.EditorBrowsableAttribute", editorBrowsableStateAdvanced);
             editorBrowsableAdvancedAttribute.AttributeType.Options = CodeTypeReferenceOptions.GlobalReference;
             resMgr.CustomAttributes.Add(editorBrowsableAdvancedAttribute);
 
             // Emit the Culture property (read/write)
-            CodeMemberProperty culture = new CodeMemberProperty();
+            var culture = new CodeMemberProperty();
             srClass.Members.Add(culture);
             culture.Name = CultureInfoPropertyName;
             culture.HasGet = true;
@@ -399,8 +411,7 @@ namespace Microsoft.Build.Tasks
 
             // Mark the Culture property as advanced
             culture.CustomAttributes.Add(editorBrowsableAdvancedAttribute);
-
-
+            
             /*
               // Here's what I'm trying to emit.  Since not all languages support
               // try/finally, we'll avoid our double lock pattern here.
@@ -416,18 +427,18 @@ namespace Microsoft.Build.Tasks
               }
               return _resMgr;
              */
-            CodeFieldReferenceExpression field_resMgr = new CodeFieldReferenceExpression(null, ResMgrFieldName);
-            CodeMethodReferenceExpression object_equalsMethod = new CodeMethodReferenceExpression(new CodeTypeReferenceExpression(typeof(Object)), "ReferenceEquals");
+            var field_resMgr = new CodeFieldReferenceExpression(null, ResMgrFieldName);
+            var object_equalsMethod = new CodeMethodReferenceExpression(new CodeTypeReferenceExpression(typeof(Object)), "ReferenceEquals");
 
-            CodeMethodInvokeExpression isResMgrNull = new CodeMethodInvokeExpression(object_equalsMethod, new CodeExpression[] { field_resMgr, new CodePrimitiveExpression(null) });
+            var isResMgrNull = new CodeMethodInvokeExpression(object_equalsMethod, field_resMgr, new CodePrimitiveExpression(null));
 
             // typeof(<class-name>).Assembly
-            CodePropertyReferenceExpression getAssembly = new CodePropertyReferenceExpression(new CodeTypeOfExpression(new CodeTypeReference(srClass.Name)), "Assembly");
+            var getAssembly = new CodePropertyReferenceExpression(new CodeTypeOfExpression(new CodeTypeReference(srClass.Name)), "Assembly");
 
             // new ResourceManager(resMgrCtorParam, typeof(<class-name>).Assembly);
-            CodeObjectCreateExpression newResMgr = new CodeObjectCreateExpression(ResMgrCodeTypeReference, new CodePrimitiveExpression(resMgrCtorParam), getAssembly);
+            var newResMgr = new CodeObjectCreateExpression(ResMgrCodeTypeReference, new CodePrimitiveExpression(resMgrCtorParam), getAssembly);
 
-            CodeStatement[] init = new CodeStatement[2];
+            var init = new CodeStatement[2];
             init[0] = new CodeVariableDeclarationStatement(ResMgrCodeTypeReference, tmpVarName, newResMgr);
             init[1] = new CodeAssignStatement(field_resMgr, new CodeVariableReferenceExpression(tmpVarName));
 
@@ -439,12 +450,11 @@ namespace Microsoft.Build.Tasks
             resMgr.Comments.Add(new CodeCommentStatement(SR.GetString(SR.ResMgrPropertyComment), true));
             resMgr.Comments.Add(new CodeCommentStatement(DocCommentSummaryEnd, true));
 
-
             // Emit code for Culture property
-            CodeFieldReferenceExpression field_resCulture = new CodeFieldReferenceExpression(null, CultureInfoFieldName);
+            var field_resCulture = new CodeFieldReferenceExpression(null, CultureInfoFieldName);
             culture.GetStatements.Add(new CodeMethodReturnStatement(field_resCulture));
 
-            CodePropertySetValueReferenceExpression newCulture = new CodePropertySetValueReferenceExpression();
+            var newCulture = new CodePropertySetValueReferenceExpression();
             culture.SetStatements.Add(new CodeAssignStatement(field_resCulture, newCulture));
 
             // Add a doc comment to Culture property
@@ -483,20 +493,23 @@ namespace Microsoft.Build.Tasks
         [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")]
         private static bool DefineResourceFetchingProperty(String propertyName, String resourceName, ResourceData data, CodeTypeDeclaration srClass, bool internalClass, bool useStatic)
         {
-            CodeMemberProperty prop = new CodeMemberProperty();
-            prop.Name = propertyName;
-            prop.HasGet = true;
-            prop.HasSet = false;
+            var prop = new CodeMemberProperty
+            {
+                Name = propertyName,
+                HasGet = true,
+                HasSet = false
+            };
 
             Type type = data.Type;
-
             if (type == null)
             {
                 return false;
             }
 
             if (type == typeof(MemoryStream))
+            {
                 type = typeof(UnmanagedMemoryStream);
+            }
 
             // Ensure type is internalally visible.  This is necessary to ensure
             // users can access classes via a base type.  Imagine a class like
@@ -510,9 +523,11 @@ namespace Microsoft.Build.Tasks
             // special casing collection interfaces & ignoring serialization 
             // interfaces or IDisposable.
             while (!type.IsPublic)
+            {
                 type = type.BaseType;
+            }
 
-            CodeTypeReference valueType = new CodeTypeReference(type);
+            var valueType = new CodeTypeReference(type);
             prop.Type = valueType;
             if (internalClass)
                 prop.Attributes = MemberAttributes.Assembly;
@@ -529,18 +544,20 @@ namespace Microsoft.Build.Tasks
             // For Objects, emit this:
             //    Object obj = ResourceManager.GetObject("name", _resCulture);
             //    return (MyValueType) obj;
-            CodePropertyReferenceExpression resMgr = new CodePropertyReferenceExpression(null, "ResourceManager");
-            CodeFieldReferenceExpression resCultureField = new CodeFieldReferenceExpression((useStatic) ? null : new CodeThisReferenceExpression(), CultureInfoFieldName);
+            var resMgr = new CodePropertyReferenceExpression(null, "ResourceManager");
+            var resCultureField = new CodeFieldReferenceExpression((useStatic) ? null : new CodeThisReferenceExpression(), CultureInfoFieldName);
 
             bool isString = type == typeof(String);
             bool isStream = type == typeof(UnmanagedMemoryStream) || type == typeof(MemoryStream);
-            String getMethodName = String.Empty;
-            String text = String.Empty;
+            String getMethodName;
+            String text;
             String valueAsString = TruncateAndFormatCommentStringForOutput(data.ValueAsString);
             String typeName = String.Empty;
 
             if (!isString) // Stream or Object
+            {
                 typeName = TruncateAndFormatCommentStringForOutput(type.ToString());
+            }
 
             if (isString)
                 getMethodName = "GetString";
@@ -550,7 +567,9 @@ namespace Microsoft.Build.Tasks
                 getMethodName = "GetObject";
 
             if (isString)
+            {
                 text = SR.GetString(SR.StringPropertyComment, valueAsString);
+            }
             else
             { // Stream or Object
                 if (valueAsString == null ||
@@ -564,7 +583,7 @@ namespace Microsoft.Build.Tasks
             prop.Comments.Add(new CodeCommentStatement(text, true));
             prop.Comments.Add(new CodeCommentStatement(DocCommentSummaryEnd, true));
 
-            CodeExpression getValue = new CodeMethodInvokeExpression(resMgr, getMethodName, new CodePrimitiveExpression(resourceName), resCultureField);
+            var getValue = new CodeMethodInvokeExpression(resMgr, getMethodName, new CodePrimitiveExpression(resourceName), resCultureField);
             CodeMethodReturnStatement ret;
             if (isString || isStream)
             {
@@ -572,7 +591,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                CodeVariableDeclarationStatement returnObj = new CodeVariableDeclarationStatement(typeof(Object), "obj", getValue);
+                var returnObj = new CodeVariableDeclarationStatement(typeof(Object), "obj", getValue);
                 prop.GetStatements.Add(returnObj);
 
                 ret = new CodeMethodReturnStatement(new CodeCastExpression(valueType, new CodeVariableReferenceExpression("obj")));
@@ -593,9 +612,9 @@ namespace Microsoft.Build.Tasks
         private static String VerifyResourceName(String key, CodeDomProvider provider, bool isNameSpace)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+                throw new ArgumentNullException(nameof(key));
             if (provider == null)
-                throw new ArgumentNullException("provider");
+                throw new ArgumentNullException(nameof(provider));
 
             foreach (char c in s_charsToReplace)
             {
@@ -620,10 +639,18 @@ namespace Microsoft.Build.Tasks
             return null;
         }
 
-        private static SortedList VerifyResourceNames(Dictionary<String, ResourceData> resourceList, CodeDomProvider codeProvider, ArrayList errors, out Hashtable reverseFixupTable)
+        private static SortedList<string, ResourceData> VerifyResourceNames(
+            Dictionary<String, ResourceData> resourceList,
+            CodeDomProvider codeProvider,
+            List<string> errors,
+            out Dictionary<string, string> reverseFixupTable)
         {
-            reverseFixupTable = new Hashtable(0, StringComparer.InvariantCultureIgnoreCase);
-            SortedList cleanedResourceList = new SortedList(StringComparer.InvariantCultureIgnoreCase, resourceList.Count);
+            reverseFixupTable = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
+            var cleanedResourceList =
+                new SortedList<string, ResourceData>(StringComparer.InvariantCultureIgnoreCase)
+                {
+                    Capacity = resourceList.Count
+                };
 
             foreach (KeyValuePair<String, ResourceData> entry in resourceList)
             {
@@ -661,15 +688,15 @@ namespace Microsoft.Build.Tasks
 
                     // Now see if we've already mapped another key to the 
                     // same name.
-                    String oldDuplicateKey = (String)reverseFixupTable[newKey];
-                    if (oldDuplicateKey != null)
+                    if (reverseFixupTable.TryGetValue(newKey, out string oldDuplicateKey))
                     {
                         // We can't handle this key nor the previous one.
                         // Remove the old one.
                         if (!errors.Contains(oldDuplicateKey))
+                        {
                             errors.Add(oldDuplicateKey);
-                        if (cleanedResourceList.Contains(newKey))
-                            cleanedResourceList.Remove(newKey);
+                        }
+                        cleanedResourceList.Remove(newKey);
                         errors.Add(key);
                         continue;
                     }
@@ -677,18 +704,21 @@ namespace Microsoft.Build.Tasks
                     key = newKey;
                 }
                 ResourceData value = entry.Value;
-                if (!cleanedResourceList.Contains(key))
+                if (!cleanedResourceList.ContainsKey(key))
+                {
                     cleanedResourceList.Add(key, value);
+                }
                 else
                 {
                     // There was a case-insensitive conflict between two keys.
                     // Or possibly one key was fixed up in a way that conflicts 
                     // with another key (ie, "A B" and "A_B").
-                    String fixedUp = (String)reverseFixupTable[key];
-                    if (fixedUp != null)
+                    if (reverseFixupTable.TryGetValue(key, out string fixedUp))
                     {
                         if (!errors.Contains(fixedUp))
+                        {
                             errors.Add(fixedUp);
+                        }
                         reverseFixupTable.Remove(key);
                     }
                     errors.Add(entry.Key);
@@ -699,4 +729,3 @@ namespace Microsoft.Build.Tasks
         }
     }
 }
-

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -44,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         #region Properties
 
         // outputs of all built targets
-        private readonly ArrayList _targetOutputs = new ArrayList();
+        private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
         private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
@@ -57,24 +56,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IBuildEngine BuildEngine { get; set; }
 
-        public IBuildEngine2 BuildEngine2
-        {
-            get { return (IBuildEngine2)BuildEngine; }
-        }
+        public IBuildEngine2 BuildEngine2 => (IBuildEngine2)BuildEngine;
 
-        public IBuildEngine3 BuildEngine3
-        {
-            get { return (IBuildEngine3)BuildEngine; }
-        }
+        public IBuildEngine3 BuildEngine3 => (IBuildEngine3)BuildEngine;
 
-        public TaskLoggingHelper Log
-        {
-            get
-            {
-                return _logHelper ?? (_logHelper = new TaskLoggingHelperExtension(this,
-                           AssemblyResources.PrimaryResources, AssemblyResources.SharedResources, "MSBuild."));
-            }
-        }
+        public TaskLoggingHelper Log => _logHelper ?? (_logHelper = new TaskLoggingHelperExtension(this,
+            AssemblyResources.PrimaryResources, AssemblyResources.SharedResources, "MSBuild."));
 
         /// <inheritdoc />
         /// <summary>
@@ -122,13 +109,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <value>Array of output items.</value>
         [Output]
-        public ITaskItem[] TargetOutputs
-        {
-            get
-            {
-                return (ITaskItem[])_targetOutputs.ToArray(typeof(ITaskItem));
-            }
-        }
+        public ITaskItem[] TargetOutputs => _targetOutputs.ToArray();
 
         /// <summary>
         /// Indicates if the paths of target output items should be rebased relative to the calling project.
@@ -255,14 +236,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             // We have been asked to unescape all escaped characters before processing
-            if (this.TargetAndPropertyListSeparators != null && this.TargetAndPropertyListSeparators.Length > 0)
+            if (TargetAndPropertyListSeparators != null && TargetAndPropertyListSeparators.Length > 0)
             {
                 ExpandAllTargetsAndProperties();
             }
 
             // Parse the global properties into a hashtable.
-            Hashtable propertiesTable;
-            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", this.Properties, out propertiesTable))
+            if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", Properties, out Dictionary<string, string> propertiesTable))
             {
                 return false;
             }
@@ -272,7 +252,7 @@ namespace Microsoft.Build.BackEnd
             if (!String.IsNullOrEmpty(RemoveProperties))
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
-                undefinePropertiesArray = RemoveProperties.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                undefinePropertiesArray = RemoveProperties.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string property in undefinePropertiesArray)
                 {
                     Log.LogMessageFromText(String.Format(CultureInfo.InvariantCulture, "  {0}", property), MessageImportance.Low);
@@ -303,13 +283,11 @@ namespace Microsoft.Build.BackEnd
             // string[] represents a set of target names to build.  Depending on the value 
             // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
             // the targets together, or we call the engine separately for each target.
-            ArrayList targetLists = CreateTargetLists(this.Targets, this.RunEachTargetSeparately);
-
+            List<string[]> targetLists = CreateTargetLists(Targets, RunEachTargetSeparately);
 
             bool success = true;
             ITaskItem[] singleProject = null;
             bool[] skipProjects = null;
-
 
             if (BuildInParallel)
             {
@@ -411,19 +389,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Build projects which have not been skipped. This will be done in parallel
         /// </summary>
-        private async Task<bool> BuildProjectsInParallel(Hashtable propertiesTable, string[] undefinePropertiesArray, ArrayList targetLists, bool success, bool[] skipProjects)
+        private async Task<bool> BuildProjectsInParallel(Dictionary<string, string> propertiesTable, string[] undefinePropertiesArray, List<string[]> targetLists, bool success, bool[] skipProjects)
         {
             // There were some projects that were skipped so we need to recreate the
             // project array with those projects removed
-            List<ITaskItem> projectsToBuildArrayList = new List<ITaskItem>();
+            var projectsToBuildList = new List<ITaskItem>();
             for (int i = 0; i < Projects.Length; i++)
             {
                 if (!skipProjects[i])
                 {
-                    projectsToBuildArrayList.Add(Projects[i]);
+                    projectsToBuildList.Add(Projects[i]);
                 }
             }
-            var projectToBuildInParallel = projectsToBuildArrayList.ToArray();
+            var projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
             if (projectToBuildInParallel.Length <= 0) return success;
@@ -458,32 +436,33 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ExpandAllTargetsAndProperties()
         {
-            List<string> expandedProperties = new List<string>();
-            List<string> expandedTargets = new List<string>();
+            var expandedProperties = new List<string>();
+            var expandedTargets = new List<string>();
 
             if (Properties != null)
             {
                 // Expand all properties
-                for (int n = 0; n < Properties.Length; n++)
+                foreach (string p in Properties)
                 {
                     // Split each property according to the separators
-                    string[] expandedPropertyValues = Properties[n].Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedPropertyValues = p.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
                     // Add the resultant properties to the final list
                     foreach (string property in expandedPropertyValues)
                     {
                         expandedProperties.Add(property);
                     }
                 }
+
                 Properties = expandedProperties.ToArray();
             }
 
             if (Targets != null)
             {
                 // Expand all targets
-                for (int n = 0; n < Targets.Length; n++)
+                foreach (string t in Targets)
                 {
                     // Split each target according to the separators
-                    string[] expandedTargetValues = Targets[n].Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedTargetValues = t.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
                     // Add the resultant targets to the final list
                     foreach (string target in expandedTargetValues)
                     {
@@ -495,13 +474,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="targets"></param>
-        /// <param name="runEachTargetSeparately"></param>
-        /// <returns></returns>
-        internal static ArrayList CreateTargetLists
+        internal static List<string[]> CreateTargetLists
             (
             string[] targets,
             bool runEachTargetSeparately
@@ -511,7 +484,7 @@ namespace Microsoft.Build.BackEnd
             // string[] represents a set of target names to build.  Depending on the value 
             // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
             // the targets together, or we call the engine separately for each target.
-            ArrayList targetLists = new ArrayList();
+            var targetLists = new List<string[]>();
             if ((runEachTargetSeparately) && (targets != null) && (targets.Length > 0))
             {
                 // Separate target invocations for each individual target.
@@ -530,20 +503,16 @@ namespace Microsoft.Build.BackEnd
             return targetLists;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>True if the operation was successful</returns>
         internal static async Task<bool> ExecuteTargets(
             ITaskItem[] projects,
-            Hashtable propertiesTable,
+            Dictionary<string, string> propertiesTable,
             string[] undefineProperties,
-            ArrayList targetLists,
+            List<string[]> targetLists,
             bool stopOnFirstFailure,
             bool rebaseOutputs,
             IBuildEngine3 buildEngine,
             TaskLoggingHelper log,
-            ArrayList targetOutputs,
+            List<ITaskItem> targetOutputs,
             bool useResultsCache,
             bool unloadProjectsOnCompletion,
             string toolsVersion,
@@ -554,12 +523,11 @@ namespace Microsoft.Build.BackEnd
             // We don't log a message about the project and targets we're going to
             // build, because it'll all be in the immediately subsequent ProjectStarted event.
 
-            string[] projectDirectory = new string[projects.Length];
-            string[] projectNames = new string[projects.Length];
-            string[] toolsVersions = new string[projects.Length];
-            IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
-            IDictionary[] projectProperties = new IDictionary[projects.Length];
-            List<string>[] undefinePropertiesPerProject = new List<string>[projects.Length];
+            var projectDirectory = new string[projects.Length];
+            var projectNames = new string[projects.Length];
+            var toolsVersions = new string[projects.Length];
+            var projectProperties = new Dictionary<string, string>[projects.Length];
+            var undefinePropertiesPerProject = new List<string>[projects.Length];
 
             for (int i = 0; i < projectNames.Length; i++)
             {
@@ -574,15 +542,13 @@ namespace Microsoft.Build.BackEnd
                     projectNames[i] = projects[i].ItemSpec;
                     toolsVersions[i] = toolsVersion;
 
-
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
-                        Hashtable preProjectPropertiesTable;
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
-                              out preProjectPropertiesTable)
+                             (log, ResourceUtilities.FormatResourceString("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
+                              out Dictionary<string, string> preProjectPropertiesTable)
                            )
                         {
                             return false;
@@ -601,7 +567,7 @@ namespace Microsoft.Build.BackEnd
                     string projectUndefineProperties = projects[i].GetMetadata("UndefineProperties");
                     if (!String.IsNullOrEmpty(projectUndefineProperties))
                     {
-                        string[] propertiesToUndefine = projectUndefineProperties.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] propertiesToUndefine = projectUndefineProperties.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                         if (undefinePropertiesPerProject[i] == null)
                         {
                             undefinePropertiesPerProject[i] = new List<string>(propertiesToUndefine.Length);
@@ -622,29 +588,28 @@ namespace Microsoft.Build.BackEnd
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
-                        Hashtable additionalProjectPropertiesTable;
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
-                              out additionalProjectPropertiesTable)
+                             (log, ResourceUtilities.FormatResourceString("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
+                              out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {
                             return false;
                         }
 
-                        Hashtable combinedTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                        var combinedTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         // First copy in the properties from the global table that not in the additional properties table
                         if (projectProperties[i] != null)
                         {
-                            foreach (DictionaryEntry entry in projectProperties[i])
+                            foreach (KeyValuePair<string, string> entry in projectProperties[i])
                             {
-                                if (!additionalProjectPropertiesTable.Contains(entry.Key))
+                                if (!additionalProjectPropertiesTable.ContainsKey(entry.Key))
                                 {
                                     combinedTable.Add(entry.Key, entry.Value);
                                 }
                             }
                         }
                         // Add all the additional properties
-                        foreach (DictionaryEntry entry in additionalProjectPropertiesTable)
+                        foreach (KeyValuePair<string, string> entry in additionalProjectPropertiesTable)
                         {
                             combinedTable.Add(entry.Key, entry.Value);
                         }
@@ -674,13 +639,12 @@ namespace Microsoft.Build.BackEnd
                 // Send the project off to the build engine.  By passing in null to the 
                 // first param, we are indicating that the project to build is the same
                 // as the *calling* project file.
-                bool currentTargetResult = true;
 
-                TaskHost taskHost = (TaskHost)buildEngine;
+                var taskHost = (TaskHost)buildEngine;
                 BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
 
-                currentTargetResult = result.Result;
-                targetOutputsPerProject = result.TargetOutputsPerProject;
+                bool currentTargetResult = result.Result;
+                IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = result.TargetOutputsPerProject;
                 success = success && currentTargetResult;
 
                 // If the engine was able to satisfy the build request
@@ -688,7 +652,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     for (int i = 0; i < projects.Length; i++)
                     {
-                        IEnumerable nonNullTargetList = targetList ?? targetOutputsPerProject[i].Keys;
+                        IEnumerable<string> nonNullTargetList = targetList ?? targetOutputsPerProject[i].Keys;
 
                         foreach (string targetName in nonNullTargetList)
                         {

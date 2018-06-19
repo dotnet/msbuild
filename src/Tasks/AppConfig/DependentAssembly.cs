@@ -4,9 +4,8 @@
 using System;
 using System.Xml;
 using System.Reflection;
-using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
-
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -17,16 +16,6 @@ namespace Microsoft.Build.Tasks
     internal sealed class DependentAssembly
     {
         /// <summary>
-        /// List of binding redirects. Type is BindingRedirect.
-        /// </summary>
-        private BindingRedirect[] _bindingRedirects = null;
-
-        /// <summary>
-        /// The partial <see cref="AssemblyName"/>, there should be no version.
-        /// </summary>
-        private AssemblyName _partialAssemblyName;
-
-        /// <summary>
         /// The partial <see cref="AssemblyName"/>, there should be no version.
         /// Setter and Getter clone the incoming / outgoing assembly
         /// </summary>
@@ -34,37 +23,27 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                _partialAssemblyName = value.CloneIfPossible();
-                _partialAssemblyName.Version = null;
+                AssemblyNameReadOnly = value.CloneIfPossible();
+                AssemblyNameReadOnly.Version = null;
             }
-            get
-            {
-                return _partialAssemblyName?.CloneIfPossible();
-            }
+            get => AssemblyNameReadOnly?.CloneIfPossible();
         }
 
         /// <summary>
         /// The full <see cref="AssemblyName"/>. It is not cloned. Callers should not mutate this object.
         /// </summary>
-        internal AssemblyName AssemblyNameReadOnly
-        {
-            get
-            {
-                return _partialAssemblyName;
-            }
-        }
+        internal AssemblyName AssemblyNameReadOnly { get; private set; }
 
         /// <summary>
         /// The reader is positioned on a &lt;dependentassembly&gt; element--read it.
         /// </summary>
-        /// <param name="reader"></param>
         internal void Read(XmlReader reader)
         {
-            ArrayList redirects = new ArrayList();
+            var redirects = new List<BindingRedirect>();
 
-            if (_bindingRedirects != null)
+            if (BindingRedirects != null)
             {
-                redirects.AddRange(_bindingRedirects);
+                redirects.AddRange(BindingRedirects);
             }
 
             while (reader.Read())
@@ -112,7 +91,7 @@ namespace Microsoft.Build.Tasks
 
                     try
                     {
-                        _partialAssemblyName = new AssemblyNameExtension(assemblyName).AssemblyName;
+                        AssemblyNameReadOnly = new AssemblyNameExtension(assemblyName).AssemblyName;
                     }
                     catch (System.IO.FileLoadException e)
                     {
@@ -124,22 +103,17 @@ namespace Microsoft.Build.Tasks
                 // Look for a <bindingRedirect> element.
                 if (reader.NodeType == XmlNodeType.Element && AppConfig.StringEquals(reader.Name, "bindingRedirect"))
                 {
-                    BindingRedirect bindingRedirect = new BindingRedirect();
+                    var bindingRedirect = new BindingRedirect();
                     bindingRedirect.Read(reader);
                     redirects.Add(bindingRedirect);
                 }
             }
-            _bindingRedirects = (BindingRedirect[])redirects.ToArray(typeof(BindingRedirect));
+            BindingRedirects = redirects.ToArray();
         }
 
         /// <summary>
         /// The binding redirects.
         /// </summary>
-        /// <value></value>
-        internal BindingRedirect[] BindingRedirects
-        {
-            set { _bindingRedirects = value; }
-            get { return _bindingRedirects; }
-        }
+        internal BindingRedirect[] BindingRedirects { set; get; }
     }
 }

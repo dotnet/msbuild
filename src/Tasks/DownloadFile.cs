@@ -1,11 +1,13 @@
-﻿using Microsoft.Build.Framework;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Tasks
@@ -112,11 +114,10 @@ namespace Microsoft.Build.Tasks
         /// Attempts to download the file.
         /// </summary>
         /// <param name="uri">The parsed <see cref="Uri"/> of the request.</param>
-        /// <param name="filename">The filename to use when downloading the file.</param>
         private void Download(Uri uri)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
-            using (HttpClient client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
+            using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date
                 using (HttpResponseMessage response = client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token)
@@ -135,7 +136,6 @@ namespace Microsoft.Build.Tasks
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
                     }
 
-
                     if (!TryGetFileName(response, out string filename))
                     {
                         Log.LogErrorFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks
 
                     DirectoryInfo destinationDirectory = Directory.CreateDirectory(DestinationFolder.ItemSpec);
 
-                    FileInfo destinationFile = new FileInfo(Path.Combine(destinationDirectory.FullName, filename));
+                    var destinationFile = new FileInfo(Path.Combine(destinationDirectory.FullName, filename));
 
                     // The file is considered up-to-date if its the same length.  This could be inaccurate, we can consider alternatives in the future
                     if (ShouldSkip(response, destinationFile))
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks
 
                     try
                     {
-                        using (FileStream target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
+                        using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
@@ -191,7 +191,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="exception">The originally thrown exception.</param>
         /// <param name="actualException">The actual exception to be used for logging errors.</param>
         /// <returns><code>true</code> if the exception is retriable, otherwise <code>false</code>.</returns>
-        private bool IsRetriable(Exception exception, out Exception actualException)
+        private static bool IsRetriable(Exception exception, out Exception actualException)
         {
             actualException = exception;
 
@@ -290,7 +290,6 @@ namespace Microsoft.Build.Tasks
                    && destinationFile.Length == response.Content.Headers.ContentLength
                    && response.Content.Headers.LastModified.HasValue
                    && destinationFile.LastWriteTimeUtc < response.Content.Headers.LastModified.Value.UtcDateTime;
-
         }
     }
 }

@@ -7,21 +7,15 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    /*
-     * Class:   AxTlbBaseReference
-     * 
-     * Common abstract base for aximp and tlbimp COM reference wrapper classes. 
-     * They share the resolution method and only differ in constructing the wrapper file name.
-     *
-     */
+    /// <summary>
+    /// Common abstract base for aximp and tlbimp COM reference wrapper classes. 
+    /// They share the resolution method and only differ in constructing the wrapper file name.
+    /// </summary>
     internal abstract class AxTlbBaseReference : ComReference
     {
         #region Constructors	
@@ -37,14 +31,14 @@ namespace Microsoft.Build.Tasks
         /// <param name="keyFile">file containing public/private keys</param>
         /// <param name="keyContainer">container name for public/private keys</param>
         /// <param name="executeAsTool">True if GenerateWrapper() should generate the wrapper out-of-proc using aximp.exe or tlbimp.exe</param>
-        /// <param name="sdkToolsPath">Path to the SDK tools directory where aximp.exe or tlbimp.exe can be found</param>
+        /// <param name="toolPath">Path to the SDK tools directory where aximp.exe or tlbimp.exe can be found</param>
         /// <param name="buildEngine">BuildEngine of parent task; needed for logging purposes when generating wrapper out-of-proc</param>
         internal AxTlbBaseReference(TaskLoggingHelper taskLoggingHelper, bool silent, IComReferenceResolver resolverCallback, ComReferenceInfo referenceInfo, string itemName, string outputDirectory, bool delaySign, string keyFile, string keyContainer, bool includeTypeLibVersionInName, bool executeAsTool, string toolPath, IBuildEngine buildEngine, string[] environmentVariables)
             : base(taskLoggingHelper, silent, referenceInfo, itemName)
         {
-            _resolverCallback = resolverCallback;
-            _outputDirectory = outputDirectory;
-            _includeTypeLibVersionInName = includeTypeLibVersionInName;
+            ResolverCallback = resolverCallback;
+            OutputDirectory = outputDirectory;
+            IncludeTypeLibVersionInName = includeTypeLibVersionInName;
 
             BuildEngine = buildEngine;
             EnvironmentVariables = environmentVariables;
@@ -62,28 +56,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// directory we should write the wrapper to
         /// </summary>
-        protected virtual string OutputDirectory
-        {
-            get
-            {
-                return _outputDirectory;
-            }
-        }
-
-        private string _outputDirectory;
+        protected virtual string OutputDirectory { get; }
 
         /// <summary>
         /// callback interface for resolving dependent COM refs/NET assemblies
         /// </summary>
-        protected IComReferenceResolver ResolverCallback
-        {
-            get
-            {
-                return _resolverCallback;
-            }
-        }
-
-        private IComReferenceResolver _resolverCallback;
+        protected IComReferenceResolver ResolverCallback { get; }
 
         /// <summary>
         /// container name for public/private keys
@@ -128,30 +106,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// When true, we include the typelib version number in the name.
         /// </summary>
-        protected bool IncludeTypeLibVersionInName
-        {
-            get
-            {
-                return _includeTypeLibVersionInName;
-            }
-
-            set
-            {
-                _includeTypeLibVersionInName = value;
-            }
-        }
-
-        private bool _includeTypeLibVersionInName;
+        protected bool IncludeTypeLibVersionInName { get; set; }
 
         #endregion
 
         #region Methods
 
-        /*
-         * Method:  FindExistingWrapper
-         * 
-         * Checks if there's a preexisting wrapper for this reference.
-         */
+        /// <summary>
+        /// Checks if there's a preexisting wrapper for this reference. 
+        /// </summary>
         internal override bool FindExistingWrapper(out ComReferenceWrapperInfo wrapperInfo, DateTime componentTimestamp)
         {
             wrapperInfo = null;
@@ -164,33 +127,36 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            wrapperInfo = new ComReferenceWrapperInfo();
-            wrapperInfo.path = wrapperPath;
+            wrapperInfo = new ComReferenceWrapperInfo { path = wrapperPath };
 
             return IsWrapperUpToDate(wrapperInfo, componentTimestamp);
         }
 
-        /*
-         * Method:  IsWrapperUpToDate
-         * 
-         * Checks if the existing wrapper is up to date.
-         */
+        /// <summary>
+        /// Checks if the existing wrapper is up to date.
+        /// </summary>
         protected virtual bool IsWrapperUpToDate(ComReferenceWrapperInfo wrapperInfo, DateTime componentTimestamp)
         {
-            Debug.Assert(ReferenceInfo.strippedTypeLibPath != null && ReferenceInfo.strippedTypeLibPath.Length > 0, "ReferenceInfo.path should be valid if we got here");
-            if (ReferenceInfo.strippedTypeLibPath == null || ReferenceInfo.strippedTypeLibPath.Length == 0)
+            Debug.Assert(!string.IsNullOrEmpty(ReferenceInfo.strippedTypeLibPath), "ReferenceInfo.path should be valid if we got here");
+            if (string.IsNullOrEmpty(ReferenceInfo.strippedTypeLibPath))
+            {
                 throw new ComReferenceResolutionException();
+            }
 
             // if wrapper doesn't exist, wrapper is obviously not up to date
             if (!File.Exists(wrapperInfo.path))
+            {
                 return false;
+            }
 
             // if typelib file has a DIFFERENT last write time, wrapper is not up to date
             // the reason we're comparing write times in an unusual way is that type libraries are unusual
             // "source files" for wrappers. If you upgrade/downgrade a system component, its write
             // time may be earlier than before but we should still regenerate the wrapper.
             if (DateTime.Compare(File.GetLastWriteTime(ReferenceInfo.strippedTypeLibPath), componentTimestamp) != 0)
+            {
                 return false;
+            }
 
             // Compare our the existing wrapper's strong name state to the one we are requesting. 
             if (!SigningRequirementsMatchExistingWrapper(wrapperInfo))
@@ -212,22 +178,18 @@ namespace Microsoft.Build.Tasks
             return (wrapperInfo.assembly != null);
         }
 
-        /*
-         * Method:  GetWrapperPath
-         * 
-         * Constructs the wrapper file path. 
-         */
+        /// <summary>
+        /// Constructs the wrapper file path. 
+        /// </summary>
         internal string GetWrapperPath()
         {
             // combine with the specified output directory
             return Path.Combine(OutputDirectory, GetWrapperFileName());
         }
 
-        /*
-         * Method:  GetWrapperFileName
-         * 
-         * Helper method for constructing wrapper file name.
-         */
+        /// <summary>
+        /// Helper method for constructing wrapper file name.
+        /// </summary>
         internal string GetWrapperFileName()
         {
             return GetWrapperFileNameInternal(ReferenceInfo.typeLibName);
@@ -236,9 +198,12 @@ namespace Microsoft.Build.Tasks
         /*
          * Method:  GetWrapperFileName
          * 
-         * Constructs the wrapper file name from a type library name. Specialized wrappers must override it if 
-         * they want to use the Resolve method from this class.
+         * 
          */
+        /// <summary>
+        /// Constructs the wrapper file name from a type library name. Specialized wrappers must override it if 
+        /// they want to use the Resolve method from this class.
+        /// </summary>
         protected abstract string GetWrapperFileNameInternal(string typeLibName);
 
         /// <summary>
@@ -257,7 +222,7 @@ namespace Microsoft.Build.Tasks
             // XXX = the header ("Interop." or the like)
             // YYY = typeLibName
             // Z.W = optional TLB version number
-            StringBuilder builder = new StringBuilder(interopDllHeader);
+            var builder = new StringBuilder(interopDllHeader);
             builder.Append(typeLibName);
 
             if (includeTypeLibVersionInName)
@@ -306,12 +271,12 @@ namespace Microsoft.Build.Tasks
                 // to fully sign the assembly. (only if either KeyContainer or KeyFile was specified though)
                 if (keyPair == null)
                 {
-                    if (KeyContainer != null && KeyContainer.Length > 0)
+                    if (!string.IsNullOrEmpty(KeyContainer))
                     {
                         Log.LogErrorWithCodeFromResources(null, ReferenceInfo.SourceItemSpec, 0, 0, 0, 0, "ResolveComReference.StrongNameUtils.NoKeyPairInContainer", KeyContainer);
                         throw new StrongNameException();
                     }
-                    else if (KeyFile != null && KeyFile.Length > 0)
+                    if (!string.IsNullOrEmpty(KeyFile))
                     {
                         Log.LogErrorWithCodeFromResources(null, ReferenceInfo.SourceItemSpec, 0, 0, 0, 0, "ResolveComReference.StrongNameUtils.NoKeyPairInFile", KeyFile);
                         throw new StrongNameException();
@@ -329,16 +294,9 @@ namespace Microsoft.Build.Tasks
         {
             StrongNameLevel desiredStrongNameLevel = StrongNameLevel.None;
 
-            if ((KeyFile != null && KeyFile.Length > 0) || (KeyContainer != null && KeyContainer.Length > 0))
+            if (!string.IsNullOrEmpty(KeyFile) || !string.IsNullOrEmpty(KeyContainer))
             {
-                if (DelaySign)
-                {
-                    desiredStrongNameLevel = StrongNameLevel.DelaySigned;
-                }
-                else
-                {
-                    desiredStrongNameLevel = StrongNameLevel.FullySigned;
-                }
+                desiredStrongNameLevel = DelaySign ? StrongNameLevel.DelaySigned : StrongNameLevel.FullySigned;
             }
 
             // ...and see what we have already
@@ -354,11 +312,8 @@ namespace Microsoft.Build.Tasks
             if (desiredStrongNameLevel == StrongNameLevel.DelaySigned ||
                 desiredStrongNameLevel == StrongNameLevel.FullySigned)
             {
-                StrongNameKeyPair snkPair;
-                byte[] desiredPublicKey = null;
-
                 // get desired public key
-                StrongNameUtils.GetStrongNameKey(Log, KeyFile, KeyContainer, out snkPair, out desiredPublicKey);
+                StrongNameUtils.GetStrongNameKey(Log, KeyFile, KeyContainer, out _, out byte[] desiredPublicKey);
 
                 // get current public key
                 AssemblyName assemblyName = AssemblyName.GetAssemblyName(wrapperInfo.path);

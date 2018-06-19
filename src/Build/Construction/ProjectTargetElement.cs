@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
@@ -54,10 +55,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                return new ReadOnlyCollection<ProjectItemGroupElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectItemGroupElement>(Children)
-                    );
+                return new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
             }
         }
 
@@ -68,10 +66,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                return new ReadOnlyCollection<ProjectPropertyGroupElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectPropertyGroupElement>(Children)
-                    );
+                return new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
             }
         }
 
@@ -82,10 +77,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                return new ReadOnlyCollection<ProjectTaskElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectTaskElement>(Children)
-                    );
+                return new ReadOnlyCollection<ProjectTaskElement>(Children.OfType<ProjectTaskElement>());
             }
         }
 
@@ -96,10 +88,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                return new ReadOnlyCollection<ProjectOnErrorElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectOnErrorElement>(Children)
-                    );
+                return new ReadOnlyCollection<ProjectOnErrorElement>(Children.OfType<ProjectOnErrorElement>());
             }
         }
         #endregion
@@ -127,7 +116,7 @@ namespace Microsoft.Build.Construction
 
                 string unescapedValue = EscapingUtilities.UnescapeAll(value);
 
-                int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.illegalTargetNameCharacters);
+                int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
                 if (indexOfSpecialCharacter >= 0)
                 {
                     ErrorUtilities.ThrowArgument("OM_NameInvalid", unescapedValue, unescapedValue[indexOfSpecialCharacter]);

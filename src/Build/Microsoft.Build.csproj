@@ -27,11 +27,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
 
-    <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
 
-    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" Condition="'$(MonoBuild)' == 'true'" />
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -43,7 +43,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.0.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
@@ -378,7 +378,6 @@
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\IDeepCloneable.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
-    <Compile Include="Collections\FilteringEnumerable.cs" />
     <Compile Include="Collections\HashTableUtility.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -703,6 +702,28 @@
       <Link>SharedUtilities\FileMatcher.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\FileSystem\FileSystemFactory.cs">
+    	<Link>FileSystem\FileSystemFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\IFileSystemAbstraction.cs">
+    	<Link>FileSystem\IFileSystemAbstraction.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\ManagedFileSystem.cs">
+    	<Link>FileSystem\ManagedFileSystem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\NativeWin32Exception.cs">
+    	<Link>FileSystem\NativeWin32Exception.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\SafeFileHandle.cs">
+    	<Link>FileSystem\SafeFileHandle.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\WindowsFileSystem.cs">
+    	<Link>FileSystem\WindowsFileSystem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileSystem\WindowsNative.cs">
+    	<Link>FileSystem\WindowsNative.cs</Link>
+    </Compile>
+
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>SharedUtilities\FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

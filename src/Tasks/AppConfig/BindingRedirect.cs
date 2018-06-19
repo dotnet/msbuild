@@ -3,7 +3,6 @@
 
 using System;
 using System.Xml;
-using System.Collections;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -16,49 +15,21 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The low end of the old version range.
         /// </summary>
-        private Version _oldVersionLow = null;
+        internal Version OldVersionLow { set; get; }
 
         /// <summary>
         /// The high end of the old version range.
         /// </summary>
-        private Version _oldVersionHigh = null;
+        internal Version OldVersionHigh { set; get; }
 
         /// <summary>
         /// The new version number.
         /// </summary>
-        private Version _newVersion = null;
-
-        /// <summary>
-        /// The low end of the old version range.
-        /// </summary>
-        internal Version OldVersionLow
-        {
-            set { _oldVersionLow = value; }
-            get { return _oldVersionLow; }
-        }
-
-        /// <summary>
-        /// The high end of the old version range.
-        /// </summary>
-        internal Version OldVersionHigh
-        {
-            set { _oldVersionHigh = value; }
-            get { return _oldVersionHigh; }
-        }
-
-        /// <summary>
-        /// The new version number.
-        /// </summary>
-        internal Version NewVersion
-        {
-            set { _newVersion = value; }
-            get { return _newVersion; }
-        }
+        internal Version NewVersion { set; get; }
 
         /// <summary>
         /// The reader is positioned on a &lt;bindingRedirect&gt; element--read it.
         /// </summary>
-        /// <param name="reader"></param>
         internal void Read(XmlReader reader)
         {
             string oldVersion = reader.GetAttribute("oldVersion");
@@ -73,14 +44,14 @@ namespace Microsoft.Build.Tasks
                 if (dashPosition != -1)
                 {
                     // This is a version range.
-                    _oldVersionLow = new Version(oldVersion.Substring(0, dashPosition));
-                    _oldVersionHigh = new Version(oldVersion.Substring(dashPosition + 1));
+                    OldVersionLow = new Version(oldVersion.Substring(0, dashPosition));
+                    OldVersionHigh = new Version(oldVersion.Substring(dashPosition + 1));
                 }
                 else
                 {
                     // This is a single version.
-                    _oldVersionLow = new Version(oldVersion);
-                    _oldVersionHigh = new Version(oldVersion);
+                    OldVersionLow = new Version(oldVersion);
+                    OldVersionHigh = new Version(oldVersion);
                 }
             }
             catch (Exception e)
@@ -100,7 +71,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                _newVersion = new Version(newVersionAttribute);
+                NewVersion = new Version(newVersionAttribute);
             }
             catch (Exception e)
             {

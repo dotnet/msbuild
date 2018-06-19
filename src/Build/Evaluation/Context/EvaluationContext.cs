@@ -4,9 +4,12 @@
 // </copyright>
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Evaluation.Context
 {
@@ -32,6 +35,12 @@ namespace Microsoft.Build.Evaluation.Context
         internal SharingPolicy Policy { get; }
 
         internal virtual ISdkResolverService SdkResolverService { get; } = new CachingSdkResolverService();
+        internal IFileSystemAbstraction FileSystem { get; } = ManagedFileSystem.Singleton();
+
+        /// <summary>
+        /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
+        /// </summary>
+        internal ConcurrentDictionary<string, ImmutableArray<string>> FileEntryExpansionCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
 
         internal EvaluationContext(SharingPolicy policy)
         {
@@ -66,6 +75,17 @@ namespace Microsoft.Build.Evaluation.Context
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     return null;
             }
+        }
+
+        /// <summary>
+        /// Ideally caches should be discarded by discarding this entire object.
+        /// However, there could be situations where API users have a <see cref="Project"/> object loaned to another entity, and cannot swap the context, but still need to reset it.
+        /// </summary>
+        public void ResetCaches()
+        {
+            SdkResolverService.ClearCaches();
+            FileSystem.ClearCaches();
+            FileEntryExpansionCache.Clear();
         }
     }
 }

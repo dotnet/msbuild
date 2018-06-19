@@ -356,6 +356,21 @@
         <target state="translated">Katalog roboczy „{0}” nie istnieje.</target>
         <note>No error code because an error will be prefixed.</note>
       </trans-unit>
+      <trans-unit id="FileHash.FileNotFound">
+        <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
+        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3954: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
+        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
+        <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashEncoding">
+        <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
+        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <note>{StrBegin="MSB3951: "}</note>
+      </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
         <target state="translated">Odnaleziono element „{0}”.</target>
@@ -1442,6 +1457,11 @@
         <target state="translated">MSB3455: Nie można uruchomić programu ResGen.exe, ponieważ liczba znaków w wierszu polecenia ({0}) przekracza maksymalną dozwoloną długość polecenia. W celu rozwiązania tego problemu (1) usuń niepotrzebne odwołania do zestawów lub (2) skróć ścieżki do tych odwołań.</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">Lokalizacja klucza rejestru AssemblyFoldersEx: „{0}”</target>
@@ -2186,9 +2206,9 @@
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
         <source>Project reference "{0}" has not been resolved.</source>
-        <target state="translated">Odwołanie do projektu „{0}” nie zostało rozpoznane.</target>
+        <target state="needs-review-translation">Odwołanie do projektu „{0}” nie zostało rozpoznane.</target>
         <note>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </note>
@@ -2360,42 +2380,42 @@
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="new">Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <target state="translated">Nie wykonano rozpakowywania z pliku „{0}” do pliku „{1}”, ponieważ parametr „{2}” w projekcie został ustawiony na wartość „{3}”, a rozmiary plików i sygnatury czasowe pasują do siebie.</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
-        <target state="new">MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</target>
+        <target state="translated">MSB3931: Nie można rozpakować do katalogu „{0}”, ponieważ nie można go utworzyć. {1}</target>
         <note>{StrBegin="MSB3931: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotExtractFile">
         <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
-        <target state="new">MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</target>
+        <target state="translated">MSB3936: Nie można otworzyć rozpakowywanego pliku „{0}” do katalogu „{1}”. {2}</target>
         <note>{StrBegin="MSB3936: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
         <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
-        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</target>
+        <target state="translated">MSB3935: Nie można rozpakować pliku „{0}”, ponieważ plik docelowy „{1}” jest tylko do odczytu i nie można go udostępnić do zapisu. {2}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
         <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
-        <target state="new">MSB3933: Failed to open zip file "{0}".  {1}</target>
+        <target state="translated">MSB3933: Nie można otworzyć pliku zip „{0}”. {1}</target>
         <note>{StrBegin="MSB3933: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
         <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
-        <target state="new">MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <target state="translated">MSB3934: Nie można otworzyć rozpakowywanego pliku „{0}” do „{1}”, ponieważ znajduje się on poza katalogiem docelowym.</target>
         <note>{StrBegin="MSB3934: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorFileDoesNotExist">
         <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
-        <target state="new">MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</target>
+        <target state="translated">MSB3932: Nie można rozpakować pliku „{0}”, ponieważ plik nie istnieje lub jest niedostępny.</target>
         <note>{StrBegin="MSB3932: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.FileComment">
         <source>Unzipping file "{0}" to "{1}".</source>
-        <target state="new">Unzipping file "{0}" to "{1}".</target>
+        <target state="translated">Rozpakowywanie pliku „{0}” do pliku „{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
@@ -2412,6 +2432,11 @@
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
         <target state="translated">„{1}” jest nieprawidłową wartością parametru „{0}”.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.HashMismatch">
+        <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
+        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
@@ -3115,22 +3140,22 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.Comment">
         <source>Zipping directory "{0}" to "{1}".</source>
-        <target state="new">Zipping directory "{0}" to "{1}".</target>
+        <target state="translated">Kompresowanie katalogu „{0}” do pliku „{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
         <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
-        <target state="new">MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB3941: Nie można skompresować katalogu „{0}”, ponieważ nie istnieje lub jest niedostępny.</target>
         <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
         <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
-        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</target>
+        <target state="translated">MSB3943: Nie można skompresować katalogu „{0}” do pliku „{1}”. {2}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">
         <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
-        <target state="new">MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <target state="translated">MSB3942: Nie można utworzyć pliku zip „{0}”, ponieważ już istnieje. Usuń plik lub zmień jego nazwę i spróbuj ponownie.</target>
         <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>

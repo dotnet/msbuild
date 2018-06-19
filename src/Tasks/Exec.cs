@@ -54,7 +54,6 @@ namespace Microsoft.Build.Tasks
         private string _batchFile;
         private string _customErrorRegex;
         private string _customWarningRegex;
-        private bool _ignoreStandardErrorWarningFormat = false; // By default, detect standard-format errors
         private readonly List<ITaskItem> _nonEmptyOutput = new List<ITaskItem>();
         private Encoding _standardErrorEncoding;
         private Encoding _standardOutputEncoding;
@@ -67,7 +66,7 @@ namespace Microsoft.Build.Tasks
         [Required]
         public string Command
         {
-            get { return _command; }
+            get => _command;
             set
             {
                 _command = value;
@@ -97,8 +96,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string CustomErrorRegularExpression
         {
-            get { return _customErrorRegex; }
-            set { _customErrorRegex = value; }
+            get => _customErrorRegex;
+            set => _customErrorRegex = value;
         }
 
         /// <summary>
@@ -108,8 +107,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string CustomWarningRegularExpression
         {
-            get { return _customWarningRegex; }
-            set { _customWarningRegex = value; }
+            get => _customWarningRegex;
+            set => _customWarningRegex = value;
         }
 
         /// <summary>
@@ -117,27 +116,17 @@ namespace Microsoft.Build.Tasks
         /// the standard error/warning format, and log them as errors/warnings.
         /// Defaults to false.
         /// </summary>
-        public bool IgnoreStandardErrorWarningFormat
-        {
-            get { return _ignoreStandardErrorWarningFormat; }
-            set { _ignoreStandardErrorWarningFormat = value; }
-        }
+        public bool IgnoreStandardErrorWarningFormat { get; set; }
 
         /// <summary>
         /// Property specifying the encoding of the captured task standard output stream
         /// </summary>
-        protected override Encoding StandardOutputEncoding
-        {
-            get { return _standardOutputEncoding; }
-        }
+        protected override Encoding StandardOutputEncoding => _standardOutputEncoding;
 
         /// <summary>
         /// Property specifying the encoding of the captured task standard error stream
         /// </summary>
-        protected override Encoding StandardErrorEncoding
-        {
-            get { return _standardErrorEncoding; }
-        }
+        protected override Encoding StandardErrorEncoding => _standardErrorEncoding;
 
         /// <summary>
         /// Whether or not to use UTF8 encoding for the cmd file and console window.
@@ -153,7 +142,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string StdOutEncoding
         {
-            get { return StandardOutputEncoding.EncodingName; }
+            get => StandardOutputEncoding.EncodingName;
             set
             {
                 try
@@ -174,7 +163,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public string StdErrEncoding
         {
-            get { return StandardErrorEncoding.EncodingName; }
+            get => StandardErrorEncoding.EncodingName;
             set
             {
                 try
@@ -192,8 +181,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] Outputs
         {
-            get { return _outputs ?? Array.Empty<ITaskItem>(); }
-            set { _outputs = value; }
+            get => _outputs ?? Array.Empty<ITaskItem>();
+            set => _outputs = value;
         }
 
         /// <summary>
@@ -202,10 +191,7 @@ namespace Microsoft.Build.Tasks
         /// if they aren't used.  ConsoleOutput is a combination of stdout and stderr.
         /// </summary>
         [Output]
-        public ITaskItem[] ConsoleOutput
-        {
-            get { return !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray(); }
-        }
+        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
 
         #endregion
 
@@ -246,16 +232,16 @@ namespace Microsoft.Build.Tasks
                     sw.WriteLine("set errorlevel=dummy");
                     sw.WriteLine("set errorlevel=");
 
-                // We may need to change the code page and console encoding.
-                if (encoding.CodePage != EncodingUtilities.CurrentSystemOemEncoding.CodePage)
-                {
-                    // Output to nul so we don't change output and logs.
-                    sw.WriteLine(string.Format(@"%SystemRoot%\System32\chcp.com {0}>nul", encoding.CodePage));
+                    // We may need to change the code page and console encoding.
+                    if (encoding.CodePage != EncodingUtilities.CurrentSystemOemEncoding.CodePage)
+                    {
+                        // Output to nul so we don't change output and logs.
+                        sw.WriteLine($@"%SystemRoot%\System32\chcp.com {encoding.CodePage}>nul");
 
-                    // Ensure that the console encoding is correct.
-                    _standardOutputEncoding = encoding;
-                    _standardErrorEncoding = encoding;
-                }
+                        // Ensure that the console encoding is correct.
+                        _standardOutputEncoding = encoding;
+                        _standardErrorEncoding = encoding;
+                    }
 
                     // if the working directory is a UNC path, bracket the exec command with pushd and popd, because pushd
                     // automatically maps the network path to a drive letter, and then popd disconnects it.
@@ -353,17 +339,17 @@ namespace Microsoft.Build.Tasks
         {
             if (IgnoreExitCode)
             {
-                Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", this.Command, ExitCode);
+                Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", Command, ExitCode);
                 return true;
             }
 
             if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", this.Command, ExitCode);
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", Command, ExitCode);
             }
             else
             {
-                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", this.Command, ExitCode);
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailed", Command, ExitCode);
             }
             return false;
         }
@@ -412,7 +398,7 @@ namespace Microsoft.Build.Tasks
             {
                 Log.LogWarning(singleLine);
             }
-            else if (_ignoreStandardErrorWarningFormat)
+            else if (IgnoreStandardErrorWarningFormat)
             {
                 // Not detecting regular format errors and warnings, and it didn't
                 // match any regexes either -- log as a regular message
@@ -644,19 +630,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the tool to execute
         /// </summary>
-        protected override string ToolName
-        {
-            get { return NativeMethodsShared.IsWindows ? "cmd.exe" : "sh"; }
-        }
+        protected override string ToolName => NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
 
         /// <summary>
         /// Importance with which to log ordinary messages in the
         /// standard error stream.
         /// </summary>
-        protected override MessageImportance StandardErrorLoggingImportance
-        {
-            get { return MessageImportance.High; }
-        }
+        protected override MessageImportance StandardErrorLoggingImportance => MessageImportance.High;
 
         /// <summary>
         /// Importance with which to log ordinary messages in the
@@ -665,10 +645,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks>
         /// Overridden to increase from the default "Low" up to "High".
         /// </remarks>
-        protected override MessageImportance StandardOutputLoggingImportance
-        {
-            get { return MessageImportance.High; }
-        }
+        protected override MessageImportance StandardOutputLoggingImportance => MessageImportance.High;
 
         #endregion
 
@@ -717,13 +694,13 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-            /// <summary>
-            /// Checks to see if a string can be encoded in a specified code page.
-            /// </summary>
-            /// <remarks>Internal for testing purposes.</remarks>
-            /// <param name="codePage">Code page for encoding.</param>
-            /// <param name="stringToEncode">String to encode.</param>
-            /// <returns>True if the string can be encoded in the specified code page.</returns>
+        /// <summary>
+        /// Checks to see if a string can be encoded in a specified code page.
+        /// </summary>
+        /// <remarks>Internal for testing purposes.</remarks>
+        /// <param name="codePage">Code page for encoding.</param>
+        /// <param name="stringToEncode">String to encode.</param>
+        /// <returns>True if the string can be encoded in the specified code page.</returns>
         internal static bool CanEncodeString(int codePage, string stringToEncode)
         {
             // We have a System.String that contains some characters. Get a lossless representation

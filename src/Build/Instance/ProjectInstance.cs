@@ -2390,7 +2390,7 @@ namespace Microsoft.Build.Execution
 
                     if (environmentVariableName != null &&
                         (!XmlUtilities.IsValidElementName(environmentVariableName)
-                        || XMakeElements.IllegalItemPropertyNames[environmentVariableName] != null
+                        || XMakeElements.ReservedItemNames.Contains(environmentVariableName)
                         || ReservedPropertyNames.IsReservedProperty(environmentVariableName))
                        )
                     {

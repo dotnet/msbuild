@@ -8,12 +8,12 @@ namespace Microsoft.Build.Tasks
     //
     // Abstract base class to implement IDisposable interface.
     //
-    internal abstract class DisposableBase : System.IDisposable
+    internal abstract class DisposableBase : IDisposable
     {
         private bool _disposed;
 
         // Constructor
-        public DisposableBase()
+        protected DisposableBase()
         {
             _disposed = false;
         }

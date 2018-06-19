@@ -255,13 +255,7 @@ namespace Microsoft.Build.Framework
         {
             if (buildEventContext == null)
             {
-                buildEventContext = new BuildEventContext
-                                       (
-                                       BuildEventContext.InvalidNodeId,
-                                       BuildEventContext.InvalidTargetId,
-                                       BuildEventContext.InvalidProjectContextId,
-                                       BuildEventContext.InvalidTaskId
-                                       );
+                buildEventContext = BuildEventContext.Invalid;
             }
         }
 #endregion

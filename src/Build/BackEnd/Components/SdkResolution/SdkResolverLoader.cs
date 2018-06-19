@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(location), "SdkResolverDllInManifestMissing", pathToManifest, string.Empty);
                 }
 
-                path = manifest.Path;
+                path = FileUtilities.FixFilePath(manifest.Path);
             }
             catch (SerializationException e)
             {

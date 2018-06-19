@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!--
-  
+
    See bottom of this file for information about message buckets.
 
    Please keep this file sorted.
-  
+
   -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -153,11 +153,11 @@
         The AxImp message bucket is: MSB3656 - MSB3660.
 
         If this bucket overflows, pls. contact 'vsppbdev'.
-  -->  
+  -->
   <data name="AxImp.NoInputFileSpecified">
     <value>MSB3656: No input file has been passed to the task, exiting.</value>
     <comment>{StrBegin="MSB3656: "}</comment>
-  </data>  
+  </data>
   <!--
         The AxTlbBaseTask message bucket is: MSB3646 - MSB3655.
 
@@ -178,7 +178,7 @@
   <data name="AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid">
     <value>MSB3650: Neither SDKToolsPath '{0}' nor ToolPath '{1}' is a valid directory.  One of these must be set.</value>
     <comment>{StrBegin="MSB3650: "}</comment>
-  </data>  
+  </data>
   <data name="AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer">
     <value>MSB3651: The key container '{0}' does not contain a public/private key pair.</value>
     <comment>{StrBegin="MSB3651: "}</comment>
@@ -241,11 +241,11 @@
   </data>
   <data name="Copy.FileComment">
     <value>Copying file from "{0}" to "{1}".</value>
-    <comment>LOCALIZATION: {0} and {1} are paths.</comment>      
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
   <data name="Copy.HardLinkComment">
     <value>Creating hard link to copy "{0}" to "{1}".</value>
-    <comment>LOCALIZATION: {0} and {1} are paths.</comment>      
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
   <data name="Copy.RetryingAsFileCopy">
     <value>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</value>
@@ -264,7 +264,7 @@
   </data>
   <data name="Copy.SymbolicLinkComment">
     <value>Creating symbolic link to copy "{0}" to "{1}".</value>
-    <comment>LOCALIZATION: {0} and {1} are paths.</comment>      
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>
   </data>
   <data name="Copy.Retrying">
     <value>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</value>
@@ -299,7 +299,7 @@
     <value>MSB3031: Could not set additional metadata. "{0}" is a reserved metadata name and cannot be modified.</value>
     <comment>{StrBegin="MSB3031: "} UE: Tasks and OM users are not allowed to remove or change the value of the built-in meta-data on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
   </data>
-  
+
   <!--
         The CreateManifestResourceName message bucket is: MSB3041 - MSB3050
 
@@ -423,7 +423,7 @@
     <comment>{StrBegin="MSB3541: "}</comment>
   </data>
   <!--
-        The General message bucket is: 
+        The General message bucket is:
         MSB3081 - MSB3109
         MSB3666 - MSB3675   Task: General
 
@@ -1681,6 +1681,10 @@
     <value>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</value>
     <comment></comment>
   </data>
+  <data name="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+    <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
+    <comment></comment>
+  </data>
   <!--
         The ResolveComReference message bucket is: MSB3281 - MSB3320
 
@@ -1856,7 +1860,7 @@
   <data name="ResolveKeySource.ResolvedThumbprintEmpty">
     <value>MSB3327: Unable to find code signing certificate in the current user’s Windows certificate store. To correct this, either disable signing of the ClickOnce manifest or install the certificate into the certificate store.</value>
     <comment>{StrBegin="MSB3327: "}</comment>
-  </data>  
+  </data>
   <!--
         The ResolveManifestFiles message bucket is: MSB3331 - MSB3340
 
@@ -1893,7 +1897,7 @@
   <data name="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
     <value>Project reference "{0}" has not been resolved.</value>
     <comment>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </comment>
@@ -1972,7 +1976,7 @@
         The TlbImp message bucket is: MSB3661 - MSB3665
 
         If this bucket overflows, pls. contact 'vsppbdev'.
-  -->  
+  -->
   <data name="TlbImp.InvalidTransformParameter">
     <value>MSB3661: Invalid value '{0}' passed to the Transform property.</value>
     <comment>{StrBegin="MSB3661: "}</comment>
@@ -2167,7 +2171,7 @@
       <value>MSB3694: Unable to create Xaml task.  The EnumValue "{1}" on EnumProperty "{0}" is missing the SwitchValue attribute.</value>
     <comment>{StrBegin="MSB3694: "}</comment>
   </data>
-  <!-- 3695 belongs to this task but was skipped so that the two "CommandFailed" error codes could be side-by-side.  Please consider 
+  <!-- 3695 belongs to this task but was skipped so that the two "CommandFailed" error codes could be side-by-side.  Please consider
        using this error code first before jumping to 3723. -->
   <data name="Xaml.CommandFailed">
     <value>MSB3721: The command "{0}" exited with code {1}.</value>
@@ -2226,7 +2230,7 @@
   <data name="XslTransform.UseTrustedSettings" xml:space="preserve">
     <value>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</value>
   </data>
-  
+
 
   <!--
         The XmlPoke message bucket is: MSB3731-3740.
@@ -2305,29 +2309,29 @@
     <data name="WriteCodeFragment.MustSpecifyLocation" xml:space="preserve">
       <value>MSB3711: At least one of OutputFile or OutputDirectory must be provided.</value>
       <comment>{StrBegin="MSB3711: "}</comment>
-    </data>    
+    </data>
     <data name="WriteCodeFragment.CouldNotCreateProvider" xml:space="preserve">
       <value>MSB3712: Code for the language "{0}" could not be generated. {1}</value>
       <comment>{StrBegin="MSB3712: "}</comment>
-    </data> 
+    </data>
     <data name="WriteCodeFragment.CouldNotWriteOutput" xml:space="preserve">
       <value>MSB3713: The file "{0}" could not be created. {1}</value>
       <comment>{StrBegin="MSB3713: "}</comment>
-    </data>  
+    </data>
     <data name="WriteCodeFragment.SkippedNumberedParameter" xml:space="preserve">
       <value>MSB3714: The parameter "{0}" was supplied, but not all previously numbered parameters.</value>
       <comment>{StrBegin="MSB3714: "}</comment>
-    </data>     
+    </data>
     <data name="WriteCodeFragment.NoWorkToDo" xml:space="preserve">
       <value>No output file was written because no code was specified to create.</value>
-    </data>    
+    </data>
     <data name="WriteCodeFragment.GeneratedFile" xml:space="preserve">
       <value>Emitted specified code into "{0}".</value>
-    </data>      
+    </data>
     <data name="WriteCodeFragment.Comment" xml:space="preserve">
       <value>Generated by the MSBuild WriteCodeFragment class.</value>
-    </data>      
-    
+    </data>
+
 
  <!--
         MSB3751 - MSB3761   Task: CodeTaskFactory
@@ -2338,7 +2342,7 @@
   <data name="CodeTaskFactory.CodeElementIsMissing" xml:space="preserve">
     <value>MSB3751: The &lt;Code&gt; element is missing for the "{0}" task. This element is required.</value>
     <comment>{StrBegin="MSB3751: "} &lt;Code&gt; should not be localized it is the name of an xml element</comment>
-  </data>  
+  </data>
   <data name="CodeTaskFactory.AttributeEmpty" xml:space="preserve">
     <value>MSB3752: The "{0}" attribute has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
     <comment>{StrBegin="MSB3752: "}</comment>
@@ -2405,7 +2409,7 @@
   </data>
   <!--
         MSB3773 - MSB3783   Task: ResolveSDKReference
-        MSB3841 - MSB3850   
+        MSB3841 - MSB3850
         ResolveSDKReference Exception messages
         If this bucket overflows, pls. contact 'vsppbdev'.
  -->
@@ -2488,15 +2492,15 @@
     <data name="ResolveSDKReference.Prefer32BitNotSupportedWithNeutralProject" xml:space="preserve">
     <value>MSB3782: The "{0}" SDK does not support targeting a neutral architecture with "Prefer 32-Bit" enabled for the project. Please go to the project properties (Build tab for C# and Compile tab for VB) and disable the "Prefer 32-bit" option, or change your project to target a non-neutral architecture.</value>
     <comment>{StrBegin="MSB3782: "} Also, please localize "Prefer 32-Bit" in the same way that it is localized in wizard\vbdesigner\designer\proppages\buildproppage.resx</comment>
-   </data>  
+   </data>
     <data name="ResolveSDKReference.MaxPlatformVersionLessThanTargetPlatformVersion" xml:space="preserve">
     <value>MSB3783: Project "{0}" depends upon SDK "{1} v{2}" which was released originally for apps targeting "{3} {4}". To verify whether "{1} v{2}" is compatible with "{5} {6}", contact the SDK author or see http://go.microsoft.com/fwlink/?LinkID=309181.</value>
     <comment>{StrBegin="MSB3783: "}</comment>
-   </data>  
+   </data>
    <data name="ResolveSDKReference.InvalidDependencyInPlatform" xml:space="preserve">
     <value>MSB3841: The SDK "{0}" depends on the SDK "{1}", which is not compatible with "{2} {3}". Please reference a version of SDK "{0}" which supports "{2} {3}".</value>
     <comment>{StrBegin="MSB3841: "}</comment>
-   </data>  
+   </data>
    <data name="ResolveSDKReference.MaxPlatformVersionNotSpecified" xml:space="preserve">
     <value>MSB3842: Project "{0}" depends upon SDK "{1} v{2}" which supports apps targeting "{3} {4}". To verify whether "{1} v{2}" is compatible with "{5} {6}", contact the SDK author or see http://go.microsoft.com/fwlink/?LinkID=309181.</value>
     <comment>{StrBegin="MSB3842: "}</comment>
@@ -2592,7 +2596,7 @@
   </data>
   <data name="GetSDKReferenceFiles.NoOriginalItemSpec" xml:space="preserve">
     <value>The "OriginalItemSpec" metadata for the resolved SDK with path "{0}" was empty. The "OriginalItemSpec" metadata must be set."</value>
-  </data>  
+  </data>
   <data name="GetSDKReferenceFiles.CouldNotGetSDKReferenceFiles" xml:space="preserve">
     <value>MSB3795: There was a problem in the GetSDKReferenceFiles task. {0}</value>
     <comment>{StrBegin="MSB3795: "}</comment>
@@ -2636,13 +2640,13 @@
     <value>MSB3871: Shared projects cannot be built on their own.  Please either build a project that references this project, or build the entire solution.</value>
     <comment>{StrBegin="MSB3871: "}</comment>
   </data>
-  
+
   <!--
         MSB3891 - MSB3900   Targets: Copy Overflow
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
   <data name="Copy.ExactlyOneTypeOfLink">
-    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>    
+    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>
   </data>
 
   <!--
@@ -2745,6 +2749,27 @@
   <data name="ZipDirectory.Comment">
     <value>Zipping directory "{0}" to "{1}".</value>
   </data>
+
+  <!--
+        MSB3951 - MSB3960  Tasks: GetFileHash and VerifyFileHash
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="FileHash.UnrecognizedHashEncoding" xml:space="preserve">
+    <value>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</value>
+    <comment>{StrBegin="MSB3951: "}</comment>
+  </data>
+  <data name="VerifyFileHash.HashMismatch" xml:space="preserve">
+    <value>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</value>
+    <comment>{StrBegin="MSB3952: "}</comment>
+  </data>
+  <data name="FileHash.UnrecognizedHashAlgorithm" xml:space="preserve">
+    <value>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</value>
+    <comment>{StrBegin="MSB3953: "}</comment>
+  </data>
+  <data name="FileHash.FileNotFound" xml:space="preserve">
+    <value>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3954: "}</comment>
+  </data>
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -2799,13 +2824,13 @@
             MSB3642 - MSB3646   Task: GetReferenceAssemblyPaths
             MSB3646 - MSB3655   Task: AxTlbBaseTask
             MSB3656 - MSB3660   Task: AxImp
-            MSB3661 - MSB3665   Task: TlbImp            
+            MSB3661 - MSB3665   Task: TlbImp
             MSB3666 - MSB3675   Task: General
             MSB3676 - MSB3685   Task: Move
             MSB3686 - MSB3695   Task: XamlTaskFactory
             MSB3696 - MSB3700   Task: GenerateBootstrapper overflow
             MSB3701 - MSB3710   Task: XslTransformation
-            MSB3711 - MSB3720   Task: WriteCodeFragment      
+            MSB3711 - MSB3720   Task: WriteCodeFragment
             MSB3721 - MSB3730   Task: XamlTaskFactory overflow
             MSB3731 - MSB3740   Task: XmlPoke
             MSB3741 - MSB3750   Task: XmlPeek
@@ -2827,14 +2852,15 @@
             MSB3921 - MSB3930   Task: DownloadFile
             MSB3931 - MSB3940   Task: Unzip
             MSB3941 - MSB3950   Task: ZipDirectory
+            MSB3951 - MSB3960   Task: VerifyFileHash
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
 
         The following codes are not longer used but have shipped so should not be reused:
             MSB3109
-       
-        
+
+
         The message spec is here:
            http://msbuild/wiki/default.aspx/MSBuild.GenerateResourceTaskMessages
 

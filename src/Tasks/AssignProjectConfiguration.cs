@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml;
@@ -14,47 +13,19 @@ namespace Microsoft.Build.Tasks
 {
     public class AssignProjectConfiguration : ResolveProjectBase
     {
-        #region Constructors
-
-        /// <summary>
-        /// default public constructor
-        /// </summary>
-        public AssignProjectConfiguration()
-        {
-            // do nothing
-        }
-
-        #endregion
-
         #region Properties
 
         /// <summary>
         /// A special XML string containing a project configuration for each project - we need to simply 
         /// match the projects and assign the appropriate configuration names to them
         /// </summary>
-        public string SolutionConfigurationContents
-        {
-            get
-            {
-                return _solutionConfigurationContents;
-            }
-            set
-            {
-                _solutionConfigurationContents = value;
-            }
-        }
-
-        private string _solutionConfigurationContents = null;
+        public string SolutionConfigurationContents { get; set; }
 
         /// <summary>
         /// Whether to use the solution dependency information passed in the solution blob
         /// to add synthetic project references for the purposes of build ordering
         /// </summary>
-        public bool AddSyntheticProjectReferencesForSolutionDependencies
-        {
-            get;
-            set;
-        }
+        public bool AddSyntheticProjectReferencesForSolutionDependencies { get; set; }
 
         /// <summary>
         /// String containing a semicolon-delimited list of mappings from the platform names used
@@ -66,15 +37,8 @@ namespace Microsoft.Build.Tasks
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Vcx", Justification = "Public API that has already shipped; VCX is a recognizable short form for .vcxproj")]
         public string DefaultToVcxPlatformMapping
         {
-            get
-            {
-                if (_defaultToVcxPlatformMapping == null)
-                {
-                    _defaultToVcxPlatformMapping = "AnyCPU=Win32;X86=Win32;X64=X64;Itanium=Itanium";
-                }
-
-                return _defaultToVcxPlatformMapping;
-            }
+            get => _defaultToVcxPlatformMapping ??
+                   (_defaultToVcxPlatformMapping = "AnyCPU=Win32;X86=Win32;X64=X64;Itanium=Itanium");
 
             set
             {
@@ -86,7 +50,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private string _defaultToVcxPlatformMapping = null;
+        private string _defaultToVcxPlatformMapping;
 
         /// <summary>
         /// String containing a semicolon-delimited list of mappings from .vcxproj platform names
@@ -126,150 +90,54 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private string _vcxToDefaultPlatformMapping = null;
+        private string _vcxToDefaultPlatformMapping;
 
         /// <summary>
         /// The current project's full path
         /// </summary>
-        public string CurrentProject
-        {
-            get;
-            set;
-        }
+        public string CurrentProject { get; set; }
 
         /// <summary>
         /// The current project's platform.
         /// </summary>
-        public string CurrentProjectConfiguration
-        {
-            get
-            {
-                return _currentProjectConfiguration;
-            }
-
-            set
-            {
-                _currentProjectConfiguration = value;
-            }
-        }
-
-        private string _currentProjectConfiguration;
+        public string CurrentProjectConfiguration { get; set; }
 
         /// <summary>
         /// The current project's platform.
         /// </summary>
-        public string CurrentProjectPlatform
-        {
-            get
-            {
-                return _currentProjectPlatform;
-            }
-
-            set
-            {
-                _currentProjectPlatform = value;
-            }
-        }
+        public string CurrentProjectPlatform { get; set; }
 
         /// <summary>
         /// Should we build references even if they were disabled in the project configuration
         /// </summary>
-        private bool _onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration = false;
-
-        /// <summary>
-        /// Should we build references even if they were disabled in the project configuration
-        /// </summary>
-        public bool OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration
-        {
-            get
-            {
-                return _onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration;
-            }
-
-            set
-            {
-                _onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration = value;
-            }
-        }
+        public bool OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration { get; set; } = false;
 
         // Whether to set the project reference's GlobalPropertiesToRemove metadata to contain
         // Configuration and Platform. 
-        private bool _shouldUnsetParentConfigurationAndPlatform = false;
 
         /// <summary>
         /// Whether to set the GlobalPropertiesToRemove metadata on the project reference such that
         /// on an MSBuild call, the Configuration and Platform metadata will be unset, allowing the 
         /// child project to build in its default configuration / platform. 
         /// </summary>
-        public bool ShouldUnsetParentConfigurationAndPlatform
-        {
-            get
-            {
-                return _shouldUnsetParentConfigurationAndPlatform;
-            }
-
-            set
-            {
-                _shouldUnsetParentConfigurationAndPlatform = value;
-            }
-        }
-
-        private string _outputType;
+        public bool ShouldUnsetParentConfigurationAndPlatform { get; set; } = false;
 
         /// <summary>
         /// The output type for the project
         /// </summary>
-        public string OutputType
-        {
-            get
-            {
-                return _outputType;
-            }
-
-            set
-            {
-                _outputType = value;
-            }
-        }
-
-        private string _currentProjectPlatform;
+        public string OutputType { get; set; }
 
         /// <summary>
         /// True if we should use the default mappings to resolve the configuration/platform
         /// of the passed in project references, false otherwise.
         /// </summary>
-        public bool ResolveConfigurationPlatformUsingMappings
-        {
-            get
-            {
-                return _resolveConfigurationPlatformUsingMappings;
-            }
-
-            set
-            {
-                _resolveConfigurationPlatformUsingMappings = value;
-            }
-        }
-
-        private bool _resolveConfigurationPlatformUsingMappings;
+        public bool ResolveConfigurationPlatformUsingMappings { get; set; }
 
         /// <summary>
         /// The list of resolved reference paths (preserving the original project reference attributes)
         /// </summary>
         [Output]
-        public ITaskItem[] AssignedProjects
-        {
-            get
-            {
-                return _assignedProjects;
-            }
-            set
-            {
-                _assignedProjects = value;
-            }
-        }
-
-        private ITaskItem[] _assignedProjects = null;
+        public ITaskItem[] AssignedProjects { get; set; }
 
         /// <summary>
         /// The list of project reference items that could not be resolved using the pre-resolved list of outputs.
@@ -277,19 +145,7 @@ namespace Microsoft.Build.Tasks
         /// are in the MSBuild format.
         /// </summary>
         [Output]
-        public ITaskItem[] UnassignedProjects
-        {
-            get
-            {
-                return _unassignedProjects;
-            }
-            set
-            {
-                _unassignedProjects = value;
-            }
-        }
-
-        private ITaskItem[] _unassignedProjects = null;
+        public ITaskItem[] UnassignedProjects { get; set; }
 
         private const string attrFullConfiguration = "FullConfiguration";
         private const string buildReferenceMetadataName = "BuildReference";
@@ -300,11 +156,11 @@ namespace Microsoft.Build.Tasks
         private const string attrSetConfiguration = "SetConfiguration";
         private const string attrSetPlatform = "SetPlatform";
 
-        private static readonly char[] s_configPlatformSeparator = new char[] { '|' };
+        private static readonly char[] s_configPlatformSeparator = { '|' };
 
         private IDictionary<string, string> _vcxToDefaultMap;
         private IDictionary<string, string> _defaultToVcxMap;
-        private bool _mappingsPopulated = false;
+        private bool _mappingsPopulated;
 
         #endregion
 
@@ -323,8 +179,8 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                ArrayList resolvedReferences = new ArrayList(ProjectReferences.GetLength(0));
-                ArrayList unresolvedReferences = new ArrayList(ProjectReferences.GetLength(0));
+                var resolvedReferences = new List<ITaskItem>(ProjectReferences.GetLength(0));
+                var unresolvedReferences = new List<ITaskItem>(ProjectReferences.GetLength(0));
 
                 if (!String.IsNullOrEmpty(SolutionConfigurationContents))
                 {
@@ -340,10 +196,7 @@ namespace Microsoft.Build.Tasks
 
                 foreach (ITaskItem projectRef in ProjectReferences)
                 {
-                    bool resolveSuccess = false;
-                    ITaskItem resolvedReference;
-
-                    resolveSuccess = ResolveProject(projectRef, out resolvedReference);
+                    bool resolveSuccess = ResolveProject(projectRef, out ITaskItem resolvedReference);
 
                     if (resolveSuccess)
                     {
@@ -365,9 +218,9 @@ namespace Microsoft.Build.Tasks
                                 globalPropertiesToRemove += ";";
                             }
 
-                            if (projectRef is ITaskItem2)
+                            if (projectRef is ITaskItem2 item2)
                             {
-                                ((ITaskItem2)projectRef).SetMetadataValueLiteral("GlobalPropertiesToRemove", globalPropertiesToRemove + "Configuration;Platform");
+                                item2.SetMetadataValueLiteral("GlobalPropertiesToRemove", globalPropertiesToRemove + "Configuration;Platform");
                             }
                             else
                             {
@@ -384,12 +237,12 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                AssignedProjects = (ITaskItem[])resolvedReferences.ToArray(typeof(ITaskItem));
-                UnassignedProjects = (ITaskItem[])unresolvedReferences.ToArray(typeof(ITaskItem));
+                AssignedProjects = resolvedReferences.ToArray();
+                UnassignedProjects = unresolvedReferences.ToArray();
             }
             catch (XmlException e)
             {
-                Log.LogErrorWithCodeFromResources("General.ErrorExecutingTask", this.GetType().Name, e.Message);
+                Log.LogErrorWithCodeFromResources("General.ErrorExecutingTask", GetType().Name, e.Message);
                 return false;
             }
 
@@ -399,16 +252,11 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
-
-
+        
         /// <summary>
         /// Given a project reference task item and an XML document containing project configurations, 
         /// find the configuration for that task item.
         /// </summary>
-        /// <param name="resolvedPath">
-        /// resulting ITaskItem containing the resolved project item with the FullConfiguration, 
-        /// Configuration and Platform attributes
-        /// </param>
         /// <returns>true if resolved successfully</returns>
         internal bool ResolveProject(ITaskItem projectRef, out ITaskItem resolvedProjectWithConfiguration)
         {
@@ -432,7 +280,7 @@ namespace Microsoft.Build.Tasks
                     SetupDefaultPlatformMappings();
                 }
 
-                string transformedPlatform = null;
+                string transformedPlatform;
 
                 if (String.Equals(projectRef.GetMetadata("Extension"), ".vcxproj", StringComparison.OrdinalIgnoreCase))
                 {
@@ -450,31 +298,28 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            SetBuildInProjectAndReferenceOutputAssemblyMetadata(_onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration, projectRef, projectConfigurationElement);
+            SetBuildInProjectAndReferenceOutputAssemblyMetadata(OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration, projectRef, projectConfigurationElement);
 
-            if (projectConfiguration != null)
+            if (!string.IsNullOrEmpty(projectConfiguration))
             {
-                if (!string.IsNullOrEmpty(projectConfiguration))
+                resolvedProjectWithConfiguration = projectRef;
+                resolvedProjectWithConfiguration.SetMetadata(attrFullConfiguration, projectConfiguration);
+
+                string[] configurationPlatformParts = projectConfiguration.Split(s_configPlatformSeparator);
+                resolvedProjectWithConfiguration.SetMetadata(attrSetConfiguration, "Configuration=" + configurationPlatformParts[0]);
+                resolvedProjectWithConfiguration.SetMetadata(attrConfiguration, configurationPlatformParts[0]);
+
+                if (configurationPlatformParts.Length > 1)
                 {
-                    resolvedProjectWithConfiguration = projectRef;
-                    resolvedProjectWithConfiguration.SetMetadata(attrFullConfiguration, projectConfiguration);
-
-                    string[] configurationPlatformParts = projectConfiguration.Split(s_configPlatformSeparator);
-                    resolvedProjectWithConfiguration.SetMetadata(attrSetConfiguration, "Configuration=" + configurationPlatformParts[0]);
-                    resolvedProjectWithConfiguration.SetMetadata(attrConfiguration, configurationPlatformParts[0]);
-
-                    if (configurationPlatformParts.Length > 1)
-                    {
-                        resolvedProjectWithConfiguration.SetMetadata(attrSetPlatform, "Platform=" + configurationPlatformParts[1]);
-                        resolvedProjectWithConfiguration.SetMetadata(attrPlatform, configurationPlatformParts[1]);
-                    }
-                    else
-                    {
-                        resolvedProjectWithConfiguration.SetMetadata(attrSetPlatform, "Platform=");
-                    }
-
-                    return true;
+                    resolvedProjectWithConfiguration.SetMetadata(attrSetPlatform, "Platform=" + configurationPlatformParts[1]);
+                    resolvedProjectWithConfiguration.SetMetadata(attrPlatform, configurationPlatformParts[1]);
                 }
+                else
+                {
+                    resolvedProjectWithConfiguration.SetMetadata(attrSetPlatform, "Platform=");
+                }
+
+                return true;
             }
 
             resolvedProjectWithConfiguration = null;
@@ -489,13 +334,11 @@ namespace Microsoft.Build.Tasks
         {
             if (projectConfigurationElement != null && resolvedProjectWithConfiguration != null && onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)
             {
-                bool buildProject = false;
-
                 // The value of the specified attribute. An empty string is returned if a matching attribute is not found or if the attribute does not have a specified or default value. 
                 string buildProjectInSolution = projectConfigurationElement.GetAttribute(buildProjectInSolutionAttribute);
 
                 // We could not parse out what was in the attribute, act as if it was not set in the first place. 
-                if (bool.TryParse(buildProjectInSolution, out buildProject))
+                if (bool.TryParse(buildProjectInSolution, out bool buildProject))
                 {
                     // If we do not want to build references disabled in the solution configuration blob   
                     // and the solution configuration indicates the build for this project is disabled 
@@ -553,7 +396,7 @@ namespace Microsoft.Build.Tasks
             {
                 string[] platforms = mapping.Split('=');
 
-                if (platforms == null || platforms.Length != 2)
+                if (platforms.Length != 2)
                 {
                     Log.LogErrorFromResources("AssignProjectConfiguration.IllegalMappingString", mapping.Trim(), mappingList);
                 }

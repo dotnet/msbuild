@@ -1496,7 +1496,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set the CopyLocal metadata to false on all assemblies that are located in the GAC.
         /// </summary>
-        /// <param name="outputTaskItems">ArrayList of ITaskItems that will be outputted from the task</param>
+        /// <param name="outputTaskItems">List of ITaskItems that will be outputted from the task</param>
         /// <param name="gacPath">The GAC root path</param>
         internal void SetCopyLocalToFalseOnGacOrNoPIAAssemblies(List<ITaskItem> outputTaskItems, string gacPath)
         {

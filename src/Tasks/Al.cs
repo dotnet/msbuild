@@ -6,7 +6,6 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -69,106 +68,106 @@ namespace Microsoft.Build.Tasks
 */
         public string AlgorithmId
         {
-            set { Bag["AlgorithmId"] = value; }
-            get { return (string)Bag["AlgorithmId"]; }
+            set => Bag[nameof(AlgorithmId)] = value;
+            get => (string)Bag[nameof(AlgorithmId)];
         }
 
         public string BaseAddress
         {
-            set { Bag["BaseAddress"] = value; }
-            get { return (string)Bag["BaseAddress"]; }
+            set => Bag[nameof(BaseAddress)] = value;
+            get => (string)Bag[nameof(BaseAddress)];
         }
 
         public string CompanyName
         {
-            set { Bag["CompanyName"] = value; }
-            get { return (string)Bag["CompanyName"]; }
+            set => Bag[nameof(CompanyName)] = value;
+            get => (string)Bag[nameof(CompanyName)];
         }
 
         public string Configuration
         {
-            set { Bag["Configuration"] = value; }
-            get { return (string)Bag["Configuration"]; }
+            set => Bag[nameof(Configuration)] = value;
+            get => (string)Bag[nameof(Configuration)];
         }
 
         public string Copyright
         {
-            set { Bag["Copyright"] = value; }
-            get { return (string)Bag["Copyright"]; }
+            set => Bag[nameof(Copyright)] = value;
+            get => (string)Bag[nameof(Copyright)];
         }
 
         public string Culture
         {
-            set { Bag["Culture"] = value; }
-            get { return (string)Bag["Culture"]; }
+            set => Bag[nameof(Culture)] = value;
+            get => (string)Bag[nameof(Culture)];
         }
 
         public bool DelaySign
         {
-            set { Bag["DelaySign"] = value; }
-            get { return GetBoolParameterWithDefault("DelaySign", false); }
+            set => Bag[nameof(DelaySign)] = value;
+            get => GetBoolParameterWithDefault(nameof(DelaySign), false);
         }
 
         public string Description
         {
-            set { Bag["Description"] = value; }
-            get { return (string)Bag["Description"]; }
+            set => Bag[nameof(Description)] = value;
+            get => (string)Bag[nameof(Description)];
         }
 
         public string EvidenceFile
         {
-            set { Bag["EvidenceFile"] = value; }
-            get { return (string)Bag["EvidenceFile"]; }
+            set => Bag[nameof(EvidenceFile)] = value;
+            get => (string)Bag[nameof(EvidenceFile)];
         }
 
         public string FileVersion
         {
-            set { Bag["FileVersion"] = value; }
-            get { return (string)Bag["FileVersion"]; }
+            set => Bag[nameof(FileVersion)] = value;
+            get => (string)Bag[nameof(FileVersion)];
         }
 
         public string Flags
         {
-            set { Bag["Flags"] = value; }
-            get { return (string)Bag["Flags"]; }
+            set => Bag["Flags"] = value;
+            get => (string)Bag["Flags"];
         }
 
         public bool GenerateFullPaths
         {
-            set { Bag["GenerateFullPaths"] = value; }
-            get { return GetBoolParameterWithDefault("GenerateFullPaths", false); }
+            set => Bag[nameof(GenerateFullPaths)] = value;
+            get => GetBoolParameterWithDefault(nameof(GenerateFullPaths), false);
         }
 
         public string KeyFile
         {
-            set { Bag["KeyFile"] = value; }
-            get { return (string)Bag["KeyFile"]; }
+            set => Bag[nameof(KeyFile)] = value;
+            get => (string)Bag[nameof(KeyFile)];
         }
 
         public string KeyContainer
         {
-            set { Bag["KeyContainer"] = value; }
-            get { return (string)Bag["KeyContainer"]; }
+            set => Bag[nameof(KeyContainer)] = value;
+            get => (string)Bag[nameof(KeyContainer)];
         }
 
         public string MainEntryPoint
         {
-            set { Bag["MainEntryPoint"] = value; }
-            get { return (string)Bag["MainEntryPoint"]; }
+            set => Bag[nameof(MainEntryPoint)] = value;
+            get => (string)Bag[nameof(MainEntryPoint)];
         }
 
         [Output]
         [Required]
         public ITaskItem OutputAssembly
         {
-            set { Bag["OutputAssembly"] = value; }
-            get { return (ITaskItem)Bag["OutputAssembly"]; }
+            set => Bag[nameof(OutputAssembly)] = value;
+            get => (ITaskItem)Bag[nameof(OutputAssembly)];
         }
 
         public string Platform
         {
-            set { Bag["Platform"] = value; }
-            get { return (string)Bag["Platform"]; }
+            set => Bag[nameof(Platform)] = value;
+            get => (string)Bag[nameof(Platform)];
         }
 
         // Map explicit platform of "AnyCPU" or the default platform (null or ""), since it is commonly understood in the 
@@ -178,8 +177,8 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                string platform = this.Platform;
-                if ((String.IsNullOrEmpty(platform) || platform.Equals("anycpu", StringComparison.OrdinalIgnoreCase)) && this.Prefer32Bit)
+                string platform = Platform;
+                if ((String.IsNullOrEmpty(platform) || platform.Equals("anycpu", StringComparison.OrdinalIgnoreCase)) && Prefer32Bit)
                 {
                     platform = "anycpu32bitpreferred";
                 }
@@ -189,68 +188,68 @@ namespace Microsoft.Build.Tasks
 
         public bool Prefer32Bit
         {
-            set { Bag["Prefer32Bit"] = value; }
-            get { return GetBoolParameterWithDefault("Prefer32Bit", false); }
+            set => Bag[nameof(Prefer32Bit)] = value;
+            get => GetBoolParameterWithDefault(nameof(Prefer32Bit), false);
         }
 
         public string ProductName
         {
-            set { Bag["ProductName"] = value; }
-            get { return (string)Bag["ProductName"]; }
+            set => Bag[nameof(ProductName)] = value;
+            get => (string)Bag[nameof(ProductName)];
         }
 
         public string ProductVersion
         {
-            set { Bag["ProductVersion"] = value; }
-            get { return (string)Bag["ProductVersion"]; }
+            set => Bag[nameof(ProductVersion)] = value;
+            get => (string)Bag[nameof(ProductVersion)];
         }
 
         public string[] ResponseFiles
         {
-            set { Bag["ResponseFiles"] = value; }
-            get { return (string[])Bag["ResponseFiles"]; }
+            set => Bag[nameof(ResponseFiles)] = value;
+            get => (string[])Bag[nameof(ResponseFiles)];
         }
 
         public string TargetType
         {
-            set { Bag["TargetType"] = value; }
-            get { return (string)Bag["TargetType"]; }
+            set => Bag[nameof(TargetType)] = value;
+            get => (string)Bag[nameof(TargetType)];
         }
 
         public string TemplateFile
         {
-            set { Bag["TemplateFile"] = value; }
-            get { return (string)Bag["TemplateFile"]; }
+            set => Bag[nameof(TemplateFile)] = value;
+            get => (string)Bag[nameof(TemplateFile)];
         }
 
         public string Title
         {
-            set { Bag["Title"] = value; }
-            get { return (string)Bag["Title"]; }
+            set => Bag[nameof(Title)] = value;
+            get => (string)Bag[nameof(Title)];
         }
 
         public string Trademark
         {
-            set { Bag["Trademark"] = value; }
-            get { return (string)Bag["Trademark"]; }
+            set => Bag[nameof(Trademark)] = value;
+            get => (string)Bag[nameof(Trademark)];
         }
 
         public string Version
         {
-            set { Bag["Version"] = value; }
-            get { return (string)Bag["Version"]; }
+            set => Bag[nameof(Version)] = value;
+            get => (string)Bag[nameof(Version)];
         }
 
         public string Win32Icon
         {
-            set { Bag["Win32Icon"] = value; }
-            get { return (string)Bag["Win32Icon"]; }
+            set => Bag[nameof(Win32Icon)] = value;
+            get => (string)Bag[nameof(Win32Icon)];
         }
 
         public string Win32Resource
         {
-            set { Bag["Win32Resource"] = value; }
-            get { return (string)Bag["Win32Resource"]; }
+            set => Bag[nameof(Win32Resource)] = value;
+            get => (string)Bag[nameof(Win32Resource)];
         }
 
 
@@ -258,28 +257,28 @@ namespace Microsoft.Build.Tasks
         // This is not required.
         public ITaskItem[] SourceModules
         {
-            set { Bag["SourceModules"] = value; }
-            get { return (ITaskItem[])Bag["SourceModules"]; }
+            set => Bag[nameof(SourceModules)] = value;
+            get => (ITaskItem[])Bag[nameof(SourceModules)];
         }
 
         // Embedded resource files: file[,name[,private]]
         public ITaskItem[] EmbedResources
         {
-            set { Bag["EmbedResources"] = value; }
-            get { return (ITaskItem[])Bag["EmbedResources"]; }
+            set => Bag[nameof(EmbedResources)] = value;
+            get => (ITaskItem[])Bag[nameof(EmbedResources)];
         }
 
         // Linked resource files: file[,name[,target][,private]]]
         public ITaskItem[] LinkResources
         {
-            set { Bag["LinkResources"] = value; }
-            get { return (ITaskItem[])Bag["LinkResources"]; }
+            set => Bag[nameof(LinkResources)] = value;
+            get => (ITaskItem[])Bag[nameof(LinkResources)];
         }
 
         public string SdkToolsPath
         {
-            set { Bag["SdkToolsPath"] = value; }
-            get { return (string)Bag["SdkToolsPath"]; }
+            set => Bag[nameof(SdkToolsPath)] = value;
+            get => (string)Bag[nameof(SdkToolsPath)];
         }
 
         #endregion
@@ -288,18 +287,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Return the name of the tool to execute.
         /// </summary>
-        override protected string ToolName
-        {
-            get
-            {
-                return "al.exe";
-            }
-        }
+        protected override string ToolName => "al.exe";
 
         /// <summary>
         /// Return the path of the tool to execute
         /// </summary>
-        override protected string GenerateFullPathToTool()
+        protected override string GenerateFullPathToTool()
         {
             string pathToTool = null;
 
@@ -312,7 +305,7 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(pathToTool) || !File.Exists(pathToTool))
             {
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             }
 
             return pathToTool;
@@ -321,57 +314,57 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Fills the provided CommandLineBuilderExtension with those switches and other information that can go into a response file.
         /// </summary>
-        override protected internal void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
+        protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
         {
-            commandLine.AppendSwitchIfNotNull("/algid:", this.AlgorithmId);
-            commandLine.AppendSwitchIfNotNull("/baseaddress:", this.BaseAddress);
-            commandLine.AppendSwitchIfNotNull("/company:", this.CompanyName);
-            commandLine.AppendSwitchIfNotNull("/configuration:", this.Configuration);
-            commandLine.AppendSwitchIfNotNull("/copyright:", this.Copyright);
-            commandLine.AppendSwitchIfNotNull("/culture:", this.Culture);
-            commandLine.AppendPlusOrMinusSwitch("/delaysign", this.Bag, "DelaySign");
-            commandLine.AppendSwitchIfNotNull("/description:", this.Description);
-            commandLine.AppendSwitchIfNotNull("/evidence:", this.EvidenceFile);
-            commandLine.AppendSwitchIfNotNull("/fileversion:", this.FileVersion);
-            commandLine.AppendSwitchIfNotNull("/flags:", this.Flags);
-            commandLine.AppendWhenTrue("/fullpaths", this.Bag, "GenerateFullPaths");
-            commandLine.AppendSwitchIfNotNull("/keyfile:", this.KeyFile);
-            commandLine.AppendSwitchIfNotNull("/keyname:", this.KeyContainer);
-            commandLine.AppendSwitchIfNotNull("/main:", this.MainEntryPoint);
-            commandLine.AppendSwitchIfNotNull("/out:", (this.OutputAssembly == null) ? null : this.OutputAssembly.ItemSpec);
-            commandLine.AppendSwitchIfNotNull("/platform:", this.PlatformWith32BitPreference);
-            commandLine.AppendSwitchIfNotNull("/product:", this.ProductName);
-            commandLine.AppendSwitchIfNotNull("/productversion:", this.ProductVersion);
-            commandLine.AppendSwitchIfNotNull("/target:", this.TargetType);
-            commandLine.AppendSwitchIfNotNull("/template:", this.TemplateFile);
-            commandLine.AppendSwitchIfNotNull("/title:", this.Title);
-            commandLine.AppendSwitchIfNotNull("/trademark:", this.Trademark);
-            commandLine.AppendSwitchIfNotNull("/version:", this.Version);
-            commandLine.AppendSwitchIfNotNull("/win32icon:", this.Win32Icon);
-            commandLine.AppendSwitchIfNotNull("/win32res:", this.Win32Resource);
+            commandLine.AppendSwitchIfNotNull("/algid:", AlgorithmId);
+            commandLine.AppendSwitchIfNotNull("/baseaddress:", BaseAddress);
+            commandLine.AppendSwitchIfNotNull("/company:", CompanyName);
+            commandLine.AppendSwitchIfNotNull("/configuration:", Configuration);
+            commandLine.AppendSwitchIfNotNull("/copyright:", Copyright);
+            commandLine.AppendSwitchIfNotNull("/culture:", Culture);
+            commandLine.AppendPlusOrMinusSwitch("/delaysign", Bag, "DelaySign");
+            commandLine.AppendSwitchIfNotNull("/description:", Description);
+            commandLine.AppendSwitchIfNotNull("/evidence:", EvidenceFile);
+            commandLine.AppendSwitchIfNotNull("/fileversion:", FileVersion);
+            commandLine.AppendSwitchIfNotNull("/flags:", Flags);
+            commandLine.AppendWhenTrue("/fullpaths", Bag, "GenerateFullPaths");
+            commandLine.AppendSwitchIfNotNull("/keyfile:", KeyFile);
+            commandLine.AppendSwitchIfNotNull("/keyname:", KeyContainer);
+            commandLine.AppendSwitchIfNotNull("/main:", MainEntryPoint);
+            commandLine.AppendSwitchIfNotNull("/out:", OutputAssembly?.ItemSpec);
+            commandLine.AppendSwitchIfNotNull("/platform:", PlatformWith32BitPreference);
+            commandLine.AppendSwitchIfNotNull("/product:", ProductName);
+            commandLine.AppendSwitchIfNotNull("/productversion:", ProductVersion);
+            commandLine.AppendSwitchIfNotNull("/target:", TargetType);
+            commandLine.AppendSwitchIfNotNull("/template:", TemplateFile);
+            commandLine.AppendSwitchIfNotNull("/title:", Title);
+            commandLine.AppendSwitchIfNotNull("/trademark:", Trademark);
+            commandLine.AppendSwitchIfNotNull("/version:", Version);
+            commandLine.AppendSwitchIfNotNull("/win32icon:", Win32Icon);
+            commandLine.AppendSwitchIfNotNull("/win32res:", Win32Resource);
 
-            commandLine.AppendSwitchIfNotNull("", this.SourceModules, new string[] { "TargetFile" });
+            commandLine.AppendSwitchIfNotNull("", SourceModules, new[] { "TargetFile" });
 
             commandLine.AppendSwitchIfNotNull
             (
                 "/embed:",
-                this.EmbedResources,
-                new string[] { "LogicalName", "Access" }
+                EmbedResources,
+                new[] { "LogicalName", "Access" }
             );
 
             commandLine.AppendSwitchIfNotNull
             (
                 "/link:",
-                this.LinkResources,
-                new string[] { "LogicalName", "TargetFile", "Access" }
+                LinkResources,
+                new[] { "LogicalName", "TargetFile", "Access" }
             );
 
             // It's a good idea for the response file to be the very last switch passed, just 
             // from a predictability perspective.  This is also consistent with the compiler
             // tasks (Csc, etc.)
-            if (this.ResponseFiles != null)
+            if (ResponseFiles != null)
             {
-                foreach (string responseFile in this.ResponseFiles)
+                foreach (string responseFile in ResponseFiles)
                 {
                     commandLine.AppendSwitchIfNotNull("@", responseFile);
                 }
@@ -380,11 +373,11 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            if (this.Culture != null && this.OutputAssembly != null)
+            if (Culture != null)
             {
                 // This allows subsequent tasks in the build process to know what culture each satellite 
                 // assembly is associated with.
-                this.OutputAssembly.SetMetadata("Culture", this.Culture);
+                OutputAssembly?.SetMetadata("Culture", Culture);
             }
 
             return base.Execute();

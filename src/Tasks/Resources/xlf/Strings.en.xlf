@@ -401,6 +401,21 @@
         <target state="new">The working directory "{0}" does not exist.</target>
         <note>No error code because an error will be prefixed.</note>
       </trans-unit>
+      <trans-unit id="FileHash.FileNotFound">
+        <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
+        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB3954: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
+        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
+        <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashEncoding">
+        <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
+        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <note>{StrBegin="MSB3951: "}</note>
+      </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
         <target state="new">Found "{0}".</target>
@@ -1487,6 +1502,11 @@
         <target state="new">MSB3455: ResGen.exe may not run because the command line is {0} characters long, which exceeds the maximum length of the command. To fix this problem, please either (1) remove unnecessary assembly references, or (2) make the paths to those references shorter.</target>
         <note>{StrBegin="MSB3455: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="new">AssemblyFoldersEx location: "{0}"</target>
@@ -2238,7 +2258,7 @@
         <source>Project reference "{0}" has not been resolved.</source>
         <target state="new">Project reference "{0}" has not been resolved.</target>
         <note>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </note>
@@ -2462,6 +2482,11 @@
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
         <target state="new">"{1}" is an invalid value for the "{0}" parameter.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.HashMismatch">
+        <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
+        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>

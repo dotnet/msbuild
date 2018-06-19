@@ -51,22 +51,75 @@ namespace Microsoft.Build.UnitTests.Definition
 
             sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
         }
+		
+		[Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        public void ReevaluationShouldRespectContextLifetime(EvaluationContext.SharingPolicy policy)
+        {
+            var collection = _env.CreateProjectCollection().Collection;
+
+            var context1 = EvaluationContext.Create(policy);
+
+            var project = Project.FromXmlReader(
+                XmlReader.Create(new StringReader("<Project></Project>")),
+                new ProjectOptions
+                {
+                    ProjectCollection = collection,
+                    EvaluationContext = context1,
+                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                });
+
+            project.AddItem("a", "b");
+
+            project.ReevaluateIfNecessary();
+
+            var context2 = GetEvaluationContext(project);
+
+            switch (policy)
+            {
+                case EvaluationContext.SharingPolicy.Shared:
+                    context1.ShouldBeSameAs(context2);
+                    break;
+                case EvaluationContext.SharingPolicy.Isolated:
+                    context1.ShouldNotBeSameAs(context2);
+                    break;
+            }
+        }
+
+        private static EvaluationContext GetEvaluationContext(Project p)
+        {
+            var fieldInfo = p.GetType().GetField("_lastEvaluationContext", BindingFlags.NonPublic | BindingFlags.Instance);
+            var value = fieldInfo.GetValue(p);
+
+            value.ShouldBeOfType<EvaluationContext>();
+
+            return (EvaluationContext) value;
+        }
+
+        private static string[] _sdkResolutionProjects =
+        {
+            "<Project Sdk=\"foo\"></Project>",
+            "<Project Sdk=\"bar\"></Project>",
+            "<Project Sdk=\"foo\"></Project>",
+            "<Project Sdk=\"bar\"></Project>"
+        };
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared, 1, 1)]
-        [InlineData(EvaluationContext.SharingPolicy.Isolated, 3, 3)]
-        public void ContextSdkResolverIsUsed(EvaluationContext.SharingPolicy policy, int sdkLookupsForFoo, int sdkLookupsForBar)
+        [InlineData(EvaluationContext.SharingPolicy.Isolated, 4, 4)]
+        public void ContextPinsSdkResolverCache(EvaluationContext.SharingPolicy policy, int sdkLookupsForFoo, int sdkLookupsForBar)
         {
             try
             {
                 EvaluationContext.TestOnlyAlterStateOnCreate = c => SetResolverForContext(c, _resolver);
 
                 var context = EvaluationContext.Create(policy);
-                EvaluateProjects(context);
+                EvaluateProjects(_sdkResolutionProjects, context, null);
 
+                _resolver.ResolvedCalls.Count.ShouldBe(2);
                 _resolver.ResolvedCalls["foo"].ShouldBe(sdkLookupsForFoo);
                 _resolver.ResolvedCalls["bar"].ShouldBe(sdkLookupsForBar);
-                _resolver.ResolvedCalls.Count.ShouldBe(2);
             }
             finally
             {
@@ -80,15 +133,11 @@ namespace Microsoft.Build.UnitTests.Definition
             var contextHashcodesSeen = new HashSet<int>();
 
             EvaluateProjects(
+                _sdkResolutionProjects,
                 null,
                 p =>
                 {
-                    var fieldInfo = p.GetType().GetField("_lastEvaluationContext", BindingFlags.NonPublic | BindingFlags.Instance);
-                    var obj = fieldInfo.GetValue(p);
-
-                    obj.ShouldBeOfType<EvaluationContext>();
-
-                    var context = (EvaluationContext) obj;
+                    var context = GetEvaluationContext(p);
 
                     context.Policy.ShouldBe(EvaluationContext.SharingPolicy.Isolated);
 
@@ -97,64 +146,112 @@ namespace Microsoft.Build.UnitTests.Definition
                     contextHashcodesSeen.Add(context.GetHashCode());
                 });
         }
+        public static IEnumerable<object> ContextPinsGlobExpansionCacheData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    EvaluationContext.SharingPolicy.Shared,
+                    new[]
+                    {
+                        new[] {"0.cs"},
+                        new[] {"0.cs"},
+                        new[] {"0.cs"},
+                        new[] {"0.cs"}
+                    }
+                };
 
-        private void EvaluateProjects(EvaluationContext context, Action<Project> projectAction = null)
+                yield return new object[]
+                {
+                    EvaluationContext.SharingPolicy.Isolated,
+                    new[]
+                    {
+                        new[] {"0.cs"},
+                        new[] {"0.cs", "1.cs"},
+                        new[] {"0.cs", "1.cs", "2.cs"},
+                        new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
+                    }
+                };
+            }
+        }
+
+        private static string[] _globProjects =
+        {
+            @"<Project>
+                <ItemGroup>
+                    <i Include=`**/*.cs` />
+                </ItemGroup>
+            </Project>",
+
+            @"<Project>
+                <ItemGroup>
+                    <i Include=`**/*.cs` />
+                </ItemGroup>
+            </Project>",
+        };
+
+        [Theory]
+        [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
+        public void ContextPinsGlobExpansionCache(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var projectDirectory = _env.DefaultTestDirectory.FolderPath;
+
+            _env.SetCurrentDirectory(projectDirectory);
+
+            var context = EvaluationContext.Create(policy);
+
+            var evaluationCount = 0;
+
+            File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
+
+            EvaluateProjects(
+                _globProjects,
+                context,
+                project =>
+                {
+                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount];
+                    evaluationCount++;
+
+                    File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
+
+                    ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
+                }
+                );
+        }
+
+        /// <summary>
+        /// Should be at least two test projects to test cache visibility between projects
+        /// </summary>
+        private void EvaluateProjects(string[] projectContents, EvaluationContext context, Action<Project> projectAction)
         {
             var collection = _env.CreateProjectCollection().Collection;
 
-            var project1 = Project.FromXmlReader(
-                XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")),
-                new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
+            var projects = new List<Project>(projectContents.Length);
 
-            projectAction?.Invoke(project1);
+            foreach (var projectContent in projectContents)
+            {
+                var project = Project.FromXmlReader(
+                    XmlReader.Create(new StringReader(projectContent.Cleanup())),
+                    new ProjectOptions
+                    {
+                        ProjectCollection = collection,
+                        EvaluationContext = context,
+                        LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                    });
 
-            var project2 = Project.FromXmlReader(
-                XmlReader.Create(new StringReader("<Project Sdk=\"bar\"></Project>")),
-                new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
+                projectAction?.Invoke(project);
 
-            projectAction?.Invoke(project2);
+                projects.Add(project);
+            }
 
-            var project3 = Project.FromXmlReader(
-                XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")),
-                new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
+            foreach (var project in projects)
+            {
+                project.AddItem("a", "b");
+                project.ReevaluateIfNecessary(context);
 
-            projectAction?.Invoke(project3);
-
-            var project4 = Project.FromXmlReader(
-                XmlReader.Create(new StringReader("<Project Sdk=\"bar\"></Project>")),
-                new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
-
-            projectAction?.Invoke(project4);
-
-            project3.AddItem("a", "b");
-            project3.ReevaluateIfNecessary(context);
-
-            projectAction?.Invoke(project3);
-
-            project4.AddItem("a", "b");
-            project4.ReevaluateIfNecessary(context);
-
-            projectAction?.Invoke(project4);
+                projectAction?.Invoke(project);
+            }
         }
-  }
+    }
 }

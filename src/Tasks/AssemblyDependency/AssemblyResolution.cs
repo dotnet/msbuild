@@ -2,18 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Resources;
+using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Reflection;
-using System.IO;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
 namespace Microsoft.Build.Tasks
@@ -37,8 +30,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="jaggedResolvers">The array of resolvers to search with.</param>
         /// <param name="assemblyName">The assembly name to look up.</param>
+        /// <param name="sdkName"></param>
         /// <param name="rawFileNameCandidate">The file name to match if {RawFileName} is seen. (May be null).</param>
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
+        /// <param name="wantSpecificVersion"></param>
         /// <param name="executableExtensions">The filename extension of the assembly. Must be this or its no match.</param>
         /// <param name="hintPath">This reference's hintpath</param>
         /// <param name="assemblyFolderKey">Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project.</param>
@@ -78,7 +73,6 @@ namespace Microsoft.Build.Tasks
                 // Search each searchpath.
                 foreach (Resolver resolver in resolvers)
                 {
-                    string fileLocation;
                     if
                     (
                         resolver.Resolve
@@ -92,7 +86,7 @@ namespace Microsoft.Build.Tasks
                             hintPath,
                             assemblyFolderKey,
                             assembliesConsideredAndRejected,
-                            out fileLocation,
+                            out string fileLocation,
                             out userRequestedSpecificFile
                         )
                     )
@@ -109,6 +103,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Compile search paths into an array of resolvers.
         /// </summary>
+        /// <param name="buildEngine"></param>
         /// <param name="searchPaths"></param>
         /// <param name="candidateAssemblyFiles">Paths to assembly files mentioned in the project.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
@@ -117,7 +112,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyName"></param>
         /// <param name="getRegistrySubKeyNames"></param>
         /// <param name="getRegistrySubKeyDefaultValue"></param>
+        /// <param name="openBaseKey"></param>
         /// <param name="installedAssemblies"></param>
+        /// <param name="getRuntimeVersion"></param>
+        /// <param name="targetedRuntimeVersion"></param>
+        /// <param name="getAssemblyPathInGac"></param>
+        /// <param name="log"></param>
         /// <returns></returns>
         public static Resolver[] CompileSearchPaths
         (
@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log
         )
         {
-            Resolver[] resolvers = new Resolver[searchPaths.Length];
+            var resolvers = new Resolver[searchPaths.Length];
 
             for (int p = 0; p < searchPaths.Length; ++p)
             {
@@ -196,10 +196,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Build a resolver array from a set of directories to resolve directly from.
         /// </summary>
-        /// <param name="directories"></param>
-        /// <param name="fileExists"></param>
-        /// <param name="getAssemblyName"></param>
-        /// <returns></returns>
         internal static Resolver[] CompileDirectories
         (
             List<string> directories,

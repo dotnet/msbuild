@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using System.Collections.Generic;
@@ -58,26 +57,26 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [XmlRoot("DeployManifest")]
     public sealed class DeployManifest : Manifest
     {
-        private string _createDesktopShortcut = null;
-        private string _deploymentUrl = null;
-        private string _disallowUrlActivation = null;
-        private AssemblyReference _entryPoint = null;
-        private string _errorReportUrl = null;
+        private string _createDesktopShortcut;
+        private string _deploymentUrl;
+        private string _disallowUrlActivation;
+        private AssemblyReference _entryPoint;
+        private string _errorReportUrl;
         private string _install = "true";
-        private string _mapFileExtensions = null;
-        private string _minimumRequiredVersion = null;
-        private string _product = null;
-        private string _publisher = null;
-        private string _suiteName = null;
-        private string _supportUrl = null;
-        private string _trustUrlParameters = null;
-        private string _updateEnabled = null;
+        private string _mapFileExtensions;
+        private string _minimumRequiredVersion;
+        private string _product;
+        private string _publisher;
+        private string _suiteName;
+        private string _supportUrl;
+        private string _trustUrlParameters;
+        private string _updateEnabled;
         private string _updateInterval = "0";
-        private string _updateMode = null;
+        private string _updateMode;
         private string _updateUnit = "days";
-        private CompatibleFrameworkCollection _compatibleFrameworkList = null;
-        private List<CompatibleFramework> _compatibleFrameworks = null;
-        private string _targetFrameworkMoniker = null;
+        private CompatibleFrameworkCollection _compatibleFrameworkList;
+        private List<CompatibleFramework> _compatibleFrameworks = new List<CompatibleFramework>();
+        private string _targetFrameworkMoniker;
 
         private const string _redistListFolder = "RedistList";
         private const string _redistListFile = "FrameworkList.xml";
@@ -87,7 +86,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         public DeployManifest()
         {
-            _compatibleFrameworks = new List<CompatibleFramework>();
         }
 
         /// <summary>
@@ -95,7 +93,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         public DeployManifest(string targetFrameworkMoniker)
         {
-            _compatibleFrameworks = new List<CompatibleFramework>();
             DiscoverCompatFrameworks(targetFrameworkMoniker);
         }
 
@@ -103,7 +100,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             if (!string.IsNullOrEmpty(moniker))
             {
-                FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(moniker);
+                var frameworkName = new FrameworkNameVersioning(moniker);
                 if (frameworkName.Version.Major >= 4)
                 {
                     _compatibleFrameworks.Clear();
@@ -132,12 +129,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// codes from GetInstallableFrameworkForTargetFxInternal in 
         /// env/vscore/package/FxMultiTargeting/FrameworkMultiTargetingInternal.cs
         /// </summary>
-        /// <param name="frameworkName"></param>
-        /// <returns></returns>
-        private FrameworkNameVersioning GetInstallableFrameworkName(FrameworkNameVersioning frameworkName)
+        private static FrameworkNameVersioning GetInstallableFrameworkName(FrameworkNameVersioning frameworkName)
         {
             string installableFramework = null;
-            FrameworkNameVersioning installableFrameworkObj = null;
+            FrameworkNameVersioning installableFrameworkObj;
 
             IList<string> referenceAssemblyPaths = GetPathToReferenceAssemblies(frameworkName);
 
@@ -178,7 +173,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return installableFrameworkObj;
         }
 
-        private string GetRedistListFilePath(string referenceAssemblyPath)
+        private static string GetRedistListFilePath(string referenceAssemblyPath)
         {
             string redistListPath = Path.Combine(referenceAssemblyPath, _redistListFolder);
             redistListPath = Path.Combine(redistListPath, _redistListFile);
@@ -186,7 +181,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return redistListPath;
         }
 
-        private IList<string> GetPathToReferenceAssemblies(FrameworkNameVersioning targetFrameworkMoniker)
+        private static IList<string> GetPathToReferenceAssemblies(FrameworkNameVersioning targetFrameworkMoniker)
         {
             IList<string> targetFrameworkPaths = null;
             try
@@ -210,29 +205,22 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <param name="redistListFilePath">the path to the redistlist file</param>
         /// <returns>InstallableFramework</returns>
-        private string GetInstallableFramework(string redistListFilePath)
+        private static string GetInstallableFramework(string redistListFilePath)
         {
             string installableFramework = null;
 
             try
             {
-                XmlDocument doc = new XmlDocument();
-                XmlReaderSettings xrSettings = new XmlReaderSettings();
-                xrSettings.DtdProcessing = DtdProcessing.Ignore;
+                var doc = new XmlDocument();
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader xr = XmlReader.Create(redistListFilePath, xrSettings))
                 {
                     doc.Load(xr);
                     XmlNode fileListNode = doc.DocumentElement;
-                    if (fileListNode != null)
+                    XmlAttribute nameattr = fileListNode?.Attributes["InstallableFramework"];
+                    if (!String.IsNullOrEmpty(nameattr?.Value))
                     {
-                        XmlAttribute nameattr = fileListNode.Attributes["InstallableFramework"];
-                        if (nameattr != null)
-                        {
-                            if (!String.IsNullOrEmpty(nameattr.Value))
-                            {
-                                installableFramework = nameattr.Value;
-                            }
-                        }
+                        installableFramework = nameattr.Value;
                     }
                 }
             }
@@ -244,7 +232,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
 
-        private CompatibleFramework GetSubsetCompatFramework(FrameworkNameVersioning frameworkName)
+        private static CompatibleFramework GetSubsetCompatFramework(FrameworkNameVersioning frameworkName)
         {
             CompatibleFramework compat = GetFullCompatFramework(frameworkName);
             compat.Profile = frameworkName.Profile;
@@ -252,13 +240,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return compat;
         }
 
-        private CompatibleFramework GetFullCompatFramework(FrameworkNameVersioning frameworkName)
+        private static CompatibleFramework GetFullCompatFramework(FrameworkNameVersioning frameworkName)
         {
-            CompatibleFramework compat = new CompatibleFramework();
-            compat.Version = frameworkName.Version.ToString();
-
-            compat.SupportedRuntime = PatchCLRVersion(Util.GetClrVersion(frameworkName.Version.ToString()));
-            compat.Profile = "Full";
+            var compat = new CompatibleFramework
+            {
+                Version = frameworkName.Version.ToString(),
+                SupportedRuntime = PatchCLRVersion(Util.GetClrVersion(frameworkName.Version.ToString())),
+                Profile = "Full"
+            };
 
             return compat;
         }
@@ -268,12 +257,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <param name="version"></param>
         /// <returns></returns>
-        private string PatchCLRVersion(string version)
+        private static string PatchCLRVersion(string version)
         {
             try
             {
-                Version ver = new Version(version);
-                Version result = new Version(ver.Major, ver.Minor, ver.Build);
+                var ver = new Version(version);
+                var result = new Version(ver.Major, ver.Minor, ver.Build);
                 return result.ToString();
             }
             catch (ArgumentException)
@@ -301,8 +290,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool CreateDesktopShortcut
         {
-            get { return ConvertUtil.ToBoolean(_createDesktopShortcut); }
-            set { _createDesktopShortcut = (value ? "true" : null); }
+            get => ConvertUtil.ToBoolean(_createDesktopShortcut);
+            set => _createDesktopShortcut = (value ? "true" : null);
         }
 
         /// <summary>
@@ -311,7 +300,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string TargetFrameworkMoniker
         {
-            get { return _targetFrameworkMoniker; }
+            get => _targetFrameworkMoniker;
             set
             {
                 _targetFrameworkMoniker = value;
@@ -328,7 +317,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             get
             {
                 if (_compatibleFrameworkList == null && _compatibleFrameworks != null)
+                {
                     _compatibleFrameworkList = new CompatibleFrameworkCollection(_compatibleFrameworks.ToArray());
+                }
                 return _compatibleFrameworkList;
             }
         }
@@ -342,8 +333,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string DeploymentUrl
         {
-            get { return _deploymentUrl; }
-            set { _deploymentUrl = value; }
+            get => _deploymentUrl;
+            set => _deploymentUrl = value;
         }
 
         /// <summary>
@@ -355,21 +346,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool DisallowUrlActivation
         {
-            get { return ConvertUtil.ToBoolean(_disallowUrlActivation); }
-            set { _disallowUrlActivation = value ? "true" : null; } // NOTE: disallowUrlActivation=false is implied, and Fusion prefers the false case to be unspecified
+            get => ConvertUtil.ToBoolean(_disallowUrlActivation);
+            set => _disallowUrlActivation = value ? "true" : null; // NOTE: disallowUrlActivation=false is implied, and Fusion prefers the false case to be unspecified
         }
 
         [XmlIgnore]
         public override AssemblyReference EntryPoint
         {
-            get
-            {
-                return _entryPoint;
-            }
-            set
-            {
-                _entryPoint = value;
-            }
+            get => _entryPoint;
+            set => _entryPoint = value;
         }
 
         /// <summary>
@@ -379,8 +364,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string ErrorReportUrl
         {
-            get { return _errorReportUrl; }
-            set { _errorReportUrl = value; }
+            get => _errorReportUrl;
+            set => _errorReportUrl = value;
         }
 
         /// <summary>
@@ -392,8 +377,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool Install
         {
-            get { return ConvertUtil.ToBoolean(_install); }
-            set { _install = Convert.ToString(value, CultureInfo.InvariantCulture); }
+            get => ConvertUtil.ToBoolean(_install);
+            set => _install = Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -405,8 +390,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool MapFileExtensions
         {
-            get { return ConvertUtil.ToBoolean(_mapFileExtensions); }
-            set { _mapFileExtensions = value ? "true" : null; } // NOTE: mapFileExtensions=false is implied, and Fusion prefers the false case to be unspecified
+            get => ConvertUtil.ToBoolean(_mapFileExtensions);
+            set => _mapFileExtensions = value ? "true" : null; // NOTE: mapFileExtensions=false is implied, and Fusion prefers the false case to be unspecified
         }
 
         /// <summary>
@@ -418,8 +403,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string MinimumRequiredVersion
         {
-            get { return _minimumRequiredVersion; }
-            set { _minimumRequiredVersion = value; }
+            get => _minimumRequiredVersion;
+            set => _minimumRequiredVersion = value;
         }
 
         internal override void OnAfterLoad()
@@ -436,7 +421,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             base.OnBeforeSave();
             if (AssemblyIdentity != null && String.IsNullOrEmpty(AssemblyIdentity.PublicKeyToken))
+            {
                 AssemblyIdentity.PublicKeyToken = "0000000000000000";
+            }
         }
 
         /// <summary>
@@ -447,8 +434,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Product
         {
-            get { return _product; }
-            set { _product = value; }
+            get => _product;
+            set => _product = value;
         }
 
         /// <summary>
@@ -459,8 +446,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Publisher
         {
-            get { return _publisher; }
-            set { _publisher = value; }
+            get => _publisher;
+            set => _publisher = value;
         }
 
         /// <summary>
@@ -470,8 +457,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string SuiteName
         {
-            get { return _suiteName; }
-            set { _suiteName = value; }
+            get => _suiteName;
+            set => _suiteName = value;
         }
 
         /// <summary>
@@ -481,8 +468,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string SupportUrl
         {
-            get { return _supportUrl; }
-            set { _supportUrl = value; }
+            get => _supportUrl;
+            set => _supportUrl = value;
         }
 
         /// <summary>
@@ -492,8 +479,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool TrustUrlParameters
         {
-            get { return ConvertUtil.ToBoolean(_trustUrlParameters); }
-            set { _trustUrlParameters = value ? "true" : null; } // NOTE: trustUrlParameters=false is implied, and Fusion prefers the false case to be unspecified
+            get => ConvertUtil.ToBoolean(_trustUrlParameters);
+            set => _trustUrlParameters = value ? "true" : null;
+            // NOTE: trustUrlParameters=false is implied, and Fusion prefers the false case to be unspecified
         }
 
         /// <summary>
@@ -504,8 +492,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public bool UpdateEnabled
         {
-            get { return ConvertUtil.ToBoolean(_updateEnabled); }
-            set { _updateEnabled = Convert.ToString(value, CultureInfo.InvariantCulture); }
+            get => ConvertUtil.ToBoolean(_updateEnabled);
+            set => _updateEnabled = Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -522,7 +510,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 catch (ArgumentException) { return 1; }
                 catch (FormatException) { return 1; }
             }
-            set { _updateInterval = Convert.ToString(value, CultureInfo.InvariantCulture); }
+            set => _updateInterval = Convert.ToString(value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -539,10 +527,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 catch (FormatException) { return UpdateMode.Foreground; }
                 catch (ArgumentException) { return UpdateMode.Foreground; }
             }
-            set
-            {
-                _updateMode = value.ToString();
-            }
+            set => _updateMode = value.ToString();
         }
 
         /// <summary>
@@ -558,10 +543,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 catch (FormatException) { return UpdateUnit.Days; }
                 catch (ArgumentException) { return UpdateUnit.Days; }
             }
-            set
-            {
-                _updateUnit = value.ToString();
-            }
+            set => _updateUnit = value.ToString();
         }
 
         public override void Validate()
@@ -576,33 +558,46 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private void ValidateDeploymentProvider()
         {
             if (!String.IsNullOrEmpty(_deploymentUrl) && PathUtil.IsLocalPath(_deploymentUrl))
+            {
                 OutputMessages.AddWarningMessage("GenerateManifest.InvalidDeploymentProvider");
+            }
         }
 
         private void ValidateEntryPoint()
         {
             if (_entryPoint != null)
             {
-                if (!String.IsNullOrEmpty(_entryPoint.TargetPath) && !_entryPoint.TargetPath.EndsWith(".manifest", StringComparison.OrdinalIgnoreCase))
-                    OutputMessages.AddErrorMessage("GenerateManifest.InvalidEntryPoint", _entryPoint.ToString());
-
-                string ManifestPath = _entryPoint.ResolvedPath;
-                if (ManifestPath == null)
-                    ManifestPath = Path.Combine(Path.GetDirectoryName(SourcePath), _entryPoint.TargetPath);
-                if (File.Exists(ManifestPath))
+                if (!String.IsNullOrEmpty(_entryPoint.TargetPath) && !_entryPoint.TargetPath.EndsWith(
+                        ".manifest",
+                        StringComparison.OrdinalIgnoreCase))
                 {
-                    ApplicationManifest entryPointManifest = ManifestReader.ReadManifest(ManifestPath, false) as ApplicationManifest;
+                    OutputMessages.AddErrorMessage("GenerateManifest.InvalidEntryPoint", _entryPoint.ToString());
+                }
+
+                string manifestPath = _entryPoint.ResolvedPath;
+                if (manifestPath == null)
+                {
+                    manifestPath = Path.Combine(Path.GetDirectoryName(SourcePath), _entryPoint.TargetPath);
+                }
+                if (File.Exists(manifestPath))
+                {
+                    ApplicationManifest entryPointManifest = ManifestReader.ReadManifest(manifestPath, false) as ApplicationManifest;
                     if (entryPointManifest != null)
                     {
                         if (Install)
                         {
                             if (entryPointManifest.HostInBrowser)
+                            {
                                 OutputMessages.AddErrorMessage("GenerateManifest.HostInBrowserNotOnlineOnly");
+                            }
                         }
                         else
                         {
-                            if (entryPointManifest.FileAssociations != null && entryPointManifest.FileAssociations.Count > 0)
+                            if (entryPointManifest.FileAssociations != null &&
+                                entryPointManifest.FileAssociations.Count > 0)
+                            {
                                 OutputMessages.AddErrorMessage("GenerateManifest.FileAssociationsNotInstalled");
+                            }
                         }
                     }
                 }
@@ -613,10 +608,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             if (!String.IsNullOrEmpty(_minimumRequiredVersion))
             {
-                Version v1 = new Version(_minimumRequiredVersion);
-                Version v2 = new Version(AssemblyIdentity.Version);
+                var v1 = new Version(_minimumRequiredVersion);
+                var v2 = new Version(AssemblyIdentity.Version);
                 if (v1 > v2)
+                {
                     OutputMessages.AddErrorMessage("GenerateManifest.GreaterMinimumRequiredVersion");
+                }
             }
         }
 
@@ -627,8 +624,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("CreateDesktopShortcut")]
         public string XmlCreateDesktopShortcut
         {
-            get { return _createDesktopShortcut != null ? _createDesktopShortcut.ToLowerInvariant() : null; }
-            set { _createDesktopShortcut = value; }
+            get => _createDesktopShortcut?.ToLowerInvariant();
+            set => _createDesktopShortcut = value;
         }
 
         [Browsable(false)]
@@ -636,8 +633,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlArray("CompatibleFrameworks")]
         public CompatibleFramework[] XmlCompatibleFrameworks
         {
-            get { return _compatibleFrameworks.Count > 0 ? _compatibleFrameworks.ToArray() : null; }
-            set { _compatibleFrameworks = new List<CompatibleFramework>(value); }
+            get => _compatibleFrameworks.Count > 0 ? _compatibleFrameworks.ToArray() : null;
+            set => _compatibleFrameworks = new List<CompatibleFramework>(value);
         }
 
         [Browsable(false)]
@@ -645,8 +642,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("DeploymentUrl")]
         public string XmlDeploymentUrl
         {
-            get { return _deploymentUrl; }
-            set { _deploymentUrl = value; }
+            get => _deploymentUrl;
+            set => _deploymentUrl = value;
         }
 
         [Browsable(false)]
@@ -654,8 +651,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("DisallowUrlActivation")]
         public string XmlDisallowUrlActivation
         {
-            get { return _disallowUrlActivation != null ? _disallowUrlActivation.ToLowerInvariant() : null; }
-            set { _disallowUrlActivation = value; }
+            get => _disallowUrlActivation?.ToLowerInvariant();
+            set => _disallowUrlActivation = value;
         }
 
         [Browsable(false)]
@@ -663,8 +660,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("ErrorReportUrl")]
         public string XmlErrorReportUrl
         {
-            get { return _errorReportUrl; }
-            set { _errorReportUrl = value; }
+            get => _errorReportUrl;
+            set => _errorReportUrl = value;
         }
 
         [Browsable(false)]
@@ -672,8 +669,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Install")]
         public string XmlInstall
         {
-            get { return !String.IsNullOrEmpty(_install) ? _install.ToLower(CultureInfo.InvariantCulture) : "true"; } // NOTE: Install attribute shouldn't be null in the manifest, so specify install="true" by default
-            set { _install = value; }
+            get => !String.IsNullOrEmpty(_install) ? _install.ToLower(CultureInfo.InvariantCulture) : "true";  // NOTE: Install attribute shouldn't be null in the manifest, so specify install="true" by default
+            set => _install = value;
         }
 
         [Browsable(false)]
@@ -681,8 +678,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("MapFileExtensions")]
         public string XmlMapFileExtensions
         {
-            get { return _mapFileExtensions != null ? _mapFileExtensions.ToLowerInvariant() : null; }
-            set { _mapFileExtensions = value; }
+            get => _mapFileExtensions?.ToLowerInvariant();
+            set => _mapFileExtensions = value;
         }
 
         [Browsable(false)]
@@ -690,8 +687,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("MinimumRequiredVersion")]
         public string XmlMinimumRequiredVersion
         {
-            get { return _minimumRequiredVersion; }
-            set { _minimumRequiredVersion = value; }
+            get => _minimumRequiredVersion;
+            set => _minimumRequiredVersion = value;
         }
 
         [Browsable(false)]
@@ -699,8 +696,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Product")]
         public string XmlProduct
         {
-            get { return _product; }
-            set { _product = value; }
+            get => _product;
+            set => _product = value;
         }
 
         [Browsable(false)]
@@ -708,8 +705,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Publisher")]
         public string XmlPublisher
         {
-            get { return _publisher; }
-            set { _publisher = value; }
+            get => _publisher;
+            set => _publisher = value;
         }
 
         [Browsable(false)]
@@ -717,8 +714,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("SuiteName")]
         public string XmlSuiteName
         {
-            get { return _suiteName; }
-            set { _suiteName = value; }
+            get => _suiteName;
+            set => _suiteName = value;
         }
 
         [Browsable(false)]
@@ -726,8 +723,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("SupportUrl")]
         public string XmlSupportUrl
         {
-            get { return _supportUrl; }
-            set { _supportUrl = value; }
+            get => _supportUrl;
+            set => _supportUrl = value;
         }
 
         [Browsable(false)]
@@ -735,8 +732,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("TrustUrlParameters")]
         public string XmlTrustUrlParameters
         {
-            get { return _trustUrlParameters != null ? _trustUrlParameters.ToLowerInvariant() : null; }
-            set { _trustUrlParameters = value; }
+            get => _trustUrlParameters?.ToLowerInvariant();
+            set => _trustUrlParameters = value;
         }
 
         [Browsable(false)]
@@ -744,8 +741,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("UpdateEnabled")]
         public string XmlUpdateEnabled
         {
-            get { return _updateEnabled != null ? _updateEnabled.ToLower(CultureInfo.InvariantCulture) : null; }
-            set { _updateEnabled = value; }
+            get => _updateEnabled?.ToLower(CultureInfo.InvariantCulture);
+            set => _updateEnabled = value;
         }
 
         [Browsable(false)]
@@ -753,8 +750,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("UpdateInterval")]
         public string XmlUpdateInterval
         {
-            get { return _updateInterval; }
-            set { _updateInterval = value; }
+            get => _updateInterval;
+            set => _updateInterval = value;
         }
 
         [Browsable(false)]
@@ -762,8 +759,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("UpdateMode")]
         public string XmlUpdateMode
         {
-            get { return _updateMode; }
-            set { _updateMode = value; }
+            get => _updateMode;
+            set => _updateMode = value;
         }
 
         [Browsable(false)]
@@ -771,8 +768,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("UpdateUnit")]
         public string XmlUpdateUnit
         {
-            get { return _updateUnit != null ? _updateUnit.ToLower(CultureInfo.InvariantCulture) : null; }
-            set { _updateUnit = value; }
+            get => _updateUnit?.ToLower(CultureInfo.InvariantCulture);
+            set => _updateUnit = value;
         }
 
         #endregion

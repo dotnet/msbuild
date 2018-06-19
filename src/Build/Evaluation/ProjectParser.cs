@@ -7,10 +7,7 @@
 
 using Microsoft.Build.Shared;
 using System;
-using System.Xml;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using Microsoft.Build.Framework;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -38,57 +35,62 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attribute list when only Condition and Label are valid
         /// </summary>
-        private readonly static string[] s_validAttributesOnlyConditionAndLabel = new string[] { XMakeAttributes.condition, XMakeAttributes.label };
+        private static readonly HashSet<string> ValidAttributesOnlyConditionAndLabel = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label };
 
         /// <summary>
         /// Valid attribute list for item
         /// </summary>
-        private readonly static string[] s_knownAttributesOnItem = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update };
+        private static readonly HashSet<string> KnownAttributesOnItem = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.include, XMakeAttributes.exclude, XMakeAttributes.remove, XMakeAttributes.keepMetadata, XMakeAttributes.removeMetadata, XMakeAttributes.keepDuplicates, XMakeAttributes.update };
+
+        /// <summary>
+        /// Valid attributes list for item which is case-insensitive.
+        /// </summary>
+        private static readonly HashSet<string> KnownAttributesOnItemIgnoreCase = new HashSet<string>(KnownAttributesOnItem, StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Valid attributes on import element
         /// </summary>
-        private readonly static string[] s_validAttributesOnImport = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project, XMakeAttributes.sdk, XMakeAttributes.sdkVersion, XMakeAttributes.sdkMinimumVersion };
+        private static readonly HashSet<string> ValidAttributesOnImport = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.project, XMakeAttributes.sdk, XMakeAttributes.sdkVersion, XMakeAttributes.sdkMinimumVersion };
 
         /// <summary>
         /// Valid attributes on usingtask element
         /// </summary>
-        private readonly static string[] s_validAttributesOnUsingTask = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName, XMakeAttributes.taskFactory, XMakeAttributes.architecture, XMakeAttributes.runtime, XMakeAttributes.requiredPlatform, XMakeAttributes.requiredRuntime };
+        private static readonly HashSet<string> ValidAttributesOnUsingTask = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName, XMakeAttributes.taskFactory, XMakeAttributes.architecture, XMakeAttributes.runtime, XMakeAttributes.requiredPlatform, XMakeAttributes.requiredRuntime };
 
         /// <summary>
         /// Valid attributes on target element
         /// </summary>
-        private readonly static string[] s_validAttributesOnTarget = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.name, XMakeAttributes.inputs, XMakeAttributes.outputs, XMakeAttributes.keepDuplicateOutputs, XMakeAttributes.dependsOnTargets, XMakeAttributes.beforeTargets, XMakeAttributes.afterTargets, XMakeAttributes.returns };
+        private static readonly HashSet<string> ValidAttributesOnTarget = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.name, XMakeAttributes.inputs, XMakeAttributes.outputs, XMakeAttributes.keepDuplicateOutputs, XMakeAttributes.dependsOnTargets, XMakeAttributes.beforeTargets, XMakeAttributes.afterTargets, XMakeAttributes.returns };
 
         /// <summary>
         /// Valid attributes on on error element
         /// </summary>
-        private readonly static string[] s_validAttributesOnOnError = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.executeTargets };
+        private static readonly HashSet<string> ValidAttributesOnOnError = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.executeTargets };
 
         /// <summary>
         /// Valid attributes on output element
         /// </summary>
-        private readonly static string[] s_validAttributesOnOutput = new string[] { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskParameter, XMakeAttributes.itemName, XMakeAttributes.propertyName };
+        private static readonly HashSet<string> ValidAttributesOnOutput = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskParameter, XMakeAttributes.itemName, XMakeAttributes.propertyName };
 
         /// <summary>
         /// Valid attributes on UsingTaskParameter element
         /// </summary>
-        private readonly static string[] s_validAttributesOnUsingTaskParameter = new string[] { XMakeAttributes.parameterType, XMakeAttributes.output, XMakeAttributes.required };
+        private static readonly HashSet<string> ValidAttributesOnUsingTaskParameter = new HashSet<string> { XMakeAttributes.parameterType, XMakeAttributes.output, XMakeAttributes.required };
 
         /// <summary>
         /// Valid attributes on UsingTaskTask element
         /// </summary>
-        private readonly static string[] s_validAttributesOnUsingTaskBody = new string[] { XMakeAttributes.evaluate };
+        private static readonly HashSet<string> ValidAttributesOnUsingTaskBody = new HashSet<string> { XMakeAttributes.evaluate };
 
         /// <summary>
         /// The ProjectRootElement to parse into
         /// </summary>
-        private ProjectRootElement _project;
+        private readonly ProjectRootElement _project;
 
         /// <summary>
         /// The document to parse from
         /// </summary>
-        private XmlDocumentWithLocation _document;
+        private readonly XmlDocumentWithLocation _document;
 
         /// <summary>
         /// Whether a ProjectExtensions node has been encountered already.
@@ -149,15 +151,7 @@ namespace Microsoft.Build.Construction
         private void Parse()
         {
             // XML guarantees exactly one root element
-            XmlElementWithLocation element = null;
-            foreach (XmlNode childNode in _document.ChildNodes)
-            {
-                if (childNode.NodeType == XmlNodeType.Element)
-                {
-                    element = (XmlElementWithLocation)childNode;
-                    break;
-                }
-            }
+            XmlElementWithLocation element = _document.DocumentElement as XmlElementWithLocation;
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(element != null, ElementLocation.Create(_document.FullPath), "NoRootProjectElement", XMakeElements.project);
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.Name != XMakeElements.visualStudioProject, element.Location, "ProjectUpgradeNeeded", _project.FullPath);
@@ -174,73 +168,55 @@ namespace Microsoft.Build.Construction
                 _project.XmlNamespace = element.NamespaceURI;
             }
 
-            ParseProjectElement(element);
-        }
-
-        /// <summary>
-        /// Parse a ProjectRootElement from an element
-        /// </summary>
-        private void ParseProjectElement(XmlElementWithLocation element)
-        {
             // Historically, we allow any attribute on the Project element
 
-            // The element wasn't available to the ProjectRootElement constructor,
-            // so we have to set it now
+            // The element wasn't available to the ProjectRootElement constructor so we have to set it now
             _project.SetProjectRootElementFromParser(element, _project);
 
-
-            ParseProjectRootElementChildren(element);
-        }
-
-        /// <summary>
-        /// Parse the child of a ProjectRootElement
-        /// </summary>
-        private void ParseProjectRootElementChildren(XmlElementWithLocation element)
-        {
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
-                ProjectElement child = null;
-
                 switch (childElement.Name)
                 {
                     case XMakeElements.propertyGroup:
-                        child = ParseProjectPropertyGroupElement(childElement, _project);
+                        _project.AppendParentedChildNoChecks(ParseProjectPropertyGroupElement(childElement, _project));
                         break;
 
                     case XMakeElements.itemGroup:
-                        child = ParseProjectItemGroupElement(childElement, _project);
+                        _project.AppendParentedChildNoChecks(ParseProjectItemGroupElement(childElement, _project));
                         break;
 
                     case XMakeElements.importGroup:
-                        child = ParseProjectImportGroupElement(childElement, _project);
+                        _project.AppendParentedChildNoChecks(ParseProjectImportGroupElement(childElement, _project));
                         break;
 
                     case XMakeElements.import:
-                        child = ParseProjectImportElement(childElement, _project);
+                        _project.AppendParentedChildNoChecks(ParseProjectImportElement(childElement, _project));
                         break;
 
                     case XMakeElements.usingTask:
-                        child = ParseProjectUsingTaskElement(childElement);
+                        _project.AppendParentedChildNoChecks(ParseProjectUsingTaskElement(childElement));
                         break;
 
                     case XMakeElements.target:
-                        child = ParseProjectTargetElement(childElement);
+                        _project.AppendParentedChildNoChecks(ParseProjectTargetElement(childElement));
                         break;
 
                     case XMakeElements.itemDefinitionGroup:
-                        child = ParseProjectItemDefinitionGroupElement(childElement);
+                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement));
                         break;
 
                     case XMakeElements.choose:
-                        child = ParseProjectChooseElement(childElement, _project, 0 /* nesting depth */);
+                        _project.AppendParentedChildNoChecks(ParseProjectChooseElement(childElement, _project, 0 /* nesting depth */));
                         break;
 
                     case XMakeElements.projectExtensions:
-                        child = ParseProjectExtensionsElement(childElement);
+                        _project.AppendParentedChildNoChecks(ParseProjectExtensionsElement(childElement));
                         break;
+
                     case XMakeElements.sdk:
-                        child = ParseProjectSdkElement(childElement);
+                        _project.AppendParentedChildNoChecks(ParseProjectSdkElement(childElement));
                         break;
+
                     // Obsolete
                     case XMakeElements.error:
                     case XMakeElements.warning:
@@ -252,8 +228,6 @@ namespace Microsoft.Build.Construction
                         ProjectXmlUtilities.ThrowProjectInvalidChildElement(childElement.Name, childElement.ParentNode.Name, childElement.Location);
                         break;
                 }
-
-                _project.AppendParentedChildNoChecks(child);
             }
         }
 
@@ -262,13 +236,18 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectPropertyGroupElement ParseProjectPropertyGroupElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnlyConditionAndLabel);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
             ProjectPropertyGroupElement propertyGroup = new ProjectPropertyGroupElement(element, parent, _project);
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
-                ProjectPropertyElement property = ParseProjectPropertyElement(childElement, propertyGroup);
+                ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnlyConditionAndLabel);
+                XmlUtilities.VerifyThrowProjectValidElementName(childElement);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!XMakeElements.ReservedItemNames.Contains(childElement.Name) && !ReservedPropertyNames.IsReservedProperty(childElement.Name), childElement.Location, "CannotModifyReservedProperty", childElement.Name);
+
+                // All children inside a property are ignored, since they are only part of its value
+                ProjectPropertyElement property = new ProjectPropertyElement(childElement, propertyGroup, _project);
 
                 propertyGroup.AppendParentedChildNoChecks(property);
             }
@@ -276,26 +255,13 @@ namespace Microsoft.Build.Construction
             return propertyGroup;
         }
 
-        /// <summary>
-        /// Parse a ProjectPropertyElement from the element
-        /// </summary>
-        private ProjectPropertyElement ParseProjectPropertyElement(XmlElementWithLocation element, ProjectPropertyGroupElement parent)
-        {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnlyConditionAndLabel);
-
-            XmlUtilities.VerifyThrowProjectValidElementName(element);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(XMakeElements.IllegalItemPropertyNames[element.Name] == null && !ReservedPropertyNames.IsReservedProperty(element.Name), element.Location, "CannotModifyReservedProperty", element.Name);
-
-            // All children inside a property are ignored, since they are only part of its value
-            return new ProjectPropertyElement(element, parent, _project);
-        }
 
         /// <summary>
         /// Parse a ProjectItemGroupElement
         /// </summary>
         private ProjectItemGroupElement ParseProjectItemGroupElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnlyConditionAndLabel);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
             ProjectItemGroupElement itemGroup = new ProjectItemGroupElement(element, parent, _project);
 
@@ -363,7 +329,7 @@ namespace Microsoft.Build.Construction
             ProjectErrorUtilities.VerifyThrowInvalidProject(update.Length > 0 || element.Attributes[XMakeAttributes.update] == null, element.Location, "MissingRequiredAttribute", XMakeAttributes.update, itemType);
 
             XmlUtilities.VerifyThrowProjectValidElementName(element);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(XMakeElements.IllegalItemPropertyNames[itemType] == null, element.Location, "CannotModifyReservedItem", itemType);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!XMakeElements.ReservedItemNames.Contains(itemType), element.Location, "CannotModifyReservedItem", itemType);
 
             ProjectItemElement item = new ProjectItemElement(element, parent, _project);
 
@@ -407,22 +373,21 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            for (int i = 0; i < s_knownAttributesOnItem.Length; i++)
+            if (KnownAttributesOnItem.Contains(name))
             {
-                //  Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
-                //  error instead of unexpected behavior
-                if (name == s_knownAttributesOnItem[i])
-                {
-                    isReservedAttributeName = true;
-                    isValidMetadataNameInAttribute = false;
-                    return;
-                }
-                else if (name.Equals(s_knownAttributesOnItem[i], StringComparison.OrdinalIgnoreCase))
-                {
-                    isReservedAttributeName = false;
-                    isValidMetadataNameInAttribute = false;
-                    return;
-                }
+                isReservedAttributeName = true;
+                isValidMetadataNameInAttribute = false;
+
+                return;
+            }
+
+            //  Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
+            //  error instead of unexpected behavior
+            if (KnownAttributesOnItemIgnoreCase.Contains(name))
+            {
+                isReservedAttributeName = false;
+                isValidMetadataNameInAttribute = false;
+                return;
             }
 
             //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
@@ -433,8 +398,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
-                XMakeElements.IllegalItemPropertyNames[name] != null)
+            if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) || XMakeElements.ReservedItemNames.Contains(name))
             {
                 isReservedAttributeName = false;
                 isValidMetadataNameInAttribute = false;
@@ -450,13 +414,13 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectMetadataElement ParseProjectMetadataElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnlyConditionAndLabel);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
             XmlUtilities.VerifyThrowProjectValidElementName(element);
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(parent is ProjectItemElement) || ((ProjectItemElement)parent).Remove.Length == 0, element.Location, "ChildElementsBelowRemoveNotAllowed", element.Name);
             ProjectErrorUtilities.VerifyThrowInvalidProject(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(element.Name), element.Location, "ItemSpecModifierCannotBeCustomMetadata", element.Name);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(XMakeElements.IllegalItemPropertyNames[element.Name] == null, element.Location, "CannotModifyReservedItemMetadata", element.Name);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(!XMakeElements.ReservedItemNames.Contains(element.Name), element.Location, "CannotModifyReservedItemMetadata", element.Name);
 
             ProjectMetadataElement metadatum = new ProjectMetadataElement(element, parent, _project);
 
@@ -478,20 +442,20 @@ namespace Microsoft.Build.Construction
         /// <returns>A ProjectImportGroupElement derived from the XML element passed in</returns>
         private ProjectImportGroupElement ParseProjectImportGroupElement(XmlElementWithLocation element, ProjectRootElement parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnlyConditionAndLabel);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
             ProjectImportGroupElement importGroup = new ProjectImportGroupElement(element, parent, _project);
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (
+                (
                     childElement.Name == XMakeElements.import,
                     childElement.Location,
                     "UnrecognizedChildElement",
                     childElement.Name,
                     element.Name
-                    );
+                );
 
                 ProjectImportElement item = ParseProjectImportElement(childElement, importGroup);
 
@@ -507,15 +471,15 @@ namespace Microsoft.Build.Construction
         private ProjectImportElement ParseProjectImportElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+            (
                 parent is ProjectRootElement || parent is ProjectImportGroupElement,
                 element.Location,
                 "UnrecognizedParentElement",
                 parent,
                 element
-                );
+            );
 
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnImport);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnImport);
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.project);
             ProjectXmlUtilities.VerifyThrowProjectNoChildElements(element);
 
@@ -551,7 +515,9 @@ namespace Microsoft.Build.Construction
                 }
                 else
                 {
-                    ProjectUsingTaskParameterElement parameter = ParseUsingTaskParameterElement(childElement, parameterGroup);
+                    ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnUsingTaskParameter);
+                    XmlUtilities.VerifyThrowProjectValidElementName(childElement);
+                    ProjectUsingTaskParameterElement parameter = new ProjectUsingTaskParameterElement(childElement, parameterGroup, _project);
                     parameterGroup.AppendParentedChildNoChecks(parameter);
 
                     // Add the name of the child element to the hashset so we can check for a duplicate child element
@@ -563,45 +529,25 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Parse a UsingTaskBodyElement from the element
-        /// </summary>
-        private ProjectUsingTaskBodyElement ParseUsingTaskBodyElement(XmlElementWithLocation element, ProjectUsingTaskElement parent)
-        {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnUsingTaskBody);
-            XmlUtilities.VerifyThrowProjectValidElementName(element);
-            return new ProjectUsingTaskBodyElement(element, parent, _project);
-        }
-
-        /// <summary>
-        /// Parse a UsingTaskParameterElement from the element
-        /// </summary>
-        private ProjectUsingTaskParameterElement ParseUsingTaskParameterElement(XmlElementWithLocation element, UsingTaskParameterGroupElement parent)
-        {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnUsingTaskParameter);
-            XmlUtilities.VerifyThrowProjectValidElementName(element);
-            return new ProjectUsingTaskParameterElement(element, parent, _project);
-        }
-
-        /// <summary>
         /// Parse a ProjectUsingTaskElement
         /// </summary>
         private ProjectUsingTaskElement ParseProjectUsingTaskElement(XmlElementWithLocation element)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnUsingTask);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnUsingTask);
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.GetAttribute(XMakeAttributes.taskName).Length > 0, element.Location, "ProjectTaskNameEmpty");
 
             string assemblyName = element.GetAttribute(XMakeAttributes.assemblyName);
             string assemblyFile = element.GetAttribute(XMakeAttributes.assemblyFile);
 
             ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
-                ((assemblyName.Length > 0) ^ (assemblyFile.Length > 0)),
+            (
+                (assemblyName.Length > 0) ^ (assemblyFile.Length > 0),
                 element.Location,
                 "UsingTaskAssemblySpecification",
                 XMakeElements.usingTask,
                 XMakeAttributes.assemblyName,
                 XMakeAttributes.assemblyFile
-                );
+            );
 
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.assemblyName);
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.assemblyFile);
@@ -632,7 +578,9 @@ namespace Microsoft.Build.Construction
                             ProjectXmlUtilities.ThrowProjectInvalidChildElementDueToDuplicate(childElement);
                         }
 
-                        child = ParseUsingTaskBodyElement(childElement, usingTask);
+                        ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnUsingTaskBody);
+
+                        child = new ProjectUsingTaskBodyElement(childElement, usingTask, _project);
                         foundTaskElement = true;
                         break;
                     default:
@@ -651,15 +599,13 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectTargetElement ParseProjectTargetElement(XmlElementWithLocation element)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnTarget);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnTarget);
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.name);
 
-            string targetName = ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.name);
-
             // Orcas compat: all target names are automatically unescaped
-            targetName = EscapingUtilities.UnescapeAll(targetName);
+            string targetName = EscapingUtilities.UnescapeAll(ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.name));
 
-            int indexOfSpecialCharacter = targetName.IndexOfAny(XMakeElements.illegalTargetNameCharacters);
+            int indexOfSpecialCharacter = targetName.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
             if (indexOfSpecialCharacter >= 0)
             {
                 ProjectErrorUtilities.ThrowInvalidProject(element.GetAttributeLocation(XMakeAttributes.name), "NameInvalid", targetName, targetName[indexOfSpecialCharacter]);
@@ -693,8 +639,13 @@ namespace Microsoft.Build.Construction
                         break;
 
                     case XMakeElements.onError:
-                        onError = ParseProjectOnErrorElement(childElement, target);
-                        child = onError;
+                        // Previous OM accidentally didn't verify ExecuteTargets on parse,
+                        // but we do, as it makes no sense 
+                        ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnOnError);
+                        ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(childElement, XMakeAttributes.executeTargets);
+                        ProjectXmlUtilities.VerifyThrowProjectNoChildElements(childElement);
+
+                        child = onError = new ProjectOnErrorElement(childElement, target, _project);
                         break;
 
                     case XMakeElements.itemDefinitionGroup:
@@ -726,12 +677,12 @@ namespace Microsoft.Build.Construction
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject
                 (
-                !XMakeAttributes.IsBadlyCasedSpecialTaskAttribute(attribute.Name),
-                attribute.Location,
-                "BadlyCasedSpecialTaskAttribute",
-                attribute.Name,
-                element.Name,
-                element.Name
+                    !XMakeAttributes.IsBadlyCasedSpecialTaskAttribute(attribute.Name),
+                    attribute.Location,
+                    "BadlyCasedSpecialTaskAttribute",
+                    attribute.Name,
+                    element.Name,
+                    element.Name
                 );
             }
 
@@ -754,42 +705,27 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectOutputElement ParseProjectOutputElement(XmlElementWithLocation element, ProjectTaskElement parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnOutput);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnOutput);
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.taskParameter);
             ProjectXmlUtilities.VerifyThrowProjectNoChildElements(element);
 
-            string taskParameter = element.GetAttribute(XMakeAttributes.taskParameter);
-            string itemName = element.GetAttribute(XMakeAttributes.itemName);
-            string propertyName = element.GetAttribute(XMakeAttributes.propertyName);
+            XmlAttributeWithLocation itemNameAttribute = element.GetAttributeWithLocation(XMakeAttributes.itemName);
+            XmlAttributeWithLocation propertyNameAttribute = element.GetAttributeWithLocation(XMakeAttributes.propertyName);
 
             ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
-                (itemName.Length > 0 || propertyName.Length > 0) && (itemName.Length == 0 || propertyName.Length == 0),
+            (
+                String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && !String.IsNullOrWhiteSpace(propertyNameAttribute?.Value) || !String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && String.IsNullOrWhiteSpace(propertyNameAttribute?.Value),
                 element.Location,
                 "InvalidTaskOutputSpecification",
                 parent.Name
-                );
+            );
 
-            ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.itemName);
-            ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.propertyName);
+            ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, itemNameAttribute, XMakeAttributes.itemName);
+            ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, propertyNameAttribute, XMakeAttributes.propertyName);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject(!ReservedPropertyNames.IsReservedProperty(propertyName), element.Location, "CannotModifyReservedProperty", propertyName);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(String.IsNullOrWhiteSpace(propertyNameAttribute?.Value) || !ReservedPropertyNames.IsReservedProperty(propertyNameAttribute.Value), element.Location, "CannotModifyReservedProperty", propertyNameAttribute?.Value);
 
             return new ProjectOutputElement(element, parent, _project);
-        }
-
-        /// <summary>
-        /// Parse a ProjectOnErrorElement
-        /// </summary>
-        private ProjectOnErrorElement ParseProjectOnErrorElement(XmlElementWithLocation element, ProjectTargetElement parent)
-        {
-            // Previous OM accidentally didn't verify ExecuteTargets on parse,
-            // but we do, as it makes no sense 
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnOnError);
-            ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.executeTargets);
-            ProjectXmlUtilities.VerifyThrowProjectNoChildElements(element);
-
-            return new ProjectOnErrorElement(element, parent, _project);
         }
 
         /// <summary>
@@ -797,7 +733,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnlyConditionAndLabel);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
             ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, _project, _project);
 
@@ -816,7 +752,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectItemDefinitionElement ParseProjectItemDefinitionXml(XmlElementWithLocation element, ProjectItemDefinitionGroupElement parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, s_validAttributesOnlyConditionAndLabel);
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
             // Orcas inadvertently did not check for reserved item types (like "Choose") in item definitions,
             // as we do for item types in item groups. So we do not have a check here.
@@ -875,7 +811,6 @@ namespace Microsoft.Build.Construction
                 choose.AppendParentedChildNoChecks(child);
             }
 
-            nestingDepth--;
             ProjectErrorUtilities.VerifyThrowInvalidProject(foundWhen, element.Location, "ChooseMustContainWhen");
 
             return choose;
@@ -958,7 +893,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Parse a ProjectExtensionsElement
+        /// Parse a ProjectSdkElement
         /// </summary>
         private ProjectSdkElement ParseProjectSdkElement(XmlElementWithLocation element)
         {

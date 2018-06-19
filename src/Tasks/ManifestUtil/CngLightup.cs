@@ -174,9 +174,7 @@ namespace System.Security.Cryptography
         {
             // Because RSACryptoServiceProvider existed in 4.5, but RSACng didn't, and RSA's SignData
             // method requires types that aren't in 4.5, try RSACryptoServiceProvider's way first.
-            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
-
-            if (rsaCsp != null)
+            if (rsa is RSACryptoServiceProvider rsaCsp)
             {
                 return rsaCsp.SignData(data, hashAlgorithmName);
             }
@@ -231,9 +229,7 @@ namespace System.Security.Cryptography
         {
             // Because RSACryptoServiceProvider existed in 4.5, but RSACng didn't, and RSA's SignData
             // method requires types that aren't in 4.5, try RSACryptoServiceProvider's way first.
-            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
-
-            if (rsaCsp != null)
+            if (rsa is RSACryptoServiceProvider rsaCsp)
             {
                 return rsaCsp.VerifyData(data, hashAlgorithmName, signature);
             }
@@ -299,9 +295,7 @@ namespace System.Security.Cryptography
         {
             // Because RSACryptoServiceProvider existed in 4.5, but RSACng didn't, and RSA's Encrypt
             // method requires types that aren't in 4.5, try RSACryptoServiceProvider's way first.
-            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
-
-            if (rsaCsp != null)
+            if (rsa is RSACryptoServiceProvider rsaCsp)
             {
                 return rsaCsp.Encrypt(data, false);
             }
@@ -313,10 +307,7 @@ namespace System.Security.Cryptography
                 Delegate openDelegate = BindRsaCryptMethod("Encrypt");
 
                 s_rsaPkcs1EncryptMethod =
-                    (delegateRsa, delegateData) =>
-                    {
-                        return (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_pkcs1EncryptionPadding);
-                    };
+                    (delegateRsa, delegateData) => (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_pkcs1EncryptionPadding);
             }
 
             Debug.Assert(s_rsaPkcs1EncryptMethod != null);
@@ -327,9 +318,7 @@ namespace System.Security.Cryptography
         {
             // Because RSACryptoServiceProvider existed in 4.5, but RSACng didn't, and RSA's Decrypt
             // method requires types that aren't in 4.5, try RSACryptoServiceProvider's way first.
-            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
-
-            if (rsaCsp != null)
+            if (rsa is RSACryptoServiceProvider rsaCsp)
             {
                 return rsaCsp.Decrypt(data, false);
             }
@@ -341,10 +330,7 @@ namespace System.Security.Cryptography
                 Delegate openDelegate = BindRsaCryptMethod("Decrypt");
 
                 s_rsaPkcs1DecryptMethod =
-                    (delegateRsa, delegateData) =>
-                    {
-                        return (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_pkcs1EncryptionPadding);
-                    };
+                    (delegateRsa, delegateData) => (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_pkcs1EncryptionPadding);
             }
 
             Debug.Assert(s_rsaPkcs1DecryptMethod != null);
@@ -355,9 +341,8 @@ namespace System.Security.Cryptography
         {
             // Because RSACryptoServiceProvider existed in 4.5, but RSACng didn't, and RSA's Encrypt
             // method requires types that aren't in 4.5, try RSACryptoServiceProvider's way first.
-            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
 
-            if (rsaCsp != null)
+            if (rsa is RSACryptoServiceProvider rsaCsp)
             {
                 return rsaCsp.Encrypt(data, true);
             }
@@ -369,10 +354,7 @@ namespace System.Security.Cryptography
                 Delegate openDelegate = BindRsaCryptMethod("Encrypt");
 
                 s_rsaOaepSha1EncryptMethod =
-                    (delegateRsa, delegateData) =>
-                    {
-                        return (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_oaepSha1EncryptionPadding);
-                    };
+                    (delegateRsa, delegateData) => (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_oaepSha1EncryptionPadding);
             }
 
             Debug.Assert(s_rsaOaepSha1EncryptMethod != null);
@@ -383,9 +365,7 @@ namespace System.Security.Cryptography
         {
             // Because RSACryptoServiceProvider existed in 4.5, but RSACng didn't, and RSA's Decrypt
             // method requires types that aren't in 4.5, try RSACryptoServiceProvider's way first.
-            RSACryptoServiceProvider rsaCsp = rsa as RSACryptoServiceProvider;
-
-            if (rsaCsp != null)
+            if (rsa is RSACryptoServiceProvider rsaCsp)
             {
                 return rsaCsp.Decrypt(data, true);
             }
@@ -397,10 +377,7 @@ namespace System.Security.Cryptography
                 Delegate openDelegate = BindRsaCryptMethod("Decrypt");
 
                 s_rsaOaepSha1DecryptMethod =
-                    (delegateRsa, delegateData) =>
-                    {
-                        return (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_oaepSha1EncryptionPadding);
-                    };
+                    (delegateRsa, delegateData) => (byte[])openDelegate.DynamicInvoke(delegateRsa, delegateData, s_oaepSha1EncryptionPadding);
             }
 
             Debug.Assert(s_rsaOaepSha1DecryptMethod != null);

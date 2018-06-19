@@ -32,39 +32,23 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Sugested redirects as output from the ResolveAssemblyReference task.
         /// </summary>
-        public ITaskItem[] SuggestedRedirects
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] SuggestedRedirects { get; set; }
 
         /// <summary>
         /// Path to the app.config source file.
         /// </summary>
-        public ITaskItem AppConfigFile
-        {
-            get;
-            set;
-        }
+        public ITaskItem AppConfigFile { get; set; }
 
         /// <summary>
         /// Name of the output application config file: $(TargetFileName).config
         /// </summary>
-        public string TargetName
-        {
-            get;
-            set;
-        }
+        public string TargetName { get; set; }
 
         /// <summary>
         /// Path to an intermediate file where we can write the input app.config plus the generated binding redirects.
         /// </summary>
         [Output]
-        public ITaskItem OutputAppConfigFile
-        {
-            get;
-            set;
-        }
+        public ITaskItem OutputAppConfigFile { get; set; }
 
         /// <summary>
         /// Execute the task.
@@ -87,10 +71,10 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            var runtimeNode = doc.Root.Nodes()
-                                        .OfType<XElement>()
-                                        .Where(e => e.Name.LocalName == "runtime")
-                                        .FirstOrDefault();
+            XElement runtimeNode = doc.Root
+                                      .Nodes()
+                                      .OfType<XElement>()
+                                      .FirstOrDefault(e => e.Name.LocalName == "runtime");
 
             if (runtimeNode == null)
             {
@@ -224,10 +208,10 @@ namespace Microsoft.Build.Tasks
 
                 foreach (var dependentAssembly in dependentAssemblies)
                 {
-                    var assemblyIdentity = dependentAssembly.Nodes()
+                    var assemblyIdentity = dependentAssembly
+                        .Nodes()
                         .OfType<XElement>()
-                        .Where(e => e.Name.LocalName == "assemblyIdentity")
-                        .FirstOrDefault();
+                        .FirstOrDefault(e => e.Name.LocalName == "assemblyIdentity");
 
                     if (assemblyIdentity == null)
                     {
@@ -237,10 +221,10 @@ namespace Microsoft.Build.Tasks
                         continue;
                     }
 
-                    var bindingRedirect = dependentAssembly.Nodes()
+                    var bindingRedirect = dependentAssembly
+                        .Nodes()
                         .OfType<XElement>()
-                        .Where(e => e.Name.LocalName == "bindingRedirect")
-                        .FirstOrDefault();
+                        .FirstOrDefault(e => e.Name.LocalName == "bindingRedirect");
 
                     if (bindingRedirect == null)
                     {
@@ -260,7 +244,7 @@ namespace Microsoft.Build.Tasks
                     var nameValue = name.Value;
                     var publicKeyTokenValue = publicKeyToken.Value;
                     var culture = assemblyIdentity.Attribute("culture");
-                    var cultureValue = culture == null ? String.Empty : culture.Value;
+                    var cultureValue = culture?.Value ?? String.Empty;
 
                     var oldVersionAttribute = bindingRedirect.Attribute("oldVersion");
                     var newVersionAttribute = bindingRedirect.Attribute("newVersion");
@@ -271,7 +255,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     var oldVersionRange = oldVersionAttribute.Value.Split('-');
-                    if (oldVersionRange == null || oldVersionRange.Length == 0 || oldVersionRange.Length > 2)
+                    if (oldVersionRange.Length == 0 || oldVersionRange.Length > 2)
                     {
                         continue;
                     }
@@ -279,14 +263,13 @@ namespace Microsoft.Build.Tasks
                     var oldVerStrLow = oldVersionRange[0];
                     var oldVerStrHigh = oldVersionRange[oldVersionRange.Length == 1 ? 0 : 1];
 
-                    Version oldVersionLow, oldVersionHigh;
-                    if (!Version.TryParse(oldVerStrLow, out oldVersionLow))
+                    if (!Version.TryParse(oldVerStrLow, out Version oldVersionLow))
                     {
                         Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MalformedVersionNumber", oldVerStrLow);
                         continue;
                     }
 
-                    if (!Version.TryParse(oldVerStrHigh, out oldVersionHigh))
+                    if (!Version.TryParse(oldVerStrHigh, out Version oldVersionHigh))
                     {
                         Log.LogWarningWithCodeFromResources("GenerateBindingRedirects.MalformedVersionNumber", oldVerStrHigh);
                         continue;
@@ -309,10 +292,16 @@ namespace Microsoft.Build.Tasks
                                 var newPublicKeyToken = entry.Key.GetPublicKeyToken();
                                 var newProcessorArchitecture = entry.Key.ProcessorArchitecture;
 
-                                var attributes = new List<XAttribute>(4);
-                                attributes.Add(new XAttribute("name", newName));
-                                attributes.Add(new XAttribute("culture", String.IsNullOrEmpty(newCulture) ? "neutral" : newCulture));
-                                attributes.Add(new XAttribute("publicKeyToken", ResolveAssemblyReference.ByteArrayToString(newPublicKeyToken)));
+                                var attributes = new List<XAttribute>(4)
+                                {
+                                    new XAttribute("name", newName),
+                                    new XAttribute(
+                                        "culture",
+                                        String.IsNullOrEmpty(newCulture) ? "neutral" : newCulture),
+                                    new XAttribute(
+                                        "publicKeyToken",
+                                        ResolveAssemblyReference.ByteArrayToString(newPublicKeyToken))
+                                };
                                 if (newProcessorArchitecture != 0)
                                 {
                                     attributes.Add(new XAttribute("processorArchitecture", newProcessorArchitecture.ToString()));

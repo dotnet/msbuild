@@ -3,9 +3,7 @@
 
 using System;
 using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -17,20 +15,20 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 #endif
 {
-    static internal class PropertyParser
+    internal static class PropertyParser
     {
         /// <summary>
         /// Given a string of semi-colon delimited name=value pairs, this method parses it and creates 
         /// a hash table containing the property names as keys and the property values as values.  
         /// </summary>
         /// <returns>true on success, false on failure.</returns>
-        static internal bool GetTable(TaskLoggingHelper log, string parameterName, string[] propertyList, out Hashtable propertiesTable)
+        internal static bool GetTable(TaskLoggingHelper log, string parameterName, string[] propertyList, out Dictionary<string, string> propertiesTable)
         {
             propertiesTable = null;
 
             if (propertyList != null)
             {
-                propertiesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                propertiesTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 // Loop through the array.  Each string in the array should be of the form:
                 //          MyPropName=MyPropValue
@@ -57,10 +55,7 @@ namespace Microsoft.Build.Tasks
                     if (propertyName.Length == 0)
                     {
                         // No equals sign?  No property name?  That's no good to us.
-                        if (log != null)
-                        {
-                            log.LogErrorWithCodeFromResources("General.InvalidPropertyError", parameterName, propertyNameValuePair);
-                        }
+                        log?.LogErrorWithCodeFromResources("General.InvalidPropertyError", parameterName, propertyNameValuePair);
 
                         return false;
                     }
@@ -83,14 +78,14 @@ namespace Microsoft.Build.Tasks
         /// already.
         /// </summary>
         /// <returns>true on success, false on failure.</returns>
-        static internal bool GetTableWithEscaping(TaskLoggingHelper log, string parameterName, string syntaxName, string[] propertyNameValueStrings, out Hashtable finalPropertiesTable)
+        internal static bool GetTableWithEscaping(TaskLoggingHelper log, string parameterName, string syntaxName, string[] propertyNameValueStrings, out Dictionary<string, string> finalPropertiesTable)
         {
             finalPropertiesTable = null;
 
             if (propertyNameValueStrings != null)
             {
-                finalPropertiesTable = new Hashtable(StringComparer.OrdinalIgnoreCase);
-                List<PropertyNameValuePair> finalPropertiesList = new List<PropertyNameValuePair>();
+                finalPropertiesTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                var finalPropertiesList = new List<PropertyNameValuePair>();
 
                 // Loop through the array.  Each string in the array should be of the form:
                 //          MyPropName=MyPropValue
@@ -113,10 +108,7 @@ namespace Microsoft.Build.Tasks
                         if (propertyName.Length == 0)
                         {
                             // No property name?  That's no good to us.
-                            if (log != null)
-                            {
-                                log.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
-                            }
+                            log?.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
 
                             return false;
                         }
@@ -160,10 +152,7 @@ namespace Microsoft.Build.Tasks
                         else
                         {
                             // No equals sign in the very first property?  That's a problem.
-                            if (log != null)
-                            {
-                                log.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
-                            }
+                            log?.LogErrorWithCodeFromResources("General.InvalidPropertyError", syntaxName, propertyNameValueString);
 
                             return false;
                         }
@@ -172,21 +161,15 @@ namespace Microsoft.Build.Tasks
 
                 // Convert the data in the List to a Hashtable, because that's what the MSBuild task eventually
                 // needs to pass onto the engine.
-                if (log != null)
-                {
-                    log.LogMessageFromText(parameterName, MessageImportance.Low);
-                }
+                log?.LogMessageFromText(parameterName, MessageImportance.Low);
 
                 foreach (PropertyNameValuePair propertyNameValuePair in finalPropertiesList)
                 {
                     string propertyValue = OpportunisticIntern.StringBuilderToString(propertyNameValuePair.Value);
                     finalPropertiesTable[propertyNameValuePair.Name] = propertyValue;
-                    if (log != null)
-                    {
-                        log.LogMessageFromText(String.Format(CultureInfo.InvariantCulture, "  {0}={1}",
-                            propertyNameValuePair.Name, propertyValue),
-                            MessageImportance.Low);
-                    }
+                    log?.LogMessageFromText(
+                        $"  {propertyNameValuePair.Name}={propertyValue}",
+                        MessageImportance.Low);
                 }
             }
 
@@ -198,59 +181,20 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private class PropertyNameValuePair
         {
-            private string _name;
-            private StringBuilder _value;
-
             /// <summary>
             /// Property name
             /// </summary>
-            internal string Name
-            {
-                get
-                {
-                    return _name;
-                }
-
-                set
-                {
-                    _name = value;
-                }
-            }
+            internal string Name { get; }
 
             /// <summary>
             /// Property value
             /// </summary>
-            internal StringBuilder Value
-            {
-                get
-                {
-                    return _value;
-                }
+            internal StringBuilder Value { get; }
 
-                set
-                {
-                    _value = value;
-                }
-            }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="propertyName"></param>
-            /// <param name="propertyValue"></param>
             internal PropertyNameValuePair(string propertyName, string propertyValue)
             {
-                this.Name = propertyName;
-
-                this.Value = new StringBuilder();
-                this.Value.Append(propertyValue);
-            }
-
-            /// <summary>
-            /// Default construction not allowed.
-            /// </summary>
-            private PropertyNameValuePair()
-            {
+                Name = propertyName;
+                Value = new StringBuilder(propertyValue);
             }
         }
     }
