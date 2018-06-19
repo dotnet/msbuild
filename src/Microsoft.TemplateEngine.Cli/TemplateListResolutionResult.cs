@@ -256,5 +256,55 @@ namespace Microsoft.TemplateEngine.Cli
                 return _usingContextMatches;
             }
         }
+
+        public bool IsTemplateAmbiguous { get; private set; }
+
+        public bool IsNoTemplatesMatchedState { get; private set; }
+
+        public List<IReadOnlyList<ITemplateMatchInfo>> ContextProblemMatchGroups { get; private set; }
+
+        public List<IReadOnlyList<ITemplateMatchInfo>> RemainingPartialMatchGroups { get; private set; }
+
+        public void ComputeContextBasedAndOtherPartialMatches()
+        {
+            Dictionary<string, List<ITemplateMatchInfo>> contextProblemMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
+            Dictionary<string, List<ITemplateMatchInfo>> remainingPartialMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
+
+            // this filtering / grouping ignores language differences.
+            foreach (ITemplateMatchInfo template in GetBestTemplateMatchList(true))
+            {
+                if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
+                {
+                    if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
+                    {
+                        templateGroup = new List<ITemplateMatchInfo>();
+                        contextProblemMatches.Add(template.Info.GroupIdentity, templateGroup);
+                    }
+
+                    templateGroup.Add(template);
+                }
+                else if (!UsingContextMatches
+                    && template.MatchDisposition.Any(t => t.Location != MatchLocation.Context && t.Kind != MatchKind.Mismatch && t.Kind != MatchKind.Unspecified))
+                {
+                    if (!remainingPartialMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
+                    {
+                        templateGroup = new List<ITemplateMatchInfo>();
+                        remainingPartialMatches.Add(template.Info.GroupIdentity, templateGroup);
+                    }
+
+                    templateGroup.Add(template);
+                }
+            }
+
+            // context mismatches from the "matched" templates
+            ContextProblemMatchGroups = contextProblemMatches.Values.ToList<IReadOnlyList<ITemplateMatchInfo>>();
+
+            // other templates with anything matching
+            RemainingPartialMatchGroups = remainingPartialMatches.Values.ToList<IReadOnlyList<ITemplateMatchInfo>>();
+
+            //Set flags
+            IsTemplateAmbiguous = ContextProblemMatchGroups.Count + RemainingPartialMatchGroups.Count > 1;
+            IsNoTemplatesMatchedState = ContextProblemMatchGroups.Count + RemainingPartialMatchGroups.Count == 0;
+        }
     }
 }

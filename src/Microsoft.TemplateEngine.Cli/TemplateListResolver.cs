@@ -178,7 +178,9 @@ namespace Microsoft.TemplateEngine.Cli
         {
             IReadOnlyCollection<ITemplateMatchInfo> coreMatchedTemplates = PerformCoreTemplateQuery(templateInfo, hostDataLoader, commandInput, defaultLanguage);
             IReadOnlyCollection<ITemplateMatchInfo> allTemplatesInContext = PerformAllTemplatesInContextQuery(templateInfo, hostDataLoader, commandInput.TypeFilter);
-            return new TemplateListResolutionResult(commandInput.TemplateName, commandInput.Language, coreMatchedTemplates, allTemplatesInContext);
+            TemplateListResolutionResult result = new TemplateListResolutionResult(commandInput.TemplateName, commandInput.Language, coreMatchedTemplates, allTemplatesInContext);
+            result.ComputeContextBasedAndOtherPartialMatches();
+            return result;
         }
 
         // Query for template matches, filtered by everything available: name, language, context, parameters, and the host file.
