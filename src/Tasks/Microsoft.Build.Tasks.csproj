@@ -129,9 +129,6 @@
       <Link>FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs">
-      <Link>FileUtilities.GetFolderPath.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

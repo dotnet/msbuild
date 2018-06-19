@@ -2306,11 +2306,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(new ProjectCollection());
 
                 string msbuildPath = NativeMethodsShared.IsWindows ?
-#if FEATURE_SPECIAL_FOLDERS
                     Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + Path.DirectorySeparatorChar + "MSBuild" :
-#else
-                    FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles) + Path.DirectorySeparatorChar + "MSBuild" :
-#endif
                     "MSBuild";
                 Assert.Equal(msbuildPath, project.GetPropertyValue(specialPropertyName));
             }
@@ -2429,11 +2425,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             if (String.IsNullOrEmpty(expected))
             {
                 // 32 bit box
-#if FEATURE_SPECIAL_FOLDERS
                 expected = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-#else
-                expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles);
-#endif
             }
 
             string extensionsPath32Env = Environment.GetEnvironmentVariable("MSBuildExtensionsPath32");
@@ -2514,11 +2506,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 if (string.IsNullOrEmpty(expected))
                 {
                     // 64-bit window on a 64-bit machine -- ProgramFiles is correct
-#if FEATURE_SPECIAL_FOLDERS
                     expected = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-#else
-                    expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles);
-#endif
                 }
             }
 
@@ -2577,19 +2565,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void LocalAppDataDefault()
         {
-#if FEATURE_SPECIAL_FOLDERS
             string expected = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (String.IsNullOrEmpty(expected))
             {
                 expected = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             }
-#else
-            string expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData);
-            if (String.IsNullOrEmpty(expected))
-            {
-                expected = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData);
-            }
-#endif
 
             Project project = new Project();
 

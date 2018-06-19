@@ -408,7 +408,7 @@ namespace Microsoft.Build.Shared
                             currentDirectory = String.Empty;
                         }
 
-                        modifiedItemSpec = GetFullPath(itemSpec, currentDirectory);
+                        modifiedItemSpec = GetFullPathForFileSpec(itemSpec, currentDirectory);
                         fullPath = modifiedItemSpec;
 
                         ThrowForUrl(modifiedItemSpec, itemSpec, currentDirectory);

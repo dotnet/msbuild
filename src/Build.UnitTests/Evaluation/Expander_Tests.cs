@@ -2588,7 +2588,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(DateTime.Parse(_dateToParse).ToString("yyyy/MM/dd HH:mm:ss"), result);
         }
 
-#if FEATURE_SPECIAL_FOLDERS
         /// <summary>
         /// Expand property function that calls a static method available only on net46 (Environment.GetFolderPath)
         /// </summary>
@@ -2603,7 +2602,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Equal(System.Environment.GetFolderPath(Environment.SpecialFolder.System), result);
         }
-#endif
 
         /// <summary>
         /// The test exercises: RuntimeInformation / OSPlatform usage, static method invocation, static property invocation, method invocation expression as argument, call chain expression as argument
