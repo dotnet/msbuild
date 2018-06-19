@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Reflection;
+using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
@@ -44,8 +45,13 @@ namespace Microsoft.Build.Shared
         internal const int FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
         internal const int FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400;
 
+        private const int MAX_PATH_LEGACY_WINDOWS = 260;
+
         private const string kernel32Dll = "kernel32.dll";
         private const string mscoreeDLL = "mscoree.dll";
+
+        private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
+        private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
 #if FEATURE_HANDLEREF
         internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
@@ -167,6 +173,13 @@ namespace Microsoft.Build.Shared
             // Who knows
             Unknown
         }
+
+        internal enum MaxPathLimits
+        {
+            Unknown = 0,
+            LegacyWindows = MAX_PATH_LEGACY_WINDOWS,
+            None = int.MaxValue,
+        };
 
         #endregion
 
@@ -460,6 +473,48 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static int MAX_PATH = 260;
 
+        /// <summary>
+        /// Gets an enum for the max path restrictions of the current OS.
+        /// </summary>
+        internal static MaxPathLimits OSMaxPathLimit
+        {
+            get {
+                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                {
+                    SetOSMaxPathLimit();
+                }
+                return osMaxPathLimit;
+            }
+        }
+
+        /// <summary>
+        /// Cached value for OSMaxPathRestriction.
+        /// </summary>
+        private static MaxPathLimits osMaxPathLimit = MaxPathLimits.Unknown;
+
+        private static readonly object osMaxPathLimitLock = new object();
+
+        private static void SetOSMaxPathLimit()
+        {
+            lock (osMaxPathLimitLock)
+            {
+                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                {
+                    osMaxPathLimit = IsMaxPathLimitLegacyWindows() ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
+                }
+            }
+        }
+
+        private static bool IsMaxPathLimitLegacyWindows()
+        {
+            if (!IsWindows)
+            {
+                return false;
+            }
+            RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY);
+            object longPathsEnabledValue = fileSystemKey.GetValue(WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME, 0);
+            return Convert.ToInt32(longPathsEnabledValue) != 1;
+        }
 
         /// <summary>
         /// Cached value for IsUnixLike (this method is called frequently during evaluation).
