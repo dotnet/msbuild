@@ -83,8 +83,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdInteractiveRestoreDescription">
-        <source>Allow the command to block and require manual action to proceed.</source>
-        <target state="new">Allow the command to block and require manual action to proceed.</target>
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication)</source>
+        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication)</target>
         <note />
       </trans-unit>
     </body>
