@@ -557,7 +557,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
             ErrorUtilities.VerifyThrow(_componentHost == null, "BuildRequestEngine already initialized!");
             _componentHost = host;
             _configCache = (IConfigCache)host.GetComponent(BuildComponentType.ConfigCache);
@@ -1255,7 +1255,7 @@ namespace Microsoft.Build.BackEnd
         private void IssueConfigurationRequest(BuildRequestConfiguration config)
         {
             ErrorUtilities.VerifyThrowArgument(config.WasGeneratedByNode, "InvalidConfigurationId");
-            ErrorUtilities.VerifyThrowArgumentNull(config, "config");
+            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
             ErrorUtilities.VerifyThrowInvalidOperation(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
             TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
             RaiseNewConfigurationRequest(config);
@@ -1267,7 +1267,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="blocker">The information about why the request is blocked.</param>
         private void IssueBuildRequest(BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, "blocker");
+            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
 
             if (blocker.BuildRequests == null)
             {

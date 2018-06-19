@@ -266,7 +266,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating whether or not the configuration is actually building.
         /// </summary>
-        public bool IsActivelyBuilding => (_activelyBuildingTargets != null) && (_activelyBuildingTargets.Count > 0);
+        public bool IsActivelyBuilding => _activelyBuildingTargets?.Count > 0;
 
         /// <summary>
         /// Flag indicating whether or not the configuration has been loaded before.
@@ -319,12 +319,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.
         /// </summary>
-        public bool WasGeneratedByNode
-        {
-            [DebuggerStepThrough]
-            get
-            { return _configId < 0; }
-        }
+        public bool WasGeneratedByNode => _configId < 0;
 
         /// <summary>
         /// Sets or returns the configuration id
@@ -332,10 +327,7 @@ namespace Microsoft.Build.BackEnd
         public int ConfigurationId
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _configId;
-            }
+            get => _configId;
 
             [DebuggerStepThrough]
             set
@@ -348,12 +340,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the filename of the project to build.
         /// </summary>
-        public string ProjectFullPath
-        {
-            [DebuggerStepThrough]
-            get
-            { return _projectFullPath; }
-        }
+        public string ProjectFullPath => _projectFullPath;
 
         /// <summary>
         /// The tools version specified for the configuration.
@@ -361,22 +348,12 @@ namespace Microsoft.Build.BackEnd
         /// May have originated from a /tv switch, or an MSBuild task,
         /// or a Project tag, or the default.
         /// </summary>
-        public string ToolsVersion
-        {
-            [DebuggerStepThrough]
-            get
-            { return _toolsVersion; }
-        }
+        public string ToolsVersion => _toolsVersion;
 
         /// <summary>
         /// Returns the global properties to use to build this project.
         /// </summary>
-        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties
-        {
-            [DebuggerStepThrough]
-            get
-            { return _globalProperties; }
-        }
+        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties => _globalProperties;
 
         /// <summary>
         /// Sets or returns the project to build.
@@ -474,11 +451,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public List<string> ProjectInitialTargets
         {
-            [DebuggerStepThrough]
-            get
-            {
-                return _projectInitialTargets;
-            }
+            get => _projectInitialTargets;
 
             [DebuggerStepThrough]
             set
@@ -494,10 +467,7 @@ namespace Microsoft.Build.BackEnd
         public List<string> ProjectDefaultTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _projectDefaultTargets;
-            }
+            get => _projectDefaultTargets;
 
             [DebuggerStepThrough]
             set
@@ -510,12 +480,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the node packet type
         /// </summary>
-        public NodePacketType Type
-        {
-            [DebuggerStepThrough]
-            get
-            { return NodePacketType.BuildRequestConfiguration; }
-        }
+        public NodePacketType Type => NodePacketType.BuildRequestConfiguration;
 
         /// <summary>
         /// Returns the lookup which collects all items and properties during the run of this project.
@@ -526,8 +491,12 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(!IsCached, "Configuration is cached, we shouldn't be accessing the lookup.");
 
-                return _baseLookup ??
-                       (_baseLookup = new Lookup(Project.ItemsToBuildWith, Project.PropertiesToBuildWith));
+                if (_baseLookup == null)
+                {
+                    _baseLookup = new Lookup(Project.ItemsToBuildWith, Project.PropertiesToBuildWith);
+                }
+
+                return _baseLookup;
             }
         }
 
@@ -561,12 +530,7 @@ namespace Microsoft.Build.BackEnd
         /// Whether the tools version was set by the /tv switch or passed in through an msbuild callback
         /// directly or indirectly.
         /// </summary>
-        public bool ExplicitToolsVersionSpecified
-        {
-            [DebuggerStepThrough]
-            get
-            { return _explicitToolsVersionSpecified; }
-        }
+        public bool ExplicitToolsVersionSpecified => _explicitToolsVersionSpecified;
 
         /// <summary>
         /// Gets or sets the node on which this configuration's results are stored.

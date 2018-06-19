@@ -367,9 +367,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ErrorTwoProjectsEquivalentOneCollection()
         {
+            _ = new Project { FullPath = "c:\\x" };
             Assert.Throws<InvalidOperationException>(() =>
             {
-                _ = new Project { FullPath = "c:\\x" };
                 _ = new Project { FullPath = "c:\\x" };
             });
         }
@@ -578,7 +578,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             var collection = new ProjectCollection();
             var project1 = new Project(collection) { FullPath = "c:\\y" };
-            // load into collection
             Assert.Equal(0, project1.GlobalProperties.Count);
 
             collection.SetGlobalProperty("g1", "v1");

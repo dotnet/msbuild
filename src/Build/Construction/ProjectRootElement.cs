@@ -363,8 +363,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string DirectoryPath
         {
-            [DebuggerStepThrough] get { return _directory ?? String.Empty; }
-            internal set { _directory = value; }
+            get => _directory ?? String.Empty;
+            internal set => _directory = value;
             // Used during solution load to ensure solutions which were created from a file have a location.
         }
 
@@ -453,10 +453,7 @@ namespace Microsoft.Build.Construction
         public string DefaultTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.defaultTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.defaultTargets);
 
             [DebuggerStepThrough]
             set
@@ -473,10 +470,7 @@ namespace Microsoft.Build.Construction
         public string InitialTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.initialTargets);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.initialTargets);
 
             [DebuggerStepThrough]
             set
@@ -495,10 +489,7 @@ namespace Microsoft.Build.Construction
         public string Sdk
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.sdk);
 
             [DebuggerStepThrough]
             set
@@ -515,10 +506,7 @@ namespace Microsoft.Build.Construction
         public string TreatAsLocalProperty
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.treatAsLocalProperty);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.treatAsLocalProperty);
 
             [DebuggerStepThrough]
             set
@@ -535,10 +523,7 @@ namespace Microsoft.Build.Construction
         public string ToolsVersion
         {
             [DebuggerStepThrough]
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.toolsVersion);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.toolsVersion);
 
             [DebuggerStepThrough]
             set

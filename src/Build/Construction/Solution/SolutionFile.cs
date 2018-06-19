@@ -631,8 +631,6 @@ namespace Microsoft.Build.Construction
         ///  EndProject
         /// 
         /// </summary>
-        /// <param name="firstLine"></param>
-        /// <returns></returns>
         private void ParseProject(string firstLine)
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(firstLine), "ParseProject() got a null firstLine!");

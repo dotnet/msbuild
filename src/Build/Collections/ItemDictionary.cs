@@ -396,6 +396,7 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// Get the current item
             /// </summary>
+            /// <remarks>Undefined if enumerator is before or after collection: we return null.</remarks>
             public T Current => _itemEnumerator?.Current;
 
             /// <summary>

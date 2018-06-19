@@ -84,33 +84,19 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Number of children of any kind
         /// </summary>
-        public int Count { [DebuggerStepThrough]
-            get; private set;
-        }
+        public int Count { get; private set; }
 
         /// <summary>
         /// First child, if any, otherwise null.
         /// Cannot be set directly; use <see cref="PrependChild">PrependChild()</see>.
         /// </summary>
-        public ProjectElement FirstChild
-        {
-            [DebuggerStepThrough]
-            get;
-            [DebuggerStepThrough]
-            private set;
-        }
+        public ProjectElement FirstChild { get; private set; }
 
         /// <summary>
         /// Last child, if any, otherwise null.
         /// Cannot be set directly; use <see cref="AppendChild">AppendChild()</see>.
         /// </summary>
-        public ProjectElement LastChild
-        {
-            [DebuggerStepThrough]
-            get;
-            [DebuggerStepThrough]
-            private set;
-        }
+        public ProjectElement LastChild { get; private set; }
 
         /// <summary>
         /// Insert the child after the reference child.

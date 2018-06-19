@@ -51,11 +51,7 @@ namespace Microsoft.Build.Execution
         /// the project's properties table.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string Name
-        {
-            [DebuggerStepThrough]
-            get => _name;
-        }
+        public string Name => _name;
 
         /// <summary>
         /// Evaluated value of the property.
@@ -90,31 +86,19 @@ namespace Microsoft.Build.Execution
         /// Setter assumes caller has protected global properties, if necessary.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IProperty.EvaluatedValueEscaped
-        {
-            [DebuggerStepThrough]
-            get => _escapedValue;
-        }
+        string IProperty.EvaluatedValueEscaped => _escapedValue;
 
         /// <summary>
         /// Implementation of IKeyed exposing the property name
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IKeyed.Key
-        {
-            [DebuggerStepThrough]
-            get => Name;
-        }
+        string IKeyed.Key => Name;
 
         /// <summary>
         /// Implementation of IValued
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IValued.EscapedValue
-        {
-            [DebuggerStepThrough]
-            get => _escapedValue;
-        }
+        string IValued.EscapedValue => _escapedValue;
 
         #region IEquatable<ProjectPropertyInstance> Members
 

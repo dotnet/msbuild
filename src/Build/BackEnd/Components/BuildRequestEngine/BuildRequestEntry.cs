@@ -144,7 +144,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the object used to lock for synchronization of long-running operations.
         /// </summary>
-        public Object GlobalLock { [DebuggerStepThrough] get; }
+        public Object GlobalLock { get; }
 
         /// <summary>
         /// Returns the root directory for the project being built by this request.
@@ -155,22 +155,22 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the current state of the build request.
         /// </summary>
-        public BuildRequestEntryState State { [DebuggerStepThrough] get; private set; }
+        public BuildRequestEntryState State { get; private set; }
 
         /// <summary>
         /// Returns the request which originated this entry.
         /// </summary>
-        public BuildRequest Request { [DebuggerStepThrough] get; }
+        public BuildRequest Request { get; }
 
         /// <summary>
         /// Returns the build request configuration
         /// </summary>
-        public BuildRequestConfiguration RequestConfiguration { [DebuggerStepThrough] get; }
+        public BuildRequestConfiguration RequestConfiguration { get; }
 
         /// <summary>
         /// Returns the overall result for this request.
         /// </summary>
-        public BuildResult Result { [DebuggerStepThrough] get; private set; }
+        public BuildResult Result { get; private set; }
 
         /// <summary>
         /// Returns the request builder.
@@ -178,10 +178,7 @@ namespace Microsoft.Build.BackEnd
         public IRequestBuilder Builder
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _requestBuilder;
-            }
+            get => _requestBuilder;
 
             [DebuggerStepThrough]
             set

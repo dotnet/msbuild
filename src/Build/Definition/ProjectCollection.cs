@@ -861,7 +861,6 @@ namespace Microsoft.Build.Evaluation
         /// - So that the owner of this project collection can force the XML to be loaded again
         /// from disk, by doing <see cref="UnloadAllProjects"/>.
         /// </summary>
-        // No locks required because this field is only set in the constructor.
         internal ProjectRootElementCache ProjectRootElementCache { get; }
 
         /// <summary>
@@ -1258,7 +1257,7 @@ namespace Microsoft.Build.Evaluation
         {
             using (_locker.EnterWriteLock())
             {
-                ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, "projectRootElement");
+                ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
 
                 Project conflictingProject = LoadedProjects.FirstOrDefault(project => project.UsesProjectRootElement(projectRootElement));
 
@@ -1430,17 +1429,16 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void OnAfterRenameLoadedProject(string oldFullPathIfAny, Project project)
         {
+            if (project.FullPath == null)
+            {
+                return;
+            }
+
             using (_locker.EnterWriteLock())
             {
-                if (project.FullPath == null)
-                {
-                    return;
-                }
-
                 if (oldFullPathIfAny != null)
                 {
                     bool existed = _loadedProjects.RemoveProject(oldFullPathIfAny, project);
-
                     ErrorUtilities.VerifyThrowInvalidOperation(existed, "OM_ProjectWasNotLoaded");
                 }
 
@@ -1510,7 +1508,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns><c>true</c> if the toolset was found and removed; <c>false</c> otherwise.</returns>
         private bool RemoveToolsetInternal(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
             Debug.Assert(_locker.IsWriteLockHeld);
 
             if (!_toolsets.ContainsKey(toolsVersion))
@@ -1531,7 +1529,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterLoggerInternal(ILogger logger)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(logger, "logger");
+            ErrorUtilities.VerifyThrowArgumentNull(logger, nameof(logger));
             Debug.Assert(_locker.IsWriteLockHeld);
             _loggingService.RegisterLogger(new ReusableLogger(logger));
         }
@@ -1814,7 +1812,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public ReusableLogger(ILogger originalLogger)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(originalLogger, "originalLogger");
+                ErrorUtilities.VerifyThrowArgumentNull(originalLogger, nameof(originalLogger));
                 _originalLogger = originalLogger;
             }
 

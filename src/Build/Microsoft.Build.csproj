@@ -388,9 +388,7 @@
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
-    <Compile Include="Collections\Triple.cs" />
     <!-- ######################## -->
-    <Compile Include="Collections\WeakReference.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />

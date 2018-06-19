@@ -5,6 +5,7 @@
 // <summary>Dictionary that does not prevent values from being garbage collected.</summary>
 //-----------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
@@ -65,7 +66,7 @@ namespace Microsoft.Build.Collections
 
                 foreach (KeyValuePair<K, WeakReference<V>> pair in _dictionary)
                 {
-                    if (pair.Value?.Target != null)
+                    if (pair.Value?.TryGetTarget(out _) ?? false)
                     {
                         keys.Add(pair.Key);
                     }
@@ -95,9 +96,7 @@ namespace Microsoft.Build.Collections
                     return null;
                 }
 
-                V value = wrappedValue.Target;
-
-                if (value == null)
+                if (!wrappedValue.TryGetTarget(out V value))
                 {
                     _dictionary.Remove(key);
 
@@ -175,15 +174,13 @@ namespace Microsoft.Build.Collections
                 return true;
             }
 
-            value = wrappedValue.Target;
-
-            if (value == null)
+            if (!wrappedValue.TryGetTarget(out value))
             {
                 _dictionary.Remove(key);
                 return false;
             }
 
-            return result;
+            return true;
         }
 
         /// <summary>
@@ -213,9 +210,7 @@ namespace Microsoft.Build.Collections
                     continue;
                 }
 
-                V value = entry.Value.Target;
-
-                if (value == null)
+                if (!entry.Value.TryGetTarget(out _))
                 {
                     remove = remove ?? new List<K>();
                     remove.Add(entry.Key);

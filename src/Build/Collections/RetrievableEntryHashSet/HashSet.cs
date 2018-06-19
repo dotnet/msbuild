@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
+using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using Microsoft.Build.Shared;
@@ -77,12 +78,12 @@ namespace Microsoft.Build.Collections
     /// the same time. 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [DebuggerTypeProxy(typeof(HashSetDebugView<>))]
+    [DebuggerTypeProxy(typeof(Microsoft.Build.Collections.HashSetDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "By design")]
-    [Serializable]
+    [Serializable()]
 #if FEATURE_SECURITY_PERMISSIONS
-    [HostProtection(MayLeakOnAbort = true)]
+    [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
     internal class RetrievableEntryHashSet<T> : ICollection<T>,
         ISerializable, IDeserializationCallback,
@@ -91,6 +92,8 @@ namespace Microsoft.Build.Collections
     {
         // store lower 31 bits of hash code
         private const int Lower31BitMask = 0x7FFFFFFF;
+        // cutoff point, above which we won't do stackallocs. This corresponds to 100 integers.
+        private const int StackAllocThreshold = 100;
         // when constructing a hashset from an existing collection, it may contain duplicates, 
         // so this is used as the max acceptable excess ratio of capacity to count. Note that
         // this is only used on the ctor and not to automatically shrink if the hashset has, e.g,
@@ -112,6 +115,7 @@ namespace Microsoft.Build.Collections
         private IEqualityComparer<string> _comparer;
         private IConstrainedEqualityComparer<string> _constrainedComparer;
         private int _version;
+        private bool _readOnly;
 
         // temporary variable needed during deserialization
         private SerializationInfo _siInfo;
@@ -136,13 +140,13 @@ namespace Microsoft.Build.Collections
         public RetrievableEntryHashSet(IEnumerable<T> collection, IEqualityComparer<string> comparer, bool readOnly = false)
             : this(collection, comparer)
         {
-            IsReadOnly = true; // Set after possible initialization from another collection
+            _readOnly = true; // Set after possible initialization from another collection
         }
 
         public RetrievableEntryHashSet(IEnumerable<KeyValuePair<string, T>> collection, IEqualityComparer<string> comparer, bool readOnly = false)
             : this(collection.Values(), comparer, readOnly)
         {
-            IsReadOnly = true; // Set after possible initialization from another collection
+            _readOnly = true; // Set after possible initialization from another collection
         }
 
         /// <summary>
@@ -166,7 +170,7 @@ namespace Microsoft.Build.Collections
         {
             if (collection == null)
             {
-                throw new ArgumentNullException(nameof(collection));
+                throw new ArgumentNullException("collection");
             }
 
             Contract.EndContractBlock();
@@ -175,13 +179,14 @@ namespace Microsoft.Build.Collections
             // may contain duplicates, so call TrimExcess if resulting hashset is larger than
             // threshold
             int suggestedCapacity = 0;
-            if (collection is ICollection<T> coll)
+            ICollection<T> coll = collection as ICollection<T>;
+            if (coll != null)
             {
                 suggestedCapacity = coll.Count;
             }
             Initialize(suggestedCapacity);
 
-            UnionWith(collection);
+            this.UnionWith(collection);
             if ((_count == 0 && _slots.Length > HashHelpers.GetMinPrime()) ||
                 (_count > 0 && _slots.Length / _count > ShrinkThreshold))
             {
@@ -219,14 +224,20 @@ namespace Microsoft.Build.Collections
         }
 
         // Convenience to minimise change to callers used to dictionaries
-        public ICollection<T> Values => this;
+        public ICollection<T> Values
+        {
+            get { return this; }
+        }
 
         #region ICollection<T> methods
 
         // Convenience to minimise change to callers used to dictionaries
         internal T this[string name]
         {
-            get => Get(name);
+            get
+            {
+                return Get(name);
+            }
 
             set
             {
@@ -251,7 +262,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            if (IsReadOnly)
+            if (_readOnly)
             {
                 ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
             }
@@ -290,8 +301,8 @@ namespace Microsoft.Build.Collections
 
         T IDictionary<string, T>.this[string name]
         {
-            get => Get(name);
-            set => Add(value);
+            get { return Get(name); }
+            set { Add(value); }
         }
 
         /// <summary>
@@ -331,19 +342,13 @@ namespace Microsoft.Build.Collections
         public T Get(string key, int index, int length)
         {
             if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(length));
-            }
+                throw new ArgumentOutOfRangeException("length");
 
-            if (index < 0 || index > (key?.Length ?? 0) - length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
+            if (index < 0 || index > (key == null ? 0 : key.Length) - length)
+                throw new ArgumentOutOfRangeException("index");
 
             if (_constrainedComparer == null)
-            {
                 throw new InvalidOperationException("Cannot do a constrained lookup on this collection.");
-            }
         
             return GetCore(key, index, length);
         }
@@ -404,7 +409,7 @@ namespace Microsoft.Build.Collections
         /// <returns>true if removed; false if not (i.e. if the item wasn't in the HashSet)</returns>
         public bool Remove(string item)
         {
-            if (IsReadOnly)
+            if (_readOnly)
             {
                 ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
             }
@@ -454,19 +459,25 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Number of elements in this hashset
         /// </summary>
-        public int Count => _count;
+        public int Count
+        {
+            get { return _count; }
+        }
 
         /// <summary>
         /// Whether this is readonly
         /// </summary>
-        public bool IsReadOnly { get; private set; }
+        public bool IsReadOnly
+        {
+            get { return _readOnly; }
+        }
 
         /// <summary>
         /// Permanently prevent changes to the set.
         /// </summary>
         internal void MakeReadOnly()
         {
-            IsReadOnly = true;
+            _readOnly = true;
         }
 
         #endregion
@@ -480,7 +491,7 @@ namespace Microsoft.Build.Collections
 
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            foreach (T entry in this)
+            foreach (var entry in this)
             {
                 yield return new KeyValuePair<string, T>(entry.Key, entry);
             }
@@ -506,16 +517,16 @@ namespace Microsoft.Build.Collections
         {
             if (info == null)
             {
-                throw new ArgumentNullException(nameof(info));
+                throw new ArgumentNullException("info");
             }
 
             // need to serialize version to avoid problems with serializing while enumerating
             info.AddValue(VersionName, _version);
             info.AddValue(ComparerName, _comparer, typeof(IEqualityComparer<string>));
-            info.AddValue(CapacityName, _buckets?.Length ?? 0);
+            info.AddValue(CapacityName, _buckets == null ? 0 : _buckets.Length);
             if (_buckets != null)
             {
-                var array = new T[_count];
+                T[] array = new T[_count];
                 CopyTo(array);
                 info.AddValue(ElementsName, array, typeof(T[]));
             }
@@ -546,7 +557,7 @@ namespace Microsoft.Build.Collections
                 _buckets = new int[capacity];
                 _slots = new Slot[capacity];
 
-                var array = (T[])_siInfo.GetValue(ElementsName, typeof(T[]));
+                T[] array = (T[])_siInfo.GetValue(ElementsName, typeof(T[]));
 
                 if (array == null)
                 {
@@ -584,9 +595,7 @@ namespace Microsoft.Build.Collections
         void IDictionary<string, T>.Add(string key, T item)
         {
             if (key != item.Key)
-            {
                 throw new InvalidOperationException();
-            }
 
             AddEvenIfPresent(item);
         }
@@ -610,7 +619,7 @@ namespace Microsoft.Build.Collections
         {
             if (other == null)
             {
-                throw new ArgumentNullException(nameof(other));
+                throw new ArgumentNullException("other");
             }
             Contract.EndContractBlock();
 
@@ -979,12 +988,10 @@ namespace Microsoft.Build.Collections
         void ICollection<KeyValuePair<string, T>>.CopyTo(KeyValuePair<string, T>[] array, int index)
         {
             if (index < 0 || Count > array.Length - index)
-            {
-                throw new ArgumentException(nameof(index));
-            }
+                throw new ArgumentException("index");
 
             int i = index;
-            foreach (T entry in this)
+            foreach (var entry in this)
             {
                 array[i] = new KeyValuePair<string, T>(entry.Key, entry);
                 i++;
@@ -998,20 +1005,20 @@ namespace Microsoft.Build.Collections
         {
             if (array == null)
             {
-                throw new ArgumentNullException(nameof(array));
+                throw new ArgumentNullException("array");
             }
             Contract.EndContractBlock();
 
             // check array index valid index into array
             if (arrayIndex < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+                throw new ArgumentOutOfRangeException("arrayIndex");
             }
 
             // also throw if count less than 0
             if (count < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(count));
+                throw new ArgumentOutOfRangeException("count");
             }
 
             // will array, starting at arrayIndex, be able to hold elements? Note: not
@@ -1019,7 +1026,7 @@ namespace Microsoft.Build.Collections
             // count of 0; subsequent check takes care of the rest)
             if (arrayIndex > array.Length || count > array.Length - arrayIndex)
             {
-                throw new ArgumentException(nameof(arrayIndex));
+                throw new ArgumentException("arrayIndex");
             }
 
             int numCopied = 0;
@@ -1102,8 +1109,8 @@ namespace Microsoft.Build.Collections
                 // similar to IncreaseCapacity but moves down elements in case add/remove/etc
                 // caused fragmentation
                 int newSize = HashHelpers.GetPrime(_count);
-                var newSlots = new Slot[newSize];
-                var newBuckets = new int[newSize];
+                Slot[] newSlots = new Slot[newSize];
+                int[] newBuckets = new int[newSize];
 
                 // move down slots and rehash at the same time. newIndex keeps track of current 
                 // position in newSlots array
@@ -1180,13 +1187,13 @@ namespace Microsoft.Build.Collections
             }
 
             // Able to increase capacity; copy elements to larger array and rehash
-            var newSlots = new Slot[newSize];
+            Slot[] newSlots = new Slot[newSize];
             if (_slots != null)
             {
                 Array.Copy(_slots, 0, newSlots, 0, _lastIndex);
             }
 
-            var newBuckets = new int[newSize];
+            int[] newBuckets = new int[newSize];
             for (int i = 0; i < _lastIndex; i++)
             {
                 int bucket = newSlots[i].hashCode % newSize;
@@ -1203,9 +1210,10 @@ namespace Microsoft.Build.Collections
         /// ** MSBUILD: Modified so that it DOES add even if present. It will return false in that case, though.**
         /// </summary>
         /// <param name="value">value to find</param>
-        private void AddEvenIfPresent(T value)
+        /// <returns></returns>
+        private bool AddEvenIfPresent(T value)
         {
-            if (IsReadOnly)
+            if (_readOnly)
             {
                 ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
             }
@@ -1226,7 +1234,7 @@ namespace Microsoft.Build.Collections
                     // as it may be a different object with the same name,
                     // and we want "last wins" semantics
                     _slots[i].value = value;
-                    return;
+                    return false;
                 }
             }
             int index;
@@ -1252,6 +1260,7 @@ namespace Microsoft.Build.Collections
             _buckets[bucket] = index + 1;
             _count++;
             _version++;
+            return true;
         }
 
         /// <summary>
@@ -1260,19 +1269,20 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool EntriesAreReferenceEquals(RetrievableEntryHashSet<T> other)
         {
-            if (ReferenceEquals(this, other))
+            if (Object.ReferenceEquals(this, other))
             {
                 return true;
             }
 
-            if (Count != other.Count)
+            if (this.Count != other.Count)
             {
                 return false;
             }
 
+            T ours;
             foreach (T element in other)
             {
-                if (!TryGetValue(element.Key, out T ours) || !ReferenceEquals(element, ours))
+                if (!TryGetValue(element.Key, out ours) || !Object.ReferenceEquals(element, ours))
                 {
                     return false;
                 }
@@ -1616,9 +1626,10 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Copies this to an array. Used for DebugView
         /// </summary>
+        /// <returns></returns>
         internal T[] ToArray()
         {
-            var newArray = new T[Count];
+            T[] newArray = new T[Count];
             CopyTo(newArray);
             return newArray;
         }
@@ -1692,9 +1703,7 @@ namespace Microsoft.Build.Collections
         {
             // No need to check for null 'item' as we own all comparers
             if (_constrainedComparer != null)
-            {
                 return _constrainedComparer.GetHashCode(item, index, length) & Lower31BitMask;
-            }
 
             return InternalGetHashCode(item);
         }
@@ -1732,21 +1741,22 @@ namespace Microsoft.Build.Collections
 #if !SILVERLIGHT
         [Serializable()]
 #if FEATURE_SECURITY_PERMISSIONS
-        [HostProtection(MayLeakOnAbort = true)]
+        [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
 #endif
-        public struct Enumerator : IEnumerator<T>, IEnumerator
+        public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator
         {
-            private readonly RetrievableEntryHashSet<T> _set;
+            private RetrievableEntryHashSet<T> _set;
             private int _index;
-            private readonly int _version;
+            private int _version;
+            private T _current;
 
             internal Enumerator(RetrievableEntryHashSet<T> set)
             {
                 _set = set;
                 _index = 0;
                 _version = set._version;
-                Current = default(T);
+                _current = default(T);
             }
 
             public void Dispose()
@@ -1764,20 +1774,26 @@ namespace Microsoft.Build.Collections
                 {
                     if (_set._slots[_index].hashCode >= 0)
                     {
-                        Current = _set._slots[_index].value;
+                        _current = _set._slots[_index].value;
                         _index++;
                         return true;
                     }
                     _index++;
                 }
                 _index = _set._lastIndex + 1;
-                Current = default(T);
+                _current = default(T);
                 return false;
             }
 
-            public T Current { get; private set; }
+            public T Current
+            {
+                get
+                {
+                    return _current;
+                }
+            }
 
-            Object IEnumerator.Current
+            Object System.Collections.IEnumerator.Current
             {
                 get
                 {
@@ -1789,7 +1805,7 @@ namespace Microsoft.Build.Collections
                 }
             }
 
-            void IEnumerator.Reset()
+            void System.Collections.IEnumerator.Reset()
             {
                 if (_version != _set._version)
                 {
@@ -1797,7 +1813,7 @@ namespace Microsoft.Build.Collections
                 }
 
                 _index = 0;
-                Current = default(T);
+                _current = default(T);
             }
         }
     }

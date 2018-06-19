@@ -51,11 +51,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Name
         {
-            [DebuggerStepThrough]
-            get
-            {
-                return XmlElement.Name;
-            }
+            get => XmlElement.Name;
 
             set
             {

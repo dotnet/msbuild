@@ -613,7 +613,7 @@ namespace Microsoft.Build.Evaluation
         /// Can never be null.
         /// Cannot be modified.
         /// </summary>
-        public ProjectCollection ProjectCollection { [DebuggerStepThrough] get; }
+        public ProjectCollection ProjectCollection { get; }
 
         /// <summary>
         /// The backing Xml project.
@@ -622,7 +622,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// There is no setter here as that doesn't make sense. If you have a new ProjectRootElement, evaluate it into a new Project.
         /// </remarks>
-        public ProjectRootElement Xml { [DebuggerStepThrough] get; }
+        public ProjectRootElement Xml { get; }
 
         /// <summary>
         /// Whether this project is dirty such that it needs reevaluation.
@@ -2875,7 +2875,7 @@ namespace Microsoft.Build.Evaluation
             /// Almost always, projects have the same set of targets because they all import the same ones.
             /// So we keep around the last set seen and if ours is the same at the end of evaluation, unify the references.
             /// </summary>
-            private static System.WeakReference<RetrievableEntryHashSet<ProjectTargetInstance>> s_typicalTargetsCollection;
+            private static WeakReference<RetrievableEntryHashSet<ProjectTargetInstance>> s_typicalTargetsCollection;
 
             /// <summary>
             /// List of names of the properties that, while global, are still treated as overridable 
@@ -3197,7 +3197,7 @@ namespace Microsoft.Build.Evaluation
                 if (s_typicalTargetsCollection == null)
                 {
                     Targets.TrimExcess();
-                    s_typicalTargetsCollection = new System.WeakReference<RetrievableEntryHashSet<ProjectTargetInstance>>(Targets);
+                    s_typicalTargetsCollection = new WeakReference<RetrievableEntryHashSet<ProjectTargetInstance>>(Targets);
                 }
                 else
                 {

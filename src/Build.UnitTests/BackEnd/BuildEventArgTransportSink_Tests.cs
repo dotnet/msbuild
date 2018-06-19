@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildEventArgTransportSink sink = new BuildEventArgTransportSink(PacketProcessor);
             Assert.Null(sink.Name);
 
-            string name = "Test Name";
+            const string name = "Test Name";
             sink.Name = name;
             Assert.Equal(0, string.Compare(sink.Name, name, StringComparison.OrdinalIgnoreCase));
         }
@@ -41,9 +41,8 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(null);
-            }
-           );
+                var transportSink = new BuildEventArgTransportSink(null);
+            });
         }
         /// <summary>
         /// Verify consume throws the correct exception when a null build event is passed in
@@ -67,16 +66,17 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             bool wentInHandler = false;
             BuildMessageEventArgs messageEvent = new BuildMessageEventArgs("My message", "Help me keyword", "Sender", MessageImportance.High);
-            SendDataDelegate transportDelegate = delegate (INodePacket packet)
-                                                 {
-                                                     wentInHandler = true;
-                                                     LogMessagePacket loggingPacket = packet as LogMessagePacket;
-                                                     Assert.NotNull(loggingPacket);
-                                                     BuildMessageEventArgs messageEventFromPacket = loggingPacket.NodeBuildEvent.Value.Value as BuildMessageEventArgs;
-                                                     Assert.Equal(messageEventFromPacket, messageEvent);
-                                                 };
 
-            BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(transportDelegate);
+            void TransportDelegate(INodePacket packet)
+            {
+                wentInHandler = true;
+                LogMessagePacket loggingPacket = packet as LogMessagePacket;
+                Assert.NotNull(loggingPacket);
+                BuildMessageEventArgs messageEventFromPacket = loggingPacket.NodeBuildEvent.Value.Value as BuildMessageEventArgs;
+                Assert.Equal(messageEventFromPacket, messageEvent);
+            }
+
+            BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(TransportDelegate);
             transportSink.Consume(messageEvent, 0);
             Assert.True(wentInHandler); // "Expected to go into transport delegate"
         }
@@ -89,12 +89,13 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             bool wentInHandler = false;
             BuildStartedEventArgs buildStarted = new BuildStartedEventArgs("Start", "Help");
-            SendDataDelegate transportDelegate = delegate (INodePacket packet)
+
+            void TransportDelegate(INodePacket packet)
             {
                 wentInHandler = true;
-            };
+            }
 
-            BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(transportDelegate);
+            BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(TransportDelegate);
             transportSink.Consume(buildStarted, 0);
             Assert.True(transportSink.HaveLoggedBuildStartedEvent);
             Assert.False(transportSink.HaveLoggedBuildFinishedEvent);
@@ -109,12 +110,13 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             bool wentInHandler = false;
             BuildFinishedEventArgs buildFinished = new BuildFinishedEventArgs("Finished", "Help", true);
-            SendDataDelegate transportDelegate = delegate (INodePacket packet)
+
+            void TransportDelegate(INodePacket packet)
             {
                 wentInHandler = true;
-            };
+            }
 
-            BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(transportDelegate);
+            BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(TransportDelegate);
             transportSink.Consume(buildFinished, 0);
             Assert.False(transportSink.HaveLoggedBuildStartedEvent);
             Assert.True(transportSink.HaveLoggedBuildFinishedEvent);
@@ -130,19 +132,20 @@ namespace Microsoft.Build.UnitTests.Logging
         public void TestShutDown()
         {
             SendDataDelegate transportDelegate = PacketProcessor;
-            WeakReference weakTransportDelegateReference = new WeakReference(transportDelegate);
-            BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(transportDelegate);
+            var weakTransportDelegateReference = new WeakReference<SendDataDelegate>(transportDelegate);
+            var transportSink = new BuildEventArgTransportSink(transportDelegate);
 
             transportSink.ShutDown();
 
-            Assert.NotNull(weakTransportDelegateReference.Target);
+            Assert.True(weakTransportDelegateReference.TryGetTarget(out SendDataDelegate sendData));
+            Assert.NotNull(sendData);
             transportDelegate = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
             // Expected shutdown to null out the sendData delegate, the two garbage collections
             // should have collected the sendDataDelegate causing the weak reference to die.
-            Assert.Null(weakTransportDelegateReference.Target); // " Expected delegate to be dead"
+            Assert.False(weakTransportDelegateReference.TryGetTarget(out _));  // " Expected delegate to be dead"
         }
 
         /// <summary>
@@ -154,7 +157,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// garbage collected until the class it was instantiated in is collected itself.
         /// </summary>
         /// <param name="packet">Packet to process</param>
-        private void PacketProcessor(INodePacket packet)
+        private static void PacketProcessor(INodePacket packet)
         {
         }
     }
