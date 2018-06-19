@@ -18,12 +18,10 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-#if DEBUG
-                if (BuildEnvironmentHelper.Instance.RunningTests && Environment.GetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS") == "1")
+                if (BuildEnvironmentHelper.Instance.RunningTests)
                 {
                     return new Traits();
                 }
-#endif
                 return _instance;
             }
         }
