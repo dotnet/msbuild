@@ -924,7 +924,7 @@ namespace Microsoft.Build.Tasks
                     {
                         throw;
                     }
-//erik:
+
                     // Queue up for later logging, does not matter if the file is deleted or not
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceString("GetSDKReferenceFiles.ProblemReadingCacheFile", cacheFile, e.ToString()));
                 }

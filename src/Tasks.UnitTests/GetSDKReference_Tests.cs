@@ -512,7 +512,6 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
                 BuildEngine = engine,
                 CacheFileFolderPath = _cacheDirectory
             };
-Console.WriteLine("erik: _cacheDirectory {0}", _cacheDirectory);
 
             ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");
