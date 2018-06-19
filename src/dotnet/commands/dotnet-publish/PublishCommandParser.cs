@@ -10,6 +10,10 @@ namespace Microsoft.DotNet.Cli
 {
     internal static class PublishCommandParser
     {
+        public const string SelfContainedMode = "self-contained";
+        public const string FxDependentMode = "fx-dependent";
+        public const string FxDependentNoExeMode = "fx-dependent-no-exe";
+
         public static Command Publish() =>
             CreateWithRestoreOptions.Command(
                 "publish",
@@ -40,7 +44,7 @@ namespace Microsoft.DotNet.Cli
                     Accept.NoArguments().ForwardAs("-property:NoBuild=true")),
                 Create.Option(
                     "--self-contained",
-                    LocalizableStrings.SelfContainedOptionDescription,
+                    "", // Hidden option for backwards-compatibility (now '--mode self-contained').
                     Accept.ZeroOrOneArgument()
                         .WithSuggestionsFrom("true", "false")
                         .ForwardAsSingle(o =>
@@ -48,6 +52,14 @@ namespace Microsoft.DotNet.Cli
                             string value = o.Arguments.Any() ? o.Arguments.Single() : "true";
                             return $"-property:SelfContained={value}";
                         })),
+                Create.Option(
+                    "--mode",
+                    LocalizableStrings.ModeOptionDescription,
+                    Accept.AnyOneOf(
+                        SelfContainedMode,
+                        FxDependentMode,
+                        FxDependentNoExeMode)
+                        .With(name: LocalizableStrings.ModeOptionName)),
                 CommonOptions.NoRestoreOption(),
                 CommonOptions.VerbosityOption());
     }
