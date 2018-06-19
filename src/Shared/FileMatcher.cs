@@ -203,7 +203,7 @@ namespace Microsoft.Build.Shared
         /// <returns>An immutable array of matching file system entries (can be empty).</returns>
         private static ImmutableArray<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
         {
-            if (Directory.Exists(path))
+            if (fileSystem.DirectoryExists(path))
             {
                 try
                 {
@@ -211,7 +211,7 @@ namespace Microsoft.Build.Shared
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsMatch(Path.GetFileName(o), pattern, true))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern)
-                    ).ToImmutableArray();
+                        ).ToImmutableArray();
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -224,6 +224,7 @@ namespace Microsoft.Build.Shared
                     // do nothing
                 }
             }
+
             return ImmutableArray<string>.Empty;
         }
 
