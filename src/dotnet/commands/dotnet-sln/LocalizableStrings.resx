@@ -145,7 +145,7 @@
     <value>PROJECT_PATH</value>
   </data>
   <data name="RemoveProjectPathArgumentDescription" xml:space="preserve">
-    <value>The paths to the projects to from from the solution.</value>
+    <value>The paths to the projects to remove from the solution.</value>
   </data>
   <data name="RemoveAppFullName" xml:space="preserve">
     <value>Remove one or more projects from a solution file.</value>

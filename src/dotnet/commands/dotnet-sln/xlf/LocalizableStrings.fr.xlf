@@ -68,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">
-        <source>The paths to the projects to from from the solution.</source>
-        <target state="new">The paths to the projects to from from the solution.</target>
+        <source>The paths to the projects to remove from the solution.</source>
+        <target state="new">The paths to the projects to remove from the solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectsHeader">
