@@ -1539,7 +1539,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         else
                         {
                             string configFileKey = string.Format(CultureInfo.InvariantCulture, "EULA{0}", eulas.Count);
-                            var de = new KeyValuePair<string ,string>(configFileKey, eulaAttribute.ToString());
+                            var de = new KeyValuePair<string ,string>(configFileKey, eulaAttribute.Value);
                             eulas[key] = de;
                             eulaAttribute.Value = configFileKey;
                         }
