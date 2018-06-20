@@ -21,8 +21,6 @@
 
       <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
       <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>
-      <SdkInstallerNuspecFile2xx>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).2.1.2xx.nuspec</SdkInstallerNuspecFile2xx>
-      <SdkInstallerNupkgFile2xx>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).2.1.2xx.$(FullNugetVersion).nupkg</SdkInstallerNupkgFile2xx>
 
       <SdkMSBuildExtensionsNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.nuspec</SdkMSBuildExtensionsNuspecFile>
       <SdkMSBuildExtensionsNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(FullNugetVersion).nupkg</SdkMSBuildExtensionsNupkgFile>
@@ -166,21 +164,14 @@
             Condition=" '$(OS)' == 'Windows_NT'"
             Inputs="$(CombinedFrameworkSdkHostInstallerFile);
                     $(SdkInstallerNuspecFile);
-                    $(SdkInstallerNuspecFile2xx);
                     $(SdkGenerateNupkgPowershellScript)"
-            Outputs="$(SdkInstallerNupkgFile);$(SdkInstallerNupkgFile2xx)">
+            Outputs="$(SdkInstallerNupkgFile)">
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
                       '$(CombinedFrameworkSdkHostInstallerFile)'
                       '$(FullNugetVersion)'
                       '$(SdkInstallerNuspecFile)'
                       '$(SdkInstallerNupkgFile)'" />
-
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
-                      '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(FullNugetVersion)'
-                      '$(SdkInstallerNuspecFile2xx)'
-                      '$(SdkInstallerNupkgFile2xx)'" />
     </Target>
 
     <Target Name="GenerateSdkMSBuildExtensionsNupkg"
