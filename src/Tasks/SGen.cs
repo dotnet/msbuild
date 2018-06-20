@@ -255,8 +255,8 @@ namespace Microsoft.Build.Tasks
                 {
                     if (References.Length > 0)
                     {
-                        //Appending references if 
-                        commandLineBuilder.AppendSwitchIfNotNull("/r:", string.Join(",", References));
+                        //Appending references spliting them by comma
+                        commandLineBuilder.AppendSwitchIfNotNull("/reference:", string.Join(",", References));
                     }
                 }
 
