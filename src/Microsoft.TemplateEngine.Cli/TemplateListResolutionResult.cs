@@ -18,6 +18,7 @@ namespace Microsoft.TemplateEngine.Cli
             _allTemplatesInContext = allTemplatesInContext;
             _bestTemplateMatchList = null;
             _usingContextMatches = false;
+            ComputeContextBasedAndOtherPartialMatches();
         }
 
         private readonly string _templateName;
@@ -265,7 +266,7 @@ namespace Microsoft.TemplateEngine.Cli
 
         public List<IReadOnlyList<ITemplateMatchInfo>> RemainingPartialMatchGroups { get; private set; }
 
-        public void ComputeContextBasedAndOtherPartialMatches()
+        private void ComputeContextBasedAndOtherPartialMatches()
         {
             Dictionary<string, List<ITemplateMatchInfo>> contextProblemMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
             Dictionary<string, List<ITemplateMatchInfo>> remainingPartialMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
@@ -273,12 +274,13 @@ namespace Microsoft.TemplateEngine.Cli
             // this filtering / grouping ignores language differences.
             foreach (ITemplateMatchInfo template in GetBestTemplateMatchList(true))
             {
+                string groupIdentity = template.Info.GroupIdentity ?? Guid.NewGuid().ToString();
                 if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
                 {
-                    if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
+                    if (!contextProblemMatches.TryGetValue(groupIdentity, out List<ITemplateMatchInfo> templateGroup))
                     {
                         templateGroup = new List<ITemplateMatchInfo>();
-                        contextProblemMatches.Add(template.Info.GroupIdentity, templateGroup);
+                        contextProblemMatches[groupIdentity] = templateGroup;
                     }
 
                     templateGroup.Add(template);
@@ -286,10 +288,10 @@ namespace Microsoft.TemplateEngine.Cli
                 else if (!UsingContextMatches
                     && template.MatchDisposition.Any(t => t.Location != MatchLocation.Context && t.Kind != MatchKind.Mismatch && t.Kind != MatchKind.Unspecified))
                 {
-                    if (!remainingPartialMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
+                    if (!remainingPartialMatches.TryGetValue(groupIdentity, out List<ITemplateMatchInfo> templateGroup))
                     {
                         templateGroup = new List<ITemplateMatchInfo>();
-                        remainingPartialMatches.Add(template.Info.GroupIdentity, templateGroup);
+                        remainingPartialMatches[groupIdentity] = templateGroup;
                     }
 
                     templateGroup.Add(template);
