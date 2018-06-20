@@ -105,17 +105,6 @@ namespace Microsoft.Build.Evaluation
         private RenameHandlerDelegate _renameHandler;
 
         /// <summary>
-        /// Needed because the Project may trigger reevalutions under the covers on some of its operations, which, ideally,
-        /// should use the same context as the initial evaluation.
-        /// 
-        /// Examples of operations which may trigger reevaluations:
-        /// - <see cref="CreateProjectInstance()"/>
-        /// - <see cref="GetAllGlobs()"/>
-        /// - <see cref="GetItemProvenance(string)"/>
-        /// </summary>
-        private EvaluationContext _lastEvaluationContext;
-
-        /// <summary>
         /// Default project template options (include all features).
         /// </summary>
         internal const NewProjectFileOptions DefaultNewProjectTemplateOptions = NewProjectFileOptions.IncludeAllOptions;
@@ -2079,8 +2068,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
         {
-            _lastEvaluationContext = evaluationContext;
-            ReevaluateIfNecessary(LoggingService);
+            ReevaluateIfNecessary(LoggingService, evaluationContext);
         }
 
         /// <summary>
@@ -2592,15 +2580,18 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Re-evaluates the project using the specified logging service.
         /// </summary>
-        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation)
+        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, EvaluationContext evaluationContext = null)
         {
-            ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings);
+            ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings, evaluationContext);
         }
 
         /// <summary>
         /// Re-evaluates the project using the specified logging service and load settings.
         /// </summary>
-        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        private void ReevaluateIfNecessary(
+            ILoggingService loggingServiceForEvaluation,
+            ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext = null)
         {
             // We will skip the evaluation if the flag is set. This will give us better performance on scenarios
             // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes. 
@@ -2608,7 +2599,7 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
-                    Reevaluate(loggingServiceForEvaluation, loadSettings);
+                    Reevaluate(loggingServiceForEvaluation, loadSettings, evaluationContext);
                 }
                 catch (InvalidProjectFileException ex)
                 {
@@ -2628,9 +2619,12 @@ namespace Microsoft.Build.Evaluation
             return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, ProjectCollection.EnvironmentProperties, settings);
         }
 
-        private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        private void Reevaluate(
+            ILoggingService loggingServiceForEvaluation,
+            ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext = null)
         {
-            _lastEvaluationContext = _lastEvaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+            evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                 _data,
@@ -2643,9 +2637,9 @@ namespace Microsoft.Build.Evaluation
                 ProjectCollection,
                 ProjectCollection.ProjectRootElementCache,
                 s_buildEventContext,
-                _lastEvaluationContext.SdkResolverService,
+                evaluationContext.SdkResolverService,
                 BuildEventContext.InvalidSubmissionId,
-                _lastEvaluationContext);
+                evaluationContext);
 
             ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 

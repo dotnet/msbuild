@@ -26,7 +26,7 @@ namespace Microsoft.Build.Evaluation.Context
             Isolated
         }
 
-        internal static Action<EvaluationContext> TestOnlyAlterStateOnCreate { get; set; }
+        internal static Action<EvaluationContext> TestOnlyHookOnCreate { get; set; }
 
         private int _used;
 
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Evaluation.Context
         public static EvaluationContext Create(SharingPolicy policy)
         {
             var context = new EvaluationContext(policy);
-            TestOnlyAlterStateOnCreate?.Invoke(context);
+            TestOnlyHookOnCreate?.Invoke(context);
 
             return context;
         }
