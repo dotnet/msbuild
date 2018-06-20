@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -22,11 +24,17 @@ namespace Microsoft.DotNet.Build.Tasks
 
         public string CrossgenPath { get; set; }
 
+        public bool CreateSymbols { get; set; }
+
+        public string DiasymReaderPath { get; set; }
+
         public bool ReadyToRun { get; set; }
 
         public ITaskItem[] PlatformAssemblyPaths { get; set; }
 
         private string TempOutputPath { get; set; }
+
+        private bool _secondInvocationToCreateSymbols;
 
         protected override bool ValidateParameters()
         {
@@ -58,6 +66,12 @@ namespace Microsoft.DotNet.Build.Tasks
                 File.Delete(TempOutputPath);
             }
 
+            if (toolResult && CreateSymbols)
+            {
+                _secondInvocationToCreateSymbols = true;
+                toolResult = base.Execute();
+            }
+
             return toolResult;
         }
 
@@ -83,7 +97,28 @@ namespace Microsoft.DotNet.Build.Tasks
 
         protected override string GenerateCommandLineCommands()
         {
+            if (_secondInvocationToCreateSymbols)
+            {
+                return $"{GetReadyToRun()} {GetPlatformAssemblyPaths()} {GetDiasymReaderPath()} {GetCreateSymbols()}";
+            }
+
             return $"{GetReadyToRun()} {GetInPath()} {GetOutPath()} {GetPlatformAssemblyPaths()} {GetJitPath()}";
+        }
+
+        private string GetCreateSymbols()
+        {
+            var option = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "-createpdb" : "-createperfmap";
+            return $"{option} \"{Path.GetDirectoryName(DestinationPath)}\" \"{DestinationPath}\"";
+        }
+
+        private string GetDiasymReaderPath()
+        {
+            if (string.IsNullOrEmpty(DiasymReaderPath))
+            {
+                return null;
+            }
+
+            return $"-diasymreaderpath \"{DiasymReaderPath}\"";
         }
 
         private string GetReadyToRun()

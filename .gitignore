@@ -15,6 +15,9 @@ Library/
 # local nuget cache
 .nuget/
 
+# NuGet.Config at the root
+/NuGet.Config
+
 # NuGet v3 restore drops these even though we don't use MSBuild :(
 *.nuget.targets
 *.nuget.props

@@ -1,33 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.tasks))\dir.tasks" />
-  <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-    <RuntimeFrameworkVersion>$(CLI_SharedFrameworkVersion)</RuntimeFrameworkVersion>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
-    <PublishDir>$(SdkOutputDirectory)</PublishDir>
+    <PublishDir>$(ToolsetOutputDirectory)</PublishDir>
     <VersionSuffix>$(CommitCount)</VersionSuffix>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(CLI_SharedFrameworkVersion)" />
-    <PackageReference Include="Microsoft.Build.Runtime" Version="$(CLI_MSBuildRuntime_Version)" />
-    <PackageReference Include="NuGet.Build.Tasks" Version="$(CLI_NuGet_Version)" />
-    <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(CLI_TestPlatform_Version)" />
-    <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(CLI_TestPlatform_Version)" />
-    <PackageReference Include="NuGet.ProjectModel" Version="$(CLI_NuGet_Version)" />
-    <!-- The project json migration commands depend on an older version of Roslyn.
-         Lift the version here to match what tool_roslyn depends on (otherwise an older version will
-         be added to the TPA when we crossgen and we won't be able to crossgen tool_roslyn -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(CLI_Roslyn_Version)" />
+    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
+    <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetSdkResolverPackageVersion)" />
+    <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" />
+    <PackageReference Include="Microsoft.TestPlatform.Build" Version="$(MicrosoftTestPlatformBuildPackageVersion)" />
+    <PackageReference Condition=" '$(DotNetBuildFromSource)' != 'true' " Include="NuGet.Localization" Version="$(NuGetProjectModelPackageVersion)" />
+    <PackageReference Include="NuGet.ProjectModel" Version="$(NuGetProjectModelPackageVersion)" />
+    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNETCoreCompilersPackageVersion)">
+      <ExcludeAssets>All</ExcludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\tool_msbuild\tool_msbuild.csproj" />
+    <ProjectReference Include="..\tool_cli\tool_cli.csproj" />
     <ProjectReference Include="..\tool_nuget\tool_nuget.csproj" />
   </ItemGroup>
 
@@ -47,18 +47,21 @@
 
   <Target Name="PublishRoslyn"
           BeforeTargets="Publish">
-          
-    <DotNetPublish ToolPath="$(PreviousStageDirectory)"
-                   Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/tool_roslyn/tool_roslyn.csproj" />
+    <ItemGroup>
+      <RoslynBits Include="$(NuGetPackagesDir)/microsoft.netcore.compilers/$(MicrosoftNETCoreCompilersPackageVersion)/tools/**/*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(RoslynBits)" DestinationFiles="@(RoslynBits->'$(RoslynDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <RoslynFrameworkAssemblies Include="$(RoslynDirectory)/System.*.dll;$(RoslynDirectory)/runtimes/**/System.*.dll" Exclude="$(RoslynDirectory)/runtimes/**/System.IO.Pipes.AccessControl.dll"/>
+    </ItemGroup>
+    <Delete Files="@(RoslynFrameworkAssemblies)" />
   </Target>
 
   <Target Name="PublishFSharp"
           BeforeTargets="Publish">
-          
     <DotNetPublish ToolPath="$(PreviousStageDirectory)"
                    Configuration="$(Configuration)"
-                   ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" />
+                   ProjectPath="$(SrcDirectory)/tool_fsharp/tool_fsc.csproj" MSBuildArgs="/p:PublishDir=$(FSharpDirectory)" />
   </Target>
 
   <Target Name="GenerateCliRuntimeConfigurationFiles"
@@ -75,26 +78,17 @@
 
     <Delete Files="$(PublishDir)/$(TargetName).deps.json;
                    $(PublishDir)/$(TargetName).runtimeconfig.json;
-                   $(PublishDir)/%(BundledToolProjects.Identity).dll" />
+                   $(PublishDir)/%(BundledToolProjects.Identity).dll;
+                   $(PublishDir)/%(BundledToolProjects.Identity).pdb" />
 
     <ChangeEntryPointLibraryName
           DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
           NewName="%(BundledTools.Identity).deps.json" />
   </Target>
 
-  <Target Name="PublishMSBuildExtensions"
-          DependsOnTargets="GenerateMSBuildExtensions"
+  <Target Name="PublishTargetExtensions"
           AfterTargets="Publish"
           BeforeTargets="GenerateCliRuntimeConfigurationFiles">
-    <ItemGroup>
-      <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
-        <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
-      </MSBuildExtensionsContent>
-    </ItemGroup>
-    
-      <Copy SourceFiles="@(MSBuildExtensionsContent)"
-            DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
-
       <PropertyGroup>
         <MSBuildTargetsDirectory>$(PublishDir)/runtimes/any/native</MSBuildTargetsDirectory>
       </PropertyGroup>
@@ -131,7 +125,7 @@
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
-          SdkLayoutDirectory=$(SdkOutputDirectory)/Sdks/%(BundledSdk.Identity);
+          SdkLayoutDirectory=$(ToolsetOutputDirectory)/Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);
           DependencyPackageVersion=%(BundledSdk.Version);
           PreviousStageDirectory=$(PreviousStageDirectory)
@@ -146,45 +140,35 @@
   </Target>
 
   <Target Name="ChmodPublishDir"
-          AfterTargets="PublishMSBuildExtensions"
+          AfterTargets="GenerateCliRuntimeConfigurationFiles"
           Condition=" '$(OSName)' != 'win' ">
-    
-    <Exec Command="find $(SdkOutputDirectory) -type d -exec chmod 755 {} \;" />
-    <Exec Command="find $(SdkOutputDirectory) -type f -exec chmod 644 {} \;" />
-    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunCsc.sh" />
-    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/Roslyn/RunVbc.sh" />
-    <Chmod Mode="755" Glob="$(SdkOutputDirectory)/FSharp/RunFsc.sh" />
+
+    <Exec Command="find $(ToolsetOutputDirectory) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(ToolsetOutputDirectory) -type f -exec chmod 644 {} \;" />
+    <Chmod Mode="755" Glob="$(ToolsetOutputDirectory)/FSharp/RunFsc.sh" />
   </Target>
 
-  <Target Name="CreateSymbolsDirectory"
-          AfterTargets="PublishMSBuildExtensions">
+  <Target Name="DeleteSymbolsFromPublishDir"
+          AfterTargets="GenerateCliRuntimeConfigurationFiles">
     <ItemGroup>
-      <_AllSdkFiles Include="$(PublishDir)/**/*" />
+      <PdbsToDelete Include="$(PublishDir)/**/*.pdb" />
+      <PdbsToDelete Include="$(PublishDir)/**/*.ni.*.map" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(_AllSdkFiles)"
-        DestinationFiles="@(_AllSdkFiles->'$(SymbolsDirectory)/sdk/%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
-
-  <Target Name="RemovePdbsFromPublishDir"
-          AfterTargets="CreateSymbolsDirectory">
-    <ItemGroup>
-      <PdbsToClean Include="$(PublishDir)/**/*.pdb" />
-    </ItemGroup>
-
-    <Delete Files="@(PdbsToClean)" />
+    <Delete Files="@(PdbsToDelete)" />
   </Target>
 
   <Target Name="RetargetVSTestConsole"
+          BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
           AfterTargets="Publish">
     <PropertyGroup>
       <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(CLI_SharedFrameworkVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
     <ReplaceFileContents
-      InputFile="$(VSTestRuntimeConfigPath)"
-      DestinationFile="$(VSTestRuntimeConfigPath)"
+      InputFiles="$(VSTestRuntimeConfigPath)"
+      DestinationFiles="$(VSTestRuntimeConfigPath)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
   </Target>

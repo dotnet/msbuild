@@ -7,8 +7,6 @@
     <PropertyGroup>
         <MSBuildExtensionsPathInToolPath>false</MSBuildExtensionsPathInToolPath>
         <MSBuildExtensionsPathInToolPath Condition="$(MSBuildExtensionsPath.StartsWith('$(NormalizedToolPath)'))">true</MSBuildExtensionsPathInToolPath>
-        <CscToolExeInToolPath>false</CscToolExeInToolPath>
-        <CscToolExeInToolPath Condition="$(CscToolExe.StartsWith('$(NormalizedToolPath)'))">true</CscToolExeInToolPath>
         <MSBuildSDKsPathInToolPath>false</MSBuildSDKsPathInToolPath>
         <MSBuildSDKsPathInToolPath Condition="$(MSBuildSDKsPath.StartsWith('$(NormalizedToolPath)'))">true</MSBuildSDKsPathInToolPath>
     </PropertyGroup>

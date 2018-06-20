@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private static string s_buildRid;
 
         private string _artifacts;
+        private string _dotnetRoot;
         private string _builtDotnet;
         private string _nugetPackages;
         private string _stage2Sdk;
@@ -37,9 +38,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string directory = AppContext.BaseDirectory;
 #endif
 
-                while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
+                while (directory != null)
                 {
-                    directory = Directory.GetParent(directory).FullName;
+                    var gitDirOrFile = Path.Combine(directory, ".git");
+                    if (Directory.Exists(gitDirOrFile) || File.Exists(gitDirOrFile))
+                    {
+                        break;
+                    }
+                    directory = Directory.GetParent(directory)?.FullName;
                 }
 
                 if (directory == null)
@@ -80,6 +86,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public string Artifacts => _artifacts;
         public string BuiltDotnet => _builtDotnet;
+        public string DotnetRoot => _dotnetRoot;
         public string NugetPackages => _nugetPackages;
         public string Stage2Sdk => _stage2Sdk;
         public string Stage2WithBackwardsCompatibleRuntimesDirectory => _stage2WithBackwardsCompatibleRuntimesDirectory;
@@ -101,6 +108,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                                                    previousStage.ToString(),
                                                    BuildRid);
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
+            _dotnetRoot = Path.Combine(_artifacts, "dotnet");
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
             _stage2Sdk = Directory
                 .EnumerateDirectories(Path.Combine(_artifacts, "dotnet", "sdk"))
@@ -112,7 +120,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             _testPackages = Environment.GetEnvironmentVariable("TEST_PACKAGES");
             if (string.IsNullOrEmpty(_testPackages))
             {
-                throw new InvalidOperationException("TEST_PACKAGES environment variable not set");
+                _testPackages = Path.Combine(_artifacts, "test", "packages");
             }
 
             _testWorkingFolder = Path.Combine(RepoRoot,

@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             {
                 string projectDirectory = directory.Path;
 
-                string newArgs = "console -f netcoreapp2.0 --debug:ephemeral-hive --no-restore";
+                string newArgs = "console -f netcoreapp2.1 --debug:ephemeral-hive --no-restore";
                 new NewCommandShim()
                     .WithWorkingDirectory(projectDirectory)
                     .Execute(newArgs)
@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             new DotnetCommand()
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput(
-                    $"-d dependency-tool-invoker -c {configuration} -f netcoreapp2.0 portable")
+                    $"-d dependency-tool-invoker -c {configuration} -f netcoreapp2.2 portable")
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello Portable World!");;
         }

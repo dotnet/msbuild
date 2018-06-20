@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DotNetCoreSdkLKGRootUrl>$(DotnetBlobRootUrl)/Sdk/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGRootUrl>
+    <DotNetCoreSdkLKGRootUrl>$(CoreSetupBlobRootUrl)Sdk/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGRootUrl>
     <DotNetCoreSdkLKGDownloadUrl>$(DotNetCoreSdkLKGRootUrl)$(DotNetCoreSdkLKGCompressedFileName)$(CoreSetupBlobAccessTokenParam)</DotNetCoreSdkLKGDownloadUrl>
     <DotNetCoreSdkLKGDownloadDirectory>$(IntermediateDirectory)/SDKDownloadForTests/$(DotNetCoreSdkLKGVersion)/</DotNetCoreSdkLKGDownloadDirectory>
     <DotNetCoreSdkLKGArchive>$(DotNetCoreSdkLKGDownloadDirectory)$(DotNetCoreSdkLKGCompressedFileName)</DotNetCoreSdkLKGArchive>

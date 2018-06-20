@@ -2,12 +2,10 @@
 <Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)/package/Layout.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Archive.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/package/OverlayCLIOnSDK.targets" />
 
   <Target Name="Package"
           DependsOnTargets="BuildDotnetCliBuildFramework;
                             Init;
                             Layout;
-                            OverlayCLIOnSDK;
                             GenerateArchives"  />
 </Project>

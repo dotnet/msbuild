@@ -1,56 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <DotNetCoreSdkLKGVersion>2.0.3-servicing-007050</DotNetCoreSdkLKGVersion>
-    <CLI_SharedFrameworkVersion>2.0.0</CLI_SharedFrameworkVersion>
-    <CLI_MSBuild_Version>15.4.8</CLI_MSBuild_Version>
-    <CLI_MSBuildRuntime_Version>15.4.8.1</CLI_MSBuildRuntime_Version>
-    <CLI_Roslyn_Version>2.3.2-beta1-61921-05</CLI_Roslyn_Version>
-    <CLI_Roslyn_Satellites_Version>2.3.0-pre-20170727-1</CLI_Roslyn_Satellites_Version>
-    <CLI_DiaSymNative_Version>1.6.0-beta2-25304</CLI_DiaSymNative_Version>
-    <CLI_FSharp_Version>4.2.0-rc-170630-0</CLI_FSharp_Version>
-    <CLI_FSharp_Satellites_Version>4.4.1-pre-20170727-1</CLI_FSharp_Satellites_Version>
+    <DotNetCoreSdkLKGVersion>2.2.100-preview1-008982</DotNetCoreSdkLKGVersion>
+    <DotnetCliInternalVersion>2.2.100-refac-refac-20180613-1</DotnetCliInternalVersion>
+    <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview1-34355</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.2.0-preview1-26529-01</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftBuildPackageVersion>15.8.0-preview-000061</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
+    <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
+    <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>10.1.4-rtm-180515-0</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>2.8.1-beta6-62915-07</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
+    <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
+    <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
+    <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
+    <MicrosoftNETSdkPackageVersion>1.0.0-preview1-62924-06</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>2.1.300-rtm-20180515-1688249</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
+    <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
+    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta3-20180515-1688254</MicrosoftDotNetCommonItemTemplatesPackageVersion>
+    <MicrosoftDotNetCommonProjectTemplates20PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
+    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3-20180515-1688254</MicrosoftDotNetTestProjectTemplates20PackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta3-20180515-1688254</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
+    <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
+    <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
+    <MicrosoftTemplateEngineUtilsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineUtilsPackageVersion>
+    <MicrosoftDotNetPlatformAbstractionsPackageVersion>2.2.0-preview1-26508-01</MicrosoftDotNetPlatformAbstractionsPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>2.2.0-preview1-26508-01</MicrosoftExtensionsDependencyModelPackageVersion>
+    <MicrosoftDotNetCliCommandLinePackageVersion>0.1.1-rtm-62915-03</MicrosoftDotNetCliCommandLinePackageVersion>
+    <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.1-rtm-62915-03</MicrosoftDotNetProjectJsonMigrationPackageVersion>
+    <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
+    <MicrosoftDotNetArchivePackageVersion>0.2.0-beta-62628-01</MicrosoftDotNetArchivePackageVersion>
+    <NuGetBuildTasksPackageVersion>4.8.0-preview1.5196</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
+    <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
+    <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
+    <NuGetConfigurationPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetConfigurationPackageVersion>
+    <NuGetFrameworksPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetFrameworksPackageVersion>
+    <NuGetPackagingPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetPackagingPackageVersion>
+    <NuGetProjectModelPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelPackageVersion>
+    <NuGetVersioningPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetVersioningPackageVersion>
+    <NuGetSdkResolverPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetSdkResolverPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.8.0-preview-20180510-03</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
+    <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
+    <MicrosoftDotNetCliUtilsPackageVersion>2.2.100-refac-20180613-1</MicrosoftDotNetCliUtilsPackageVersion>
+    <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
+    <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
+  </PropertyGroup>
 
-    <!-- We'll usually want to keep these versions in sync, but we may want to diverge in some
-         cases, so use separate properties but derive one from the other unless we want to
-         explicitly use different versions. -->
-    <CLI_NETSDK_Version>2.0.1-servicing-20170926-1</CLI_NETSDK_Version>
-    <CLI_MSBuildExtensions_Version>$(CLI_NETSDK_Version)</CLI_MSBuildExtensions_Version>
-    <CLI_ArchiveVersion>2.0.3-refac-007132</CLI_ArchiveVersion>
-    <CLI_NuGet_Version>4.4.0-preview3-4475</CLI_NuGet_Version>
-    <CLI_NETStandardLibraryNETFrameworkVersion>2.0.0-preview3-25514-04</CLI_NETStandardLibraryNETFrameworkVersion>
-    <CLI_WEBSDK_Version>2.0.0-rel-20170908-653</CLI_WEBSDK_Version>
-    <CLI_TestPlatform_Version>15.3.0-preview-20170628-02</CLI_TestPlatform_Version>
-    <SharedFrameworkVersion>$(CLI_SharedFrameworkVersion)</SharedFrameworkVersion>
-    <SharedHostVersion>$(CLI_SharedFrameworkVersion)</SharedHostVersion>
-    <HostFxrVersion>$(CLI_SharedFrameworkVersion)</HostFxrVersion>
-    <TemplateEngineVersion>1.0.0-beta2-20170810-304</TemplateEngineVersion>
-    <TemplateEngineTemplateVersion>1.0.0-beta2-20170810-304</TemplateEngineTemplateVersion>
-    <TemplateEngineTemplate2_0Version>1.0.0-beta2-20170810-304</TemplateEngineTemplate2_0Version>
-    <PlatformAbstractionsVersion>2.0.0</PlatformAbstractionsVersion>
-    <DependencyModelVersion>2.0.0</DependencyModelVersion>
-    <CliCommandLineParserVersion>0.1.1-alpha-167</CliCommandLineParserVersion>
-    <CliMigrateVersion>1.2.1-alpha-002133</CliMigrateVersion>
-    <MicroBuildVersion>0.2.0</MicroBuildVersion>
-    <SpaTemplateVersion>1.0.417</SpaTemplateVersion>
-    <XliffTasksVersion>0.2.0-beta-000042</XliffTasksVersion>
+  <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->
+  <Import Condition=" Exists('$(OrchestratedPackageVersionsProps)') " Project="$(OrchestratedPackageVersionsProps)" />
 
-    <!-- This should either be timestamped or notimestamp as appropriate -->
-    <AspNetCoreRuntimePackageFlavor>notimestamp</AspNetCoreRuntimePackageFlavor>
-    <!--BranchName and AspNetCoreVersion will not always be the same-->
-    <AspNetCoreBranchName>2.0.0</AspNetCoreBranchName>
-    <AspNetCoreRelease>rtm</AspNetCoreRelease>
-    <AspNetCoreVersion>2.0.0</AspNetCoreVersion>
-    <AspNetCoreRuntimePackageTimestamp>26452</AspNetCoreRuntimePackageTimestamp>
+  <PropertyGroup>
+    <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</CLI_NETStandardLibraryNETFrameworkVersion>
 
-    <AspNetCoreRuntimePackageBrandName>aspnetcore-store</AspNetCoreRuntimePackageBrandName>
-    <AspNetCoreVersionAndRelease>$(AspNetCoreVersion)-$(AspNetCoreRelease)</AspNetCoreVersionAndRelease>
-    <AspNetCoreRuntimeAzureblobStoresSubfolderName>$(AspNetCoreBranchName)-$(AspNetCoreRuntimePackageTimestamp)</AspNetCoreRuntimeAzureblobStoresSubfolderName>
+    <SharedHostVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedHostVersion>
+    <HostFxrVersion>$(MicrosoftNETCoreAppPackageVersion)</HostFxrVersion>
+    <AspNetCoreVersion>$(MicrosoftAspNetCoreAppPackageVersion)</AspNetCoreVersion>
   </PropertyGroup>
 
   <!-- infrastructure and test only dependencies -->
   <PropertyGroup>
-    <VersionToolsVersion>1.0.27-prerelease-01723-01</VersionToolsVersion>
+    <BuildTasksFeedToolVersion>2.1.0-prerelease-02430-04</BuildTasksFeedToolVersion>
+    <VersionToolsVersion>$(BuildTasksFeedToolVersion)</VersionToolsVersion>
     <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
   </PropertyGroup>
+
 </Project>

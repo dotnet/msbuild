@@ -1,29 +1,31 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <SdkBrandName>Microsoft .NET Core SDK - 2.0.3</SdkBrandName>
+    <BuildName>cli</BuildName>
+    <SdkBrandName>Microsoft .NET Core SDK $(CliBrandingVersion)</SdkBrandName>
     <MSBuildExtensionsBrandName>.NET Standard Support for Visual Studio 2015</MSBuildExtensionsBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core Runtime - 2.0.1</SharedFrameworkBrandName>
-    <SharedHostBrandName>Microsoft .NET Core Host - 2.0.1</SharedHostBrandName>
-    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver - 2.0.0</HostFxrBrandName>
+    <SharedFrameworkBrandName>Microsoft .NET Core Runtime 2.1.0 - Preview</SharedFrameworkBrandName>
+    <SharedHostBrandName>Microsoft .NET Core Host 2.1.0 - Preview</SharedHostBrandName>
+    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver 2.1.0 - Preview</HostFxrBrandName>
 
     <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
     <SharedFrameworkNugetName>$(SharedFrameworkName)</SharedFrameworkNugetName>
 
     <HostMonikerRid Condition=" '$(HostRid)' == 'ubuntu.16.04-x64' OR
-        '$(HostRid)' == 'ubuntu.16.10-x64' OR
-        '$(HostRid)' == 'fedora.24-x64' OR
-        '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
+                                '$(HostRid)' == 'fedora.24-x64' OR
+                                '$(HostRid)' == 'rhel.6-x64' OR
+                                '$(HostRid)' == 'linux-musl-x64' OR
+                                '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
     <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
+    <HostMonikerRidForFileName>$(HostMonikerRid)</HostMonikerRidForFileName>
+    <HostMonikerRidForFileName Condition=" '$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true' ">$(Architecture)</HostMonikerRidForFileName>
 
     <ArtifactNameSdk>dotnet-toolset-internal</ArtifactNameSdk>
-    <ArtifactNameSdkDebug>dotnet-toolset-internal-debug</ArtifactNameSdkDebug>
-    <ArtifactNameSdkLanguagePack>dotnet-sdk-langpack</ArtifactNameSdkLanguagePack>
+    <ArtifactNameSdkLanguagePack>dotnet-toolset-langpack</ArtifactNameSdkLanguagePack>
 
     <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)</ArtifactNameWithVersionSdk>
     <ArtifactNameMSBuildExtensions>dotnet-standard-support-vs2015</ArtifactNameMSBuildExtensions>
     <ArtifactNameWithVersionMSBuildExtensions>$(ArtifactNameMSBuildExtensions)-$(SdkVersion)</ArtifactNameWithVersionMSBuildExtensions>
 
-    <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)</ArtifactNameWithVersionSdkDebug>
     <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)</ArtifactNameWithVersionSdkLanguagePack>
   </PropertyGroup>
 </Project>

@@ -24,7 +24,7 @@ if [ -z "$HOME" ]; then
     mkdir -p $HOME
 fi
 
-args=( "$@" )
+args=
 
 while [[ $# > 0 ]]; do
     lowerI="$(echo $1 | awk '{print tolower($0)}')"
@@ -32,22 +32,14 @@ while [[ $# > 0 ]]; do
         --docker)
             export BUILD_IN_DOCKER=1
             export DOCKER_IMAGENAME=$2
-            # remove docker args
-            args=( "${args[@]/$1}" )
-            args=( "${args[@]/$2}" )
             shift
             ;;
         *)
+            args="$args $1"
+            ;;
     esac
     shift
 done
-
-# $args array may have empty elements in it.
-# The easiest way to remove them is to cast to string and back to array.
-# This will actually break quoted arguments, arguments like 
-# -test "hello world" will be broken into three arguments instead of two, as it should.
-temp="${args[@]}"
-args=($temp)
 
 dockerbuild()
 {
@@ -56,7 +48,7 @@ dockerbuild()
 
 # Check if we need to build in docker
 if [ ! -z "$BUILD_IN_DOCKER" ]; then
-    dockerbuild "${args[@]}"
+    dockerbuild $args
 else
-    $DIR/run-build.sh "${args[@]}"
+    $DIR/run-build.sh $args
 fi

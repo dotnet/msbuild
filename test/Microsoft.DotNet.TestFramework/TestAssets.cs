@@ -59,8 +59,8 @@ namespace Microsoft.DotNet.TestFramework
             var assetDirectory = new DirectoryInfo(Path.Combine(_root.FullName, kind, name));
 
             return new TestAssetInfo(
-                assetDirectory,
-                name,
+                assetDirectory, 
+                name, 
                 this);
         }
 

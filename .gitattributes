@@ -51,4 +51,5 @@
 *.vbproj text=auto
 *.fsproj text=auto
 *.dbproj text=auto
+*.xlf text=auto
 *.sln text=auto eol=crlf

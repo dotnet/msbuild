@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{base.Args} {GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()} {GetRuntime()} {MsbuildArgs}"; }
+            get { return $"{base.Args} {GetProjectPath()} {GetConfiguration()} {GetNoBuild()} {GetOutput()} {GetVersionSuffix()} {GetRuntime()} {GetIncludeSymbols()} {MsbuildArgs}"; }
         }
 
         public string Configuration { get; set; }
@@ -26,8 +26,10 @@ namespace Microsoft.DotNet.Cli.Build
         public string ProjectPath { get; set; }
 
         public string VersionSuffix { get; set; }
-        
+
         public string Runtime { get; set; }
+
+        public bool IncludeSymbols { get; set; }
 
         private string GetConfiguration()
         {
@@ -48,7 +50,7 @@ namespace Microsoft.DotNet.Cli.Build
 
             return null;
         }
-        
+
         private string GetOutput()
         {
             if (!string.IsNullOrEmpty(Output))
@@ -78,15 +80,26 @@ namespace Microsoft.DotNet.Cli.Build
 
             return null;
         }
-        
+
         private string GetRuntime()
         {
             if (!string.IsNullOrEmpty(Runtime))
             {
-                return $"/p:RuntimeIdentifier={Runtime}";
+                return $"-property:RuntimeIdentifier={Runtime}";
             }
 
             return null;
         }
+
+        private string GetIncludeSymbols()
+        {
+            if (IncludeSymbols)
+            {
+                return $"--include-symbols";
+            }
+
+            return null;
+        }
+
     }
 }

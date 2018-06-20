@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
@@ -10,7 +10,7 @@
   <ItemGroup>
     <Content Include="prefercliruntime">
       <Pack>true</Pack>
-      <PackagePath>\prefercliruntime</PackagePath>
+      <PackagePath>/</PackagePath>
     </Content>
   </ItemGroup>
 </Project>

@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <Target Name="Test"
-          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
+          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' And !$(Architecture.StartsWith('arm')) "
           DependsOnTargets="BuildTests;">
 
     <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->
@@ -42,6 +42,8 @@
       BuildInParallel="True"
       Projects="@(ProjectsToTest)">
     </MSBuild>
+
+    <Exec Command="$(DotnetInOutputDirectory) exec $(RoslynDirectory)/bincore/VBCSCompiler.dll -shutdown" />
 
     <Message Text="Finished test execution" Importance="High" />
   </Target>
@@ -76,7 +78,7 @@
     <DotNetRestore ToolPath="$(OutputDirectory)"
                    WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
                    ProjectPath="%(TestPackageProject.ProjectPath)"
-                   AdditionalParameters="/p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)"
+                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
                    />
  
     <!-- https://github.com/NuGet/Home/issues/4063 -->
@@ -85,7 +87,6 @@
                 ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
-
   </Target>
 
   <Target Name="EnsureStageSeparation">

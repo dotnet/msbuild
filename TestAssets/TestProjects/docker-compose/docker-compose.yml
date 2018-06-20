@@ -1,0 +1,8 @@
+version: '3.0'
+
+services:
+  testwebapplication:
+    image: testwebapplication
+    build:
+      context: .
+      dockerfile: testwebapplication/Dockerfile

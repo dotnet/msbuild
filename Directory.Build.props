@@ -19,12 +19,17 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
 
-    <CLIBuildDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/dotnet-cli-build.dll</CLIBuildDll>
+    <RelativeCLIBuildBinaries>build_projects/dotnet-cli-build/bin</RelativeCLIBuildBinaries>
+    <RelativeCLIBuildDllName>dotnet-cli-build.dll</RelativeCLIBuildDllName>
+    <CLIBuildDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/$(RelativeCLIBuildDllName)</CLIBuildDll>
+    <BuildTasksFeedDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
-    <CliTargetFramework>netcoreapp2.0</CliTargetFramework>
+    <CliTargetFramework>netcoreapp2.2</CliTargetFramework>
+    <!-- We only need this until we get a stage0 with a 2.2 SDK. -->
+    <NETCoreAppMaximumVersion>2.2</NETCoreAppMaximumVersion>
   </PropertyGroup>
 
   <Import Project="build/InitRepo.props" />
@@ -37,9 +42,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
   <Import Project="build/Branding.props" />
-  <Import Project="build/MSBuildExtensions.props" />
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
+
   <Import Project="build/SetupPreviousStage.props" />
   <Import Project="build/OutputDirectories.props" />
 
@@ -51,8 +56,8 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <Import Project="build/AzureInfo.props" />
     <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/BundledCLI.props" />
     <Import Project="build/DotnetCoreSdkLKG.props" />
+
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>
   

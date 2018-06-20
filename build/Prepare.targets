@@ -10,6 +10,14 @@
                             SetTelemetryProfile;
                             BuildDotnetCliBuildFramework" />
 
+  <Target Name="SandBoxPrepare"
+          DependsOnTargets="PrintBuildInfo;
+                            CheckPrereqs;
+                            DownloadHostAndSharedFxArtifacts;
+                            IsolateArtifactsFromDirectoryBuildFiles;
+                            CreatePropsForNextStage">
+  </Target>
+
   <Target Name="PrintBuildInfo">
     <Message Text="Host info - Rid: $(HostRid), OSName: $(HostOSName)" Importance="High" />
     <Message Text="Build info - Rid: $(Rid), Architecture: $(Architecture), OSName: $(OSName)" Importance="High" />
@@ -28,7 +36,7 @@
       <OverwriteExtractionDestination>%(_DownloadAndExtractItem.OverwriteDestination)</OverwriteExtractionDestination>
       <OverwriteExtractionDestination Condition="'$(OverwriteExtractionDestination)' == ''">True</OverwriteExtractionDestination>
     </PropertyGroup>
-    
+
     <DownloadFile Condition=" '@(_DownloadAndExtractItem)' != '' "
                   Uri="%(_DownloadAndExtractItem.Url)"
                   DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />
@@ -130,3 +138,4 @@
   </Target>
 
 </Project>
+

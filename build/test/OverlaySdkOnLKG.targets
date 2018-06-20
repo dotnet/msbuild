@@ -4,36 +4,47 @@
       <OverlaySDK Include="$(DotNetCoreSdkLKGPublishDirectory)/**/*" />
       <TemplatesToOverlay Include="$(IntermediateDirectory)/Templates/*.nupkg" />
       <LzmaArchiveToOverlay Include="$(IntermediateDirectory)/nuGetPackagesArchive.lzma" />
-      <OverlayCLI Include="$(CLIPublishDirectory)/sdk/$(CLI_ArchiveVersion)/**/*" />
+      <ToolsetToOverlay Include="$(ToolsetOutputDirectory)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
           DestinationFiles="@(OverlaySDK->'$(OutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <Copy SourceFiles="@(TemplatesToOverlay)" 
+   <!-- <Copy SourceFiles="@(TemplatesToOverlay)" 
           DestinationFiles="@(TemplatesToOverlay->'$(SdkOutputDirectory)/Templates/%(Filename)%(Extension)')" />
 
     <Copy SourceFiles="@(LzmaArchiveToOverlay)" 
           DestinationFiles="@(LzmaArchiveToOverlay->'$(SdkOutputDirectory)/%(Filename)%(Extension)')" />
-  
-    <Copy SourceFiles="@(OverlayCLI)"
-          DestinationFiles="@(OverlayCLI->'$(SdkOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
-  
+
+    <Copy SourceFiles="$(IntermediateDirectory)/Microsoft.NETCoreSdk.BundledVersions.props"
+          DestinationFiles="$(SdkOutputDirectory)/Microsoft.NETCoreSdk.BundledVersions.props" /> -->
+
+    <Copy SourceFiles="@(ToolsetToOverlay)"
+          DestinationFiles="@(ToolsetToOverlay->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="PrepareLKGForOverlay">
     <ItemGroup>
       <LzmaArchiveFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/nuGetPackagesArchive.lzma" />
+      <BundledVersionsFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/Microsoft.NETCoreSdk.BundledVersions.props" />
       <TemplatesFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/*/Templates/*.nupkg" />
+      <BundledToolsFromLKG Include="$(DotNetCoreSdkLKGPublishDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/DotnetTools/**/*" />
     </ItemGroup>
 
     <!-- Backup the lzma archive -->
     <Copy SourceFiles="@(LzmaArchiveFromLKG)"
-          DestinationFiles="$(IntermediateDirectory)/nuGetPackagesArchive.lzma" />
+          DestinationFiles="$(SdkOutputDirectory)/nuGetPackagesArchive.lzma" />
 
     <!-- Backup the templates -->
     <Copy SourceFiles="@(TemplatesFromLKG)"
-          DestinationFiles="@(TemplatesFromLKG->'$(IntermediateDirectory)/Templates/%(Filename)%(Extension)')" />
+          DestinationFiles="@(TemplatesFromLKG->'$(SdkOutputDirectory)/Templates/%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(BundledToolsFromLKG)"
+          DestinationFiles="@(BundledToolsFromLKG->'$(SdkOutputDirectory)/DotnetTools/%(RecursiveDir)%(Filename)%(Extension)')" />
+          
+    <!-- Backup the BundledVersios.props -->
+    <Copy SourceFiles="@(BundledVersionsFromLKG)"
+          DestinationFiles="$(SdkOutputDirectory)/Microsoft.NETCoreSdk.BundledVersions.props" />
 
     <RemoveDir Directories="$(DotNetCoreSdkLKGPublishDirectory)/sdk" />
   </Target>
@@ -55,9 +66,11 @@
           DestinationFiles="@(Stage2Cli->'$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
-  <Target Name="CleanUpOverlay" AfterTargets="Test">
+  <!--<Target Name="CleanUpOverlay" AfterTargets="Test">
     <RemoveDir Directories="$(SdkOutputDirectory)/Templates" />
 
     <Delete Files="$(SdkOutputDirectory)/nuGetPackagesArchive.lzma" />
-  </Target>
+
+    <Delete Files="$(SdkOutputDirectory)/Microsoft.NETCoreSdk.BundledVersions.props" />
+  </Target>-->
 </Project>
