@@ -314,7 +314,7 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
-        <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
+        <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see http://aka.ms/dotnet-runtime-patch-selection.</source>
         <target state="needs-review-translation">プロジェクトは {0} バージョン {1} を使用して復元されましたが、現在の設定ではバージョン {2} を使用すべきところでした。この問題を解決するには、復元と後続の操作 (ビルドや発行など) で確実に同じ設定を使用するようにしてください。通常、この問題は、RuntimeIdentifier プロパティがビルドまたは発行の際に設定されたものの、復元の際には設定されなかったことで生じます。</target>
         <note>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
