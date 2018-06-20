@@ -1438,6 +1438,7 @@ namespace Microsoft.Build.Shared
             success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
             return success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0;
         }
+
         internal static bool FileExists(string fullPath)
         {
             return NativeMethodsShared.IsWindows

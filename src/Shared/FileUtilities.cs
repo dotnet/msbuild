@@ -1276,13 +1276,6 @@ namespace Microsoft.Build.Shared
             return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
         }
 
-        internal static bool TryGetPathOfFileAbove(string file, string startingDirectory, out string fullPath)
-        {
-            fullPath = GetPathOfFileAbove(file, startingDirectory);
-
-            return fullPath != String.Empty;
-        }
-
         // Method is simple set of function calls and may inline;
         // we don't want it inlining into the tight loop that calls it as an exit case,
         // so mark as non-inlining
