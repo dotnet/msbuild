@@ -24,7 +24,14 @@ namespace Microsoft.DotNet.Cli
         {
             var fullRestoreOptions = AddImplicitRestoreOptions(new Option[] { CommonOptions.HelpOption() }, true, true);
 
-            return fullRestoreOptions.Concat(new Option[] { CommonOptions.VerbosityOption() }).ToArray();
+            return fullRestoreOptions.Concat(
+                new Option[] {
+                    CommonOptions.VerbosityOption(),
+                    Create.Option(
+                        "--interactive",
+                        LocalizableStrings.CmdInteractiveRestoreOptionDescription,
+                        Accept.NoArguments()
+                              .ForwardAs("-property:NuGetInteractive=true")) }).ToArray();
         }
 
         public static Option[] AddImplicitRestoreOptions(
@@ -94,12 +101,7 @@ namespace Microsoft.DotNet.Cli
                     useShortOptions ? "-f|--force" : "--force",
                     LocalizableStrings.CmdForceRestoreOptionDescription,
                     Accept.NoArguments()
-                          .ForwardAs("-property:RestoreForce=true")),
-                 Create.Option(
-                    "--interactive",
-                    showHelp ? LocalizableStrings.CmdInteractiveRestoreOptionDescription : string.Empty,
-                    Accept.NoArguments()
-                          .ForwardAs("-property:NuGetInteractive=true"))
+                          .ForwardAs("-property:RestoreForce=true"))
             };
         }
     }
