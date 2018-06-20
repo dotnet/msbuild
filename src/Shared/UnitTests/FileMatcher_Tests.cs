@@ -2287,11 +2287,6 @@ namespace Microsoft.Build.UnitTests
             {
                 return FileSystems.Default.DirectoryEntryExists(path);
             }
-
-            public void ClearCaches()
-            {
-                FileSystems.Default.ClearCaches();
-            }
         }
     }
 }

@@ -70,9 +70,6 @@ namespace Microsoft.Build.Shared.FileSystem
             return NativeMethodsShared.FileOrDirectoryExistsWindows(path);
         }
 
-        public void ClearCaches()
-        {
-        }
         private static IEnumerable<string> EnumerateFileOrDirectories(
             string directoryPath,
             FileArtifactType fileArtifactType,
