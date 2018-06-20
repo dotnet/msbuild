@@ -54,7 +54,8 @@
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
                 ToolPath="$(PreviousStageDirectory)"
                 VersionSuffix="$(VersionSuffix)"
-                Configuration="$(Configuration)" />
+                Configuration="$(Configuration)"
+                MsbuildArgs="/p:Architecture=$(Architecture)" />
   </Target>
 
   <Target Name="BuildProjectsForNuGetPackages"
