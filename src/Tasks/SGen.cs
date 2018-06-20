@@ -255,7 +255,10 @@ namespace Microsoft.Build.Tasks
                 {
                     if (References.Length > 0)
                     {
-                        //Appending references spliting them by comma
+                        // Use a single comma-delimited argument rather than multiple /reference:file
+                        // arguments to save 11 characters per reference (" /reference:" versus ","),
+                        // which can help squeak under the command-line length limit in the
+                        // many-references case.
                         commandLineBuilder.AppendSwitchIfNotNull("/reference:", string.Join(",", References));
                     }
                 }
