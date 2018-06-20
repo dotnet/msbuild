@@ -46,11 +46,4 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CscToolPath Condition="'$(CscToolPath)' == '' and '$(CscToolExe)' == 'mcs.exe'">$(MSBuildFrameworkToolsPath)</CscToolPath>
         <DebugType Condition="'$(OS)' != 'Windows_NT' And ('$(DebugSymbols)'=='True' or ('$(DebugSymbols)'=='' And '$(_ConfigurationNameTmp)'=='Debug'))">portable</DebugType>
     </PropertyGroup>
-
-    <Target Name="_RoslynPublicSignHack" BeforeTargets="CoreCompile">
-        <PropertyGroup>
-            <_UseRoslynPublicSignHack Condition="'$(_UseRoslynPublicSignHack)' == ''">true</_UseRoslynPublicSignHack>
-            <PublicSign Condition="'$(OS)' != 'Windows_NT' and ('$(CscToolExe)' == '' or '$(CscToolExe)' == 'csc.exe' or '$(CscToolExe)' == 'csc') and '$(KeyOriginatorFile)' != '' and '$(DelaySign)' != 'true' and '$(_UseRoslynPublicSignHack)' == 'true'">true</PublicSign>
-        </PropertyGroup>
-    </Target>
 </Project>
