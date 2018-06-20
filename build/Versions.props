@@ -46,6 +46,7 @@
 
   <!-- Production Dependencies -->
   <PropertyGroup>
+    <MicrosoftWin32RegistryVersion>4.3.0</MicrosoftWin32RegistryVersion>
     <VisualStudioSetupInteropVersion>1.16.30</VisualStudioSetupInteropVersion>
 
     <!-- MSBuild custom overall switch -->
