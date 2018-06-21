@@ -253,9 +253,13 @@ namespace Microsoft.Build.Tasks
                 // Append the references, if any.
                 if (References != null)
                 {
-                    foreach (string reference in References)
+                    if (References.Length > 0)
                     {
-                        commandLineBuilder.AppendSwitchIfNotNull("/reference:", reference);
+                        // Use a single comma-delimited argument rather than multiple /reference:file
+                        // arguments to save 11 characters per reference (" /reference:" versus ","),
+                        // which can help squeak under the command-line length limit in the
+                        // many-references case.
+                        commandLineBuilder.AppendSwitchIfNotNull("/reference:", string.Join(",", References));
                     }
                 }
 
