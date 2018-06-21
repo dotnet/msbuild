@@ -51,8 +51,42 @@ namespace Microsoft.Build.UnitTests.Definition
 
             sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
         }
-		
-		[Theory]
+
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        public void SharedContextShouldGetReusedWhereasIsolatedContextShouldNot(EvaluationContext.SharingPolicy policy)
+        {
+            var previousContext = EvaluationContext.Create(policy);
+
+            for (var i = 0; i < 10; i++)
+            {
+                var currentContext = previousContext.ContextForNewProject();
+
+                if (i == 0)
+                {
+                    currentContext.ShouldBeSameAs(previousContext, "first usage context was not the same as the initial context");
+                }
+                else
+                {
+                    switch (policy)
+                    {
+                        case EvaluationContext.SharingPolicy.Shared:
+                            currentContext.ShouldBeSameAs(previousContext, $"Shared policy: usage {i} was not the same as usage {i - 1}");
+                            break;
+                        case EvaluationContext.SharingPolicy.Isolated:
+                            currentContext.ShouldNotBeSameAs(previousContext, $"Isolated policy: usage {i} was the same as usage {i - 1}");
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
+                    }
+                }
+
+                previousContext = currentContext;
+            }
+        }
+
+        [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void ReevaluationShouldRespectContextLifetime(EvaluationContext.SharingPolicy policy)
