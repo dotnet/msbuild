@@ -281,16 +281,12 @@ namespace Microsoft.Build.Shared
         }
 #endif
 
-        private unsafe static string GetFullPath(string path)
+        private static string GetFullPath(string path)
         {
 #if FEATURE_LEGACY_GETFULLPATH
             if (NativeMethodsShared.IsWindows)
             {
-                int bufferSize = GetFullPathAndAssertSuccess(path, 0, null, IntPtr.Zero);
-                char* buffer = stackalloc char[bufferSize];
-                int fullPathLength = GetFullPathAndAssertSuccess(path, bufferSize, buffer, IntPtr.Zero);
-                // Avoid creating new strings unnecessarily
-                string uncheckedFullPath = AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
+                string uncheckedFullPath = NativeMethodsShared.GetFullPath(path);
                 AssertMaxPathLimits(uncheckedFullPath);
 
                 // We really don't care about extensions here, but Path.HasExtension provides a great way to
@@ -307,13 +303,6 @@ namespace Microsoft.Build.Shared
             return fullPath;
         }
 
-        private unsafe static int GetFullPathAndAssertSuccess(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
-        {
-            int pathLength = NativeMethodsShared.GetFullPathName(target, bufferLength, buffer, mustBeZero);
-            NativeMethodsShared.AssertNativeMethodSuccess(pathLength);
-            return pathLength;
-        }
-
         private static void AssertMaxPathLimits(string path)
         {
             if (IsPathTooLong(path))
@@ -322,34 +311,9 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        /// <summary>
-        /// Compare an unsafe char buffer with a <see cref="System.String"/> to see if their contents are identical.
-        /// </summary>
-        /// <param name="buffer">The beginning of the char buffer.</param>
-        /// <param name="len">The length of the buffer.</param>
-        /// <param name="s">The string.</param>
-        /// <returns>True only if the contents of <paramref name="s"/> and the first <paramref name="len"/> characters in <paramref name="buffer"/> are identical.</returns>
-        private unsafe static bool AreStringsEqual(char* buffer, int len, string s)
-        {
-            if (len != s.Length)
-            {
-                return false;
-            }
-
-            foreach (char ch in s)
-            {
-                if (ch != *buffer++)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         private static bool IsUNCPath(string path)
         {
-            if (!path.StartsWith(@"\\", StringComparison.Ordinal))
+            if (!NativeMethodsShared.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
             {
                 return false;
             }
@@ -802,7 +766,6 @@ namespace Microsoft.Build.Shared
 #if !CLR2COMPATIBILITY
             if (NativeMethodsShared.IsWindows && Traits.Instance.CacheFileExistence)
             {
-                fullPath = AttemptToShortenPath(fullPath);
                 // Possible future improvement: make sure file existence caching happens only at evaluation time, and maybe only within a build session. https://github.com/Microsoft/msbuild/issues/2306
                 return FileExistenceCache.GetOrAdd(fullPath, (string path) => GetFileAttributes(path) != GetFileAttributesResult.Error);
             }

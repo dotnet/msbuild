@@ -1241,23 +1241,64 @@ namespace Microsoft.Build.Shared
 #if FEATURE_LEGACY_GETCURRENTDIRECTORY
             if (IsWindows)
             {
-                int bufferSize = GetCurrentDirectoryAndAssertSuccess(0, null);
+                int bufferSize = GetCurrentDirectoryWin32(0, null);
                 char* buffer = stackalloc char[bufferSize];
-                int pathLength = GetCurrentDirectoryAndAssertSuccess(bufferSize, buffer);
+                int pathLength = GetCurrentDirectoryWin32(bufferSize, buffer);
                 return new string(buffer, startIndex: 0, length: pathLength);
             }
 #endif
             return Directory.GetCurrentDirectory();
         }
 
-        private unsafe static int GetCurrentDirectoryAndAssertSuccess(int nBufferLength, char* lpBuffer)
+        private unsafe static int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
         {
             int pathLength = GetCurrentDirectory(nBufferLength, lpBuffer);
-            AssertNativeMethodSuccess(pathLength);
+            VerifyThrowWin32Result(pathLength);
             return pathLength;
         }
 
-        internal static void AssertNativeMethodSuccess(int result)
+        internal unsafe static string GetFullPath(string path)
+        {
+            int bufferSize = GetFullPathWin32(path, 0, null, IntPtr.Zero);
+            char* buffer = stackalloc char[bufferSize];
+            int fullPathLength = GetFullPathWin32(path, bufferSize, buffer, IntPtr.Zero);
+            // Avoid creating new strings unnecessarily
+            return AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
+        }
+
+        private unsafe static int GetFullPathWin32(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
+        {
+            int pathLength = GetFullPathName(target, bufferLength, buffer, mustBeZero);
+            VerifyThrowWin32Result(pathLength);
+            return pathLength;
+        }
+
+        /// <summary>
+        /// Compare an unsafe char buffer with a <see cref="System.String"/> to see if their contents are identical.
+        /// </summary>
+        /// <param name="buffer">The beginning of the char buffer.</param>
+        /// <param name="len">The length of the buffer.</param>
+        /// <param name="s">The string.</param>
+        /// <returns>True only if the contents of <paramref name="s"/> and the first <paramref name="len"/> characters in <paramref name="buffer"/> are identical.</returns>
+        private unsafe static bool AreStringsEqual(char* buffer, int len, string s)
+        {
+            if (len != s.Length)
+            {
+                return false;
+            }
+
+            foreach (char ch in s)
+            {
+                if (ch != *buffer++)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal static void VerifyThrowWin32Result(int result)
         {
             bool isError = result == 0;
             if (isError)
