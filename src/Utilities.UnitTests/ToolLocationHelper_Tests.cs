@@ -1986,11 +1986,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPathToReferenceAssembliesDefaultLocation99()
         {
-#if FEATURE_SPECIAL_FOLDERS
             string targetFrameworkRootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
-#else
-            string targetFrameworkRootPath = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
-#endif
             string targetFrameworkIdentifier = ".Net Framework";
             Version targetFrameworkVersion = new Version("99.99");
 
@@ -2000,14 +1996,10 @@ namespace Microsoft.Build.UnitTests
             directories.Count.ShouldBe(0); // "Expected the method to return no paths."
         }
 
-#if FEATURE_SPECIAL_FOLDERS
         /// <summary>
         /// Make sure we choose the correct path for program files based on the environment variables
         /// </summary>
         [Fact]
-#else
-        [Fact(Skip = "Special folders not supported")]
-#endif
         [PlatformSpecific(TestPlatforms.Windows)]
         public void TestGenerateProgramFiles32()
         {

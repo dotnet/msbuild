@@ -1480,11 +1480,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-#if FEATURE_SPECIAL_FOLDERS
                 return Environment.GetFolderPath(Environment.SpecialFolder.System);
-#else
-                return FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System);
-#endif
             }
         }
 
@@ -2770,11 +2766,7 @@ namespace Microsoft.Build.Utilities
                 // The order is important here because we want to look in the users location first before the non privileged location.
 
                 // We need this so that a user can also have an sdk installed in a non privileged location
-#if FEATURE_SPECIAL_FOLDERS
                 string userLocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-#else
-                string userLocalAppData = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData);
-#endif
                 if (userLocalAppData.Length > 0)
                 {
                     string localAppdataFolder = Path.Combine(userLocalAppData, "Microsoft SDKs");

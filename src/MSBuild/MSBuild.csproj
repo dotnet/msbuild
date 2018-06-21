@@ -62,10 +62,6 @@
       <Link>FileUtilities.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs">
-      <Link>FileUtilities.GetFolderPath.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
