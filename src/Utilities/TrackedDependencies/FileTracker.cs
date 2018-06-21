@@ -306,37 +306,24 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentNull(sources, "sources");
 
-            ArrayList rootSources = new ArrayList();
-            StringBuilder rootSourcesList = new StringBuilder();
+            // So we don't have to deal with null checks.
+            outputs = outputs ?? Array.Empty<ITaskItem>();
+
+            var rootSources = new List<string>(sources.Length + outputs.Length);
 
             foreach (ITaskItem source in sources)
             {
                 rootSources.Add(FileUtilities.NormalizePath(source.ItemSpec).ToUpperInvariant());
             }
 
-            if (outputs != null)
+            foreach (ITaskItem output in outputs)
             {
-                foreach (ITaskItem output in outputs)
-                {
-                    rootSources.Add(FileUtilities.NormalizePath(output.ItemSpec).ToUpperInvariant());
-                }
+                rootSources.Add(FileUtilities.NormalizePath(output.ItemSpec).ToUpperInvariant());
             }
 
             rootSources.Sort(StringComparer.OrdinalIgnoreCase);
 
-            foreach (string source in rootSources)
-            {
-                rootSourcesList.Append(source);
-                rootSourcesList.Append('|');
-            }
-
-            int builderLength = rootSourcesList.Length - 1;
-            if (builderLength < 0)
-            {
-                builderLength = 0;
-            }
-
-            return rootSourcesList.ToString(0, builderLength);
+            return string.Join("|", rootSources);
         }
 
         /// <summary>
