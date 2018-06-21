@@ -103,6 +103,15 @@ namespace Microsoft.Build.Utilities
         // Detours handles picking between FileTracker{32,64}.dll so only mention one.
         private static readonly string s_FileTrackerFilename = "FileTracker32.dll";
 
+        // The name of the PATH environment variable.
+        private const string pathEnvironmentVariableName = "PATH";
+
+        // Static cache of the path separator character in an array for use in String.Split.
+        private static readonly char[] pathSeparatorArray = { Path.PathSeparator };
+
+        // Static cache of the path separator character in an array for use in String.Split.
+        private static readonly string pathSeparator = Path.PathSeparator.ToString();
+
         #endregion
 
         #region Static constructor
@@ -371,12 +380,12 @@ namespace Microsoft.Build.Utilities
         /// <returns>The old value of PATH</returns>
         public static string EnsureFileTrackerOnPath(string rootPath)
         {
-            string oldPath = Environment.GetEnvironmentVariable("PATH");
+            string oldPath = Environment.GetEnvironmentVariable(pathEnvironmentVariableName);
             string fileTrackerPath = GetFileTrackerPath(ExecutableType.SameAsCurrentProcess, rootPath);
 
             if (!string.IsNullOrEmpty(fileTrackerPath))
             {
-                Environment.SetEnvironmentVariable("Path", Path.GetDirectoryName(fileTrackerPath) + ";" + oldPath);
+                Environment.SetEnvironmentVariable(pathEnvironmentVariableName, Path.GetDirectoryName(fileTrackerPath) + pathSeparator + oldPath);
             }
 
             return oldPath;
@@ -389,7 +398,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public static string FindTrackerOnPath()
         {
-            string[] paths = Environment.GetEnvironmentVariable("PATH").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] paths = Environment.GetEnvironmentVariable(pathEnvironmentVariableName).Split(pathSeparatorArray, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string path in paths)
             {
