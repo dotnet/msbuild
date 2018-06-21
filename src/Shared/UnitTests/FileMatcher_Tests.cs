@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -2001,7 +2002,7 @@ namespace Microsoft.Build.UnitTests
         {
             MockFileSystem mockFileSystem = new MockFileSystem(matchingFiles, nonmatchingFiles, untouchableFiles);
 
-            var fileMatcher = new FileMatcher(mockFileSystem.GetAccessibleFileSystemEntries, mockFileSystem.DirectoryExists);
+            var fileMatcher = new FileMatcher(new FileSystemAdapter(mockFileSystem), mockFileSystem.GetAccessibleFileSystemEntries);
 
             string[] files = fileMatcher.GetFiles
             (
@@ -2074,7 +2075,7 @@ namespace Microsoft.Build.UnitTests
          * Validate that SplitFileSpec(...) is returning the expected constituent values.
          *************************************************************************************/
 
-        private static FileMatcher loopBackFileMatcher = new FileMatcher(GetFileSystemEntriesLoopBack, null);
+        private static FileMatcher loopBackFileMatcher = new FileMatcher(FileSystems.Default, GetFileSystemEntriesLoopBack);
 
 
         private static void ValidateSplitFileSpec
@@ -2247,6 +2248,51 @@ namespace Microsoft.Build.UnitTests
         }
 
         #endregion
+
+        private class FileSystemAdapter : IFileSystem
+        {
+            private readonly MockFileSystem _mockFileSystem;
+
+            public FileSystemAdapter(MockFileSystem mockFileSystem)
+            {
+                _mockFileSystem = mockFileSystem;
+            }
+
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            {
+                return FileSystems.Default.EnumerateFiles(path, searchPattern, searchOption);
+            }
+
+            public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            {
+                return FileSystems.Default.EnumerateDirectories(path, searchPattern, searchOption);
+            }
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            {
+                return FileSystems.Default.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+            }
+
+            public bool DirectoryExists(string path)
+            {
+                return _mockFileSystem.DirectoryExists(path);
+            }
+
+            public bool FileExists(string path)
+            {
+                return FileSystems.Default.FileExists(path);
+            }
+
+            public bool DirectoryEntryExists(string path)
+            {
+                return FileSystems.Default.DirectoryEntryExists(path);
+            }
+
+            public void ClearCaches()
+            {
+                FileSystems.Default.ClearCaches();
+            }
+        }
     }
 }
 

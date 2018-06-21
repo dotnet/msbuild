@@ -24,6 +24,7 @@ using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAss
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using System.Collections.ObjectModel;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Execution
 {
@@ -226,7 +227,8 @@ namespace Microsoft.Build.Execution
             ProjectUsingTaskElement projectUsingTaskXml,
             TaskRegistry taskRegistry,
             Expander<P, I> expander,
-            ExpanderOptions expanderOptions
+            ExpanderOptions expanderOptions,
+            IFileSystem fileSystem
             )
             where P : class, IProperty
             where I : class, IItem
@@ -242,7 +244,8 @@ namespace Microsoft.Build.Execution
                 projectUsingTaskXml.ContainingProject.DirectoryPath,
                 projectUsingTaskXml.ConditionLocation,
                 loggingService,
-                buildEventContext
+                buildEventContext,
+                fileSystem
                 ))
             {
                 return;
@@ -323,12 +326,12 @@ namespace Microsoft.Build.Execution
                     if (
                             assemblyFile != null &&
                             (assemblyFile.EndsWith(s_tasksV4Filename, StringComparison.OrdinalIgnoreCase) || assemblyFile.EndsWith(s_tasksV12Filename, StringComparison.OrdinalIgnoreCase)) &&
-                            !FileUtilities.FileExistsNoThrow(assemblyFile)
+                            !FileUtilities.FileExistsNoThrow(assemblyFile, fileSystem)
                         )
                     {
                         string replacedAssemblyFile = Path.Combine(Path.GetDirectoryName(assemblyFile), s_tasksCoreFilename);
 
-                        if (FileUtilities.FileExistsNoThrow(replacedAssemblyFile))
+                        if (FileUtilities.FileExistsNoThrow(replacedAssemblyFile, fileSystem))
                         {
                             assemblyFile = replacedAssemblyFile;
                         }
@@ -342,8 +345,8 @@ namespace Microsoft.Build.Execution
                         if
                             (
                                 assemblyName.Equals(s_tasksV4SimpleName, StringComparison.OrdinalIgnoreCase) &&
-                                !FileUtilities.FileExistsNoThrow(s_potentialTasksV4Location) &&
-                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation)
+                                !FileUtilities.FileExistsNoThrow(s_potentialTasksV4Location, fileSystem) &&
+                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem)
                             )
                         {
                             assemblyName = s_tasksCoreSimpleName;
@@ -351,8 +354,8 @@ namespace Microsoft.Build.Execution
                         else if
                             (
                                 assemblyName.Equals(s_tasksV12SimpleName, StringComparison.OrdinalIgnoreCase) &&
-                                !FileUtilities.FileExistsNoThrow(s_potentialTasksV12Location) &&
-                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation)
+                                !FileUtilities.FileExistsNoThrow(s_potentialTasksV12Location, fileSystem) &&
+                                FileUtilities.FileExistsNoThrow(s_potentialTasksCoreLocation, fileSystem)
                             )
                         {
                             assemblyName = s_tasksCoreSimpleName;

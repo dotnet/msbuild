@@ -9,50 +9,50 @@ namespace Microsoft.Build.Shared.FileSystem
     /// <summary>
     /// Implementation of file system operations directly over the dot net managed layer
     /// </summary>
-    internal sealed class ManagedFileSystem : IFileSystem
+    internal sealed class MSBuildOnWindowsFileSystem : IFileSystem
     {
-        private static readonly ManagedFileSystem Instance = new ManagedFileSystem();
+        private static readonly MSBuildOnWindowsFileSystem Instance = new MSBuildOnWindowsFileSystem();
 
         /// <nodoc/>
-        public static ManagedFileSystem Singleton() => ManagedFileSystem.Instance;
+        public static MSBuildOnWindowsFileSystem Singleton() => Instance;
 
-        private ManagedFileSystem()
+        private MSBuildOnWindowsFileSystem()
         { }
 
         /// <inheritdoc/>
         public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {
-            return Directory.EnumerateFiles(path, searchPattern, searchOption);
+            return ManagedFileSystem.Singleton().EnumerateFiles(path, searchPattern, searchOption);
         }
 
         /// <inheritdoc/>
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
         {
-            return Directory.EnumerateDirectories(path, searchPattern, searchOption);
+            return ManagedFileSystem.Singleton().EnumerateDirectories(path, searchPattern, searchOption);
         }
 
         /// <inheritdoc/>
         public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern, SearchOption searchOption)
         {
-            return Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+            return ManagedFileSystem.Singleton().EnumerateFileSystemEntries(path, searchPattern, searchOption);
         }
 
         /// <inheritdoc/>
         public bool DirectoryExists(string path)
         {
-            return Directory.Exists(path);
+            return WindowsFileSystem.Singleton().DirectoryExists(path);
         }
 
         /// <inheritdoc/>
         public bool FileExists(string path)
         {
-            return File.Exists(path);
+            return WindowsFileSystem.Singleton().FileExists(path);
         }
 
         /// <inheritdoc/>
         public bool DirectoryEntryExists(string path)
         {
-            return FileExists(path) || DirectoryExists(path);
+            return WindowsFileSystem.Singleton().DirectoryEntryExists(path);
         }
 
         public void ClearCaches()

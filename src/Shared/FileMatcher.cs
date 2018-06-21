@@ -26,6 +26,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class FileMatcher
     {
+        private readonly IFileSystem _fileSystem;
         private const string recursiveDirectoryMatch = "**";
         private const string dotdot = "..";
 
@@ -56,14 +57,14 @@ namespace Microsoft.Build.Shared
         public const RegexOptions DefaultRegexOptions = RegexOptions.IgnoreCase;
 
         private readonly GetFileSystemEntries _getFileSystemEntries;
-        private readonly DirectoryExists _directoryExists;
 
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
         /// </summary>
-        public static FileMatcher Default = new FileMatcher(FileSystemFactory.GetFileSystem(), null);
+        public static FileMatcher Default = new FileMatcher(FileSystems.Default, null);
 
-        public FileMatcher(IFileSystemAbstraction fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileEntryExpansionCache = null) : this(
+        public FileMatcher(IFileSystem fileSystem, ConcurrentDictionary<string, ImmutableArray<string>> fileEntryExpansionCache = null) : this(
+            fileSystem,
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
                 entityType,
@@ -71,12 +72,11 @@ namespace Microsoft.Build.Shared
                 pattern,
                 projectDirectory,
                 stripProjectDirectory),
-            fileSystem.DirectoryExists,
             fileEntryExpansionCache)
         {
         }
 
-        public FileMatcher(GetFileSystemEntries getFileSystemEntries, DirectoryExists directoryExists, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null)
+        public FileMatcher(IFileSystem fileSystem, GetFileSystemEntries getFileSystemEntries, ConcurrentDictionary<string, ImmutableArray<string>> getFileSystemDirectoryEntriesCache = null)
         {
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -87,6 +87,8 @@ namespace Microsoft.Build.Shared
             {
                 _cachedGlobExpansions = getFileSystemDirectoryEntriesCache;
             }
+
+            _fileSystem = fileSystem;
 
             _getFileSystemEntries = getFileSystemDirectoryEntriesCache == null
                 ? getFileSystemEntries
@@ -106,8 +108,6 @@ namespace Microsoft.Build.Shared
                     }
                     return getFileSystemEntries(type, path, pattern, directory, projectDirectory);
                 };
-
-            _directoryExists = directoryExists;
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Shared
         /// <param name="stripProjectDirectory">If true the project directory should be stripped</param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns></returns>
-        private static ImmutableArray<string> GetAccessibleFileSystemEntries(IFileSystemAbstraction fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
+        private static ImmutableArray<string> GetAccessibleFileSystemEntries(IFileSystem fileSystem, FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory)
         {
             path = FileUtilities.FixFilePath(path);
             switch (entityType)
@@ -201,9 +201,9 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern"></param>
         /// <param name="fileSystem">The file system abstraction to use that implements file system operations</param>
         /// <returns>An immutable array of matching file system entries (can be empty).</returns>
-        private static ImmutableArray<string> GetAccessibleFilesAndDirectories(IFileSystemAbstraction fileSystem, string path, string pattern)
+        private static ImmutableArray<string> GetAccessibleFilesAndDirectories(IFileSystem fileSystem, string path, string pattern)
         {
-            if (Directory.Exists(path))
+            if (fileSystem.DirectoryExists(path))
             {
                 try
                 {
@@ -211,7 +211,7 @@ namespace Microsoft.Build.Shared
                         ? fileSystem.EnumerateFileSystemEntries(path, pattern)
                             .Where(o => IsMatch(Path.GetFileName(o), pattern, true))
                         : fileSystem.EnumerateFileSystemEntries(path, pattern)
-                    ).ToImmutableArray();
+                        ).ToImmutableArray();
                 }
                 // for OS security
                 catch (UnauthorizedAccessException)
@@ -224,6 +224,7 @@ namespace Microsoft.Build.Shared
                     // do nothing
                 }
             }
+
             return ImmutableArray<string>.Empty;
         }
 
@@ -268,7 +269,7 @@ namespace Microsoft.Build.Shared
         /// <returns>Files that can be accessed.</returns>
         private static ImmutableArray<string> GetAccessibleFiles
         (
-            IFileSystemAbstraction fileSystem,
+            IFileSystem fileSystem,
             string path,
             string filespec,     // can be null
             string projectDirectory,
@@ -336,7 +337,7 @@ namespace Microsoft.Build.Shared
         /// <returns>Accessible directories.</returns>
         private static ImmutableArray<string> GetAccessibleDirectories
         (
-            IFileSystemAbstraction fileSystem,
+            IFileSystem fileSystem,
             string path,
             string pattern
         )
@@ -1871,7 +1872,7 @@ namespace Microsoft.Build.Shared
              * If the fixed directory part doesn't exist, then this means no files should be
              * returned.
              */
-            if (fixedDirectoryPart.Length > 0 && !_directoryExists(fixedDirectoryPart))
+            if (fixedDirectoryPart.Length > 0 && !_fileSystem.DirectoryExists(fixedDirectoryPart))
             {
                 return SearchAction.ReturnEmptyList;
             }

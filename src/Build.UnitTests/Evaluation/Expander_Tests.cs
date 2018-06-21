@@ -31,6 +31,7 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using Xunit;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Engine.UnitTests;
+using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 
 namespace Microsoft.Build.UnitTests.Evaluation
@@ -2072,8 +2073,28 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg);
 
-            Assert.True(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot2.Endswith(`" + Path.DirectorySeparatorChar + "`))' == 'true'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
-            Assert.True(ConditionEvaluator.EvaluateCondition(@"'$(PathRoot.EndsWith(" + Path.DirectorySeparatorChar + "))' == 'false'", ParserOptions.AllowAll, expander, ExpanderOptions.ExpandProperties, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+            Assert.True(
+                ConditionEvaluator.EvaluateCondition(
+                    @"'$(PathRoot2.Endswith(`" + Path.DirectorySeparatorChar + "`))' == 'true'",
+                    ParserOptions.AllowAll,
+                    expander,
+                    ExpanderOptions.ExpandProperties,
+                    Directory.GetCurrentDirectory(),
+                    MockElementLocation.Instance,
+                    null,
+                    new BuildEventContext(1, 2, 3, 4),
+                    FileSystems.Default));
+            Assert.True(
+                ConditionEvaluator.EvaluateCondition(
+                    @"'$(PathRoot.EndsWith(" + Path.DirectorySeparatorChar + "))' == 'false'",
+                    ParserOptions.AllowAll,
+                    expander,
+                    ExpanderOptions.ExpandProperties,
+                    Directory.GetCurrentDirectory(),
+                    MockElementLocation.Instance,
+                    null,
+                    new BuildEventContext(1, 2, 3, 4),
+                    FileSystems.Default));
         }
 
         /// <summary>

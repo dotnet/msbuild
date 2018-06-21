@@ -4,6 +4,7 @@
 using System;
 #if !CLR2COMPATIBILITY
 using System.Collections.Concurrent;
+using Microsoft.Build.Shared.FileSystem;
 #endif
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -90,7 +91,9 @@ namespace Microsoft.Build.Shared
         private static readonly char[] Slashes = { '/', '\\' };
 
 #if !CLR2COMPATIBILITY
-        private static ConcurrentDictionary<string, bool> FileExistenceCache = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, bool> FileExistenceCache = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
+        private static readonly IFileSystem DefaultFileSystem = FileSystems.Default;
 #endif
 
         /// <summary>
@@ -824,32 +827,30 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="fullPath">Full path to the directory in the filesystem</param>
         /// <returns></returns>
-        internal static bool DirectoryExistsNoThrow(string fullPath)
+        internal static bool DirectoryExistsNoThrow(string fullPath
+#if !CLR2COMPATIBILITY
+            ,IFileSystem fileSystem = null
+#endif
+            )
         {
             fullPath = AttemptToShortenPath(fullPath);
-            if (NativeMethodsShared.IsWindows)
+
+            try
             {
-                NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = false;
+#if CLR2COMPATIBILITY
+                return NativeMethodsShared.DirectoryExists(fullPath);
+#else
+                fileSystem = fileSystem ?? DefaultFileSystem;
 
-                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-                if (success)
-                {
-                    return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0);
-                }
+                return Traits.Instance.CacheFileExistence
+                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryExists)
+                    : fileSystem.DirectoryExists(fullPath);
+#endif
 
-                return false;
             }
-            else
+            catch
             {
-                try
-                {
-                    return Directory.Exists(fullPath);
-                }
-                catch
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
@@ -858,26 +859,26 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="fullPath">Full path to the file in the filesystem</param>
         /// <returns></returns>
-        internal static bool FileExistsNoThrow(string fullPath)
+        internal static bool FileExistsNoThrow(string fullPath
+#if !CLR2COMPATIBILITY
+            ,IFileSystem fileSystem = null
+#endif
+        )
         {
             fullPath = AttemptToShortenPath(fullPath);
-            if (NativeMethodsShared.IsWindows)
-            {
-                NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = false;
-
-                success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
-                if (success)
-                {
-                    return ((data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0);
-                }
-
-                return false;
-            }
 
             try
             {
-                return File.Exists(fullPath);
+#if CLR2COMPATIBILITY
+                return NativeMethodsShared.FileExists(fullPath);
+#else
+                fileSystem = fileSystem ?? DefaultFileSystem;
+
+                return Traits.Instance.CacheFileExistence
+                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileExists)
+                    : fileSystem.FileExists(fullPath);
+#endif
+
             }
             catch
             {
@@ -891,35 +892,30 @@ namespace Microsoft.Build.Shared
         /// Does not throw IO exceptions, to match Directory.Exists and File.Exists.
         /// Unlike calling each of those in turn it only accesses the disk once, which is faster.
         /// </summary>
-        internal static bool FileOrDirectoryExistsNoThrow(string fullPath)
+        internal static bool FileOrDirectoryExistsNoThrow(string fullPath
+#if !CLR2COMPATIBILITY
+        ,IFileSystem fileSystem = null
+#endif
+        )
         {
             fullPath = AttemptToShortenPath(fullPath);
-            if (NativeMethodsShared.IsWindows)
+
+            try
             {
-#if !CLR2COMPATIBILITY
-                if (Traits.Instance.CacheFileExistence)
-                {
-                    // Possible future improvement: make sure file existence caching happens only at evaluation time, and maybe only within a build session. https://github.com/Microsoft/msbuild/issues/2306
-                    return FileExistenceCache.GetOrAdd(fullPath, NativeMethodsShared.FileExists);
-                }
-                else
-                {
+#if CLR2COMPATIBILITY
+                return NativeMethodsShared.FileOrDirectoryExists(fullPath);
+#else
+                fileSystem = fileSystem ?? DefaultFileSystem;
+
+                return Traits.Instance.CacheFileExistence
+                    ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryEntryExists)
+                    : fileSystem.DirectoryEntryExists(fullPath);
 #endif
-                    return NativeMethodsShared.FileExists(fullPath);
-#if !CLR2COMPATIBILITY
-                }
-#endif
+
             }
-            else
+            catch
             {
-                try
-                {
-                    return File.Exists(fullPath) || Directory.Exists(fullPath);
-                }
-                catch
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
@@ -1278,13 +1274,6 @@ namespace Microsoft.Build.Shared
             string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
 
             return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
-        }
-
-        internal static bool TryGetPathOfFileAbove(string file, string startingDirectory, out string fullPath)
-        {
-            fullPath = GetPathOfFileAbove(file, startingDirectory);
-
-            return fullPath != String.Empty;
         }
 
         // Method is simple set of function calls and may inline;

@@ -1141,7 +1141,8 @@ namespace Microsoft.Build.Evaluation
                 projectUsingTaskElement,
                 _data.TaskRegistry,
                 _expander,
-                ExpanderOptions.ExpandPropertiesAndItems
+                ExpanderOptions.ExpandPropertiesAndItems,
+                _evaluationContext.FileSystem
                 );
         }
 
@@ -2571,7 +2572,8 @@ namespace Microsoft.Build.Evaluation
                     GetCurrentDirectoryForConditionEvaluation(element),
                     element.ConditionLocation,
                     _evaluationLoggingContext.LoggingService,
-                    _evaluationLoggingContext.BuildEventContext
+                    _evaluationLoggingContext.BuildEventContext,
+                    _evaluationContext.FileSystem
                     );
 
                 return result;
@@ -2611,6 +2613,7 @@ namespace Microsoft.Build.Evaluation
                     element.ConditionLocation,
                     _evaluationLoggingContext.LoggingService,
                     _evaluationLoggingContext.BuildEventContext,
+                    _evaluationContext.FileSystem,
                     projectRootElementCache
                     );
 

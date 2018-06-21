@@ -20,6 +20,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ObjectModel = System.Collections.ObjectModel;
@@ -1089,7 +1090,8 @@ namespace Microsoft.Build.Evaluation
                             usingTask,
                             registry,
                             _expander,
-                            ExpanderOptions.ExpandProperties
+                            ExpanderOptions.ExpandProperties,
+                            FileSystems.Default
                             );
                     }
                 }

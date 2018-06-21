@@ -20,6 +20,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.BuildTasks;
@@ -2198,7 +2199,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         projectUsingTaskElement,
                         registry,
                         RegistryExpander,
-                        ExpanderOptions.ExpandPropertiesAndItems
+                        ExpanderOptions.ExpandPropertiesAndItems,
+                        FileSystems.Default
                     );
             }
 

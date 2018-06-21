@@ -35,7 +35,7 @@ namespace Microsoft.Build.Evaluation.Context
         internal SharingPolicy Policy { get; }
 
         internal virtual ISdkResolverService SdkResolverService { get; } = new CachingSdkResolverService();
-        internal IFileSystemAbstraction FileSystem { get; } = ManagedFileSystem.Singleton();
+        internal IFileSystem FileSystem { get; } = new CachingFileSystemWrapper(FileSystems.Default);
 
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
@@ -88,6 +88,7 @@ namespace Microsoft.Build.Evaluation.Context
         /// <summary>
         /// Ideally caches should be discarded by discarding this entire object.
         /// However, there could be situations where API users have a <see cref="Project"/> object loaned to another entity, and cannot swap the context, but still need to reset it.
+        /// Caches are not cleared atomically, users should ensure no other threads are performing evaluations while the caches are cleared.
         /// </summary>
         public void ResetCaches()
         {

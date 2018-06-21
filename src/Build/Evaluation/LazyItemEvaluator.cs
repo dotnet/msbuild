@@ -47,6 +47,8 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
+        protected IFileSystem FileSystem { get; }
+
         protected EngineFileUtilities EngineFileUtilities { get; }
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
@@ -59,7 +61,8 @@ namespace Microsoft.Build.Evaluation
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
-            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(evaluationContext.FileSystem, evaluationContext.FileEntryExpansionCache));
+            FileSystem = evaluationContext.FileSystem;
+            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, evaluationContext.FileEntryExpansionCache));
         }
 
         private ImmutableList<I> GetItems(string itemType)
@@ -78,7 +81,14 @@ namespace Microsoft.Build.Evaluation
             return EvaluateCondition(element, expanderOptions, parserOptions, _expander, this);
         }
 
-        private static bool EvaluateCondition(string condition, ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        private static bool EvaluateCondition(
+            string condition,
+            ProjectElement element,
+            ExpanderOptions expanderOptions,
+            ParserOptions parserOptions,
+            Expander<P, I> expander,
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator
+            )
         {
             if (condition?.Length == 0)
             {
@@ -96,14 +106,21 @@ namespace Microsoft.Build.Evaluation
                     GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
                     element.ConditionLocation,
                     lazyEvaluator._loggingContext.LoggingService,
-                    lazyEvaluator._loggingContext.BuildEventContext
+                    lazyEvaluator._loggingContext.BuildEventContext,
+                    lazyEvaluator.FileSystem
                     );
 
                 return result;
             }
         }
 
-        private static bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        private static bool EvaluateCondition(
+            ProjectElement element,
+            ExpanderOptions expanderOptions,
+            ParserOptions parserOptions,
+            Expander<P, I> expander,
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator
+            )
         {
             return EvaluateCondition(element.Condition, element, expanderOptions, parserOptions, expander, lazyEvaluator);
         }

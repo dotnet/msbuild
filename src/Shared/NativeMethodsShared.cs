@@ -1423,12 +1423,51 @@ namespace Microsoft.Build.Shared
 
 #region helper methods
 
-        internal static bool FileExists(string path)
+        internal static bool DirectoryExists(string fullPath)
+        {
+            return NativeMethodsShared.IsWindows
+                ? DirectoryExistsWindows(fullPath)
+                : Directory.Exists(fullPath);
+        }
+
+        internal static bool DirectoryExistsWindows(string fullPath)
+        {
+            NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+            bool success = false;
+
+            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+            return success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0;
+        }
+
+        internal static bool FileExists(string fullPath)
+        {
+            return NativeMethodsShared.IsWindows
+                ? FileExistsWindows(fullPath)
+                : File.Exists(fullPath);
+        }
+
+        internal static bool FileExistsWindows(string fullPath)
+        {
+            NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+            bool success = false;
+
+            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+            return success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0;
+        }
+
+        internal static bool FileOrDirectoryExists(string path)
+        {
+            return IsWindows
+                ? FileOrDirectoryExistsWindows(path)
+                : File.Exists(path) || Directory.Exists(path);
+        }
+
+        internal static bool FileOrDirectoryExistsWindows(string path)
         {
             WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
             return GetFileAttributesEx(path, 0, ref data);
         }
 
-#endregion
+        #endregion
     }
 }

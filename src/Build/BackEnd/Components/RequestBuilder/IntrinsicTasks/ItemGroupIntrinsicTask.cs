@@ -17,7 +17,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
-
+using Microsoft.Build.Shared.FileSystem;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
@@ -79,8 +79,8 @@ namespace Microsoft.Build.BackEnd
                             Project.Directory,
                             child.ConditionLocation,
                             LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext
-                            );
+                            LoggingContext.BuildEventContext,
+                            FileSystems.Default);
 
                         if (condition)
                         {
@@ -172,8 +172,8 @@ namespace Microsoft.Build.BackEnd
                     Project.Directory,
                     metadataInstance.Location,
                     LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext
-                    );
+                    LoggingContext.BuildEventContext,
+                    FileSystems.Default);
 
                 if (condition)
                 {
@@ -201,8 +201,8 @@ namespace Microsoft.Build.BackEnd
                 Project.Directory,
                 child.KeepDuplicatesLocation,
                 LoggingContext.LoggingService,
-                LoggingContext.BuildEventContext
-                );
+                LoggingContext.BuildEventContext,
+                FileSystems.Default);
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd != null && itemsToAdd.Count > 0)
             {
@@ -290,8 +290,8 @@ namespace Microsoft.Build.BackEnd
                     Project.Directory,
                     metadataInstance.ConditionLocation,
                     LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext
-                    );
+                    LoggingContext.BuildEventContext,
+                    FileSystems.Default);
 
                 if (condition)
                 {
