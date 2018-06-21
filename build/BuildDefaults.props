@@ -4,7 +4,8 @@
     <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">linux</OSPlatform>
     <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">osx</OSPlatform>
 
-    <Architecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</Architecture>
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <Architecture Condition=" $(Architecture) == '' ">$(OSArchitecture.ToLower())</Architecture>
 
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>

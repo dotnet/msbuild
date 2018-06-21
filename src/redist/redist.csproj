@@ -3,72 +3,44 @@
   <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
   <PropertyGroup>
-    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+    <Version>$(SdkVersion)</Version>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <PublishDir>$(CliOutputDirectory)</PublishDir>
-    <VersionSuffix>$(BuildNumber)</VersionSuffix>
+    <PackageId>Microsoft.DotNet.Cli.Runtime</PackageId>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\dotnet\dotnet.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="minimumMSBuildVersion">
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
+  <Target Name="GetCustomPackageFiles"
+          BeforeTargets="_GetPackageFiles"
+          DependsOnTargets="PublishMSBuildExtensions;PublishSdks;ChmodPublishDir">
+    <ItemGroup>
+      <_PackageFiles Include="@(MSBuildExtensionsContent)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\$(CliTargetFramework)\%(MSBuildExtensionsContent.PackagePath)" />
+      <_PackageFiles Include="@(SdksContent)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\$(CliTargetFramework)\%(SdksContent.PackagePath)" />
 
-  <Target Name="GenerateCliRuntimeConfigurationFiles"
-          AfterTargets="Publish">
-    <RemoveAssetFromDepsPackages DepsFile="$(PublishDir)/$(TargetName).deps.json"
-                                 SectionName="runtime"
-                                 AssetPath="%(BundledToolProjects.Identity).dll" />
-
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).deps.json"
-          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).deps.json" />
-
-    <Copy SourceFiles="$(PublishDir)/$(TargetName).runtimeconfig.json"
-          DestinationFiles="$(PublishDir)/%(BundledTools.Identity).runtimeconfig.json" />
-
-    <Delete Files="$(PublishDir)/$(TargetName).deps.json;
-                   $(PublishDir)/$(TargetName).runtimeconfig.json;
-                   $(PublishDir)/%(BundledToolProjects.Identity).dll;
-                   $(PublishDir)/%(BundledToolProjects.Identity).pdb" />
-
-    <ChangeEntryPointLibraryName
-          DepsFile="$(PublishDir)/%(BundledTools.Identity).deps.json"
-          NewName="%(BundledTools.Identity).deps.json" />
+      <_BuildOutputInPackage Remove="@(_BuildOutputInPackage)" />
+    </ItemGroup>
   </Target>
 
   <Target Name="PublishMSBuildExtensions"
           DependsOnTargets="GenerateMSBuildExtensions"
-          AfterTargets="Publish"
-          BeforeTargets="GenerateCliRuntimeConfigurationFiles">
+          AfterTargets="Publish">
     <ItemGroup>
       <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
         <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+        <PackagePath>%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
       </MSBuildExtensionsContent>
     </ItemGroup>
 
     <Copy SourceFiles="@(MSBuildExtensionsContent)"
           DestinationFiles="%(MSBuildExtensionsContent.DestinationPath)" />
-  </Target>
-
-  <!-- The msdia140typelib_clr0200.dll file is not MIT licensed (and it only used on Windows). Remove it, so
-       we can MIT license the published dotnet -->
-  <Target Name="RemoveMSDiaTypeLib"
-          AfterTargets="Publish"
-          Condition=" '$(OS)' != 'Windows_NT' ">
-    <Delete Files="$(PublishDir)/TestHost/msdia140typelib_clr0200.dll" />
   </Target>
 
   <Target Name="PublishSdks"
@@ -90,6 +62,12 @@
       BuildInParallel="False"
       Projects="@(SdksToBundle)">
     </MSBuild>
+
+    <ItemGroup>
+      <SdksContent Include="$(PublishDir)/Sdks/**/*">
+        <PackagePath>Sdks/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      </SdksContent>
+    </ItemGroup>
   </Target>
 
   <Target Name="ChmodPublishDir"
@@ -98,18 +76,5 @@
     
     <Exec Command="find $(PublishDir) -type d -exec chmod 755 {} \;" />
     <Exec Command="find $(PublishDir) -type f -exec chmod 644 {} \;" />
-  </Target>
-
-  <Target Name="SeparateSymbolsFromPublishDir"
-          AfterTargets="PublishMSBuildExtensions"
-          Condition="'$(SeparateSymbolsArchive)' != 'false'">
-
-    <ItemGroup>
-      <PdbsToMove Include="$(PublishDir)/**/*.pdb" />
-      <PdbsToMove Include="$(PublishDir)/**/*.ni.*.map" />
-    </ItemGroup>
-
-    <Move SourceFiles="@(PdbsToMove)"
-          DestinationFiles="@(PdbsToMove->'$(SymbolsDirectory)/sdk/$(SdkVersion)/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

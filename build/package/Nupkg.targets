@@ -7,10 +7,35 @@
   <Target Name="SetupProjectsToPack"
           DependsOnTargets="Init">
     <ItemGroup>
+      <ProjectsToPack Include="$(SrcDirectory)/redist">
+        <ProjectName>redist</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+        <IncludeSymbols>false</IncludeSymbols>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(SrcDirectory)/dotnet">
+        <ProjectName>dotnet</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+        <IncludeSymbols>True</IncludeSymbols>
+      </ProjectsToPack>
       <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.Cli.Utils" >
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
-        <IncludeSymbols>False</IncludeSymbols>
+        <IncludeSymbols>True</IncludeSymbols>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.Cli.Sln.Internal">
+        <ProjectName>Microsoft.DotNet.Cli.Sln.Internal</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+        <IncludeSymbols>True</IncludeSymbols>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.Configurer">
+        <ProjectName>Microsoft.DotNet.Configurer</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+        <IncludeSymbols>True</IncludeSymbols>
+      </ProjectsToPack>
+      <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.InternalAbstractions">
+        <ProjectName>Microsoft.DotNet.InternalAbstractions</ProjectName>
+        <Version>$(SdkNugetVersion)</Version>
+        <IncludeSymbols>True</IncludeSymbols>
       </ProjectsToPack>
       <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver" Condition="'$(IncludeMSBuildSdkResolver)' == 'true'" >
         <ProjectName>Microsoft.DotNet.MSBuildSdkResolver</ProjectName>
@@ -29,7 +54,8 @@
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
                 ToolPath="$(PreviousStageDirectory)"
                 VersionSuffix="$(VersionSuffix)"
-                Configuration="$(Configuration)" />
+                Configuration="$(Configuration)"
+                MsbuildArgs="/p:Architecture=$(Architecture)" />
   </Target>
 
   <Target Name="BuildProjectsForNuGetPackages"
