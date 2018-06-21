@@ -238,8 +238,8 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
-                                       + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /reference:\"C:\\SomeFolder\\reference1.dll\",\"C:\\SomeFolder\\reference2.dll\"";
-
+                                       + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /reference:\"C:\\SomeFolder\\reference1.dll,C:\\SomeFolder\\reference2.dll\"";
+            
             Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
         }
     }
