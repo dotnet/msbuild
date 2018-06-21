@@ -5,15 +5,11 @@
 // <summary>Class containing data for a build request.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
-
-using Constants = Microsoft.Build.Internal.Constants;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -67,11 +63,6 @@ namespace Microsoft.Build.BackEnd
         /// The targets specified when the request was made.  Doesn't include default or initial targets.
         /// </summary>
         private List<string> _targets;
-
-        /// <summary>
-        /// The route for host-aware tasks back to the host
-        /// </summary>
-        private HostServices _hostServices;
 
         /// <summary>
         /// The build event context of the parent
@@ -141,7 +132,7 @@ namespace Microsoft.Build.BackEnd
                 _targets.Add(EscapingUtilities.UnescapeAll(target));
             }
 
-            _hostServices = hostServices;
+            HostServices = hostServices;
             _buildEventContext = BuildEventContext.Invalid;
             _parentBuildEventContext = parentBuildEventContext;
             _globalRequestId = InvalidGlobalRequestId;
@@ -285,8 +276,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public BuildRequestDataFlags BuildRequestDataFlags
         {
-            get { return _buildRequestDataFlags; }
-            set { _buildRequestDataFlags = value; }
+            get => _buildRequestDataFlags;
+            set => _buildRequestDataFlags = value;
         }
 
         /// <summary>
@@ -294,8 +285,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public RequestedProjectState RequestedProjectState
         {
-            get { return _requestedProjectState; }
-            set { _requestedProjectState = value; }
+            get => _requestedProjectState;
+            set => _requestedProjectState = value;
         }
 
 
@@ -305,8 +296,7 @@ namespace Microsoft.Build.BackEnd
         internal HostServices HostServices
         {
             [DebuggerStepThrough]
-            get
-            { return _hostServices; }
+            get;
         }
 
         /// <summary>
@@ -324,8 +314,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool SkipNonexistentTargets
         {
-            get { return _skipNonexistentTargets; }
-            set { _skipNonexistentTargets = value; }
+            get => _skipNonexistentTargets;
+            set => _skipNonexistentTargets = value;
         }
 
         /// <summary>

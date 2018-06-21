@@ -5,10 +5,7 @@
 // <summary>A collection of component factories.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared;
@@ -23,12 +20,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The build component factories.
         /// </summary>
-        private Dictionary<BuildComponentType, BuildComponentEntry> _componentEntriesByType;
+        private readonly Dictionary<BuildComponentType, BuildComponentEntry> _componentEntriesByType;
 
         /// <summary>
         /// The host used to initialize components.
         /// </summary>
-        private IBuildComponentHost _host;
+        private readonly IBuildComponentHost _host;
 
         /// <summary>
         /// Constructor.
@@ -150,9 +147,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The component</returns>
         public IBuildComponent GetComponent(BuildComponentType type)
         {
-            BuildComponentEntry componentEntry = null;
-
-            if (!_componentEntriesByType.TryGetValue(type, out componentEntry))
+            if (!_componentEntriesByType.TryGetValue(type, out BuildComponentEntry componentEntry))
             {
                 ErrorUtilities.ThrowInternalError("No factory registered for component type {0}", type);
             }
@@ -180,9 +175,9 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public BuildComponentEntry(BuildComponentType type, BuildComponentFactoryDelegate factory, CreationPattern pattern)
             {
-                this.ComponentType = type;
+                ComponentType = type;
                 _factory = factory;
-                this.Pattern = pattern;
+                Pattern = pattern;
             }
 
             /// <summary>
@@ -190,27 +185,20 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public BuildComponentEntry(BuildComponentType type, IBuildComponent singleton)
             {
+                ComponentType = type;
                 _singleton = singleton;
-                this.Pattern = CreationPattern.Singleton;
+                Pattern = CreationPattern.Singleton;
             }
 
             /// <summary>
             /// Retrieves the component type.
             /// </summary>
-            public BuildComponentType ComponentType
-            {
-                get;
-                private set;
-            }
+            private BuildComponentType ComponentType { get; }
 
             /// <summary>
             /// Retrieves the creation pattern.
             /// </summary>
-            public CreationPattern Pattern
-            {
-                get;
-                private set;
-            }
+            public CreationPattern Pattern { get; }
 
             /// <summary>
             /// Gets an instance of the component.
@@ -227,12 +215,10 @@ namespace Microsoft.Build.BackEnd
 
                     return _singleton;
                 }
-                else
-                {
-                    IBuildComponent component = _factory(ComponentType);
-                    component.InitializeComponent(host);
-                    return component;
-                }
+
+                IBuildComponent component = _factory(ComponentType);
+                component.InitializeComponent(host);
+                return component;
             }
 
             /// <summary>

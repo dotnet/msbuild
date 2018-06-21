@@ -31,7 +31,7 @@ using ObjectModel = System.Collections.ObjectModel;
 
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Microsoft.Build.Internal.Utilities;
+    using Utilities = Internal.Utilities;
 
     /// <summary>
     /// Flags for controlling the toolset initialization.
@@ -143,11 +143,6 @@ namespace Microsoft.Build.Evaluation
         private readonly LoadedProjectCollection _loadedProjects;
 
         /// <summary>
-        /// The component host for this collection.
-        /// </summary>
-        private IBuildComponentHost _host;
-
-        /// <summary>
         /// Single logging service used for all builds of projects in this project collection
         /// </summary>
         private ILoggingService _loggingService;
@@ -223,16 +218,6 @@ namespace Microsoft.Build.Evaluation
         private int _maxNodeCount;
 
         /// <summary>
-        /// The cache of project root elements associated with this project collection.
-        /// Each is associated with a specific project collection for two reasons:
-        /// - To help protect one project collection from any XML edits through another one:
-        /// until a reload from disk - when it's ready to accept changes - it won't see the edits;
-        /// - So that the owner of this project collection can force the XML to be loaded again
-        /// from disk, by doing <see cref="UnloadAllProjects"/>.
-        /// </summary>
-        private ProjectRootElementCache _projectRootElementCache;
-
-        /// <summary>
         /// Hook up last minute dumping of any exceptions bringing down the process
         /// </summary>
         static ProjectCollection()
@@ -247,7 +232,7 @@ namespace Microsoft.Build.Evaluation
         /// information from the configuration file and registry.
         /// </summary>
         public ProjectCollection()
-            : this((IDictionary<string, string>)null)
+            : this(null)
         {
         }
 
@@ -508,7 +493,7 @@ namespace Microsoft.Build.Evaluation
                         return ReadOnlyEmptyDictionary<string, string>.Instance;
                     }
 
-                    Dictionary<string, string> dictionary = new Dictionary<string, string>(_globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
+                    var dictionary = new Dictionary<string, string>(_globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
 
                     foreach (ProjectPropertyInstance property in _globalProperties)
                     {
@@ -678,12 +663,7 @@ namespace Microsoft.Build.Evaluation
             {
                 using (_locker.EnterWriteLock())
                 {
-                    if (_hostServices == null)
-                    {
-                        _hostServices = new HostServices();
-                    }
-
-                    return _hostServices;
+                    return _hostServices ?? (_hostServices = new HostServices());
                 }
             }
 
@@ -881,20 +861,7 @@ namespace Microsoft.Build.Evaluation
         /// - So that the owner of this project collection can force the XML to be loaded again
         /// from disk, by doing <see cref="UnloadAllProjects"/>.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache
-        {
-            get
-            {
-                // no locks required because this field is only set in the constructor.
-                return _projectRootElementCache;
-            }
-
-            private set
-            {
-                // no locks required because this field is only set in the constructor.
-                _projectRootElementCache = value;
-            }
-        }
+        internal ProjectRootElementCache ProjectRootElementCache { get; }
 
         /// <summary>
         /// Escape a string using MSBuild escaping format. For example, "%3b" for ";".
@@ -932,7 +899,7 @@ namespace Microsoft.Build.Evaluation
         {
             using (_locker.EnterWriteLock())
             {
-                ErrorUtilities.VerifyThrowArgumentNull(toolset, "toolset");
+                ErrorUtilities.VerifyThrowArgumentNull(toolset, nameof(toolset));
 
                 _toolsets[toolset.ToolsVersion] = toolset;
 
@@ -970,7 +937,7 @@ namespace Microsoft.Build.Evaluation
             bool changed = false;
             using (_locker.EnterWriteLock())
             {
-                List<Toolset> toolsets = new List<Toolset>(Toolsets);
+                var toolsets = new List<Toolset>(Toolsets);
 
                 foreach (Toolset toolset in toolsets)
                 {
@@ -992,7 +959,7 @@ namespace Microsoft.Build.Evaluation
         {
             using (_locker.EnterWriteLock())
             {
-                ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
+                ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
 
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
 
@@ -1290,7 +1257,7 @@ namespace Microsoft.Build.Evaluation
         {
             using (_locker.EnterWriteLock())
             {
-                ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, "projectRootElement");
+                ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
 
                 Project conflictingProject = LoadedProjects.FirstOrDefault(project => project.UsesProjectRootElement(projectRootElement));
 
@@ -1358,7 +1325,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Copy LoadedProjectCollection as modifying a project's global properties will cause it to re-add
-                List<Project> projects = new List<Project>(_loadedProjects);
+                var projects = new List<Project>(_loadedProjects);
                 foreach (Project project in projects)
                 {
                     project.SetGlobalProperty(name, value);
@@ -1381,7 +1348,7 @@ namespace Microsoft.Build.Evaluation
                 set = _globalProperties.Remove(name);
 
                 // Copy LoadedProjectCollection as modifying a project's global properties will cause it to re-add
-                List<Project> projects = new List<Project>(_loadedProjects);
+                var projects = new List<Project>(_loadedProjects);
                 foreach (Project project in projects)
                 {
                     project.RemoveGlobalProperty(name);
@@ -1413,7 +1380,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="host">The component host.</param>
         void IBuildComponent.InitializeComponent(IBuildComponentHost host)
         {
-            _host = host;
         }
 
         /// <summary>
@@ -1421,7 +1387,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         void IBuildComponent.ShutdownComponent()
         {
-            _host = null;
         }
 
 #endregion
@@ -1464,17 +1429,16 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal void OnAfterRenameLoadedProject(string oldFullPathIfAny, Project project)
         {
+            if (project.FullPath == null)
+            {
+                return;
+            }
+
             using (_locker.EnterWriteLock())
             {
-                if (project.FullPath == null)
-                {
-                    return;
-                }
-
                 if (oldFullPathIfAny != null)
                 {
                     bool existed = _loadedProjects.RemoveProject(oldFullPathIfAny, project);
-
                     ErrorUtilities.VerifyThrowInvalidOperation(existed, "OM_ProjectWasNotLoaded");
                 }
 
@@ -1544,7 +1508,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns><c>true</c> if the toolset was found and removed; <c>false</c> otherwise.</returns>
         private bool RemoveToolsetInternal(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
             Debug.Assert(_locker.IsWriteLockHeld);
 
             if (!_toolsets.ContainsKey(toolsVersion))
@@ -1565,7 +1529,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterLoggerInternal(ILogger logger)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(logger, "logger");
+            ErrorUtilities.VerifyThrowArgumentNull(logger, nameof(logger));
             Debug.Assert(_locker.IsWriteLockHeld);
             _loggingService.RegisterLogger(new ReusableLogger(logger));
         }
@@ -1730,22 +1694,17 @@ namespace Microsoft.Build.Evaluation
         public class ProjectAddedToProjectCollectionEventArgs : EventArgs
         {
             /// <summary>
-            /// Root element which was added to the project collection.
-            /// </summary>
-            private readonly ProjectRootElement _rootElement;
-
-            /// <summary>
             /// The root element which was added to the project collection.
             /// </summary>
             public ProjectAddedToProjectCollectionEventArgs(ProjectRootElement element)
             {
-                _rootElement = element;
+                ProjectRootElement = element;
             }
 
             /// <summary>
             /// Root element which was added to the project collection.
             /// </summary>
-            public ProjectRootElement ProjectRootElement => _rootElement;
+            public ProjectRootElement ProjectRootElement { get; }
         }
 
         /// <summary>
@@ -1853,7 +1812,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public ReusableLogger(ILogger originalLogger)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(originalLogger, "originalLogger");
+                ErrorUtilities.VerifyThrowArgumentNull(originalLogger, nameof(originalLogger));
                 _originalLogger = originalLogger;
             }
 
@@ -1979,7 +1938,6 @@ namespace Microsoft.Build.Evaluation
             public LoggerVerbosity Verbosity
             {
                 get => _originalLogger.Verbosity;
-
                 set => _originalLogger.Verbosity = value;
             }
 
@@ -2301,13 +2259,6 @@ namespace Microsoft.Build.Evaluation
             private int _count;
 
             /// <summary>
-            /// Constructor
-            /// </summary>
-            internal LoadedProjectCollection()
-            {
-            }
-
-            /// <summary>
             /// Returns the number of projects currently loaded
             /// </summary>
             internal int Count
@@ -2358,7 +2309,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    _loadedProjects.TryGetValue(fullPath, out var candidates);
+                    _loadedProjects.TryGetValue(fullPath, out List<Project> candidates);
 
                     return candidates ?? (IList<Project>)Enumerable.Empty<Project>();
                 }
@@ -2373,7 +2324,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    if (_loadedProjects.TryGetValue(fullPath, out var candidates))
+                    if (_loadedProjects.TryGetValue(fullPath, out List<Project> candidates))
                     {
                         foreach (Project candidate in candidates)
                         {
@@ -2396,7 +2347,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    if (!_loadedProjects.TryGetValue(project.FullPath, out var projectList))
+                    if (!_loadedProjects.TryGetValue(project.FullPath, out List<Project> projectList))
                     {
                         projectList = new List<Project>();
                         _loadedProjects.Add(project.FullPath, projectList);
@@ -2432,7 +2383,7 @@ namespace Microsoft.Build.Evaluation
             {
                 lock (_loadedProjects)
                 {
-                    if (!_loadedProjects.TryGetValue(projectFullPath, out var projectList))
+                    if (!_loadedProjects.TryGetValue(projectFullPath, out List<Project> projectList))
                     {
                         return false;
                     }
@@ -2469,7 +2420,7 @@ namespace Microsoft.Build.Evaluation
             /// Returns true if the global properties and tools version provided are equivalent to
             /// those in the provided project, otherwise false.
             /// </summary>
-            private bool HasEquivalentGlobalPropertiesAndToolsVersion(Project project, IDictionary<string, string> globalProperties, string toolsVersion)
+            private static bool HasEquivalentGlobalPropertiesAndToolsVersion(Project project, IDictionary<string, string> globalProperties, string toolsVersion)
             {
                 if (!String.Equals(project.ToolsVersion, toolsVersion, StringComparison.OrdinalIgnoreCase))
                 {

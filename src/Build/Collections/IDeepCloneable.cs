@@ -11,7 +11,7 @@ namespace Microsoft.Build.Collections
     /// An interface representing an item which can clone itself.
     /// </summary>
     /// <typeparam name="T">The type returned by the clone operation.</typeparam>
-    internal interface IDeepCloneable<T>
+    internal interface IDeepCloneable<out T>
     {
         /// <summary>
         /// Creates a clone of the item where no data references are shared.  Changes made to the clone

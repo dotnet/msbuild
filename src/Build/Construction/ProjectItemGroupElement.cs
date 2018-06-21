@@ -7,14 +7,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -37,7 +33,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -52,13 +48,7 @@ namespace Microsoft.Build.Construction
         /// Get any child items.
         /// This is a live collection.
         /// </summary>
-        public ICollection<ProjectItemElement> Items
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectItemElement>(Children.OfType<ProjectItemElement>());
-            }
-        }
+        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(Children.OfType<ProjectItemElement>());
 
         /// <summary>
         /// True if it is known that no child items have wildcards in their
@@ -79,10 +69,7 @@ namespace Microsoft.Build.Construction
                 return _definitelyAreNoChildrenWithWildcards;
             }
 
-            set
-            {
-                _definitelyAreNoChildrenWithWildcards = value;
-            }
+            set => _definitelyAreNoChildrenWithWildcards = value;
         }
 
         /// <summary>
@@ -101,8 +88,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, "itemType");
-            ErrorUtilities.VerifyThrowArgumentLength(include, "include");
+            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentLength(include, nameof(include));
 
             // If there are no items, or it turns out that there are only items with 
             // item types that sort earlier, then we should go after the last child

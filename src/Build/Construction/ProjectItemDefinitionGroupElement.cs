@@ -5,16 +5,12 @@
 // <summary>Definition of ProjectItemDefinitionGroupElement class.</summary>
 //-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -30,7 +26,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemDefinitionGroupElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -44,13 +40,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get a list of child item definitions.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectItemDefinitionElement>(Children.OfType<ProjectItemDefinitionElement>());
-            }
-        }
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(Children.OfType<ProjectItemDefinitionElement>());
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:

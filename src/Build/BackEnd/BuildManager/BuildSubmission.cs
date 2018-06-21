@@ -6,12 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Runtime.InteropServices;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using System.Globalization;
@@ -43,7 +38,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The completion event.
         /// </summary>
-        private ManualResetEvent _completionEvent;
+        private readonly ManualResetEvent _completionEvent;
 
         /// <summary>
         /// Flag indicating if logging is done.
@@ -56,22 +51,17 @@ namespace Microsoft.Build.Execution
         private int _completionInvoked;
 
         /// <summary>
-        /// The results of the build.
-        /// </summary>
-        private BuildResult _buildResult;
-
-        /// <summary>
         /// Flag indicating whether synchronous wait should support legacy threading semantics.
         /// </summary>
-        private bool _legacyThreadingSemantics;
+        private readonly bool _legacyThreadingSemantics;
 
         /// <summary>
         /// Constructor
         /// </summary>
         internal BuildSubmission(BuildManager buildManager, int submissionId, BuildRequestData requestData, bool legacyThreadingSemantics)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildManager, "buildManager");
-            ErrorUtilities.VerifyThrowArgumentNull(requestData, "requestData");
+            ErrorUtilities.VerifyThrowArgumentNull(buildManager, nameof(buildManager));
+            ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
 
             BuildManager = buildManager;
             SubmissionId = submissionId;
@@ -85,85 +75,42 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The BuildManager with which this submission is associated.
         /// </summary>
-        public BuildManager BuildManager
-        {
-            get;
-            private set;
-        }
+        public BuildManager BuildManager { get; }
 
         /// <summary>
         /// An ID uniquely identifying this request from among other submissions within the same build.
         /// </summary>
-        public int SubmissionId
-        {
-            get;
-            private set;
-        }
+        public int SubmissionId { get; }
 
         /// <summary>
         /// The asynchronous context provided to <see cref="BuildSubmission.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/>, if any.
         /// </summary>
-        public Object AsyncContext
-        {
-            get;
-            private set;
-        }
+        public Object AsyncContext { get; private set; }
 
         /// <summary>
         /// A <see cref="System.Threading.WaitHandle"/> which will be signalled when the build is complete.  Valid after <see cref="BuildSubmission.Execute()"/> or <see cref="BuildSubmission.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/> returns, otherwise null.
         /// </summary>
-        public WaitHandle WaitHandle
-        {
-            get
-            {
-                return _completionEvent;
-            }
-        }
+        public WaitHandle WaitHandle => _completionEvent;
 
         /// <summary>
         /// Returns true if this submission is complete.
         /// </summary>
-        public bool IsCompleted
-        {
-            get
-            {
-                return WaitHandle.WaitOne(new TimeSpan(0));
-            }
-        }
+        public bool IsCompleted => WaitHandle.WaitOne(new TimeSpan(0));
 
         /// <summary>
         /// The result of the build.  Valid only after WaitHandle has become signalled.
         /// </summary>
-        public BuildResult BuildResult
-        {
-            get
-            {
-                return _buildResult;
-            }
-
-            set
-            {
-                _buildResult = value;
-            }
-        }
+        public BuildResult BuildResult { get; set; }
 
         /// <summary>
         /// The BuildRequestData being used for this submission.
         /// </summary>
-        internal BuildRequestData BuildRequestData
-        {
-            get;
-            private set;
-        }
+        internal BuildRequestData BuildRequestData { get; }
 
         /// <summary>
         /// The build request for execution.
         /// </summary>
-        internal BuildRequest BuildRequest
-        {
-            get;
-            set;
-        }
+        internal BuildRequest BuildRequest { get; set; }
 
         /// <summary>
         /// Starts the request and blocks until results are available.
@@ -172,19 +119,19 @@ namespace Microsoft.Build.Execution
         public BuildResult Execute()
         {
             LegacyThreadingData legacyThreadingData = ((IBuildComponentHost)BuildManager).LegacyThreadingData;
-            legacyThreadingData.RegisterSubmissionForLegacyThread(this.SubmissionId);
+            legacyThreadingData.RegisterSubmissionForLegacyThread(SubmissionId);
 
             ExecuteAsync(null, null, _legacyThreadingSemantics);
             if (_legacyThreadingSemantics)
             {
-                RequestBuilder.WaitWithBuilderThreadStart(new WaitHandle[] { WaitHandle }, false, legacyThreadingData, this.SubmissionId);
+                RequestBuilder.WaitWithBuilderThreadStart(new[] { WaitHandle }, false, legacyThreadingData, SubmissionId);
             }
             else
             {
                 WaitHandle.WaitOne();
             }
 
-            legacyThreadingData.UnregisterSubmissionForLegacyThread(this.SubmissionId);
+            legacyThreadingData.UnregisterSubmissionForLegacyThread(SubmissionId);
 
             return BuildResult;
         }
@@ -203,7 +150,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CompleteResults(BuildResult result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(result, "result");
+            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
 
             // We verify that we got results from the same configuration, but not necessarily the same request, because we are 
             // rather flexible in how users are allowed to submit multiple requests for the same configuration.  In this case, the
@@ -226,7 +173,7 @@ namespace Microsoft.Build.Execution
         {
             if (waitForLoggingThread)
             {
-                ((Microsoft.Build.BackEnd.Logging.LoggingService)((IBuildComponentHost)BuildManager).LoggingService).WaitForThreadToProcessEvents();
+                ((BackEnd.Logging.LoggingService)((IBuildComponentHost)BuildManager).LoggingService).WaitForThreadToProcessEvents();
             }
 
             LoggingCompleted = true;
@@ -259,14 +206,12 @@ namespace Microsoft.Build.Execution
 
                     if (null != _completionCallback)
                     {
-                        WaitCallback callback = new WaitCallback
-                        (
-                         delegate (object state)
-                         {
-                             _completionCallback(this);
-                         });
+                        void Callback(object state)
+                        {
+                            _completionCallback(this);
+                        }
 
-                        ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(callback, CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
+                        ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(Callback, CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
                     }
                 }
             }

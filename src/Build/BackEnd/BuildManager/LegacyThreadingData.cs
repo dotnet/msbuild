@@ -26,7 +26,7 @@ namespace Microsoft.Build.Execution
         /// Item1: Start event, tracks when the submission has permission to start building. 
         /// Item2: End event, signalled when that submission is no longer using the legacy thread. 
         /// </summary>
-        private IDictionary<int, Tuple<AutoResetEvent, ManualResetEvent>> _legacyThreadingEventsById = new Dictionary<int, Tuple<AutoResetEvent, ManualResetEvent>>();
+        private readonly IDictionary<int, Tuple<AutoResetEvent, ManualResetEvent>> _legacyThreadingEventsById = new Dictionary<int, Tuple<AutoResetEvent, ManualResetEvent>>();
 
         /// <summary>
         /// The current submission id building on the main thread, if any.
@@ -42,7 +42,7 @@ namespace Microsoft.Build.Execution
         /// Lock object for startNewRequestBuilderMainThreadEventsById, since it's possible for multiple submissions to be 
         /// submitted at the same time. 
         /// </summary>
-        private Object _legacyThreadingEventsLock = new Object();
+        private readonly Object _legacyThreadingEventsLock = new Object();
         #endregion
 
         #region Properties
@@ -52,10 +52,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal RequestBuilder InstanceForMainThread
         {
-            get
-            {
-                return _instanceForMainThread;
-            }
+            get => _instanceForMainThread;
 
             set
             {
@@ -69,10 +66,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal int MainThreadSubmissionId
         {
-            get
-            {
-                return _mainThreadSubmissionId;
-            }
+            get => _mainThreadSubmissionId;
 
             set
             {
@@ -127,7 +121,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal WaitHandle GetStartRequestBuilderMainThreadEventForSubmission(int submissionId)
         {
-            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents = null;
+            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents;
 
             lock (_legacyThreadingEventsLock)
             {
@@ -145,7 +139,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal Task GetLegacyThreadInactiveTask(int submissionId)
         {
-            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents = null;
+            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents;
 
             lock (_legacyThreadingEventsLock)
             {
@@ -164,16 +158,14 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrow
                 (
-                    instance != null &&
-                    instance.RequestEntry != null &&
-                    instance.RequestEntry.Request != null,
+                    instance?.RequestEntry?.Request != null,
                     "Cannot signal legacy thread start for a RequestBuilder without a request"
                 );
 
             int submissionId = instance.RequestEntry.Request.SubmissionId;
-            this.InstanceForMainThread = instance;
+            InstanceForMainThread = instance;
 
-            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents = null;
+            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents;
             lock (_legacyThreadingEventsLock)
             {
                 _legacyThreadingEventsById.TryGetValue(submissionId, out legacyThreadingEvents);
@@ -193,9 +185,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SignalLegacyThreadEnd(int submissionId)
         {
-            this.MainThreadSubmissionId = -1;
+            MainThreadSubmissionId = -1;
 
-            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents = null;
+            Tuple<AutoResetEvent, ManualResetEvent> legacyThreadingEvents;
             lock (_legacyThreadingEventsLock)
             {
                 _legacyThreadingEventsById.TryGetValue(submissionId, out legacyThreadingEvents);

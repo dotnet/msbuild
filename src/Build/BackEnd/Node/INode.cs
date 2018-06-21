@@ -5,12 +5,10 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {
-    using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
+    using NodeEngineShutdownReason = Execution.NodeEngineShutdownReason;
 
     #region Delegates
     /// <summary>

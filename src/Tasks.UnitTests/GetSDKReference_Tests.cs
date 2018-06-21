@@ -507,9 +507,11 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         public void GetReferenceAssembliesWhenExpandTrueCopyLocalFalse()
         {
             var engine = new MockEngine(_output);
-            var t = new GetSDKReferenceFiles();
-            t.BuildEngine = engine;
-            t.CacheFileFolderPath = _cacheDirectory;
+            var t = new GetSDKReferenceFiles
+            {
+                BuildEngine = engine,
+                CacheFileFolderPath = _cacheDirectory
+            };
 
             ITaskItem item = new TaskItem(_sdkDirectory);
             item.SetMetadata("ExpandReferenceAssemblies", "true");

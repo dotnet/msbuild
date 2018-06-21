@@ -4,10 +4,6 @@
 // <summary>Interface for the build component host.</summary>
 //-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
@@ -147,34 +143,22 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the name of the host.
         /// </summary>
-        string Name
-        {
-            get;
-        }
+        string Name { get; }
 
         /// <summary>
         /// Retrieves the BuildParameters used during the build.
         /// </summary>
-        BuildParameters BuildParameters
-        {
-            get;
-        }
+        BuildParameters BuildParameters { get; }
 
         /// <summary>
         /// The data structure which holds the data for the use of legacy threading semantics
         /// </summary>
-        LegacyThreadingData LegacyThreadingData
-        {
-            get;
-        }
+        LegacyThreadingData LegacyThreadingData { get; }
 
         /// <summary>
         /// Retrieves the logging service associated with a particular build
         /// </summary>
-        ILoggingService LoggingService
-        {
-            get;
-        }
+        ILoggingService LoggingService { get; }
 
         /// <summary>
         /// Registers a factory which will be used to create the necessary components of the build

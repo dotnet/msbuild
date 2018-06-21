@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections;
 using System.Security;
-using System.Text;
 
 namespace Microsoft.Build.Collections
 {
@@ -45,23 +42,23 @@ namespace Microsoft.Build.Collections
     /// on a bit array and then need to loop over it. In particular, if it avoided visiting 
     /// every bit, it would allow good perf improvements when the bit array is sparse.
     /// </summary>
-    unsafe internal class BitHelper
+    internal unsafe class BitHelper
     {   // should not be serialized
         private const byte MarkedBitFlag = 1;
         private const byte IntSize = 32;
 
         // m_length of underlying int array (not logical bit array)
-        private int _length;
+        private readonly int _length;
 
         // ptr to stack alloc'd array of ints
         [SecurityCritical]
-        private int* _arrayPtr;
+        private readonly int* _arrayPtr;
 
         // array of ints
-        private int[] _array;
+        private readonly int[] _array;
 
         // whether to operate on stack alloc'd or heap alloc'd array 
-        private bool _useStackAlloc;
+        private readonly bool _useStackAlloc;
 
         /// <summary>
         /// Instantiates a BitHelper with a heap alloc'd array of ints
@@ -91,8 +88,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Mark bit at specified position
         /// </summary>
-        /// <param name="bitPosition"></param>
-        internal unsafe void MarkBit(int bitPosition)
+        internal void MarkBit(int bitPosition)
         {
             if (_useStackAlloc)
             {
@@ -115,9 +111,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Is bit at specified position marked?
         /// </summary>
-        /// <param name="bitPosition"></param>
-        /// <returns></returns>
-        internal unsafe bool IsMarked(int bitPosition)
+        internal bool IsMarked(int bitPosition)
         {
             if (_useStackAlloc)
             {

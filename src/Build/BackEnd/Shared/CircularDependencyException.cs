@@ -6,10 +6,7 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.Serialization;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -27,7 +24,6 @@ namespace Microsoft.Build.BackEnd
         /// Constructs a standard BuildAbortedException.
         /// </summary>
         internal CircularDependencyException()
-            : base()
         {
         }
 

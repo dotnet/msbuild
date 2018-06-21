@@ -7,10 +7,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
@@ -51,10 +48,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the collection of keys in the dictionary.
         /// </summary>
-        public ICollection<K> Keys
-        {
-            get { return _backing.Keys; }
-        }
+        public ICollection<K> Keys => _backing.Keys;
 
         /// <summary>
         /// Returns the collection of values in the dictionary.
@@ -73,33 +67,20 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the number of items in the collection.
         /// </summary>
-        public int Count
-        {
-            get { return _backing.Count; }
-        }
+        public int Count => _backing.Count;
 
         /// <summary>
         /// Returns true if the collection is read-only.
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return true; }
-        }
+        public bool IsReadOnly => true;
 
         /// <summary>
         /// Accesses the value for the specified key.
         /// </summary>
         public N this[K key]
         {
-            get
-            {
-                return _converter(_backing[key]);
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
-            }
+            get => _converter(_backing[key]);
+            set => ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
         }
 
         /// <summary>
@@ -132,8 +113,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool TryGetValue(K key, out N value)
         {
-            V originalValue;
-            if (_backing.TryGetValue(key, out originalValue))
+            if (_backing.TryGetValue(key, out V originalValue))
             {
                 value = _converter(originalValue);
                 return true;

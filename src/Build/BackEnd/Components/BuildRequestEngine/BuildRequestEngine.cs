@@ -12,7 +12,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
@@ -63,17 +62,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The list of current requests the engine is working on.
         /// </summary>
-        private List<BuildRequestEntry> _requests;
+        private readonly List<BuildRequestEntry> _requests;
 
         /// <summary>
         /// Mapping of global request ids to the request entries.
         /// </summary>
-        private Dictionary<int, BuildRequestEntry> _requestsByGlobalRequestId;
+        private readonly Dictionary<int, BuildRequestEntry> _requestsByGlobalRequestId;
 
         /// <summary>
         /// The list of requests currently waiting to be submitted from RequestBuilders.
         /// </summary>
-        private Queue<PendingUnsubmittedBuildRequests> _unsubmittedRequests;
+        private readonly Queue<PendingUnsubmittedBuildRequests> _unsubmittedRequests;
 
         /// <summary>
         /// The next available local unresolved configuration Id
@@ -103,17 +102,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating if we should trace.
         /// </summary>
-        private bool _debugDumpState;
+        private readonly bool _debugDumpState;
 
         /// <summary>
         /// The path where we will store debug files
         /// </summary>
-        private string _debugDumpPath;
+        private readonly string _debugDumpPath;
 
         /// <summary>
         /// Forces caching of all configurations and results.
         /// </summary>
-        private bool _debugForceCaching;
+        private readonly bool _debugForceCaching;
 
         /// <summary>
         /// Constructor
@@ -172,13 +171,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the current engine status.
         /// </summary>
-        public BuildRequestEngineStatus Status
-        {
-            get
-            {
-                return _status;
-            }
-        }
+        public BuildRequestEngineStatus Status => _status;
 
         /// <summary>
         /// Prepares the build request engine to run a build.
@@ -220,8 +213,8 @@ namespace Microsoft.Build.BackEnd
 
                     // Determine how many requests there are to shut down, then terminate all of their builders.
                     // We will capture the exceptions which happen here (but continue shutting down gracefully.)
-                    List<BuildRequestEntry> requestsToShutdown = new List<BuildRequestEntry>(_requests);
-                    List<Exception> deactivateExceptions = new List<Exception>(_requests.Count);
+                    var requestsToShutdown = new List<BuildRequestEntry>(_requests);
+                    var deactivateExceptions = new List<Exception>(_requests.Count);
 
                     // VC observed their tasks (e.g. "CL") received the "cancel" event in several seconds after CTRL+C was captured;
                     // and the reason was we signaled the "cancel" event to the build request and wait for its completion one by one.
@@ -506,10 +499,10 @@ namespace Microsoft.Build.BackEnd
                     // If any requests can now issue build requests, do so.
                     IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
 
-                    List<BuildRequestBlocker> blockersToIssue = new List<BuildRequestBlocker>();
+                    var blockersToIssue = new List<BuildRequestBlocker>();
                     foreach (BuildRequestEntry currentEntry in _requests)
                     {
-                        List<BuildRequest> requestsToIssue = new List<BuildRequest>();
+                        var requestsToIssue = new List<BuildRequest>();
                         if (currentEntry.State == BuildRequestEntryState.Waiting)
                         {
                             // Resolve the configuration id and get the list of requests to be issued, if any.
@@ -564,7 +557,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
             ErrorUtilities.VerifyThrow(_componentHost == null, "BuildRequestEngine already initialized!");
             _componentHost = host;
             _configCache = (IConfigCache)host.GetComponent(BuildComponentType.ConfigCache);
@@ -633,11 +626,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="request">The request being resumed.</param>
         private void RaiseRequestResumed(BuildRequest request)
         {
-            RequestResumedDelegate requestResumed = OnRequestResumed;
-            if (null != requestResumed)
-            {
-                requestResumed(request);
-            }
+            OnRequestResumed?.Invoke(request);
         }
 
         /// <summary>
@@ -646,11 +635,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The exception being thrown.</param>
         private void RaiseEngineException(Exception e)
         {
-            EngineExceptionDelegate engineException = OnEngineException;
-            if (null != engineException)
-            {
-                engineException(e);
-            }
+            OnEngineException?.Invoke(e);
         }
 
         /// <summary>
@@ -659,11 +644,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="blocker">Information about what is blocking the current request.</param>
         private void RaiseRequestBlocked(BuildRequestBlocker blocker)
         {
-            RequestBlockedDelegate requestBlocked = OnRequestBlocked;
-            if (null != requestBlocked)
-            {
-                requestBlocked(blocker);
-            }
+            OnRequestBlocked?.Invoke(blocker);
         }
 
         /// <summary>
@@ -672,11 +653,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The new engine status.</param>
         private void RaiseEngineStatusChanged(BuildRequestEngineStatus newStatus)
         {
-            EngineStatusChangedDelegate statusChanged = OnStatusChanged;
-            if (null != statusChanged)
-            {
-                statusChanged(newStatus);
-            }
+            OnStatusChanged?.Invoke(newStatus);
         }
 
         /// <summary>
@@ -685,11 +662,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration which needs resolving.</param>
         private void RaiseNewConfigurationRequest(BuildRequestConfiguration config)
         {
-            NewConfigurationRequestDelegate configRequest = OnNewConfigurationRequest;
-            if (null != configRequest)
-            {
-                configRequest(config);
-            }
+            OnNewConfigurationRequest?.Invoke(config);
         }
 
         #endregion
@@ -717,7 +690,7 @@ namespace Microsoft.Build.BackEnd
             BuildRequestEntry activeEntry = null;
             BuildRequestEntry firstReadyEntry = null;
             int waitingRequests = 0;
-            List<BuildRequestEntry> completedEntries = new List<BuildRequestEntry>();
+            var completedEntries = new List<BuildRequestEntry>();
 
             foreach (BuildRequestEntry currentEntry in _requests)
             {
@@ -781,14 +754,8 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    if (waitingRequests == 0)
-                    {
-                        ChangeStatus(BuildRequestEngineStatus.Idle);
-                    }
-                    else
-                    {
-                        ChangeStatus(BuildRequestEngineStatus.Waiting);
-                    }
+                    ChangeStatus(
+                        waitingRequests == 0 ? BuildRequestEngineStatus.Idle : BuildRequestEngineStatus.Waiting);
                 }
             }
             else
@@ -802,8 +769,8 @@ namespace Microsoft.Build.BackEnd
             foreach (BuildRequestEntry completedEntry in completedEntries)
             {
                 // Shut it down because we already have enough in reserve.
-                completedEntry.Builder.OnNewBuildRequests -= new NewBuildRequestsDelegate(Builder_OnNewBuildRequests);
-                completedEntry.Builder.OnBuildRequestBlocked -= new BuildRequestBlockedDelegate(Builder_OnBlockedRequest);
+                completedEntry.Builder.OnNewBuildRequests -= Builder_OnNewBuildRequests;
+                completedEntry.Builder.OnBuildRequestBlocked -= Builder_OnBlockedRequest;
                 ((IBuildComponent)completedEntry.Builder).ShutdownComponent();
 
                 BuildRequestConfiguration configuration = _configCache[completedEntry.Request.ConfigurationId];
@@ -898,7 +865,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _nodeLoggingContext.LogFatalBuildError(
                         e,
-                        new BuildEventFileInfo(Microsoft.Build.Construction.ElementLocation.EmptyLocation));
+                        new BuildEventFileInfo(Construction.ElementLocation.EmptyLocation));
                     throw new BuildAbortedException(e.Message, e);
                 }
             }
@@ -943,8 +910,8 @@ namespace Microsoft.Build.BackEnd
 
             // NOTE: We do NOT need to register for the OnBuildRequestCompleted because we already watch the BuildRequestEntry
             // state changes.
-            builder.OnNewBuildRequests += new NewBuildRequestsDelegate(Builder_OnNewBuildRequests);
-            builder.OnBuildRequestBlocked += new BuildRequestBlockedDelegate(Builder_OnBlockedRequest);
+            builder.OnNewBuildRequests += Builder_OnNewBuildRequests;
+            builder.OnBuildRequestBlocked += Builder_OnBlockedRequest;
 
             return builder;
         }
@@ -953,7 +920,7 @@ namespace Microsoft.Build.BackEnd
         /// Starts to terminate any builder associated with the entry and clean it up in preparation for removal.
         /// </summary>
         /// <param name="entry">The entry to be deactivated</param>
-        private void BeginDeactivateBuildRequest(BuildRequestEntry entry)
+        private static void BeginDeactivateBuildRequest(BuildRequestEntry entry)
         {
             if (entry.Builder != null)
             {
@@ -965,7 +932,7 @@ namespace Microsoft.Build.BackEnd
         /// Waits for the builders until they are terminated.
         /// </summary>
         /// <param name="entry">The entry to be deactivated</param>
-        private void WaitForDeactivateCompletion(BuildRequestEntry entry)
+        private static void WaitForDeactivateCompletion(BuildRequestEntry entry)
         {
             if (entry.Builder != null)
             {
@@ -1024,8 +991,7 @@ namespace Microsoft.Build.BackEnd
             int countToSubmit = _unsubmittedRequests.Count;
             while (countToSubmit != 0)
             {
-                PendingUnsubmittedBuildRequests unsubmittedRequest;
-                unsubmittedRequest = _unsubmittedRequests.Dequeue();
+                PendingUnsubmittedBuildRequests unsubmittedRequest = _unsubmittedRequests.Dequeue();
 
                 BuildRequestEntry sourceEntry = unsubmittedRequest.SourceEntry;
 
@@ -1118,14 +1084,14 @@ namespace Microsoft.Build.BackEnd
             // to the entry rather than a series of them.
             lock (issuingEntry.GlobalLock)
             {
-                List<BuildResult> existingResultsToReport = new List<BuildResult>();
-                HashSet<NGen<int>> unresolvedConfigurationsAdded = new HashSet<NGen<int>>();
+                var existingResultsToReport = new List<BuildResult>();
+                var unresolvedConfigurationsAdded = new HashSet<NGen<int>>();
 
                 foreach (FullyQualifiedBuildRequest request in newRequests)
                 {
                     // Do we have a matching configuration?
                     BuildRequestConfiguration matchingConfig = globalConfigCache.GetMatchingConfiguration(request.Config);
-                    BuildRequest newRequest = null;
+                    BuildRequest newRequest;
 
                     BuildRequestDataFlags buildRequestDataFlags = request.BuildRequestDataFlags;
 
@@ -1289,7 +1255,7 @@ namespace Microsoft.Build.BackEnd
         private void IssueConfigurationRequest(BuildRequestConfiguration config)
         {
             ErrorUtilities.VerifyThrowArgument(config.WasGeneratedByNode, "InvalidConfigurationId");
-            ErrorUtilities.VerifyThrowArgumentNull(config, "config");
+            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
             ErrorUtilities.VerifyThrowInvalidOperation(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
             TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
             RaiseNewConfigurationRequest(config);
@@ -1301,7 +1267,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="blocker">The information about why the request is blocked.</param>
         private void IssueBuildRequest(BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, "blocker");
+            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
 
             if (blocker.BuildRequests == null)
             {
@@ -1324,17 +1290,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="action">The action to execute.</param>
         /// <param name="isLastTask"><code>true</code> if this is the last task for this queue, otherwise <code>false</code>.</param>
-        /// <returns>True if the task was scheduled, false otherwise.</returns>
         /// <remarks>This method will return false if an attempt is made to schedule an action after the queue has been shut down.</remarks>
-        private bool QueueAction(Action action, bool isLastTask)
+        private void QueueAction(Action action, bool isLastTask)
         {
-            bool actionQueued = false;
-            var queue = _workQueue;
+            ActionBlock<Action> queue = _workQueue;
             if (queue != null)
             {
                 lock (queue)
                 {
-                    actionQueued = queue.Post(
+                    queue.Post(
                         () =>
                         {
                             try
@@ -1374,8 +1338,6 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
-
-            return actionQueued;
         }
 
         /// <summary>
@@ -1407,22 +1369,22 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The global request id on which we are blocking
             /// </summary>
-            public int BlockingGlobalRequestId;
+            public readonly int BlockingGlobalRequestId;
 
             /// <summary>
             /// The target on which we are blocking
             /// </summary>
-            public string BlockingTarget;
+            public readonly string BlockingTarget;
 
             /// <summary>
             /// The issuing request
             /// </summary>
-            public BuildRequestEntry SourceEntry;
+            public readonly BuildRequestEntry SourceEntry;
 
             /// <summary>
             /// The new requests to issue
             /// </summary>
-            public FullyQualifiedBuildRequest[] NewRequests;
+            public readonly FullyQualifiedBuildRequest[] NewRequests;
 
             /// <summary>
             /// Create a new unsubmitted request entry
@@ -1431,11 +1393,11 @@ namespace Microsoft.Build.BackEnd
             /// <param name="newRequests">The new requests to be issued.</param>
             public PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, FullyQualifiedBuildRequest[] newRequests)
             {
-                this.SourceEntry = sourceEntry;
-                this.NewRequests = newRequests;
-                this.BlockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
-                this.BlockingTarget = null;
-                this.PartialBuildResult = null;
+                SourceEntry = sourceEntry;
+                NewRequests = newRequests;
+                BlockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
+                BlockingTarget = null;
+                PartialBuildResult = null;
             }
 
             /// <summary>
@@ -1444,17 +1406,17 @@ namespace Microsoft.Build.BackEnd
             /// <param name="sourceEntry">The build request originating these requests.</param>
             /// <param name="blockingGlobalRequestId">The request on which we are blocked.</param>
             /// <param name="blockingTarget">The target on which we are blocked.</param>
-            public PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget)
+            private PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget)
             {
-                this.SourceEntry = sourceEntry;
-                this.NewRequests = null;
-                this.BlockingGlobalRequestId = blockingGlobalRequestId;
-                this.BlockingTarget = blockingTarget;
-                this.PartialBuildResult = null;
+                SourceEntry = sourceEntry;
+                NewRequests = null;
+                BlockingGlobalRequestId = blockingGlobalRequestId;
+                BlockingTarget = blockingTarget;
+                PartialBuildResult = null;
             }
 
             public PendingUnsubmittedBuildRequests(BuildRequestEntry sourceEntry, int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult)
-            : this(sourceEntry, blockingGlobalRequestId, blockingTarget)
+                : this(sourceEntry, blockingGlobalRequestId, blockingTarget)
             {
                 PartialBuildResult = partialBuildResult;
             }
