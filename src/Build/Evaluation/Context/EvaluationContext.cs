@@ -74,7 +74,7 @@ namespace Microsoft.Build.Evaluation.Context
                 case SharingPolicy.Shared:
                     return this;
                 case SharingPolicy.Isolated:
-                    // reuse the first isolated context, as it has not seen an evaluation yet.
+                    // reuse the first isolated context if it has not seen an evaluation yet.
                     var previousValueWasUsed = Interlocked.CompareExchange(ref _used, 1, 0);
                     return previousValueWasUsed == 0
                         ? this
