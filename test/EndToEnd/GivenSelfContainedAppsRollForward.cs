@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,13 +12,13 @@ using Xunit;
 
 namespace EndToEnd
 {
-    public class GivenSelfContainedAppsRollForward : TestBase
+    public partial class GivenSelfContainedAppsRollForward : TestBase
     {
 
-        [Theory(Skip = "Runtime 1.1 support for openSUSE and Fedora 27 needed")]
+        [Theory]
         //  MemberData is used instead of InlineData here so we can access it in another test to
         //  verify that we are covering the latest release of .NET Core
-        [MemberData(nameof(SupportedNetCoreAppVersions))]
+        [ClassData(typeof(SupportedNetCoreAppVersions))]
         public void ItRollsForwardToTheLatestVersion(string minorVersion)
         {
             var _testInstance = TestAssets.Get("TestAppSimple")
@@ -118,24 +117,10 @@ namespace EndToEnd
                     .Element(ns + "TargetFramework")
                     .Value;
 
-                SupportedNetCoreAppVersions.Select(v => $"netcoreapp{v[0]}")
-                    .Should().Contain(targetFramework, $"the {nameof(SupportedNetCoreAppVersions)} property should include the default version " +
+                SupportedNetCoreAppVersions.Versions.Select(v => $"netcoreapp{v[0]}")
+                    .Should().Contain(targetFramework, $"the {nameof(SupportedNetCoreAppVersions)}.{nameof(SupportedNetCoreAppVersions.Versions)} property should include the default version " +
                     "of .NET Core created by \"dotnet new\"");
                 
-            }
-        }
-
-        public static IEnumerable<object[]> SupportedNetCoreAppVersions
-        {
-            get
-            {
-                return new[]
-                {
-                    "1.0",
-                    "1.1",
-                    "2.0",
-                    "2.1"
-                }.Select(version => new object[] { version });
             }
         }
     }
