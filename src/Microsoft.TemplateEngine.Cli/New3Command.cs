@@ -315,10 +315,19 @@ namespace Microsoft.TemplateEngine.Cli
                     Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, CommandName).Bold().Red());
                     break;
                 case CreationResultStatus.InvalidParamValues:
-                    TemplateUsageInformation usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, EnvironmentSettings, _commandInput, _hostDataLoader, _templateCreator);
-                    string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.InvalidParameters);
-                    Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
+                    TemplateUsageInformation? usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, EnvironmentSettings, _commandInput, _hostDataLoader, _templateCreator);
+
+                    if (usageInformation != null)
+                    {
+                        string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.Value.InvalidParameters);
+                        Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
+                    }
+                    else
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, CommandName).Bold().Red());
+                        return CreationResultStatus.NotFound;
+                    }
                     break;
                 default:
                     break;
