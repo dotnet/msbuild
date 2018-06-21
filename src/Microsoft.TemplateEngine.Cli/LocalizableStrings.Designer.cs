@@ -938,6 +938,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to locate the specified template content, the template cache may be corrupted. Try running &apos;dotnet {0} --debug:reinit&apos; to fix the issue..
+        /// </summary>
+        public static string MissingTemplateContentDetected {
+            get {
+                return ResourceManager.GetString("MissingTemplateContentDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mount Point Factories.
         /// </summary>
         public static string MountPointFactories {

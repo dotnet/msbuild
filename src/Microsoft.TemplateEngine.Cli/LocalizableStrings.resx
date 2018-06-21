@@ -616,4 +616,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="FileActionsWouldHaveBeenTaken" xml:space="preserve">
     <value>File actions would have been taken:</value>
   </data>
+  <data name="MissingTemplateContentDetected" xml:space="preserve">
+    <value>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</value>
+  </data>
 </root>

@@ -311,6 +311,9 @@ namespace Microsoft.TemplateEngine.Cli
                     break;
                 case CreationResultStatus.OperationNotSpecified:
                     break;
+                case CreationResultStatus.NotFound:
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, CommandName).Bold().Red());
+                    break;
                 case CreationResultStatus.InvalidParamValues:
                     TemplateUsageInformation usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, EnvironmentSettings, _commandInput, _hostDataLoader, _templateCreator);
                     string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.InvalidParameters);
