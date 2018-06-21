@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class containing the shared pieces of code from NodeProviderOutOfProc
-// and NodeProviderOutOfProcTaskHost.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

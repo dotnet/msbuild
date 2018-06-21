@@ -1,12 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//-----------------------------------------------------------------------
-// <copyright file="Engine_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// <summary>Tests for all Public Engine objects for the v9 Compatibility</summary>
-//-----------------------------------------------------------------------
 using System;
 using System.Collections;
 using System.Collections.Generic;

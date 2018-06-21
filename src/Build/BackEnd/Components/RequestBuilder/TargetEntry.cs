@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An entry on the TargetBuilder's target stack.  This class 
-//          does most of the work of building an individual target.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

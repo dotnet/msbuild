@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Expands item/property/metadata in expressions.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

@@ -1,12 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>
-// This class is an IDisposable object which will call the delegate which is passed into it 
-// when its dispose method is called.
-// </summary>
-//-----------------------------------------------------------------------
 
 using System;
 

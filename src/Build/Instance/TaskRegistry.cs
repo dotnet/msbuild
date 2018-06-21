@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Consults stored task declarations (from UsingTask tags) to return the appropriate Type for a requested task name.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

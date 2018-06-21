@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class used for efficiently indexing BuildRequestConfigurations in the cache.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

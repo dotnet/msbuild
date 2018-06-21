@@ -1,12 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>
-//    Gathers the list of installed SDKS in the registry and on disk and outputs them into the project
-//    so they can be used during SDK reference resolution and RAR for single files.
-// </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A dictionary over properties or metadata with copy-on-write semantics.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

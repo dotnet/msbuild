@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface allowing values of things to be gotten.</summary>
-//-----------------------------------------------------------------------
 
 namespace Microsoft.Build.Collections
 {

@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Provide a helper class for tasks to find their tools if they are in the SDK</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;

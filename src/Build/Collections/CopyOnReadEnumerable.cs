@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A class which implements IEnumerable by creating an optionally-deep copy of the backing collection.</summary>
-//-----------------------------------------------------------------------
 
 using System.Collections;
 using System.Collections.Generic;

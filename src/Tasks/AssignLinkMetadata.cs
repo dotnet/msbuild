@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Task to assign a reasonable "Link" metadata to the provided items.</summary>
-//-----------------------------------------------------------------------
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;

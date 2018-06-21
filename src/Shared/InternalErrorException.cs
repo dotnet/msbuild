@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary> Exception to be thrown whenever an assumption we have made 
-//           in the code turns out to be false.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;

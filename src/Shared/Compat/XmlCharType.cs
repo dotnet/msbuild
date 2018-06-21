@@ -2,13 +2,6 @@
 #undef XMLCHARTYPE_USE_RESOURCE
 #endif
 
-//------------------------------------------------------------------------------
-// <copyright file="XmlCharType.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// <owner current="true" primary="true">[....]</owner>
-//------------------------------------------------------------------------------
-
 //#define XMLCHARTYPE_USE_RESOURCE    // load the character properties from resources (XmlCharType.bin must be linked to System.Xml.dll)
 //#define XMLCHARTYPE_GEN_RESOURCE    // generate the character properties into XmlCharType.bin
 

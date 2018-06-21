@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>ToolTask that wraps AxImp.exe, which generates Windows forms wrappers for ActiveX controls.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 

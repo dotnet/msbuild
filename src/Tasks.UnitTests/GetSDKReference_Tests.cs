@@ -1,10 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// <copyright file="GetSDKReferenceFiles_Tests.cs" company="Microsoft">
-// </copyright>
-// <summary>Tests for the task that extracts the list of reference assemblies from the SDK</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

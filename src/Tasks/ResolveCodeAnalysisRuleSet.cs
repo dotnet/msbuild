@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A task to determine the code analysis rule set file.</summary>
-//-----------------------------------------------------------------------
 
 using System.IO;
 using Microsoft.Build.Framework;
