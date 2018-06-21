@@ -3781,7 +3781,7 @@ namespace Microsoft.Build.Utilities
 
             //sort in ascending order of the version numbers, this is important as later when we search for assemblies in other methods 
             //we should be looking in ascending order of the framework version folders on disk
-            frameworkVersions.Sort(new VersionComparer());
+            frameworkVersions.Sort(VersionComparer.Instance);
 
             return frameworkVersions;
         }
@@ -3888,6 +3888,12 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private class VersionComparer : IComparer<string>
         {
+            public static VersionComparer Instance { get; } = new VersionComparer();
+
+            private VersionComparer()
+            {
+            }
+
             public int Compare(string versionX, string versionY)
             {
                 return new Version(versionX.Substring(1)).CompareTo(new Version(versionY.Substring(1)));
