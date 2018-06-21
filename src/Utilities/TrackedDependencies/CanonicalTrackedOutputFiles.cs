@@ -430,7 +430,7 @@ namespace Microsoft.Build.Utilities
                 if (searchForSubRootsInCompositeRootingMarkers &&
                    (upperSourcesRoot.Contains(upperTableEntryRoot) ||
                     upperTableEntryRoot.Contains(upperSourcesRoot) ||
-                    RootContainsAllSubRootComponents(upperSourcesRoot, upperTableEntryRoot)))
+                    CanonicalTrackedFilesHelper.RootContainsAllSubRootComponents(upperSourcesRoot, upperTableEntryRoot)))
                 {
                     // Gather the unique outputs for this root
                     OutputsForSourceRoot(outputs, upperTableEntryRoot);
@@ -470,38 +470,6 @@ namespace Microsoft.Build.Utilities
             }
 
             return outputsArray.ToArray();
-        }
-
-        /// <summary>
-        /// Check that the given composite root contains all entries in the composite sub root
-        /// </summary>
-        /// <param name="compositeRoot">The root to look for all sub roots in</param>
-        /// <param name="compositeSubRoot">The root that is comprised of subroots to look for</param>
-        /// <returns></returns>
-        internal bool RootContainsAllSubRootComponents(string compositeRoot, string compositeSubRoot)
-        {
-            bool containsAllSubRoots = true;
-
-            // If the two are identical, then clearly all keys are present
-            if (string.Compare(compositeRoot, compositeSubRoot, StringComparison.OrdinalIgnoreCase) == 0)
-            {
-                return true;
-            }
-            else
-            {
-                // look for each sub key in the main composite key
-                string[] rootComponents = compositeSubRoot.Split('|');
-                foreach (string subRoot in rootComponents)
-                {
-                    containsAllSubRoots &= compositeRoot.Contains(subRoot);
-                    // we didn't find this subkey, so bail out
-                    if (!containsAllSubRoots)
-                    {
-                        break;
-                    }
-                }
-            }
-            return containsAllSubRoots;
         }
 
         /// <summary>
