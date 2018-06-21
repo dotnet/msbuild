@@ -58,6 +58,14 @@ namespace Microsoft.Build.Evaluation.Context
             return context;
         }
 
+        private EvaluationContext CreateUsedIsolatedContext()
+        {
+            var context = Create(SharingPolicy.Isolated);
+            context._used = 1;
+
+            return context;
+        }
+
         internal EvaluationContext ContextForNewProject()
         {
             // Projects using isolated contexts need to get a new context instance 
@@ -66,11 +74,11 @@ namespace Microsoft.Build.Evaluation.Context
                 case SharingPolicy.Shared:
                     return this;
                 case SharingPolicy.Isolated:
-                    // use the first isolated context
-                    var used = Interlocked.CompareExchange(ref _used, 1, 0);
-                    return used == 0
+                    // reuse the first isolated context, as it has not seen an evaluation yet.
+                    var previousValueWasUsed = Interlocked.CompareExchange(ref _used, 1, 0);
+                    return previousValueWasUsed == 0
                         ? this
-                        : Create(Policy);
+                        : CreateUsedIsolatedContext();
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     return null;
