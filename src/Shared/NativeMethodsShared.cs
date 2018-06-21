@@ -45,7 +45,10 @@ namespace Microsoft.Build.Shared
         internal const int FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
         internal const int FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400;
 
-        private const int MAX_PATH_LEGACY_WINDOWS = 260;
+        /// <summary>
+        /// Default buffer size to use when dealing with the Windows API.
+        /// </summary>
+        internal const int MAX_PATH = 260;
 
         private const string kernel32Dll = "kernel32.dll";
         private const string mscoreeDLL = "mscoree.dll";
@@ -177,7 +180,7 @@ namespace Microsoft.Build.Shared
         internal enum MaxPathLimits
         {
             Unknown = 0,
-            LegacyWindows = MAX_PATH_LEGACY_WINDOWS,
+            LegacyWindows = MAX_PATH,
             None = int.MaxValue,
         };
 
@@ -463,15 +466,6 @@ namespace Microsoft.Build.Shared
         #endregion
 
         #region Member data
-
-        /// <summary>
-        /// Default buffer size to use when dealing with the Windows API.
-        /// </summary>
-        /// <remarks>
-        /// This member is intentionally not a constant because we want to allow
-        /// unit tests to change it.
-        /// </remarks>
-        internal static int MAX_PATH = 260;
 
         /// <summary>
         /// Gets an enum for the max path restrictions of the current OS.
