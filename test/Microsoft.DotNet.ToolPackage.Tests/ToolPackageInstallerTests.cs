@@ -598,7 +598,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             var package = installer.InstallPackage(
                 packageId: TestPackageId,
-                versionRange: VersionRange.Parse("1.0.*"),
+                versionRange: VersionRange.Parse("1.0.0"),
                 targetFramework: _testTargetframework,
                 nugetConfig: nugetConfigPath);
 
@@ -606,6 +606,31 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             reporter.Lines.Should().Contain(l => l.Contains("warning"));
             reporter.Lines.Should().NotContain(l => l.Contains(tempProject.Value));
             reporter.Lines.Clear();
+
+            AssertPackageInstall(reporter, fileSystem, package, store);
+
+            package.Uninstall();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        // repro https://github.com/dotnet/cli/issues/9409
+        public void GivenAComplexVersionRangeInstallSucceeds(bool testMockBehaviorIsInSync)
+        {
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+            var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(emptySource);
+
+            var (store, installer, reporter, fileSystem) = Setup(
+                useMock: testMockBehaviorIsInSync,
+                feeds: GetMockFeedsForSource(emptySource));
+
+            var package = installer.InstallPackage(
+                packageId: TestPackageId,
+                versionRange: VersionRange.Parse("1.0.0-rc*"),
+                targetFramework: _testTargetframework,
+                nugetConfig: nugetConfigPath, additionalFeeds: new[] { emptySource });
 
             AssertPackageInstall(reporter, fileSystem, package, store);
 
