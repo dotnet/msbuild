@@ -1,6 +1,6 @@
 <Project>
     <ItemGroup>
-      <Compile Include="$(MSBuildThisFileDirectory)Shared\FileSystem\*.cs">
+      <Compile Include="$(MSBuildThisFileDirectory)FileSystem\*.cs">
         <Link>FileSystem\%(Filename).cs</Link>
       </Compile>
     </ItemGroup>

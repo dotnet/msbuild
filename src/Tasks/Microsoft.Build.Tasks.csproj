@@ -1,6 +1,6 @@
 ﻿<Project Sdk="RoslynTools.RepoToolset">
 
-  <Import Project="..\FileSystemSources.props" />
+  <Import Project="..\Shared\FileSystemSources.proj" />
 
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
