@@ -5,16 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Resources;
 using System.Text;
-
 using Microsoft.Build.Framework;
 using Shouldly;
-using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Xunit;
 using Xunit.Abstractions;
+using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -69,11 +67,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When set to true, allows task crashes to be logged without causing an assert.
         /// </summary>
-        internal bool AllowTaskCrashes
-        {
-            get;
-            set;
-        }
+        internal bool AllowTaskCrashes { get; set; }
 
         /// <summary>
         /// List of ExternalProjectStarted events
@@ -238,152 +232,143 @@ namespace Microsoft.Build.UnitTests
             {
                 AllBuildEvents.Add(eventArgs);
 
-                foreach (var handler in AdditionalHandlers)
+                foreach (Action<object, BuildEventArgs> handler in AdditionalHandlers)
                 {
                     handler(sender, eventArgs);
                 }
 
-                if (eventArgs is BuildWarningEventArgs w)
+                // Log the string part of the event
+                switch (eventArgs)
                 {
-                    // hack: disregard the MTA warning.
-                    // need the second condition to pass on ploc builds
-                    if (w.Code != "MSB4056" && !w.Message.Contains("MSB4056"))
-                    {
-                        string logMessage = string.Format(
-                            "{0}({1},{2}): {3} warning {4}: {5}",
-                            w.File,
-                            w.LineNumber,
-                            w.ColumnNumber,
-                            w.Subcategory,
-                            w.Code,
-                            w.Message);
+                    case BuildWarningEventArgs w:
+                        // hack: disregard the MTA warning.
+                        // need the second condition to pass on ploc builds
+                        if (w.Code != "MSB4056" && !w.Message.Contains("MSB4056"))
+                        {
+                            string logMessage = $"{w.File}({w.LineNumber},{w.ColumnNumber}): {w.Subcategory} warning {w.Code}: {w.Message}";
 
+                            _fullLog.AppendLine(logMessage);
+                            _testOutputHelper?.WriteLine(logMessage);
+
+                            ++WarningCount;
+                            Warnings.Add(w);
+                        }
+                        break;
+                    case BuildErrorEventArgs e:
+                    {
+                        string logMessage = $"{e.File}({e.LineNumber},{e.ColumnNumber}): {e.Subcategory} error {e.Code}: {e.Message}";
                         _fullLog.AppendLine(logMessage);
                         _testOutputHelper?.WriteLine(logMessage);
 
-                        ++WarningCount;
-                        Warnings.Add(w);
+                        ++ErrorCount;
+                        Errors.Add(e);
+                        break;
                     }
-                }
-                else if (eventArgs is BuildErrorEventArgs)
-                {
-                    var e = (BuildErrorEventArgs) eventArgs;
-
-                    string logMessage = string.Format(
-                        "{0}({1},{2}): {3} error {4}: {5}",
-                        e.File,
-                        e.LineNumber,
-                        e.ColumnNumber,
-                        e.Subcategory,
-                        e.Code,
-                        e.Message);
-                    _fullLog.AppendLine(logMessage);
-                    _testOutputHelper?.WriteLine(logMessage);
-
-                    ++ErrorCount;
-                    Errors.Add(e);
-                }
-                else
-                {
-                    // Log the message unless we are a build finished event and logBuildFinished is set to false.
-                    bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
-                    if (logMessage)
+                    default:
                     {
-                        _fullLog.AppendLine(eventArgs.Message);
-                        _testOutputHelper?.WriteLine(eventArgs.Message);
+                        // Log the message unless we are a build finished event and logBuildFinished is set to false.
+                        bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
+                        if (logMessage)
+                        {
+                            _fullLog.AppendLine(eventArgs.Message);
+                            _testOutputHelper?.WriteLine(eventArgs.Message);
+                        }
+                        break;
                     }
                 }
 
-                if (eventArgs is ExternalProjectStartedEventArgs args)
+                // Log the specific type of event it was
+                switch (eventArgs)
                 {
-                    ExternalProjectStartedEvents.Add(args);
-                }
-                else if (eventArgs is ExternalProjectFinishedEventArgs)
-                {
-                    ExternalProjectFinishedEvents.Add((ExternalProjectFinishedEventArgs) eventArgs);
-                }
-
-                if (eventArgs is ProjectStartedEventArgs startedEventArgs)
-                {
-                    ProjectStartedEvents.Add(startedEventArgs);
-                }
-                else if (eventArgs is ProjectFinishedEventArgs)
-                {
-                    ProjectFinishedEvents.Add((ProjectFinishedEventArgs) eventArgs);
-                }
-                else if (eventArgs is TargetStartedEventArgs)
-                {
-                    TargetStartedEvents.Add((TargetStartedEventArgs) eventArgs);
-                }
-                else if (eventArgs is TargetFinishedEventArgs)
-                {
-                    TargetFinishedEvents.Add((TargetFinishedEventArgs) eventArgs);
-                }
-                else if (eventArgs is TaskStartedEventArgs)
-                {
-                    TaskStartedEvents.Add((TaskStartedEventArgs) eventArgs);
-                }
-                else if (eventArgs is TaskFinishedEventArgs)
-                {
-                    TaskFinishedEvents.Add((TaskFinishedEventArgs) eventArgs);
-                }
-                else if (eventArgs is BuildMessageEventArgs)
-                {
-                    BuildMessageEvents.Add((BuildMessageEventArgs) eventArgs);
-                }
-                else if (eventArgs is BuildStartedEventArgs)
-                {
-                    BuildStartedEvents.Add((BuildStartedEventArgs) eventArgs);
-                }
-                else if (eventArgs is BuildFinishedEventArgs)
-                {
-                    BuildFinishedEvents.Add((BuildFinishedEventArgs) eventArgs);
-
-                    if (!AllowTaskCrashes)
+                    case ExternalProjectStartedEventArgs args:
                     {
-                        // We should not have any task crashes. Sometimes a test will validate that their expected error
-                        // code appeared, but not realize it then crashed.
-                        AssertLogDoesntContain("MSB4018");
+                        ExternalProjectStartedEvents.Add(args);
+                        break;
                     }
+                    case ExternalProjectFinishedEventArgs finishedEventArgs:
+                    {
+                        ExternalProjectFinishedEvents.Add(finishedEventArgs);
+                        break;
+                    }
+                    case ProjectStartedEventArgs startedEventArgs:
+                    {
+                        ProjectStartedEvents.Add(startedEventArgs);
+                        break;
+                    }
+                    case ProjectFinishedEventArgs finishedEventArgs:
+                    {
+                        ProjectFinishedEvents.Add(finishedEventArgs);
+                        break;
+                    }
+                    case TargetStartedEventArgs targetStartedEventArgs:
+                    {
+                        TargetStartedEvents.Add(targetStartedEventArgs);
+                        break;
+                    }
+                    case TargetFinishedEventArgs targetFinishedEventArgs:
+                    {
+                        TargetFinishedEvents.Add(targetFinishedEventArgs);
+                        break;
+                    }
+                    case TaskStartedEventArgs taskStartedEventArgs:
+                    {
+                        TaskStartedEvents.Add(taskStartedEventArgs);
+                        break;
+                    }
+                    case TaskFinishedEventArgs taskFinishedEventArgs:
+                    {
+                        TaskFinishedEvents.Add(taskFinishedEventArgs);
+                        break;
+                    }
+                    case BuildMessageEventArgs buildMessageEventArgs:
+                    {
+                        BuildMessageEvents.Add(buildMessageEventArgs);
+                        break;
+                    }
+                    case BuildStartedEventArgs buildStartedEventArgs:
+                    {
+                        BuildStartedEvents.Add(buildStartedEventArgs);
+                        break;
+                    }
+                    case BuildFinishedEventArgs buildFinishedEventArgs:
+                    {
+                        BuildFinishedEvents.Add(buildFinishedEventArgs);
 
-                    // We should not have any Engine crashes.
-                    AssertLogDoesntContain("MSB0001");
+                        if (!AllowTaskCrashes)
+                        {
+                            // We should not have any task crashes. Sometimes a test will validate that their expected error
+                            // code appeared, but not realize it then crashed.
+                            AssertLogDoesntContain("MSB4018");
+                        }
 
-                    // Console.Write in the context of a unit test is very expensive.  A hundred
-                    // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
-                    // do the Console.Write once at the end of the build.
-                    Console.Write(FullLog);
+                        // We should not have any Engine crashes.
+                        AssertLogDoesntContain("MSB0001");
+
+                        // Console.Write in the context of a unit test is very expensive.  A hundred
+                        // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
+                        // do the Console.Write once at the end of the build.
+                        Console.Write(FullLog);
+                        break;
+                    }
                 }
             }
         }
 
         // Lazy-init property returning the MSBuild engine resource manager
-        private static ResourceManager EngineResourceManager
-        {
-            get
-            {
-                return s_engineResourceManager ?? (s_engineResourceManager = new ResourceManager(
-                           "Microsoft.Build.Strings",
-                           typeof(ProjectCollection).GetTypeInfo().Assembly));
-            }
-        }
+        private static ResourceManager EngineResourceManager => s_engineResourceManager ?? (s_engineResourceManager = new ResourceManager(
+            "Microsoft.Build.Strings",
+            typeof(ProjectCollection).GetTypeInfo().Assembly));
 
         private static ResourceManager s_engineResourceManager;
 
         // Gets the resource string given the resource ID
-        public static string GetString(string stringId)
-        {
-            return EngineResourceManager.GetString(stringId, CultureInfo.CurrentUICulture);
-        }
+        public static string GetString(string stringId) => EngineResourceManager.GetString(stringId, CultureInfo.CurrentUICulture);
 
         /// <summary>
         /// Assert that the log file contains the given strings, in order.
         /// </summary>
         /// <param name="contains"></param>
-        internal void AssertLogContains(params string[] contains)
-        {
-            AssertLogContains(true, contains);
-        }
+        internal void AssertLogContains(params string[] contains) => AssertLogContains(true, contains);
 
         /// <summary>
         /// Assert that the log file contains the given string, in order. Includes the option of case invariance
@@ -418,9 +403,9 @@ namespace Microsoft.Build.UnitTests
                     }
 
                     currentLine = reader.ReadLine();
-                    if (!isCaseSensitive && currentLine != null)
+                    if (!isCaseSensitive)
                     {
-                        currentLine = currentLine.ToUpper();
+                        currentLine = currentLine?.ToUpper();
                     }
                 }
 
@@ -469,17 +454,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Assert that no errors were logged
         /// </summary>
-        internal void AssertNoErrors()
-        {
-            Assert.Equal(0, ErrorCount);
-        }
+        internal void AssertNoErrors() => Assert.Equal(0, ErrorCount);
 
         /// <summary>
         /// Assert that no warnings were logged
         /// </summary>
-        internal void AssertNoWarnings()
-        {
-            Assert.Equal(0, WarningCount);
-        }
+        internal void AssertNoWarnings() => Assert.Equal(0, WarningCount);
     }
 }

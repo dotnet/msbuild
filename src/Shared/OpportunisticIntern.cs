@@ -142,9 +142,9 @@ namespace Microsoft.Build
         internal static int AssignViaEnvironment(string env, int @default)
         {
             string threshold = Environment.GetEnvironmentVariable(env);
-            if (!String.IsNullOrEmpty(threshold))
+            if (!string.IsNullOrEmpty(threshold))
             {
-                if (Int32.TryParse(threshold, out int result))
+                if (int.TryParse(threshold, out int result))
                 {
                     return result;
                 }
@@ -160,7 +160,7 @@ namespace Microsoft.Build
         {
             // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
             s_si = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
-            s_whatIfInfinite = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
+            s_whatIfInfinite = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, int.MaxValue, int.MaxValue, int.MaxValue, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
             s_whatIfDoubled = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize * 2, s_largeMruSize * 2, s_hugeMruSize * 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
             s_whatIfHalved = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize / 2, s_largeMruSize / 2, s_hugeMruSize / 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
             s_whatIfZero = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, 0, 0, 0, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
@@ -270,10 +270,7 @@ namespace Microsoft.Build
             /// <summary>
             /// Never reference equals to string.
             /// </summary>
-            public bool ReferenceEquals(string other)
-            {
-                return false;
-            }
+            public bool ReferenceEquals(string other) => false;
 
             /// <summary>
             /// Convert target to string. Presumed to be slow (and will be called just once).
@@ -312,10 +309,7 @@ namespace Microsoft.Build
             /// <summary>
             /// Don't use this function. Use ExpensiveConvertToString
             /// </summary>
-            public override string ToString()
-            {
-                throw new InvalidOperationException();
-            }
+            public override string ToString() => throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -394,7 +388,7 @@ namespace Microsoft.Build
                 // PERF NOTE: This will be an allocation hot-spot because the char[] is finally determined to
                 // not be internable. There is still only one conversion of char[] into string it has just
                 // moved into this single spot.
-                return new String(_target, _startIndex, Length);
+                return new string(_target, _startIndex, Length);
             }
 
             /// <summary>
@@ -463,30 +457,21 @@ namespace Microsoft.Build
             /// Returns the target which is already a string.
             /// </summary>
             /// <returns>The target string.</returns>
-            public string ExpensiveConvertToString()
-            {
-                return _target;
-            }
+            public string ExpensiveConvertToString() => _target;
 
             /// <summary>
             /// Compare if the target string is equal to the given string.
             /// </summary>
             /// <param name="other">The string to compare with the target.</param>
             /// <returns>True if the strings are equal, false otherwise.</returns>
-            public bool IsOrdinalEqualToStringOfSameLength(string other)
-            {
-                return _target.Equals(other, StringComparison.Ordinal);
-            }
+            public bool IsOrdinalEqualToStringOfSameLength(string other) => _target.Equals(other, StringComparison.Ordinal);
 
             /// <summary>
             /// Verifies if the reference of the target string is the same of the given string.
             /// </summary>
             /// <param name="other">The string reference to compare to.</param>
             /// <returns>True if both references are equal, false otherwise.</returns>
-            public bool ReferenceEquals(string other)
-            {
-                return Object.ReferenceEquals(_target, other);
-            }
+            public bool ReferenceEquals(string other) => ReferenceEquals(_target, other);
         }
 
         #endregion
@@ -638,7 +623,7 @@ namespace Microsoft.Build
 
                 for (int i = 0; i < GinormousSize; i++)
                 {
-                    _ginormous.AddFirst(new WeakReference(String.Empty));
+                    _ginormous.AddFirst(new WeakReference(string.Empty));
                 }
 
                 _gatherStatistics = gatherStatistics;
@@ -658,7 +643,7 @@ namespace Microsoft.Build
                 if (candidate.Length == 0)
                 {
                     // As in the case that a property or itemlist has evaluated to empty.
-                    return String.Empty;
+                    return string.Empty;
                 }
 
                 if (_gatherStatistics)
@@ -678,7 +663,7 @@ namespace Microsoft.Build
             internal void ReportStatistics(string heading)
             {
                 string title = "Opportunistic Intern (" + heading + ")";
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - (title.Length / 2)), title);
+                Console.WriteLine("\n{0}{1}{0}", new string('=', 41 - (title.Length / 2)), title);
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Hits", _internHits, "hits");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Misses", _internMisses, "misses");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Rejects (as shorter than " + s_smallMruThreshold + " bytes)", _internRejects, "rejects");
@@ -710,16 +695,16 @@ namespace Microsoft.Build
 
                 // There's no point in reporting the ginormous string because it will have evaporated by now.
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Time Spent Interning", _stopwatch.ElapsedMilliseconds, "ms");
-                Console.WriteLine("{0}{0}", new String('=', 41));
+                Console.WriteLine("{0}{0}", new string('=', 41));
 
                 IEnumerable<string> topMissingString =
                     _missedStrings
                     .OrderByDescending(kv => kv.Value * kv.Key.Length)
                     .Take(15)
                     .Where(kv => kv.Value > 1)
-                    .Select(kv => String.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
+                    .Select(kv => string.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
 
-                Console.WriteLine("##########Top Missed Strings:  \n{0} ", String.Join("\n==============\n", topMissingString.ToArray()));
+                Console.WriteLine("##########Top Missed Strings:  \n{0} ", string.Join("\n==============\n", topMissingString.ToArray()));
                 Console.WriteLine();
 
                 IEnumerable<string> topRejectedString =
@@ -727,9 +712,9 @@ namespace Microsoft.Build
                     .OrderByDescending(kv => kv.Value * kv.Key.Length)
                     .Take(15)
                     .Where(kv => kv.Value > 1)
-                    .Select(kv => String.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
+                    .Select(kv => string.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
 
-                Console.WriteLine("##########Top Rejected Strings: \n{0} ", String.Join("\n==============\n", topRejectedString.ToArray()));
+                Console.WriteLine("##########Top Rejected Strings: \n{0} ", string.Join("\n==============\n", topRejectedString.ToArray()));
             }
 
             /// <summary>

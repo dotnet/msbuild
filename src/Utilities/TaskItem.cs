@@ -53,7 +53,7 @@ namespace Microsoft.Build.Utilities
         /// May be defined if we're copying this item from a pre-existing one.  Otherwise, 
         /// we simply don't know enough to set it properly, so it will stay null. 
         /// </summary>
-        private string _definingProject;
+        private readonly string _definingProject;
 
         #endregion
 
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TaskItem()
         {
-            _itemSpec = String.Empty;
+            _itemSpec = string.Empty;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Utilities
             string itemSpec
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemSpec, "itemSpec");
+            ErrorUtilities.VerifyThrowArgumentNull(itemSpec, nameof(itemSpec));
 
             _itemSpec = FileUtilities.FixFilePath(itemSpec);
         }
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Utilities
         ) :
             this(itemSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata, "itemMetadata");
+            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata, nameof(itemMetadata));
 
             if (itemMetadata.Count > 0)
             {
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Utilities
                     string key = (string)singleMetadata.Key;
                     if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(key))
                     {
-                        _metadata[key] = (string)singleMetadata.Value ?? String.Empty;
+                        _metadata[key] = (string)singleMetadata.Value ?? string.Empty;
                     }
                 }
             }
@@ -125,12 +125,10 @@ namespace Microsoft.Build.Utilities
             ITaskItem sourceItem
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sourceItem, "sourceItem");
-
-            ITaskItem2 sourceItemAsITaskItem2 = sourceItem as ITaskItem2;
+            ErrorUtilities.VerifyThrowArgumentNull(sourceItem, nameof(sourceItem));
 
             // Attempt to preserve escaped state
-            if (sourceItemAsITaskItem2 == null)
+            if (!(sourceItem is ITaskItem2 sourceItemAsITaskItem2))
             {
                 _itemSpec = EscapingUtilities.Escape(sourceItem.ItemSpec);
                 _definingProject = EscapingUtilities.EscapeWithCaching(sourceItem.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
@@ -159,14 +157,11 @@ namespace Microsoft.Build.Utilities
         /// <value>The item-spec string.</value>
         public string ItemSpec
         {
-            get
-            {
-                return (_itemSpec == null) ? String.Empty : EscapingUtilities.UnescapeAll(_itemSpec);
-            }
+            get => _itemSpec == null ? string.Empty : EscapingUtilities.UnescapeAll(_itemSpec);
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ItemSpec));
 
                 _itemSpec = FileUtilities.FixFilePath(value);
                 _fullPath = null;
@@ -182,11 +177,8 @@ namespace Microsoft.Build.Utilities
         /// </remarks>
         string ITaskItem2.EvaluatedIncludeEscaped
         {
-            get
-            {
-                // It's already escaped
-                return _itemSpec;
-            }
+            // It's already escaped
+            get => _itemSpec;
 
             set
             {
@@ -203,7 +195,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                List<string> metadataNames = new List<string>(_metadata?.Keys ?? Array.Empty<string>());
+                var metadataNames = new List<string>(_metadata?.Keys ?? Array.Empty<string>());
                 metadataNames.AddRange(FileUtilities.ItemSpecModifiers.All);
 
                 return metadataNames;
@@ -214,14 +206,7 @@ namespace Microsoft.Build.Utilities
         /// Gets the number of metadata set on the item.
         /// </summary>
         /// <value>Count of metadata.</value>
-        public int MetadataCount
-        {
-            get
-            {
-                int count = (_metadata == null) ? 0 : _metadata.Count;
-                return (count + FileUtilities.ItemSpecModifiers.All.Length);
-            }
-        }
+        public int MetadataCount => (_metadata?.Count ?? 0) + FileUtilities.ItemSpecModifiers.All.Length;
 
         /// <summary>
         /// Gets the metadata dictionary
@@ -249,21 +234,13 @@ namespace Microsoft.Build.Utilities
         /// Removes one of the arbitrary metadata on the item.
         /// </summary>
         /// <param name="metadataName">Name of metadata to remove.</param>
-        public void RemoveMetadata
-        (
-            string metadataName
-        )
+        public void RemoveMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-            if (_metadata == null)
-            {
-                return;
-            }
-
-            _metadata.Remove(metadataName);
+            _metadata?.Remove(metadataName);
         }
 
         /// <summary>
@@ -280,7 +257,7 @@ namespace Microsoft.Build.Utilities
             string metadataValue
         )
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
 
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
@@ -289,7 +266,7 @@ namespace Microsoft.Build.Utilities
 
             _metadata = _metadata ?? new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
-            _metadata[metadataName] = metadataValue ?? String.Empty;
+            _metadata[metadataName] = metadataValue ?? string.Empty;
         }
 
         /// <summary>
@@ -301,10 +278,7 @@ namespace Microsoft.Build.Utilities
         /// </comments>
         /// <param name="metadataName">The name of the metadata to retrieve.</param>
         /// <returns>The metadata value.</returns>
-        public string GetMetadata
-        (
-            string metadataName
-        )
+        public string GetMetadata(string metadataName)
         {
             string metadataValue = (this as ITaskItem2).GetMetadataValueEscaped(metadataName);
             return EscapingUtilities.UnescapeAll(metadataValue);
@@ -315,12 +289,9 @@ namespace Microsoft.Build.Utilities
         /// destination item, then it is not overwritten -- the original value wins.
         /// </summary>
         /// <param name="destinationItem">The item to copy metadata to.</param>
-        public void CopyMetadataTo
-        (
-            ITaskItem destinationItem
-        )
+        public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, "destinationItem");
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
 
             // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
             // between items, and need to know the source item where the metadata came from
@@ -329,10 +300,8 @@ namespace Microsoft.Build.Utilities
 
             if (_metadata != null)
             {
-                TaskItem destinationAsTaskItem = destinationItem as TaskItem;
-
                 // Avoid a copy if we can
-                if (destinationAsTaskItem != null && destinationAsTaskItem.Metadata == null)
+                if (destinationItem is TaskItem destinationAsTaskItem && destinationAsTaskItem.Metadata == null)
                 {
                     destinationAsTaskItem.Metadata = _metadata.Clone(); // Copy on write!
                 }
@@ -346,7 +315,7 @@ namespace Microsoft.Build.Utilities
                         {
                             value = destinationAsITaskItem2.GetMetadataValueEscaped(entry.Key);
 
-                            if (String.IsNullOrEmpty(value))
+                            if (string.IsNullOrEmpty(value))
                             {
                                 destinationAsITaskItem2.SetMetadata(entry.Key, entry.Value);
                             }
@@ -355,7 +324,7 @@ namespace Microsoft.Build.Utilities
                         {
                             value = destinationItem.GetMetadata(entry.Key);
 
-                            if (String.IsNullOrEmpty(value))
+                            if (string.IsNullOrEmpty(value))
                             {
                                 destinationItem.SetMetadata(entry.Key, EscapingUtilities.Escape(entry.Value));
                             }
@@ -364,7 +333,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            if (String.IsNullOrEmpty(originalItemSpec))
+            if (string.IsNullOrEmpty(originalItemSpec))
             {
                 if (destinationAsITaskItem2 != null)
                 {
@@ -391,7 +360,7 @@ namespace Microsoft.Build.Utilities
         /// </comments>
         public IDictionary CloneCustomMetadata()
         {
-            CopyOnWriteDictionary<string, string> dictionary = new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+            var dictionary = new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
             if (_metadata != null)
             {
@@ -408,10 +377,7 @@ namespace Microsoft.Build.Utilities
         /// Gets the item-spec.
         /// </summary>
         /// <returns>The item-spec string.</returns>
-        public override string ToString()
-        {
-            return _itemSpec;
-        }
+        public override string ToString() => _itemSpec;
 
 #if FEATURE_APPDOMAIN
         /// <summary>
@@ -419,11 +385,7 @@ namespace Microsoft.Build.Utilities
         /// lease (5 minutes I think) and instances can expire if they take long time processing.
         /// </summary>
         [SecurityCritical]
-        public override object InitializeLifetimeService()
-        {
-            // null means infinite lease time
-            return null;
-        }
+        public override object InitializeLifetimeService() => null; // null means infinite lease time
 #endif
 
         #endregion
@@ -435,13 +397,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="taskItemToCast">The item to operate on.</param>
         /// <returns>The item-spec of the item.</returns>
-        public static explicit operator string
-        (
-            TaskItem taskItemToCast
-        )
+        public static explicit operator string(TaskItem taskItemToCast)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast, "taskItemToCast");
-
+            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast, nameof(taskItemToCast));
             return taskItemToCast.ItemSpec;
         }
 
@@ -454,7 +412,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         string ITaskItem2.GetMetadataValueEscaped(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, "metadataName");
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
 
             string metadataValue = null;
 
@@ -464,12 +422,12 @@ namespace Microsoft.Build.Utilities
                 // Passing in a null for currentDirectory indicates we are already in the correct current directory
                 metadataValue = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(null, _itemSpec, _definingProject, metadataName, ref _fullPath);
             }
-            else if (_metadata != null)
+            else
             {
-                _metadata.TryGetValue(metadataName, out metadataValue);
+                _metadata?.TryGetValue(metadataName, out metadataValue);
             }
 
-            return (metadataValue == null) ? String.Empty : metadataValue;
+            return metadataValue ?? string.Empty;
         }
 
         /// <summary>
@@ -478,25 +436,16 @@ namespace Microsoft.Build.Utilities
         /// <comments>
         /// Assumes the value is passed in unescaped. 
         /// </comments>
-        void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue)
-        {
-            SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
-        }
+        void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue) => SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
 
         /// <summary>
         /// ITaskItem2 implementation which returns a clone of the metadata on this object.
         /// Values returned are in their original escaped form. 
         /// </summary>
         /// <returns>The cloned metadata.</returns>
-        IDictionary ITaskItem2.CloneCustomMetadataEscaped()
-        {
-            if (_metadata == null)
-            {
-                return new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
-            }
-
-            return (IDictionary)_metadata.Clone();
-        }
+        IDictionary ITaskItem2.CloneCustomMetadataEscaped() => _metadata == null
+            ? new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default)
+            : _metadata.Clone();
 
         #endregion
     }

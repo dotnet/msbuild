@@ -2,11 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -21,25 +20,13 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     internal static class DependencyTableCache
     {
-        #region Member Data
+        private static readonly char[] s_numerals = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        private static readonly TaskItemItemSpecIgnoreCaseComparer s_taskItemComparer = new TaskItemItemSpecIgnoreCaseComparer();
+
         /// <summary>
         /// The dictionary that maps the root of the tlog filenames to the dependencytable built from their content
         /// </summary>
-        private static Dictionary<string, DependencyTableCacheEntry> s_dependencyTableCache = new Dictionary<string, DependencyTableCacheEntry>(StringComparer.OrdinalIgnoreCase);
-        private static readonly char[] s_numerals = new char[10] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-        private static TaskItemItemSpecIgnoreCaseComparer s_taskItemComparer = new TaskItemItemSpecIgnoreCaseComparer();
-
-        #endregion
-
-        #region Properties
-        /// <summary>
-        /// Access to the table
-        /// </summary>
-        internal static Dictionary<string, DependencyTableCacheEntry> DependencyTable
-        {
-            get { return DependencyTableCache.s_dependencyTableCache; }
-        }
-        #endregion
+        internal static Dictionary<string, DependencyTableCacheEntry> DependencyTable { get; } = new Dictionary<string, DependencyTableCacheEntry>(StringComparer.OrdinalIgnoreCase);
 
         #region Methods
         /// <summary>
@@ -99,7 +86,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The normalized rooting marker based on that set of tlogs</returns>
         internal static string FormatNormalizedTlogRootingMarker(ITaskItem[] tlogFiles)
         {
-            HashSet<ITaskItem> normalizedFiles = new HashSet<ITaskItem>(s_taskItemComparer);
+            var normalizedFiles = new HashSet<ITaskItem>(s_taskItemComparer);
 
             for (int i = 0; i < tlogFiles.Length; i++)
             {
@@ -136,7 +123,7 @@ namespace Microsoft.Build.Utilities
         /// </comments>
         /// <param name="tlogPath">The tlog path to normalize</param>
         /// <returns>The normalized path</returns>
-        internal static string NormalizeTlogPath(string tlogPath)
+        private static string NormalizeTlogPath(string tlogPath)
         {
             if (tlogPath.IndexOfAny(s_numerals) == -1)
             {
@@ -146,7 +133,7 @@ namespace Microsoft.Build.Utilities
             }
             else
             {
-                int i = 0;
+                int i;
                 StringBuilder normalizedTlogFilename = new StringBuilder();
 
                 // We're walking the filename backwards since once we hit the final '\', we know we can stop parsing. 
@@ -216,17 +203,17 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             public bool Equals(ITaskItem x, ITaskItem y)
             {
-                if (Object.ReferenceEquals(x, y))
+                if (ReferenceEquals(x, y))
                 {
                     return true;
                 }
 
-                if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+                if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 {
                     return false;
                 }
 
-                return String.Equals(x.ItemSpec, y.ItemSpec, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(x.ItemSpec, y.ItemSpec, StringComparison.OrdinalIgnoreCase);
             }
 
             /// <summary>
@@ -234,15 +221,7 @@ namespace Microsoft.Build.Utilities
             /// on the itemspec, the hash code for this particular comparer also only uses the 
             /// itemspec to make its determination. 
             /// </summary>
-            public int GetHashCode(ITaskItem obj)
-            {
-                if (obj == null)
-                {
-                    return 0;
-                }
-
-                return StringComparer.OrdinalIgnoreCase.GetHashCode(obj.ItemSpec);
-            }
+            public int GetHashCode(ITaskItem obj) => obj == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.ItemSpec);
         }
 
         #endregion
@@ -253,31 +232,13 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     internal class DependencyTableCacheEntry
     {
-        #region Member Data
         // the set of tlog files used to build this cache entry
-        private ITaskItem[] _tlogFiles;
-        private DateTime _tableTime;
-        private IDictionary _dependencyTable;
-        #endregion
+        public ITaskItem[] TlogFiles { get; }
 
-        #region Properties
-        public ITaskItem[] TlogFiles
-        {
-            get { return _tlogFiles; }
-        }
+        public DateTime TableTime { get; }
 
-        public DateTime TableTime
-        {
-            get { return _tableTime; }
-        }
+        public IDictionary DependencyTable { get; }
 
-        public IDictionary DependencyTable
-        {
-            get { return _dependencyTable; }
-        }
-        #endregion
-
-        #region Constructor
         /// <summary>
         /// Construct a new entry
         /// </summary>
@@ -285,26 +246,25 @@ namespace Microsoft.Build.Utilities
         /// <param name="dependencyTable">The dependency table to be cached</param>
         internal DependencyTableCacheEntry(ITaskItem[] tlogFiles, IDictionary dependencyTable)
         {
-            _tlogFiles = new ITaskItem[tlogFiles.Length];
-            _tableTime = DateTime.MinValue;
+            TlogFiles = new ITaskItem[tlogFiles.Length];
+            TableTime = DateTime.MinValue;
 
             // Our cache's knowledge of the tlog items needs their full path
             for (int tlogItemCount = 0; tlogItemCount < tlogFiles.Length; tlogItemCount++)
             {
                 string tlogFilename = FileUtilities.NormalizePath(tlogFiles[tlogItemCount].ItemSpec);
-                _tlogFiles[tlogItemCount] = new TaskItem(tlogFilename);
+                TlogFiles[tlogItemCount] = new TaskItem(tlogFilename);
                 // Our cache entry needs to use the last modified time of the latest tlog
                 // involved so that our cache can be invalidated if any tlog is updated
                 DateTime modifiedTime = NativeMethodsShared.GetLastWriteFileUtcTime(tlogFilename);
-                if (modifiedTime > _tableTime)
+                if (modifiedTime > TableTime)
                 {
-                    _tableTime = modifiedTime;
+                    TableTime = modifiedTime;
                 }
             }
 
-            _dependencyTable = dependencyTable;
+            DependencyTable = dependencyTable;
         }
-        #endregion
     }
 }
 

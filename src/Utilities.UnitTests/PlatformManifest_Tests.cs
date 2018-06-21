@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Basic tests of Platform.xml parsing
     /// </summary>
-    sealed public class PlatformManifest_Tests
+    public sealed class PlatformManifest_Tests
     {
         /// <summary>
         /// Should get a read error when the manifest location is invalid
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
             {
                 manifest.Manifest.ReadError.ShouldBeFalse();
                 manifest.Manifest.Name.ShouldBe("UAP");
-                manifest.Manifest.FriendlyName.ShouldBe(String.Empty);
+                manifest.Manifest.FriendlyName.ShouldBe(string.Empty);
                 manifest.Manifest.PlatformVersion.ShouldBe("1.0.0.0");
 
                 manifest.Manifest.DependentPlatforms.Count.ShouldBe(0);
@@ -152,8 +152,8 @@ namespace Microsoft.Build.UnitTests
                 manifest.Manifest.ApiContracts.Count.ShouldBe(0);
                 manifest.Manifest.DependentPlatforms.Count.ShouldBe(1);
 
-                List<PlatformManifest.DependentPlatform> platforms = new List<PlatformManifest.DependentPlatform>(manifest.Manifest.DependentPlatforms);
-                platforms[0].Name.ShouldBe(String.Empty);
+                var platforms = new List<PlatformManifest.DependentPlatform>(manifest.Manifest.DependentPlatforms);
+                platforms[0].Name.ShouldBe(string.Empty);
                 platforms[0].Version.ShouldBe("1.0.0.0");
             }
         }
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests
                 manifest.Manifest.ApiContracts.Count.ShouldBe(0);
                 manifest.Manifest.DependentPlatforms.Count.ShouldBe(3);
 
-                List<PlatformManifest.DependentPlatform> platforms = new List<PlatformManifest.DependentPlatform>(manifest.Manifest.DependentPlatforms);
+                var platforms = new List<PlatformManifest.DependentPlatform>(manifest.Manifest.DependentPlatforms);
                 platforms[0].Name.ShouldBe("UAP");
                 platforms[0].Version.ShouldBe("1.0.0.0");
                 platforms[1].Name.ShouldBe("UAP");
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests
                 manifest.Manifest.ApiContracts.Count.ShouldBe(1);
                 ApiContract contract = manifest.Manifest.ApiContracts.First();
                 contract.Name.ShouldBe("System");
-                contract.Version.ShouldBe(String.Empty);
+                contract.Version.ShouldBe(string.Empty);
             }
         }
 
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
                 manifest.Manifest.DependentPlatforms.Count.ShouldBe(0);
                 manifest.Manifest.ApiContracts.Count.ShouldBe(3);
 
-                List<ApiContract> contracts = new List<ApiContract>(manifest.Manifest.ApiContracts);
+                var contracts = new List<ApiContract>(manifest.Manifest.ApiContracts);
 
                 contracts[0].Name.ShouldBe("System");
                 contracts[0].Version.ShouldBe("1.2.0.4");
@@ -304,21 +304,17 @@ namespace Microsoft.Build.UnitTests
         /// Wrapper around PlatformManifest that creates one with the specified content in 
         /// the temporary directory and deletes it on disposal. 
         /// </summary>
-        private class TemporaryPlatformManifest : IDisposable
+        private sealed class TemporaryPlatformManifest : IDisposable
         {
             /// <summary>
             /// Directory in which the PlatformManifest wrapped by this class lives
             /// </summary>
-            private string _manifestDirectory = null;
+            private readonly string _manifestDirectory;
 
             /// <summary>
             /// Accessor for the PlatformManifest wrapped by this class
             /// </summary>
-            public PlatformManifest Manifest
-            {
-                get;
-                private set;
-            }
+            public PlatformManifest Manifest { get; }
 
             /// <summary>
             /// Constructor
@@ -331,31 +327,13 @@ namespace Microsoft.Build.UnitTests
                 Manifest = new PlatformManifest(_manifestDirectory);
             }
 
-            #region IDisposable Support
-
-            /// <summary>
-            /// Dispose this object
-            /// </summary>
-            protected virtual void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    if (FileUtilities.DirectoryExistsNoThrow(_manifestDirectory))
-                    {
-                        FileUtilities.DeleteDirectoryNoThrow(_manifestDirectory, recursive: true);
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Dispose this object
-            /// </summary>
             public void Dispose()
             {
-                Dispose(true);
+                if (FileUtilities.DirectoryExistsNoThrow(_manifestDirectory))
+                {
+                    FileUtilities.DeleteDirectoryNoThrow(_manifestDirectory, recursive: true);
+                }
             }
-            #endregion
-
         }
     }
 }

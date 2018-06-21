@@ -46,7 +46,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="taskInstance">task containing an instance of this class</param>
         public TaskLoggingHelper(ITask taskInstance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskInstance, "taskInstance");
+            ErrorUtilities.VerifyThrowArgumentNull(taskInstance, nameof(taskInstance));
             _taskInstance = taskInstance;
             TaskName = taskInstance.GetType().Name;
         }
@@ -56,8 +56,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TaskLoggingHelper(IBuildEngine buildEngine, string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildEngine, "buildEngine");
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, "taskName");
+            ErrorUtilities.VerifyThrowArgumentNull(buildEngine, nameof(buildEngine));
+            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
             TaskName = taskName;
             _buildEngine = buildEngine;
         }

@@ -22,28 +22,24 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         internal static bool RootContainsAllSubRootComponents(string compositeRoot, string compositeSubRoot)
         {
-            bool containsAllSubRoots = true;
-
             // If the two are identical, then clearly all keys are present
             if (string.Compare(compositeRoot, compositeSubRoot, StringComparison.OrdinalIgnoreCase) == 0)
             {
                 return true;
             }
-            else
+
+            // look for each sub key in the main composite key
+            string[] rootComponents = compositeSubRoot.Split('|');
+            foreach (string subRoot in rootComponents)
             {
-                // look for each sub key in the main composite key
-                string[] rootComponents = compositeSubRoot.Split('|');
-                foreach (string subRoot in rootComponents)
+                // we didn't find this subkey, so bail out
+                if (!compositeRoot.Contains(subRoot))
                 {
-                    containsAllSubRoots &= compositeRoot.Contains(subRoot);
-                    // we didn't find this subkey, so bail out
-                    if (!containsAllSubRoots)
-                    {
-                        break;
-                    }
+                    return false;
                 }
             }
-            return containsAllSubRoots;
+
+            return true;
         }
 
         /// <summary>
@@ -57,9 +53,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputNewestTime">Timestamp of the most recently modified file.</param>
         /// <returns>True if all members of 'files' exist, false otherwise</returns>
         internal static bool FilesExistAndRecordNewestWriteTime(ITaskItem[] files, TaskLoggingHelper log, out DateTime outputNewestTime, out string outputNewestFilename)
-        {
-            return FilesExistAndRecordRequestedWriteTime(files, log, true /* return information about the newest file */, out outputNewestTime, out outputNewestFilename);
-        }
+            => FilesExistAndRecordRequestedWriteTime(files, log, true /* return information about the newest file */, out outputNewestTime, out outputNewestFilename);
 
         /// <summary>
         /// This method checks that the specified files exist. During the scan the
@@ -72,19 +66,17 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputOldestTime">Timestamp of the least recently modified file.</param>
         /// <returns>True if all members of 'files' exist, false otherwise</returns>
         internal static bool FilesExistAndRecordOldestWriteTime(ITaskItem[] files, TaskLoggingHelper log, out DateTime outputOldestTime, out string outputOldestFilename)
-        {
-            return FilesExistAndRecordRequestedWriteTime(files, log, false /* return information about the oldest file */, out outputOldestTime, out outputOldestFilename);
-        }
+            => FilesExistAndRecordRequestedWriteTime(files, log, false /* return information about the oldest file */, out outputOldestTime, out outputOldestFilename);
 
         private static bool FilesExistAndRecordRequestedWriteTime(ITaskItem[] files, TaskLoggingHelper log, bool getNewest, out DateTime requestedTime, out string requestedFilename)
         {
             bool allExist = true;
             requestedTime = getNewest ? DateTime.MinValue : DateTime.MaxValue;
-            requestedFilename = String.Empty;
+            requestedFilename = string.Empty;
 
             // No output files for the source were tracked
             // safely assume that this is because we didn't track them because they weren't compiled
-            if ((files == null) || (files.Length == 0))
+            if (files == null || files.Length == 0)
             {
                 allExist = false;
             }
@@ -100,16 +92,11 @@ namespace Microsoft.Build.Utilities
                         allExist = false;
                         break;
                     }
-                    else
+
+                    if (getNewest && lastWriteTime > requestedTime || !getNewest && lastWriteTime < requestedTime)
                     {
-                        if (
-                            (getNewest && lastWriteTime > requestedTime) ||
-                            (!getNewest && lastWriteTime < requestedTime)
-                           )
-                        {
-                            requestedTime = lastWriteTime;
-                            requestedFilename = item.ItemSpec;
-                        }
+                        requestedTime = lastWriteTime;
+                        requestedFilename = item.ItemSpec;
                     }
                 }
             }
