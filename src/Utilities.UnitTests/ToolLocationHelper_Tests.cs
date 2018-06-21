@@ -2005,29 +2005,19 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure we choose the correct path for program files based on the environment variables
+        /// Make sure we choose the correct path for program files based on the operating system
         /// </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
         public void TestGenerateProgramFiles32()
         {
-            string programFilesX86Original = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-            string programFiles = Environment.GetEnvironmentVariable("ProgramFiles");
-            try
-            {
-                Environment.SetEnvironmentVariable("ProgramFiles(x86)", null);
-                string result = FrameworkLocationHelper.GenerateProgramFiles32();
-                result.ShouldBe(programFiles, StringCompareShould.IgnoreCase); // "Expected to use program files but used program files x86"
+            Environment.SpecialFolder folder = Environment.Is64BitOperatingSystem ? Environment.SpecialFolder.ProgramFilesX86 : Environment.SpecialFolder.ProgramFiles;
+            string programFilesX86 = Environment.GetFolderPath(folder);
+            string result = FrameworkLocationHelper.GenerateProgramFiles32();
 
-                Environment.SetEnvironmentVariable("ProgramFiles(x86)", String.Empty);
-
-                result = FrameworkLocationHelper.GenerateProgramFiles32();
-                result.ShouldBe(programFiles, StringCompareShould.IgnoreCase); // "Expected to use program files but used program files x86"
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("ProgramFiles(x86)", programFilesX86Original);
-            }
+            // 32-bit OS: "Expected to use program files"
+            // 64-bit OS: "Expected to use program files x86"
+            result.ShouldBe(programFilesX86, StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
