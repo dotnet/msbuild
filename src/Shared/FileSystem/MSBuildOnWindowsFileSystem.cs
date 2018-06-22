@@ -54,9 +54,5 @@ namespace Microsoft.Build.Shared.FileSystem
         {
             return WindowsFileSystem.Singleton().DirectoryEntryExists(path);
         }
-
-        public void ClearCaches()
-        {
-        }
     }
 }

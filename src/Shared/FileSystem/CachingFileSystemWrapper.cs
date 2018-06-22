@@ -18,12 +18,6 @@ namespace Microsoft.Build.Shared.FileSystem
             _fileSystem = fileSystem;
         }
 
-        public void ClearCaches()
-        {
-            _fileSystem.ClearCaches();
-            _existenceCache.Clear();
-        }
-
         public bool DirectoryEntryExists(string path)
         {
             return CachedExistenceCheck(path, p => _fileSystem.DirectoryEntryExists(p));

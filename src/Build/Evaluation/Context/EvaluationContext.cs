@@ -26,7 +26,7 @@ namespace Microsoft.Build.Evaluation.Context
             Isolated
         }
 
-        internal static Action<EvaluationContext> TestOnlyAlterStateOnCreate { get; set; }
+        internal static Action<EvaluationContext> TestOnlyHookOnCreate { get; set; }
 
         private int _used;
 
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Evaluation.Context
         public static EvaluationContext Create(SharingPolicy policy)
         {
             var context = new EvaluationContext(policy);
-            TestOnlyAlterStateOnCreate?.Invoke(context);
+            TestOnlyHookOnCreate?.Invoke(context);
 
             return context;
         }
@@ -81,18 +81,6 @@ namespace Microsoft.Build.Evaluation.Context
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     return null;
             }
-        }
-
-        /// <summary>
-        /// Ideally caches should be discarded by discarding this entire object.
-        /// However, there could be situations where API users have a <see cref="Project"/> object loaned to another entity, and cannot swap the context, but still need to reset it.
-        /// Caches are not cleared atomically, users should ensure no other threads are performing evaluations while the caches are cleared.
-        /// </summary>
-        public void ResetCaches()
-        {
-            SdkResolverService.ClearCaches();
-            FileSystem.ClearCaches();
-            FileEntryExpansionCache.Clear();
         }
     }
 }

@@ -54,9 +54,5 @@ namespace Microsoft.Build.Shared.FileSystem
         {
             return FileExists(path) || DirectoryExists(path);
         }
-
-        public void ClearCaches()
-        {
-        }
     }
 }

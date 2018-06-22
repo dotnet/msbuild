@@ -9,7 +9,6 @@ namespace Microsoft.Build.Shared.FileSystem
     /// <summary>
     /// Abstracts away some file system operations
     /// </summary>
-    /// TODO: This interface has only enumeration and existence related methods. Consider extending it to include other file system operations.
     internal interface IFileSystem
     {
         /// <summary>
@@ -41,7 +40,5 @@ namespace Microsoft.Build.Shared.FileSystem
         /// Determines whether the given path refers to an existing entry in the directory service.
         /// </summary>
         bool DirectoryEntryExists(string path);
-
-        void ClearCaches();
     }
 }

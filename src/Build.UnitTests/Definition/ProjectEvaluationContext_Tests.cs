@@ -87,46 +87,37 @@ namespace Microsoft.Build.UnitTests.Definition
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
-        public void ReevaluationShouldRespectContextLifetime(EvaluationContext.SharingPolicy policy)
+        public void ReevaluationShouldNotReuseInitialContext(EvaluationContext.SharingPolicy policy)
         {
-            var collection = _env.CreateProjectCollection().Collection;
-
-            var context1 = EvaluationContext.Create(policy);
-
-            var project = Project.FromXmlReader(
-                XmlReader.Create(new StringReader("<Project></Project>")),
-                new ProjectOptions
-                {
-                    ProjectCollection = collection,
-                    EvaluationContext = context1,
-                    LoadSettings = ProjectLoadSettings.IgnoreMissingImports
-                });
-
-            project.AddItem("a", "b");
-
-            project.ReevaluateIfNecessary();
-
-            var context2 = GetEvaluationContext(project);
-
-            switch (policy)
+            try
             {
-                case EvaluationContext.SharingPolicy.Shared:
-                    context1.ShouldBeSameAs(context2);
-                    break;
-                case EvaluationContext.SharingPolicy.Isolated:
-                    context1.ShouldNotBeSameAs(context2);
-                    break;
+                EvaluationContext.TestOnlyHookOnCreate = c => SetResolverForContext(c, _resolver);
+
+                var collection = _env.CreateProjectCollection().Collection;
+
+                var context = EvaluationContext.Create(policy);
+
+                var project = Project.FromXmlReader(
+                    XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")),
+                    new ProjectOptions
+                    {
+                        ProjectCollection = collection,
+                        EvaluationContext = context,
+                        LoadSettings = ProjectLoadSettings.IgnoreMissingImports
+                    });
+
+                _resolver.ResolvedCalls["foo"].ShouldBe(1);
+
+                project.AddItem("a", "b");
+
+                project.ReevaluateIfNecessary();
+
+                _resolver.ResolvedCalls["foo"].ShouldBe(2);
             }
-        }
-
-        private static EvaluationContext GetEvaluationContext(Project p)
-        {
-            var fieldInfo = p.GetType().GetField("_lastEvaluationContext", BindingFlags.NonPublic | BindingFlags.Instance);
-            var value = fieldInfo.GetValue(p);
-
-            value.ShouldBeOfType<EvaluationContext>();
-
-            return (EvaluationContext) value;
+            finally
+            {
+                EvaluationContext.TestOnlyHookOnCreate = null;
+            }
         }
 
         private static string[] _sdkResolutionProjects =
@@ -144,7 +135,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             try
             {
-                EvaluationContext.TestOnlyAlterStateOnCreate = c => SetResolverForContext(c, _resolver);
+                EvaluationContext.TestOnlyHookOnCreate = c => SetResolverForContext(c, _resolver);
 
                 var context = EvaluationContext.Create(policy);
                 EvaluateProjects(_sdkResolutionProjects, context, null);
@@ -155,28 +146,28 @@ namespace Microsoft.Build.UnitTests.Definition
             }
             finally
             {
-                EvaluationContext.TestOnlyAlterStateOnCreate = null;
+                EvaluationContext.TestOnlyHookOnCreate = null;
             }
         }
 
         [Fact]
         public void DefaultContextIsIsolatedContext()
         {
-            var contextHashcodesSeen = new HashSet<int>();
+            try
+            {
+                var seenContexts = new HashSet<EvaluationContext>();
 
-            EvaluateProjects(
-                _sdkResolutionProjects,
-                null,
-                p =>
-                {
-                    var context = GetEvaluationContext(p);
+                EvaluationContext.TestOnlyHookOnCreate = c => seenContexts.Add(c);
 
-                    context.Policy.ShouldBe(EvaluationContext.SharingPolicy.Isolated);
+                EvaluateProjects(_sdkResolutionProjects, null, null);
 
-                    contextHashcodesSeen.ShouldNotContain(context.GetHashCode());
-
-                    contextHashcodesSeen.Add(context.GetHashCode());
-                });
+                seenContexts.Count.ShouldBe(8); // 4 evaluations and 4 reevaluations
+                seenContexts.ShouldAllBe(c => c.Policy == EvaluationContext.SharingPolicy.Isolated);
+            }
+            finally
+            {
+                EvaluationContext.TestOnlyHookOnCreate = null;
+            }
         }
         public static IEnumerable<object> ContextPinsGlobExpansionCacheData
         {

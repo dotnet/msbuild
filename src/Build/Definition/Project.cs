@@ -105,17 +105,6 @@ namespace Microsoft.Build.Evaluation
         private RenameHandlerDelegate _renameHandler;
 
         /// <summary>
-        /// Needed because the Project may trigger reevalutions under the covers on some of its operations, which, ideally,
-        /// should use the same context as the initial evaluation.
-        /// 
-        /// Examples of operations which may trigger reevaluations:
-        /// - <see cref="CreateProjectInstance()"/>
-        /// - <see cref="GetAllGlobs()"/>
-        /// - <see cref="GetItemProvenance(string)"/>
-        /// </summary>
-        private EvaluationContext _lastEvaluationContext;
-
-        /// <summary>
         /// Default project template options (include all features).
         /// </summary>
         internal const NewProjectFileOptions DefaultNewProjectTemplateOptions = NewProjectFileOptions.IncludeAllOptions;
@@ -1119,7 +1108,19 @@ namespace Microsoft.Build.Evaluation
         /// </returns>
         public List<GlobResult> GetAllGlobs()
         {
-            return GetAllGlobs(GetEvaluatedItemElements());
+            return GetAllGlobs(evaluationContext: null);
+        }
+
+        /// <summary>
+        /// See <see cref="GetAllGlobs()"/>
+        /// </summary>
+        /// <param name="evaluationContext">
+        ///     The evaluation context to use in case reevaluation is required.
+        ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+        /// </param>
+        public List<GlobResult> GetAllGlobs(EvaluationContext evaluationContext)
+        {
+            return GetAllGlobs(GetEvaluatedItemElements(evaluationContext));
         }
 
         /// <summary>
@@ -1128,12 +1129,24 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">Confine search to item elements of this type</param>
         public List<GlobResult> GetAllGlobs(string itemType)
         {
+            return GetAllGlobs(itemType, null);
+        }
+
+        /// <summary>
+        /// See <see cref="GetAllGlobs(string)"/>
+        /// </summary>
+        /// <param name="evaluationContext">
+        ///     The evaluation context to use in case reevaluation is required.
+        ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+        /// </param>
+        public List<GlobResult> GetAllGlobs(string itemType, EvaluationContext evaluationContext)
+        {
             if (string.IsNullOrEmpty(itemType))
             {
                 return new List<GlobResult>();
             }
 
-            return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(), itemType));
+            return GetAllGlobs(GetItemElementsByType(GetEvaluatedItemElements(evaluationContext), itemType));
         }
 
         // represents cumulated remove information for a particular item type
@@ -1345,7 +1358,19 @@ namespace Microsoft.Build.Evaluation
         /// </returns>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch)
         {
-            return GetItemProvenance(itemToMatch, GetEvaluatedItemElements());
+            return GetItemProvenance(itemToMatch, evaluationContext: null);
+        }
+
+        /// <summary>
+        /// See <see cref="GetItemProvenance(string)"/>
+        /// </summary>
+        /// <param name="evaluationContext">
+        ///     The evaluation context to use in case reevaluation is required.
+        ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+        /// </param>
+        public List<ProvenanceResult> GetItemProvenance(string itemToMatch, EvaluationContext evaluationContext)
+        {
+            return GetItemProvenance(itemToMatch, GetEvaluatedItemElements(evaluationContext));
         }
 
         /// <summary>
@@ -1355,7 +1380,19 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemType">The item type to constrain the search in</param>
         public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType)
         {
-            return GetItemProvenance(itemToMatch, GetItemElementsByType(GetEvaluatedItemElements(), itemType));
+            return GetItemProvenance(itemToMatch, itemType, null);
+        }
+
+        /// <summary>
+        /// See <see cref="GetItemProvenance(string, string)"/>
+        /// </summary>
+        /// <param name="evaluationContext">
+        ///     The evaluation context to use in case reevaluation is required.
+        ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+        /// </param>
+        public List<ProvenanceResult> GetItemProvenance(string itemToMatch, string itemType, EvaluationContext evaluationContext)
+        {
+            return GetItemProvenance(itemToMatch, GetItemElementsByType(GetEvaluatedItemElements(evaluationContext), itemType));
         }
 
         /// <summary>
@@ -1368,12 +1405,24 @@ namespace Microsoft.Build.Evaluation
         /// </param>
         public List<ProvenanceResult> GetItemProvenance(ProjectItem item)
         {
+            return GetItemProvenance(item, null);
+        }
+
+        /// <summary>
+        /// See <see cref="GetItemProvenance(ProjectItem)"/>
+        /// </summary>
+        /// <param name="evaluationContext">
+        ///     The evaluation context to use in case reevaluation is required.
+        ///     To avoid reevaluation use <see cref="ProjectLoadSettings.RecordEvaluatedItemElements"/>
+        /// </param>
+        public List<ProvenanceResult> GetItemProvenance(ProjectItem item, EvaluationContext evaluationContext)
+        {
             if (item == null)
             {
                 return new List<ProvenanceResult>();
             }
 
-            IEnumerable<ProjectItemElement> itemElementsAbove = GetItemElementsThatMightAffectItem(GetEvaluatedItemElements(), item);
+            IEnumerable<ProjectItemElement> itemElementsAbove = GetItemElementsThatMightAffectItem(GetEvaluatedItemElements(evaluationContext), item);
 
             return GetItemProvenance(item.EvaluatedInclude, itemElementsAbove);
         }
@@ -1385,12 +1434,13 @@ namespace Microsoft.Build.Evaluation
         /// 
         /// Using this method avoids storing extra data in memory when its not needed.
         /// </summary>
-        private List<ProjectItemElement> GetEvaluatedItemElements()
+        /// <param name="evaluationContext"></param>
+        private List<ProjectItemElement> GetEvaluatedItemElements(EvaluationContext evaluationContext)
         {
             if (!_loadSettings.HasFlag(ProjectLoadSettings.RecordEvaluatedItemElements))
             {
                 _loadSettings = _loadSettings | ProjectLoadSettings.RecordEvaluatedItemElements;
-                Reevaluate(LoggingService, _loadSettings);
+                Reevaluate(LoggingService, _loadSettings, evaluationContext);
             }
 
             return _data.EvaluatedItemElements;
@@ -2028,7 +2078,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ProjectInstance CreateProjectInstance()
         {
-            return CreateProjectInstance(LoggingService, ProjectInstanceSettings.None);
+            return CreateProjectInstance(LoggingService, ProjectInstanceSettings.None, null);
         }
 
         /// <summary>
@@ -2040,7 +2090,17 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings)
         {
-            return CreateProjectInstance(LoggingService, settings);
+            return CreateProjectInstance(LoggingService, settings, null);
+        }
+
+        /// <summary>
+        /// See <see cref="CreateProjectInstance(ProjectInstanceSettings)"/>
+        /// </summary>
+        /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
+        /// <returns></returns>
+        public ProjectInstance CreateProjectInstance(ProjectInstanceSettings settings, EvaluationContext evaluationContext)
+        {
+            return CreateProjectInstance(LoggingService, settings, evaluationContext);
         }
 
         /// <summary>
@@ -2079,8 +2139,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/></param>
         public void ReevaluateIfNecessary(EvaluationContext evaluationContext)
         {
-            _lastEvaluationContext = evaluationContext;
-            ReevaluateIfNecessary(LoggingService);
+            ReevaluateIfNecessary(LoggingService, evaluationContext);
         }
 
         /// <summary>
@@ -2265,13 +2324,22 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
+            return Build(targets, loggers, remoteLoggers, null);
+        }
+
+        /// <summary>
+        /// See <see cref="Build(string[], IEnumerable&lt;ILogger&gt;, IEnumerable&lt;ForwardingLoggerRecord&gt;)"/>
+        /// </summary>
+        /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required</param>
+        public bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext)
+        {
             if (!IsBuildEnabled)
             {
                 LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
                 return false;
             }
 
-            ProjectInstance instance = CreateProjectInstance(LoggingService, ProjectInstanceSettings.None);
+            ProjectInstance instance = CreateProjectInstance(LoggingService, ProjectInstanceSettings.None, evaluationContext);
 
             if (loggers == null && ProjectCollection.Loggers != null)
             {
@@ -2592,15 +2660,18 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Re-evaluates the project using the specified logging service.
         /// </summary>
-        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation)
+        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, EvaluationContext evaluationContext = null)
         {
-            ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings);
+            ReevaluateIfNecessary(loggingServiceForEvaluation, _loadSettings, evaluationContext);
         }
 
         /// <summary>
         /// Re-evaluates the project using the specified logging service and load settings.
         /// </summary>
-        private void ReevaluateIfNecessary(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        private void ReevaluateIfNecessary(
+            ILoggingService loggingServiceForEvaluation,
+            ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext = null)
         {
             // We will skip the evaluation if the flag is set. This will give us better performance on scenarios
             // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes. 
@@ -2608,7 +2679,7 @@ namespace Microsoft.Build.Evaluation
             {
                 try
                 {
-                    Reevaluate(loggingServiceForEvaluation, loadSettings);
+                    Reevaluate(loggingServiceForEvaluation, loadSettings, evaluationContext);
                 }
                 catch (InvalidProjectFileException ex)
                 {
@@ -2621,16 +2692,22 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Creates a project instance based on this project using the specified logging service.
         /// </summary>  
-        private ProjectInstance CreateProjectInstance(ILoggingService loggingServiceForEvaluation, ProjectInstanceSettings settings)
+        private ProjectInstance CreateProjectInstance(
+            ILoggingService loggingServiceForEvaluation,
+            ProjectInstanceSettings settings,
+            EvaluationContext evaluationContext)
         {
-            ReevaluateIfNecessary(loggingServiceForEvaluation);
+            ReevaluateIfNecessary(loggingServiceForEvaluation, evaluationContext);
 
             return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, ProjectCollection.EnvironmentProperties, settings);
         }
 
-        private void Reevaluate(ILoggingService loggingServiceForEvaluation, ProjectLoadSettings loadSettings)
+        private void Reevaluate(
+            ILoggingService loggingServiceForEvaluation,
+            ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext = null)
         {
-            _lastEvaluationContext = _lastEvaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+            evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
             Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                 _data,
@@ -2643,9 +2720,9 @@ namespace Microsoft.Build.Evaluation
                 ProjectCollection,
                 ProjectCollection.ProjectRootElementCache,
                 s_buildEventContext,
-                _lastEvaluationContext.SdkResolverService,
+                evaluationContext.SdkResolverService,
                 BuildEventContext.InvalidSubmissionId,
-                _lastEvaluationContext);
+                evaluationContext);
 
             ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
