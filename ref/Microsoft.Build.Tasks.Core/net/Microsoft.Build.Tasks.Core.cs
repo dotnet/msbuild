@@ -918,7 +918,7 @@ namespace Microsoft.Build.Tasks
         public bool Silent { get { throw null; } set { } }
         public string StateFile { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public Microsoft.Build.Framework.ITaskItem[] SuggestedRedirects { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskItem[] SuggestedRedirects { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public bool SupportsBindingRedirectGeneration { get { throw null; } set { } }
         public string TargetedRuntimeVersion { get { throw null; } set { } }
         public string[] TargetFrameworkDirectories { get { throw null; } set { } }
