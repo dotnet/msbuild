@@ -77,42 +77,12 @@ namespace Microsoft.Build.Internal
         private static XmlReader GetXmlReader(string file, StreamReader input, out Encoding encoding)
         {
             string uri = new UriBuilder(Uri.UriSchemeFile, string.Empty) { Path = file }.ToString();
-#if FEATURE_XMLTEXTREADER
             var reader = new XmlTextReader(uri, input) { DtdProcessing = DtdProcessing.Ignore };
 
             reader.Read();
             encoding = input.CurrentEncoding;
 
             return reader;
-#else
-            var xr = XmlReader.Create(input, new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore}, uri);
-
-            // Set Normalization = false if possible. Without this, certain line endings will be normalized
-            // with \n (specifically in XML comments). Does not throw if if type or property is not found.
-            // This issue does not apply to XmlTextReader (above) which is not shipped with .NET Core yet.
-            
-            // NOTE: This doesn't work in .NET Core.
-            //var xmlReaderType = typeof(XmlReader).GetTypeInfo().Assembly.GetType("System.Xml.XmlTextReaderImpl");
-
-            //// Works in full framework, not in .NET Core
-            //var normalization = xmlReaderType?.GetProperty("Normalization", BindingFlags.Instance | BindingFlags.NonPublic);
-            //normalization?.SetValue(xr, false);
-
-            //// Set _normalize = false, and _ps.eolNormalized = true
-            //var normalizationMember = xmlReaderType?.GetField("_normalize", BindingFlags.Instance | BindingFlags.NonPublic);
-            //normalizationMember?.SetValue(xr, false);
-
-            //var psField = xmlReaderType.GetField("_ps", BindingFlags.Instance | BindingFlags.NonPublic);
-            //var ps = psField.GetValue(xr);
-            
-            //var eolField = ps.GetType().GetField("eolNormalized", BindingFlags.Instance | BindingFlags.NonPublic);
-            //eolField.SetValue(ps, true);
-
-            xr.Read();
-            encoding = input.CurrentEncoding;
-
-            return xr;
-#endif
         }
 
         /// <summary>

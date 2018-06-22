@@ -360,11 +360,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             Project project;
             using (StringReader sr = new StringReader(one))
             {
-#if FEATURE_XMLTEXTREADER
                 using (XmlReader xr = XmlTextReader.Create(sr))
-#else
-                using (XmlReader xr = XmlReader.Create(sr))
-#endif
                 {
                     project = new Project(xr);
                 }

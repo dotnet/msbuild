@@ -96,7 +96,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_XMLTEXTREADER</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
     <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>

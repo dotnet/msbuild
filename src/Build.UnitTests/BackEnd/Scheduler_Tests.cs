@@ -673,11 +673,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
 
             _parameters.DetailedSummary = true;
-#if FEATURE_XMLTEXTREADER
             Project project = new Project(new XmlTextReader(new StringReader(contents)));
-#else
-            Project project = new Project(XmlReader.Create(new StringReader(contents)));
-#endif
             BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" });
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
