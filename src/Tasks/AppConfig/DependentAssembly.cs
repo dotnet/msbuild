@@ -108,12 +108,12 @@ namespace Microsoft.Build.Tasks
                     redirects.Add(bindingRedirect);
                 }
             }
-            BindingRedirects = redirects.ToArray();
+            BindingRedirects = redirects;
         }
 
         /// <summary>
         /// The binding redirects.
         /// </summary>
-        internal BindingRedirect[] BindingRedirects { set; get; }
+        internal List<BindingRedirect> BindingRedirects { set; get; }
     }
 }

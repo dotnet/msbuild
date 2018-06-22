@@ -315,7 +315,7 @@ namespace Microsoft.Build.Tasks
             return targetPath;
         }
 
-        private void GetOutputAssemblies(List<PublishInfo> publishInfos, ref List<ITaskItem> assemblyList)
+        private void GetOutputAssemblies(List<PublishInfo> publishInfos, List<ITaskItem> assemblyList)
         {
             var assemblyMap = new AssemblyMap();
 
@@ -407,8 +407,8 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] GetOutputAssembliesAndSatellites(List<PublishInfo> assemblyPublishInfos, List<PublishInfo> satellitePublishInfos)
         {
             var assemblyList = new List<ITaskItem>();
-            GetOutputAssemblies(assemblyPublishInfos, ref assemblyList);
-            GetOutputSatellites(satellitePublishInfos, ref assemblyList);
+            GetOutputAssemblies(assemblyPublishInfos, assemblyList);
+            GetOutputSatellites(satellitePublishInfos, assemblyList);
             return assemblyList.ToArray();
         }
 
@@ -478,7 +478,7 @@ namespace Microsoft.Build.Tasks
             return fileList.ToArray();
         }
 
-        private void GetOutputSatellites(List<PublishInfo> publishInfos, ref List<ITaskItem> assemblyList)
+        private void GetOutputSatellites(List<PublishInfo> publishInfos, List<ITaskItem> assemblyList)
         {
             var satelliteMap = new FileMap();
 

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -101,9 +103,7 @@ namespace Microsoft.Build.Tasks
 
             // Look up an assembly with the same base name in the installedAssemblyTables.
             // This list should be sorted alphabetically by simple name and then greatest verion
-            AssemblyEntry[] tableCandidates = _redistList.FindAssemblyNameFromSimpleName(assemblyName.Name);
-
-            foreach (AssemblyEntry tableCandidate in tableCandidates)
+            foreach (AssemblyEntry tableCandidate in _redistList.FindAssemblyNameFromSimpleName(assemblyName.Name))
             {
                 // Make an AssemblyNameExtension for comparing.
                 AssemblyNameExtension mostRecentAssemblyNameCandidate = tableCandidate.AssemblyNameExtension;
@@ -135,13 +135,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Find every assembly full name in the redist list that matches the given simple name.
         /// </summary>
-        /// <param name="simpleName"></param>
         /// <returns>The array of assembly names.</returns>
-        internal AssemblyEntry[] FindAssemblyNameFromSimpleName(string simpleName)
+        internal IEnumerable<AssemblyEntry> FindAssemblyNameFromSimpleName(string simpleName)
         {
             if (_redistList == null)
             {
-                return Array.Empty<AssemblyEntry>();
+                return Enumerable.Empty<AssemblyEntry>();
             }
 
             return _redistList.FindAssemblyNameFromSimpleName(simpleName);

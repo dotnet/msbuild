@@ -42,7 +42,8 @@ namespace Microsoft.Build.Tasks
         private readonly HashSet<string> _externallyResolvedPrimaryReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private DependentAssembly[] _remappedAssemblies = Array.Empty<DependentAssembly>();
+        private List<DependentAssembly> _remappedAssemblies = new List<DependentAssembly>();
+
         /// <summary>If true, then search for dependencies.</summary>
         private readonly bool _findDependencies;
         /// <summary>
@@ -275,7 +276,7 @@ namespace Microsoft.Build.Tasks
             _assemblyMetadataCache = assemblyMetadataCache;
 
             // Set condition for when to check assembly version against the target framework version 
-            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
+            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? s_targetFrameworkVersion_40) <= s_targetFrameworkVersion_40);
 
             // Convert the list of installed SDK's to a dictionary for faster lookup
             _resolvedSDKReferences = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
@@ -531,7 +532,7 @@ namespace Microsoft.Build.Tasks
             string itemSpec = referenceAssemblyName.ItemSpec;
             string fusionName = referenceAssemblyName.GetMetadata(ItemMetadataNames.fusionName);
             bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyName, ItemMetadataNames.IgnoreVersionForFrameworkReference, out bool metadataFound);
-            bool ignoreVersionForFrameworkReference = false;
+            bool ignoreVersionForFrameworkReference;
 
             if (metadataFound)
             {
@@ -791,7 +792,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (FileLoadException)
             {
-                // Not a valid AssemblyName. Maybe its a file name.
+                // Not a valid AssemblyName. Maybe it's a file name.
                 // TryGatherAssemblyNameEssentials
                 return;
             }
@@ -1589,7 +1590,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="exceptions">Errors encountered while computing closure.</param>
         internal void ComputeClosure
         (
-            DependentAssembly[] remappedAssembliesValue,
+            List<DependentAssembly> remappedAssembliesValue,
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
             ArrayList exceptions
@@ -1816,8 +1817,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ResolveConflicts
         (
-            out DependentAssembly[] idealRemappings,
-            out AssemblyNameReference[] conflictingReferences
+            out List<DependentAssembly> idealRemappings,
+            out List<AssemblyNameReference> conflictingReferences
         )
         {
             idealRemappings = null;
@@ -1913,13 +1914,13 @@ namespace Microsoft.Build.Tasks
                     OldVersionHigh = assemblyNameReference.assemblyName.AssemblyName.Version,
                     NewVersion = assemblyNameReference.assemblyName.AssemblyName.Version
                 };
-                remapping.BindingRedirects = new[] { bindingRedirect };
+                remapping.BindingRedirects = new List<BindingRedirect> { bindingRedirect };
 
                 idealRemappingsList.Add(remapping);
             }
 
-            idealRemappings = idealRemappingsList.ToArray();
-            conflictingReferences = assemblyNamesList.ToArray();
+            idealRemappings = idealRemappingsList;
+            conflictingReferences = assemblyNamesList;
         }
 
         /// <summary>

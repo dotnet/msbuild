@@ -77,12 +77,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Merged set of assembly reference paths (default + specified)
         /// </summary>
-        private string[] _referencedAssemblies;
+        private List<string> _referencedAssemblies;
 
         /// <summary>
         /// Merged set of namespaces (default + specified) 
         /// </summary>
-        private string[] _usingNamespaces;
+        private List<string> _usingNamespaces;
 
         /// <summary>
         /// Type of code fragment, ie   Fragment, Class, Method
@@ -445,7 +445,7 @@ namespace Microsoft.Build.Tasks
         /// Extract the <Reference /> elements from the <UsingTask />
         /// </summary>
         /// <returns>string[] of reference paths</returns>
-        private string[] ExtractReferencedAssemblies()
+        private List<string> ExtractReferencedAssemblies()
         {
             XmlNodeList referenceNodes = _taskNode.SelectNodes("//*[local-name()='Reference']");
             var references = new List<string>();
@@ -469,14 +469,14 @@ namespace Microsoft.Build.Tasks
                 references.Add(attribute.Value);
             }
 
-            return references.ToArray();
+            return references;
         }
 
         /// <summary>
         /// Extract the <Using /> elements from the <UsingTask />
         /// </summary>
         /// <returns>string[] of using's</returns>
-        private string[] ExtractUsingNamespaces()
+        private List<string> ExtractUsingNamespaces()
         {
             XmlNodeList usingNodes = _taskNode.SelectNodes("//*[local-name()='Using']");
 
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Tasks
                 usings.Add(attribute.Value);
             }
 
-            return usings.ToArray();
+            return usings;
         }
 
         /// <summary>
@@ -720,7 +720,7 @@ namespace Microsoft.Build.Tasks
         private Assembly CompileInMemoryAssembly()
         {
             // Combine our default assembly references with those specified
-            List<string> finalReferencedAssemblies = new List<string>();
+            var finalReferencedAssemblies = new List<string>();
             CombineReferencedAssemblies(finalReferencedAssemblies);
 
             // Combine our default using's with those specified
@@ -875,10 +875,10 @@ namespace Microsoft.Build.Tasks
 
             if (_usingNamespaces != null)
             {
-                usingNamespaceCount += _usingNamespaces.Length;
+                usingNamespaceCount += _usingNamespaces.Count;
             }
 
-            string[] finalUsingNamespaces = new string[usingNamespaceCount];
+            var finalUsingNamespaces = new string[usingNamespaceCount];
             _defaultUsingNamespaces.CopyTo(finalUsingNamespaces, 0);
             _usingNamespaces?.CopyTo(finalUsingNamespaces, _defaultUsingNamespaces.Length);
 

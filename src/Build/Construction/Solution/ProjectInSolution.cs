@@ -115,7 +115,6 @@ namespace Microsoft.Build.Construction
             _relativePath = null;
             ProjectGuid = null;
             _dependencies = new List<string>();
-            ProjectReferences = new ArrayList();
             ParentProjectGuid = null;
             _uniqueProjectName = null;
             ParentSolution = solution;
@@ -200,7 +199,7 @@ namespace Microsoft.Build.Construction
         /// either specified as Dependencies above, or as ProjectReferences in the
         /// project file, which the solution doesn't have insight into. 
         /// </summary>
-        internal ArrayList ProjectReferences { get; }
+        internal List<string> ProjectReferences { get; } = new List<string>();
 
         internal SolutionFile ParentSolution { get; set; }
 

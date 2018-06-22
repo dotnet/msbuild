@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -152,7 +153,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             internal FileState(SerializationInfo info, StreamingContext context)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+                ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
                 lastModified = new DateTime(info.GetInt64("mod"), (DateTimeKind)info.GetInt32("modk"));
                 assemblyName = (AssemblyNameExtension)info.GetValue("an", typeof(AssemblyNameExtension));
@@ -174,7 +175,7 @@ namespace Microsoft.Build.Tasks
             [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
             public void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+                ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
                 info.AddValue("mod", lastModified.Ticks);
                 info.AddValue("modk", (int)lastModified.Kind);
@@ -243,7 +244,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal SystemState(SerializationInfo info, StreamingContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
             instanceLocalFileStateCache = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
             isDirty = false;
@@ -254,8 +255,6 @@ namespace Microsoft.Build.Tasks
         /// This is used to optimize IO in the case of files requested from one 
         /// of the FX folders.
         /// </summary>
-        /// <param name="providedFrameworkPaths"></param>
-        /// <param name="installedAssemblyTables"></param>
         internal void SetInstalledAssemblyInformation
         (
             AssemblyTableInfo[] installedAssemblyTableInfos
@@ -270,7 +269,7 @@ namespace Microsoft.Build.Tasks
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
+            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
 
             info.AddValue("fileState", instanceLocalFileStateCache);
         }
@@ -287,7 +286,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set the GetLastWriteTime delegate.
         /// </summary>
-        /// <param name="getLastWriteTime">Delegate used to get the last write time.</param>
+        /// <param name="getLastWriteTimeValue">Delegate used to get the last write time.</param>
         internal void SetGetLastWriteTime(GetLastWriteTime getLastWriteTimeValue)
         {
             getLastWriteTime = getLastWriteTimeValue;
@@ -296,7 +295,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a GetAssemblyName delegate. 
         /// </summary>
-        /// <param name="getAssemblyName">The delegate.</param>
+        /// <param name="getAssemblyNameValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal GetAssemblyName CacheDelegate(GetAssemblyName getAssemblyNameValue)
         {
@@ -307,7 +306,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a GetAssemblyMetadata delegate. 
         /// </summary>
-        /// <param name="getAssemblyMetadata">The delegate.</param>
+        /// <param name="getAssemblyMetadataValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal GetAssemblyMetadata CacheDelegate(GetAssemblyMetadata getAssemblyMetadataValue)
         {
@@ -318,7 +317,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a FileExists delegate. 
         /// </summary>
-        /// <param name="fileExists">The delegate.</param>
+        /// <param name="fileExistsValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal FileExists CacheDelegate(FileExists fileExistsValue)
         {
@@ -335,7 +334,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a GetDirectories delegate. 
         /// </summary>
-        /// <param name="getDirectories">The delegate.</param>
+        /// <param name="getDirectoriesValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal GetDirectories CacheDelegate(GetDirectories getDirectoriesValue)
         {
@@ -380,15 +379,14 @@ namespace Microsoft.Build.Tasks
         {
             // Is it in the process-wide cache?
             FileState cacheFileState = null;
-            FileState processFileState = null;
-            SystemState.s_processWideFileStateCache.TryGetValue(path, out processFileState);
-            FileState instanceLocalFileState = instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
+            s_processWideFileStateCache.TryGetValue(path, out FileState processFileState);
+            FileState instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
 
             // Sync the caches.
             if (processFileState == null && instanceLocalFileState != null)
             {
                 cacheFileState = instanceLocalFileState;
-                SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
+                s_processWideFileStateCache[path] = instanceLocalFileState;
             }
             else if (processFileState != null && instanceLocalFileState == null)
             {
@@ -405,7 +403,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     cacheFileState = instanceLocalFileState;
-                    SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
+                    s_processWideFileStateCache[path] = instanceLocalFileState;
                 }
             }
 
@@ -414,7 +412,7 @@ namespace Microsoft.Build.Tasks
             {
                 cacheFileState = new FileState(getLastWriteTime(path));
                 instanceLocalFileStateCache[path] = cacheFileState;
-                SystemState.s_processWideFileStateCache[path] = cacheFileState;
+                s_processWideFileStateCache[path] = cacheFileState;
                 isDirty = true;
             }
             else
@@ -425,38 +423,12 @@ namespace Microsoft.Build.Tasks
                 {
                     cacheFileState = new FileState(getLastWriteTime(path));
                     instanceLocalFileStateCache[path] = cacheFileState;
-                    SystemState.s_processWideFileStateCache[path] = cacheFileState;
+                    s_processWideFileStateCache[path] = cacheFileState;
                     isDirty = true;
                 }
             }
 
             return cacheFileState;
-        }
-
-        private FileState GetFileStateFromProcessWideCache(string path, FileState template)
-        {
-            // When reading from the process-wide cache, we always check to see if our data
-            // is up-to-date to avoid getting stale data from a previous build.
-            DateTime lastModified = getLastWriteTime(path);
-
-            // Has another build seen this file before?
-            FileState state;
-            if (!s_processWideFileStateCache.TryGetValue(path, out state) || state.LastModified != lastModified)
-            {   // We've never seen it before, or we're out of date
-
-                state = CreateFileState(lastModified, template);
-                s_processWideFileStateCache[path] = state;
-            }
-
-            return state;
-        }
-
-        private FileState CreateFileState(DateTime lastModified, FileState template)
-        {
-            if (template != null && template.LastModified == lastModified)
-                return template;    // Our serialized data is up-to-date
-
-            return new FileState(lastModified);
         }
 
         /// <summary>
@@ -473,25 +445,24 @@ namespace Microsoft.Build.Tasks
                 string extension = Path.GetExtension(path);
                 if (String.Compare(extension, ".dll", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    AssemblyEntry[] assemblyNames = redistList.FindAssemblyNameFromSimpleName
+                    IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName
                         (
                             Path.GetFileNameWithoutExtension(path)
                         );
 
-                    for (int i = 0; i < assemblyNames.Length; ++i)
+                    foreach (AssemblyEntry a in assemblyNames)
                     {
                         string filename = Path.GetFileName(path);
-                        string pathFromRedistList = Path.Combine(assemblyNames[i].FrameworkDirectory, filename);
+                        string pathFromRedistList = Path.Combine(a.FrameworkDirectory, filename);
 
                         if (String.Equals(path, pathFromRedistList, StringComparison.OrdinalIgnoreCase))
                         {
-                            return new AssemblyNameExtension(assemblyNames[i].FullName);
+                            return new AssemblyNameExtension(a.FullName);
                         }
                     }
                 }
             }
-
-
+            
             // Not a well-known FX assembly so now check the cache.
             FileState fileState = GetFileState(path);
             if (fileState.Assembly == null)

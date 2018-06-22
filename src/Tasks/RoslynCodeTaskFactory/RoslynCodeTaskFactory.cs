@@ -226,12 +226,12 @@ namespace Microsoft.Build.Tasks
                 codeTypeDeclaration.Members.Add(new CodeSnippetTypeMember(taskInfo.SourceCode));
             }
 
-            CodeNamespace codeNamespace = new CodeNamespace("InlineCode");
+            var codeNamespace = new CodeNamespace("InlineCode");
             codeNamespace.Imports.AddRange(DefaultNamespaces.Union(taskInfo.Namespaces, StringComparer.OrdinalIgnoreCase).Select(i => new CodeNamespaceImport(i)).ToArray());
 
             codeNamespace.Types.Add(codeTypeDeclaration);
 
-            CodeCompileUnit codeCompileUnit = new CodeCompileUnit();
+            var codeCompileUnit = new CodeCompileUnit();
 
             codeCompileUnit.Namespaces.Add(codeNamespace);
 
@@ -680,7 +680,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.NoLogo = true;
                     managedCompiler.Optimize = false;
                     managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
-                    managedCompiler.References = references.ToArray();
+                    managedCompiler.References = references;
                     managedCompiler.Sources = new ITaskItem[] { new TaskItem(sourceCodePath) };
                     managedCompiler.TargetType = "Library";
                     managedCompiler.UseSharedCompilation = false;

@@ -463,15 +463,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Find every assembly full name that matches the given simple name.
         /// </summary>
-        /// <param name="simpleName"></param>
-        /// <returns>The array of assembly names.</returns>
-        internal AssemblyEntry[] FindAssemblyNameFromSimpleName
-        (
-            string simpleName
-        )
+        /// <returns>The list of assembly names.</returns>
+        internal IEnumerable<AssemblyEntry> FindAssemblyNameFromSimpleName(string simpleName)
         {
-            var candidateNames = new List<AssemblyEntry>();
-
             if (_simpleNameMap.TryGetValue(simpleName, out int index))
             {
                 for (int i = index; i < _assemblyList.Count; ++i)
@@ -481,11 +475,9 @@ namespace Microsoft.Build.Tasks
                     {
                         break;
                     }
-                    candidateNames.Add(entry);
+                    yield return entry;
                 }
             }
-
-            return candidateNames.ToArray();
         }
 
         /// <summary>
@@ -946,8 +938,8 @@ namespace Microsoft.Build.Tasks
         // K: target framework directory + subsetNames, V: subset list paths found on disk underneath the subsetList folder
         private static Dictionary<string, string[]> s_subsetListPathCache;
 
-        // Locl for subsetListPathCache
-        private static readonly Object s_subsetListPathCacheLock = new Object();
+        // Lock for subsetListPathCache
+        private static readonly object s_subsetListPathCacheLock = new object();
 
         // Folder to look for the subset lists in under the target framework directories
         private const string subsetListFolder = "SubsetList";

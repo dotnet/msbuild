@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     {
         private readonly List<CompatibleFramework> _list = new List<CompatibleFramework>();
 
-        internal CompatibleFrameworkCollection(CompatibleFramework[] compatibleFrameworks)
+        internal CompatibleFrameworkCollection(IEnumerable<CompatibleFramework> compatibleFrameworks)
         {
             if (compatibleFrameworks == null)
             {
@@ -38,11 +38,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public IEnumerator GetEnumerator()
         {
             return _list.GetEnumerator();
-        }
-
-        internal CompatibleFramework[] ToArray()
-        {
-            return _list.ToArray();
         }
     }
 }

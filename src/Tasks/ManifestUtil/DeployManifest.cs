@@ -318,7 +318,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (_compatibleFrameworkList == null && _compatibleFrameworks != null)
                 {
-                    _compatibleFrameworkList = new CompatibleFrameworkCollection(_compatibleFrameworks.ToArray());
+                    _compatibleFrameworkList = new CompatibleFrameworkCollection(_compatibleFrameworks);
                 }
                 return _compatibleFrameworkList;
             }

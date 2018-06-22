@@ -494,7 +494,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Add the project to the BuildManager so we can use the start information later in the build process
             _buildEventManager.AddProjectStartedEvent(e, _showTimeStamp || IsVerbosityAtLeast(LoggerVerbosity.Detailed));
 
-
+            
             if (this.showPerfSummary)
             {
                 // Create a new project performance counter for this project

@@ -406,7 +406,7 @@ namespace Microsoft.Build.Tasks
                         // Only log a warning or error if there were incompatible references
                         if (listOfIncompatibleReferences.Count > 0)
                         {
-                            string incompatibleReferencesDelimited = String.Join(", ", listOfIncompatibleReferences.ToArray());
+                            string incompatibleReferencesDelimited = String.Join(", ", listOfIncompatibleReferences);
                             if (notCompatibleReference.SupportsMultipleVersions == MultipleVersionSupport.Error)
                             {
                                 Log.LogErrorWithCodeFromResources("ResolveSDKReference.CannotReferenceTwoSDKsSameFamily", notCompatibleReference.SDKName, incompatibleReferencesDelimited, notCompatibleReference.ProductFamilyName);
@@ -435,7 +435,7 @@ namespace Microsoft.Build.Tasks
                     // Only log a warning or error if there were incompatible references
                     if (listOfIncompatibleReferences.Count > 0)
                     {
-                        string incompatibleReferencesDelimited = String.Join(", ", listOfIncompatibleReferences.ToArray());
+                        string incompatibleReferencesDelimited = string.Join(", ", listOfIncompatibleReferences);
                         if (notCompatibleReference.SupportsMultipleVersions == MultipleVersionSupport.Error)
                         {
                             Log.LogErrorWithCodeFromResources("ResolveSDKReference.CannotReferenceTwoSDKsSameName", notCompatibleReference.SDKName, incompatibleReferencesDelimited);
@@ -451,7 +451,7 @@ namespace Microsoft.Build.Tasks
             AddMetadataToReferences(Log, sdkReferenceItems, _runtimeReferenceOnlyDependenciesByName, "RuntimeReferenceOnly", "true");
 
             // Gather the ResolvedItems from the SDKReference where the reference was resolved.
-            ResolvedSDKReferences = sdkReferenceItems.Where(x => x.Resolved).Select(x => x.ResolvedItem).ToArray<ITaskItem>();
+            ResolvedSDKReferences = sdkReferenceItems.Where(x => x.Resolved).Select(x => x.ResolvedItem).ToArray();
 
             VerifySDKDependsOn(Log, sdkReferenceItems);
 
@@ -1340,9 +1340,9 @@ namespace Microsoft.Build.Tasks
 
                         // For testing especially it's nice to have a set order of what the generated appxlocation string will be at the end
                         var architectureLocations = new SortedDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-                        List<string> appxLocationComponents = new List<string>();
+                        var appxLocationComponents = new List<string>();
 
-                        foreach (var appxLocation in AppxLocationsFromManifest)
+                        foreach (KeyValuePair<string, string> appxLocation in AppxLocationsFromManifest)
                         {
                             if (!String.IsNullOrEmpty(appxLocation.Key))
                             {
@@ -1400,7 +1400,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        foreach (var location in architectureLocations)
+                        foreach (KeyValuePair<string, string> location in architectureLocations)
                         {
                             appxLocationComponents.Add(location.Key);
                             appxLocationComponents.Add(location.Value);
@@ -1434,10 +1434,9 @@ namespace Microsoft.Build.Tasks
                 ResolvedItem.SetMetadata("Version", Version);
 
                 // Check to see if the copy local metadata has been set in the project file.
-                bool result;
-                bool hasExpandReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.ExpandReferenceAssemblies), out result);
-                bool hasCopyRedist = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyRedist), out result);
-                bool hasCopyLocalExpandedReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyLocalExpandedReferenceAssemblies), out result);
+                bool hasExpandReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.ExpandReferenceAssemblies), out _);
+                bool hasCopyRedist = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyRedist), out _);
+                bool hasCopyLocalExpandedReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyLocalExpandedReferenceAssemblies), out _);
 
                 bool referenceItemHasSDKName = sdkNamesOnReferenceItems.Contains(SDKName);
 
