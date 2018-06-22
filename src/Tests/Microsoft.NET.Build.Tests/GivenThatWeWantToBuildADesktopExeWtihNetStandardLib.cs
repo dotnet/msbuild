@@ -14,6 +14,9 @@ using FluentAssertions;
 using Xunit;
 
 using Xunit.Abstractions;
+using System.Text.RegularExpressions;
+using System.Text;
+using System.Globalization;
 
 namespace Microsoft.NET.Build.Tests
 {
@@ -257,7 +260,7 @@ namespace Microsoft.NET.Build.Tests
                 .Should()
                 .Pass()
                 .And
-                .NotHaveStdOutContaining("warning")
+                .HaveStdOutContaining(HasAndOnlyHasWarningNETSDK1069, "has and only has warning expected")
                 .And
                 .HaveStdOutContainingIgnoreCase(successMessage);
 
@@ -425,5 +428,159 @@ namespace Microsoft.NET.Build.Tests
             });
         }
 
+        [WindowsOnlyTheory]
+        [InlineData("net461", "netstandard1.5", true, true, ".NETFramework < 4.7.2 -> .NETStandard >= 1.5 --> warning")]
+        [InlineData("net461", "netstandard1.5", true, false, ".NETFramework < 4.7.2 -> .NETStandard >= 1.5 --> warning")]
+        [InlineData("net461", "netstandard1.4", false, true, ".NETFramework any -> .NETStandard < 1.5 --> no warning")]
+        [InlineData("net461", "netstandard1.4", false, false, ".NETFramework any -> .NETStandard < 1.5 --> no warning")]
+        [InlineData("net472", "netstandard1.4", false, true, ".NETFramework any -> .NETStandard < 1.5 --> no warning")]
+        [InlineData("net472", "netstandard1.4", false, false, ".NETFramework any -> .NETStandard < 1.5 --> no warning")]
+        [InlineData("net472", "netstandard1.5", false, true, ".NETFramework >= 4.7.2 -> .NETStandard any --> no warning")]
+        [InlineData("net472", "netstandard1.5", false, false, ".NETFramework >= 4.7.2 -> .NETStandard any --> no warning")]
+        [InlineData("net472", "netstandard2.0", false, true, ".NETFramework >= 4.7.2 -> .NETStandard any --> no warning")]
+        [InlineData("net472", "netstandard2.0", false, false, ".NETFramework >= 4.7.2 -> .NETStandard any --> no warning")]
+
+        public void It_generate_warning_depends_on_framework_and_library_netstandard_version(string framework, string libraryNetstandard, bool shouldHaveWarning, bool isSdk, string description)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(GetTemplateName(isSdk), identifier: framework + libraryNetstandard + isSdk.ToString() + description)
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (IsAppProject(projectPath))
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        AddReferenceToLibrary(project, ReferenceScenario.ProjectReference);
+                        if (isSdk)
+                        {
+                            project.Root.Element(ns + "PropertyGroup")
+                                        .Element(ns + "TargetFramework")
+                                        .Value = framework;
+                        }
+                        else
+                        {
+                            var parsedFramework = NuGet.Frameworks.NuGetFramework.Parse(framework);
+
+                            project.Root.Element(ns + "PropertyGroup")
+                                        .Element(ns + "TargetFrameworkVersion")
+                                        .Value = "v" + GetDisplayVersion(parsedFramework.Version);
+                        }
+                    }
+
+                    if (IsLibraryProject(projectPath))
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        var targetFrameworkProperty = propertyGroup.Element(ns + "TargetFramework");
+                        targetFrameworkProperty.Value = libraryNetstandard;
+                    }
+                });
+
+            testAsset.Restore(Log, relativePath: AppName);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+
+            if (shouldHaveWarning)
+            {
+                buildCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(HasAndOnlyHasWarningNETSDK1069, "has and only has warning expected" + description);
+            }
+            else
+            {
+                buildCommand
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .NotHaveStdOutContaining("warning");
+            }
+        }
+
+        [WindowsOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+
+        public void It_can_suppress_NETSDK1069_warning(bool isSdk)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())
+                .WithSource()
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (IsAppProject(projectPath))
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        AddReferenceToLibrary(project, ReferenceScenario.ProjectReference);
+                        if (isSdk)
+                        {
+                            project.Root.Element(ns + "PropertyGroup")
+                                        .Element(ns + "TargetFramework")
+                                        .Value = "net461";
+                        }
+                        else
+                        {
+                            project.Root.Element(ns + "PropertyGroup")
+                                        .Element(ns + "TargetFrameworkVersion")
+                                        .Value = "v4.6.1";
+                        }
+
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        propertyGroup.Add(new XElement(ns + "MSBuildWarningsAsMessages"));
+                        var targetFrameworkProperty = propertyGroup.Element(ns + "MSBuildWarningsAsMessages");
+                        targetFrameworkProperty.Value = "NETSDK1069";
+                    }
+
+                    if (IsLibraryProject(projectPath))
+                    {
+                        var ns = project.Root.Name.Namespace;
+                        var propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                        var targetFrameworkProperty = propertyGroup.Element(ns + "TargetFramework");
+                        targetFrameworkProperty.Value = "netstandard1.5";
+                    }
+                });
+
+            testAsset.Restore(Log, relativePath: AppName);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, AppName));
+
+            buildCommand
+            .Execute()
+            .Should()
+            .Pass()
+            .And
+            .NotHaveStdOutContaining("warning");
+        }
+
+        private bool HasAndOnlyHasWarningNETSDK1069(string stdout)
+        {
+            var allWarningCount = Regex.Matches(stdout, "warning").Count;
+            var targetCount = Regex.Matches(stdout, "warning NETSDK1069").Count;
+
+            return (targetCount > 0) && (targetCount == allWarningCount);
+        }
+
+        // Copy from NuGet.
+        // Conver from 4.6.1.0 to 4.6.1
+        private static string GetDisplayVersion(Version version)
+        {
+            var sb = new StringBuilder(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor));
+
+            if (version.Build > 0
+                || version.Revision > 0)
+            {
+                sb.AppendFormat(CultureInfo.InvariantCulture, ".{0}", version.Build);
+
+                if (version.Revision > 0)
+                {
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ".{0}", version.Revision);
+                }
+            }
+
+            return sb.ToString();
+        }
     }
 }

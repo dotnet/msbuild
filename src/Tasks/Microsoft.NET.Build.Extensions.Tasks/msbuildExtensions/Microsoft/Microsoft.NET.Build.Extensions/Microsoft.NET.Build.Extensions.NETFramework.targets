@@ -97,6 +97,10 @@ Copyright (c) .NET Foundation. All rights reserved.
                                           Exclude="@(_NETStandardLibraryNETFrameworkLib->'$(MSBuildThisFileDirectory)net461\lib\%(FileName).dll')" />
     </ItemGroup>
 
+    <NETBuildExtensionsWarning Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''"
+                               ResourceName="NETFrameworkToNonBuiltInNETStandard"
+                               />
+
     <ItemGroup Condition="'@(_NETStandardLibraryNETFrameworkLib)' != ''">
       <!-- Remove simple name references if we're directly providing a reference assembly to the compiler. For example,
            consider a project with a Reference Include="System.Net.Http" or "System.IO.Compression", which are both in

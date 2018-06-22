@@ -43,6 +43,7 @@ partial class Program
         if (testCommandLine.ShouldShowHelp)
         {
             TestCommandLine.ShowHelp();
+            ShowAdditionalHelp();
         }
         else
         {
@@ -74,6 +75,8 @@ partial class Program
 
     static partial void BeforeTestRun(List<string> args);
     static partial void AfterTestRun();
+
+    static partial void ShowAdditionalHelp();
 
     private class OutputLogger : ITestOutputHelper
     {

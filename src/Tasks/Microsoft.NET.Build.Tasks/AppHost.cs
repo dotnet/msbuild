@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
+using System.IO.MemoryMappedFiles;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
@@ -43,10 +45,6 @@ namespace Microsoft.NET.Build.Tasks
                 throw new BuildErrorException(Strings.FileNameIsTooLong, appBinaryFilePath);
             }
 
-            var array = File.ReadAllBytes(appHostSourceFilePath);
-
-            SearchAndReplace(array, _bytesToSearch, bytesToWrite, appHostSourceFilePath);
-
             if (!Directory.Exists(destinationDirectory))
             {
                 Directory.CreateDirectory(destinationDirectory);
@@ -56,9 +54,12 @@ namespace Microsoft.NET.Build.Tasks
             File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwriteExisting);
 
             // Re-write ModifiedAppHostPath with the proper contents.
-            using (FileStream fs = new FileStream(appHostDestinationFilePath, FileMode.Truncate, FileAccess.ReadWrite, FileShare.Read))
+            using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
             {
-                fs.Write(array, 0, array.Length);
+                using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
+                {
+                    SearchAndReplace(accessor, _bytesToSearch, bytesToWrite, appHostSourceFilePath);
+                }
             }
         }
 
@@ -99,13 +100,13 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         // See: https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm
-        private static int KMPSearch(byte[] pattern, byte[] bytes)
+        private static unsafe int KMPSearch(byte[] pattern, byte* bytes, long bytesLength)
         {
             int m = 0;
             int i = 0;
             int[] table = ComputeKMPFailureFunction(pattern);
 
-            while (m + i < bytes.Length)
+            while (m + i < bytesLength)
             {
                 if (pattern[i] == bytes[m + i])
                 {
@@ -129,24 +130,53 @@ namespace Microsoft.NET.Build.Tasks
                     }
                 }
             }
+
             return -1;
         }
 
-        private static void SearchAndReplace(byte[] array, byte[] searchPattern, byte[] patternToReplace, string appHostSourcePath)
+        private static unsafe void SearchAndReplace(
+            MemoryMappedViewAccessor accessor,
+            byte[] searchPattern,
+            byte[] patternToReplace,
+            string appHostSourcePath)
         {
-            int offset = KMPSearch(searchPattern, array);
-            if (offset < 0)
+            byte* pointer = null;
+
+            try
             {
-                throw new BuildErrorException(Strings.AppHostHasBeenModified, appHostSourcePath, _placeHolder);
+                accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
+                byte* bytes = pointer + accessor.PointerOffset;
+
+                int position = KMPSearch(searchPattern, bytes, accessor.Capacity);
+                if (position < 0)
+                {
+                    throw new BuildErrorException(Strings.AppHostHasBeenModified, appHostSourcePath, _placeHolder);
+                }
+
+                accessor.WriteArray(
+                    position: position,
+                    array: patternToReplace,
+                    offset: 0,
+                    count: patternToReplace.Length);
+
+                Pad0(searchPattern, patternToReplace, bytes, position);
             }
+            finally
+            {
+                if (pointer != null)
+                {
+                    accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+                }
+            }
+        }
 
-            patternToReplace.CopyTo(array, offset);
-
+        private static unsafe void Pad0(byte[] searchPattern, byte[] patternToReplace, byte* bytes, int offset)
+        {
             if (patternToReplace.Length < searchPattern.Length)
             {
                 for (int i = patternToReplace.Length; i < searchPattern.Length; i++)
                 {
-                    array[i + offset] = 0x0;
+                    bytes[i + offset] = 0x0;
                 }
             }
         }

@@ -285,10 +285,11 @@ Copyright (c) .NET Foundation. All rights reserved.
     it requires a host in the output directory to load the app.
     During "publish", all required assets are copied to the publish directory.
     -->
-    <ItemGroup Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_IsExecutable)' == 'true'">
+    <ItemGroup Condition="'$(UseAppHost)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_IsExecutable)' == 'true'">
       <NativeNETCoreCopyLocalItems Include="@(NativeCopyLocalItems)"
-                                   Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostPolicyLibraryName)' or
-                                              '%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostFxrLibraryName)'" />
+                                   Condition="'$(SelfContained)' == 'true' and
+                                              ('%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostPolicyLibraryName)' or
+                                               '%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostFxrLibraryName)')" />
 
       <NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
                                    Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
@@ -326,7 +327,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       </NativeNETCoreCopyLocalItems>
     </ItemGroup>
 
-    <ItemGroup Condition="'$(SelfContained)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_IsExecutable)' == 'true'">
+    <ItemGroup Condition="'$(UseAppHost)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_IsExecutable)' == 'true'">
       <AllNETCoreCopyLocalItems Include="@(NativeNETCoreCopyLocalItems)">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         <CopyToPublishDirectory>Never</CopyToPublishDirectory>
@@ -351,8 +352,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <_FrameworkReferenceAssemblies Include="@(ReferencePath)"
-                                     Condition="%(ReferencePath.FrameworkFile) == 'true' or
-                                                %(ReferencePath.ResolvedFrom) == 'ImplicitlyExpandDesignTimeFacades'" />
+                                     Condition="(%(ReferencePath.FrameworkFile) == 'true' or
+                                                %(ReferencePath.ResolvedFrom) == 'ImplicitlyExpandDesignTimeFacades')
+                                            and ('%(ReferencePath.NuGetSourceType)' == ''  or
+                                                 '%(ReferencePath.NuGetIsFrameworkReference)' == 'true')" />
 
       <!--
       "ReferenceOnly" assemblies are assemblies that are only used at compile-time, and they can't be resolved
@@ -394,7 +397,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </When>
 
     <When Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(_IsExecutable)' == 'true'">
-      <PropertyGroup Condition="'$(SelfContained)' != 'true'">
+      <PropertyGroup Condition="'$(UseAppHost)' != 'true'">
         <!-- TODO: https://github.com/dotnet/sdk/issues/20 Need to get the DotNetHost path from MSBuild -->
         <RunCommand Condition="'$(RunCommand)' == ''">dotnet</RunCommand>
 
@@ -403,7 +406,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <RunArguments Condition="'$(RunArguments)' == ''">$(_NetCoreRunArguments)</RunArguments>
       </PropertyGroup>
 
-      <PropertyGroup Condition="'$(SelfContained)' == 'true'">
+      <PropertyGroup Condition="'$(UseAppHost)' == 'true'">
         <RunCommand Condition="'$(RunCommand)' == ''">$(TargetDir)$(AssemblyName)$(_NativeExecutableExtension)</RunCommand>
         <RunArguments Condition="'$(RunArguments)' == ''">$(StartArguments)</RunArguments>
       </PropertyGroup>
