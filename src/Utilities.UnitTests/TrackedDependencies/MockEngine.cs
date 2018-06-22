@@ -2,13 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Resources;
-using System.Reflection;
 using System.Collections;
-using System.Globalization;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.TrackedDependencies
@@ -27,163 +22,90 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    sealed internal class MockEngine : IBuildEngine2
+    internal sealed class MockEngine : IBuildEngine2
     {
-        private bool _isRunningMultipleNodes;
-        private int _messages = 0;
-        private int _warnings = 0;
-        private int _errors = 0;
-        private string _log = "";
-        private string _upperLog = null;
+        private string _upperLog;
 
-        internal int Messages
-        {
-            set { _messages = value; }
-            get { return _messages; }
-        }
+        internal int Messages { set; get; }
 
-        internal int Warnings
-        {
-            set { _warnings = value; }
-            get { return _warnings; }
-        }
+        internal int Warnings { set; get; }
 
-        internal int Errors
-        {
-            set { _errors = value; }
-            get { return _errors; }
-        }
+        internal int Errors { set; get; }
 
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
-            if (eventArgs.File != null && eventArgs.File.Length > 0)
+            if (!string.IsNullOrEmpty(eventArgs.File))
             {
                 Console.Write("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
             }
 
             Console.Write("ERROR: ");
-            _log += "ERROR: ";
+            Log += "ERROR: ";
             Console.Write("ERROR " + eventArgs.Code + ": ");
-            _log += "ERROR " + eventArgs.Code + ": ";
-            ++_errors;
+            Log += "ERROR " + eventArgs.Code + ": ";
+            ++Errors;
 
             Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
+            Log += eventArgs.Message;
+            Log += "\n";
         }
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
-            if (eventArgs.File != null && eventArgs.File.Length > 0)
+            if (!string.IsNullOrEmpty(eventArgs.File))
             {
                 Console.Write("{0}({1},{2}): ", eventArgs.File, eventArgs.LineNumber, eventArgs.ColumnNumber);
             }
 
             Console.Write("WARNING " + eventArgs.Code + ": ");
-            _log += "WARNING " + eventArgs.Code + ": ";
-            ++_warnings;
+            Log += "WARNING " + eventArgs.Code + ": ";
+            ++Warnings;
 
             Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
+            Log += eventArgs.Message;
+            Log += "\n";
         }
 
         public void LogCustomEvent(CustomBuildEventArgs eventArgs)
         {
             Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
+            Log += eventArgs.Message;
+            Log += "\n";
         }
 
         public void LogMessageEvent(BuildMessageEventArgs eventArgs)
         {
             Console.WriteLine(eventArgs.Message);
-            _log += eventArgs.Message;
-            _log += "\n";
-            ++_messages;
+            Log += eventArgs.Message;
+            Log += "\n";
+            ++Messages;
         }
 
-        internal string Log
-        {
-            set { _log = value; }
-            get { return _log; }
-        }
+        internal string Log { set; get; } = "";
 
-        public bool ContinueOnError
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public bool ContinueOnError => false;
 
-        public string ProjectFileOfTaskNode
-        {
-            get
-            {
-                return String.Empty;
-            }
-        }
+        public string ProjectFileOfTaskNode => string.Empty;
 
-        public int LineNumberOfTaskNode
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int LineNumberOfTaskNode => 0;
 
-        public int ColumnNumberOfTaskNode
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int ColumnNumberOfTaskNode => 0;
 
-        public bool IsRunningMultipleNodes
-        {
-            get { return _isRunningMultipleNodes; }
-            set { _isRunningMultipleNodes = value; }
-        }
+        public bool IsRunningMultipleNodes { get; set; }
 
-        public bool BuildProjectFile
-            (
-            string projectFileName,
-            string[] targetNames,
-            IDictionary globalProperties,
-            IDictionary targetOutputs,
-            string toolsVersion
-            )
-        {
-            return false;
-        }
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion) => false;
 
-        public bool BuildProjectFile
-            (
-            string projectFileName,
-            string[] targetNames,
-            IDictionary globalProperties,
-            IDictionary targetOutputs
-            )
-        {
-            return false;
-        }
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs) => false;
 
-        public bool BuildProjectFilesInParallel
-        (
+        public bool BuildProjectFilesInParallel(
             string[] projectFileNames,
             string[] targetNames,
             IDictionary[] globalProperties,
             IDictionary[] targetOutputsPerProject,
             string[] toolsVersion,
             bool useResultsCache,
-            bool unloadProjectsOnCompletion
-        )
-        {
-            return false;
-        }
+            bool unloadProjectsOnCompletion) => false;
 
         /// <summary>
         /// Assert that the log file contains the given string.
@@ -194,7 +116,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         {
             if (_upperLog == null)
             {
-                _upperLog = _log;
+                _upperLog = Log;
                 _upperLog = _upperLog.ToUpperInvariant();
             }
 
@@ -214,7 +136,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         {
             if (_upperLog == null)
             {
-                _upperLog = _log;
+                _upperLog = Log;
                 _upperLog = _upperLog.ToUpperInvariant();
             }
 

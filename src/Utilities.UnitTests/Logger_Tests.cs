@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="verbosity">Verbosity level.</param>
         public EmptyLogger(LoggerVerbosity verbosity)
         {
-            this.Verbosity = verbosity;
+            Verbosity = verbosity;
         }
 
         /// <summary>

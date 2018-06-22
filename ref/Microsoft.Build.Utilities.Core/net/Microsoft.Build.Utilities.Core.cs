@@ -6,10 +6,10 @@ namespace Microsoft.Build.Utilities
         protected AppDomainIsolatedTask() { }
         protected AppDomainIsolatedTask(System.Resources.ResourceManager taskResources) { }
         protected AppDomainIsolatedTask(System.Resources.ResourceManager taskResources, string helpKeywordPrefix) { }
-        public Microsoft.Build.Framework.IBuildEngine BuildEngine { get { throw null; } set { } }
+        public Microsoft.Build.Framework.IBuildEngine BuildEngine { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected string HelpKeywordPrefix { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskHost HostObject { get { throw null; } set { } }
-        public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskHost HostObject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Utilities.TaskLoggingHelper Log { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         protected System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
         public abstract bool Execute();
         [System.Security.SecurityCriticalAttribute]
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Utilities
         public CanonicalTrackedInputFiles(Microsoft.Build.Framework.ITask ownerTask, Microsoft.Build.Framework.ITaskItem[] tlogFiles, Microsoft.Build.Framework.ITaskItem[] sourceFiles, Microsoft.Build.Framework.ITaskItem[] excludedInputPaths, Microsoft.Build.Utilities.CanonicalTrackedOutputFiles outputs, bool useMinimalRebuildOptimization, bool maintainCompositeRootingMarkers) { }
         public CanonicalTrackedInputFiles(Microsoft.Build.Framework.ITaskItem[] tlogFiles, Microsoft.Build.Framework.ITaskItem[] sourceFiles, Microsoft.Build.Framework.ITaskItem[] excludedInputPaths, Microsoft.Build.Utilities.CanonicalTrackedOutputFiles outputs, bool useMinimalRebuildOptimization, bool maintainCompositeRootingMarkers) { }
         public CanonicalTrackedInputFiles(Microsoft.Build.Framework.ITaskItem[] tlogFiles, Microsoft.Build.Framework.ITaskItem[] sourceFiles, Microsoft.Build.Utilities.CanonicalTrackedOutputFiles outputs, bool useMinimalRebuildOptimization, bool maintainCompositeRootingMarkers) { }
-        public System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>> DependencyTable { get { throw null; } }
+        public System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, string>> DependencyTable { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public Microsoft.Build.Framework.ITaskItem[] ComputeSourcesNeedingCompilation() { throw null; }
         public Microsoft.Build.Framework.ITaskItem[] ComputeSourcesNeedingCompilation(bool searchForSubRootsInCompositeRootingMarkers) { throw null; }
         public bool FileIsExcludedFromDependencyCheck(string fileName) { throw null; }
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Utilities
         public CanonicalTrackedOutputFiles(Microsoft.Build.Framework.ITask ownerTask, Microsoft.Build.Framework.ITaskItem[] tlogFiles) { }
         public CanonicalTrackedOutputFiles(Microsoft.Build.Framework.ITask ownerTask, Microsoft.Build.Framework.ITaskItem[] tlogFiles, bool constructOutputsFromTLogs) { }
         public CanonicalTrackedOutputFiles(Microsoft.Build.Framework.ITaskItem[] tlogFiles) { }
-        public System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.DateTime>> DependencyTable { get { throw null; } }
+        public System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.DateTime>> DependencyTable { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public void AddComputedOutputForSourceRoot(string sourceKey, string computedOutput) { }
         public void AddComputedOutputsForSourceRoot(string sourceKey, Microsoft.Build.Framework.ITaskItem[] computedOutputs) { }
         public void AddComputedOutputsForSourceRoot(string sourceKey, string[] computedOutputs) { }
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Utilities
         public CommandLineBuilder() { }
         public CommandLineBuilder(bool quoteHyphensOnCommandLine) { }
         public CommandLineBuilder(bool quoteHyphensOnCommandLine, bool useNewLineSeparator) { }
-        protected System.Text.StringBuilder CommandLine { get { throw null; } }
+        protected System.Text.StringBuilder CommandLine { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public int Length { get { throw null; } }
         public void AppendFileNameIfNotNull(Microsoft.Build.Framework.ITaskItem fileItem) { }
         public void AppendFileNameIfNotNull(string fileName) { }
@@ -174,19 +174,19 @@ namespace Microsoft.Build.Utilities
         public FlatTrackingData(Microsoft.Build.Framework.ITaskItem[] tlogFiles, Microsoft.Build.Framework.ITaskItem[] tlogFilesToIgnore, System.DateTime missingFileTimeUtc, string[] excludedInputPaths, System.Collections.Generic.IDictionary<string, System.DateTime> sharedLastWriteTimeUtcCache, bool treatRootMarkersAsEntries) { }
         public FlatTrackingData(Microsoft.Build.Framework.ITaskItem[] tlogFiles, bool skipMissingFiles) { }
         public FlatTrackingData(Microsoft.Build.Framework.ITaskItem[] tlogFiles, System.DateTime missingFileTimeUtc) { }
-        public System.Collections.Generic.List<string> MissingFiles { get { throw null; } set { } }
-        public string NewestFileName { get { throw null; } set { } }
+        public System.Collections.Generic.List<string> MissingFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string NewestFileName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.DateTime NewestFileTime { get { throw null; } set { } }
         public System.DateTime NewestFileTimeUtc { get { throw null; } set { } }
-        public string NewestTLogFileName { get { throw null; } set { } }
+        public string NewestTLogFileName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.DateTime NewestTLogTime { get { throw null; } set { } }
         public System.DateTime NewestTLogTimeUtc { get { throw null; } set { } }
-        public string OldestFileName { get { throw null; } set { } }
+        public string OldestFileName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.DateTime OldestFileTime { get { throw null; } set { } }
         public System.DateTime OldestFileTimeUtc { get { throw null; } set { } }
-        public bool SkipMissingFiles { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskItem[] TlogFiles { get { throw null; } set { } }
-        public bool TlogsAvailable { get { throw null; } set { } }
+        public bool SkipMissingFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Framework.ITaskItem[] TlogFiles { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool TlogsAvailable { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool TreatRootMarkersAsEntries { get { throw null; } set { } }
         public bool FileIsExcludedFromDependencyCheck(string fileName) { throw null; }
         public static void FinalizeTLogs(bool trackedOperationsSucceeded, Microsoft.Build.Framework.ITaskItem[] readTLogNames, Microsoft.Build.Framework.ITaskItem[] writeTLogNames, Microsoft.Build.Framework.ITaskItem[] trackedFilesToRemoveFromTLogs) { }
@@ -207,8 +207,8 @@ namespace Microsoft.Build.Utilities
     public abstract partial class Logger : Microsoft.Build.Framework.ILogger
     {
         protected Logger() { }
-        public virtual string Parameters { get { throw null; } set { } }
-        public virtual Microsoft.Build.Framework.LoggerVerbosity Verbosity { get { throw null; } set { } }
+        public virtual string Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public virtual Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public virtual string FormatErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs args) { throw null; }
         public virtual string FormatWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs args) { throw null; }
         public abstract void Initialize(Microsoft.Build.Framework.IEventSource eventSource);
@@ -342,14 +342,14 @@ namespace Microsoft.Build.Utilities
         protected Task() { }
         protected Task(System.Resources.ResourceManager taskResources) { }
         protected Task(System.Resources.ResourceManager taskResources, string helpKeywordPrefix) { }
-        public Microsoft.Build.Framework.IBuildEngine BuildEngine { get { throw null; } set { } }
+        public Microsoft.Build.Framework.IBuildEngine BuildEngine { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public Microsoft.Build.Framework.IBuildEngine2 BuildEngine2 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine3 BuildEngine3 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine4 BuildEngine4 { get { throw null; } }
         public Microsoft.Build.Framework.IBuildEngine5 BuildEngine5 { get { throw null; } }
         protected string HelpKeywordPrefix { get { throw null; } set { } }
-        public Microsoft.Build.Framework.ITaskHost HostObject { get { throw null; } set { } }
-        public Microsoft.Build.Utilities.TaskLoggingHelper Log { get { throw null; } }
+        public Microsoft.Build.Framework.ITaskHost HostObject { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public Microsoft.Build.Utilities.TaskLoggingHelper Log { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         protected System.Resources.ResourceManager TaskResources { get { throw null; } set { } }
         public abstract bool Execute();
     }
@@ -525,24 +525,24 @@ namespace Microsoft.Build.Utilities
         protected virtual System.Collections.Generic.Dictionary<string, string> EnvironmentOverride { get { throw null; } }
         public string[] EnvironmentVariables { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         [Microsoft.Build.Framework.OutputAttribute]
-        public int ExitCode { get { throw null; } }
+        public int ExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         protected virtual bool HasLoggedErrors { get { throw null; } }
-        public bool LogStandardErrorAsError { get { throw null; } set { } }
+        public bool LogStandardErrorAsError { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected virtual System.Text.Encoding ResponseFileEncoding { get { throw null; } }
         protected virtual System.Text.Encoding StandardErrorEncoding { get { throw null; } }
-        public string StandardErrorImportance { get { throw null; } set { } }
+        public string StandardErrorImportance { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected Microsoft.Build.Framework.MessageImportance StandardErrorImportanceToUse { get { throw null; } }
         protected virtual Microsoft.Build.Framework.MessageImportance StandardErrorLoggingImportance { get { throw null; } }
         protected virtual System.Text.Encoding StandardOutputEncoding { get { throw null; } }
-        public string StandardOutputImportance { get { throw null; } set { } }
+        public string StandardOutputImportance { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected Microsoft.Build.Framework.MessageImportance StandardOutputImportanceToUse { get { throw null; } }
         protected virtual Microsoft.Build.Framework.MessageImportance StandardOutputLoggingImportance { get { throw null; } }
         protected int TaskProcessTerminationTimeout { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public virtual int Timeout { get { throw null; } set { } }
+        public virtual int Timeout { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected System.Threading.ManualResetEvent ToolCanceled { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public virtual string ToolExe { get { throw null; } set { } }
         protected abstract string ToolName { get; }
-        public string ToolPath { get { throw null; } set { } }
+        public string ToolPath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool UseCommandProcessor { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public bool YieldDuringToolExecution { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected virtual string AdjustCommandsForOperatingSystem(string input) { throw null; }

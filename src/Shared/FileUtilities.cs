@@ -290,7 +290,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string NormalizePath(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
 #if FEATURE_LEGACY_GETFULLPATH
 
@@ -973,8 +973,8 @@ namespace Microsoft.Build.Shared
         /// <returns>relative path (can be the full path)</returns>
         internal static string MakeRelative(string basePath, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(basePath, "basePath");
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+            ErrorUtilities.VerifyThrowArgumentNull(basePath, nameof(basePath));
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
             if (basePath.Length == 0)
             {
@@ -1006,7 +1006,7 @@ namespace Microsoft.Build.Shared
         /// <returns>uri object</returns>
         private static Uri CreateUriFromPath(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, "path");
+            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
 
             Uri pathUri = null;
 

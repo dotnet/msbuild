@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Utilities
@@ -47,11 +46,10 @@ namespace Microsoft.Build.Utilities
 
         private static void GetAllChildIdsUnix(int parentId, ISet<int> children)
         {
-            string stdout;
             var exitCode = RunProcessAndWaitForExit(
                 "pgrep",
                 $"-P {parentId}",
-                out stdout);
+                out string stdout);
 
             if (exitCode == 0 && !string.IsNullOrEmpty(stdout))
             {
@@ -79,11 +77,10 @@ namespace Microsoft.Build.Utilities
 
         private static void KillProcessUnix(int processId)
         {
-            string stdout;
             RunProcessAndWaitForExit(
                 "kill",
                 $"-TERM {processId}",
-                out stdout);
+                out string _);
         }
 
         private static int RunProcessAndWaitForExit(string fileName, string arguments, out string stdout)

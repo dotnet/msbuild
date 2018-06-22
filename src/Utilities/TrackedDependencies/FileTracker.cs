@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Collections;
-using System.Text;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-
+using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -59,49 +58,60 @@ namespace Microsoft.Build.Utilities
     public static class FileTracker
     {
         #region Static Member Data
+
         // The default path to temp, used to create explicitly short and long paths
-        private static string s_tempPath = Path.GetTempPath();
+        private static readonly string s_tempPath = Path.GetTempPath();
 
         // The short path to temp
-        private static string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
+        private static readonly string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
 
         // The long path to temp
-        private static string s_tempLongPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetLongFilePath(s_tempPath).ToUpperInvariant());
+        private static readonly string s_tempLongPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetLongFilePath(s_tempPath).ToUpperInvariant());
 
         // The path to ApplicationData (is equal to %USERPROFILE%\Application Data folder in Windows XP and %USERPROFILE%\AppData\Roaming in Vista and later)
 #if FEATURE_SPECIAL_FOLDERS
-        private static string s_applicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).ToUpperInvariant());
+        private static readonly string s_applicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData).ToUpperInvariant());
 #else
-        private static string s_applicationDataPath = FileUtilities.EnsureTrailingSlash(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData).ToUpperInvariant());
+        private static readonly string s_applicationDataPath = FileUtilities.EnsureTrailingSlash(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData).ToUpperInvariant());
 #endif
 
         // The path to LocalApplicationData (is equal to %USERPROFILE%\Local Settings\Application Data folder in Windows XP and %USERPROFILE%\AppData\Local in Vista and later).
 #if FEATURE_SPECIAL_FOLDERS
-        private static string s_localApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).ToUpperInvariant());
+        private static readonly string s_localApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).ToUpperInvariant());
 #else
-            private static string s_localApplicationDataPath = FileUtilities.EnsureTrailingSlash(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData).ToUpperInvariant());
+        private static readonly string s_localApplicationDataPath = FileUtilities.EnsureTrailingSlash(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData).ToUpperInvariant());
 #endif
 
         // The path to the LocalLow folder. In Vista and later, user application data is organized across %USERPROFILE%\AppData\LocalLow,  %USERPROFILE%\AppData\Local (%LOCALAPPDATA%) 
         // and %USERPROFILE%\AppData\Roaming (%APPDATA%). The LocalLow folder is not present in XP.
 #if FEATURE_SPECIAL_FOLDERS
-        private static string s_localLowApplicationDataPath = FileUtilities.EnsureTrailingSlash(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
+        private static readonly string s_localLowApplicationDataPath = FileUtilities.EnsureTrailingSlash(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
 #else
-        private static string s_localLowApplicationDataPath = FileUtilities.EnsureTrailingSlash(Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
+        private static readonly string s_localLowApplicationDataPath = FileUtilities.EnsureTrailingSlash(Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.UserProfile), "AppData\\LocalLow").ToUpperInvariant());
 #endif
 
         // The path to the common Application Data, which is also used by some programs (e.g. antivirus) that we wish to ignore.
         // Is equal to C:\Documents and Settings\All Users\Application Data on XP, and C:\ProgramData on Vista+.
         // But for backward compatibility, the paths "C:\Documents and Settings\All Users\Application Data" and "C:\Users\All Users\Application Data" are still accessible via Junction point on Vista+.
         // Thus this list is created to store all possible common application data paths to cover more cases as possible.
-        private static List<string> s_commonApplicationDataPaths;
+        private static readonly List<string> s_commonApplicationDataPaths;
 
         // The name of the standalone tracker tool.
-        private static string s_TrackerFilename = "Tracker.exe";
+        private static readonly string s_TrackerFilename = "Tracker.exe";
 
         // The name of the assembly that is injected into the executing process.
         // Detours handles picking between FileTracker{32,64}.dll so only mention one.
-        private static string s_FileTrackerFilename = "FileTracker32.dll";
+        private static readonly string s_FileTrackerFilename = "FileTracker32.dll";
+
+        // The name of the PATH environment variable.
+        private const string pathEnvironmentVariableName = "PATH";
+
+        // Static cache of the path separator character in an array for use in String.Split.
+        private static readonly char[] pathSeparatorArray = { Path.PathSeparator };
+
+        // Static cache of the path separator character in an array for use in String.Split.
+        private static readonly string pathSeparator = Path.PathSeparator.ToString();
+
         #endregion
 
         #region Static constructor
@@ -140,26 +150,17 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Stops tracking file accesses.  
         /// </summary>
-        public static void EndTrackingContext()
-        {
-            InprocTrackingNativeMethods.EndTrackingContext();
-        }
+        public static void EndTrackingContext() => InprocTrackingNativeMethods.EndTrackingContext();
 
         /// <summary>
         /// Resume tracking file accesses in the current tracking context. 
         /// </summary>
-        public static void ResumeTracking()
-        {
-            InprocTrackingNativeMethods.ResumeTracking();
-        }
+        public static void ResumeTracking() => InprocTrackingNativeMethods.ResumeTracking();
 
         /// <summary>
         /// Set the global thread count, and assign that count to the current thread. 
         /// </summary>
-        public static void SetThreadCount(int threadCount)
-        {
-            InprocTrackingNativeMethods.SetThreadCount(threadCount);
-        }
+        public static void SetThreadCount(int threadCount) => InprocTrackingNativeMethods.SetThreadCount(threadCount);
 
         /// <summary>
         /// Starts tracking file accesses. 
@@ -167,10 +168,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="intermediateDirectory">The directory into which to write the tracking log files</param>
         /// <param name="taskName">The name of the task calling this function, used to determine the 
         /// names of the tracking log files</param>
-        public static void StartTrackingContext(string intermediateDirectory, string taskName)
-        {
-            InprocTrackingNativeMethods.StartTrackingContext(intermediateDirectory, taskName);
-        }
+        public static void StartTrackingContext(string intermediateDirectory, string taskName) => InprocTrackingNativeMethods.StartTrackingContext(intermediateDirectory, taskName);
 
         /// <summary>
         /// Starts tracking file accesses, using the rooting marker in the response file provided.  To 
@@ -182,25 +180,17 @@ namespace Microsoft.Build.Utilities
         /// names of the tracking log files</param>
         /// <param name="rootMarkerResponseFile">The path to the root marker response file.</param>
         public static void StartTrackingContextWithRoot(string intermediateDirectory, string taskName, string rootMarkerResponseFile)
-        {
-            InprocTrackingNativeMethods.StartTrackingContextWithRoot(intermediateDirectory, taskName, rootMarkerResponseFile);
-        }
+            => InprocTrackingNativeMethods.StartTrackingContextWithRoot(intermediateDirectory, taskName, rootMarkerResponseFile);
 
         /// <summary>
         /// Stop tracking file accesses and get rid of the current tracking contexts. 
         /// </summary>
-        public static void StopTrackingAndCleanup()
-        {
-            InprocTrackingNativeMethods.StopTrackingAndCleanup();
-        }
+        public static void StopTrackingAndCleanup() => InprocTrackingNativeMethods.StopTrackingAndCleanup();
 
         /// <summary>
         /// Temporarily suspend tracking of file accesses in the current tracking context. 
         /// </summary>
-        public static void SuspendTracking()
-        {
-            InprocTrackingNativeMethods.SuspendTracking();
-        }
+        public static void SuspendTracking() => InprocTrackingNativeMethods.SuspendTracking();
 
         /// <summary>
         /// Write tracking logs for all contexts and threads. 
@@ -209,10 +199,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="taskName">The name of the task calling this function, used to determine the 
         /// names of the tracking log files</param>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLogs", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
-        public static void WriteAllTLogs(string intermediateDirectory, string taskName)
-        {
-            InprocTrackingNativeMethods.WriteAllTLogs(intermediateDirectory, taskName);
-        }
+        public static void WriteAllTLogs(string intermediateDirectory, string taskName) => InprocTrackingNativeMethods.WriteAllTLogs(intermediateDirectory, taskName);
 
         /// <summary>
         /// Write tracking logs corresponding to the current tracking context.  
@@ -221,10 +208,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="taskName">The name of the task calling this function, used to determine the 
         /// names of the tracking log files</param>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLogs", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
-        public static void WriteContextTLogs(string intermediateDirectory, string taskName)
-        {
-            InprocTrackingNativeMethods.WriteContextTLogs(intermediateDirectory, taskName);
-        }
+        public static void WriteContextTLogs(string intermediateDirectory, string taskName) => InprocTrackingNativeMethods.WriteContextTLogs(intermediateDirectory, taskName);
 
         #endregion // Native method wrappers
 
@@ -238,8 +222,6 @@ namespace Microsoft.Build.Utilities
         /// </param>
         public static bool FileIsExcludedFromDependencies(string fileName)
         {
-            bool exclude = true;
-
             // UNDONE: This check means that we cannot incremental build projects
             // that exist under the following directories on XP:
             // %USERPROFILE%\Application Data
@@ -259,14 +241,12 @@ namespace Microsoft.Build.Utilities
             // 5. Files under the common ("All Users") Application Data location -- C:\Documents and Settings\All Users\Application Data 
             //    on XP and either C:\Users\All Users\Application Data or C:\ProgramData on Vista+
 
-            exclude = FileTracker.FileIsUnderPath(fileName, s_applicationDataPath) ||
-                      FileTracker.FileIsUnderPath(fileName, s_localApplicationDataPath) ||
-                      FileTracker.FileIsUnderPath(fileName, s_localLowApplicationDataPath) ||
-                      FileTracker.FileIsUnderPath(fileName, s_tempShortPath) ||
-                      FileTracker.FileIsUnderPath(fileName, s_tempLongPath) ||
-                      s_commonApplicationDataPaths.Any(p => FileTracker.FileIsUnderPath(fileName, p));
-
-            return exclude;
+            return FileIsUnderPath(fileName, s_applicationDataPath) ||
+                   FileIsUnderPath(fileName, s_localApplicationDataPath) ||
+                   FileIsUnderPath(fileName, s_localLowApplicationDataPath) ||
+                   FileIsUnderPath(fileName, s_tempShortPath) ||
+                   FileIsUnderPath(fileName, s_tempLongPath) ||
+                   s_commonApplicationDataPaths.Any(p => FileIsUnderPath(fileName, p));
         }
 
         /// <summary>
@@ -291,27 +271,21 @@ namespace Microsoft.Build.Utilities
             path = FileUtilities.EnsureTrailingSlash(path);
 
             // Is the fileName under the filePath?
-            return String.Compare(fileName, 0, path, 0, path.Length, StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Compare(fileName, 0, path, 0, path.Length, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
         /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
-        public static string FormatRootingMarker(ITaskItem source)
-        {
-            return FormatRootingMarker(new ITaskItem[] { source }, null);
-        }
+        public static string FormatRootingMarker(ITaskItem source) => FormatRootingMarker(new[] { source }, null);
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
         /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
         /// <param name="output">An <see cref="ITaskItem"/> containing information about the output.</param>
-        public static string FormatRootingMarker(ITaskItem source, ITaskItem output)
-        {
-            return FormatRootingMarker(new ITaskItem[] { source }, new ITaskItem[] { output });
-        }
+        public static string FormatRootingMarker(ITaskItem source, ITaskItem output) => FormatRootingMarker(new[] { source }, new[] { output });
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
@@ -319,10 +293,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="sources">
         /// ITaskItem array of primary sources.
         /// </param>
-        public static string FormatRootingMarker(ITaskItem[] sources)
-        {
-            return FormatRootingMarker(sources, null);
-        }
+        public static string FormatRootingMarker(ITaskItem[] sources) => FormatRootingMarker(sources, null);
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
@@ -335,38 +306,24 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentNull(sources, "sources");
 
-            ArrayList rootSources = new ArrayList();
-            StringBuilder rootSourcesList = new StringBuilder();
-            int builderLength = 0;
+            // So we don't have to deal with null checks.
+            outputs = outputs ?? Array.Empty<ITaskItem>();
+
+            var rootSources = new List<string>(sources.Length + outputs.Length);
 
             foreach (ITaskItem source in sources)
             {
                 rootSources.Add(FileUtilities.NormalizePath(source.ItemSpec).ToUpperInvariant());
             }
 
-            if (outputs != null)
+            foreach (ITaskItem output in outputs)
             {
-                foreach (ITaskItem output in outputs)
-                {
-                    rootSources.Add(FileUtilities.NormalizePath(output.ItemSpec).ToUpperInvariant());
-                }
+                rootSources.Add(FileUtilities.NormalizePath(output.ItemSpec).ToUpperInvariant());
             }
 
             rootSources.Sort(StringComparer.OrdinalIgnoreCase);
 
-            foreach (string source in rootSources)
-            {
-                rootSourcesList.Append(source);
-                rootSourcesList.Append('|');
-            }
-
-            builderLength = rootSourcesList.Length - 1;
-            if (builderLength < 0)
-            {
-                builderLength = 0;
-            }
-
-            return rootSourcesList.ToString(0, builderLength);
+            return string.Join("|", rootSources);
         }
 
         /// <summary>
@@ -377,10 +334,7 @@ namespace Microsoft.Build.Utilities
         /// ITaskItem array of primary sources.
         /// </param>
         /// <returns>The response file path.</returns>
-        public static string CreateRootingMarkerResponseFile(ITaskItem[] sources)
-        {
-            return CreateRootingMarkerResponseFile(FormatRootingMarker(sources));
-        }
+        public static string CreateRootingMarkerResponseFile(ITaskItem[] sources) => CreateRootingMarkerResponseFile(FormatRootingMarker(sources));
 
         /// <summary>
         /// Given a rooting marker, creates a temporary response file with that rooting marker 
@@ -402,10 +356,7 @@ namespace Microsoft.Build.Utilities
         /// not be on the PATH.
         /// </summary>
         /// <returns>The old value of PATH</returns>
-        public static string EnsureFileTrackerOnPath()
-        {
-            return EnsureFileTrackerOnPath(null);
-        }
+        public static string EnsureFileTrackerOnPath() => EnsureFileTrackerOnPath(null);
 
         /// <summary>
         /// Prepends the path to the appropriate FileTracker assembly to the PATH
@@ -416,16 +367,12 @@ namespace Microsoft.Build.Utilities
         /// <returns>The old value of PATH</returns>
         public static string EnsureFileTrackerOnPath(string rootPath)
         {
-            string oldPath = Environment.GetEnvironmentVariable("PATH");
+            string oldPath = Environment.GetEnvironmentVariable(pathEnvironmentVariableName);
             string fileTrackerPath = GetFileTrackerPath(ExecutableType.SameAsCurrentProcess, rootPath);
 
-            if (!String.IsNullOrEmpty(fileTrackerPath))
+            if (!string.IsNullOrEmpty(fileTrackerPath))
             {
-                Environment.SetEnvironmentVariable
-                            (
-                                "Path",
-                                Path.GetDirectoryName(fileTrackerPath) + ";" + oldPath
-                            );
+                Environment.SetEnvironmentVariable(pathEnvironmentVariableName, Path.GetDirectoryName(fileTrackerPath) + pathSeparator + oldPath);
             }
 
             return oldPath;
@@ -438,22 +385,15 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public static string FindTrackerOnPath()
         {
-            string[] paths = Environment.GetEnvironmentVariable("PATH").Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] paths = Environment.GetEnvironmentVariable(pathEnvironmentVariableName).Split(pathSeparatorArray, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (string path in paths)
             {
-                string trackerPath;
-
                 try
                 {
-                    if (!Path.IsPathRooted(path))
-                    {
-                        trackerPath = Path.GetFullPath(path);
-                    }
-                    else
-                    {
-                        trackerPath = path;
-                    }
+                    string trackerPath = !Path.IsPathRooted(path)
+                        ? Path.GetFullPath(path)
+                        : path;
 
                     trackerPath = Path.Combine(trackerPath, s_TrackerFilename);
 
@@ -477,10 +417,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="toolType">The executable type for the tool being tracked</param>
         /// <returns>True if we need to track out-of-proc, false if inproc tracking is OK</returns>
-        public static bool ForceOutOfProcTracking(ExecutableType toolType)
-        {
-            return ForceOutOfProcTracking(toolType, null, null);
-        }
+        public static bool ForceOutOfProcTracking(ExecutableType toolType) => ForceOutOfProcTracking(toolType, null, null);
 
         /// <summary>
         /// Determines whether we must track out-of-proc, or whether inproc tracking will work. 
@@ -517,10 +454,7 @@ namespace Microsoft.Build.Utilities
         /// Tracker.exe. 
         /// </summary>
         /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
-        public static string GetTrackerPath(ExecutableType toolType)
-        {
-            return GetTrackerPath(toolType, null);
-        }
+        public static string GetTrackerPath(ExecutableType toolType) => GetTrackerPath(toolType, null);
 
         /// <summary>
         /// Given the ExecutableType of the tool being wrapped and information that we 
@@ -529,10 +463,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
         /// <param name="rootPath">The root path for Tracker.exe.  Overrides the toolType if specified.</param>
-        public static string GetTrackerPath(ExecutableType toolType, string rootPath)
-        {
-            return GetPath(s_TrackerFilename, toolType, rootPath);
-        }
+        public static string GetTrackerPath(ExecutableType toolType, string rootPath) => GetPath(s_TrackerFilename, toolType, rootPath);
 
         /// <summary>
         /// Given the ExecutableType of the tool being wrapped and information that we 
@@ -540,10 +471,7 @@ namespace Microsoft.Build.Utilities
         /// FileTracker.dll. 
         /// </summary>
         /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
-        public static string GetFileTrackerPath(ExecutableType toolType)
-        {
-            return GetFileTrackerPath(toolType, null);
-        }
+        public static string GetFileTrackerPath(ExecutableType toolType) => GetFileTrackerPath(toolType, null);
 
         /// <summary>
         /// Given the ExecutableType of the tool being wrapped and information that we 
@@ -552,10 +480,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="toolType">The <see cref="ExecutableType"/> of the tool being wrapped</param>
         /// <param name="rootPath">The root path for FileTracker.dll.  Overrides the toolType if specified.</param>
-        public static string GetFileTrackerPath(ExecutableType toolType, string rootPath)
-        {
-            return GetPath(s_FileTrackerFilename, toolType, rootPath);
-        }
+        public static string GetFileTrackerPath(ExecutableType toolType, string rootPath) => GetPath(s_FileTrackerFilename, toolType, rootPath);
 
         /// <summary>
         /// Given a filename (only really meant to support either Tracker.exe or FileTracker.dll), returns
@@ -566,9 +491,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="rootPath">The root path for the file.  Overrides the toolType if specified.</param>
         private static string GetPath(string filename, ExecutableType toolType, string rootPath)
         {
-            string trackerPath = null;
+            string trackerPath;
 
-            if (!String.IsNullOrEmpty(rootPath))
+            if (!string.IsNullOrEmpty(rootPath))
             {
                 trackerPath = Path.Combine(rootPath, filename);
 
@@ -637,9 +562,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="rootFiles">Rooting marker</param>
         /// <returns>The arguments as a string</returns>
         public static string TrackerResponseFileArguments(string dllName, string intermediateDirectory, string rootFiles)
-        {
-            return TrackerResponseFileArguments(dllName, intermediateDirectory, rootFiles, null);
-        }
+            => TrackerResponseFileArguments(dllName, intermediateDirectory, rootFiles, null);
 
         /// <summary>
         /// This method constructs the correct Tracker.exe response file arguments from its parameters
@@ -655,7 +578,7 @@ namespace Microsoft.Build.Utilities
 
             builder.AppendSwitchIfNotNull("/d ", dllName);
 
-            if (!String.IsNullOrEmpty(intermediateDirectory))
+            if (!string.IsNullOrEmpty(intermediateDirectory))
             {
                 intermediateDirectory = FileUtilities.NormalizePath(intermediateDirectory);
                 // If the intermediate directory ends up with a trailing slash, then be rid of it!
@@ -703,9 +626,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="rootFiles">Rooting marker</param>
         /// <returns>The arguments as a string</returns>
         public static string TrackerArguments(string command, string arguments, string dllName, string intermediateDirectory, string rootFiles)
-        {
-            return TrackerArguments(command, arguments, dllName, intermediateDirectory, rootFiles, null);
-        }
+            => TrackerArguments(command, arguments, dllName, intermediateDirectory, rootFiles, null);
 
         /// <summary>
         /// This method constructs the correct Tracker.exe arguments from its parameters
@@ -718,13 +639,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="cancelEventName">If a cancel event has been created that Tracker should be listening for, its name is passed here</param>
         /// <returns>The arguments as a string</returns>
         public static string TrackerArguments(string command, string arguments, string dllName, string intermediateDirectory, string rootFiles, string cancelEventName)
-        {
-            string fullArguments = TrackerResponseFileArguments(dllName, intermediateDirectory, rootFiles, cancelEventName);
-
-            fullArguments += TrackerCommandArguments(command, arguments);
-
-            return fullArguments;
-        }
+            => TrackerResponseFileArguments(dllName, intermediateDirectory, rootFiles, cancelEventName) + TrackerCommandArguments(command, arguments);
 
         #region StartProcess methods
 
@@ -758,9 +673,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="rootFiles">Rooting marker</param>
         /// <returns>Process instance</returns>
         public static Process StartProcess(string command, string arguments, ExecutableType toolType, string dllName, string intermediateDirectory, string rootFiles)
-        {
-            return StartProcess(command, arguments, toolType, dllName, intermediateDirectory, rootFiles, null);
-        }
+            => StartProcess(command, arguments, toolType, dllName, intermediateDirectory, rootFiles, null);
 
         /// <summary>
         /// Start the process; tracking the command.
@@ -772,9 +685,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="rootFiles">Rooting marker</param>
         /// <returns>Process instance</returns>
         public static Process StartProcess(string command, string arguments, ExecutableType toolType, string intermediateDirectory, string rootFiles)
-        {
-            return StartProcess(command, arguments, toolType, null, intermediateDirectory, rootFiles, null);
-        }
+            => StartProcess(command, arguments, toolType, null, intermediateDirectory, rootFiles, null);
 
         /// <summary>
         /// Start the process; tracking the command.
@@ -785,9 +696,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="rootFiles">Rooting marker</param>
         /// <returns>Process instance</returns>
         public static Process StartProcess(string command, string arguments, ExecutableType toolType, string rootFiles)
-        {
-            return StartProcess(command, arguments, toolType, null, null, rootFiles, null);
-        }
+            => StartProcess(command, arguments, toolType, null, null, rootFiles, null);
 
         /// <summary>
         /// Start the process; tracking the command.
@@ -797,9 +706,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="toolType">The type of executable the wrapped tool is</param>
         /// <returns>Process instance</returns>
         public static Process StartProcess(string command, string arguments, ExecutableType toolType)
-        {
-            return StartProcess(command, arguments, toolType, null, null, null, null);
-        }
+            => StartProcess(command, arguments, toolType, null, null, null, null);
 
         #endregion // StartProcess methods
 
@@ -817,7 +724,7 @@ namespace Microsoft.Build.Utilities
             // Only log when we have been passed a TaskLoggingHelper
             if (Log != null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, "messageResourceName");
+                ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
                 Log.LogMessage(importance, AssemblyResources.FormatResourceString(messageResourceName, messageArgs));
             }

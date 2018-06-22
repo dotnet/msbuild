@@ -925,8 +925,8 @@ namespace Microsoft.Build.Shared
         /// <returns>The path to the reference assembly location</returns>
         internal static string GenerateReferenceAssemblyPath(string targetFrameworkRootPath, FrameworkName frameworkName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath, "targetFrameworkRootPath");
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, "frameworkName");
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath, nameof(targetFrameworkRootPath));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, nameof(frameworkName));
 
             try
             {
@@ -958,7 +958,7 @@ namespace Microsoft.Build.Shared
         /// </comments>
         internal static string RemoveDirectories(string path, int numberOfLevelsToRemove)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(numberOfLevelsToRemove > 0, "what are you doing passing a negative number to this function??");
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(numberOfLevelsToRemove > 0, nameof(numberOfLevelsToRemove));
 
             string fixedPath = null;
             if (path != null)

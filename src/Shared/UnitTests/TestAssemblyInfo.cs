@@ -79,7 +79,7 @@ public class MSBuildTestAssemblyFixture : IDisposable
     /// <param name="testEnvironment"></param>
     private static void SetDotnetHostPath(TestEnvironment testEnvironment)
     {
-        var currentFolder = System.AppContext.BaseDirectory;
+        var currentFolder = AppContext.BaseDirectory;
 
         while (currentFolder != null)
         {

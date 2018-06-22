@@ -20,13 +20,8 @@ namespace Microsoft.Build.Shared
         /// <returns>The resource string, or null if not found.</returns>
         internal static string GetString(string name)
         {
-            // NOTE: the ResourceManager.GetString() method is thread-safe
-            string resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
-
-            if (resource == null)
-            {
-                resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
-            }
+            string resource = PrimaryResources.GetString(name, CultureInfo.CurrentUICulture)
+                ?? SharedResources.GetString(name, CultureInfo.CurrentUICulture);
 
             ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
 
@@ -38,26 +33,14 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <remarks>This property is thread-safe.</remarks>
         /// <value>ResourceManager for primary resources.</value>
-        internal static ResourceManager PrimaryResources
-        {
-            get
-            {
-                return s_resources;
-            }
-        }
+        internal static ResourceManager PrimaryResources { get; } = new ResourceManager("Microsoft.Build.Utilities.Core.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
 
         /// <summary>
         /// Gets the assembly's shared resources i.e. the resources this assembly shares with other assemblies.
         /// </summary>
         /// <remarks>This property is thread-safe.</remarks>
         /// <value>ResourceManager for shared resources.</value>
-        internal static ResourceManager SharedResources
-        {
-            get
-            {
-                return s_sharedResources;
-            }
-        }
+        internal static ResourceManager SharedResources { get; } = new ResourceManager("Microsoft.Build.Utilities.Core.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in. The current thread's culture is used for formatting.
@@ -68,7 +51,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unformatted, "unformatted");
+            ErrorUtilities.VerifyThrowArgumentNull(unformatted, nameof(unformatted));
 
             return ResourceUtilities.FormatString(unformatted, args);
         }
@@ -87,17 +70,12 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName, "resourceName");
+            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
 
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resourceString = GetString(resourceName);
 
             return FormatString(resourceString, args);
         }
-
-        // assembly resources
-        private static readonly ResourceManager s_resources = new ResourceManager("Microsoft.Build.Utilities.Core.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
-        // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("Microsoft.Build.Utilities.Core.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
     }
 }
