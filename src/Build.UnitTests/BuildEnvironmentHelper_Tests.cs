@@ -59,6 +59,37 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [Trait("Category", "nonlinuxtests")]
+        [Trait("Category", "nonosxtests")]
+        public void FindVisualStudioEnvironmentByEnvironmentVariable(bool is64BitMSbuild)
+        {
+            using (var env = new EmptyVSEnviroment())
+            {
+                var msbuildBinDirectory = is64BitMSbuild
+                    ? Path.Combine(env.BuildDirectory, "amd64")
+                    : env.BuildDirectory;
+
+                var msBuildPath = Path.Combine(msbuildBinDirectory, MSBuildExeName);
+                var msBuildConfig = Path.Combine(msbuildBinDirectory, $"{MSBuildExeName}.config");
+                var vsMSBuildDirectory = Path.Combine(env.TempFolderRoot, "MSBuild");
+
+                env.WithEnvironment("MSBUILD_EXE_PATH", msBuildPath);
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
+
+                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
+                BuildEnvironmentHelper.Instance.MSBuildExtensionsPath.ShouldBe(vsMSBuildDirectory);
+                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.ShouldBe(msbuildBinDirectory);
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath.ShouldBe(msBuildPath);
+                BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile.ShouldBe(msBuildConfig);
+                BuildEnvironmentHelper.Instance.RunningInVisualStudio.ShouldBeFalse();
+                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
+                BuildEnvironmentHelper.Instance.RunningTests.ShouldBeFalse();
+            }
+        }
+
         [Fact]
         [Trait("Category", "nonlinuxtests")]
         [Trait("Category", "nonosxtests")]
@@ -438,7 +469,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             public string MSBuildExePath64 => Path.Combine(BuildDirectory64, MSBuildExeName);
 
-            public EmptyVSEnviroment() : base("msbuild.exe", false)
+            public EmptyVSEnviroment() : base("MSBuild.exe", false)
             {
                 try
                 {
