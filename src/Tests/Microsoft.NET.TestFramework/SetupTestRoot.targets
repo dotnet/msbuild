@@ -41,6 +41,7 @@
     <add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" />
     <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
     <add key="container-tools" value="https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json" />
+    <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
         ]]>
       </NugetConfigFeeds>
 
