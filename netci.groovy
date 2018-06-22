@@ -59,7 +59,10 @@ ${buildCommand}
 """
         }
         else if (os == 'Windows_NT_NoSuffix') {
-            buildCommand = "${buildCommand} /p:DropSuffix=true"
+            buildCommand = """
+set DropSuffix=true
+${buildCommand}
+"""
         }
     }
     else if (os == 'Windows_2016') {
@@ -68,7 +71,7 @@ ${buildCommand}
     else if (os.startsWith("Linux")) {
         osUsedForMachineAffinity = 'Ubuntu16.04';
         if (os == 'Linux-musl') {
-            buildCommand = "${buildCommand} --runtime-id linux-musl-x64 --docker alpine.3.6"
+            buildCommand = "${baseShellBuildCommand} --runtime-id linux-musl-x64 --docker alpine.3.6"
         }
         else
         {
@@ -77,7 +80,10 @@ ${buildCommand}
                 buildCommand = "${buildCommand} --architecture ${architecture} /p:CLIBUILD_SKIP_TESTS=true"
             }
             if (os == 'Linux_NoSuffix') {
-                buildCommand = "${buildCommand} /p:DropSuffix=true"
+                buildCommand = """
+export DropSuffix=true
+${buildCommand}
+"""
             }
         }
     }
