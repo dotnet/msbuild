@@ -11,7 +11,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal sealed class RuntimeSection
     {
-       /// <summary>
+        /// <summary>
         /// The reader is positioned on a &lt;runtime&gt; element--read it.
         /// </summary>
         internal void Read(XmlReader reader)

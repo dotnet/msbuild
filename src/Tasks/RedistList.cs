@@ -939,7 +939,7 @@ namespace Microsoft.Build.Tasks
         private static Dictionary<string, string[]> s_subsetListPathCache;
 
         // Lock for subsetListPathCache
-        private static readonly object s_subsetListPathCacheLock = new object();
+        private static readonly Object s_subsetListPathCacheLock = new Object();
 
         // Folder to look for the subset lists in under the target framework directories
         private const string subsetListFolder = "SubsetList";

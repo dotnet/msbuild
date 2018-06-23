@@ -39,5 +39,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             return _list.GetEnumerator();
         }
+
+        internal CompatibleFramework[] ToArray()
+        {
+            return _list.ToArray();
+        }
     }
 }

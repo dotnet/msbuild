@@ -1340,9 +1340,9 @@ namespace Microsoft.Build.Tasks
 
                         // For testing especially it's nice to have a set order of what the generated appxlocation string will be at the end
                         var architectureLocations = new SortedDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-                        var appxLocationComponents = new List<string>();
+                        List<string> appxLocationComponents = new List<string>();
 
-                        foreach (KeyValuePair<string, string> appxLocation in AppxLocationsFromManifest)
+                        foreach (var appxLocation in AppxLocationsFromManifest)
                         {
                             if (!String.IsNullOrEmpty(appxLocation.Key))
                             {
@@ -1400,7 +1400,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        foreach (KeyValuePair<string, string> location in architectureLocations)
+                        foreach (var location in architectureLocations)
                         {
                             appxLocationComponents.Add(location.Key);
                             appxLocationComponents.Add(location.Value);
@@ -1434,9 +1434,10 @@ namespace Microsoft.Build.Tasks
                 ResolvedItem.SetMetadata("Version", Version);
 
                 // Check to see if the copy local metadata has been set in the project file.
-                bool hasExpandReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.ExpandReferenceAssemblies), out _);
-                bool hasCopyRedist = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyRedist), out _);
-                bool hasCopyLocalExpandedReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyLocalExpandedReferenceAssemblies), out _);
+                bool result;
+                bool hasExpandReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.ExpandReferenceAssemblies), out result);
+                bool hasCopyRedist = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyRedist), out result);
+                bool hasCopyLocalExpandedReferenceAssemblies = bool.TryParse(ReferenceItem.GetMetadata(SDKManifest.Attributes.CopyLocalExpandedReferenceAssemblies), out result);
 
                 bool referenceItemHasSDKName = sdkNamesOnReferenceItems.Contains(SDKName);
 

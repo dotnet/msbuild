@@ -51,7 +51,14 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
-        private SystemState _cache;
+        private SystemState _cache = null;
+
+        /// <summary>
+        /// Construct
+        /// </summary>
+        public ResolveAssemblyReference()
+        {
+        }
 
         #region Properties
 
@@ -80,6 +87,7 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _serializationAssemblyFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _scatterFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _copyLocalFiles = Array.Empty<TaskItem>();
+        private ITaskItem[] _suggestedRedirects = Array.Empty<TaskItem>();
         private string[] _targetFrameworkSubsets = Array.Empty<string>();
         private string[] _fullTargetFrameworkSubsetNames = Array.Empty<string>();
         private string _targetedFrameworkMoniker = String.Empty;
@@ -693,7 +701,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The display name of the target framework moniker, if any. This is only for logging.
         /// </summary>
-        public string TargetFrameworkMonikerDisplayName { get; set; }
+        public string TargetFrameworkMonikerDisplayName
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Provide a set of names which if seen in the TargetFrameworkSubset list will cause the ignoring 
@@ -856,12 +868,15 @@ namespace Microsoft.Build.Tasks
         ///  MaxVersion - the maximum version number.
         /// </summary>
         [Output]
-        public ITaskItem[] SuggestedRedirects { get; private set; } = Array.Empty<TaskItem>();
+        public ITaskItem[] SuggestedRedirects
+        {
+            get { return _suggestedRedirects; }
+        }
 
         /// <summary>
         /// Storage for names of all files writen to disk.
         /// </summary>
-        private readonly ArrayList _filesWritten = new ArrayList();
+        private ArrayList _filesWritten = new ArrayList();
 
         /// <summary>
         /// The names of all files written to disk.
@@ -1027,9 +1042,10 @@ namespace Microsoft.Build.Tasks
                                         assemblyIdentityAttributes.Add(new XAttribute("name", idealRemappingPartialAssemblyName.Name));
 
                                         // We use "neutral" for "Invariant Language (Invariant Country)" in assembly names.
+                                        var cultureString = idealRemappingPartialAssemblyName.CultureName;
                                         assemblyIdentityAttributes.Add(new XAttribute("culture", String.IsNullOrEmpty(idealRemappingPartialAssemblyName.CultureName) ? "neutral" : idealRemappingPartialAssemblyName.CultureName));
 
-                                        byte[] publicKeyToken = idealRemappingPartialAssemblyName.GetPublicKeyToken();
+                                        var publicKeyToken = idealRemappingPartialAssemblyName.GetPublicKeyToken();
                                         assemblyIdentityAttributes.Add(new XAttribute("publicKeyToken", ResolveAssemblyReference.ByteArrayToString(publicKeyToken)));
 
                                         var node = new XElement(
@@ -1947,8 +1963,9 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
+
                     // Validate the contents of the InstalledAssemblyTables parameter.
-                    AssemblyTableInfo[] installedAssemblyTableInfo = GetInstalledAssemblyTableInfo(_ignoreDefaultInstalledAssemblyTables, _installedAssemblyTables, RedistList.GetRedistListPathsFromDisk, TargetFrameworkDirectories);
+                    AssemblyTableInfo[] installedAssemblyTableInfo = GetInstalledAssemblyTableInfo(_ignoreDefaultInstalledAssemblyTables, _installedAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), TargetFrameworkDirectories);
                     AssemblyTableInfo[] whiteListSubsetTableInfo = null;
 
                     InstalledAssemblies installedAssemblies = null;
@@ -2094,7 +2111,7 @@ namespace Microsoft.Build.Tasks
                             : null;
 
                     // Start the table of dependencies with all of the primary references.
-                    var dependencyTable = new ReferenceTable
+                    ReferenceTable dependencyTable = new ReferenceTable
                     (
                         BuildEngine,
                         _findDependencies,
@@ -2143,7 +2160,7 @@ namespace Microsoft.Build.Tasks
                     ArrayList generalResolutionExceptions = new ArrayList();
 
                     subsetOrProfileName = targetingSubset && String.IsNullOrEmpty(_targetedFrameworkMoniker) ? subsetOrProfileName : _targetedFrameworkMoniker;
-                    bool excludedReferencesExist;
+                    bool excludedReferencesExist = false;
 
                     List<DependentAssembly> autoUnifiedRemappedAssemblies = null;
                     List<AssemblyNameReference> autoUnifiedRemappedAssemblyReferences = null;
@@ -2178,6 +2195,7 @@ namespace Microsoft.Build.Tasks
                         {
                             dependencyTable.RemoveReferencesMarkedForExclusion(true /* Remove the reference and do not warn*/, subsetOrProfileName);
                         }
+
 
                         // Based on the closure, get a table of ideal remappings needed to 
                         // produce zero conflicts.
@@ -2297,8 +2315,8 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    DependsOnSystemRuntime = useSystemRuntime.ToString();
-                    DependsOnNETStandard = useNetStandard.ToString();
+                    this.DependsOnSystemRuntime = useSystemRuntime.ToString();
+                    this.DependsOnNETStandard = useNetStandard.ToString();
 
                     WriteStateFile();
 
@@ -2325,7 +2343,7 @@ namespace Microsoft.Build.Tasks
                                 {
                                     assemblyName = getAssemblyName(item.ItemSpec);
                                 }
-                                catch (FileLoadException)
+                                catch (System.IO.FileLoadException)
                                 {
                                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
@@ -2396,7 +2414,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getAssemblyMetadata">the delegate to access assembly metadata</param>
         /// <param name="assemblyMetadataCache">Cache of pre-extracted assembly metadata.</param>
         /// <returns>list of dependencies</returns>
-        private static AssemblyNameExtension[] GetDependencies(Reference resolvedReference, FileExists fileExists, GetAssemblyMetadata getAssemblyMetadata, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
+        private AssemblyNameExtension[] GetDependencies(Reference resolvedReference, FileExists fileExists, GetAssemblyMetadata getAssemblyMetadata, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
         {
             AssemblyNameExtension[] result = null;
             if (resolvedReference != null && resolvedReference.IsPrimary && !resolvedReference.IsBadImage)
@@ -2726,7 +2744,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            SuggestedRedirects = holdSuggestedRedirects.ToArray();
+            _suggestedRedirects = holdSuggestedRedirects.ToArray();
         }
 
         /// <summary>
@@ -2738,7 +2756,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of AssemblyTableInfo objects (Describe the path and framework directory of a redist or subset list xml file) </returns>
         private AssemblyTableInfo[] GetInstalledAssemblyTableInfo(bool ignoreInstalledAssemblyTables, ITaskItem[] assemblyTables, GetListPath GetAssemblyListPaths, string[] targetFrameworkDirectories)
         {
-            var tableMap = new Dictionary<string, AssemblyTableInfo>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, AssemblyTableInfo> tableMap = new Dictionary<string, AssemblyTableInfo>(StringComparer.OrdinalIgnoreCase);
 
             if (!ignoreInstalledAssemblyTables)
             {
@@ -2782,7 +2800,7 @@ namespace Microsoft.Build.Tasks
                 tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory);
             }
 
-            var extensions = new AssemblyTableInfo[tableMap.Count];
+            AssemblyTableInfo[] extensions = new AssemblyTableInfo[tableMap.Count];
             tableMap.Values.CopyTo(extensions, 0);
 
             return extensions;

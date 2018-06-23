@@ -226,12 +226,12 @@ namespace Microsoft.Build.Tasks
                 codeTypeDeclaration.Members.Add(new CodeSnippetTypeMember(taskInfo.SourceCode));
             }
 
-            var codeNamespace = new CodeNamespace("InlineCode");
+            CodeNamespace codeNamespace = new CodeNamespace("InlineCode");
             codeNamespace.Imports.AddRange(DefaultNamespaces.Union(taskInfo.Namespaces, StringComparer.OrdinalIgnoreCase).Select(i => new CodeNamespaceImport(i)).ToArray());
 
             codeNamespace.Types.Add(codeTypeDeclaration);
 
-            var codeCompileUnit = new CodeCompileUnit();
+            CodeCompileUnit codeCompileUnit = new CodeCompileUnit();
 
             codeCompileUnit.Namespaces.Add(codeNamespace);
 

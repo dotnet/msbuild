@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             internal FileState(SerializationInfo info, StreamingContext context)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+                ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
                 lastModified = new DateTime(info.GetInt64("mod"), (DateTimeKind)info.GetInt32("modk"));
                 assemblyName = (AssemblyNameExtension)info.GetValue("an", typeof(AssemblyNameExtension));
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Tasks
             [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
             public void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+                ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
                 info.AddValue("mod", lastModified.Ticks);
                 info.AddValue("modk", (int)lastModified.Kind);
@@ -244,7 +244,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal SystemState(SerializationInfo info, StreamingContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
             instanceLocalFileStateCache = (Hashtable)info.GetValue("fileState", typeof(Hashtable));
             isDirty = false;
@@ -255,6 +255,8 @@ namespace Microsoft.Build.Tasks
         /// This is used to optimize IO in the case of files requested from one 
         /// of the FX folders.
         /// </summary>
+        /// <param name="providedFrameworkPaths"></param>
+        /// <param name="installedAssemblyTables"></param>
         internal void SetInstalledAssemblyInformation
         (
             AssemblyTableInfo[] installedAssemblyTableInfos
@@ -269,7 +271,7 @@ namespace Microsoft.Build.Tasks
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
 
             info.AddValue("fileState", instanceLocalFileStateCache);
         }
@@ -379,14 +381,15 @@ namespace Microsoft.Build.Tasks
         {
             // Is it in the process-wide cache?
             FileState cacheFileState = null;
-            s_processWideFileStateCache.TryGetValue(path, out FileState processFileState);
-            FileState instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
+            FileState processFileState = null;
+            s_processWideFileStateCache.TryGetValue(path, out processFileState);
+            FileState instanceLocalFileState = instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
 
             // Sync the caches.
             if (processFileState == null && instanceLocalFileState != null)
             {
                 cacheFileState = instanceLocalFileState;
-                s_processWideFileStateCache[path] = instanceLocalFileState;
+                SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
             }
             else if (processFileState != null && instanceLocalFileState == null)
             {
@@ -403,7 +406,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     cacheFileState = instanceLocalFileState;
-                    s_processWideFileStateCache[path] = instanceLocalFileState;
+                    SystemState.s_processWideFileStateCache[path] = instanceLocalFileState;
                 }
             }
 
@@ -412,7 +415,7 @@ namespace Microsoft.Build.Tasks
             {
                 cacheFileState = new FileState(getLastWriteTime(path));
                 instanceLocalFileStateCache[path] = cacheFileState;
-                s_processWideFileStateCache[path] = cacheFileState;
+                SystemState.s_processWideFileStateCache[path] = cacheFileState;
                 isDirty = true;
             }
             else
@@ -423,12 +426,38 @@ namespace Microsoft.Build.Tasks
                 {
                     cacheFileState = new FileState(getLastWriteTime(path));
                     instanceLocalFileStateCache[path] = cacheFileState;
-                    s_processWideFileStateCache[path] = cacheFileState;
+                    SystemState.s_processWideFileStateCache[path] = cacheFileState;
                     isDirty = true;
                 }
             }
 
             return cacheFileState;
+        }
+
+        private FileState GetFileStateFromProcessWideCache(string path, FileState template)
+        {
+            // When reading from the process-wide cache, we always check to see if our data
+            // is up-to-date to avoid getting stale data from a previous build.
+            DateTime lastModified = getLastWriteTime(path);
+
+            // Has another build seen this file before?
+            FileState state;
+            if (!s_processWideFileStateCache.TryGetValue(path, out state) || state.LastModified != lastModified)
+            {   // We've never seen it before, or we're out of date
+
+                state = CreateFileState(lastModified, template);
+                s_processWideFileStateCache[path] = state;
+            }
+
+            return state;
+        }
+
+        private FileState CreateFileState(DateTime lastModified, FileState template)
+        {
+            if (template != null && template.LastModified == lastModified)
+                return template;    // Our serialized data is up-to-date
+
+            return new FileState(lastModified);
         }
 
         /// <summary>

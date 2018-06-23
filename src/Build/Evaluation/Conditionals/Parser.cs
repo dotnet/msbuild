@@ -43,11 +43,11 @@ namespace Microsoft.Build.Evaluation
         private Scanner _lexer;
         private ParserOptions _options;
         private ElementLocation _elementLocation;
-        internal int errorPosition; // useful for unit tests
+        internal int errorPosition = 0; // useful for unit tests
 
         #region REMOVE_COMPAT_WARNING
 
-        private bool _warnedForExpression;
+        private bool _warnedForExpression = false;
 
         private BuildEventContext _logBuildEventContext;
         /// <summary>
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Evaluation
         private GenericExpressionNode Factor(string expression)
         {
             // Checks for TokenTypes String, Numeric, Property, ItemMetadata, and ItemList.
-            GenericExpressionNode arg = Arg(expression);
+            GenericExpressionNode arg = this.Arg(expression);
 
             // If it's one of those, return it.
             if (arg != null)

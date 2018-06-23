@@ -110,10 +110,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="state"></param>
         /// <param name="isFilePath">True if this is afile name and the path should be normalized</param>
         /// <returns>Scalar result</returns>
-        private static string ExpandArgumentForScalarParameter(
-            string function,
-            GenericExpressionNode argumentNode,
-            ConditionEvaluator.IConditionEvaluationState state,
+        private static string ExpandArgumentForScalarParameter(string function, GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state,
             bool isFilePath = true)
         {
             string argument = argumentNode.GetUnexpandedValue(state);
@@ -148,7 +145,7 @@ namespace Microsoft.Build.Evaluation
             return expandedValue;
         }
 
-        private static List<string> ExpandArgumentAsFileList(GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state, bool isFilePath = true)
+        private List<string> ExpandArgumentAsFileList(GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state, bool isFilePath = true)
         {
             string argument = argumentNode.GetUnexpandedValue(state);
 
@@ -157,7 +154,8 @@ namespace Microsoft.Build.Evaluation
             {
                 argument = FileUtilities.FixFilePath(argument);
             }
-            
+
+
             IList<TaskItem> expanded = state.ExpandIntoTaskItems(argument);
             var expandedCount = expanded.Count;
 

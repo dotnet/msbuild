@@ -623,12 +623,18 @@ namespace Microsoft.Build.Tasks
         /// This item shouldn't be passed to compilers and so forth. 
         /// </summary>
         /// <value>'true' if this reference points to a bad image.</value>
-        internal bool IsBadImage { get; private set; }
+        internal bool IsBadImage { get; private set; } = false;
 
         /// <summary>
         ///  If true, then this item conflicted with another item and lost.
         /// </summary>
-        internal bool IsConflictVictim => ConflictVictorName != null;
+        internal bool IsConflictVictim
+        {
+            get
+            {
+                return ConflictVictorName != null;
+            }
+        }
 
         /// <summary>
         /// Add a conflict victim to this reference
@@ -647,12 +653,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The name of the assembly that won over this reference.
+        ///  The name of the assembly that won over this reference.
         /// </summary>
-        internal AssemblyNameExtension ConflictVictorName { get; set; }
+        internal AssemblyNameExtension ConflictVictorName { get; set; } = null;
 
         /// <summary>
-        /// The reason why this reference lost to another reference.
+        ///  The reason why this reference lost to another reference.
         /// </summary>
         internal ConflictLossReason ConflictLossExplanation { get; set; } = ConflictLossReason.DidntLose;
 

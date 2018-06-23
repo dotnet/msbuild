@@ -706,6 +706,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Determines if the target needs to be built/rebuilt/skipped if it has discrete outputs.
         /// </summary>
+        /// <param name="itemVectorsInTargetInputs"></param>
+        /// <param name="itemVectorTransformsInTargetInputs"></param>
+        /// <param name="discreteItemsInTargetInputs"></param>
+        /// <param name="targetOutputItemSpecs"></param>
         /// <returns>Indication of how to build the target.</returns>
         private DependencyAnalysisResult PerformDependencyAnalysisIfDiscreteOutputs
         (
@@ -715,14 +719,14 @@ namespace Microsoft.Build.BackEnd
             List<string> targetOutputItemSpecs
         )
         {
-            DependencyAnalysisResult result;
+            DependencyAnalysisResult result = DependencyAnalysisResult.SkipUpToDate;
 
             List<string> targetInputItemSpecs = GetItemSpecsFromItemVectors(itemVectorsInTargetInputs);
             targetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorTransformsInTargetInputs));
             targetInputItemSpecs.AddRange(discreteItemsInTargetInputs.Values);
 
-            List<string> inputs = CollectionHelpers.RemoveNulls(targetInputItemSpecs);
-            List<string> outputs = CollectionHelpers.RemoveNulls(targetOutputItemSpecs);
+            List<string> inputs = CollectionHelpers.RemoveNulls<string>(targetInputItemSpecs);
+            List<string> outputs = CollectionHelpers.RemoveNulls<string>(targetOutputItemSpecs);
 
             if (inputs.Count == 0)
             {
@@ -735,7 +739,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // if any input is newer than any output, do a full build
-            bool someOutOfDate = IsAnyOutOfDate(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, _project.Directory, inputs, outputs);
+            DependencyAnalysisLogDetail dependencyAnalysisDetailEntry;
+            bool someOutOfDate = IsAnyOutOfDate(out dependencyAnalysisDetailEntry, _project.Directory, inputs, outputs);
 
             if (someOutOfDate)
             {
@@ -889,6 +894,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Finds the differences in the keys between the two given hashtables.
         /// </summary>
+        /// <param name="h1"></param>
+        /// <param name="h2"></param>
+        /// <param name="commonKeys"></param>
+        /// <param name="uniqueKeysInH1"></param>
+        /// <param name="uniqueKeysInH2"></param>
         private static void DiffHashtables<K, V>(IDictionary<K, V> h1, IDictionary<K, V> h2, out List<K> commonKeys, out List<K> uniqueKeysInH1, out List<K> uniqueKeysInH2) where K : class, IEquatable<K> where V : class
         {
             commonKeys = new List<K>();
@@ -1201,22 +1211,22 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         // the project whose target we are analyzing.
-        private readonly ProjectInstance _project;
+        private ProjectInstance _project;
         // the target to analyze
-        private readonly ProjectTargetInstance _targetToAnalyze;
+        private ProjectTargetInstance _targetToAnalyze;
 
         // the value of the target's "Inputs" attribute
-        private readonly string _targetInputSpecification;
+        private string _targetInputSpecification;
         // the value of the target's "Outputs" attribute
-        private readonly string _targetOutputSpecification;
+        private string _targetOutputSpecification;
 
         // Details of the dependency analysis for logging
         private readonly List<DependencyAnalysisLogDetail> _dependencyAnalysisDetail = new List<DependencyAnalysisLogDetail>();
 
         // Engine logging service which to log message to
-        private readonly ILoggingService _loggingService;
+        private ILoggingService _loggingService;
         // Event context information where event is raised from
-        private readonly BuildEventContext _buildEventContext;
+        private BuildEventContext _buildEventContext;
 
         /// <summary>
         /// By default we do not sort target inputs and outputs as it has significant perf impact.
@@ -1227,13 +1237,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The unique target inputs.
         /// </summary>
-        private readonly IDictionary<string, object> _uniqueTargetInputs =
+        private IDictionary<string, object> _uniqueTargetInputs =
                    (s_sortInputsOutputs ? (IDictionary<string, object>)new SortedDictionary<string, object>(StringComparer.OrdinalIgnoreCase) : (IDictionary<string, object>)new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
         /// The unique target outputs.
         /// </summary>
-        private readonly IDictionary<string, object> _uniqueTargetOutputs =
+        private IDictionary<string, object> _uniqueTargetOutputs =
                    (s_sortInputsOutputs ? (IDictionary<string, object>)new SortedDictionary<string, object>(StringComparer.OrdinalIgnoreCase) : (IDictionary<string, object>)new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase));
     }
 

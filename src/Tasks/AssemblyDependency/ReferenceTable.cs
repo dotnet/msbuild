@@ -276,7 +276,7 @@ namespace Microsoft.Build.Tasks
             _assemblyMetadataCache = assemblyMetadataCache;
 
             // Set condition for when to check assembly version against the target framework version 
-            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? s_targetFrameworkVersion_40) <= s_targetFrameworkVersion_40);
+            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
 
             // Convert the list of installed SDK's to a dictionary for faster lookup
             _resolvedSDKReferences = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
@@ -532,7 +532,7 @@ namespace Microsoft.Build.Tasks
             string itemSpec = referenceAssemblyName.ItemSpec;
             string fusionName = referenceAssemblyName.GetMetadata(ItemMetadataNames.fusionName);
             bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyName, ItemMetadataNames.IgnoreVersionForFrameworkReference, out bool metadataFound);
-            bool ignoreVersionForFrameworkReference;
+            bool ignoreVersionForFrameworkReference = false;
 
             if (metadataFound)
             {
