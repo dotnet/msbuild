@@ -5,7 +5,6 @@
         <NugetConfigPrivateFeeds Include="$(ExternalRestoreSources.Split(';'))" />
       </ItemGroup>
 
-    <!-- dotnet-core is needed since no old (like 1.1) runtime package will be published to relatively new BlobFeed -->
     <PropertyGroup>
       <NugetConfigHeader>
         <![CDATA[
@@ -29,7 +28,6 @@
     <add key="container-tools" value="https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json" />
     <add key="linux-musl-bootstrap-feed" value="https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json" />
     <add key="dotnet-msbuild" value="https://dotnet.myget.org/F/msbuild/api/v3/index.json" />
-    <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
         ]]>
       </NugetConfigCLIFeeds>
 
