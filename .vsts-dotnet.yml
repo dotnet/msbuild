@@ -1,5 +1,6 @@
 queue:
   name: VSEng-MicroBuildVS2017
+trigger: none
 variables:
   BuildConfiguration: 'Release'
   TeamName: MSBuild
