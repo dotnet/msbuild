@@ -60,6 +60,11 @@
         <target state="translated">MSBuild에 올바른 "{0}" 개체가 필요합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: 도구 버전 "{0}"을(를) 인식할 수 없습니다. 사용할 수 있는 도구 버전은 {1}입니다.</target>
