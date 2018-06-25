@@ -309,8 +309,8 @@ namespace Microsoft.Build.Shared
         {
             if (IsPathTooLong(path))
             {
-                throw new PathTooLongException($"Path: {path} exceeds the OS max path limit. " +
-                    $"The fully qualified file name must be less than {NativeMethodsShared.OSMaxPathLimit - 1} characters.");
+                throw new PathTooLongException(ResourceUtilities.FormatString(
+                    AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.OSMaxPathLimit - 1));
             }
         }
 

@@ -60,6 +60,11 @@
         <target state="translated">MSBuild erwartet ein gültiges {0}-Objekt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Die Toolsversion "{0}" ist unbekannt. Verfügbare Toolversionen sind {1}.</target>
