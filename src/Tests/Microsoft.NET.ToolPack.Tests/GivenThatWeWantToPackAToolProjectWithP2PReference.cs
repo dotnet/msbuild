@@ -72,7 +72,7 @@ namespace Microsoft.NET.ToolPack.Tests
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))
             {
                 nupkgReader
-                    .GetPackageDependencies().First().Packages
+                    .GetPackageDependencies()
                     .Should().BeEmpty();
             }
         }
