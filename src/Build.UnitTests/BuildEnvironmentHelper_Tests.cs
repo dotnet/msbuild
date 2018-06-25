@@ -59,7 +59,11 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [Theory(Skip = "NA on .net core")]
+#else
         [Theory]
+#endif
         [InlineData(true)]
         [InlineData(false)]
         [Trait("Category", "nonlinuxtests")]
