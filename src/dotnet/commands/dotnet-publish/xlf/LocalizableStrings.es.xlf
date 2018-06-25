@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Plataforma de destino para la que se publica. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="needs-review-translation">Plataforma de destino para la que se publica. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -23,13 +23,13 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to place the published artifacts.</source>
-        <target state="translated">Directorio de salida en el que se ubicarán los artefactos publicados.</target>
+        <source>The output directory to place the published artifacts in.</source>
+        <target state="needs-review-translation">Directorio de salida en el que se ubicarán los artefactos publicados.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
-        <source>manifest.xml</source>
-        <target state="translated">manifest.xml</target>
+        <source>MANIFEST</source>
+        <target state="needs-review-translation">manifest.xml</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -37,14 +37,51 @@
         <target state="translated">La ruta de acceso a un archivo de manifiesto de destino que contiene la lista de paquetes que se excluirán del paso de publicación.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publica el tiempo de ejecución de .NET Core con su aplicación para que no sea necesario instalarlo en la máquina de destino. Si se especifica un identificador de tiempo de ejecución, se toma como predeterminado el valor "true".</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">No compile el proyecto antes de publicarlo. Implica --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish the application for.
+The default is to publish a framework-dependent application without an executable.</source>
+        <target state="new">The target runtime to publish the application for.
+The default is to publish a framework-dependent application without an executable.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionDescription">
+        <source>The mode to use when publishing the application.
+The 'self-contained' mode publishes the application with the .NET Core runtime.
+The 'fx-dependent' mode publishes the application as framework-dependent. If a target runtime is specified, it is published with an executable.
+The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
+The default is 'fx-dependent-no-exe' when a target runtime is not specified.
+The default is 'self-contained' when a target runtime is specified.</source>
+        <target state="new">The mode to use when publishing the application.
+The 'self-contained' mode publishes the application with the .NET Core runtime.
+The 'fx-dependent' mode publishes the application as framework-dependent. If a target runtime is specified, it is published with an executable.
+The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
+The default is 'fx-dependent-no-exe' when a target runtime is not specified.
+The default is 'self-contained' when a target runtime is specified.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionName">
+        <source>MODE</source>
+        <target state="new">MODE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishModeAndSelfContainedOptionsConflict">
+        <source>The '--mode' and '--self-contained' options cannot be used together. Specify only one of the options.</source>
+        <target state="new">The '--mode' and '--self-contained' options cannot be used together. Specify only one of the options.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedPublishMode">
+        <source>The specified publish mode '{0}' is not supported.</source>
+        <target state="new">The specified publish mode '{0}' is not supported.</target>
         <note />
       </trans-unit>
     </body>

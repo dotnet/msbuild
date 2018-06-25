@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Add
         protected override string CommandName => "add";
         protected override string FullCommandNameLocalized => LocalizableStrings.NetAddCommand;
         protected override string ArgumentName => Constants.ProjectArgumentName;
-        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
+        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>

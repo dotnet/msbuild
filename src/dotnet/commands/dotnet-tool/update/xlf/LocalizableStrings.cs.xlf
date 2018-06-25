@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to update.</source>
-        <target state="translated">ID balíčku NuGet nástroje, který se má aktualizovat</target>
+        <source>The NuGet Package Id of the tool to update.</source>
+        <target state="needs-review-translation">ID balíčku NuGet nástroje, který se má aktualizovat</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Updates a tool to the latest stable version for use.</source>
-        <target state="translated">Aktualizuje nástroj na nejnovější používanou stabilní verzi.</target>
+        <source>Update a tool to the latest stable version.</source>
+        <target state="needs-review-translation">Aktualizuje nástroj na nejnovější používanou stabilní verzi.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -48,8 +48,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Update user wide.</source>
-        <target state="translated">Aktualizujte pro všechny uživatele.</target>
+        <source>Update the tool in the current user's tools directory.</source>
+        <target state="needs-review-translation">Aktualizujte pro všechny uživatele.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFullCommandNameLocalized">
@@ -65,11 +65,6 @@
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
         <target state="translated">(--global) je v konfliktu s parametrem cesty nástroje (--tool-path). Zadejte prosím pouze jeden z parametrů.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="translated">Umístění, do kterého se nástroj nainstaluje</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -93,13 +88,33 @@
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
-        <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <source>Add an additional NuGet package source to use during the update.</source>
+        <target state="new">Add an additional NuGet package source to use during the update.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
-        <source>ADD_SOURCE</source>
-        <target state="new">ADD_SOURCE</target>
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="new">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to update.</source>
+        <target state="new">The directory containing the tool to update.</target>
         <note />
       </trans-unit>
     </body>

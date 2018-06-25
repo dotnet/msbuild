@@ -8,18 +8,18 @@
         <note />
       </trans-unit>
       <trans-unit id="MSBuildOptionDescription">
-        <source>Shuts down the MSBuild build server.</source>
-        <target state="translated">Apaga el servidor de compilación de MSBuild.</target>
+        <source>Shut down the MSBuild build server.</source>
+        <target state="needs-review-translation">Apaga el servidor de compilación de MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="VBCSCompilerOptionDescription">
-        <source>Shuts down the VB/C# compiler build server.</source>
-        <target state="translated">Apaga el servidor de compilación del compilador de VB o C#.</target>
+        <source>Shut down the VB/C# compiler build server.</source>
+        <target state="needs-review-translation">Apaga el servidor de compilación del compilador de VB o C#.</target>
         <note />
       </trans-unit>
       <trans-unit id="RazorOptionDescription">
-        <source>Shuts down the Razor build server.</source>
-        <target state="translated">Apaga el servidor de compilación de Razor.</target>
+        <source>Shut down the Razor build server.</source>
+        <target state="needs-review-translation">Apaga el servidor de compilación de Razor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShuttingDownServer">

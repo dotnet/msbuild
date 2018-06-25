@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Core Project-to-Project dependency viewer</source>
-        <target state="translated">.NET Core プロジェクト間の依存関係ビューアー</target>
+        <source>List all project-to-project references of the project.</source>
+        <target state="needs-review-translation">.NET Core プロジェクト間の依存関係ビューアー</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">

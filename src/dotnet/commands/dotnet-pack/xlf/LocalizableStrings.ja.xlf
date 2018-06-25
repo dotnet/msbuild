@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place built packages.</source>
-        <target state="translated">ビルド パッケージを配置するディレクトリ。</target>
+        <source>The output directory to place built packages in.</source>
+        <target state="needs-review-translation">ビルド パッケージを配置するディレクトリ。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -33,13 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
-        <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
-        <target state="translated">PDB とソース ファイルを含めます。ソース ファイルは、結果の nuget パッケージの src フォルダーに移動します</target>
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="needs-review-translation">PDB とソース ファイルを含めます。ソース ファイルは、結果の nuget パッケージの src フォルダーに移動します</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">パッケージに処理可能なフラグを設定します。詳しくは、https://aka.ms/nupkgservicing をご覧ください。</target>
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="needs-review-translation">パッケージに処理可能なフラグを設定します。詳しくは、https://aka.ms/nupkgservicing をご覧ください。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -50,6 +50,11 @@
       <trans-unit id="CmdArgumentDescription">
         <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
         <target state="translated">パックするプロジェクト。既定は現在のディレクトリ内のプロジェクト ファイルです。任意のプロジェクト ファイルへのパスを指定できます</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

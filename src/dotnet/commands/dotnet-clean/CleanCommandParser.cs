@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Clean.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -13,16 +14,18 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "clean",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments(),
+                Accept.ZeroOrMoreArguments()
+                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                            description: CommonLocalizableStrings.ProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option("-o|--output", 
                               LocalizableStrings.CmdOutputDirDescription,
                                          Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
                         .ForwardAsSingle(o => $"-property:OutputPath={o.Arguments.Single()}")),
-                CommonOptions.FrameworkOption(),
-                CommonOptions.RuntimeOption(),
-                CommonOptions.ConfigurationOption(),
+                CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
+                CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
+                CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                 CommonOptions.VerbosityOption());
     }
 }
