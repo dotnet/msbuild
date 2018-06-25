@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -197,16 +198,20 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             if (FileUtilities.DirectoryExistsNoThrow(_cacheDirectory))
             {
+                _output.WriteLine($"Found existing cache directory {_cacheDirectory}; deleting it.");
                 FileUtilities.DeleteDirectoryNoThrow(_cacheDirectory, true);
             }
 
             Directory.CreateDirectory(_cacheDirectory);
+
+            _output.WriteLine($"Created cache directory {_cacheDirectory}.");
         }
 
         public void Dispose()
         {
             if (FileUtilities.DirectoryExistsNoThrow(_cacheDirectory))
             {
+                _output.WriteLine($"Deleting cache directory {_cacheDirectory}.");
                 FileUtilities.DeleteDirectoryNoThrow(_cacheDirectory, true);
             }
         }
@@ -218,22 +223,24 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
         public void PassReferenceWithNoReferenceDirectory()
         {
             var engine = new MockEngine(_output);
-            var t = new GetSDKReferenceFiles();
-            t.BuildEngine = engine;
+
             ITaskItem item = new TaskItem("C:\\SDKDoesNotExist");
             item.SetMetadata("ExpandReferenceAssemblies", "true");
             item.SetMetadata("TargetedSDKConfiguration", "Retail");
             item.SetMetadata("TargetedSDKArchitecture", "x86");
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
-            t.ResolvedSDKReferences = new ITaskItem[] { item };
-            t.CacheFileFolderPath = _cacheDirectory;
+            var t = new GetSDKReferenceFiles
+            {
+                BuildEngine = engine,
+                ResolvedSDKReferences = new ITaskItem[] { item },
+                CacheFileFolderPath = _cacheDirectory,
+            };
 
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
-            Assert.True(success);
-            Assert.Equal(0, t.CopyLocalFiles.Length);
-            Assert.Equal(0, t.References.Length);
-            Assert.Equal(0, t.RedistFiles.Length);
+            t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p)).ShouldBeTrue();
+            t.CopyLocalFiles.ShouldBeEmpty();
+            t.References.ShouldBeEmpty();
+            t.RedistFiles.ShouldBeEmpty();
         }
 
         private delegate IList<string> GetSDKFolders(string sdkRoot);
