@@ -323,10 +323,8 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Environment::ExpandEnvironmentVariables", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetEnvironmentVariable", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetEnvironmentVariables", environmentType);
-#if FEATURE_SPECIAL_FOLDERS
                         availableStaticMethods.TryAdd("System.Environment::GetFolderPath", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetLogicalDrives", environmentType);
-#endif
 
 // All the following properties only have getters
 #if FEATURE_GET_COMMANDLINE
@@ -343,9 +341,7 @@ namespace Microsoft.Build.Internal
 #endif
                         availableStaticMethods.TryAdd("System.Environment::ProcessorCount", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::StackTrace", environmentType);
-#if FEATURE_SPECIAL_FOLDERS
                         availableStaticMethods.TryAdd("System.Environment::SystemDirectory", environmentType);
-#endif
 #if FEATURE_SYSTEMPAGESIZE
                         availableStaticMethods.TryAdd("System.Environment::SystemPageSize", environmentType);
 #endif

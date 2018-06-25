@@ -535,20 +535,12 @@ namespace Microsoft.Build.Internal
 
             if (String.IsNullOrEmpty(localAppData))
             {
-#if FEATURE_SPECIAL_FOLDERS
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-#else
-                localAppData = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData);
-#endif
             }
 
             if (String.IsNullOrEmpty(localAppData))
             {
-#if FEATURE_SPECIAL_FOLDERS
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-#else
-                localAppData = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData);
-#endif
             }
 
             if (String.IsNullOrEmpty(localAppData))

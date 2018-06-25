@@ -776,15 +776,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-#if FEATURE_SPECIAL_FOLDERS
         private string _pathToArbitraryBogusFile = NativeMethodsShared.IsWindows // OK on 64 bit as well
                                                         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe")
                                                         : "/bin/cat";
-#else
-        private string _pathToArbitraryBogusFile = NativeMethodsShared.IsWindows // OK on 64 bit as well
-                                                        ? Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "notepad.exe")
-                                                        : "/bin/cat";
-#endif
 
         /// <summary>
         /// Basic case

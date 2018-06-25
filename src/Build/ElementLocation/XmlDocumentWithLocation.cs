@@ -355,11 +355,7 @@ namespace Microsoft.Build.Construction
                             ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
                             string directory = Path.GetDirectoryName(fullPath);
 
-#if FEATURE_SPECIAL_FOLDERS
                             string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-#else
-                            string windowsFolder = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.Windows);
-#endif
 
                             if ((!String.IsNullOrEmpty(windowsFolder) && directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase)) ||
                                 (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles32) && directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||

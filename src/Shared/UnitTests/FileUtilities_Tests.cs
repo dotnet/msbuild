@@ -799,11 +799,7 @@ namespace Microsoft.Build.UnitTests
         public void GenerateTempFileNameWithDirectoryAndExtension()
         {
             string path = null;
-#if FEATURE_SPECIAL_FOLDERS
             string directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "subfolder");
-#else
-            string directory = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData), "subfolder");
-#endif
 
             try
             {
