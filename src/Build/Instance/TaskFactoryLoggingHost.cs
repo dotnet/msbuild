@@ -58,8 +58,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "loggingContext");
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 
             _activeProxy = true;
             _isRunningWithMultipleNodes = isRunningWithMultipleNodes;
@@ -152,7 +152,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 
@@ -173,7 +173,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 
@@ -194,7 +194,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 
@@ -215,7 +215,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogCustomEvent(Microsoft.Build.Framework.CustomBuildEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             VerifyActiveProxy();
 
             // If we are in building across process we need the events to be serializable. This method will 

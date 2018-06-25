@@ -5,7 +5,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System;
-using System.Collections;
 using System.Diagnostics;
 
 namespace Microsoft.Build.Execution
@@ -59,9 +58,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public ITaskHost GetHostObject(string projectFile, string targetName, string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentNull(targetName, nameof(targetName));
+            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
 
             HostObjects hostObjects;
             if (_hostObjectMap == null || !_hostObjectMap.TryGetValue(projectFile, out hostObjects))
@@ -80,9 +79,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void RegisterHostObject(string projectFile, string targetName, string taskName, ITaskHost hostObject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, "taskName");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentNull(targetName, nameof(targetName));
+            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
 
             // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly 
             // out of proc, in which case it will become in-proc after this call completes.  See GetNodeAffinity.

@@ -4,7 +4,6 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
@@ -56,9 +55,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectMetadata(IProjectMetadataParent parent, ProjectMetadataElement xml, string evaluatedValueEscaped, ProjectMetadata predecessor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, "evaluatedValueEscaped");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, nameof(evaluatedValueEscaped));
 
             _parent = parent;
             _xml = xml;
@@ -115,7 +114,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "value");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(value));
                 Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
                 ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent != null && _xml.Parent.Parent != null && _xml.Parent.Parent.Parent != null, "OM_ObjectIsNoLongerActive");
 

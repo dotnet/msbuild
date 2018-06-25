@@ -4,11 +4,8 @@
 using System;
 using System.Text;
 using System.Collections;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -488,7 +485,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void ProjectStartedHandler(object sender, ProjectStartedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
             ErrorUtilities.VerifyThrowArgumentNull(e.ParentProjectBuildEventContext, "ParentProjectBuildEventContext");
 
             // Add the project to the BuildManager so we can use the start information later in the build process
@@ -544,10 +541,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
 
-
-            //Get the project started event so we can use its information to properly display a project finished event
+            // Get the project started event so we can use its information to properly display a project finished event
             ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e.BuildEventContext);
             ErrorUtilities.VerifyThrow(startedEvent != null, "Project finished event for {0} received without matching start event", e.ProjectFile);
 
@@ -740,7 +736,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TargetStartedHandler(object sender, TargetStartedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
 
             // Add the target started information to the buildEventManager so its information can be used
             // later in the build
@@ -762,7 +758,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TargetFinishedHandler(object sender, TargetFinishedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
 
             if (this.showPerfSummary)
             {
@@ -834,7 +830,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TaskStartedHandler(object sender, TaskStartedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
 
             // if verbosity is detailed or diagnostic
 
@@ -875,7 +871,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
             if (this.showPerfSummary)
             {
                 // Stop the task performance counter which was started in the task started event
@@ -909,7 +905,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void ErrorHandler(object sender, BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
             // Keep track of the number of error events raised 
             errorCount++;
 
@@ -955,7 +951,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public override void WarningHandler(object sender, BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
             // Keep track of the number of warning events raised during the build
             warningCount++;
 
@@ -1005,7 +1001,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (showOnlyErrors || showOnlyWarnings) return;
 
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
             bool print = false;
             bool lightenText = false;
 
@@ -1471,7 +1467,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (showOnlyErrors || showOnlyWarnings) return;
 
-            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, nameof(BuildEventContext));
             if (IsVerbosityAtLeast(LoggerVerbosity.Detailed))
             {
                 // ignore custom events with null messages -- some other

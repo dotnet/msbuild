@@ -224,7 +224,7 @@ namespace Microsoft.Build.Tasks
             get { return _targetFrameworkSubsets; }
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "TargetFrameworkSubsets");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(TargetFrameworkSubsets));
                 _targetFrameworkSubsets = value;
             }
         }
@@ -352,7 +352,7 @@ namespace Microsoft.Build.Tasks
             get { return _installedAssemblySubsetTables; }
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledAssemblySubsetTables");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(InstalledAssemblySubsetTables));
                 _installedAssemblySubsetTables = value;
             }
         }
@@ -379,7 +379,7 @@ namespace Microsoft.Build.Tasks
             get { return _fullFrameworkAssemblyTables; }
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkAssemblyTables");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(FullFrameworkAssemblyTables));
                 _fullFrameworkAssemblyTables = value;
             }
         }
@@ -722,7 +722,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "FullTargetFrameworkSubsetNames");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(FullTargetFrameworkSubsetNames));
                 _fullTargetFrameworkSubsetNames = value;
             }
         }
@@ -740,7 +740,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "profileName");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ProfileName));
                 _profileName = value;
             }
         }
@@ -759,7 +759,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkFolders");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(FullFrameworkFolders));
                 _fullFrameworkFolders = value;
             }
         }
@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogReferenceDependenciesAndSourceItems(string fusionName, Reference conflictCandidate)
         {
-            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, "ConflictCandidate");
+            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, nameof(conflictCandidate));
             Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceString("ResolveAssemblyReference.ReferenceDependsOn", fusionName, conflictCandidate.FullPath));
 
             if (conflictCandidate.IsPrimary)
@@ -1555,7 +1555,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="importance">The importance of the message.</param>
         private void LogFullName(Reference reference, MessageImportance importance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reference, "reference");
+            ErrorUtilities.VerifyThrowArgumentNull(reference, nameof(reference));
 
             if (reference.IsResolved)
             {

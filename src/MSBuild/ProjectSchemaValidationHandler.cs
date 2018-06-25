@@ -37,8 +37,8 @@ namespace Microsoft.Build.CommandLine
             string binPath
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentNull(binPath, "binPath");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentNull(binPath, nameof(binPath));
 
             if ((schemaFile == null) || (schemaFile.Length == 0))
             {
@@ -75,8 +75,8 @@ namespace Microsoft.Build.CommandLine
             string schemaFile
         )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(schemaFile, "schemaFile");
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
+            ErrorUtilities.VerifyThrowArgumentNull(schemaFile, nameof(schemaFile));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
 
             // Options for XmlReader object can be set only in constructor. After the object is created, they
             // become read-only. Because of that we need to create

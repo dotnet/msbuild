@@ -2,22 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
 #else
 using System.Collections.Concurrent;
 #endif
-using System.Globalization;
-using System.Text;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
-using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
@@ -145,7 +139,7 @@ namespace Microsoft.Build.BackEnd
         public void Listen(INodePacketFactory factory)
         {
             ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
-            ErrorUtilities.VerifyThrowArgumentNull(factory, "factory");
+            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -192,7 +186,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="pipeName">The name of the pipe to which we should connect.</param>
         internal void InternalConstruct(string pipeName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pipeName, "pipeName");
+            ErrorUtilities.VerifyThrowArgumentLength(pipeName, nameof(pipeName));
 
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
@@ -232,8 +226,8 @@ namespace Microsoft.Build.BackEnd
 #else
         internal void InternalConstruct(string clientToServerPipeHandle, string serverToClientPipeHandle)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(clientToServerPipeHandle, "clientToServerPipeHandle");
-            ErrorUtilities.VerifyThrowArgumentLength(serverToClientPipeHandle, "serverToClientPipeHandle");
+            ErrorUtilities.VerifyThrowArgumentLength(clientToServerPipeHandle, nameof(clientToServerPipeHandle));
+            ErrorUtilities.VerifyThrowArgumentLength(serverToClientPipeHandle, nameof(serverToClientPipeHandle));
 
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
 
@@ -313,7 +307,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             ErrorUtilities.VerifyThrow(null != _packetQueue, "packetQueue is null");
             ErrorUtilities.VerifyThrow(null != _packetAvailable, "packetAvailable is null");
 

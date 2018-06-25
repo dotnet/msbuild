@@ -304,7 +304,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputs">ITaskItem array of outputs.</param>
         public static string FormatRootingMarker(ITaskItem[] sources, ITaskItem[] outputs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources, "sources");
+            ErrorUtilities.VerifyThrowArgumentNull(sources, nameof(sources));
 
             // So we don't have to deal with null checks.
             outputs = outputs ?? Array.Empty<ITaskItem>();

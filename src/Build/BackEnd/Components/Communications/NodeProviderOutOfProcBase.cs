@@ -10,14 +10,12 @@ using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using System.Threading.Tasks;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd
@@ -75,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             context.SendData(packet);
         }
 
@@ -448,7 +446,7 @@ namespace Microsoft.Build.BackEnd
         private int LaunchNode(string msbuildLocation, string commandLineArgs)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, "msbuildLocation");
+            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
 
             if (!File.Exists(msbuildLocation))
             {

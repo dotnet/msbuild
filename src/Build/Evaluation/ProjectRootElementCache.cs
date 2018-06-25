@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Xml;
 using Microsoft.Build.Construction;
 
@@ -14,7 +12,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using OutOfProcNode = Microsoft.Build.Execution.OutOfProcNode;
 
@@ -262,7 +259,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     projectRootElement = openProjectRootElement(projectFile, this);
 
-                    ErrorUtilities.VerifyThrowInternalNull(projectRootElement, "projectRootElement");
+                    ErrorUtilities.VerifyThrowInternalNull(projectRootElement, nameof(projectRootElement));
                     ErrorUtilities.VerifyThrow(projectRootElement.FullPath == projectFile, "Got project back with incorrect path");
                     ErrorUtilities.VerifyThrow(_weakCache.Contains(projectFile), "Open should have renamed into cache and boosted");
                 }
@@ -331,7 +328,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath, "oldFullPath");
+                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath, nameof(oldFullPath));
                 RenameEntryInternal(oldFullPath, projectRootElement);
             }
         }
@@ -459,7 +456,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, "projectRootElement");
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)

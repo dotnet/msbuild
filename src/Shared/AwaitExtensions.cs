@@ -54,7 +54,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The awaiter.</returns>
         internal static TaskAwaiter GetAwaiter(this WaitHandle handle)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(handle, "handle");
+            ErrorUtilities.VerifyThrowArgumentNull(handle, nameof(handle));
             return handle.ToTask().GetAwaiter();
         }
 
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The awaiter.</returns>
         internal static TaskAwaiter<int> GetAwaiter(this WaitHandle[] handles)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(handles, "handle");
+            ErrorUtilities.VerifyThrowArgumentNull(handles, nameof(handles));
             return handles.ToTask().GetAwaiter();
         }
 
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static Task<int> ToTask(this WaitHandle[] handles, int timeout = Timeout.Infinite)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(handles, "handle");
+            ErrorUtilities.VerifyThrowArgumentNull(handles, nameof(handles));
 
             var tcs = new TaskCompletionSource<int>();
             int signalledHandle = WaitHandle.WaitAny(handles, 0);

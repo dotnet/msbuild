@@ -1,9 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
@@ -26,8 +23,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="referenceLocation">The location from which it was referred.</param>
         internal TargetSpecification(string targetName, ElementLocation referenceLocation)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetName, "targetName");
-            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation, "referenceLocation");
+            ErrorUtilities.VerifyThrowArgumentLength(targetName, nameof(targetName));
+            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation, nameof(referenceLocation));
 
             this._targetName = targetName;
             this._referenceLocation = referenceLocation;

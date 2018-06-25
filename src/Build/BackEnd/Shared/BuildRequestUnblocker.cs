@@ -1,9 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
@@ -44,7 +41,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal BuildRequestUnblocker(int globalRequestIdToResume)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(globalRequestIdToResume != BuildRequest.InvalidGlobalRequestId, "globalRequestIdToResume");
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(globalRequestIdToResume != BuildRequest.InvalidGlobalRequestId, nameof(globalRequestIdToResume));
             _blockedGlobalRequestId = globalRequestIdToResume;
         }
 

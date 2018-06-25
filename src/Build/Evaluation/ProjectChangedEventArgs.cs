@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -20,7 +17,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="project">The changed project.</param>
         internal ProjectChangedEventArgs(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, "project");
+            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
 
             Project = project;
         }

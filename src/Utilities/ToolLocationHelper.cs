@@ -2545,7 +2545,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         internal static void GatherSDKsFromRegistryImpl(Dictionary<TargetPlatformSDK, TargetPlatformSDK> platformMonikers, string registryKeyRoot, RegistryView registryView, RegistryHive registryHive, GetRegistrySubKeyNames getRegistrySubKeyNames, GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue, OpenBaseKey openBaseKey, FileExists fileExists)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(platformMonikers, "PlatformMonikers");
+            ErrorUtilities.VerifyThrowArgumentNull(platformMonikers, nameof(platformMonikers));
             if (string.IsNullOrEmpty(registryKeyRoot))
             {
                 return;

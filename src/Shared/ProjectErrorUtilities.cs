@@ -1,9 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Diagnostics;
-
 /******************************************************************************
  * 
  *                              !! WARNING !!
@@ -389,7 +386,7 @@ namespace Microsoft.Build.Shared
             params object[] args
         )
         {
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
 #if DEBUG
             if (errorSubCategoryResourceName != null)
             {

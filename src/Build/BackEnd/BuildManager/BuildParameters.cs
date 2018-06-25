@@ -661,7 +661,7 @@ namespace Microsoft.Build.Execution
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "EnvironmentPropertiesInternal");
+                ErrorUtilities.VerifyThrowInternalNull(value, nameof(EnvironmentPropertiesInternal));
                 _environmentProperties = value;
             }
         }

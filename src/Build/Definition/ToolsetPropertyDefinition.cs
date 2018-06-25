@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using Microsoft.Build.Shared;
@@ -40,11 +37,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="source">The property source</param>
         public ToolsetPropertyDefinition(string name, string value, IElementLocation source)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
-            ErrorUtilities.VerifyThrowArgumentNull(source, "source");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(source, nameof(source));
 
             // value can be the empty string but not null
-            ErrorUtilities.VerifyThrowArgumentNull(value, "value");
+            ErrorUtilities.VerifyThrowArgumentNull(value, nameof(value));
 
             _name = name;
             _value = value;
@@ -74,7 +71,7 @@ namespace Microsoft.Build.Evaluation
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "Value");
+                ErrorUtilities.VerifyThrowInternalNull(value, nameof(Value));
                 _value = value;
             }
         }

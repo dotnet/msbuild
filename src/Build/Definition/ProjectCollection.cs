@@ -448,7 +448,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectCollectionChangedEventArgs eventArgs = null;
                 using (_locker.EnterWriteLock())
                 {
-                    ErrorUtilities.VerifyThrowArgumentLength(value, "DefaultToolsVersion");
+                    ErrorUtilities.VerifyThrowArgumentLength(value, nameof(DefaultToolsVersion));
 
                     if (!_toolsets.ContainsKey(value))
                     {
@@ -1024,7 +1024,7 @@ namespace Microsoft.Build.Evaluation
         {
             using (_locker.EnterWriteLock())
             {
-                ErrorUtilities.VerifyThrowArgumentLength(fileName, "fileName");
+                ErrorUtilities.VerifyThrowArgumentLength(fileName, nameof(fileName));
                 BuildEventContext buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
                 if (globalProperties == null)
@@ -1398,7 +1398,7 @@ namespace Microsoft.Build.Evaluation
         {
             using (_locker.EnterWriteLock())
             {
-                ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, "projectRootElement");
+                ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
 
                 ProjectRootElementCache.DiscardStrongReferences();
 

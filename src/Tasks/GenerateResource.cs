@@ -39,7 +39,6 @@ using Microsoft.Internal.Performance;
 using System.Runtime.Versioning;
 
 using Microsoft.Build.Utilities;
-using System.Xml.Linq;
 
 namespace Microsoft.Build.Tasks
 {
@@ -597,7 +596,7 @@ namespace Microsoft.Build.Tasks
         {
             // Throw an internal error, since this method should only ever get called by other aspects of this task, not
             // anything that the user touches. 
-            ErrorUtilities.VerifyThrowInternalNull(resGenCommand, "resGenCommand");
+            ErrorUtilities.VerifyThrowInternalNull(resGenCommand, nameof(resGenCommand));
 
             // append the /useSourcePath flag if requested.
             if (UseSourcePath)

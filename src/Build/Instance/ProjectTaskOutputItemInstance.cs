@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-
 using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
@@ -58,11 +55,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectTaskOutputItemInstance(string itemType, string taskParameter, string condition, ElementLocation location, ElementLocation itemTypeLocation, ElementLocation taskParameterLocation, ElementLocation conditionLocation)
         {
-            ErrorUtilities.VerifyThrowInternalLength(itemType, "itemType");
-            ErrorUtilities.VerifyThrowInternalLength(taskParameter, "taskParameter");
-            ErrorUtilities.VerifyThrowInternalNull(location, "location");
-            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation, "itemTypeLocation");
-            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation, "taskParameterLocation");
+            ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowInternalLength(taskParameter, nameof(taskParameter));
+            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation, nameof(itemTypeLocation));
+            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation, nameof(taskParameterLocation));
 
             _itemType = itemType;
             _taskParameter = taskParameter;

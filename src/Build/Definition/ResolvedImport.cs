@@ -27,7 +27,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ResolvedImport(Project project, ProjectImportElement importingElement, ProjectRootElement importedProject, int versionEvaluated, SdkResult sdkResult)
         {
-            ErrorUtilities.VerifyThrowInternalNull(importedProject, "child");
+            ErrorUtilities.VerifyThrowInternalNull(importedProject, nameof(importedProject));
 
             ImportingElement = importingElement;
             ImportedProject = importedProject;

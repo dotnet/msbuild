@@ -61,7 +61,7 @@ namespace Microsoft.Build.Evaluation
         internal ToolsetConfigurationReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, Func<Configuration> readApplicationConfiguration)
             : base(environmentProperties, globalProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration, "readApplicationConfiguration");
+            ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration, nameof(readApplicationConfiguration));
             _readApplicationConfiguration = readApplicationConfiguration;
             _projectImportSearchPathsCache = new Dictionary<string, Dictionary<string, ProjectImportPathMatch>>(StringComparer.OrdinalIgnoreCase);
         }

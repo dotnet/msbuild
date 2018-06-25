@@ -115,8 +115,8 @@ namespace Microsoft.Build.BackEnd
             BuildRequestDataFlags buildRequestDataFlags = BuildRequestDataFlags.None,
             RequestedProjectState requestedProjectState = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, "targets");
-            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, "parentBuildEventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, nameof(escapedTargets));
+            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, nameof(parentBuildEventContext));
 
             _submissionId = submissionId;
             _configurationId = configurationId;

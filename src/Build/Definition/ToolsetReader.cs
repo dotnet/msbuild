@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
@@ -358,7 +357,7 @@ namespace Microsoft.Build.Evaluation
             out string defaultOverrideToolsVersion
             )
         {
-            error.VerifyThrowArgumentNull(toolsets, "Toolsets");
+            error.VerifyThrowArgumentNull(toolsets, nameof(toolsets));
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 

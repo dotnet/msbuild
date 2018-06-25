@@ -2,13 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Threading;
-using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -155,8 +150,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The data to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(nodeId == _inProcNodeId, "node");
-            ErrorUtilities.VerifyThrowArgumentNull(packet, "packet");
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(nodeId == _inProcNodeId, nameof(nodeId));
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
 
             if (null == _inProcNode)
             {

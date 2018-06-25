@@ -3,24 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.IO;
-using System.IO.Pipes;
 using System.Diagnostics;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
-using System.Security.Principal;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 
@@ -103,7 +94,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool CreateNode(int nodeId, INodePacketFactory factory, NodeConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory, "factory");
+            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
 
             if (_nodeContexts.Count == ComponentHost.BuildParameters.MaxNodeCount)
             {

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using System;
 
@@ -29,7 +28,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal RegistryLocation(string registryPath)
         {
-            ErrorUtilities.VerifyThrowInternalLength(registryPath, "registryPath");
+            ErrorUtilities.VerifyThrowInternalLength(registryPath, nameof(registryPath));
 
             this.registryPath = registryPath;
         }
