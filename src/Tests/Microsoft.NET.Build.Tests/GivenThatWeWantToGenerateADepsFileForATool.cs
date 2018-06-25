@@ -97,7 +97,7 @@ class Program
 
             var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name);
 
-            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreMyGetFeed);
+            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
             toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
 
@@ -129,7 +129,7 @@ class Program
                         new XAttribute("Version", "1.0.0")));
                 });
 
-            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreMyGetFeed };
+            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreBlobFeed };
             sources.Add(nupkgPath);
 
             NuGetConfigWriter.Write(toolReferencerInstance.TestRoot, sources);

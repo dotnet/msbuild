@@ -137,7 +137,7 @@ namespace Microsoft.NET.Build.Tests
             var testAsset = _testAssetsManager.CreateTestProject(testProject, testIdentifier)
                 .Restore(Log, testProject.Name, extraArgs);
 
-            NuGetConfigWriter.Write(testAsset.TestRoot, NuGetConfigWriter.DotnetCoreMyGetFeed);
+            NuGetConfigWriter.Write(testAsset.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
             var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
 
