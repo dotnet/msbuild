@@ -1,0 +1,23 @@
+<Project ToolsVersion="14.0" DefaultTargets="Test">
+  <Target Name="OverlaySdkOnLKG">
+    <ItemGroup>
+      <OverlaySDK Include="$(DotNetCoreSdkLKGPublishDirectory)/**/*" />
+      <OverlayCLI Include="$(OutputDirectory)/**/*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(OverlaySDK)"
+          DestinationFiles="@(OverlaySDK->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <ItemGroup>
+      <OldSdk Include="$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/**/*" />
+    </ItemGroup>
+
+    <Move SourceFiles="@(OldSdk)"
+          DestinationFiles="@(OldSdk->'$(SdkOutputDirectory)\sdk\$(SdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <RemoveDir Directories="$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)" />
+
+    <Copy SourceFiles="@(OverlayCLI)"
+          DestinationFiles="@(OverlayCLI->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

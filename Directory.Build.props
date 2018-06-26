@@ -20,11 +20,12 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
+    <GeneratedNuGetConfig>$(RepoRoot)/NuGet.Config</GeneratedNuGetConfig>
 
     <RelativeCLIBuildBinaries>build_projects/dotnet-cli-build/bin</RelativeCLIBuildBinaries>
     <RelativeCLIBuildDllName>dotnet-cli-build.dll</RelativeCLIBuildDllName>
     <CLIBuildDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/$(RelativeCLIBuildDllName)</CLIBuildDll>
-    <BuildTasksFeedDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
+    <BuildTasksFeedDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
@@ -34,23 +35,18 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <NETCoreAppMaximumVersion>2.2</NETCoreAppMaximumVersion>
   </PropertyGroup>
 
-  <Import Project="build/InitRepo.props" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(HostInfoProps)" />
-  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(BuildInfoProps)" />
-
   <Import Project="build/BranchInfo.props" />
   <Import Project="build/AzureInfo.props" />
 
   <Import Project="build/DependencyVersions.props" />
   <Import Project="build/Version.props" />
-  <Import Project="build/DerivedHostMachineInfo.props" />
+
   <Import Project="build/Branding.props" />
 
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/InputDirectories.props" />
   <Import Project="build/MSBuildExtensions.props" />
-  <Import Project="build/SetupPreviousStage.props" />
+
   <Import Project="build/OutputDirectories.props" />
 
   <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">
@@ -58,15 +54,10 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
          which is what the signing build uses -->
     <Import Project="build/BundledTools.props" />
     <Import Project="build/BundledSdks.props" />
-    <Import Project="build/BundledTemplates.props" />
-    <Import Project="build/BundledDotnetTools.props" />
 
     <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/BundledRuntimes.props" />
-    <Import Project="build/CrossGen.props" />
-    <Import Project="build/BackwardsCompatibilityRuntimes.props" />
+    <Import Project="build/SetupPreviousStage.props" />
 
-    <Import Project="build/InstallerInfo.props" />
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>
   

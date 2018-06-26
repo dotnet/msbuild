@@ -1,6 +1,6 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Channel>master</Channel>
-    <BranchName>master</BranchName>
+    <Channel>dev/repo-refactoring</Channel>
+    <BranchName>dev/repo-refactoring</BranchName>
   </PropertyGroup>
 </Project>

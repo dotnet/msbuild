@@ -20,7 +20,6 @@
   </Target>
 
   <Target Name="SetSigningProperties">
-    <Error Condition="'$(Rid)' == ''" Text="Missing required property 'Rid'." />
     <PropertyGroup>
       <SdkResolverOutputDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout/MSBuildSdkResolver</SdkResolverOutputDirectory>
 
