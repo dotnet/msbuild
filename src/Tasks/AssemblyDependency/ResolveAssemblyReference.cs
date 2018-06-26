@@ -2206,7 +2206,7 @@ namespace Microsoft.Build.Tasks
                         );
                     }
 
-                    List<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
+                    IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
 
                     // Compute all dependencies.
                     dependencyTable.ComputeClosure(allRemappedAssemblies, _assemblyFiles, _assemblyNames, generalResolutionExceptions);
@@ -2444,7 +2444,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Combines two DependentAssembly arrays into one.
         /// </summary>
-        private static List<DependentAssembly> CombineRemappedAssemblies(List<DependentAssembly> first, List<DependentAssembly> second)
+        private static IReadOnlyCollection<DependentAssembly> CombineRemappedAssemblies(IReadOnlyCollection<DependentAssembly> first, IReadOnlyCollection<DependentAssembly> second)
         {
             if (first == null)
                 return second;
