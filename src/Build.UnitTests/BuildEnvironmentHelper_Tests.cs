@@ -84,6 +84,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.ShouldBe(msbuildBinDirectory);
                 BuildEnvironmentHelper.Instance.CurrentMSBuildExePath.ShouldBe(msBuildPath);
                 BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile.ShouldBe(msBuildConfig);
+                // This code is not running inside the Visual Studio devenv.exe process
                 BuildEnvironmentHelper.Instance.RunningInVisualStudio.ShouldBeFalse();
                 BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
                 BuildEnvironmentHelper.Instance.RunningTests.ShouldBeFalse();
