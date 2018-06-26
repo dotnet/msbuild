@@ -1,8 +1,9 @@
-// Copyright (c) .NET Foundation and contributors. All rights reserved.
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,8 +17,10 @@ using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Microsoft.TemplateEngine.Cli;
 using NuGet.Versioning;
 using Xunit;
+using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
@@ -607,6 +610,35 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             reporter.Lines.Should().NotContain(l => l.Contains(tempProject.Value));
             reporter.Lines.Clear();
 
+            AssertPackageInstall(reporter, fileSystem, package, store);
+
+            package.Uninstall();
+        }
+
+        [Fact]
+        public void GivenARootWithNonAsciiCharactorInstallSucceeds()
+        {
+            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+
+            var surrogate = char.ConvertFromUtf32(int.Parse("2A601", NumberStyles.HexNumber));
+            string nonAscii = "ab Ṱ̺̺̕o 田中さん åä," + surrogate;
+
+            var root = new DirectoryPath(Path.Combine(TempRoot.Root, nonAscii, Path.GetRandomFileName()));
+            var reporter = new BufferedReporter();
+            var fileSystem = new FileSystemWrapper();
+            var store = new ToolPackageStore(root);
+            var installer = new ToolPackageInstaller(
+                store: store,
+                projectRestorer: new ProjectRestorer(reporter),
+                tempProject: GetUniqueTempProjectPathEachTest(),
+                offlineFeed: new DirectoryPath("does not exist"));
+
+            var package = installer.InstallPackage(
+                packageId: TestPackageId,
+                versionRange: VersionRange.Parse(TestPackageVersion),
+                targetFramework: _testTargetframework,
+                nugetConfig: nugetConfigPath);
+                
             AssertPackageInstall(reporter, fileSystem, package, store);
 
             package.Uninstall();
