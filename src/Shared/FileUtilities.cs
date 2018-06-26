@@ -289,7 +289,12 @@ namespace Microsoft.Build.Shared
             if (NativeMethodsShared.IsWindows)
             {
                 string uncheckedFullPath = NativeMethodsShared.GetFullPath(path);
-                AssertMaxPathLimits(uncheckedFullPath);
+
+                if (IsPathTooLong(uncheckedFullPath))
+                {
+                    string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.OSMaxPathLimit);
+                    throw new PathTooLongException(message);
+                }
 
                 // We really don't care about extensions here, but Path.HasExtension provides a great way to
                 // invoke the CLR's invalid path checks (these are independent of path length)
@@ -300,18 +305,7 @@ namespace Microsoft.Build.Shared
                 return IsUNCPath(uncheckedFullPath) ? Path.GetFullPath(uncheckedFullPath) : uncheckedFullPath;
             }
 #endif
-            string fullPath = Path.GetFullPath(path);
-            AssertMaxPathLimits(fullPath);
-            return fullPath;
-        }
-
-        private static void AssertMaxPathLimits(string path)
-        {
-            if (IsPathTooLong(path))
-            {
-                throw new PathTooLongException(ResourceUtilities.FormatString(
-                    AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.OSMaxPathLimit - 1));
-            }
+            return Path.GetFullPath(path);
         }
 
         private static bool IsUNCPath(string path)
