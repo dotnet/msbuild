@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftAspNetCoreAllPackageVersion>2.1.1-rtm-30818</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAllPackageVersion>2.1.1</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.1.0</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.1.1</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
     <MicrosoftAspNetCoreMvcPackageVersion>2.1.1</MicrosoftAspNetCoreMvcPackageVersion>
-    <DotnetEfPackageVersion>2.1.1-rtm-30818</DotnetEfPackageVersion>
-    <DotnetDevCertsPackageVersion>2.1.0</DotnetDevCertsPackageVersion>
-    <DotnetSqlCachePackageVersion>2.1.0</DotnetSqlCachePackageVersion>
-    <DotnetUserSecretsPackageVersion>2.1.0</DotnetUserSecretsPackageVersion>
-    <DotnetWatchPackageVersion>2.1.0</DotnetWatchPackageVersion>
+    <DotnetEfPackageVersion>2.1.1</DotnetEfPackageVersion>
+    <DotnetDevCertsPackageVersion>2.1.1</DotnetDevCertsPackageVersion>
+    <DotnetSqlCachePackageVersion>2.1.1</DotnetSqlCachePackageVersion>
+    <DotnetUserSecretsPackageVersion>2.1.1</DotnetUserSecretsPackageVersion>
+    <DotnetWatchPackageVersion>2.1.1</DotnetWatchPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.1.1</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.8.0-preview-000125</MicrosoftBuildPackageVersion>
