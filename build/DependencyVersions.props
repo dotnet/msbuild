@@ -58,6 +58,7 @@
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
+    <NUnit3TemplatesVersion>1.5.1</NUnit3TemplatesVersion>
   </PropertyGroup>
 
   <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->
