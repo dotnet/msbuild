@@ -123,7 +123,9 @@ namespace Microsoft.Build.Shared
         {
             var msBuildExePath = s_getEnvironmentVariable("MSBUILD_EXE_PATH");
 
-            return TryFromStandaloneMSBuildExe(msBuildExePath);
+            return msBuildExePath == null
+                ? null
+                : TryFromMSBuildAssemblyUnderVisualStudio(msBuildExePath, msBuildExePath) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
         }
 
         private static BuildEnvironment TryFromVisualStudioProcess()
@@ -181,19 +183,10 @@ namespace Microsoft.Build.Shared
             var msBuildDll = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.dll");
 
             // First check if we're in a VS installation
-            if (NativeMethodsShared.IsWindows &&
-                Regex.IsMatch(buildAssembly, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*", RegexOptions.IgnoreCase))
+            var environment = TryFromMSBuildAssemblyUnderVisualStudio(buildAssembly, msBuildExe);
+            if (environment != null)
             {
-                // In a Visual Studio path we must have MSBuild.exe
-                if (File.Exists(msBuildExe))
-                {
-                    return new BuildEnvironment(
-                        BuildEnvironmentMode.VisualStudio,
-                        msBuildExe,
-                        runningTests: s_runningTests(),
-                        runningInVisualStudio: false,
-                        visualStudioPath: GetVsRootFromMSBuildAssembly(msBuildExe));
-                }
+                return environment;
             }
 
             // We're not in VS, check for MSBuild.exe / dll to consider this a standalone environment.
@@ -214,6 +207,26 @@ namespace Microsoft.Build.Shared
 
             return null;
 
+        }
+
+        private static BuildEnvironment TryFromMSBuildAssemblyUnderVisualStudio(string msbuildAssembly, string msbuildExe)
+        {
+            if (NativeMethodsShared.IsWindows &&
+                Regex.IsMatch(msbuildAssembly, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*", RegexOptions.IgnoreCase))
+            {
+                // In a Visual Studio path we must have MSBuild.exe
+                if (File.Exists(msbuildExe))
+                {
+                    return new BuildEnvironment(
+                        BuildEnvironmentMode.VisualStudio,
+                        msbuildExe,
+                        runningTests: s_runningTests(),
+                        runningInVisualStudio: false,
+                        visualStudioPath: GetVsRootFromMSBuildAssembly(msbuildExe));
+                }
+            }
+
+            return null;
         }
 
         private static BuildEnvironment TryFromDevConsole()
