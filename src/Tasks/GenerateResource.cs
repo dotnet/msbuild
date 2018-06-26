@@ -21,6 +21,7 @@ using Microsoft.Build.Shared;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Xml;
+using System.Xml.Linq;
 using System.Runtime.InteropServices;
 #if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
