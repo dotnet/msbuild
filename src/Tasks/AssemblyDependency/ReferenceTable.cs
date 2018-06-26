@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 
@@ -42,7 +43,7 @@ namespace Microsoft.Build.Tasks
         private readonly HashSet<string> _externallyResolvedPrimaryReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private List<DependentAssembly> _remappedAssemblies = new List<DependentAssembly>();
+        private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
 
         /// <summary>If true, then search for dependencies.</summary>
         private readonly bool _findDependencies;
@@ -1590,7 +1591,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="exceptions">Errors encountered while computing closure.</param>
         internal void ComputeClosure
         (
-            List<DependentAssembly> remappedAssembliesValue,
+            IEnumerable<DependentAssembly> remappedAssembliesValue,
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
             ArrayList exceptions
