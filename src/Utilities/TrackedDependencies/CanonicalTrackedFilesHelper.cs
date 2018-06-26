@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputNewestFilename">Name of the most recently modified file.</param>
         /// <param name="outputNewestTime">Timestamp of the most recently modified file.</param>
         /// <returns>True if all members of 'files' exist, false otherwise</returns>
-        internal static bool FilesExistAndRecordNewestWriteTime(ITaskItem[] files, TaskLoggingHelper log, out DateTime outputNewestTime, out string outputNewestFilename)
+        internal static bool FilesExistAndRecordNewestWriteTime(ICollection<ITaskItem> files, TaskLoggingHelper log, out DateTime outputNewestTime, out string outputNewestFilename)
             => FilesExistAndRecordRequestedWriteTime(files, log, true /* return information about the newest file */, out outputNewestTime, out outputNewestFilename);
 
         /// <summary>
@@ -65,10 +65,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputOldestFilename">Name of the least recently modified file.</param>
         /// <param name="outputOldestTime">Timestamp of the least recently modified file.</param>
         /// <returns>True if all members of 'files' exist, false otherwise</returns>
-        internal static bool FilesExistAndRecordOldestWriteTime(ITaskItem[] files, TaskLoggingHelper log, out DateTime outputOldestTime, out string outputOldestFilename)
+        internal static bool FilesExistAndRecordOldestWriteTime(ICollection<ITaskItem> files, TaskLoggingHelper log, out DateTime outputOldestTime, out string outputOldestFilename)
             => FilesExistAndRecordRequestedWriteTime(files, log, false /* return information about the oldest file */, out outputOldestTime, out outputOldestFilename);
 
-        private static bool FilesExistAndRecordRequestedWriteTime(ITaskItem[] files, TaskLoggingHelper log, bool getNewest, out DateTime requestedTime, out string requestedFilename)
+        private static bool FilesExistAndRecordRequestedWriteTime(ICollection<ITaskItem> files, TaskLoggingHelper log, bool getNewest, out DateTime requestedTime, out string requestedFilename)
         {
             bool allExist = true;
             requestedTime = getNewest ? DateTime.MinValue : DateTime.MaxValue;
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Utilities
 
             // No output files for the source were tracked
             // safely assume that this is because we didn't track them because they weren't compiled
-            if (files == null || files.Length == 0)
+            if (files == null || files.Count == 0)
             {
                 allExist = false;
             }

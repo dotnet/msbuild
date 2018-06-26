@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 
@@ -42,7 +43,8 @@ namespace Microsoft.Build.Tasks
         private readonly HashSet<string> _externallyResolvedPrimaryReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private DependentAssembly[] _remappedAssemblies = Array.Empty<DependentAssembly>();
+        private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
+
         /// <summary>If true, then search for dependencies.</summary>
         private readonly bool _findDependencies;
         /// <summary>
@@ -791,7 +793,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (FileLoadException)
             {
-                // Not a valid AssemblyName. Maybe its a file name.
+                // Not a valid AssemblyName. Maybe it's a file name.
                 // TryGatherAssemblyNameEssentials
                 return;
             }
@@ -1589,7 +1591,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="exceptions">Errors encountered while computing closure.</param>
         internal void ComputeClosure
         (
-            DependentAssembly[] remappedAssembliesValue,
+            IEnumerable<DependentAssembly> remappedAssembliesValue,
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
             ArrayList exceptions
@@ -1816,8 +1818,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ResolveConflicts
         (
-            out DependentAssembly[] idealRemappings,
-            out AssemblyNameReference[] conflictingReferences
+            out List<DependentAssembly> idealRemappings,
+            out List<AssemblyNameReference> conflictingReferences
         )
         {
             idealRemappings = null;
@@ -1913,13 +1915,13 @@ namespace Microsoft.Build.Tasks
                     OldVersionHigh = assemblyNameReference.assemblyName.AssemblyName.Version,
                     NewVersion = assemblyNameReference.assemblyName.AssemblyName.Version
                 };
-                remapping.BindingRedirects = new[] { bindingRedirect };
+                remapping.BindingRedirects = new List<BindingRedirect> { bindingRedirect };
 
                 idealRemappingsList.Add(remapping);
             }
 
-            idealRemappings = idealRemappingsList.ToArray();
-            conflictingReferences = assemblyNamesList.ToArray();
+            idealRemappings = idealRemappingsList;
+            conflictingReferences = assemblyNamesList;
         }
 
         /// <summary>

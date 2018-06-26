@@ -250,7 +250,7 @@ namespace Microsoft.Build.Tasks
             List<string[]> targetLists = CreateTargetLists(Targets, RunEachTargetSeparately);
 
             bool success = true;
-            ITaskItem[] singleProject = null;
+            List<ITaskItem> singleProject = null;
             bool[] skipProjects = null;
 
             if (BuildInParallel)
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                singleProject = new ITaskItem[1];
+                singleProject = new List<ITaskItem>(1) { null };
             }
 
             // Read in each project file.  If there are any errors opening the file or parsing the XML,
@@ -357,22 +357,21 @@ namespace Microsoft.Build.Tasks
         {
             // There were some projects that were skipped so we need to recreate the
             // project array with those projects removed
-            var projectsToBuildList = new List<ITaskItem>();
+            var projectsToBuildInParallel = new List<ITaskItem>();
             for (int i = 0; i < Projects.Length; i++)
             {
                 if (!skipProjects[i])
                 {
-                    projectsToBuildList.Add(Projects[i]);
+                    projectsToBuildInParallel.Add(Projects[i]);
                 }
             }
-            ITaskItem[] projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
-            if (projectToBuildInParallel.Length > 0)
+            if (projectsToBuildInParallel.Count > 0)
             {
                 if (!ExecuteTargets
                                 (
-                                projectToBuildInParallel,
+                                projectsToBuildInParallel,
                                 propertiesTable,
                                 undefinePropertiesArray,
                                 targetLists,
@@ -466,7 +465,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the operation was successful</returns>
         internal static bool ExecuteTargets
             (
-            ITaskItem[] projects,
+            List<ITaskItem> projects,
             Dictionary<string, string> propertiesTable,
             string[] undefineProperties,
             List<string[]> targetLists,
@@ -485,11 +484,11 @@ namespace Microsoft.Build.Tasks
             // We don't log a message about the project and targets we're going to
             // build, because it'll all be in the immediately subsequent ProjectStarted event.
 
-            var projectDirectory = new string[projects.Length];
-            var projectNames = new string[projects.Length];
-            var toolsVersions = new string[projects.Length];
-            var projectProperties = new Dictionary<string, string>[projects.Length];
-            var undefinePropertiesPerProject = new IList<string>[projects.Length];
+            var projectDirectory = new string[projects.Count];
+            var projectNames = new string[projects.Count];
+            var toolsVersions = new string[projects.Count];
+            var projectProperties = new Dictionary<string, string>[projects.Count];
+            var undefinePropertiesPerProject = new IList<string>[projects.Count];
 
             for (int i = 0; i < projectNames.Length; i++)
             {
@@ -610,7 +609,7 @@ namespace Microsoft.Build.Tasks
                 // If the engine was able to satisfy the build request
                 if (currentTargetResult)
                 {
-                    for (int i = 0; i < projects.Length; i++)
+                    for (int i = 0; i < projects.Count; i++)
                     {
                         IEnumerable<string> nonNullTargetList = targetList ?? targetOutputsPerProject[i].Keys;
 

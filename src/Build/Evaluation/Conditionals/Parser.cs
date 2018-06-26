@@ -1,14 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Globalization;
-using System.Collections;
-using System.Xml;
 using System;
+using System.Collections.Generic;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -292,7 +289,7 @@ namespace Microsoft.Build.Evaluation
                     ProjectErrorUtilities.VerifyThrowInvalidProject(false, _elementLocation, "UnexpectedTokenInCondition", _lexer.IsNextString(), errorPosition);
                     return null;
                 }
-                ArrayList arglist = new ArrayList();
+                var arglist = new List<GenericExpressionNode>();
                 Arglist(expression, arglist);
                 if (!Same(expression, Token.TokenType.RightParenthesis))
                 {
@@ -333,13 +330,15 @@ namespace Microsoft.Build.Evaluation
             return null;
         }
 
-        private void Arglist(string expression, ArrayList arglist)
+        private void Arglist(string expression, List<GenericExpressionNode> arglist)
         {
             if (!_lexer.IsNext(Token.TokenType.RightParenthesis))
+            {
                 Args(expression, arglist);
+            }
         }
 
-        private void Args(string expression, ArrayList arglist)
+        private void Args(string expression, List<GenericExpressionNode> arglist)
         {
             GenericExpressionNode arg = Arg(expression);
             arglist.Add(arg);

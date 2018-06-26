@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     {
         private readonly List<CompatibleFramework> _list = new List<CompatibleFramework>();
 
-        internal CompatibleFrameworkCollection(CompatibleFramework[] compatibleFrameworks)
+        internal CompatibleFrameworkCollection(IEnumerable<CompatibleFramework> compatibleFrameworks)
         {
             if (compatibleFrameworks == null)
             {

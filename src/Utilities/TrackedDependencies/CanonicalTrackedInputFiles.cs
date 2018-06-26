@@ -377,7 +377,6 @@ namespace Microsoft.Build.Utilities
 
             // We have our set of outputs, construct our array
             sourcesNeedingCompilationList.AddRange(sourcesNeedingCompilation.Values);
-            ITaskItem[] sourcesNeedingCompilationArray = sourcesNeedingCompilationList.ToArray();
 
             // now that we have our dependencies, we need to check if any of them are newer than the outputs.
             DateTime newestSourceDependencyTime;
@@ -386,7 +385,7 @@ namespace Microsoft.Build.Utilities
             string oldestOutputFile = string.Empty;
 
             if (
-                CanonicalTrackedFilesHelper.FilesExistAndRecordNewestWriteTime(sourcesNeedingCompilationArray, _log, out newestSourceDependencyTime, out newestSourceDependencyFile) &&
+                CanonicalTrackedFilesHelper.FilesExistAndRecordNewestWriteTime(sourcesNeedingCompilationList, _log, out newestSourceDependencyTime, out newestSourceDependencyFile) &&
                 CanonicalTrackedFilesHelper.FilesExistAndRecordOldestWriteTime(_outputFileGroup, _log, out oldestOutputTime, out oldestOutputFile)
                 )
             {
@@ -408,7 +407,7 @@ namespace Microsoft.Build.Utilities
                 // We have our set of outputs, log the details
                 FileTracker.LogMessageFromResources(_log, MessageImportance.Low, "Tracking_InputsFor", upperSourcesRoot);
 
-                foreach (ITaskItem inputItem in sourcesNeedingCompilationArray)
+                foreach (ITaskItem inputItem in sourcesNeedingCompilationList)
                 {
                     FileTracker.LogMessage(_log, MessageImportance.Low, "\t" + inputItem);
                 }

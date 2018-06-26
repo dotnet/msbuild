@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -92,23 +93,17 @@ namespace Microsoft.Build.Tasks
             {
                 // If there are multiple entries in the redist list for this assembly, let's
                 // pick the one with the highest version and resolve it.
-
-                AssemblyEntry[] assemblyEntries = installedAssemblies.FindAssemblyNameFromSimpleName(assemblyName.Name);
-
-                if (assemblyEntries.Length != 0)
+                foreach (AssemblyEntry a in installedAssemblies.FindAssemblyNameFromSimpleName(assemblyName.Name))
                 {
-                    for (int i = 0; i < assemblyEntries.Length; ++i)
-                    {
-                        var current = new AssemblyNameExtension(assemblyEntries[i].FullName);
+                    var current = new AssemblyNameExtension(a.FullName);
 
-                        // If the current version is higher than the previously looked at.
-                        if (current.Version != null && current.Version.CompareTo(assemblyNameToUse.Version) > 0)
+                    // If the current version is higher than the previously looked at.
+                    if (current.Version != null && current.Version.CompareTo(assemblyNameToUse.Version) > 0)
+                    {
+                        // Only compare the Culture and the public key token, the simple names will ALWAYS be the same and the version we do not care about.
+                        if (assemblyName.PartialNameCompare(current, PartialComparisonFlags.Culture | PartialComparisonFlags.PublicKeyToken))
                         {
-                            // Only compare the Culture and the public key token, the simple names will ALWAYS be the same and the version we do not care about.
-                            if (assemblyName.PartialNameCompare(current, PartialComparisonFlags.Culture | PartialComparisonFlags.PublicKeyToken))
-                            {
-                                assemblyNameToUse = current;
-                            }
+                            assemblyNameToUse = current;
                         }
                     }
                 }

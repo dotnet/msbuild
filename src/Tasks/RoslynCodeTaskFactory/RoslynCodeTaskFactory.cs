@@ -680,7 +680,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.NoLogo = true;
                     managedCompiler.Optimize = false;
                     managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
-                    managedCompiler.References = references.ToArray();
+                    managedCompiler.References = references;
                     managedCompiler.Sources = new ITaskItem[] { new TaskItem(sourceCodePath) };
                     managedCompiler.TargetType = "Library";
                     managedCompiler.UseSharedCompilation = false;

@@ -647,9 +647,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Return the list of conflict victims.
         /// </summary>
-        internal AssemblyNameExtension[] GetConflictVictims()
+        internal List<AssemblyNameExtension> GetConflictVictims()
         {
-            return _conflictVictims.ToArray();
+            return _conflictVictims;
         }
 
         /// <summary>

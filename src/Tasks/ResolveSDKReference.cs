@@ -406,7 +406,7 @@ namespace Microsoft.Build.Tasks
                         // Only log a warning or error if there were incompatible references
                         if (listOfIncompatibleReferences.Count > 0)
                         {
-                            string incompatibleReferencesDelimited = String.Join(", ", listOfIncompatibleReferences.ToArray());
+                            string incompatibleReferencesDelimited = String.Join(", ", listOfIncompatibleReferences);
                             if (notCompatibleReference.SupportsMultipleVersions == MultipleVersionSupport.Error)
                             {
                                 Log.LogErrorWithCodeFromResources("ResolveSDKReference.CannotReferenceTwoSDKsSameFamily", notCompatibleReference.SDKName, incompatibleReferencesDelimited, notCompatibleReference.ProductFamilyName);
@@ -435,7 +435,7 @@ namespace Microsoft.Build.Tasks
                     // Only log a warning or error if there were incompatible references
                     if (listOfIncompatibleReferences.Count > 0)
                     {
-                        string incompatibleReferencesDelimited = String.Join(", ", listOfIncompatibleReferences.ToArray());
+                        string incompatibleReferencesDelimited = string.Join(", ", listOfIncompatibleReferences);
                         if (notCompatibleReference.SupportsMultipleVersions == MultipleVersionSupport.Error)
                         {
                             Log.LogErrorWithCodeFromResources("ResolveSDKReference.CannotReferenceTwoSDKsSameName", notCompatibleReference.SDKName, incompatibleReferencesDelimited);
@@ -451,7 +451,7 @@ namespace Microsoft.Build.Tasks
             AddMetadataToReferences(Log, sdkReferenceItems, _runtimeReferenceOnlyDependenciesByName, "RuntimeReferenceOnly", "true");
 
             // Gather the ResolvedItems from the SDKReference where the reference was resolved.
-            ResolvedSDKReferences = sdkReferenceItems.Where(x => x.Resolved).Select(x => x.ResolvedItem).ToArray<ITaskItem>();
+            ResolvedSDKReferences = sdkReferenceItems.Where(x => x.Resolved).Select(x => x.ResolvedItem).ToArray();
 
             VerifySDKDependsOn(Log, sdkReferenceItems);
 

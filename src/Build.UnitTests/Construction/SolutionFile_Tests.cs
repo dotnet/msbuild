@@ -1466,7 +1466,7 @@ EndGlobal
             Assert.Equal("", releaseAspNetCompilerParameters.aspNetAPTCA);
             Assert.Equal("", releaseAspNetCompilerParameters.aspNetFixedNames);
 
-            ArrayList aspNetProjectReferences = solution.ProjectsInOrder[0].ProjectReferences;
+            List<string> aspNetProjectReferences = solution.ProjectsInOrder[0].ProjectReferences;
             Assert.Equal(2, aspNetProjectReferences.Count);
             Assert.Equal("{FD705688-88D1-4C22-9BFF-86235D89C2FC}", aspNetProjectReferences[0]);
             Assert.Equal("{F0726D09-042B-4A7A-8A01-6BED2422BD5D}", aspNetProjectReferences[1]);

@@ -12,11 +12,6 @@ namespace Microsoft.Build.Tasks
     internal sealed class RuntimeSection
     {
         /// <summary>
-        /// List of dependent assemblies. Type is DependentAssembly.
-        /// </summary>
-        private readonly List<DependentAssembly> _dependentAssemblies = new List<DependentAssembly>();
-
-        /// <summary>
         /// The reader is positioned on a &lt;runtime&gt; element--read it.
         /// </summary>
         internal void Read(XmlReader reader)
@@ -39,7 +34,7 @@ namespace Microsoft.Build.Tasks
                     // Otherwise, this section is no use.
                     if (dependentAssembly.PartialAssemblyName != null)
                     {
-                        _dependentAssemblies.Add(dependentAssembly);
+                        DependentAssemblies.Add(dependentAssembly);
                     }
                 }
             }
@@ -48,6 +43,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Return the collection of dependent assemblies for this runtime element.
         /// </summary>
-        internal DependentAssembly[] DependentAssemblies => _dependentAssemblies.ToArray();
+        internal List<DependentAssembly> DependentAssemblies { get; } = new List<DependentAssembly>();
     }
 }
