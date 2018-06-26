@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -292,8 +291,8 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal AssemblyInfoToLoadedTypes(Func<Type, object, bool> typeFilter, AssemblyLoadInfo loadInfo)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
-                ErrorUtilities.VerifyThrowArgumentNull(loadInfo, "loadInfo");
+                ErrorUtilities.VerifyThrowArgumentNull(typeFilter, nameof(typeFilter));
+                ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
 
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
@@ -306,7 +305,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal LoadedType GetLoadedTypeByTypeName(string typeName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeName, "typeName");
+                ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 // Only one thread should be doing operations on this instance of the object at a time.
 

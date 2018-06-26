@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Xml;
 using System.Runtime.Serialization;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
 
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Exceptions
 {
@@ -186,8 +183,8 @@ namespace Microsoft.Build.Exceptions
             Exception innerException
         ) : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentLength(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
 
             // Try to helpfully provide a full path if possible, but do so robustly.
             // This exception might be because the path was invalid!

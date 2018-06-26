@@ -3,10 +3,6 @@
 #if FEATURE_WIN32_REGISTRY
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Security;
 
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
@@ -67,8 +63,8 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal RegistryKeyWrapper(string registryKeyPath, RegistryKey registryHive)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(registryKeyPath, "registryKeyPath");
-            ErrorUtilities.VerifyThrowArgumentNull(registryHive, "registryHive");
+            ErrorUtilities.VerifyThrowArgumentNull(registryKeyPath, nameof(registryKeyPath));
+            ErrorUtilities.VerifyThrowArgumentNull(registryHive, nameof(registryHive));
 
             _registryKeyPath = registryKeyPath;
             _registryHive = registryHive;
@@ -173,7 +169,7 @@ namespace Microsoft.Build.Internal
         /// <returns></returns>
         public virtual RegistryKeyWrapper OpenSubKey(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             RegistryKeyWrapper wrapper = this;
             string[] keyNames = name.Split(new char[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);

@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -72,7 +70,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to add.</param>
         public void AddConfiguration(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config, "config");
+            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
             ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
 
             lock (_lockObject)
@@ -106,7 +104,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config, "config");
+            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
             return GetMatchingConfiguration(new ConfigurationMetadata(config));
         }
 
@@ -117,7 +115,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configMetadata, "configMetadata");
+            ErrorUtilities.VerifyThrowArgumentNull(configMetadata, nameof(configMetadata));
             lock (_lockObject)
             {
                 int configId;
@@ -328,7 +326,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The build component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
         }
 
         /// <summary>

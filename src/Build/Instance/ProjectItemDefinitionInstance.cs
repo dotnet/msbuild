@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System;
@@ -40,7 +39,7 @@ namespace Microsoft.Build.Execution
         /// <param name="itemType">The type of item this definition object represents.</param>
         internal ProjectItemDefinitionInstance(ProjectInstance projectInstance, string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemType, "itemType");
+            ErrorUtilities.VerifyThrowArgumentNull(itemType, nameof(itemType));
 
             _itemType = itemType;
         }

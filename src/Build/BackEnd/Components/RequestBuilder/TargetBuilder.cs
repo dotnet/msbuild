@@ -4,12 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Text;
 using System.Threading;
-using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -101,11 +98,11 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The target's outputs and result codes</returns>
         public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry, "entry");
-            ErrorUtilities.VerifyThrowArgumentNull(callback, "requestBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames, "targetNames");
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "baseLookup");
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
+            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(callback, nameof(callback));
+            ErrorUtilities.VerifyThrowArgumentNull(targetNames, nameof(targetNames));
+            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, nameof(baseLookup));
             ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
             ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
 
@@ -212,7 +209,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
             _componentHost = host;
         }
 
@@ -538,7 +535,7 @@ namespace Microsoft.Build.BackEnd
             if (_buildResult.HasResultsForTarget(currentTargetEntry.Name))
             {
                 TargetResult targetResult = _buildResult[currentTargetEntry.Name] as TargetResult;
-                ErrorUtilities.VerifyThrowInternalNull(targetResult, "targetResult");
+                ErrorUtilities.VerifyThrowInternalNull(targetResult, nameof(targetResult));
 
                 if (targetResult.ResultCode != TargetResultCode.Skipped)
                 {

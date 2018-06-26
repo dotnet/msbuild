@@ -205,7 +205,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, "task");
+            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
 #if FEATURE_APPDOMAIN
             AppDomain appDomain;
             if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
@@ -261,7 +261,7 @@ namespace Microsoft.Build.BackEnd
                 string taskProjectFile
             )
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loadInfo, "loadInfo");
+            ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
             if (taskFactoryIdentityParameters != null)
@@ -273,7 +273,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName, "taskName");
+                ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 _taskName = taskName;
                 _loadedType = _typeLoader.Load(taskName, loadInfo);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
@@ -351,7 +351,7 @@ namespace Microsoft.Build.BackEnd
 
             if (useTaskFactory)
             {
-                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, "buildComponentHost");
+                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, nameof(buildComponentHost));
 
                 mergedParameters = mergedParameters ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -417,7 +417,7 @@ namespace Microsoft.Build.BackEnd
             LoadedType taskClass = null;
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
+                ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
                 taskClass = _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly);
                 if (taskClass != null)
                 {

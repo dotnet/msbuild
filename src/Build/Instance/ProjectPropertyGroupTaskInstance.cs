@@ -1,15 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
-
 using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
 {
@@ -53,9 +50,9 @@ namespace Microsoft.Build.Execution
             List<ProjectPropertyGroupTaskPropertyInstance> properties
             )
         {
-            ErrorUtilities.VerifyThrowInternalNull(condition, "condition");
-            ErrorUtilities.VerifyThrowInternalNull(location, "location");
-            ErrorUtilities.VerifyThrowInternalNull(properties, "properties");
+            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
+            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
 
             _condition = condition;
             _location = location;

@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             public void Run(string[] includes, IDictionary<string, string> metadataToAdd)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(includes, "includes");
+                ErrorUtilities.VerifyThrowArgumentNull(includes, nameof(includes));
 
                 CreatedTaskItems = new TaskItem[includes.Length];
 

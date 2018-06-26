@@ -2,10 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -34,7 +32,7 @@ namespace Microsoft.Build.Execution
         internal ReflectableTaskPropertyInfo(TaskPropertyInfo taskPropertyInfo, Type taskType)
             : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskType, "taskType");
+            ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
             _taskType = taskType;
         }
 

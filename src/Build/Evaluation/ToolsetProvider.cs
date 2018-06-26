@@ -3,15 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
-
-using Constants = Microsoft.Build.Internal.Constants;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -72,7 +68,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
 
             Toolset toolset;
             _toolsets.TryGetValue(toolsVersion, out toolset);

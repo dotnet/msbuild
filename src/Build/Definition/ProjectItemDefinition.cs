@@ -1,15 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
-using System;
-using System.Linq;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -53,8 +52,8 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal ProjectItemDefinition(Project project, string itemType)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, "project");
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, "itemType");
+            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
 
             _project = project;
             _itemType = itemType;

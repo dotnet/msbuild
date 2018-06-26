@@ -81,7 +81,7 @@ namespace Microsoft.Build.Evaluation
                 "Unexpected token type"
                 );
 
-            ErrorUtilities.VerifyThrowInternalNull(tokenString, "tokenString");
+            ErrorUtilities.VerifyThrowInternalNull(tokenString, nameof(tokenString));
 
             _tokenType = type;
             _tokenString = tokenString;

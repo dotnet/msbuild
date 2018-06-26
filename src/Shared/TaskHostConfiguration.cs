@@ -5,12 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Text;
 
 using Microsoft.Build.Shared;
-using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -122,8 +118,8 @@ namespace Microsoft.Build.BackEnd
                 IDictionary<string, object> taskParameters
             )
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, "taskName");
-            ErrorUtilities.VerifyThrowInternalLength(taskLocation, "taskLocation");
+            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));
 
             _nodeId = nodeId;
             _startupDirectory = startupDirectory;

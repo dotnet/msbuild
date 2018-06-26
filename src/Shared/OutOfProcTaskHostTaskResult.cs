@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 using Microsoft.Build.BackEnd;
 
@@ -61,7 +60,7 @@ namespace Microsoft.Build.Shared
                 result == TaskCompleteType.CrashedDuringExecution ||
                 result == TaskCompleteType.CrashedAfterExecution)
             {
-                ErrorUtilities.VerifyThrowInternalNull(taskException, "taskException");
+                ErrorUtilities.VerifyThrowInternalNull(taskException, nameof(taskException));
             }
 
             if (exceptionMessage != null)

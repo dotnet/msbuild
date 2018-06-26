@@ -92,9 +92,9 @@ namespace Microsoft.Build.Tasks
         /// <returns>true if transformation succeeds.</returns>
         public override bool Execute()
         {
-            ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
-            ErrorUtilities.VerifyThrowArgumentNull(_value, "Value");
-            ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, "XmlInputPath");
+            ErrorUtilities.VerifyThrowArgumentNull(_query, nameof(Query));
+            ErrorUtilities.VerifyThrowArgumentNull(_value, nameof(Value));
+            ErrorUtilities.VerifyThrowArgumentNull(_xmlInputPath, nameof(XmlInputPath));
 
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();

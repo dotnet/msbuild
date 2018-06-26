@@ -4,10 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
-using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
@@ -91,7 +88,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="buildProcessEnvironment">The build process environment as it was at the end of the task's execution.</param>
         public TaskHostTaskComplete(OutOfProcTaskHostTaskResult result, IDictionary<string, string> buildProcessEnvironment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(result, "result");
+            ErrorUtilities.VerifyThrowInternalNull(result, nameof(result));
 
             _taskResult = result.Result;
             _taskException = result.TaskException;

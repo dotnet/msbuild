@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -289,7 +286,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if successful</returns>
         private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup, "lookup");
+            ErrorUtilities.VerifyThrowArgumentNull(lookup, nameof(lookup));
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;

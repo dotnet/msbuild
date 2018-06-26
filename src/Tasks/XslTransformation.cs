@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+                ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, nameof(OutputPaths));
                 return _outputPaths;
             }
 
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks
         {
             XmlInput xmlinput;
             XsltInput xsltinput;
-            ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+            ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, nameof(OutputPaths));
 
             // Load XmlInput, XsltInput parameters
             try

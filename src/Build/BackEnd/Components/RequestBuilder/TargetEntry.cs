@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -15,7 +14,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using MessageImportance = Microsoft.Build.Framework.MessageImportance;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -168,11 +166,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="stopProcessingOnCompletion">True if the target builder should stop processing the current target stack when this target is complete.</param>
         internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, TargetBuiltReason buildReason, IBuildComponentHost host, bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, "requestEntry");
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, "targetBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host, "host");
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
+            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
+            ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, nameof(targetSpecification));
+            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, nameof(baseLookup));
+            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;

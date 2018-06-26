@@ -2,15 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 
@@ -93,8 +89,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(ItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems, "projectItems");
-            ErrorUtilities.VerifyThrowInternalNull(properties, "properties");
+            ErrorUtilities.VerifyThrowInternalNull(projectItems, nameof(projectItems));
+            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
 
             Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
@@ -454,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ProjectPropertyInstance GetProperty(string name)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, "name");
+            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
 
             return GetProperty(name, 0, name.Length - 1);
         }
@@ -1161,7 +1157,7 @@ namespace Microsoft.Build.BackEnd
 
                 set
                 {
-                    ErrorUtilities.VerifyThrowInternalNull(value, "value");
+                    ErrorUtilities.VerifyThrowInternalNull(value, nameof(value));
                     _modifications[metadataName] = value;
                 }
             }

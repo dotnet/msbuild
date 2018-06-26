@@ -92,8 +92,8 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, "name");
-                ErrorUtilities.VerifyThrowArgumentNull(value, "value");
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(value));
 
                 XmlElement idElement = XmlElement[name];
 

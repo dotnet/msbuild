@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -18,7 +16,6 @@ using Microsoft.Build.Shared;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -1247,8 +1244,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestToNode(SchedulableRequest request, int nodeId, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(request, "request");
-            ErrorUtilities.VerifyThrowArgumentNull(responses, "responses");
+            ErrorUtilities.VerifyThrowArgumentNull(request, nameof(request));
+            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
             ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
 
             // Currently we cannot move certain kinds of traversals (notably solution metaprojects) to other nodes because 
@@ -1486,8 +1483,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedOnInProgressTarget(SchedulableRequest blockedRequest, BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest, "blockedRequest");
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, "blocker");
+            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest, nameof(blockedRequest));
+            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
 
             // We are blocked on an in-progress request building a target whose results we need.
             SchedulableRequest blockingRequest = _schedulingData.GetScheduledRequest(blocker.BlockingRequestId);
@@ -1545,8 +1542,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedByNewRequests(SchedulableRequest parentRequest, BuildRequestBlocker blocker, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, "blocker");
-            ErrorUtilities.VerifyThrowArgumentNull(responses, "responses");
+            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
+            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
 
             // The request is waiting on new requests.
             bool abortRequestBatch = false;

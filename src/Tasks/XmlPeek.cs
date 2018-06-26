@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
+                ErrorUtilities.VerifyThrowArgumentNull(_query, nameof(Query));
                 return _query;
             }
 

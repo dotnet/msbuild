@@ -3,7 +3,6 @@
 
 using System;
 using System.Xml;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Shared
@@ -70,7 +69,7 @@ namespace Microsoft.Build.Shared
         /// <param name="name">name to validate</param>
         internal static void VerifyThrowArgumentValidElementName(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             int firstInvalidCharLocation = LocateFirstInvalidElementNameCharacter(name);
 
@@ -89,7 +88,7 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static void VerifyThrowProjectValidElementName(string name, IElementLocation location)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
             int firstInvalidCharLocation = LocateFirstInvalidElementNameCharacter(name);
 
             if (-1 != firstInvalidCharLocation)

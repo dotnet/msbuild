@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool Unregister(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, "typeLibPath");
+            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, nameof(typeLibPath));
 
             Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisteringAssembly", assemblyPath);
 

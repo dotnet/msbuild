@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Evaluation = Microsoft.Build.Evaluation;
 using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
@@ -17,7 +16,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Internal;
 
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using System.Xml;
@@ -33,6 +31,7 @@ using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 namespace Microsoft.Build.Execution
 {
     using Utilities = Microsoft.Build.Internal.Utilities;
+
     /// <summary>
     /// Enum for controlling project instance creation
     /// </summary>
@@ -239,8 +238,8 @@ namespace Microsoft.Build.Execution
         /// <returns>A new project instance</returns>
         public ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
+            ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
 
             // We do not control the current directory at this point, but assume that if we were
             // passed a relative path, the caller assumes we will prepend the current directory.
@@ -374,9 +373,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId, ProjectLoadSettings? projectLoadSettings)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, "buildParameters");
+            ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, nameof(buildParameters));
 
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
 
@@ -390,9 +389,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, "buildParameters");
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, nameof(buildParameters));
             Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
@@ -402,9 +401,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(Evaluation.Project.Data data, string directory, string fullPath, HostServices hostServices, PropertyDictionary<ProjectPropertyInstance> environmentVariableProperties, ProjectInstanceSettings settings)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data, "data");
-            ErrorUtilities.VerifyThrowInternalLength(directory, "directory");
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(fullPath, "fullPath");
+            ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
+            ErrorUtilities.VerifyThrowInternalLength(directory, nameof(directory));
+            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(fullPath, nameof(fullPath));
 
             _directory = directory;
             _projectFileLocation = ElementLocation.Create(fullPath);
@@ -1142,7 +1141,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IItem is an internal interface; this is less confusing to outside customers. ")]
         public static string GetEvaluatedItemIncludeEscaped(ProjectItemInstance item)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item, "item");
+            ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
 
             return ((IItem)item).EvaluatedIncludeEscaped;
         }
@@ -1152,7 +1151,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public static string GetEvaluatedItemIncludeEscaped(ProjectItemDefinitionInstance item)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item, "item");
+            ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
 
             return ((IItem)item).EvaluatedIncludeEscaped;
         }
@@ -1162,7 +1161,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectMetadataInstance metadatum)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadatum, "metadatum");
+            ErrorUtilities.VerifyThrowArgumentNull(metadatum, nameof(metadatum));
 
             return metadatum.EvaluatedValueEscaped;
         }
@@ -1173,7 +1172,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IItem is an internal interface; this is less confusing to outside customers. ")]
         public static string GetMetadataValueEscaped(ProjectItemInstance item, string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item, "item");
+            ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
 
             return ((IItem)item).GetMetadataValueEscaped(name);
         }
@@ -1183,7 +1182,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public static string GetMetadataValueEscaped(ProjectItemDefinitionInstance item, string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(item, "item");
+            ErrorUtilities.VerifyThrowArgumentNull(item, nameof(item));
 
             return ((IItem)item).GetMetadataValueEscaped(name);
         }
@@ -1194,7 +1193,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "IProperty is an internal interface; this is less confusing to outside customers. ")]
         public static string GetPropertyValueEscaped(ProjectPropertyInstance property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(property, "property");
+            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
 
             return ((IProperty)property).EvaluatedValueEscaped;
         }
@@ -2005,10 +2004,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal static ProjectInstance[] LoadSolutionForBuild(string projectFile, PropertyDictionary<ProjectPropertyInstance> globalPropertiesInstances, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext projectBuildEventContext, bool isExplicitlyLoaded, IReadOnlyCollection<string> targetNames, ISdkResolverService sdkResolverService, int submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances, "globalPropertiesInstances");
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, "buildParameters");
+            ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentNull(globalPropertiesInstances, nameof(globalPropertiesInstances));
+            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, nameof(buildParameters));
             ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(projectFile), "Project file {0} is not a solution.", projectFile);
 
             ProjectInstance[] projectInstances = null;
@@ -2247,7 +2246,7 @@ namespace Microsoft.Build.Execution
         {
             VerifyThrowNotImmutable();
 
-            ErrorUtilities.VerifyThrowInternalLength(targetName, "targetName");
+            ErrorUtilities.VerifyThrowInternalLength(targetName, nameof(targetName));
             ErrorUtilities.VerifyThrow(!_actualTargets.ContainsKey(targetName), "Target {0} already exists.", targetName);
 
             ProjectTargetInstance target = new ProjectTargetInstance
@@ -2490,9 +2489,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void Initialize(ProjectRootElement xml, IDictionary<string, string> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService = null, int submissionId = BuildEventContext.InvalidSubmissionId, ProjectLoadSettings? projectLoadSettings = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
-            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, "buildParameters");
+            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, nameof(explicitToolsVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(buildParameters, nameof(buildParameters));
 
             _directory = xml.DirectoryPath;
             _projectFileLocation = (xml.ProjectFileLocation != null) ? xml.ProjectFileLocation : ElementLocation.EmptyLocation;

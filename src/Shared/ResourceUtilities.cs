@@ -6,9 +6,6 @@ using System.Resources;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using System.Text;
 using System.ComponentModel;
 
 #if BUILDINGAPPXTASKS
@@ -38,7 +35,7 @@ namespace Microsoft.Build.Shared
         internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string code)
         {
 #if !BUILDINGAPPXTASKS
-            ErrorUtilities.VerifyThrowInternalNull(message, "message");
+            ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
 #endif
 
             code = null;

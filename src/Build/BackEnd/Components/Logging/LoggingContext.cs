@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Diagnostics;
 using Microsoft.Build.Exceptions;
@@ -35,8 +38,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="eventContext">The event context</param>
         public LoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingService, "loggingService");
-            ErrorUtilities.VerifyThrowArgumentNull(eventContext, "eventContext");
+            ErrorUtilities.VerifyThrowArgumentNull(loggingService, nameof(loggingService));
+            ErrorUtilities.VerifyThrowArgumentNull(eventContext, nameof(eventContext));
 
             _loggingService = loggingService;
             _eventContext = eventContext;

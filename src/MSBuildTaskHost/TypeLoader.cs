@@ -4,11 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Collections;
-using System.Globalization;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Microsoft.Build.Shared
@@ -224,8 +220,8 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal AssemblyInfoToLoadedTypes(TypeFilter typeFilter, AssemblyLoadInfo loadInfo)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
-                ErrorUtilities.VerifyThrowArgumentNull(loadInfo, "loadInfo");
+                ErrorUtilities.VerifyThrowArgumentNull(typeFilter, nameof(typeFilter));
+                ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
 
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
@@ -238,7 +234,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal LoadedType GetLoadedTypeByTypeName(string typeName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeName, "typeName");
+                ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
 
                 // Only one thread should be doing operations on this instance of the object at a time.
 

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -35,7 +34,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal SubToolset(string subToolsetVersion, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, "subToolsetVersion");
+            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, nameof(subToolsetVersion));
 
             _subToolsetVersion = subToolsetVersion;
             _properties = properties;

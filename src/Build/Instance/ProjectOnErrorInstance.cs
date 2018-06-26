@@ -56,9 +56,9 @@ namespace Microsoft.Build.Execution
             ElementLocation conditionLocation
             )
         {
-            ErrorUtilities.VerifyThrowInternalLength(executeTargets, "executeTargets");
-            ErrorUtilities.VerifyThrowInternalNull(condition, "condition");
-            ErrorUtilities.VerifyThrowInternalNull(location, "location");
+            ErrorUtilities.VerifyThrowInternalLength(executeTargets, nameof(executeTargets));
+            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
+            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
 
             _executeTargets = executeTargets;
             _condition = condition;

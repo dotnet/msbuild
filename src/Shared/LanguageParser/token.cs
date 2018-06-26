@@ -2,21 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Text;
-using System.Resources;
-using System.Reflection;
-using System.Collections;
-using System.Globalization;
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
-    /*
-     * Class:   Token
-     *
-     * Base class for all token classes.
-     *
-     */
+    /// <summary>
+    /// Base class for all token classes.
+    /// </summary>
     internal abstract class Token
     {
         // The text from the originating source file that caused this token.
@@ -24,22 +15,18 @@ namespace Microsoft.Build.Shared.LanguageParser
         // The line number that the token fell on.
         private int _line = 0;
 
-        /*
-         * Method:  InnerText
-         * 
-         * Get or set the InnerText for this token
-         */
+        /// <summary>
+        /// Get or set the InnerText for this token
+        /// </summary>
         internal string InnerText
         {
             get { return _innerText; }
             set { _innerText = value; }
         }
 
-        /*
-         * Method:  Line
-         * 
-         * Get or set the Line for this token
-         */
+        /// <summary>
+        /// Get or set the Line for this token
+        /// </summary>
         internal int Line
         {
             get
@@ -52,11 +39,9 @@ namespace Microsoft.Build.Shared.LanguageParser
             }
         }
 
-        /*
-         * Method:  EqualsIgnoreCase
-         * 
-         * Return true if the given string equals the content of this token
-         */
+        /// <summary>
+        /// Return true if the given string equals the content of this token.
+        /// </summary>
         internal bool EqualsIgnoreCase(string compareTo)
         {
             return (String.Compare(_innerText, compareTo, StringComparison.OrdinalIgnoreCase) == 0);
