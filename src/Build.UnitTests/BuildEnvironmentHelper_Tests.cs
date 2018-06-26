@@ -59,15 +59,11 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-#if RUNTIME_TYPE_NETCORE
-        [Theory(Skip = "NA on .net core")]
-#else
         [Theory]
-#endif
         [InlineData(true)]
         [InlineData(false)]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindVisualStudioEnvironmentByEnvironmentVariable(bool is64BitMSbuild)
         {
             using (var env = new EmptyVSEnviroment())
@@ -95,8 +91,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindBuildEnvironmentFromCommandLineVisualStudio()
         {
             using (var env = new EmptyVSEnviroment())
@@ -130,8 +126,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindBuildEnvironmentFromRunningProcessVisualStudio()
         {
             using (var env = new EmptyVSEnviroment())
@@ -201,8 +197,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void FindBuildEnvironmentFromVisualStudioRoot()
         {
             using (var env = new EmptyVSEnviroment())
@@ -220,8 +216,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByEnvironment()
         {
             using (var env = new EmptyVSEnviroment())
@@ -236,8 +232,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcess()
         {
             using (var env = new EmptyVSEnviroment())
@@ -251,8 +247,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcessAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -266,8 +262,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Theory]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         [InlineData("15.0")]
         [InlineData("15.3")]
         public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion)
@@ -309,8 +305,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByProcessName()
         {
             using (var env = new EmptyVSEnviroment())
@@ -324,8 +320,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByBlendProcess()
         {
             using (var env = new EmptyVSEnviroment())
@@ -339,8 +335,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -355,8 +351,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
         {
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles:true, includeAmd64Folder:true))
@@ -373,8 +368,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64NoVS()
         {
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
@@ -389,8 +383,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentFindsAmd64RunningInAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -421,8 +415,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentVSFromMSBuildAssembly()
         {
             using (var env = new EmptyVSEnviroment())
@@ -440,8 +434,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "nonlinuxtests")]
-        [Trait("Category", "nonosxtests")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentVSFromMSBuildAssemblyAmd64()
         {
             using (var env = new EmptyVSEnviroment())
