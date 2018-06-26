@@ -250,6 +250,8 @@ static class Program
                 IsSdkProject = true,
                 IsExe = true
             };
+            testProject.AdditionalProperties.Add("TargetLatestRuntimePatch", "true");
+
             var testAsset = _testAssetsManager.CreateTestProject(testProject)
                 .Restore(Log, testProject.Name);
             var getValuesCommand = new GetValuesCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name),
