@@ -70,7 +70,7 @@ namespace Microsoft.NET.ToolPack.Tests
                 }
 
                 nupkgReader
-                    .GetPackageDependencies().First().Packages
+                    .GetPackageDependencies()
                     .Should().BeEmpty();
             }
         }

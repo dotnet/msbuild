@@ -45,7 +45,7 @@ namespace Microsoft.NET.Restore.Tests
                         new XAttribute("Include", obsoletePackageId)));
                 });
 
-            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreMyGetFeed);
+            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
             toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
 
