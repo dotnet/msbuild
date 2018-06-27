@@ -8,3 +8,4 @@ steps:
   inputs:
     testRunner: XUnit
     testResultsFiles: '**\*UnitTests*.xml'
+  condition: succeededOrFailed()
