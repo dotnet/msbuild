@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
 
             void Verify(string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
             {
-                string[] matchedFiles = FileMatcher.Default.GetFiles(testFolder.FolderPath, include, excludes);
+                string[] matchedFiles = FileMatcher.Default.GetFiles(testFolder.FolderPath, include, excludes?.ToList());
 
                 if (shouldHaveNoMatches)
                 {
@@ -1260,11 +1260,11 @@ namespace Microsoft.Build.UnitTests
                     Array.Sort(files);
                     Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new []{"a.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new []{"a.cs", "c.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs", "c.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs" }, files);
                 }
