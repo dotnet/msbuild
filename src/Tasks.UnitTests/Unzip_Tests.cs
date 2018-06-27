@@ -88,6 +88,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Not really: but if we're running as root, this fails.
         public void LogsErrorIfReadOnlyFileCannotBeOverwitten()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
