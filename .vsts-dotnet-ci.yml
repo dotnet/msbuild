@@ -7,12 +7,12 @@ steps:
   displayName: Publish Test Results
   inputs:
     testRunner: XUnit
-    testResultsFiles: '**\*UnitTests*.xml'
+    testResultsFiles: 'artifacts/**/*UnitTests*.xml'
   condition: always()
 - script: |
    pwd
-   cat $SYSTEM_DEFAULTWORKINGDIRECTORY
+   echo $SYSTEM_DEFAULTWORKINGDIRECTORY
    ls -lahr
-   ls -lahr $SYSTEM_DEFAULTWORKINGDIRECTORY
+   ls -lahR $SYSTEM_DEFAULTWORKINGDIRECTORY
   displayName: Command Line Script
   condition: always()
