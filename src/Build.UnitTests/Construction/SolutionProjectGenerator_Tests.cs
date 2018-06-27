@@ -1664,6 +1664,9 @@ EndGlobal
                 ";
 
             SolutionFile solution = null;
+            MockLogger logger = new MockLogger();
+            ProjectCollection collection = new ProjectCollection();
+            collection.RegisterLogger(logger);
 
             try
             {
@@ -1674,7 +1677,7 @@ EndGlobal
                 // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
 
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, collection.LoggingService);
 
                 // Instantiating the
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());

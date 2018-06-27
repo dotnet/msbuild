@@ -745,6 +745,7 @@ namespace Microsoft.Build.Construction
                 foreach (ProjectInstance instance in projectInstances)
                 {
                     instance.ToProjectRootElement().Save(instance.FullPath);
+                    LogMetaProjectGeneratedEvent(instance.FullPath);
                 }
             }
 
@@ -885,7 +886,9 @@ namespace Microsoft.Build.Construction
             if (Environment.GetEnvironmentVariable("MSBUILDEMITSOLUTION") != null)
             {
                 string path = traversalProject.FullPath;
-                traversalProject.Save(_solutionFile.FullPath + ".metaproj.tmp");
+                string metaProjectPath = _solutionFile.FullPath + ".metaproj.tmp";
+                traversalProject.Save(metaProjectPath);
+                LogMetaProjectGeneratedEvent(metaProjectPath);
                 traversalProject.FullPath = path;
             }
 
@@ -910,6 +913,16 @@ namespace Microsoft.Build.Construction
             AddStandardTraversalTargets(traversalInstance, projectsInOrder);
 
             return traversalInstance;
+        }
+
+        private void LogMetaProjectGeneratedEvent(string fullPath)
+        {
+            var eventArgs = new MetaProjectGeneratedEventArgs()
+            {
+                BuildEventContext = _projectBuildEventContext,
+                ProjectFile = fullPath,
+            };
+            _loggingService.LogBuildEvent(eventArgs);
         }
 
         /// <summary>

@@ -339,6 +339,10 @@ namespace Microsoft.Build.Framework
         Low = 2,
         Normal = 1,
     }
+    public partial class MetaProjectGeneratedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public MetaProjectGeneratedEventArgs() { }
+    }
     [System.AttributeUsageAttribute((System.AttributeTargets)(128), AllowMultiple=false, Inherited=false)]
     public sealed partial class OutputAttribute : System.Attribute
     {
