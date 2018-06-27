@@ -8,4 +8,11 @@ steps:
   inputs:
     testRunner: XUnit
     testResultsFiles: '**\*UnitTests*.xml'
-  condition: succeededOrFailed()
+  condition: always()
+- script: |
+   pwd
+   cat $SYSTEM_DEFAULTWORKINGDIRECTORY
+   ls -lahr
+   ls -lahr $SYSTEM_DEFAULTWORKINGDIRECTORY
+  displayName: Command Line Script
+  condition: always()
