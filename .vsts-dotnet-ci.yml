@@ -1,5 +1,5 @@
 phases:
-- phase: Mac Mono
+- phase: MacMono
   queue: Hosted macOS Preview
   steps:
   - bash: . 'build/cibuild.sh'
@@ -11,7 +11,7 @@ phases:
       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
     condition: always()
 
-- phase: Linux CoreCLR
+- phase: LinuxCoreCLR
   queue: Hosted Linux Preview
   steps:
   - bash: . 'build/cibuild.sh'
