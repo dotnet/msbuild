@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var outputDll = testInstance.Root.GetDirectory("bin", configuration, target)
                 .GetFile($"{testAppName}.dll");
 
-            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll.FullName)
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World");
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
 
             var testProjectDirectory = testInstance.Root;
 
-            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
+            new DotnetCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .ExecuteWithCapturedOutput("outputsframeworkversion-netcoreapp1.0")
                 .Should()

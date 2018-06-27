@@ -1,9 +1,0 @@
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
-    <BundledDotnetTools Include="dotnet-dev-certs" Version="$(AspNetCoreVersion)" />
-    <BundledDotnetTools Include="dotnet-ef" Version="$(AspNetCoreVersion)" ObsoletesCliTool="Microsoft.EntityFrameworkCore.Tools.DotNet" />
-    <BundledDotnetTools Include="dotnet-sql-cache" Version="$(AspNetCoreVersion)" ObsoletesCliTool="Microsoft.Extensions.Caching.SqlConfig.Tools" />
-    <BundledDotnetTools Include="dotnet-user-secrets" Version="$(AspNetCoreVersion)" ObsoletesCliTool="Microsoft.Extensions.SecretManager.Tools" />
-    <BundledDotnetTools Include="dotnet-watch" Version="$(AspNetCoreVersion)" ObsoletesCliTool="Microsoft.DotNet.Watcher.Tools" />
-  </ItemGroup>
-</Project>

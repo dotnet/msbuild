@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tests
         private readonly DotnetToolsCommandResolver _dotnetToolsCommandResolver;
 
         // Assets are placed during build of this project
-        private static string GetDotnetToolPath() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestDotnetToolsLayoutDirectory");
+        private static string GetDotnetToolPath() => Path.Combine(new RepoDirectoriesProvider().Stage2Sdk, "DotnetTools");
 
         public GivenADotnetToolsCommandResolver()
         {
