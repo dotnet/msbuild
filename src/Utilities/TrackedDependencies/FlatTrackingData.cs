@@ -10,6 +10,7 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 #if FEATURE_FILE_TRACKER
 
@@ -651,7 +652,7 @@ namespace Microsoft.Build.Utilities
             else if (_tlogMarker != string.Empty)
             {
                 string markerDirectory = Path.GetDirectoryName(_tlogMarker);
-                if (!Directory.Exists(markerDirectory))
+                if (!FileSystems.Default.DirectoryExists(markerDirectory))
                 {
                     Directory.CreateDirectory(markerDirectory);
                 }

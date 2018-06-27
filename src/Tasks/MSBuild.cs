@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -286,7 +287,7 @@ namespace Microsoft.Build.Tasks
                     break;
                 }
 
-                if (File.Exists(projectPath) || (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Build))
+                if (FileSystems.Default.FileExists(projectPath) || (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Build))
                 {
                     if (FileUtilities.IsVCProjFilename(projectPath))
                     {

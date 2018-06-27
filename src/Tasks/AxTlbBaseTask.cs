@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -127,8 +128,8 @@ namespace Microsoft.Build.Tasks
         {
             // Verify that a path for the tool exists -- if the tool doesn't exist in it 
             // we'll worry about that later
-            if ((String.IsNullOrEmpty(ToolPath) || !Directory.Exists(ToolPath)) &&
-                (String.IsNullOrEmpty(SdkToolsPath) || !Directory.Exists(SdkToolsPath)))
+            if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
+                (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -181,7 +182,7 @@ namespace Microsoft.Build.Tasks
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                if (File.Exists(KeyFile))
+                if (FileSystems.Default.FileExists(KeyFile))
                 {
                     keyFileExists = true;
                 }

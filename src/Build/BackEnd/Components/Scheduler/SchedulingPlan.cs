@@ -11,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -144,7 +145,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            if (!File.Exists(planName))
+            if (!FileSystems.Default.FileExists(planName))
             {
                 return;
             }

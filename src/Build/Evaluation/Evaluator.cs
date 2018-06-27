@@ -2379,7 +2379,7 @@ namespace Microsoft.Build.Evaluation
                         // Perhaps the import tag has a typo in, for example.
 
                         // There's a specific message for file not existing
-                        if (!File.Exists(importFileUnescaped))
+                        if (!FileSystems.Default.FileExists(importFileUnescaped))
                         {
                             bool ignoreMissingImportsFlagSet = (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0;
                             if (!throwOnFileNotExistsError || ignoreMissingImportsFlagSet)

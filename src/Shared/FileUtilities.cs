@@ -155,7 +155,7 @@ namespace Microsoft.Build.Shared
         {
             string cacheDirectory = GetCacheDirectory();
 
-            if (Directory.Exists(cacheDirectory))
+            if (DefaultFileSystem.DirectoryExists(cacheDirectory))
             {
                 DeleteDirectoryNoThrow(cacheDirectory, true);
             }
@@ -417,13 +417,13 @@ namespace Microsoft.Build.Shared
                 firstSlash = value.Substring(1).IndexOf('/') + 1;
             }
 
-            if (firstSlash > 0 && Directory.Exists(Path.Combine(baseDirectory, value.Substring(0, firstSlash))))
+            if (firstSlash > 0 && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.Substring(0, firstSlash))))
             {
                 return true;
             }
 
             // Check for actual files or directories under / that get missed by the above logic
-            if (firstSlash == 0 && value[0] == '/' && (Directory.Exists(value) || File.Exists(value)))
+            if (firstSlash == 0 && value[0] == '/' && DefaultFileSystem.DirectoryEntryExists(value))
             {
                 return true;
             }
@@ -640,7 +640,7 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
-                    if (Directory.Exists(path))
+                    if (DefaultFileSystem.DirectoryExists(path))
                     {
                         Directory.Delete(path, recursive);
                         break;
@@ -1150,7 +1150,7 @@ namespace Microsoft.Build.Shared
                 // If we successfully locate the file in the directory that we're
                 // looking in, simply return that location. Otherwise we'll
                 // keep moving up the tree.
-                if (File.Exists(possibleFileDirectory))
+                if (DefaultFileSystem.FileExists(possibleFileDirectory))
                 {
                     // We've found the file, return the directory we found it in
                     return lookInDirectory;

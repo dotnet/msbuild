@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -117,7 +118,7 @@ namespace Microsoft.Build.Shared
                                 cultureSubfolder,
                                 $"{assemblyName.Name}.{extension}");
                             if (IsAssemblyAlreadyLoaded(candidatePath) ||
-                                !File.Exists(candidatePath))
+                                !FileSystems.Default.FileExists(candidatePath))
                             {
                                 continue;
                             }

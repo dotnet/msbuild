@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 
 namespace Microsoft.Build.Tasks
@@ -65,7 +66,7 @@ namespace Microsoft.Build.Tasks
                             if (product.ValueCount > 0)
                             {
                                 string folder = (string)product.GetValue("");
-                                if (Directory.Exists(folder))
+                                if (FileSystems.Default.DirectoryExists(folder))
                                 {
                                     string regkeyAlias = aliasKey + "\\" + productName;
                                     directories[regkeyAlias] = folder;

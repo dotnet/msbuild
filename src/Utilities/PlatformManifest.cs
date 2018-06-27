@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Utilities
 {
@@ -90,7 +91,7 @@ namespace Microsoft.Build.Utilities
             {
                 string platformManifestPath = Path.Combine(_pathToManifest, "Platform.xml");
 
-                if (File.Exists(platformManifestPath))
+                if (FileSystems.Default.FileExists(platformManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
                     XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };

@@ -10,6 +10,7 @@ using System.Resources;
 using System.Xml;
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -201,7 +202,7 @@ namespace Microsoft.Build.Tasks
                 //
                 // filename is the filename of the .resx file that is to be examined.
 
-                if (File.Exists(FileName))
+                if (FileSystems.Default.FileExists(FileName))
                 {
                     linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory);
                 }

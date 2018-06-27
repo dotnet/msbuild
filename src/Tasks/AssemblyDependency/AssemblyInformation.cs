@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text;
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 #if !FEATURE_ASSEMBLY_LOADFROM || MONO
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
@@ -94,7 +95,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    if (File.Exists(newLocation))
+                    if (FileSystems.Default.FileExists(newLocation))
                     {
                         assembly = Assembly.ReflectionOnlyLoadFrom(newLocation);
                     }
@@ -817,7 +818,7 @@ namespace Microsoft.Build.Tasks
         {
             using (var sr = new BinaryReader(File.OpenRead(path)))
             {
-                if (!File.Exists(path))
+                if (!FileSystems.Default.FileExists(path))
                 {
                     return string.Empty;
                 }

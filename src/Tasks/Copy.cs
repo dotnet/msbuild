@@ -11,6 +11,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -225,7 +226,7 @@ namespace Microsoft.Build.Tasks
 
             if (!string.IsNullOrEmpty(destinationFolder) && !_directoriesKnownToExist.ContainsKey(destinationFolder))
             {
-                if (!Directory.Exists(destinationFolder))
+                if (!FileSystems.Default.DirectoryExists(destinationFolder))
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Copy.CreatesDirectory", destinationFolder);
                     Directory.CreateDirectory(destinationFolder);
@@ -761,7 +762,7 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    if (e is IOException && DestinationFolder != null && File.Exists(DestinationFolder.ItemSpec))
+                    if (e is IOException && DestinationFolder != null && FileSystems.Default.FileExists(DestinationFolder.ItemSpec))
                     {
                         // We failed to create the DestinationFolder because it's an existing file. No sense retrying.
                         // We don't check for this case upstream because it'd be another hit to the filesystem.

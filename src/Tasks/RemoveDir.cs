@@ -7,6 +7,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem directory in Directories)
             {
-                if (Directory.Exists(directory.ItemSpec))
+                if (FileSystems.Default.DirectoryExists(directory.ItemSpec))
                 {
                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                     Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.Removing", directory.ItemSpec);
