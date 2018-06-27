@@ -4,7 +4,6 @@
 using System;
 #if !CLR2COMPATIBILITY
 using System.Collections.Concurrent;
-using Microsoft.Build.Shared.FileSystem;
 #endif
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -87,10 +87,10 @@ namespace Microsoft.Build.Shared
 
 #if !CLR2COMPATIBILITY
         private static readonly ConcurrentDictionary<string, bool> FileExistenceCache = new ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-
-        private static readonly IFileSystem DefaultFileSystem = FileSystems.Default;
+#else
+        private static readonly Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool> FileExistenceCache = new Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 #endif
-
+        private static readonly IFileSystem DefaultFileSystem = FileSystems.Default;
         private enum GetFileAttributesResult
         {
             Directory,
@@ -736,26 +736,19 @@ namespace Microsoft.Build.Shared
         /// Returns if the directory exists
         /// </summary>
         /// <param name="fullPath">Full path to the directory in the filesystem</param>
+        /// <param name="fileSystem">The file system</param>
         /// <returns></returns>
-        internal static bool DirectoryExistsNoThrow(string fullPath
-#if !CLR2COMPATIBILITY
-            ,IFileSystem fileSystem = null
-#endif
-            )
+        internal static bool DirectoryExistsNoThrow(string fullPath, IFileSystem fileSystem = null)
         {
             fullPath = AttemptToShortenPath(fullPath);
 
             try
             {
-#if CLR2COMPATIBILITY
-                return NativeMethodsShared.DirectoryExists(fullPath);
-#else
                 fileSystem = fileSystem ?? DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryExists)
                     : fileSystem.DirectoryExists(fullPath);
-#endif
 
             }
             catch
@@ -768,26 +761,19 @@ namespace Microsoft.Build.Shared
         /// Returns if the directory exists
         /// </summary>
         /// <param name="fullPath">Full path to the file in the filesystem</param>
+        /// <param name="fileSystem">The file system</param>
         /// <returns></returns>
-        internal static bool FileExistsNoThrow(string fullPath
-#if !CLR2COMPATIBILITY
-            ,IFileSystem fileSystem = null
-#endif
-        )
+        internal static bool FileExistsNoThrow(string fullPath, IFileSystem fileSystem = null)
         {
             fullPath = AttemptToShortenPath(fullPath);
 
             try
             {
-#if CLR2COMPATIBILITY
-                return NativeMethodsShared.FileExists(fullPath);
-#else
                 fileSystem = fileSystem ?? DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.FileExists)
                     : fileSystem.FileExists(fullPath);
-#endif
 
             }
             catch
@@ -802,26 +788,17 @@ namespace Microsoft.Build.Shared
         /// Does not throw IO exceptions, to match Directory.Exists and File.Exists.
         /// Unlike calling each of those in turn it only accesses the disk once, which is faster.
         /// </summary>
-        internal static bool FileOrDirectoryExistsNoThrow(string fullPath
-#if !CLR2COMPATIBILITY
-        ,IFileSystem fileSystem = null
-#endif
-        )
+        internal static bool FileOrDirectoryExistsNoThrow(string fullPath, IFileSystem fileSystem = null)
         {
             fullPath = AttemptToShortenPath(fullPath);
 
             try
             {
-#if CLR2COMPATIBILITY
-                return NativeMethodsShared.FileOrDirectoryExists(fullPath);
-#else
                 fileSystem = fileSystem ?? DefaultFileSystem;
 
                 return Traits.Instance.CacheFileExistence
                     ? FileExistenceCache.GetOrAdd(fullPath, fileSystem.DirectoryEntryExists)
                     : fileSystem.DirectoryEntryExists(fullPath);
-#endif
-
             }
             catch
             {

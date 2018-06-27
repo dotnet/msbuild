@@ -171,14 +171,16 @@
       <Link>OutOfProcTaskHostTaskResult.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskLoader.cs" />
-    <Compile Include="..\Shared\LoadedType.cs">
-    </Compile>
-    <Compile Include="..\Shared\AssemblyLoadInfo.cs">
-    </Compile>
+    <Compile Include="..\Shared\LoadedType.cs" />
+    <Compile Include="..\Shared\AssemblyLoadInfo.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
-    <Compile Include="..\Shared\AssemblyNameExtension.cs">
-    </Compile>
+    <Compile Include="..\Shared\AssemblyNameExtension.cs" />
+
+    <Compile Include="..\Shared\FileSystem\IFileSystem.cs" />
+    <Compile Include="..\Shared\FileSystem\FileSystems.cs" />
+    <Compile Include="FileSystem\MSBuildTaskHostFileSystem.cs" />
+
     <Compile Include="..\MSBuild\NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="..\MSBuild\OutOfProcTaskHostNode.cs" />
     <Compile Include="..\MSBuild\OutOfProcTaskAppDomainWrapperBase.cs">

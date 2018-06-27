@@ -14,6 +14,9 @@ namespace Microsoft.Build.Shared.FileSystem
 
         private static IFileSystem GetFileSystem()
         {
+#if CLR2COMPATIBILITY
+            return MSBuildTaskHostFileSystem.Singleton();
+#else
             if (NativeMethodsShared.IsWindows)
             {
                 return MSBuildOnWindowsFileSystem.Singleton();
@@ -22,6 +25,7 @@ namespace Microsoft.Build.Shared.FileSystem
             {
                 return ManagedFileSystem.Singleton();
             }
+#endif
         }
     }
 }
