@@ -1751,20 +1751,20 @@ namespace Microsoft.Build.Shared
                     excludeSpecsUnescaped);
             }
 
-            var filesKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+            var enumerationKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
             ImmutableArray<string> files;
-            if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+            if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
-                object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(filesKey, _ => new object());
+                object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(enumerationKey, _ => new object());
                 lock (locks)
                 {
-                    if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+                    if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
                     {
                         files =
                             _cachedGlobExpansions.GetOrAdd(
-                                filesKey,
+                                enumerationKey,
                                 (_) =>
                                     GetFilesImplementation(
                                         projectDirectoryUnescaped,
@@ -1786,12 +1786,26 @@ namespace Microsoft.Build.Shared
             Debug.Assert(projectDirectoryUnescaped != null);
             Debug.Assert(filespecUnescaped != null);
 
-            var sb = new StringBuilder();
-
             if (filespecUnescaped.Contains(".."))
             {
                 filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
             }
+
+            var excludeSize = 0;
+
+            if (excludes != null)
+            {
+                foreach (var exclude in excludes)
+                {
+                    excludeSize += exclude.Length;
+                }
+            }
+
+            var sb = new StringBuilder(
+                projectDirectoryUnescaped.Length + // OK to over allocate a bit, this is a short lived object
+                filespecUnescaped.Length +
+                excludeSize
+                );
 
             // Don't include the project directory when the glob is independent of it.
             // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
