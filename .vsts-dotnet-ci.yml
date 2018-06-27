@@ -3,3 +3,8 @@ queue: Hosted Linux Preview
 steps:
 - bash: . 'build/cibuild.sh'
   displayName: CI Build
+- task: PublishTestResults@2
+  displayName: Publish Test Results
+  inputs:
+    testRunner: XUnit
+    testResultsFiles: '**\*UnitTests*.xml'
