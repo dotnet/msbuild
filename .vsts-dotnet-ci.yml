@@ -1,18 +1,24 @@
-queue: Hosted Linux Preview
+phases:
+- phase: Mac Mono
+  queue: Hosted macOS Preview
+  steps:
+  - bash: . 'build/cibuild.sh'
+    displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+    condition: always()
 
-steps:
-- bash: . 'build/cibuild.sh'
-  displayName: CI Build
-- task: PublishTestResults@2
-  displayName: Publish Test Results
-  inputs:
-    testRunner: XUnit
-    testResultsFiles: 'artifacts/**/*UnitTests*.xml'
-  condition: always()
-- script: |
-   pwd
-   echo $SYSTEM_DEFAULTWORKINGDIRECTORY
-   ls -lahr
-   ls -lahR $SYSTEM_DEFAULTWORKINGDIRECTORY
-  displayName: Command Line Script
-  condition: always()
+- phase: Linux CoreCLR
+  queue: Hosted Linux Preview
+  steps:
+  - bash: . 'build/cibuild.sh'
+    displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+    condition: always()
