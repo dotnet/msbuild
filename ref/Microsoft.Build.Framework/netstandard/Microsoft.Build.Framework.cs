@@ -222,6 +222,7 @@ namespace Microsoft.Build.Framework
     }
     public partial interface IEventSource3 : Microsoft.Build.Framework.IEventSource, Microsoft.Build.Framework.IEventSource2
     {
+        void IncludeEvaluationMetaprojects();
         void IncludeEvaluationProfiles();
         void IncludeTaskInputs();
     }
@@ -338,6 +339,11 @@ namespace Microsoft.Build.Framework
         High = 0,
         Low = 2,
         Normal = 1,
+    }
+    public partial class MetaprojectGeneratedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
+    {
+        public string metaprojectXml;
+        public MetaprojectGeneratedEventArgs(string metaprojectXml, string metaprojectPath, string message) { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(128), AllowMultiple=false, Inherited=false)]
     public sealed partial class OutputAttribute : System.Attribute

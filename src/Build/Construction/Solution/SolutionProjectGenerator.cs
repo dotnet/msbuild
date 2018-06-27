@@ -740,12 +740,9 @@ namespace Microsoft.Build.Construction
 
             // Special environment variable to allow people to see the in-memory MSBuild project generated
             // to represent the SLN.
-            if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
+            foreach (ProjectInstance instance in projectInstances)
             {
-                foreach (ProjectInstance instance in projectInstances)
-                {
-                    instance.ToProjectRootElement().Save(instance.FullPath);
-                }
+                EmitMetaproject(instance.ToProjectRootElement(), instance.FullPath);
             }
 
             return projectInstances.ToArray();
@@ -788,8 +785,8 @@ namespace Microsoft.Build.Construction
                 // If we cannot build the project directly, then we need to generate a metaproject for it.
                 if (!canBuildDirectly)
                 {
-                    ProjectInstance metaProject = CreateMetaproject(traversalInstance, project, projectConfiguration);
-                    projectInstances.Add(metaProject);
+                    ProjectInstance metaproject = CreateMetaproject(traversalInstance, project, projectConfiguration);
+                    projectInstances.Add(metaproject);
                 }
             }
 
@@ -882,12 +879,10 @@ namespace Microsoft.Build.Construction
 
             // For debugging purposes: some information is lost when evaluating into a project instance,
             // so make it possible to see what we have at this point.
-            if (Environment.GetEnvironmentVariable("MSBUILDEMITSOLUTION") != null)
-            {
-                string path = traversalProject.FullPath;
-                traversalProject.Save(_solutionFile.FullPath + ".metaproj.tmp");
-                traversalProject.FullPath = path;
-            }
+            string path = traversalProject.FullPath;
+            string metaprojectPath = _solutionFile.FullPath + ".metaproj.tmp";
+            EmitMetaproject(traversalProject, metaprojectPath);
+            traversalProject.FullPath = path;
 
             // Create the instance.  From this point forward we can evaluate conditions against the traversal project directly.
             var traversalInstance = new ProjectInstance
@@ -910,6 +905,29 @@ namespace Microsoft.Build.Construction
             AddStandardTraversalTargets(traversalInstance, projectsInOrder);
 
             return traversalInstance;
+        }
+
+        private void EmitMetaproject(ProjectRootElement metaproject, string path)
+        {
+            if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
+            {
+                metaproject.Save(path);
+            }
+            if (_loggingService.IncludeEvaluationMetaprojects == true)
+            {
+                var xml = new StringBuilder();
+                using (var writer = new StringWriter(xml))
+                {
+                    metaproject.Save(writer);
+                }
+
+                string message = ResourceUtilities.GetResourceString("MetaprojectGenerated");
+                var eventArgs = new MetaprojectGeneratedEventArgs(xml.ToString(), path, message)
+                {
+                    BuildEventContext = _projectBuildEventContext,
+                };
+                _loggingService.LogBuildEvent(eventArgs);
+            }
         }
 
         /// <summary>
