@@ -44,6 +44,7 @@ phases:
     displayName: cibuild.cmd
     inputs:
       filename: 'build/cibuild.cmd'
+      arguments: '-hostType Core'
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
