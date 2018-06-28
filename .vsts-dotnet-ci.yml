@@ -37,7 +37,7 @@ phases:
 #       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
 #     condition: always()
 
-- phase: WindowsCore
+- phase: WindowsOnCore
   queue: 'Hosted VS2017'
   steps:
   - script: set
@@ -52,6 +52,27 @@ phases:
     inputs:
       filename: 'build/cibuild.cmd'
       arguments: '-hostType Core'
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+    condition: always()
+
+- phase: WindowsOnFull
+  queue: 'Hosted VS2017'
+  steps:
+  - script: set
+    displayName: Command Line Script
+  - task: BatchScript@1
+    displayName: VsDevCmd
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+      modifyEnvironment: true
+  - task: BatchScript@1
+    displayName: cibuild.cmd
+    inputs:
+      filename: 'build/cibuild.cmd'
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
