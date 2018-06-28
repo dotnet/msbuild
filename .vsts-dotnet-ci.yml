@@ -24,3 +24,15 @@ phases:
       testRunner: XUnit
       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
     condition: always()
+
+- phase: Mac
+  queue: 'Hosted macOS Preview'
+  steps:
+  - bash: . 'build/cibuild.sh'
+    displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+    condition: always()
