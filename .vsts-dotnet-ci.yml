@@ -40,10 +40,12 @@ phases:
 - phase: WindowsCore
   queue: 'Hosted VS2017'
   steps:
+  - script: set
+    displayName: Command Line Script
   - task: BatchScript@1
     displayName: VsDevCmd
     inputs:
-      filename: '$(VisualStudio)\Common7\Tools\VsDevCmd.bat'
+      filename: '$(agent.VisualStudio)\Common7\Tools\VsDevCmd.bat'
       arguments: '-hostType Core'
       modifyEnvironment: true
   - task: BatchScript@1
