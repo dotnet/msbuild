@@ -32,6 +32,7 @@
   <UsingTask TaskName="TarGzFileExtractToDirectory" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="UpdateVersionsRepo" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="UploadToAzure" AssemblyFile="$(CLIBuildDll)"/>
+  <UsingTask TaskName="UploadToLinuxPackageRepository" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(CLIBuildDll)"/>
 </Project>

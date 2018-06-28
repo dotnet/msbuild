@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
+    <Content Include="$(SdkOutputDirectory)\sdk\*\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
