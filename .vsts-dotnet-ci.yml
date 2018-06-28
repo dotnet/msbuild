@@ -4,7 +4,7 @@ phases:
   steps:
   - bash: . 'build/install-mono.sh'
     displayName: Install Mono
-  - bash: . 'build/cibuild.sh' '-hostType mono' 
+  - bash: . 'build/cibuild.sh' '-hostType mono'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish Test Results
@@ -30,6 +30,20 @@ phases:
   steps:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+    condition: always()
+
+- phase: WindowsCore
+  queue: 'Hosted VS2017'
+  steps:
+  - task: BatchScript@1
+    displayName: cibuild.cmd
+    inputs:
+      filename: 'build/cibuild.cmd'
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
