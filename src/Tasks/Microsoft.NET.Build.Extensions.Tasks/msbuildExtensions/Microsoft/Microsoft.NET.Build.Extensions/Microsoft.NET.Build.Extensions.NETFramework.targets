@@ -139,7 +139,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="RemoveZipFileSuggestedRedirect"
           BeforeTargets="GenerateBindingRedirects"
           DependsOnTargets="ResolveAssemblyReferences"
-          Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7.1'">
+          Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7.1' And '$(AllowZipFileRedirect)' != 'true'">
     <ItemGroup>
       <SuggestedBindingRedirects Remove="System.IO.Compression.ZipFile, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     </ItemGroup>
