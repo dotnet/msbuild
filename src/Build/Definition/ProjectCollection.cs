@@ -280,12 +280,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
-        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents)
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly = false)
         {
             _loadedProjects = new LoadedProjectCollection();
             _toolsetDefinitionLocations = toolsetDefinitionLocations;
             MaxNodeCount = maxNodeCount;
-            ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */);
+            ProjectRootElementCache = new ProjectRootElementCache(false /* do not automatically reload changed files from disk */, loadProjectsReadOnly);
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
 
             try
