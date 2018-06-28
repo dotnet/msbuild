@@ -45,8 +45,7 @@ phases:
   - task: BatchScript@1
     displayName: VsDevCmd
     inputs:
-      filename: '$(agent.VisualStudio)\Common7\Tools\VsDevCmd.bat'
-      arguments: '-hostType Core'
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
       modifyEnvironment: true
   - task: BatchScript@1
     displayName: cibuild.cmd
