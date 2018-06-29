@@ -1,5 +1,5 @@
 phases:
-# - phase: LinuxOnMono
+# - phase: MonoOnLinux
 #   queue: Hosted Linux Preview
 #   steps:
 #   - bash: . 'build/install-mono.sh'
@@ -13,7 +13,7 @@ phases:
 #       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
 #     condition: always()
 
-- phase: LinuxOnCore
+- phase: CoreOnLinux
   queue: Hosted Linux Preview
   steps:
   - bash: . 'build/cibuild.sh'
@@ -25,7 +25,7 @@ phases:
       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
     condition: always()
 
-- phase: MacOnCore
+- phase: CoreOnMac
   queue: 'Hosted macOS Preview'
   steps:
   - bash: . 'build/cibuild.sh'
@@ -37,7 +37,7 @@ phases:
       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
     condition: always()
 
-- phase: MacOnMono
+- phase: MonoOnMac
   queue: 'Hosted macOS Preview'
   steps:
   - script: |
@@ -57,7 +57,7 @@ phases:
       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
     condition: always()
 
-- phase: WindowsOnCore
+- phase: CoreOnWindows
   queue: 'Hosted VS2017'
   steps:
   - script: set
@@ -100,7 +100,7 @@ phases:
       mergeTestResults: true
     condition: always()
 
-- phase: WindowsOnFull
+- phase: FullOnWindows
   queue: 'Hosted VS2017'
   steps:
   - script: set
