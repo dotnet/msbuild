@@ -1,5 +1,7 @@
 #!/bin/bash -v
 
+echo "PATH is $PATH"
+
 if [ "$1" ==  "-fromScript" ]; then
   otherScript=$2
   shift 2
@@ -362,6 +364,7 @@ function Build {
     msbuildHost=$(QQ $DOTNET_HOST_PATH)
   elif [ "$hostType" = "mono" ]
   then
+    echo "MONO MODE use system? $useSystemMSBuild"
     if [ -z $useSystemMSBuild ]; then
       downloadMSBuildForMono
       msbuildHost=""
