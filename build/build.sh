@@ -77,6 +77,7 @@ while [[ $# -gt 0 ]]; do
       exit 0
       ;;
     -hosttype)
+      echo "HOSTTYPE ARG: $1 $2"
       hostType=$2
       shift 2
       ;;
@@ -129,6 +130,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     *)
+      echo "UNKNOWN ARG $1"
       properties="$properties $1"
       shift 1
       ;;
