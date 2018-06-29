@@ -52,7 +52,7 @@ phases:
      echo "##vso[task.setvariable variable=PATH;]$MONOPREFIX/bin:$PATH"
      echo "Path after  $PATH"
     displayName: Select Mono version
-  - bash: . 'build.sh' "-hostType mono"
+  - bash: . 'build.sh' -hostType mono
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish Test Results
