@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -v
 
 if [ "$1" ==  "-fromScript" ]; then
   otherScript=$2
