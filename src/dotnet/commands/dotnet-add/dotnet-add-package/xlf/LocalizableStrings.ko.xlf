@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Add a NuGet package reference to the project.</source>
-        <target state="needs-review-translation">.NET 패키지 참조 추가 명령</target>
+        <target state="translated">프로젝트에 NuGet 패키지 참조를 추가합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,27 +19,27 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">특정 프레임워크를 대상으로 지정할 때에만 참조를 추가합니다.</target>
+        <target state="translated">특정 프레임워크를 대상으로 지정할 때에만 참조를 추가합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Add the reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">미리 보기 복원 및 호환성 검사를 수행하지 않고 참조를 추가합니다.</target>
+        <target state="translated">미리 보기 복원 및 호환성 검사를 수행하지 않고 참조를 추가합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet package source to use during the restore.</source>
-        <target state="needs-review-translation">복원 중 사용할 NuGet 패키지 소스를 지정합니다.</target>
+        <target state="translated">복원 중 사용할 NuGet 패키지 소스입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">패키지를 지정된 디렉터리에 복원합니다.</target>
+        <target state="translated">패키지를 복원할 디렉터리입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the package to add.</source>
-        <target state="needs-review-translation">추가할 패키지의 버전입니다.</target>
+        <target state="translated">추가할 패키지의 버전입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIR</source>
-        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
+        <target state="translated">PACKAGE_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

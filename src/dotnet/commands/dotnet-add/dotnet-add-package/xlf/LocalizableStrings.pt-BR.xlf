@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Add a NuGet package reference to the project.</source>
-        <target state="needs-review-translation">Comando de adicionar referência do pacote do .NET</target>
+        <target state="translated">Adicione uma referência do pacote do NuGet ao projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,27 +19,27 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Adiciona referência apenas ao definir uma estrutura específica como destino.</target>
+        <target state="translated">Adicionar a referência apenas ao direcionar a uma estrutura específica.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Add the reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">Adiciona referência sem executar a visualização da restauração e a verificação de compatibilidade.</target>
+        <target state="translated">Adicionar a referência sem executar a visualização da restauração e a verificação de compatibilidade.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet package source to use during the restore.</source>
-        <target state="needs-review-translation">Especifica as fontes de pacote NuGet a serem usadas durante a restauração.</target>
+        <target state="translated">A origem do pacote do NuGet a ser usada durante a restauração.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">Restaura os pacotes para o diretório especificado.</target>
+        <target state="translated">O diretório no qual os pacotes serão restaurados.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the package to add.</source>
-        <target state="needs-review-translation">Versão do pacote a ser adicionada.</target>
+        <target state="translated">A versão do pacote a ser adicionada.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIR</source>
-        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
+        <target state="translated">PACKAGE_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

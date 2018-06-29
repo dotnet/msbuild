@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ShowHelpInfo">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Yardım bilgilerini göster</target>
+        <target state="translated">Komut satırı yardımını gösterir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowVersionInfo">

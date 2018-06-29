@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
-        <target state="needs-review-translation">Impostare questo flag per ignorare i riferimenti P2P (da progetto a progetto) e compilare solo il progetto radice</target>
+        <target state="translated">Non compila i riferimenti P2P (da progetto a progetto) e compila solo il progetto specificato.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Do not use incremental building.</source>
-        <target state="needs-review-translation">Disabilita la compilazione incrementale.</target>
+        <target state="translated">Non usa la compilazione incrementale.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">Directory di output in cui inserire gli artefatti compilati.</target>
+        <target state="translated">Directory di output in cui inserire gli artefatti compilati.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to build for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <target state="translated">Framework di destinazione per cui eseguire la compilazione. Il framework di destinazione deve essere specificato anche nel file di progetto.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="new">The target runtime to build for.</target>
+        <target state="translated">Runtime di destinazione per cui eseguire la compilazione.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
+        <target state="translated">Configurazione da usare per compilare il progetto. L'impostazione predefinita per la maggior parte dei progetti è 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

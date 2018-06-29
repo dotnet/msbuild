@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The output directory to place built packages in.</source>
-        <target state="needs-review-translation">Derlenen paketlerin yerleştirileceği dizin.</target>
+        <target state="translated">Derlenen paketlerin yerleştirileceği çıkış dizini.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
-        <target state="needs-review-translation">PDB’leri ve kaynak dosyaları ekleyin. Elde edilen nuget paketinde kaynak dosyaları, src klasöründe yer alır</target>
+        <target state="translated">PDB’leri ve kaynak dosyaları ekler. Elde edilen nuget paketinde kaynak dosyaları, ‘src’ klasöründe yer alır.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
-        <target state="needs-review-translation">Pakette serviceable bayrağını ayarlayın. Daha fazla bilgi için bkz. https://aka.ms/nupkgservicing.</target>
+        <target state="translated">Pakette serviceable bayrağını ayarlar. Daha fazla bilgi için bkz. https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
+        <target state="translated">Paketi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
         <note />
       </trans-unit>
     </body>

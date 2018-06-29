@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
         <source>The settings file to use when running tests.</source>
-        <target state="needs-review-translation">執行測試時要使用的設定。</target>
+        <target state="translated">執行測試時要使用的設定檔。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdListTestsDescription">
         <source>List the discovered tests instead of running the tests.</source>
-        <target state="needs-review-translation">列出探索到的測試</target>
+        <target state="translated">列出探索到的測試，而非執行測試。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
@@ -40,37 +40,36 @@
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
                                         See https://aka.ms/vstest-filtering for more information on filtering support.
                                         </source>
-        <target state="needs-review-translation">執行符合指定運算式的測試。
+        <target state="translated">執行符合指定運算式的測試。
                                         範例:
-                                        執行測試，其中優先順序設為 1: --filter "Priority = 1"
+                                        執行測試，而優先順序設為 1: --filter "Priority = 1"
                                         使用指定的全名執行測試: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
                                         執行內含指定名稱的測試: --filter "FullyQualifiedName~Namespace.Class"
-                                        篩選資源的詳細資訊: https://aka.ms/vstest-filtering
+                                        如需篩選支援的詳細資訊，請參閱 https://aka.ms/vstest-filtering。
                                         </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
         <source>The path to the custom adapters to use for the test run.</source>
-        <target state="needs-review-translation">從測試回合中的指定路徑使用自訂配接器。
-                                        範例: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</target>
+        <target state="translated">到達用於測試執行的自訂配接器路徑。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
         <source>LOGGER</source>
-        <target state="needs-review-translation">LoggerUri/FriendlyName</target>
+        <target state="translated">LOGGER</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>The logger to use for test results.
                                         Examples:
-                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="needs-review-translation">指定測試結果的記錄器。
+        <target state="translated">為測試結果所使用的記錄器。
                                         範例:
-                                        使用唯一的檔案名稱以 trx 格式記錄: --logger trx
-                                        使用指定的檔案名稱以 trx 格式記錄: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        記錄器引數支援的詳細資訊: https://aka.ms/vstest-report</target>
+                                        使用不重複的檔案名稱，以 trx 格式記錄: --logger trx
+                                        使用指定的檔案名稱，以 trx 格式記錄: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        如需記錄器引數的詳細資訊，請參閱 https://aka.ms/vstest-report。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -80,18 +79,17 @@
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">要從中尋找要執行之二進位檔的目錄</target>
+        <target state="translated">放置建置成品的輸出目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
         <source>LOG_FILE</source>
-        <target state="needs-review-translation">PATH_TO_FILE</target>
+        <target state="translated">LOG_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
         <source>Enable verbose logging to the specified file.</source>
-        <target state="needs-review-translation">啟用測試平台的詳細資訊記錄。
-                                       記錄已寫入提供的檔案中。</target>
+        <target state="translated">為指定的檔案啟用詳細資訊記錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
@@ -101,19 +99,19 @@
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
         <source>ADAPTER_PATH</source>
-        <target state="needs-review-translation">PATH_TO_ADAPTER</target>
+        <target state="translated">ADAPTER_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdResultsDirectoryDescription">
         <source>The directory where the test results will be placed.
 The specified directory will be created if it does not exist.</source>
-        <target state="needs-review-translation">用於置放測試結果的目錄。若指定的目錄不存在，則會建立該目錄。
-                                        範例: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</target>
+        <target state="translated">將放置測試結果的目錄。
+若指定的目錄不存在，則會建立該目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToResultsDirectory">
         <source>RESULTS_DIR</source>
-        <target state="needs-review-translation">PATH_TO_RESULTS_DIRECTORY</target>
+        <target state="translated">RESULTS_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
@@ -124,41 +122,42 @@ RunSettings arguments:
   Use a space to separate multiple '[name]=[value]' pairs.
   See https://aka.ms/vstest-runsettings-arguments for more information on RunSettings arguments.
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
-        <target state="needs-review-translation">
+        <target state="translated">
 
 RunSettings 引數:
-  透過命令列傳遞 runsettings 組態的引數。引數可以接在 "-- " 之後，以 [名稱]=[值] 的格式指定為成對的「名稱/值」。請注意 -- 之後的空格。
-  請使用空格隔開多個 [名稱]=[值]。
-  RunSettings 引數支援的詳細資訊: https://aka.ms/vstest-runsettings-arguments
+  傳遞為 RunSettings 組態的引數。引數的指定方式為成對的 '[name]=[value]'，接在 "-- " (請注意 -- 之後的空格) 之後。
+  請使用空格隔開多個成對的 '[name]=[value]'。
+  如需 RunSettings 引數的詳細資訊，請參閱 https://aka.ms/vstest-runsettings-arguments。
   範例: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
         <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
         <source>DATA_COLLECTOR_NAME</source>
-        <target state="needs-review-translation">DATA_COLLECTOR_FRIENDLY_NAME</target>
+        <target state="translated">DATA_COLLECTOR_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="cmdCollectDescription">
         <source>The friendly name of the data collector to use for the test run.
                                         More info here: https://aka.ms/vstest-collect</source>
-        <target state="needs-review-translation">為測試回合啟用資料收集器。
-                                        如需詳細資訊，請參閱: https://aka.ms/vstest-collect</target>
+        <target state="translated">用於測試執行的資料收集器之易記名稱。
+                                        此處提供詳細資訊: https://aka.ms/vstest-collect</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
         <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
 Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
-        <target state="needs-review-translation">在 Blame 模式中執行測試。此選項有助於隔離造成測試主機損毀的問題測試。其會在目前的目錄中建立 "Sequence.xml" 這樣的輸出檔案，以擷取損毀前執行測試的順序。</target>
+        <target state="translated">以 Blame 模式執行測試。此選項有助於釐清造成測試主機損毀的出錯測試。
+其會在目前的目錄 (擷取損毀前執行測試的順序) 中輸出 'Sequence.xml' 檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to run tests for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to run tests for. The target framework must also be specified in the project file.</target>
+        <target state="translated">要為其執行測試的目標架構。該目標架構必須在專案檔中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for running tests. The default for most projects is 'Debug'.</target>
+        <target state="translated">要用於執行測試的組態。大部分的專案預設為「偵錯」。</target>
         <note />
       </trans-unit>
     </body>

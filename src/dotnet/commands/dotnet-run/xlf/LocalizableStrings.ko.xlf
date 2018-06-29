@@ -138,12 +138,12 @@ The current {1} is '{2}'.</source>
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to run for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to run for. The default for most projects is 'Debug'.</target>
+        <target state="translated">실행할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to run for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to run for. The target framework must also be specified in the project file.</target>
+        <target state="translated">실행할 대상 프레임워크입니다. 대상 프레임워크는 프로젝트 파일에도 지정되어야 합니다.</target>
         <note />
       </trans-unit>
     </body>

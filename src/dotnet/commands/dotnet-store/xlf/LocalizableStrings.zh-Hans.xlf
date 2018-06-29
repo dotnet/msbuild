@@ -14,12 +14,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to store the given assemblies in.</source>
-        <target state="needs-review-translation">存储给定程序集的输出目录。</target>
+        <target state="translated">要存储给定程序集的输出目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
         <source>FRAMEWORK_VERSION</source>
-        <target state="needs-review-translation">FrameworkVersion</target>
+        <target state="translated">FRAMEWORK_VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
@@ -29,12 +29,12 @@
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
         <source>WORKING_DIR</source>
-        <target state="needs-review-translation">IntermediateWorkingDir</target>
+        <target state="translated">WORKING_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
         <source>The working directory used by the command to execute.</source>
-        <target state="needs-review-translation">由要执行的命令使用的目录。</target>
+        <target state="translated">由要执行的命令使用的工作目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateDirExists">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
         <source>Skip the optimization phase.</source>
-        <target state="needs-review-translation">跳过优化阶段。</target>
+        <target state="translated">跳过优化阶段。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectManifest">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="SkipSymbolsOptionDescription">
         <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
-        <target state="needs-review-translation">跳过符号文件的创建操作，这些文件可用于分析已优化的程序集。</target>
+        <target state="translated">跳过符号文件的创建操作，这些文件可用于分析已优化的程序集。</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyManifests">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
-        <target state="new">The target framework to store packages for. The target framework has to be specified in the project file.</target>
+        <target state="translated">要存储包的目标框架。目标框架必须在项目文件中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to store packages for.</source>
-        <target state="new">The target runtime to store packages for.</target>
+        <target state="translated">要存储包的目标运行时。</target>
         <note />
       </trans-unit>
     </body>

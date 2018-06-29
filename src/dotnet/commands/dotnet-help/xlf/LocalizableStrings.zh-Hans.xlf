@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">显示帮助。</target>
+        <target state="translated">显示命令行帮助。</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -59,42 +59,42 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Create a new .NET project or file.</source>
-        <target state="needs-review-translation">初始化 .NET 项目。</target>
+        <target state="translated">创建新的 .NET 项目或文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in a .NET project.</source>
-        <target state="needs-review-translation">还原 .NET 项目中指定的依赖项。</target>
+        <target state="translated">还原 .NET 项目中指定的依赖项。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Build a .NET project.</source>
-        <target state="needs-review-translation">生成 .NET 项目。</target>
+        <target state="translated">生成 .NET 项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publish a .NET project for deployment.</source>
-        <target state="needs-review-translation">发布 .NET 项目以进行部署(包括运行时)。</target>
+        <target state="translated">发布 .NET 项目进行部署。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Build and run a .NET project output.</source>
-        <target state="needs-review-translation">编译并立即执行 .NET 项目。</target>
+        <target state="translated">生成并运行 .NET 项目输出。</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Run unit tests using the test runner specified in a .NET project.</source>
-        <target state="needs-review-translation">使用项目中指定的测试运行程序运行单元测试。</target>
+        <target state="translated">使用 .NET 项目中指定的测试运行程序运行单元测试。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Create a NuGet package.</source>
-        <target state="needs-review-translation">创建 NuGet 包。</target>
+        <target state="translated">创建 NuGet 包。</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="needs-review-translation">将基于 project.json 的项目迁移到基于 MSBuild 的项目。</target>
+        <target state="translated">将 project.json 项目迁移到 MSBuild 项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add a package or reference to a .NET project.</source>
-        <target state="needs-review-translation">将引用添加到项目中。</target>
+        <target state="translated">将包或引用添加到 .NET 项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove a package or reference from a .NET project.</source>
-        <target state="needs-review-translation">从项目中删除引用。</target>
+        <target state="translated">从 .NET 项目中删除包或引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -124,12 +124,12 @@
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Run Microsoft Build Engine (MSBuild) commands.</source>
-        <target state="needs-review-translation">运行 Microsoft 生成引擎 (MSBuild)。</target>
+        <target state="translated">运行 Microsoft 生成引擎(MSBuild)命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Run Microsoft Test Engine (VSTest) commands.</source>
-        <target state="needs-review-translation">运行 Microsoft 测试执行命令行工具。</target>
+        <target state="translated">运行 Microsoft 测试引擎(VSTest)命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -139,22 +139,22 @@
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build outputs of a .NET project.</source>
-        <target state="needs-review-translation">清除生成输出。</target>
+        <target state="translated">清理 .NET 项目的生成输出。</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
         <source>Modify Visual Studio solution files.</source>
-        <target state="needs-review-translation">修改解决方案(SLN)文件。</target>
+        <target state="translated">修改 Visual Studio 解决方案文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references of a .NET project.</source>
-        <target state="needs-review-translation">列出项目参考或安装的工具。</target>
+        <target state="translated">列出 .NET 项目的项目引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">指定的命令“{0}”不是有效的 CLI 命令。请指定有效的 CLI 命令。有关详细信息，请运行 dotnet help。</target>
+        <target state="translated">指定的命令“{0}”不是有效的 SDK 命令。请指定有效的 SDK 命令。有关详细信息，请运行 dotnet help。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the SDK commands.</source>
-        <target state="needs-review-translation">用于就每个 CLI 命令获取更详细帮助的实用程序。</target>
+        <target state="translated">用于获取每个 SDK 命令相关的更详细帮助的实用程序。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>The SDK command to launch online help for.</source>
-        <target state="needs-review-translation">要查看其更详细帮助的 CLI 命令。</target>
+        <target state="translated">要启动联机帮助的 SDK 命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet [command] --help' for more information on a command.</source>
-        <target state="needs-review-translation">运行“dotnet 命令 --help”，获取有关命令的详细信息。</target>
+        <target state="translated">运行 "dotnet [command] --help"，获取有关命令的详细信息。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -244,12 +244,12 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="needs-review-translation">在运行时存储中存储指定的程序集。</target>
+        <target state="translated">在运行时包存储中存储指定的程序集。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or manage tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">安装或使用扩展 .NET 体验的工具。</target>
+        <target state="translated">安装或管理扩展 .NET 体验的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -259,42 +259,42 @@
       </trans-unit>
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
-        <target state="new">Create and manage development certificates.</target>
+        <target state="translated">创建和管理开发证书。</target>
         <note />
       </trans-unit>
       <trans-unit id="EfDefinition">
         <source>Entity Framework Core command-line tools.</source>
-        <target state="new">Entity Framework Core command-line tools.</target>
+        <target state="translated">Entity Framework Core 命令行工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
+        <target state="translated">SQL Server 缓存命令行工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
-        <target state="new">Manage development user secrets.</target>
+        <target state="translated">管理开发用户密码。</target>
         <note />
       </trans-unit>
       <trans-unit id="WatchDefinition">
         <source>Start a file watcher that runs a command when files change.</source>
-        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <target state="translated">启动文件观察程序，它会在文件发生更改时运行命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
         <source>Additional commands from bundled tools:</source>
-        <target state="new">Additional commands from bundled tools:</target>
+        <target state="translated">捆绑工具中的其他命令:</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET Core SDK command.</source>
-        <target state="new">Execute a .NET Core SDK command.</target>
+        <target state="translated">执行 .NET Core SDK 命令。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
-        <target state="new">Execute a .NET Core application.</target>
+        <target state="translated">执行 .NET Core 应用程序。</target>
         <note />
       </trans-unit>
     </body>

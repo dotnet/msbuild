@@ -74,15 +74,17 @@ namespace Microsoft.DotNet.New.Tests
                 .Should().Pass();
         }
 
+        // Remove the expectedVersion parameter once we have templates targetting netcoreapp2.2.
         [Theory]
-        // [InlineData("console", "microsoft.netcore.app")] re-enable when this issue is resolved: "https://github.com/dotnet/cli/issues/9420"
-        [InlineData("classlib", "netstandard.library")]
-        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName)
+        [InlineData("console", "microsoft.netcore.app")]
+        // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
+        [InlineData("classlib", "netstandard.library", null)]
+        public void NewProjectRestoresCorrectPackageVersion(string type, string packageName, string expectedVersion)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
             var packagesDirectory = Path.Combine(rootPath, "packages");
             var projectName = "Project";
-            var expectedVersion = GetFrameworkPackageVersion();
+            expectedVersion = expectedVersion ?? GetFrameworkPackageVersion();
 
             var repoRootNuGetConfig = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
 
@@ -106,7 +108,7 @@ namespace Microsoft.DotNet.New.Tests
                 var sharedFxDir = dotnetDir
                     .GetDirectory("shared", "Microsoft.NETCore.App")
                     .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.1.1"));
+                    .Single(d => d.Name.StartsWith("2.1.0"));
 
                 if (packageName == "microsoft.netcore.app")
                 {

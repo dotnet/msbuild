@@ -34,11 +34,11 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp2.1")
+                .Execute("--framework netcoreapp2.2")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp2.1", "publish", $"{testAppName}.dll");
+            var outputDll = Path.Combine(testProjectDirectory, "bin", configuration, "netcoreapp2.2", "publish", $"{testAppName}.dll");
 
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(outputDll)
@@ -58,7 +58,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--framework netcoreapp2.1")
+                .Execute("--framework netcoreapp2.2")
                 .Should().Pass();
         }
 
@@ -75,7 +75,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute("--framework netcoreapp2.1")
+                .Execute("--framework netcoreapp2.2")
                 .Should().Pass();
         }
 
@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput("--framework netcoreapp2.1 --no-restore")
+                .ExecuteWithCapturedOutput("--framework netcoreapp2.2 --no-restore")
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
         }
@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             return testProjectDirectory
-                    .GetDirectory("bin", configuration, "netcoreapp2.1", rid ?? "", "publish");
+                    .GetDirectory("bin", configuration, "netcoreapp2.2", rid ?? "", "publish");
         }
 
         [Fact]

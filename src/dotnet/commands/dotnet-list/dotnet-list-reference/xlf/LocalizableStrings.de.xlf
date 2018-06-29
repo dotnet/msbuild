@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>List all project-to-project references of the project.</source>
-        <target state="needs-review-translation">Viewer für .NET Core-Interprojektabhängigkeit</target>
+        <target state="translated">Hiermit listen Sie alle Projekt-zu-Projekt-Verweise des Projekts auf.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -15,8 +15,8 @@
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}.
 {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">In Projekt „{1}“ liegen keine {0}-Verweise vor.
-{0} ist der Typ des angeforderten Elements (Projekt, Paket, P2P) und „{1}“ das Objekt, an dem der Vorgang ausgeführt wird (eine Projekt- oder Projektmappendatei). </target>
+        <target state="translated">In Projekt "{1}" liegen keine {0}-Verweise vor.
+{0} ist der Typ des angeforderten Elements (Projekt, Paket, P2P) und "{1}" das Objekt, an dem der Vorgang ausgeführt wird (eine Projekt- oder Projektmappendatei). </target>
         <note />
       </trans-unit>
     </body>

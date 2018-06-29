@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Add a NuGet package reference to the project.</source>
-        <target state="needs-review-translation">.NET 添加包引用命令</target>
+        <target state="translated">向项目添加 NuGet 包引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,27 +19,27 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Add the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">仅针对特定框架添加引用。</target>
+        <target state="translated">仅针对特定框架添加引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
         <source>Add the reference without performing restore preview and compatibility check.</source>
-        <target state="needs-review-translation">在没有执行还原预览和兼容性检查的情况下添加引用。</target>
+        <target state="translated">在没有执行还原预览和兼容性检查的情况下添加引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
         <source>The NuGet package source to use during the restore.</source>
-        <target state="needs-review-translation">使用还原期间所用的特定 NuGet 包源。</target>
+        <target state="translated">要在还原期间使用的 NuGet 包源。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">将包还原到指定目录。</target>
+        <target state="translated">要将包还原到其中的目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the package to add.</source>
-        <target state="needs-review-translation">要添加的包的版本。</target>
+        <target state="translated">要添加的包版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDGFileException">
@@ -64,7 +64,7 @@
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
         <source>PACKAGE_DIR</source>
-        <target state="needs-review-translation">PACKAGE_DIRECTORY</target>
+        <target state="translated">PACKAGE_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">

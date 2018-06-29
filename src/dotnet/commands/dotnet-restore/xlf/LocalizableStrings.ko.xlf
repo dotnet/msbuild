@@ -29,22 +29,22 @@
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
         <source>The NuGet package source to use for the restore.</source>
-        <target state="needs-review-translation">복원 중 사용할 NuGet 패키지 소스를 지정합니다.</target>
+        <target state="translated">복원에 사용할 NuGet 패키지 소스입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
         <source>PACKAGES_DIR</source>
-        <target state="needs-review-translation">PACKAGES_DIRECTORY</target>
+        <target state="translated">PACKAGES_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
         <source>The directory to restore packages to.</source>
-        <target state="needs-review-translation">패키지를 설치할 디렉터리입니다.</target>
+        <target state="translated">패키지를 복원할 디렉터리입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
         <source>Prevent restoring multiple projects in parallel.</source>
-        <target state="needs-review-translation">여러 프로젝트를 병렬로 복원을 사용하지 않도록 설정합니다.</target>
+        <target state="translated">여러 프로젝트를 병렬로 복원하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
         <source>Do not restore project-to-project references and only restore the specified project.</source>
-        <target state="needs-review-translation">프로젝트 간 참조를 무시하고 루트 프로젝트만 복원하려면 이 플래그를 설정합니다.</target>
+        <target state="translated">p2p(프로젝트 간) 참조를 복원하지 않고 지정한 프로젝트만 복원합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -79,13 +79,14 @@
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
         <source>The target runtime to restore packages for.</source>
-        <target state="needs-review-translation">패키지를 복원할 대상 런타입니다.</target>
+        <target state="translated">패키지를 복원할 대상 런타임입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
         <source>Force all dependencies to be resolved even if the last restore was successful.
 This is equivalent to deleting project.assets.json.</source>
-        <target state="needs-review-translation">마지막 복원이 성공적인 경우에도 이 플래그를 설정하여 모든 종속성을 확인합니다. project.assets.json을 삭제하는 것과 동일합니다.</target>
+        <target state="translated">마지막 복원이 성공적인 경우에도 모든 종속성을 확인합니다.
+project.assets.json을 삭제하는 것과 동일합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdInteractiveRestoreOptionDescription">

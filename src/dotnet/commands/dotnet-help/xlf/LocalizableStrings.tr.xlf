@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Yardımı gösterir.</target>
+        <target state="translated">Komut satırı yardımını gösterir.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -59,42 +59,42 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Create a new .NET project or file.</source>
-        <target state="needs-review-translation">.NET projelerini başlatır.</target>
+        <target state="translated">Yeni bir .NET projesi veya dosyası oluşturur.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in a .NET project.</source>
-        <target state="needs-review-translation">.NET projesinde belirtilen bağımlılıkları geri yükler.</target>
+        <target state="translated">Bir .NET projesinde belirtilen bağımlılıkları geri yükler.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Build a .NET project.</source>
-        <target state="needs-review-translation">.NET projesi derler.</target>
+        <target state="translated">Bir .NET projesi derler.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publish a .NET project for deployment.</source>
-        <target state="needs-review-translation">Dağıtım için bir .NET projesi yayımlar (çalışma zamanı dahil).</target>
+        <target state="translated">Bir .NET projesini dağıtım için yayımlar.</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Build and run a .NET project output.</source>
-        <target state="needs-review-translation">Bir .NET projesini derler ve hemen çalıştırır.</target>
+        <target state="translated">Bir .NET projesi çıktısı derler ve çalıştırır.</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Run unit tests using the test runner specified in a .NET project.</source>
-        <target state="needs-review-translation">Projede belirtilen test çalıştırıcısını kullanarak birim testleri çalıştırır.</target>
+        <target state="translated">.NET projesinde belirtilen test çalıştırıcısını kullanarak birim testleri çalıştırır.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Create a NuGet package.</source>
-        <target state="needs-review-translation">NuGet paketi oluşturur.</target>
+        <target state="translated">Bir NuGet paketi oluşturur.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="needs-review-translation">project.json tabanlı bir projeyi msbuild tabanlı bir projeye geçirir.</target>
+        <target state="translated">Bir project.json projesini MSBuild projesine geçirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add a package or reference to a .NET project.</source>
-        <target state="needs-review-translation">Projeye başvuru ekleyin.</target>
+        <target state="translated">Bir .NET projesine paket ya da başvuru ekler.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove a package or reference from a .NET project.</source>
-        <target state="needs-review-translation">Projeden başvuru kaldırın.</target>
+        <target state="translated">Bir .NET projesinden paket ya da başvuruyu kaldırır.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -124,12 +124,12 @@
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Run Microsoft Build Engine (MSBuild) commands.</source>
-        <target state="needs-review-translation">Microsoft Build Engine’i (MSBuild) çalıştırır.</target>
+        <target state="translated">Microsoft Build Engine (MSBuild) komutlarını çalıştırır.</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Run Microsoft Test Engine (VSTest) commands.</source>
-        <target state="needs-review-translation">Microsoft Test Çalıştırması Komut Satırı Aracı’nı çalıştırır.</target>
+        <target state="translated">Microsoft Test Engine (VSTest) komutlarını çalıştırır.</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -139,22 +139,22 @@
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build outputs of a .NET project.</source>
-        <target state="needs-review-translation">Derleme çıkışlarını temizler.</target>
+        <target state="translated">Bir .NET projesinin derleme çıktılarını temizler.</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
         <source>Modify Visual Studio solution files.</source>
-        <target state="needs-review-translation">Çözüm (SLN) dosyalarını değiştirin.</target>
+        <target state="translated">Visual Studio çözüm dosyalarını değiştirir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references of a .NET project.</source>
-        <target state="needs-review-translation">Proje başvurularını veya yüklü araçları listeleyin.</target>
+        <target state="translated">Bir .NET projesinin proje başvurularını listeler.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">Belirtilen '{0}' komutu geçerli bir CLI komutu değil. Lütfen geçerli bir CLI komutu belirtin. Daha fazla bilgi için dotnet yardımını çalıştırın.</target>
+        <target state="translated">Belirtilen '{0}' komutu geçerli bir SDK komutu değil. Lütfen geçerli bir SDK komutu belirtin. Daha fazla bilgi için dotnet yardımını çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the SDK commands.</source>
-        <target state="needs-review-translation">CLI komutlarının her biri hakkında daha ayrıntılı yardım sunan yardımcı program.</target>
+        <target state="translated">SDK komutlarının her biri hakkında daha ayrıntılı yardım sunan yardımcı program.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>The SDK command to launch online help for.</source>
-        <target state="needs-review-translation">Daha ayrıntılı yardım bilgileri görüntülenecek olan CLI komutu.</target>
+        <target state="translated">Çevrimiçi yardımı başlatılacak SDK komutu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet [command] --help' for more information on a command.</source>
-        <target state="needs-review-translation">Bir komut hakkında daha fazla bilgi için 'dotnet COMMAND --help' komutunu çalıştırın.</target>
+        <target state="translated">Bir komut hakkında daha fazla bilgi için 'dotnet [komut] --help' komutunu çalıştırın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -244,12 +244,12 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="needs-review-translation">Belirtilen bütünleştirilmiş kodları çalışma zamanı deposunda depolar.</target>
+        <target state="translated">Belirtilen bütünleştirilmiş kodları çalışma zamanı paket deposunda depolar.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or manage tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">.NET deneyiminizi genişleten araçları yükleyin veya bu araçlarla çalışın.</target>
+        <target state="translated">.NET deneyimini genişleten araçları yükler veya yönetir.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -259,42 +259,42 @@
       </trans-unit>
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
-        <target state="new">Create and manage development certificates.</target>
+        <target state="translated">Geliştirme sertifikaları oluşturun ve yönetin.</target>
         <note />
       </trans-unit>
       <trans-unit id="EfDefinition">
         <source>Entity Framework Core command-line tools.</source>
-        <target state="new">Entity Framework Core command-line tools.</target>
+        <target state="translated">Entity Framework Core komut satırı araçları.</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
+        <target state="translated">SQL Server önbellek komut satırı araçları.</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
-        <target state="new">Manage development user secrets.</target>
+        <target state="translated">Kullanıcı gizli dizilerini yönetin.</target>
         <note />
       </trans-unit>
       <trans-unit id="WatchDefinition">
         <source>Start a file watcher that runs a command when files change.</source>
-        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <target state="translated">Dosyalar değiştiğinde bir komut çalıştıran bir dosya izleyici başlatın.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
         <source>Additional commands from bundled tools:</source>
-        <target state="new">Additional commands from bundled tools:</target>
+        <target state="translated">Paket grubu oluşturulmuş araçlardaki ek komutlar:</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET Core SDK command.</source>
-        <target state="new">Execute a .NET Core SDK command.</target>
+        <target state="translated">Bir .NET Core SDK komutunu yürütür.</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
-        <target state="new">Execute a .NET Core application.</target>
+        <target state="translated">Bir .NET Core uygulamasını yürütür.</target>
         <note />
       </trans-unit>
     </body>

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PATH</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -35,13 +35,15 @@ Defaults to current directory if nothing is specified.</source>
       <trans-unit id="CmdTemplateDescription">
         <source>The base MSBuild template to use for the migrated project.
 The default is the project included in dotnet new.</source>
-        <target state="needs-review-translation">要用於受移轉應用程式的基底 MSBuild 範本。預設為 dotnet new 中所包含的專案。</target>
+        <target state="translated">為已移轉之應用程式使用的基底 MSBuild 範本。
+預設為 dotnet new 中所包含的專案。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the SDK package that will be referenced in the migrated project.
 The default is the version of the SDK in dotnet new.</source>
-        <target state="needs-review-translation">已移轉的應用程式中將會參考的 SDK 套件版本。預設為 dotnet new 中的 SDK 版本。</target>
+        <target state="translated">已移轉之專案中將會參考的 SDK 套件版本。
+預設為 dotnet new 中的 SDK 版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

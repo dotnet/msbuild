@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
-        <target state="needs-review-translation">Projeden projeye başvuruları yoksaymak ve yalnızca kök projeyi derlemek için bu bayrağı ayarlayın</target>
+        <target state="translated">Projeden projeye başvuruları derlemez ve yalnızca belirtilen projeyi derler.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Do not use incremental building.</source>
-        <target state="needs-review-translation">Artımlı derlemeyi devre dışı bırakır.</target>
+        <target state="translated">Artımlı derleme kullanmaz.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">Derlenen yapıtların yerleştirileceği çıkış dizini.</target>
+        <target state="translated">Derlenen yapıtların yerleştirileceği çıkış dizini.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to build for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <target state="translated">Derlemenin yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında da belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="new">The target runtime to build for.</target>
+        <target state="translated">Derlemenin yapılacağı hedef çalışma zamanı.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
+        <target state="translated">Projeyi derlemek için kullanılacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
         <note />
       </trans-unit>
     </body>

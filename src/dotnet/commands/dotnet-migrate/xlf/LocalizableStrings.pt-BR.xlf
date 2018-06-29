@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PATH</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -35,13 +35,15 @@ Usará o diretório atual como padrão se nenhuma opção for especificada.</tar
       <trans-unit id="CmdTemplateDescription">
         <source>The base MSBuild template to use for the migrated project.
 The default is the project included in dotnet new.</source>
-        <target state="needs-review-translation">Modelo base do MSBuild a ser usado para o aplicativo migrado. O padrão é o projeto incluído em dotnet new.</target>
+        <target state="translated">O modelo base do MSBuild a ser usado para o projeto migrado.
+O padrão é o projeto incluído em dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the SDK package that will be referenced in the migrated project.
 The default is the version of the SDK in dotnet new.</source>
-        <target state="needs-review-translation">A versão do pacote SDK que será referida no aplicativo migrado. O padrão é a versão do SDK em dotnet new.</target>
+        <target state="translated">A versão do pacote do SDK que será referenciada no projeto migrado. 
+O padrão é a versão do SDK em dotnet new.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">
