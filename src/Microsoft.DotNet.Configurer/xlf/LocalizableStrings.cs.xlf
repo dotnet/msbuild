@@ -73,7 +73,7 @@ Další informace o konfiguraci protokolu HTTPS najdete na webu https://go.micro
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">Nešlo určit domovský adresář uživatele. Nastavte proměnnou prostředí {0}, která určí adresář, který se má použít.</target>
         <note />
       </trans-unit>
     </body>

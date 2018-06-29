@@ -73,7 +73,7 @@ Pour plus d'informations sur la configuration du protocole HTTPS, consultez http
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">Impossible de déterminer le répertoire de base de l'utilisateur. Définissez la variable d'environnement '{0}' pour spécifier le répertoire à utiliser.</target>
         <note />
       </trans-unit>
     </body>
