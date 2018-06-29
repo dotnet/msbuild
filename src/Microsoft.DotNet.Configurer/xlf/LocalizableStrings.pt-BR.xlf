@@ -73,7 +73,7 @@ Para obter mais informações de como configurar HTTPS, confira https://go.micro
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">O diretório inicial do usuário não pôde ser definido. Configure a variável de ambiente '{0}' para especificar o diretório a ser utilizado.</target>
         <note />
       </trans-unit>
     </body>

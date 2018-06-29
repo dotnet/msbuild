@@ -73,7 +73,7 @@ Weitere Informationen zur Konfiguration von HTTPS finden Sie unter https://go.mi
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">Das Startverzeichnis des Benutzers konnte nicht ermittelt werden. Legen Sie die Umgebungsvariable "{0}" fest, um das zu verwendende Verzeichnis anzugeben.</target>
         <note />
       </trans-unit>
     </body>

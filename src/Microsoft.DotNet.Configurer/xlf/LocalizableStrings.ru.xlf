@@ -73,7 +73,7 @@ For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?l
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">Не удалось определить домашний каталог пользователя. Чтобы указать нужный каталог, задайте переменную среды "{0}".</target>
         <note />
       </trans-unit>
     </body>
