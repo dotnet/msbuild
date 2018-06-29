@@ -19,6 +19,7 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 
 Build Status
 ------------
+
 |Windows x64 |
 |:------:|
 |[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7716/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7716)|
@@ -26,7 +27,7 @@ Build Status
 Basic usage
 -----------
 
-When you have the .NET Command Line Interface installed on your OS of choice, you can try it out using some of the samples on the [dotnet/core repo](https://github.com/dotnet/core/tree/master/samples). You can download the sample in a directory, and then you can kick the tires of the CLI.
+When you have the .NET Command Line Interface installed on your OS of choice, you can try it out using some of the samples on the [dotnet/core repo](https://github.com/dotnet/core/tree/release/2.2.1xx/samples). You can download the sample in a directory, and then you can kick the tires of the CLI.
 
 
 First, you will need to restore the packages:
