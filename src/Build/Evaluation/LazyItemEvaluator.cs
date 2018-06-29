@@ -62,7 +62,7 @@ namespace Microsoft.Build.Evaluation
             _evaluationProfiler = evaluationProfiler;
 
             FileSystem = evaluationContext.FileSystem;
-            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, evaluationContext.FileEntryExpansionCache));
+            EngineFileUtilities = evaluationContext.EngineFileUtilities;
         }
 
         private ImmutableList<I> GetItems(string itemType)
