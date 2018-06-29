@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
-        public void It_does_not_print_the_first_time_use_notice_when_the_user_has_set_the_DOTNET_SKIP_FIRST_TIME_EXPERIENCE_environemnt_variable()
+        public void It_does_not_print_the_first_time_use_notice_when_the_user_has_set_the_DOTNET_SKIP_FIRST_TIME_EXPERIENCE_environment_variable()
         {
             _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(false);
 
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Fact]
-        public void It_does_not_print_the_first_time_use_notice_when_the_user_has_set_the_DOTNET_PRINT_TELEMETRY_MESSAGE_environemnt_variable()
+        public void It_does_not_print_the_first_time_use_notice_when_the_user_has_set_the_DOTNET_PRINT_TELEMETRY_MESSAGE_environment_variable()
         {
             _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(false);
 
