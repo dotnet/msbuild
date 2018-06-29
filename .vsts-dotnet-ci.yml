@@ -1,5 +1,5 @@
 phases:
-# - phase: LinuxMono
+# - phase: LinuxOnMono
 #   queue: Hosted Linux Preview
 #   steps:
 #   - bash: . 'build/install-mono.sh'
@@ -13,31 +13,31 @@ phases:
 #       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
 #     condition: always()
 
-# - phase: LinuxCoreCLR
-#   queue: Hosted Linux Preview
-#   steps:
-#   - bash: . 'build/cibuild.sh'
-#     displayName: CI Build
-#   - task: PublishTestResults@2
-#     displayName: Publish Test Results
-#     inputs:
-#       testRunner: XUnit
-#       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
-#     condition: always()
+- phase: LinuxOnCore
+  queue: Hosted Linux Preview
+  steps:
+  - bash: . 'build/cibuild.sh'
+    displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+    condition: always()
 
-# - phase: Mac
-#   queue: 'Hosted macOS Preview'
-#   steps:
-#   - bash: . 'build/cibuild.sh'
-#     displayName: CI Build
-#   - task: PublishTestResults@2
-#     displayName: Publish Test Results
-#     inputs:
-#       testRunner: XUnit
-#       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
-#     condition: always()
+- phase: MacOnCore
+  queue: 'Hosted macOS Preview'
+  steps:
+  - bash: . 'build/cibuild.sh'
+    displayName: CI Build
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+    condition: always()
 
-- phase: MacMono
+- phase: MacOnMono
   queue: 'Hosted macOS Preview'
   steps:
   - script: |
