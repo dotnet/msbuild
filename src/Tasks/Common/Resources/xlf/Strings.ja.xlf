@@ -9,22 +9,22 @@
       </trans-unit>
       <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
         <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="new">NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</target>
+        <target state="translated">NETSDK1066: RuntimeIdentifier を指定して、フレームワークに依存するアプリケーションをアプリケーション ホストを使用して発行する必要があります。</target>
         <note>{StrBegin="NETSDK1066: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
-        <target state="new">NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</target>
+        <target state="translated">NETSDK1067: アプリケーション ホストを使用するには、自己完結型のアプリケーションが必要です。SelfContained を false に設定するか、UseAppHost を true に設定してください。</target>
         <note>{StrBegin="NETSDK1067: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkDependentAppHostRequiresVersion21">
         <source>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</source>
-        <target state="new">NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</target>
+        <target state="translated">NETSDK1068: フレームワークに依存するアプリケーション ホストには、最低でも 'netcoreapp2.1' のターゲット フレームワークが必要です。</target>
         <note>{StrBegin="NETSDK1068: "}</note>
       </trans-unit>
       <trans-unit id="NETFrameworkToNonBuiltInNETStandard">
         <source>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</source>
-        <target state="new">NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</target>
+        <target state="translated">NETSDK1069: このプロジェクトは .NET Standard 1.5 以上をターゲットとするライブラリを使用します。また、このプロジェクトは、そのバージョンの .NET Standard に対するサポートが組み込まれていない .NET Framework のバージョンをターゲットとしています。一連の既知の問題について、https://aka.ms/net-standard-known-issues をご覧ください。.NET Framework 4.7.2 への再ターゲットを検討してください。</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
