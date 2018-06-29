@@ -47,7 +47,7 @@ phases:
      echo "##vso[task.setvariable variable=PKG_CONFIG_PATH;]$MONOPREFIX/lib/pkgconfig:$MONOPREFIX/share/pkgconfig:$PKG_CONFIG_PATH"
      echo "##vso[task.setvariable variable=PATH;]$MONOPREFIX/bin:$PATH"
     displayName: Select Mono version
-  - bash: . 'build/cibuild.sh' '-hostType mono'
+  - bash: . 'build.sh' '-hostType mono'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish Test Results
