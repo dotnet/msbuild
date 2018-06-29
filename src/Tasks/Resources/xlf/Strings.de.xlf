@@ -358,17 +358,17 @@
       </trans-unit>
       <trans-unit id="FileHash.FileNotFound">
         <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
-        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB3954: Fehler beim Berechnen des Hashs für die Datei "{0}", weil sie nicht vorhanden oder unzugänglich ist.</target>
         <note>{StrBegin="MSB3954: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
         <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
-        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
+        <target state="translated">MSB3953: Nicht erkannter Name für Hashalgorithmus ({0}). Zulässige Algorithmen sind "SHA256", "SHA384" und "SHA512".</target>
         <note>{StrBegin="MSB3953: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashEncoding">
         <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
-        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <target state="translated">MSB3951: Nicht erkannte Hashcodierung "{0}". Zulässige Codierungen sind "hex" und "base64".</target>
         <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
@@ -1459,7 +1459,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
         <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
-        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <target state="translated">Die Assemblydatei "{0}" konnte nicht geöffnet werden. Das PE-Image enthält keine verwalteten Metadaten.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
@@ -2206,7 +2206,7 @@
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
         <source>Project reference "{0}" has not been resolved.</source>
-        <target state="needs-review-translation">Der Projektverweis "{0}" wurde nicht aufgelöst.</target>
+        <target state="translated">Der Projektverweis "{0}" wurde nicht aufgelöst.</target>
         <note>
       UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
@@ -2430,12 +2430,12 @@
       </trans-unit>
       <trans-unit id="Vbc.ParameterHasInvalidValue">
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
-        <target state="translated">"{1}" ist ein ungültiger Wert für den {0}-Parameter.</target>
+        <target state="translated">"{1}" ist ein ungültiger Wert für den Parameter "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="VerifyFileHash.HashMismatch">
         <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
-        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <target state="translated">MSB3952: Keine Dateihashübereinstimmung. "{0}" muss einen {1}-Dateihash von "{2}" aufweisen, dieser lautet jedoch "{3}".</target>
         <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">

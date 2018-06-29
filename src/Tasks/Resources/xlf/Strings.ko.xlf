@@ -358,17 +358,17 @@
       </trans-unit>
       <trans-unit id="FileHash.FileNotFound">
         <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
-        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB3954: '{0}' 파일이 존재하지 않거나 액세스할 수 없어서 이 파일에 대한 해시를 계산하지 못했습니다.</target>
         <note>{StrBegin="MSB3954: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
         <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
-        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
+        <target state="translated">MSB3953: 인식할 수 없는 해시 알고리즘 이름 '{0}'입니다. 허용되는 알고리즘은 'SHA256', 'SHA384' 및 'SHA512'입니다.</target>
         <note>{StrBegin="MSB3953: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashEncoding">
         <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
-        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <target state="translated">MSB3951: 인식할 수 없는 해시 인코딩 '{0}'입니다. 허용되는 인코딩은 'hex' 및 'base64'입니다.</target>
         <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
@@ -1459,7 +1459,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
         <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
-        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <target state="translated">어셈블리 파일 '{0}'을(를) 열 수 없습니다. -- PE 이미지에 관리된 메타데이터가 포함되어 있지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
@@ -2206,7 +2206,7 @@
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
         <source>Project reference "{0}" has not been resolved.</source>
-        <target state="needs-review-translation">프로젝트 참조 "{0}"이(가) 확인되지 않았습니다.</target>
+        <target state="translated">프로젝트 참조 "{0}"이(가) 확인되지 않았습니다.</target>
         <note>
       UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
@@ -2435,7 +2435,7 @@
       </trans-unit>
       <trans-unit id="VerifyFileHash.HashMismatch">
         <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
-        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <target state="translated">MSB3952: 파일 해시가 일치하지 않습니다. {0}에 {2}의 {1} 파일 해시가 필요하지만 {3}이었습니다.</target>
         <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">

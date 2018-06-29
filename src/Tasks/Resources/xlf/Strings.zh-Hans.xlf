@@ -358,17 +358,17 @@
       </trans-unit>
       <trans-unit id="FileHash.FileNotFound">
         <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
-        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB3954: 未能计算文件“{0}”的哈希，因为它不存在或不可访问。</target>
         <note>{StrBegin="MSB3954: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
         <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
-        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
+        <target state="translated">MSB3953: 无法识别的哈希算法名称“{0}”。可使用的算法是 “SHA256”、“SHA384” 和 “SHA512”。</target>
         <note>{StrBegin="MSB3953: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashEncoding">
         <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
-        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <target state="translated">MSB3951: 无法识别的哈希编码“{0}”。可使用的编码是 “hex” 和 “base64”。</target>
         <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
@@ -1459,7 +1459,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
         <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
-        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <target state="translated">无法打开程序集文件“{0}”- PE 映像不包含任何托管元数据。</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
@@ -2206,7 +2206,7 @@
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
         <source>Project reference "{0}" has not been resolved.</source>
-        <target state="needs-review-translation">尚未解析项目引用“{0}”。</target>
+        <target state="translated">尚未解析项目引用“{0}”。</target>
         <note>
       UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
@@ -2435,7 +2435,7 @@
       </trans-unit>
       <trans-unit id="VerifyFileHash.HashMismatch">
         <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
-        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <target state="translated">MSB3952: 文件哈希不匹配。{0} 应具有 {1} 文件哈希 {2}，但却具有 {3}。</target>
         <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
