@@ -19,12 +19,12 @@
       </trans-unit>
       <trans-unit id="AddAppFullName">
         <source>Add one or more projects to a solution file.</source>
-        <target state="needs-review-translation">Comando para adicionar projetos a um arquivo de solução do .NET</target>
+        <target state="translated">Adicionar um ou mais projetos em um arquivo de solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
-        <target state="needs-review-translation">Comando para remover projetos de um arquivo de solução do .NET</target>
+        <target state="translated">Remover um ou mais projetos de um arquivo de solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="ListAppFullName">
         <source>List all projects in a solution file.</source>
-        <target state="needs-review-translation">Comando para listar projetos em um arquivo de solução do .NET</target>
+        <target state="translated">Listar todos os projetos em um arquivo de solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
@@ -44,37 +44,37 @@
       </trans-unit>
       <trans-unit id="SolutionArgumentName">
         <source>SLN_FILE</source>
-        <target state="new">SLN_FILE</target>
+        <target state="translated">SLN_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionArgumentDescription">
         <source>The solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="new">The solution file to operate on. If not specified, the command will search the current directory for one.</target>
+        <target state="translated">O arquivo de solução no qual a operação ocorrerá. Se não for especificado, o comando pesquisará um arquivo de solução no diretório atual.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentDescription">
         <source>The paths to the projects to add to the solution.</source>
-        <target state="new">The paths to the projects to add to the solution.</target>
+        <target state="translated">Os caminhos para os projetos a serem adicionados na solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">
         <source>The paths to the projects to remove from the solution.</source>
-        <target state="new">The paths to the projects to remove from the solution.</target>
+        <target state="needs-review-translation">Os caminhos para os projetos da solução.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectsHeader">
         <source>Project(s)</source>
-        <target state="new">Project(s)</target>
+        <target state="translated">Projetos</target>
         <note />
       </trans-unit>
     </body>

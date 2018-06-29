@@ -9,32 +9,32 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Command to add, remove, and list projects from the solution (SLN) file.</source>
-        <target state="translated">Commande permettant d'ajouter, de supprimer et de répertorier des projets à partir du fichier solution (SLN).</target>
+        <target state="translated">Commande permettant d'ajouter, de retirer et de répertorier des projets à partir du fichier solution (SLN).</target>
         <note />
       </trans-unit>
       <trans-unit id="AppHelpText">
         <source>Projects to add or to remove from the solution.</source>
-        <target state="translated">Projets à ajouter ou supprimer dans la solution.</target>
+        <target state="translated">Projets à ajouter ou retirer dans la solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddAppFullName">
         <source>Add one or more projects to a solution file.</source>
-        <target state="needs-review-translation">Commande .NET Ajouter un ou des projets à un fichier solution</target>
+        <target state="translated">Ajoutez un ou plusieurs projets à un fichier solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
         <source>Remove one or more projects from a solution file.</source>
-        <target state="needs-review-translation">Commande .NET Supprimer un ou des projets dans un fichier solution</target>
+        <target state="translated">Supprimez un ou plusieurs projets d'un fichier solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
         <source>Remove the specified project(s) from the solution. The project is not impacted.</source>
-        <target state="translated">Supprimez le ou les projets spécifiés dans la solution. Le projet n'est pas affecté.</target>
+        <target state="translated">Retirez le ou les projets spécifiés dans la solution. Le projet n'est pas affecté.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">
         <source>List all projects in a solution file.</source>
-        <target state="needs-review-translation">Commande .NET Répertorier un ou des projets dans un fichier solution</target>
+        <target state="translated">Listez tous les projets d'un fichier solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
@@ -44,37 +44,37 @@
       </trans-unit>
       <trans-unit id="SolutionArgumentName">
         <source>SLN_FILE</source>
-        <target state="new">SLN_FILE</target>
+        <target state="translated">SLN_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionArgumentDescription">
         <source>The solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="new">The solution file to operate on. If not specified, the command will search the current directory for one.</target>
+        <target state="translated">Fichier solution à utiliser. Si aucun fichier n'est spécifié, la commande en recherche un dans le répertoire actif.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="AddProjectPathArgumentDescription">
         <source>The paths to the projects to add to the solution.</source>
-        <target state="new">The paths to the projects to add to the solution.</target>
+        <target state="translated">Chemins des projets à ajouter à la solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">
         <source>The paths to the projects to remove from the solution.</source>
-        <target state="new">The paths to the projects to remove from the solution.</target>
+        <target state="needs-review-translation">Chemins des projets à supprimer de la solution.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectsHeader">
         <source>Project(s)</source>
-        <target state="new">Project(s)</target>
+        <target state="translated">Projet(s)</target>
         <note />
       </trans-unit>
     </body>

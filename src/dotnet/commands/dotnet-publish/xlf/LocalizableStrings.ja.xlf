@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">発行用のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルで指定する必要があります。</target>
+        <target state="translated">発行する対象のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルで指定する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">発行された成果物を配置する出力ディレクトリ。</target>
+        <target state="translated">発行された成果物を配置する出力ディレクトリ。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -45,13 +45,13 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish the application for.
 The default is to publish a framework-dependent application without an executable.</source>
-        <target state="new">The target runtime to publish the application for.
-The default is to publish a framework-dependent application without an executable.</target>
+        <target state="needs-review-translation">発行する対象のターゲット ランタイム。これは、自己完結型の配置を作成する際に使用します。
+既定では、フレームワーク依存アプリケーションを発行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">発行する対象の構成。大部分のプロジェクトで、既定値は 'Debug' です。</target>
         <note />
       </trans-unit>
       <trans-unit id="ModeOptionDescription">

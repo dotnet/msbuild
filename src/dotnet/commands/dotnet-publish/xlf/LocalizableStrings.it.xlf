@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Framework di destinazione per cui eseguire la pubblicazione. Il framework di destinazione deve essere specificato nel file di progetto.</target>
+        <target state="translated">Framework di destinazione per cui eseguire la pubblicazione. Il framework di destinazione deve essere specificato nel file di progetto.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,12 +24,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">Directory di output in cui inserire gli artefatti pubblicati.</target>
+        <target state="translated">Directory di output in cui inserire gli artefatti pubblicati.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFESTO</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -45,13 +45,13 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish the application for.
 The default is to publish a framework-dependent application without an executable.</source>
-        <target state="new">The target runtime to publish the application for.
-The default is to publish a framework-dependent application without an executable.</target>
+        <target state="needs-review-translation">Runtime di destinazione per cui eseguire la pubblicazione. Viene usata durante la creazione della distribuzione indipendente.
+Per impostazione predefinita, viene pubblicata un'applicazione dipendente dal framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Configurazione per cui eseguire la pubblicazione. L'impostazione predefinita per la maggior parte dei progetti è 'Debug'.</target>
         <note />
       </trans-unit>
       <trans-unit id="ModeOptionDescription">
