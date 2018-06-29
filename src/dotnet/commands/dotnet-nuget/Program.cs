@@ -35,9 +35,14 @@ namespace Microsoft.DotNet.Tools.NuGet
             public int Run(string[] args)
             {
                 var nugetApp = new NuGetForwardingApp(args);
-
+                nugetApp.WithEnvironmentVariable("DOTNET_HOST_PATH", GetDotnetPath());
                 return nugetApp.Execute();
             }
+        }
+
+        private static string GetDotnetPath()
+        {
+            return new Muxer().MuxerPath;
         }
     }
 }

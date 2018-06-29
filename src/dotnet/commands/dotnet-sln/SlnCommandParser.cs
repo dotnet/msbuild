@@ -15,8 +15,8 @@ namespace Microsoft.DotNet.Cli
                 LocalizableStrings.AppFullName,
                 Accept.ExactlyOneArgument()
                       .DefaultToCurrentDirectory()
-                      .With(name: CommonLocalizableStrings.CmdSlnFile,
-                            description: CommonLocalizableStrings.ArgumentsSolutionDescription),
+                      .With(name: LocalizableStrings.SolutionArgumentName,
+                            description: LocalizableStrings.SolutionArgumentDescription),
                 CommonOptions.HelpOption(),
                 SlnAddParser.SlnAdd(),
                 SlnListParser.SlnList(),

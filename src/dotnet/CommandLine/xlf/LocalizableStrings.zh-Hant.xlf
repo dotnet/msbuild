@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpInfo">
-        <source>Show help information</source>
-        <target state="translated">顯示說明資訊</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">顯示說明資訊</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowVersionInfo">

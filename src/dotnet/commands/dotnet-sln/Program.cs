@@ -17,7 +17,7 @@ namespace Microsoft.DotNet.Tools.Sln
         protected override string CommandName => "sln";
         protected override string FullCommandNameLocalized => LocalizableStrings.AppFullName;
         protected override string ArgumentName => Constants.SolutionArgumentName;
-        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsSolutionDescription;
+        protected override string ArgumentDescriptionLocalized => LocalizableStrings.SolutionArgumentDescription;
 
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>

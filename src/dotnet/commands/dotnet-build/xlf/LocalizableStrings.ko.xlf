@@ -13,23 +13,38 @@
         <note />
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
-        <source>Set this flag to ignore project-to-project references and only build the root project</source>
-        <target state="translated">p2p(프로젝트 간) 참조를 무시하고 루트 프로젝트만 빌드하려면 이 플래그를 설정합니다.</target>
+        <source>Do not build project-to-project references and only build the specified project.</source>
+        <target state="needs-review-translation">p2p(프로젝트 간) 참조를 무시하고 루트 프로젝트만 빌드하려면 이 플래그를 설정합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
-        <source>Disables incremental build.</source>
-        <target state="translated">증분 빌드를 사용하지 않습니다.</target>
+        <source>Do not use incremental building.</source>
+        <target state="needs-review-translation">증분 빌드를 사용하지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to place built artifacts.</source>
-        <target state="translated">빌드된 아티팩트를 배치할 출력 디렉터리입니다.</target>
+        <source>The output directory to place built artifacts in.</source>
+        <target state="needs-review-translation">빌드된 아티팩트를 배치할 출력 디렉터리입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
         <source>OUTPUT_DIR</source>
         <target state="translated">OUTPUT_DIR</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to build for. The target framework must also be specified in the project file.</source>
+        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to build for.</source>
+        <target state="new">The target runtime to build for.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

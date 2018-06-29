@@ -15,7 +15,9 @@ namespace Microsoft.DotNet.Cli
             CreateWithRestoreOptions.Command(
                 "pack",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments(),
+                Accept.ZeroOrMoreArguments()
+                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                            description: CommonLocalizableStrings.ProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
@@ -35,7 +37,7 @@ namespace Microsoft.DotNet.Cli
                     "--include-source",
                     LocalizableStrings.CmdIncludeSourceDescription,
                     Accept.NoArguments().ForwardAs("-property:IncludeSource=true")),
-                CommonOptions.ConfigurationOption(),
+                CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "-s|--serviceable",

@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Project to Project reference Command</source>
-        <target state="translated">Příkaz rozhraní .NET pro přidání odkazu mezi projekty</target>
+        <source>Add a project-to-project reference to the project.</source>
+        <target state="needs-review-translation">Příkaz rozhraní .NET pro přidání odkazu mezi projekty</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -12,14 +12,19 @@
         <target state="translated">Příkaz pro přidání odkazu mezi projekty</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Project to project references to add</source>
-        <target state="translated">Přidávané odkazy mezi projekty</target>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="needs-review-translation">Přidat odkaz jen v případě, že cílem je konkrétní architektura</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Add reference only when targeting a specific framework</source>
-        <target state="translated">Přidat odkaz jen v případě, že cílem je konkrétní architektura</target>
+      <trans-unit id="ProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="new">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectPathArgumentDescription">
+        <source>The paths to the projects to add as references.</source>
+        <target state="new">The paths to the projects to add as references.</target>
         <note />
       </trans-unit>
     </body>

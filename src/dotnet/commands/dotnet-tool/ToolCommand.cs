@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Tool
         protected override string CommandName => "tool";
         protected override string FullCommandNameLocalized => LocalizableStrings.InstallFullCommandNameLocalized;
         protected override string ArgumentName => Constants.ProjectArgumentName;
-        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
+        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>

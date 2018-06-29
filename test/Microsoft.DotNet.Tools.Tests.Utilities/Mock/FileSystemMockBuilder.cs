@@ -39,6 +39,17 @@ namespace Microsoft.Extensions.DependencyModel.Tests
             return this;
         }
 
+        /// <summary>
+        /// Just a "home" means different path on Windows and Unix.
+        /// Create a platform dependent Temporary directory path and use it to avoid further mis interpretation in
+        /// later tests. Like "c:/home vs /home". Instead always use Path.Combine(TempraryDirectory, "home")
+        /// </summary>
+        internal FileSystemMockBuilder UseCurrentSystemTemporaryDirectory()
+        {
+            TemporaryFolder = Path.GetTempPath();
+            return this;
+        }
+
         internal IFileSystem Build()
         {
             return new FileSystemMock(_files, TemporaryFolder);

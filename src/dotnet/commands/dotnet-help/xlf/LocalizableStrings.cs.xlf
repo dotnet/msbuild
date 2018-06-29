@@ -32,14 +32,9 @@
         <target state="translated">Společné možnosti všech příkazů</target>
         <note />
       </trans-unit>
-      <trans-unit id="CommonOptions">
-        <source>Common options</source>
-        <target state="translated">Společné možnosti</target>
-        <note />
-      </trans-unit>
       <trans-unit id="HelpDefinition">
-        <source>Show help.</source>
-        <target state="translated">Zobrazí nápovědu.</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">Zobrazí nápovědu.</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -63,43 +58,43 @@
         <note />
       </trans-unit>
       <trans-unit id="NewDefinition">
-        <source>Initialize .NET projects.</source>
-        <target state="translated">Inicializuje projekty .NET.</target>
+        <source>Create a new .NET project or file.</source>
+        <target state="needs-review-translation">Inicializuje projekty .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
-        <source>Restore dependencies specified in the .NET project.</source>
-        <target state="translated">Obnoví závislosti zadané v projektu .NET.</target>
+        <source>Restore dependencies specified in a .NET project.</source>
+        <target state="needs-review-translation">Obnoví závislosti zadané v projektu .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
-        <source>Builds a .NET project.</source>
-        <target state="translated">Sestaví projekt .NET.</target>
+        <source>Build a .NET project.</source>
+        <target state="needs-review-translation">Sestaví projekt .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
-        <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="translated">Publikuje projekt .NET pro nasazení (včetně modulu runtime).</target>
+        <source>Publish a .NET project for deployment.</source>
+        <target state="needs-review-translation">Publikuje projekt .NET pro nasazení (včetně modulu runtime).</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
-        <source>Compiles and immediately executes a .NET project.</source>
-        <target state="translated">Zkompiluje a hned spustí projekt .NET.</target>
+        <source>Build and run a .NET project output.</source>
+        <target state="needs-review-translation">Zkompiluje a hned spustí projekt .NET.</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
-        <source>Runs unit tests using the test runner specified in the project.</source>
-        <target state="translated">Spustí testy jednotek v nástroji Test Runner zadaném v projektu.</target>
+        <source>Run unit tests using the test runner specified in a .NET project.</source>
+        <target state="needs-review-translation">Spustí testy jednotek v nástroji Test Runner zadaném v projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
-        <source>Creates a NuGet package.</source>
-        <target state="translated">Vytvoří balíček NuGet.</target>
+        <source>Create a NuGet package.</source>
+        <target state="needs-review-translation">Vytvoří balíček NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
-        <source>Migrates a project.json based project to a msbuild based project.</source>
-        <target state="translated">Na základě projektu migruje soubor project.json na projekt založený na nástroji MSBuild.</target>
+        <source>Migrate a project.json project to an MSBuild project.</source>
+        <target state="needs-review-translation">Na základě projektu migruje soubor project.json na projekt založený na nástroji MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -108,13 +103,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AddDefinition">
-        <source>Add reference to the project.</source>
-        <target state="translated">Přidá odkaz k projektu.</target>
+        <source>Add a package or reference to a .NET project.</source>
+        <target state="needs-review-translation">Přidá odkaz k projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
-        <source>Remove reference from the project.</source>
-        <target state="translated">Odebere odkaz z projektu.</target>
+        <source>Remove a package or reference from a .NET project.</source>
+        <target state="needs-review-translation">Odebere odkaz z projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -128,13 +123,13 @@
         <note />
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
-        <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="translated">Spustí Microsoft Build Engine (MSBuild).</target>
+        <source>Run Microsoft Build Engine (MSBuild) commands.</source>
+        <target state="needs-review-translation">Spustí Microsoft Build Engine (MSBuild).</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
-        <source>Runs Microsoft Test Execution Command Line Tool.</source>
-        <target state="translated">Spustí nástroj příkazového řádku od Microsoftu, který testuje spuštění.</target>
+        <source>Run Microsoft Test Engine (VSTest) commands.</source>
+        <target state="needs-review-translation">Spustí nástroj příkazového řádku od Microsoftu, který testuje spuštění.</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -143,23 +138,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CleanDefinition">
-        <source>Clean build output(s).</source>
-        <target state="translated">Smaže výstupy sestavení.</target>
+        <source>Clean build outputs of a .NET project.</source>
+        <target state="needs-review-translation">Smaže výstupy sestavení.</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
-        <source>Modify solution (SLN) files.</source>
-        <target state="translated">Umožňuje upravovat soubory řešení (SLN).</target>
+        <source>Modify Visual Studio solution files.</source>
+        <target state="needs-review-translation">Umožňuje upravovat soubory řešení (SLN).</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List references of a .NET project.</source>
+        <source>List project references of a .NET project.</source>
         <target state="needs-review-translation">Zobrazí seznam odkazů projektu nebo nainstalovaných nástrojů.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
-        <source>Specified command '{0}' is not a valid CLI command. Please specify a valid CLI commands. For more information, run dotnet help.</source>
-        <target state="translated">Zadaný příkaz {0} není platným příkazem rozhraní příkazového řádku. Zadejte prosím platné příkazy rozhraní příkazového řádku. Další informace získáte spuštěním příkazu dotnet help.</target>
+        <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
+        <target state="needs-review-translation">Zadaný příkaz {0} není platným příkazem rozhraní příkazového řádku. Zadejte prosím platné příkazy rozhraní příkazového řádku. Další informace získáte spuštěním příkazu dotnet help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -168,8 +163,8 @@
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
-        <source>Utility to get more detailed help about each of the CLI commands.</source>
-        <target state="translated">Nástroj k získání podrobnější nápovědy k jednotlivým příkazům rozhraní příkazového řádku.</target>
+        <source>Utility to get more detailed help about each of the SDK commands.</source>
+        <target state="needs-review-translation">Nástroj k získání podrobnější nápovědy k jednotlivým příkazům rozhraní příkazového řádku.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -178,8 +173,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
-        <source>CLI command for which to view more detailed help.</source>
-        <target state="translated">Příkaz rozhraní příkazového řádku, ke kterému chcete získat podrobnější nápovědu</target>
+        <source>The SDK command to launch online help for.</source>
+        <target state="needs-review-translation">Příkaz rozhraní příkazového řádku, ke kterému chcete získat podrobnější nápovědu</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -213,8 +208,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
-        <source>Run 'dotnet COMMAND --help' for more information on a command.</source>
-        <target state="translated">Další informace o příkazu získáte spuštěním příkazu dotnet PŘÍKAZ --help.</target>
+        <source>Run 'dotnet [command] --help' for more information on a command.</source>
+        <target state="needs-review-translation">Další informace o příkazu získáte spuštěním příkazu dotnet PŘÍKAZ --help.</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -248,13 +243,13 @@
         <note />
       </trans-unit>
       <trans-unit id="StoreDefinition">
-        <source>Stores the specified assemblies in the runtime store.</source>
-        <target state="translated">Ukládá zadaná nastavení do úložiště runtime.</target>
+        <source>Store the specified assemblies in the runtime package store.</source>
+        <target state="needs-review-translation">Ukládá zadaná nastavení do úložiště runtime.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
-        <source>Install or work with tools that extend the .NET experience.</source>
-        <target state="translated">Instaluje nástroje, které rozšiřují prostředí .NET, nebo s nimi pracuje.</target>
+        <source>Install or manage tools that extend the .NET experience.</source>
+        <target state="needs-review-translation">Instaluje nástroje, které rozšiřují prostředí .NET, nebo s nimi pracuje.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -288,8 +283,18 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
-        <source>Additional tools ('dotnet [tool-name] --help' for more information):</source>
-        <target state="new">Additional tools ('dotnet [tool-name] --help' for more information):</target>
+        <source>Additional commands from bundled tools:</source>
+        <target state="new">Additional commands from bundled tools:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKCommandUsageDescription">
+        <source>Execute a .NET Core SDK command.</source>
+        <target state="new">Execute a .NET Core SDK command.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ExecutionUsageDescription">
+        <source>Execute a .NET Core application.</source>
+        <target state="new">Execute a .NET Core application.</target>
         <note />
       </trans-unit>
     </body>

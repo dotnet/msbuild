@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>Lists installed tools in the current development environment.</source>
-        <target state="translated">Перечисляет установленные инструменты в текущей среде разработки.</target>
+        <source>List tools installed in the current development environment.</source>
+        <target state="needs-review-translation">Перечисляет установленные инструменты в текущей среде разработки.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>List user wide tools.</source>
-        <target state="translated">Перечисление пользовательских инструментов.</target>
+        <source>List tools in the current user's tools directory.</source>
+        <target state="needs-review-translation">Перечисление пользовательских инструментов.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -32,11 +32,6 @@
         <target state="translated">Предупреждение. Пакет инструментов "{0}" недопустим: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tools are installed.</source>
-        <target state="translated">Расположение для установки средств.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">
         <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
         <target state="translated">Укажите глобальный параметр (--global) или параметр пути к средству (--tool-path).</target>
@@ -50,6 +45,16 @@
       <trans-unit id="InvalidToolPathOption">
         <source>Tool path '{0}' does not exist.</source>
         <target state="translated">Путь к средству "{0}" не существует.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tools to list.</source>
+        <target state="new">The directory containing the tools to list.</target>
         <note />
       </trans-unit>
     </body>

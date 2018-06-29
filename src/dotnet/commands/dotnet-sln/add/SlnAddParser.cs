@@ -13,8 +13,8 @@ namespace Microsoft.DotNet.Cli
             Create.Command("add",
                            LocalizableStrings.AddAppFullName,
                            Accept.OneOrMoreArguments(o => CommonLocalizableStrings.SpecifyAtLeastOneProjectToAdd)
-                                 .With(name: "args",
-                                       description: LocalizableStrings.AddSubcommandHelpText),
+                                 .With(name: LocalizableStrings.AddProjectPathArgumentName,
+                                       description: LocalizableStrings.AddProjectPathArgumentDescription),
                            CommonOptions.HelpOption());
     }
 }

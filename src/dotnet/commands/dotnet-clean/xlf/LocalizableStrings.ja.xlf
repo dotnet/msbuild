@@ -18,8 +18,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed.</source>
-        <target state="translated">ビルド出力が配置されているディレクトリ。</target>
+        <source>The directory containing the build artifacts to clean.</source>
+        <target state="needs-review-translation">ビルド出力が配置されているディレクトリ。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
+        <target state="new">The target framework to clean for. The target framework must also be specified in the project file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to clean for.</source>
+        <target state="new">The target runtime to clean for.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to clean for. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

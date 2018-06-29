@@ -81,37 +81,39 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
         [Fact]
         public void GivenEnvironmentVariableItUsesItForThePidDirectory()
         {
-            const string PidDirectory = "path/to/some/directory";
-
+            IFileSystem fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
+            var pidDirectory = Path.Combine(fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath, "path/to/some/directory");
             var provider = new BuildServerProvider(
-                new FileSystemMockBuilder().Build(),
-                CreateEnvironmentProviderMock(PidDirectory).Object);
+                fileSystem,
+                CreateEnvironmentProviderMock(pidDirectory).Object);
 
             provider
                 .GetPidFileDirectory()
                 .Value
                 .Should()
-                .Be(PidDirectory);
+                .Be(pidDirectory);
         }
 
         [Fact]
         public void GivenARazorPidFileItReturnsARazorBuildServer()
         {
             const int ProcessId = 1234;
-            const string ServerPath = "/path/to/rzc.dll";
             const string PipeName = "some-pipe-name";
 
             string pidDirectory = Path.GetFullPath("var/pids/build");
             string pidFilePath = Path.Combine(pidDirectory, $"{RazorPidFile.FilePrefix}{ProcessId}");
 
-            var fileSystemMock = new FileSystemMockBuilder()
-                .AddFile(
+            var fileSystemMockBuilder = new FileSystemMockBuilder();
+            fileSystemMockBuilder.UseCurrentSystemTemporaryDirectory();
+            var serverPath = Path.Combine(fileSystemMockBuilder.TemporaryFolder, "path/to/rzc.dll");
+
+            IFileSystem fileSystemMock = fileSystemMockBuilder.AddFile(
                     pidFilePath,
-                    $"{ProcessId}{Environment.NewLine}{RazorPidFile.RazorServerType}{Environment.NewLine}{ServerPath}{Environment.NewLine}{PipeName}")
+                    $"{ProcessId}{Environment.NewLine}{RazorPidFile.RazorServerType}{Environment.NewLine}{serverPath}{Environment.NewLine}{PipeName}")
                 .AddFile(
                     Path.Combine(pidDirectory, $"{RazorPidFile.FilePrefix}not-a-pid-file"),
                     "not-a-pid-file")
-                .Build();
+                    .Build();
 
             var provider = new BuildServerProvider(
                 fileSystemMock,
@@ -127,7 +129,7 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
             razorServer.PidFile.Should().NotBeNull();
             razorServer.PidFile.Path.Value.Should().Be(pidFilePath);
             razorServer.PidFile.ProcessId.Should().Be(ProcessId);
-            razorServer.PidFile.ServerPath.Value.Should().Be(ServerPath);
+            razorServer.PidFile.ServerPath.Value.Should().Be(serverPath);
             razorServer.PidFile.PipeName.Should().Be(PipeName);
         }
 

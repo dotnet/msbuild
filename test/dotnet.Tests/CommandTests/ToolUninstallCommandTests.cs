@@ -34,14 +34,17 @@ namespace Microsoft.DotNet.Tests.Commands
 
         private const string PackageId = "global.tool.console.demo";
         private const string PackageVersion = "1.0.4";
-        private const string ShimsDirectory = "shims";
-        private const string ToolsDirectory = "tools";
+        private readonly string _shimsDirectory;
+        private readonly string _toolsDirectory;
 
         public ToolUninstallCommandTests()
         {
             _reporter = new BufferedReporter();
-            _fileSystem = new FileSystemMockBuilder().Build();
-            _environmentPathInstructionMock = new EnvironmentPathInstructionMock(_reporter, ShimsDirectory);
+            _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
+            var tempDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
+            _shimsDirectory = Path.Combine(tempDirectory, "shims");
+            _toolsDirectory = Path.Combine(tempDirectory, "tools");
+            _environmentPathInstructionMock = new EnvironmentPathInstructionMock(_reporter, _shimsDirectory);
         }
 
         [Fact]
@@ -74,10 +77,10 @@ namespace Microsoft.DotNet.Tests.Commands
                     PackageId,
                     PackageVersion));
 
-            var packageDirectory = new DirectoryPath(Path.GetFullPath(ToolsDirectory))
+            var packageDirectory = new DirectoryPath(Path.GetFullPath(_toolsDirectory))
                 .WithSubDirectories(PackageId, PackageVersion);
             var shimPath = Path.Combine(
-                ShimsDirectory,
+                _shimsDirectory,
                 ProjectRestorerMock.FakeCommandName +
                     (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
 
@@ -116,10 +119,10 @@ namespace Microsoft.DotNet.Tests.Commands
                     PackageId,
                     PackageVersion));
 
-            var packageDirectory = new DirectoryPath(Path.GetFullPath(ToolsDirectory))
+            var packageDirectory = new DirectoryPath(Path.GetFullPath(_toolsDirectory))
                 .WithSubDirectories(PackageId, PackageVersion);
             var shimPath = Path.Combine(
-                ShimsDirectory,
+                _shimsDirectory,
                 ProjectRestorerMock.FakeCommandName +
                     (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
 
@@ -192,7 +195,7 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
 
-            var store = new ToolPackageStoreMock(new DirectoryPath(ToolsDirectory), _fileSystem);
+            var store = new ToolPackageStoreMock(new DirectoryPath(_toolsDirectory), _fileSystem);
             var packageInstallerMock = new ToolPackageInstallerMock(
                 _fileSystem,
                 store,
@@ -205,7 +208,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 result,
                 (_) => (store, packageInstallerMock),
                 (_) => new ShellShimRepository(
-                    new DirectoryPath(ShimsDirectory),
+                    new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _environmentPathInstructionMock,
@@ -220,11 +223,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 result["dotnet"]["tool"]["uninstall"],
                 result,
                 (_) => new ToolPackageStoreMock(
-                    new DirectoryPath(ToolsDirectory),
+                    new DirectoryPath(_toolsDirectory),
                     _fileSystem,
                     uninstallCallback),
                 (_) => new ShellShimRepository(
-                    new DirectoryPath(ShimsDirectory),
+                    new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
                 _reporter);

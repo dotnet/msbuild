@@ -19,6 +19,7 @@ namespace Microsoft.DotNet.New.Tests
         [InlineData("C#", "console", false)]
         [InlineData("C#", "classlib", false)]
         [InlineData("C#", "mstest", false)]
+        [InlineData("C#", "nunit", false)]
         [InlineData("C#", "xunit", false)]
         [InlineData("C#", "web", false)]
         [InlineData("C#", "mvc", false)]
@@ -30,11 +31,13 @@ namespace Microsoft.DotNet.New.Tests
         // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
         //[InlineData("F#", "classlib", false)]
         [InlineData("F#", "mstest", false)]
+        [InlineData("F#", "nunit", false)]
         [InlineData("F#", "xunit", false)]
         [InlineData("F#", "mvc", false)]
         [InlineData("VB", "console", false)]
         [InlineData("VB", "classlib", false)]
         [InlineData("VB", "mstest", false)]
+        [InlineData("VB", "nunit", false)]
         [InlineData("VB", "xunit", false)]
         public void TemplateRestoresAndBuildsWithoutWarnings(
             string language,

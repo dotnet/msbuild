@@ -36,9 +36,9 @@ namespace Microsoft.DotNet.Tools.Sln.List
             }
             else
             {
-                Reporter.Output.WriteLine($"{CommonLocalizableStrings.ProjectReferenceOneOrMore}");
-                Reporter.Output.WriteLine(new string('-', CommonLocalizableStrings.ProjectReferenceOneOrMore.Length));
-                foreach (var slnProject in slnFile.Projects)
+                Reporter.Output.WriteLine($"{LocalizableStrings.ProjectsHeader}");
+                Reporter.Output.WriteLine(new string('-', LocalizableStrings.ProjectsHeader.Length));
+                foreach (var slnProject in slnFile.Projects.Where(p => p.TypeGuid != ProjectTypeGuids.SolutionFolderGuid))
                 {
                     Reporter.Output.WriteLine(slnProject.FilePath);
                 }

@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which to place built packages.</source>
-        <target state="translated">Directory in cui inserire i pacchetti compilati.</target>
+        <source>The output directory to place built packages in.</source>
+        <target state="needs-review-translation">Directory in cui inserire i pacchetti compilati.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -33,13 +33,13 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
-        <source>Include PDBs and source files. Source files go into the src folder in the resulting nuget package</source>
-        <target state="translated">Include i PDB e i file di origine. I file di origine vengono inseriti nella cartella src nel pacchetto NuGet risultante</target>
+        <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
+        <target state="needs-review-translation">Include i PDB e i file di origine. I file di origine vengono inseriti nella cartella src nel pacchetto NuGet risultante</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
-        <source>Set the serviceable flag in the package. For more information, please see https://aka.ms/nupkgservicing.</source>
-        <target state="translated">Imposta il flag serviceable nel pacchetto. Per altre informazioni,vedere https://aka.ms/nupkgservicing.</target>
+        <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
+        <target state="needs-review-translation">Imposta il flag serviceable nel pacchetto. Per altre informazioni,vedere https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -50,6 +50,11 @@
       <trans-unit id="CmdArgumentDescription">
         <source>The project to pack, defaults to the project file in the current directory. Can be a path to any project file</source>
         <target state="translated">Progetto di cui creare il pacchetto. Per impostazione predefinita, verrà usato il file di progetto nella directory corrente. Può essere un percorso di qualsiasi file di progetto</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
+        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
         <note />
       </trans-unit>
     </body>

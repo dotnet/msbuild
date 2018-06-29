@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
-        <source>PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</source>
-        <target state="translated">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <source>PATH</source>
+        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -33,13 +33,15 @@ Defaults to current directory if nothing is specified.</source>
         <note />
       </trans-unit>
       <trans-unit id="CmdTemplateDescription">
-        <source>Base MSBuild template to use for migrated app. The default is the project included in dotnet new.</source>
-        <target state="translated">针对迁移的应用使用的基本 MSBuild 模板。默认值为 dotnet new 中包含的项目。</target>
+        <source>The base MSBuild template to use for the migrated project.
+The default is the project included in dotnet new.</source>
+        <target state="needs-review-translation">针对迁移的应用使用的基本 MSBuild 模板。默认值为 dotnet new 中包含的项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>The version of the SDK package that will be referenced in the migrated app. The default is the version of the SDK in dotnet new.</source>
-        <target state="translated">要在迁移的应用中引用的 SDK 包版本。默认值为 dotnet new 中的 SDK 版本。</target>
+        <source>The version of the SDK package that will be referenced in the migrated project.
+The default is the version of the SDK in dotnet new.</source>
+        <target state="needs-review-translation">要在迁移的应用中引用的 SDK 包版本。默认值为 dotnet new 中的 SDK 版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

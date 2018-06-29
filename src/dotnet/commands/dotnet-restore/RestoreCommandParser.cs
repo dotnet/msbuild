@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Tools;
 using LocalizableStrings = Microsoft.DotNet.Tools.Restore.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
@@ -14,14 +15,23 @@ namespace Microsoft.DotNet.Cli
             Create.Command(
                 "restore",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrMoreArguments(),
+                Accept.ZeroOrMoreArguments()
+                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                            description: CommonLocalizableStrings.ProjectArgumentDescription),
                 FullRestoreOptions());
 
         private static Option[] FullRestoreOptions()
         {
             var fullRestoreOptions = AddImplicitRestoreOptions(new Option[] { CommonOptions.HelpOption() }, true, true);
 
-            return fullRestoreOptions.Concat(new Option[] { CommonOptions.VerbosityOption() }).ToArray();
+            return fullRestoreOptions.Concat(
+                new Option[] {
+                    CommonOptions.VerbosityOption(),
+                    Create.Option(
+                        "--interactive",
+                        LocalizableStrings.CmdInteractiveRestoreOptionDescription,
+                        Accept.NoArguments()
+                              .ForwardAs("-property:NuGetInteractive=true")) }).ToArray();
         }
 
         public static Option[] AddImplicitRestoreOptions(

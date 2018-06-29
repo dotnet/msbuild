@@ -609,64 +609,29 @@
         <target state="translated">Ungültige Projektmappe "{0}". {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="ArgumentsProjectDescription">
-        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="translated">Die zu verwendende Projektdatei. Wenn keine Datei angegeben ist, sucht der Befehl im aktuellen Verzeichnis nach einer Datei.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ArgumentsSolutionDescription">
-        <source>Solution file to operate on. If not specified, the command will search the current directory for one.</source>
-        <target state="translated">Die zu verwendende Projektmappendatei. Wenn keine Projektmappendatei angegeben ist, sucht der Befehl im aktuellen Verzeichnis nach einer Datei.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdSlnFile">
-        <source>SLN_FILE</source>
-        <target state="translated">&lt;SLN_FILE&gt;</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdProjectFile">
-        <source>PROJECT</source>
-        <target state="translated">PROJECT</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidProjectWithExceptionMessage">
         <source>Invalid project `{0}`. {1}.</source>
         <target state="translated">Ungültiges Projekt "{0}". {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
-        <source>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="translated">Legen Sie den Ausführlichkeitsgrad des Befehls fest. Zulässige Werte sind "q[uiet]" (keine Ausgabe), "m[inimal]", "n[ormal]", "d[etailed]" (ausführlich) und "diag[nostic]" (Diagnose).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Zielframework für die Veröffentlichung. Das Zielframework muss in der Projektdatei angegeben werden.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RuntimeOptionDescription">
-        <source>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</source>
-        <target state="translated">Veröffentlichen Sie das Projekt für eine angegebene Runtime. Wird zum Erstellen einer eigenständigen Bereitstellung verwendet. Standardmäßig wird eine frameworkabhängige App veröffentlicht.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ConfigurationOptionDescription">
-        <source>Configuration to use for building the project.  Default for most projects is  "Debug".</source>
-        <target state="translated">Konfiguration für die Erstellung des Projekts.  Standard für die meisten Projekte ist "Debug".</target>
+        <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
+        <target state="needs-review-translation">Legen Sie den Ausführlichkeitsgrad des Befehls fest. Zulässige Werte sind "q[uiet]" (keine Ausgabe), "m[inimal]", "n[ormal]", "d[etailed]" (ausführlich) und "diag[nostic]" (Diagnose).</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
-        <source>Defines the value for the $(VersionSuffix) property in the project.</source>
-        <target state="translated">Definiert den Wert für die Eigenschaft "$(VersionSuffix)" im Projekt.</target>
+        <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
+        <target state="needs-review-translation">Definiert den Wert für die Eigenschaft "$(VersionSuffix)" im Projekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
-        <source>Show help information.</source>
-        <target state="translated">Hilfeinformationen anzeigen.</target>
+        <source>Show command line help.</source>
+        <target state="needs-review-translation">Hilfeinformationen anzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
-        <source>Does not do an implicit restore when executing the command.</source>
-        <target state="translated">Führt beim Ausführen des Befehls keine implizite Wiederherstellung durch.</target>
+        <source>Do not restore the project before building.</source>
+        <target state="needs-review-translation">Führt beim Ausführen des Befehls keine implizite Wiederherstellung durch.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -891,6 +856,41 @@ setx PATH "%PATH%;{0}"
       <trans-unit id="FailedToReadNuGetLockFile">
         <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
         <target state="translated">Fehler beim Lesen von NuGet-LockFile für Toolpaket "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentName">
+        <source>PROJECT</source>
+        <target state="new">PROJECT</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectArgumentDescription">
+        <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LevelArgumentName">
+        <source>LEVEL</source>
+        <target state="new">LEVEL</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkArgumentName">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeIdentifierArgumentName">
+        <source>RUNTIME_IDENTIFIER</source>
+        <target state="new">RUNTIME_IDENTIFIER</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationArgumentName">
+        <source>CONFIGURATION</source>
+        <target state="new">CONFIGURATION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionSuffixArgumentName">
+        <source>VERSION_SUFFIX</source>
+        <target state="new">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

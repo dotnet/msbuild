@@ -12,6 +12,16 @@ namespace Microsoft.DotNet.Cli
     {
         public static int Run(string[] args)
         {
+            return RunWithReporter(args, Reporter.Output);
+        }
+
+        public static int RunWithReporter(string [] args, IReporter reporter)
+        {
+            if (reporter == null)
+            {
+                throw new ArgumentNullException(nameof(reporter));
+            }
+
             try
             {
                 DebugHelper.HandleDebugSwitch(ref args);
@@ -28,7 +38,7 @@ namespace Microsoft.DotNet.Cli
 
                 foreach (var suggestion in suggestions)
                 {
-                    Console.WriteLine(suggestion);
+                    reporter.WriteLine(suggestion);
                 }
             }
             catch (Exception)

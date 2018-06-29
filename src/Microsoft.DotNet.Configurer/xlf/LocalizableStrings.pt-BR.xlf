@@ -71,6 +71,11 @@ Para confiar no certificado (apenas Windows e macOS), primeiramente instale a fe
 Para saber mais sobre a configuração de HTTPS, acesse https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

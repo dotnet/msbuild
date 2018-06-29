@@ -10,13 +10,13 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to install.</source>
-        <target state="translated">Идентификатор пакета NuGet устанавливаемого инструмента.</target>
+        <source>The NuGet Package Id of the tool to install.</source>
+        <target state="needs-review-translation">Идентификатор пакета NuGet устанавливаемого инструмента.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Installs a tool for use on the command line.</source>
-        <target state="translated">Устанавливает инструмент для использования в командной строке.</target>
+        <source>Install a tool for use on the command line.</source>
+        <target state="needs-review-translation">Устанавливает инструмент для использования в командной строке.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -30,8 +30,8 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
-        <source>Version of the tool package in NuGet.</source>
-        <target state="translated">Версия пакета инструмента в NuGet.</target>
+        <source>The version of the tool package to install.</source>
+        <target state="needs-review-translation">Версия пакета инструмента в NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -45,8 +45,8 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Install user wide.</source>
-        <target state="translated">Установка на уровне пользователя.</target>
+        <source>Install the tool to the current user's tools directory.</source>
+        <target state="needs-review-translation">Установка на уровне пользователя.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -99,11 +99,6 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="translated">Расположение для установки средства.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
         <target state="translated">Не удалось установить инструмент "{0}".</target>
@@ -125,13 +120,38 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
-        <source>Adds an additional NuGet package source to use during installation.</source>
-        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <source>Add an additional NuGet package source to use during installation.</source>
+        <target state="new">Add an additional NuGet package source to use during installation.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
         <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionName">
+        <source>VERSION</source>
+        <target state="new">VERSION</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="new">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="new">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
+        <target state="new">The directory where the tool will be installed. The directory will be created if it does not exist.</target>
         <note />
       </trans-unit>
     </body>
