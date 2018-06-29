@@ -82,6 +82,11 @@
         <target state="translated">Non è possibile generare un file temporaneo per il progetto '{0}'. Non è possibile aggiungere il riferimento al pacchetto. Cancellare la directory temp e riprovare.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

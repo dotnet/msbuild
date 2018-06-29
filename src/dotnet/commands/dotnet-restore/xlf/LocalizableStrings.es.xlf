@@ -88,6 +88,11 @@ This is equivalent to deleting project.assets.json.</source>
         <target state="needs-review-translation">Establezca este indicador para forzar la resolución de todas las dependencias aunque la última restauración se haya realizado correctamente. Esta acción es equivalente a eliminar project.assets.json.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
