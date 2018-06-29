@@ -73,7 +73,7 @@ phases:
       filename: 'build/cibuild.cmd'
       arguments: '-hostType Core'
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Full Framework'
       testRunner: XUnit
@@ -82,7 +82,7 @@ phases:
       mergeTestResults: true
     condition: always()
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Core 2.0 Test Results
     inputs:
       testRunTitle: '.NET Core 2.0'
       testRunner: XUnit
@@ -91,7 +91,7 @@ phases:
       mergeTestResults: true
     condition: always()
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Core 2.1 Test Results
     inputs:
       testRunTitle: '.NET Core 2.1'
       testRunner: XUnit
@@ -115,7 +115,7 @@ phases:
     inputs:
       filename: 'build/cibuild.cmd'
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Full Framework'
       testRunner: XUnit
@@ -124,7 +124,7 @@ phases:
       mergeTestResults: true
     condition: always()
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Core 2.0 Test Results
     inputs:
       testRunTitle: '.NET Core 2.0'
       testRunner: XUnit
@@ -133,7 +133,7 @@ phases:
       mergeTestResults: true
     condition: always()
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Core 2.1 Test Results
     inputs:
       testRunTitle: '.NET Core 2.1'
       testRunner: XUnit
