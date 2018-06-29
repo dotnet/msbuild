@@ -2,6 +2,8 @@
 
 echo "PATH is $PATH"
 
+which mono
+
 if [ "$1" ==  "-fromScript" ]; then
   otherScript=$2
   shift 2
@@ -359,6 +361,8 @@ function Build {
     ExitIfError $? "Failed to clear NuGet cache"
   fi
 
+  echo "Checking hostttype: $hostType"
+
   if [ "$hostType" = "core" ]
   then
     msbuildHost=$(QQ $DOTNET_HOST_PATH)
@@ -518,6 +522,8 @@ then
 fi
 
 NuGetPackageRoot=$NUGET_PACKAGES
+
+echo "STARTING BUILD"
 
 Build
 
