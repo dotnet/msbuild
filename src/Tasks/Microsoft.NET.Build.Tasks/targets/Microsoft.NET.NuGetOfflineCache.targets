@@ -21,7 +21,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(DisableImplicitNuGetFallbackFolder)' != 'true' and Exists($(_NugetFallbackFolder)) ">
-    <RestoreAdditionalProjectSources Condition=" '$(_IsNETCore1x)' == 'true' ">$(RestoreAdditionalProjectSources);$(_NugetFallbackFolder)</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSources Condition=" '$(_IsNETCore1x)' == 'true' and '$(DisableImplicit1xNuGetFallbackFolder)' != 'true' ">$(RestoreAdditionalProjectSources);$(_NugetFallbackFolder)</RestoreAdditionalProjectSources>
     <RestoreAdditionalProjectFallbackFoldersExcludes Condition=" '$(_IsNETCore1x)' == 'true' ">$(RestoreAdditionalProjectFallbackFoldersExcludes);$(_NugetFallbackFolder)</RestoreAdditionalProjectFallbackFoldersExcludes>
 
     <RestoreAdditionalProjectFallbackFolders Condition=" '$(_IsNETCore1x)' != 'true' ">$(RestoreAdditionalProjectFallbackFolders);$(_NugetFallbackFolder)</RestoreAdditionalProjectFallbackFolders>
