@@ -55,8 +55,29 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
+      testRunTitle: 'Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunTitle: '.NET Core 2.0'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunTitle: '.NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
     condition: always()
 
 - phase: WindowsOnFull
@@ -76,6 +97,27 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish Test Results
     inputs:
+      testRunTitle: 'Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunTitle: '.NET Core 2.0'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunTitle: '.NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
     condition: always()
