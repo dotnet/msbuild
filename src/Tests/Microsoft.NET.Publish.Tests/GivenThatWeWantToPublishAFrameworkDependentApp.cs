@@ -69,7 +69,7 @@ namespace Microsoft.NET.Publish.Tests
                 $"{TestProjectName}.runtimeconfig.json",
             };
 
-            if (useAppHost != "false")
+            if (useAppHost == "true")
             {
                 expectedFiles.Add(appHostName);
             }
@@ -78,7 +78,7 @@ namespace Microsoft.NET.Publish.Tests
             publishDirectory.Should().OnlyHaveFiles(expectedFiles);
 
             // Run the apphost if one was generated
-            if (useAppHost != "false")
+            if (useAppHost == "true")
             {
                 Command.Create(Path.Combine(publishDirectory.FullName, appHostName), Enumerable.Empty<string>())
                     .EnvironmentVariable(
