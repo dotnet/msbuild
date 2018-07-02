@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
-        public void ContextCachesGlopExpansions(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        public void ContextCachesItemElementGlobExpansions(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
             var projectDirectory = _env.DefaultTestDirectory.FolderPath;
 
@@ -237,6 +237,46 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
+
+                    ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
+                }
+                );
+        }
+
+        private static string[] _projectsWithGlobImports =
+        {
+            @"<Project>
+                <Import Project=`*.props` />
+            </Project>",
+
+            @"<Project>
+                <Import Project=`*.props` />
+            </Project>",
+        };
+
+        [Theory]
+        [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
+        public void ContextCachesImportGlobExpansions(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var projectDirectory = _env.DefaultTestDirectory.FolderPath;
+
+            _env.SetCurrentDirectory(projectDirectory);
+
+            var context = EvaluationContext.Create(policy);
+
+            var evaluationCount = 0;
+
+            File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.props"), $"<Project><ItemGroup><i Include=`{evaluationCount}.cs`/></ItemGroup></Project>".Cleanup());
+
+            EvaluateProjects(
+                _projectsWithGlobImports,
+                context,
+                project =>
+                {
+                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount];
+                    evaluationCount++;
+
+                    File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.props"), $"<Project><ItemGroup><i Include=`{evaluationCount}.cs`/></ItemGroup></Project>".Cleanup());
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
                 }
