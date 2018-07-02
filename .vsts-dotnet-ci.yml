@@ -19,11 +19,24 @@ phases:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Core 2.0 Test Results
     inputs:
+      testRunTitle: 'Linux .NET Core 2.0'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
     condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'Linux .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+
 
 - phase: CoreOnMac
   queue: 'Hosted macOS Preview'
@@ -31,11 +44,24 @@ phases:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
-    displayName: Publish Test Results
+    displayName: Publish .NET Core 2.0 Test Results
     inputs:
+      testRunTitle: 'macOS .NET Core 2.0'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
     condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'macOS .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+
 
 - phase: MonoOnMac
   queue: 'Hosted macOS Preview'
@@ -79,7 +105,7 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
-      testRunTitle: 'Full Framework'
+      testRunTitle: 'Windows-on-core Full Framework'
       testRunner: XUnit
       testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
       publishRunAttachments: true
@@ -88,7 +114,7 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.0 Test Results
     inputs:
-      testRunTitle: '.NET Core 2.0'
+      testRunTitle: 'Windows-on-core .NET Core 2.0'
       testRunner: XUnit
       testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
       publishRunAttachments: true
@@ -97,7 +123,7 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
-      testRunTitle: '.NET Core 2.1'
+      testRunTitle: 'Windows-on-core .NET Core 2.1'
       testRunner: XUnit
       testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
@@ -121,7 +147,7 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
-      testRunTitle: 'Full Framework'
+      testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
       testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
       publishRunAttachments: true
@@ -130,7 +156,7 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.0 Test Results
     inputs:
-      testRunTitle: '.NET Core 2.0'
+      testRunTitle: 'Windows-on-full .NET Core 2.0'
       testRunner: XUnit
       testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
       publishRunAttachments: true
@@ -139,7 +165,7 @@ phases:
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
     inputs:
-      testRunTitle: '.NET Core 2.1'
+      testRunTitle: 'Windows-on-full .NET Core 2.1'
       testRunner: XUnit
       testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
       publishRunAttachments: true
