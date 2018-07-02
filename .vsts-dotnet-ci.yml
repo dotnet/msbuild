@@ -63,29 +63,29 @@ phases:
     condition: always()
 
 
-- phase: MonoOnMac
-  queue: 'Hosted macOS Preview'
-  steps:
-  - script: |
-     set -v
-     echo "YO I am alive!"
-     SYMLINK=5_10_1
-     MONOPREFIX=/Library/Frameworks/Mono.framework/Versions/$SYMLINK
-     echo "##vso[task.setvariable variable=DYLD_FALLBACK_LIBRARY_PATH;]$MONOPREFIX/lib:/lib:/usr/lib:$DYLD_LIBRARY_FALLBACK_PATH"
-     echo "##vso[task.setvariable variable=PKG_CONFIG_PATH;]$MONOPREFIX/lib/pkgconfig:$MONOPREFIX/share/pkgconfig:$PKG_CONFIG_PATH"
-     echo "Path before $PATH"
-     echo "Prepending $MONOPREFIX/bin:"
-     echo "##vso[task.setvariable variable=PATH;]$MONOPREFIX/bin:$PATH"
-     echo "Path after  $PATH"
-    displayName: Select Mono version
-  - bash: . 'build.sh' -hostType mono
-    displayName: CI Build
-  - task: PublishTestResults@2
-    displayName: Publish Test Results
-    inputs:
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
-    condition: always()
+#- phase: MonoOnMac
+#  queue: 'Hosted macOS Preview'
+#  steps:
+#  - script: |
+#     set -v
+#     echo "YO I am alive!"
+#     SYMLINK=5_10_1
+#     MONOPREFIX=/Library/Frameworks/Mono.framework/Versions/$SYMLINK
+#     echo "##vso[task.setvariable variable=DYLD_FALLBACK_LIBRARY_PATH;]$MONOPREFIX/lib:/lib:/usr/lib:$DYLD_LIBRARY_FALLBACK_PATH"
+#     echo "##vso[task.setvariable variable=PKG_CONFIG_PATH;]$MONOPREFIX/lib/pkgconfig:$MONOPREFIX/share/pkgconfig:$PKG_CONFIG_PATH"
+#     echo "Path before $PATH"
+#     echo "Prepending $MONOPREFIX/bin:"
+#     echo "##vso[task.setvariable variable=PATH;]$MONOPREFIX/bin:$PATH"
+#     echo "Path after  $PATH"
+#    displayName: Select Mono version
+#  - bash: . 'build.sh' -hostType mono
+#    displayName: CI Build
+#  - task: PublishTestResults@2
+#    displayName: Publish Test Results
+#    inputs:
+#      testRunner: XUnit
+#      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+#    condition: always()
 
 - phase: CoreOnWindows
   queue: 'Hosted VS2017'
