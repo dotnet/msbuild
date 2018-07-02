@@ -1787,7 +1787,7 @@ namespace Microsoft.Build.Shared
 
             var sb = new StringBuilder();
 
-            if (filespecUnescaped.Contains("..", StringComparison.Ordinal))
+            if (filespecUnescaped.Contains(".."))
             {
                 filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
             }
