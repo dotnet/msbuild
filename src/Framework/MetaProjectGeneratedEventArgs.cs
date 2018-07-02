@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Microsoft.Build.Framework
+﻿namespace Microsoft.Build.Framework
 {
     public class MetaProjectGeneratedEventArgs : BuildMessageEventArgs
     {
+        public string metaProjectPath;
+
+        public MetaProjectGeneratedEventArgs(string metaProjectPath)
+        {
+            this.metaProjectPath = metaProjectPath;
+        }
     }
 }

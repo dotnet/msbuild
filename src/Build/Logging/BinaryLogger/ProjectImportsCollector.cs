@@ -47,25 +47,28 @@ namespace Microsoft.Build.Logging
 
         public void AddFile(string filePath)
         {
-            if (filePath == null || _fileStream == null)
-            {
-                return;
-            }
+            AddFile(filePath, filePath);
+        }
 
-            lock (_fileStream)
+        public void AddFile(string filePath, string archivePath)
+        {
+            if (filePath != null && archivePath != null && _fileStream != null)
             {
-                // enqueue the task to add a file and return quickly
-                // to avoid holding up the current thread
-                _currentTask = _currentTask.ContinueWith(t =>
+                lock (_fileStream)
                 {
-                    try
+                    // enqueue the task to add a file and return quickly
+                    // to avoid holding up the current thread
+                    _currentTask = _currentTask.ContinueWith(t =>
                     {
-                        AddFileCore(filePath);
-                    }
-                    catch
-                    {
-                    }
-                }, TaskScheduler.Default);
+                        try
+                        {
+                            AddFileCore(filePath, archivePath);
+                        }
+                        catch
+                        {
+                        }
+                    }, TaskScheduler.Default);
+                }
             }
         }
 
@@ -73,7 +76,7 @@ namespace Microsoft.Build.Logging
         /// This method doesn't need locking/synchronization because it's only called
         /// from a task that is chained linearly
         /// </remarks>
-        private void AddFileCore(string filePath)
+        private void AddFileCore(string filePath, string archivePath)
         {
             // quick check to avoid repeated disk access for Exists etc.
             if (_processedFiles.Contains(filePath))
@@ -96,9 +99,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            string archivePath = CalculateArchivePath(filePath);
-
-            ZipArchiveEntry archiveEntry = _zipArchive.CreateEntry(archivePath);
+            ZipArchiveEntry archiveEntry = _zipArchive.CreateEntry(CalculateArchivePath(archivePath));
             archiveEntry.LastWriteTime = fileInfo.LastWriteTime;
 
             using (Stream entryStream = archiveEntry.Open())

@@ -740,13 +740,9 @@ namespace Microsoft.Build.Construction
 
             // Special environment variable to allow people to see the in-memory MSBuild project generated
             // to represent the SLN.
-            if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
+            foreach (ProjectInstance instance in projectInstances)
             {
-                foreach (ProjectInstance instance in projectInstances)
-                {
-                    instance.ToProjectRootElement().Save(instance.FullPath);
-                    LogMetaProjectGeneratedEvent(instance.FullPath);
-                }
+                EmitMetaProject(instance.ToProjectRootElement(), instance.FullPath);
             }
 
             return projectInstances.ToArray();
@@ -883,14 +879,10 @@ namespace Microsoft.Build.Construction
 
             // For debugging purposes: some information is lost when evaluating into a project instance,
             // so make it possible to see what we have at this point.
-            if (Environment.GetEnvironmentVariable("MSBUILDEMITSOLUTION") != null)
-            {
-                string path = traversalProject.FullPath;
-                string metaProjectPath = _solutionFile.FullPath + ".metaproj.tmp";
-                traversalProject.Save(metaProjectPath);
-                LogMetaProjectGeneratedEvent(metaProjectPath);
-                traversalProject.FullPath = path;
-            }
+            string path = traversalProject.FullPath;
+            string metaProjectPath = _solutionFile.FullPath + ".metaproj.tmp";
+            EmitMetaProject(traversalProject, metaProjectPath);
+            traversalProject.FullPath = path;
 
             // Create the instance.  From this point forward we can evaluate conditions against the traversal project directly.
             var traversalInstance = new ProjectInstance
@@ -915,12 +907,14 @@ namespace Microsoft.Build.Construction
             return traversalInstance;
         }
 
-        private void LogMetaProjectGeneratedEvent(string fullPath)
+        private void EmitMetaProject(ProjectRootElement metaProject, string metaProjectPath)
         {
-            var eventArgs = new MetaProjectGeneratedEventArgs()
+            string filePath = Environment.GetEnvironmentVariable("MSBuildEmitSolution") == null ? Path.GetTempFileName() : metaProjectPath;
+            metaProject.Save(filePath);
+            var eventArgs = new MetaProjectGeneratedEventArgs(metaProjectPath)
             {
                 BuildEventContext = _projectBuildEventContext,
-                ProjectFile = fullPath,
+                ProjectFile = filePath,
             };
             _loggingService.LogBuildEvent(eventArgs);
         }
