@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
 using Microsoft.Build.BackEnd.SdkResolution;
@@ -11,6 +12,7 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
@@ -169,6 +171,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 EvaluationContext.TestOnlyHookOnCreate = null;
             }
         }
+
         public static IEnumerable<object> ContextPinsGlobExpansionCacheData
         {
             get
@@ -220,8 +223,6 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             var projectDirectory = _env.DefaultTestDirectory.FolderPath;
 
-            _env.SetCurrentDirectory(projectDirectory);
-
             var context = EvaluationContext.Create(policy);
 
             var evaluationCount = 0;
@@ -237,6 +238,93 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
+
+                    ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
+                }
+                );
+        }
+
+        private static string[] _projectsWithOutOfConeGlobs =
+        {
+            @"<Project>
+                <ItemGroup>
+                    <i Include=`{0}**/*.cs` />
+                </ItemGroup>
+            </Project>",
+
+            @"<Project>
+                <ItemGroup>
+                    <i Include=`{0}**/*.cs` />
+                </ItemGroup>
+            </Project>",
+        };
+
+        public static IEnumerable<object> ContextCachesCommonOutOfProjectConeGlobData
+        {
+            get
+            {
+                // combine the globbing test data with another bool for relative / absolute itemspecs
+                foreach (var itemSpecPathIsRelative in new []{true, false})
+                {
+                    foreach (var globData in ContextPinsGlobExpansionCacheData)
+                    {
+                        object[] globDataArray = (object[]) globData;
+
+                        yield return new[]
+                        {
+                            itemSpecPathIsRelative,
+                            globDataArray[0],
+                            globDataArray[1],
+                        };
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ContextCachesCommonOutOfProjectConeGlobData))]
+        // projects should cache glob expansions when the glob is shared between projects and points outside of project cone
+        public void ContextCachesCommonOutOfProjectConeGlob(bool itemSpecPathIsRelative, EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var testDirectory = _env.DefaultTestDirectory.FolderPath;
+            var globDirectory = Path.Combine(testDirectory, "GlobDirectory");
+
+            var itemSpecDirectoryPart = itemSpecPathIsRelative
+                ? Path.Combine("..", "GlobDirectory")
+                : globDirectory;
+
+            itemSpecDirectoryPart = itemSpecDirectoryPart.WithTrailingSlash();
+
+            Directory.CreateDirectory(globDirectory);
+
+            // Globs with a directory part will produce items prepended with that directory part
+            foreach (var globExpansion in expectedGlobExpansions)
+            {
+                for (var i = 0; i < globExpansion.Length; i++)
+                {
+                    globExpansion[i] = Path.Combine(itemSpecDirectoryPart, globExpansion[i]);
+                }
+            }
+
+            var projectSpecs = _projectsWithOutOfConeGlobs
+                .Select(p => string.Format(p, itemSpecDirectoryPart))
+                .Select((p ,i) => (Path.Combine(testDirectory, $"ProjectDirectory{i}", $"Project{i}.proj"), p));
+
+            var context = EvaluationContext.Create(policy);
+
+            var evaluationCount = 0;
+
+            File.WriteAllText(Path.Combine(globDirectory, $"{evaluationCount}.cs"), "");
+
+            EvaluateProjects(
+                projectSpecs,
+                context,
+                project =>
+                {
+                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount];
+                    evaluationCount++;
+
+                    File.WriteAllText(Path.Combine(globDirectory, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
                 }
@@ -259,8 +347,6 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ContextCachesImportGlobExpansions(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
             var projectDirectory = _env.DefaultTestDirectory.FolderPath;
-
-            _env.SetCurrentDirectory(projectDirectory);
 
             var context = EvaluationContext.Create(policy);
 
@@ -305,8 +391,6 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             var projectDirectory = _env.DefaultTestDirectory.FolderPath;
 
-            _env.SetCurrentDirectory(projectDirectory);
-
             var context = EvaluationContext.Create(policy);
 
             var theFile = Path.Combine(projectDirectory, "0.cs");
@@ -346,19 +430,30 @@ namespace Microsoft.Build.UnitTests.Definition
                 );
         }
 
+        private void EvaluateProjects(IEnumerable<string> projectContents, EvaluationContext context, Action<Project> afterEvaluationAction)
+        {
+            EvaluateProjects(
+                projectContents.Select((p, i) => (Path.Combine(_env.DefaultTestDirectory.FolderPath, $"Project{i}.proj"), p)),
+                context,
+                afterEvaluationAction);
+        }
+
         /// <summary>
         /// Should be at least two test projects to test cache visibility between projects
         /// </summary>
-        private void EvaluateProjects(string[] projectContents, EvaluationContext context, Action<Project> afterEvaluationAction)
+        private void EvaluateProjects(IEnumerable<(string ProjectPath, string ProjectContents)> projectSpecs, EvaluationContext context, Action<Project> afterEvaluationAction)
         {
             var collection = _env.CreateProjectCollection().Collection;
 
-            var projects = new List<Project>(projectContents.Length);
+            var projects = new List<Project>();
 
-            foreach (var projectContent in projectContents)
+            foreach (var spec in projectSpecs)
             {
-                var project = Project.FromXmlReader(
-                    XmlReader.Create(new StringReader(projectContent.Cleanup())),
+                Directory.CreateDirectory(Path.GetDirectoryName(spec.ProjectPath));
+                File.WriteAllText(spec.ProjectPath, spec.ProjectContents.Cleanup());
+
+                var project = Project.FromFile(
+                    spec.ProjectPath,
                     new ProjectOptions
                     {
                         ProjectCollection = collection,

@@ -1782,9 +1782,27 @@ namespace Microsoft.Build.Shared
 
         private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, IEnumerable<string> excludes)
         {
+            Debug.Assert(projectDirectoryUnescaped != null);
+            Debug.Assert(filespecUnescaped != null);
+
             var sb = new StringBuilder();
 
-            sb.Append(projectDirectoryUnescaped);
+            if (filespecUnescaped.Contains("..", StringComparison.Ordinal))
+            {
+                filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+            }
+
+            var filespecIsAnAbsoluteGlobPointingOutsideOfProjectCone =
+                Path.IsPathRooted(filespecUnescaped) &&
+                !filespecUnescaped.StartsWith(projectDirectoryUnescaped, StringComparison.OrdinalIgnoreCase);
+
+            // If we include the project directory when the filespec does not depend on it we'll get cache misses
+            // when the project directory independent glob repeats for each project.
+            if (!filespecIsAnAbsoluteGlobPointingOutsideOfProjectCone)
+            {
+                sb.Append(projectDirectoryUnescaped);
+            }
+
             sb.Append(filespecUnescaped);
 
             if (excludes != null)
