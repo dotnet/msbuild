@@ -83,8 +83,10 @@ namespace Microsoft.NET.Build.Tasks
                     new SingleProjectInfo(sourceProjectFile, name, version, outputName, dependencyReferences: null, resourceAssemblies: null));
             }
 
+            //  Include direct references of referenced projects, but only if they are CopyLocal
             IEnumerable<ITaskItem> projectReferenceDependencyPaths = referenceDependencyPaths
-                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase));
+                .Where(r => string.Equals(r.GetMetadata(MetadataKeys.ReferenceSourceTarget), "ProjectReference", StringComparison.OrdinalIgnoreCase) &&
+                            MSBuildUtilities.ConvertStringToBool(r.GetMetadata(MetadataKeys.CopyLocal)));
 
             foreach (ITaskItem projectReferenceDependencyPath in projectReferenceDependencyPaths)
             {
