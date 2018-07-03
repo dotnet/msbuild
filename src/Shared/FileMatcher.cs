@@ -1796,8 +1796,8 @@ namespace Microsoft.Build.Shared
                 Path.IsPathRooted(filespecUnescaped) &&
                 !filespecUnescaped.StartsWith(projectDirectoryUnescaped, StringComparison.OrdinalIgnoreCase);
 
-            // If we include the project directory when the filespec does not depend on it we'll get cache misses
-            // when the project directory independent glob repeats for each project.
+            // Don't include the project directory when the glob is independent of it.
+            // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
             if (!filespecIsAnAbsoluteGlobPointingOutsideOfProjectCone)
             {
                 sb.Append(projectDirectoryUnescaped);

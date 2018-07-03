@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 {
                     foreach (var globData in ContextPinsGlobExpansionCacheData)
                     {
-                        object[] globDataArray = (object[]) globData;
+                        var globDataArray = (object[]) globData;
 
                         yield return new[]
                         {
@@ -308,7 +308,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             var projectSpecs = _projectsWithOutOfConeGlobs
                 .Select(p => string.Format(p, itemSpecDirectoryPart))
-                .Select((p ,i) => (Path.Combine(testDirectory, $"ProjectDirectory{i}", $"Project{i}.proj"), p));
+                .Select((p, i) => new ProjectSpecification(Path.Combine(testDirectory, $"ProjectDirectory{i}", $"Project{i}.proj"), p));
 
             var context = EvaluationContext.Create(policy);
 
@@ -433,27 +433,45 @@ namespace Microsoft.Build.UnitTests.Definition
         private void EvaluateProjects(IEnumerable<string> projectContents, EvaluationContext context, Action<Project> afterEvaluationAction)
         {
             EvaluateProjects(
-                projectContents.Select((p, i) => (Path.Combine(_env.DefaultTestDirectory.FolderPath, $"Project{i}.proj"), p)),
+                projectContents.Select((p, i) => new ProjectSpecification(Path.Combine(_env.DefaultTestDirectory.FolderPath, $"Project{i}.proj"), p)),
                 context,
                 afterEvaluationAction);
+        }
+
+        private struct ProjectSpecification
+        {
+            public string ProjectPath { get; }
+            public string ProjectContents { get; }
+
+            public ProjectSpecification(string projectPath, string projectContents)
+            {
+                ProjectPath = projectPath;
+                ProjectContents = projectContents;
+            }
+
+            public void Deconstruct(out string projectPath, out string projectContents)
+            {
+                projectPath = this.ProjectPath;
+                projectContents = this.ProjectContents;
+            }
         }
 
         /// <summary>
         /// Should be at least two test projects to test cache visibility between projects
         /// </summary>
-        private void EvaluateProjects(IEnumerable<(string ProjectPath, string ProjectContents)> projectSpecs, EvaluationContext context, Action<Project> afterEvaluationAction)
+        private void EvaluateProjects(IEnumerable<ProjectSpecification> projectSpecs, EvaluationContext context, Action<Project> afterEvaluationAction)
         {
             var collection = _env.CreateProjectCollection().Collection;
 
             var projects = new List<Project>();
 
-            foreach (var spec in projectSpecs)
+            foreach (var (projectPath, projectContents) in projectSpecs)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(spec.ProjectPath));
-                File.WriteAllText(spec.ProjectPath, spec.ProjectContents.Cleanup());
+                Directory.CreateDirectory(Path.GetDirectoryName(projectPath));
+                File.WriteAllText(projectPath, projectContents.Cleanup());
 
                 var project = Project.FromFile(
-                    spec.ProjectPath,
+                    projectPath,
                     new ProjectOptions
                     {
                         ProjectCollection = collection,
