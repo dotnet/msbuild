@@ -1793,13 +1793,9 @@ namespace Microsoft.Build.Shared
                 filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
             }
 
-            var filespecIsAnAbsoluteGlobPointingOutsideOfProjectCone =
-                Path.IsPathRooted(filespecUnescaped) &&
-                !filespecUnescaped.StartsWith(projectDirectoryUnescaped, StringComparison.OrdinalIgnoreCase);
-
             // Don't include the project directory when the glob is independent of it.
             // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
-            if (!filespecIsAnAbsoluteGlobPointingOutsideOfProjectCone)
+            if (!FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(projectDirectoryUnescaped, filespecUnescaped))
             {
                 sb.Append(projectDirectoryUnescaped);
             }
@@ -1815,6 +1811,20 @@ namespace Microsoft.Build.Shared
             }
 
             return sb.ToString();
+
+            bool FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(string projectDirectory, string filespec)
+            {
+                try
+                {
+                    return Path.IsPathRooted(filespec) &&
+                           !filespec.StartsWith(projectDirectory, StringComparison.OrdinalIgnoreCase);
+                }
+                catch
+                {
+                    // glob expansion is "supposed" to silently fail on IO exceptions
+                    return false;
+                }
+            }
         }
 
         enum SearchAction
