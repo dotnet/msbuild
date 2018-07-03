@@ -2,19 +2,90 @@ trigger:
 - exp/vsts-pr-builds
 
 phases:
-# - phase: MonoOnLinux
-#   queue: Hosted Linux Preview
-#   steps:
-#   - bash: . 'build/install-mono.sh'
-#     displayName: Install Mono
-#   - bash: . 'build/cibuild.sh' '-hostType mono'
-#     displayName: CI Build
-#   - task: PublishTestResults@2
-#     displayName: Publish Test Results
-#     inputs:
-#       testRunner: XUnit
-#       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
-#     condition: always()
+- phase: FullOnWindows
+  queue: 'Hosted VS2017'
+  steps:
+  - script: set
+    displayName: Command Line Script
+  - task: BatchScript@1
+    displayName: VsDevCmd
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+      modifyEnvironment: true
+  - task: BatchScript@1
+    displayName: cibuild.cmd
+    inputs:
+      filename: 'build/cibuild.cmd'
+  - task: PublishTestResults@2
+    displayName: Publish .NET Framework Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full Full Framework'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.0 Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full .NET Core 2.0'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+
+- phase: CoreOnWindows
+  queue: 'Hosted VS2017'
+  steps:
+  - script: set
+    displayName: Command Line Script
+  - task: BatchScript@1
+    displayName: VsDevCmd
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+      modifyEnvironment: true
+  - task: BatchScript@1
+    displayName: cibuild.cmd
+    inputs:
+      filename: 'build/cibuild.cmd'
+      arguments: '-hostType Core'
+  - task: PublishTestResults@2
+    displayName: Publish .NET Framework Test Results
+    inputs:
+      testRunTitle: 'Windows-on-core Full Framework'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.0 Test Results
+    inputs:
+      testRunTitle: 'Windows-on-core .NET Core 2.0'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'Windows-on-core .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
 
 - phase: CoreOnLinux
   queue: Hosted Linux Preview
@@ -90,87 +161,16 @@ phases:
 #      testResultsFiles: 'artifacts/**/*UnitTests*.xml'
 #    condition: always()
 
-- phase: CoreOnWindows
-  queue: 'Hosted VS2017'
-  steps:
-  - script: set
-    displayName: Command Line Script
-  - task: BatchScript@1
-    displayName: VsDevCmd
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
-  - task: BatchScript@1
-    displayName: cibuild.cmd
-    inputs:
-      filename: 'build/cibuild.cmd'
-      arguments: '-hostType Core'
-  - task: PublishTestResults@2
-    displayName: Publish .NET Framework Test Results
-    inputs:
-      testRunTitle: 'Windows-on-core Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.0 Test Results
-    inputs:
-      testRunTitle: 'Windows-on-core .NET Core 2.0'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
-    inputs:
-      testRunTitle: 'Windows-on-core .NET Core 2.1'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-
-- phase: FullOnWindows
-  queue: 'Hosted VS2017'
-  steps:
-  - script: set
-    displayName: Command Line Script
-  - task: BatchScript@1
-    displayName: VsDevCmd
-    inputs:
-      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
-      modifyEnvironment: true
-  - task: BatchScript@1
-    displayName: cibuild.cmd
-    inputs:
-      filename: 'build/cibuild.cmd'
-  - task: PublishTestResults@2
-    displayName: Publish .NET Framework Test Results
-    inputs:
-      testRunTitle: 'Windows-on-full Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.0 Test Results
-    inputs:
-      testRunTitle: 'Windows-on-full .NET Core 2.0'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.0*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
-  - task: PublishTestResults@2
-    displayName: Publish .NET Core 2.1 Test Results
-    inputs:
-      testRunTitle: 'Windows-on-full .NET Core 2.1'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
-      publishRunAttachments: true
-      mergeTestResults: true
-    condition: always()
+# - phase: MonoOnLinux
+#   queue: Hosted Linux Preview
+#   steps:
+#   - bash: . 'build/install-mono.sh'
+#     displayName: Install Mono
+#   - bash: . 'build/cibuild.sh' '-hostType mono'
+#     displayName: CI Build
+#   - task: PublishTestResults@2
+#     displayName: Publish Test Results
+#     inputs:
+#       testRunner: XUnit
+#       testResultsFiles: 'artifacts/**/*UnitTests*.xml'
+#     condition: always()
