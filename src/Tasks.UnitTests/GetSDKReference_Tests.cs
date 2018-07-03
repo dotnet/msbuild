@@ -237,7 +237,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
                 CacheFileFolderPath = _cacheDirectory,
             };
 
-            t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p)).ShouldBeTrue();
+            t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true).ShouldBeTrue();
             t.CopyLocalFiles.ShouldBeEmpty();
             t.References.ShouldBeEmpty();
             t.RedistFiles.ShouldBeEmpty();
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             var t = new GetSDKReferenceFiles();
             t.BuildEngine = engine;
             t.CacheFileFolderPath = _cacheDirectory;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(0, t.References.Length);
@@ -370,7 +370,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(0, t.References.Length);
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(9, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -472,7 +472,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             // Process both regular and runtime-only references
             t.ResolvedSDKReferences = new ITaskItem[] { item1, item2 };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
 
             Assert.Equal(8, t.References.Length);
@@ -483,7 +483,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.CacheFileFolderPath = _cacheDirectory;
 
             t.ResolvedSDKReferences = new ITaskItem[] { item1 };
-            success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
 
             Assert.Equal(8, t.References.Length);
@@ -494,7 +494,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.CacheFileFolderPath = _cacheDirectory;
 
             t.ResolvedSDKReferences = new ITaskItem[] { item2 };
-            success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
 
             Assert.Equal(0, t.References.Length);
@@ -523,7 +523,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             ITaskItem[] references1 = t.References;
 
@@ -599,7 +599,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item2.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t2.ResolvedSDKReferences = new ITaskItem[] { item2 };
-            bool success2 = t2.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success2 = t2.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             ITaskItem[] references2 = t2.References;
             Assert.True(success2);
 
@@ -642,7 +642,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -692,7 +692,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.ReferenceExtensions = new string[] { ".dll" };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.References.Length);
@@ -737,7 +737,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.False(success);
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration", _sdkDirectory);
         }
@@ -761,7 +761,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.False(success);
             engine.AssertLogContainsMessageFromResource(_resourceDelegate, "GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture", _sdkDirectory);
         }
@@ -787,7 +787,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -840,7 +840,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -892,7 +892,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogReferencesList = false;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -930,7 +930,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogRedistFilesList = false;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(8, t.References.Length);
@@ -993,7 +993,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.RedistFiles.Length);
@@ -1025,7 +1025,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.RedistFiles.Length);
@@ -1058,7 +1058,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
             Assert.Equal(5, t.RedistFiles.Length);
@@ -1091,7 +1091,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(8, t.References.Length);
 
@@ -1121,7 +1121,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogReferenceConflictWithinSDKAsWarning = true;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(8, t.References.Length);
 
@@ -1150,7 +1150,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             item.SetMetadata("OriginalItemSpec", "SDKWithManifest, Version=2.0");
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(5, t.RedistFiles.Length);
 
@@ -1179,7 +1179,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item };
             t.LogRedistConflictWithinSDKAsWarning = true;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
             Assert.True(success);
             Assert.Equal(5, t.RedistFiles.Length);
 
@@ -1215,7 +1215,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item, item2 };
             t.LogReferencesList = false;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -1262,7 +1262,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item, item2 };
             t.LogReferencesList = false;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -1306,7 +1306,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             t.LogReferencesList = false;
             t.LogReferenceConflictBetweenSDKsAsWarning = false;
             t.LogRedistConflictBetweenSDKsAsWarning = false;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
 
             Assert.True(success);
             Assert.Equal(0, t.CopyLocalFiles.Length);
@@ -1353,7 +1353,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
 
             t.ResolvedSDKReferences = new ITaskItem[] { item, item2 };
             t.LogReferencesList = false;
-            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            bool success = t.Execute(_getAssemblyName, _getAssemblyRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: true);
 
             Assert.True(success);
             Assert.Equal(7, t.RedistFiles.Length);
