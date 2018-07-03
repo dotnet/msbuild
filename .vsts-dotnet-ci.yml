@@ -1,3 +1,6 @@
+trigger:
+- exp/vsts-pr-builds
+
 phases:
 # - phase: MonoOnLinux
 #   queue: Hosted Linux Preview
