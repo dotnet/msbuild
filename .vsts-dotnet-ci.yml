@@ -136,7 +136,6 @@ phases:
       mergeTestResults: true
     condition: always()
 
-
 #- phase: MonoOnMac
 #  queue: 'Hosted macOS Preview'
 #  steps:
