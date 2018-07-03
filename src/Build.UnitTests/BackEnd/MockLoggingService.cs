@@ -204,12 +204,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { }
         }
 
-        public void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes)
+        public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
         }
 
-        public void AddWarningsAsErrors(int projectInstanceId, ISet<string> codes)
+        public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
         }
