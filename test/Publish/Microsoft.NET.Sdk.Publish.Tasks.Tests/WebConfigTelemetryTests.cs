@@ -11,22 +11,26 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
     {
         private XDocument WebConfigTemplate => XDocument.Parse(
 @"<configuration>
-  <system.webServer>
-    <handlers>
-      <add name=""aspNetCore"" path=""*"" verb=""*"" modules=""AspNetCoreModule"" resourceType=""Unspecified""/>
-    </handlers>
-    <aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false"" stdoutLogFile="".\logs\stdout"" />
-  </system.webServer>
+    <location path=""."" inheritInChildApplications=""false"">
+      <system.webServer>
+        <handlers>
+          <add name=""aspNetCore"" path=""*"" verb=""*"" modules=""AspNetCoreModule"" resourceType=""Unspecified""/>
+        </handlers>
+        <aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false"" stdoutLogFile="".\logs\stdout"" />
+      </system.webServer>
+  </location >
 </configuration>");
 
         private XDocument WebConfigTemplateWithProjectGuid => XDocument.Parse(
 @"<configuration>
-  <system.webServer>
-    <handlers>
-      <add name=""aspNetCore"" path=""*"" verb=""*"" modules=""AspNetCoreModule"" resourceType=""Unspecified""/>
-    </handlers>
-    <aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false"" stdoutLogFile="".\logs\stdout"" />
-  </system.webServer>
+  <location path=""."" inheritInChildApplications=""false"">
+      <system.webServer>
+        <handlers>
+          <add name=""aspNetCore"" path=""*"" verb=""*"" modules=""AspNetCoreModule"" resourceType=""Unspecified""/>
+        </handlers>
+        <aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false"" stdoutLogFile="".\logs\stdout"" />
+      </system.webServer>
+  </location >
 </configuration>
 <!--ProjectGuid: 66964EC2-712A-451A-AB4F-33F18D8F54F1-->");
 
@@ -66,7 +70,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         public void WebConfigTelemetry_SetsProjectGuidIfNotOptedOut(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension:".exe", aspNetCoreHostingModel:null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension:".exe", aspNetCoreHostingModel:null, environmentName: null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
             
             //Act 
@@ -81,7 +85,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         public void WebConfigTelemetry_DoesNotSetProjectGuidIfOptedOut_ThroughIgnoreProjectGuid(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel:null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel:null, environmentName: null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
 
             //Act 
@@ -96,7 +100,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         public void WebConfigTelemetry_RemovesProjectGuidIfOptedOut_ThroughIgnoreProjectGuid(string projectGuid)
         {
             // Arrange
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel:null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel:null, environmentName: null);
             Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
             // Adds Guid to the config
             XDocument transformedWebConfigWithGuid = WebConfigTelemetry.AddTelemetry(transformedWebConfig, projectGuid, false, null, null);
@@ -116,7 +120,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             // Arrange
             string projectFullPath = GetTestProjectsFullPath();
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel: null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel: null, environmentName: null);
             string previousValue = Environment.GetEnvironmentVariable(TelemetryOptout);
 
             //Act 
@@ -135,7 +139,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             // Arrange
             string projectFullPath = GetTestProjectsFullPath();
-            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel: null);
+            XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreHostingModel: null, environmentName: null);
             string previousValue = Environment.GetEnvironmentVariable(TelemetryOptout);
 
             //Act 
