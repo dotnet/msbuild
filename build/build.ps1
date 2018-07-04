@@ -11,6 +11,7 @@ Param(
   [switch] $norestore,
   [switch] $sign,
   [switch] $skiptests,
+  [switch] $test,
   [switch] $bootstrapOnly,
   [string] $verbosity = "minimal",
   [string] $hostType,
@@ -33,6 +34,7 @@ function Print-Usage() {
     Write-Host "  -build                  Build solution"
     Write-Host "  -rebuild                Rebuild solution"
     Write-Host "  -skipTests              Don't run tests"
+    Write-Host "  -test                   Run tests. Ignores skipTests"
     Write-Host "  -bootstrapOnly          Don't run build again with bootstrapped MSBuild"
     Write-Host "  -sign                   Sign build outputs"
     Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
@@ -255,7 +257,7 @@ function Build {
   $testStage0 = $false
   if ($bootstrapOnly)
   {
-    $testStage0 = $test
+    $testStage0 = $runTests
   }
 
   $msbuildArgs = AddLogCmd "Build" $commonMSBuildArgs
@@ -293,7 +295,7 @@ function Build {
     # - Don't pack
     # - Do run tests (if not skipped)
     # - Don't try to create a bootstrap deployment
-    CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
+    CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$runTests /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
   }
   
   if ($ci)
@@ -372,7 +374,7 @@ $VersionsProps = Join-Path $PSScriptRoot "Versions.props"
 
 $log = -not $nolog
 $restore = -not $norestore
-$test = -not $skiptests
+$runTests = (-not $skiptests) -or $test
 
 if ($hostType -eq '')
 {
