@@ -148,7 +148,13 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool HasWildcards(string filespec)
         {
-            return -1 != filespec.IndexOfAny(s_wildcardCharacters);
+            // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
+            // regular expression that does the same thing, regardless of whether
+            // filespec contains one of the characters.
+            // Choose LastIndexOfAny instead of IndexOfAny because it seems more likely
+            // that wildcards will tend to be towards the right side.
+
+            return -1 != filespec.LastIndexOfAny(s_wildcardCharacters);
         }
 
         /// <summary>
@@ -1732,11 +1738,6 @@ namespace Microsoft.Build.Shared
         )
         {
             // For performance. Short-circuit iff there is no wildcard.
-            // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
-            // regular expression that does the same thing, regardless of whether
-            // filespec contains one of the characters.
-            // Choose LastIndexOfAny instead of IndexOfAny because it seems more likely
-            // that wildcards will tend to be towards the right side.
             if (!HasWildcards(filespecUnescaped))
             {
                 return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
@@ -1782,9 +1783,23 @@ namespace Microsoft.Build.Shared
 
         private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, IEnumerable<string> excludes)
         {
+            Debug.Assert(projectDirectoryUnescaped != null);
+            Debug.Assert(filespecUnescaped != null);
+
             var sb = new StringBuilder();
 
-            sb.Append(projectDirectoryUnescaped);
+            if (filespecUnescaped.Contains(".."))
+            {
+                filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+            }
+
+            // Don't include the project directory when the glob is independent of it.
+            // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
+            if (!FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(projectDirectoryUnescaped, filespecUnescaped))
+            {
+                sb.Append(projectDirectoryUnescaped);
+            }
+
             sb.Append(filespecUnescaped);
 
             if (excludes != null)
@@ -1796,6 +1811,20 @@ namespace Microsoft.Build.Shared
             }
 
             return sb.ToString();
+
+            bool FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(string projectDirectory, string filespec)
+            {
+                try
+                {
+                    return Path.IsPathRooted(filespec) &&
+                           !filespec.StartsWith(projectDirectory, StringComparison.OrdinalIgnoreCase);
+                }
+                catch
+                {
+                    // glob expansion is "supposed" to silently fail on IO exceptions
+                    return false;
+                }
+            }
         }
 
         enum SearchAction
