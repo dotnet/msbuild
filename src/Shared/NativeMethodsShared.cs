@@ -503,6 +503,16 @@ namespace Microsoft.Build.Shared
 #endif
         }
 
+        private static readonly bool s_is64BitProcess = Marshal.SizeOf(NullIntPtr) == 8;
+
+        /// <summary>
+        /// Gets a flag indicating if we are running as a 64 bit process
+        /// </summary>
+        internal static bool Is64BitProcess
+        {
+            get { return s_is64BitProcess; }
+        }
+
         private static readonly object IsMonoLock = new object();
 
         private static bool? _isMono;
@@ -744,6 +754,18 @@ namespace Microsoft.Build.Shared
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
                 bool success = false;
 
+                if (!Is64BitProcess)
+                {
+                    //32 bit processes do not have access to system32. to get time for files there we must remap to a special
+                    string windowsDirectory = Environment.SystemDirectory.ToLowerInvariant();
+                    string fullPathUpper = fullPath.ToLowerInvariant();
+
+                    if (fullPathUpper.StartsWith(windowsDirectory))
+                    {
+                        fullPath = fullPathUpper.Replace("system32", "sysnative");
+                    }
+                }
+
                 success = GetFileAttributesEx(fullPath, 0, ref data);
                 if (success)
                 {
@@ -885,6 +907,18 @@ namespace Microsoft.Build.Shared
 
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
                 bool success = false;
+
+                if (!Is64BitProcess)
+                {
+                    //32 bit processes do not have access to system32. to get time for files there we must remap to a special
+                    string windowsDirectory = Environment.SystemDirectory.ToLowerInvariant();
+                    string fullPathUpper = fullPath.ToLowerInvariant();
+
+                    if (fullPathUpper.StartsWith(windowsDirectory))
+                    {
+                        fullPath = fullPathUpper.Replace("system32", "sysnative");
+                    }
+                }
 
                 success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
 
