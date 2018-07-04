@@ -1040,6 +1040,42 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        public void InvalidPathInDirectMetadata()
+        {
+            var logger = Helpers.BuildProjectUsingBuildManagerExpectResult(
+                @"<Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <ItemGroup>
+                        <x Include=':|?*'>
+                            <m>%(FullPath)</m>
+                        </x>
+                    </ItemGroup>
+                </Project>",
+                BuildResultCode.Failure);
+
+            logger.AssertLogContains("MSB4248");
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        public void PathTooLongInDirectMetadata()
+        {
+            var logger = Helpers.BuildProjectUsingBuildManagerExpectResult(
+                @"<Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <ItemGroup>
+                        <x Include='" + new string('x', 250) + @"'>
+                            <m>%(FullPath)</m>
+                        </x>
+                    </ItemGroup>
+                </Project>",
+                BuildResultCode.Failure);
+
+            logger.AssertLogContains("MSB4248");
+        }
+
         /// <summary>
         /// Asking for blank metadata with ->AnyHaveMetadataValue
         /// </summary>

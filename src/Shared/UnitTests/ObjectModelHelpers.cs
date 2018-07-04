@@ -11,12 +11,14 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -1308,6 +1310,45 @@ namespace Microsoft.Build.UnitTests
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             result = project.Build(loggers);
+        }
+
+        public static MockLogger BuildProjectUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
+        {
+            var logger = new MockLogger();
+
+            var result = BuildProjectUsingBuildManager(content, logger);
+
+            result.OverallResult.ShouldBe(expectedResult);
+
+            return logger;
+        }
+
+        public static BuildResult BuildProjectUsingBuildManager(string content, MockLogger logger)
+        {
+            // Replace the crazy quotes with real ones
+            content = ObjectModelHelpers.CleanupFileContents(content);
+
+            List<ILogger> loggers = new List<ILogger>();
+
+            using (var env = TestEnvironment.Create())
+            using (var buildManager = new BuildManager())
+            {
+                var testProject = env.CreateTestProjectWithFiles(content.Cleanup());
+
+                var result = buildManager.Build(
+                    new BuildParameters()
+                    {
+                        Loggers = new []{logger}
+                    },
+                    new BuildRequestData(
+                        testProject.ProjectFile,
+                        new Dictionary<string, string>(),
+                        MSBuildConstants.CurrentToolsVersion,
+                        new string[] {},
+                        null));
+
+                return result;
+            }
         }
 
         /// <summary>

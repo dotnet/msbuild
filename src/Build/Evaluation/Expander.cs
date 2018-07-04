@@ -257,7 +257,7 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
-            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
+            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
-            string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
+            string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _usedUninitializedProperties);
         }
 
@@ -326,7 +326,7 @@ namespace Microsoft.Build.Evaluation
 
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
-            expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options);
+            expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _usedUninitializedProperties);
             expression = FileUtilities.MaybeAdjustFilePath(expression);
 
@@ -695,107 +695,120 @@ namespace Microsoft.Build.Evaluation
             /// <param name="metadata"></param>
             /// <param name="options"></param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
-            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options)
+            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation)
             {
-                if (((options & ExpanderOptions.ExpandMetadata) == 0))
+                try
                 {
-                    return expression;
-                }
-
-                if (expression.Length == 0)
-                {
-                    return expression;
-                }
-
-                ErrorUtilities.VerifyThrow(metadata != null, "Cannot expand metadata without providing metadata");
-
-                // PERF NOTE: Regex matching is expensive, so if the string doesn't contain any item metadata references, just bail
-                // out -- pre-scanning the string is actually cheaper than running the Regex, even when there are no matches!
-                if (s_invariantCompareInfo.IndexOf(expression, "%(", CompareOptions.Ordinal) == -1)
-                {
-                    return expression;
-                }
-
-                string result = null;
-
-                if (s_invariantCompareInfo.IndexOf(expression, "@(", CompareOptions.Ordinal) == -1)
-                {
-                    // if there are no item vectors in the string
-                    // run a simpler Regex to find item metadata references
-                    MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
-                    result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
-                }
-                else
-                {
-                    List<ExpressionShredder.ItemExpressionCapture> itemVectorExpressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-
-                    // The most common case is where the transform is the whole expression
-                    // Also if there were no valid item vector expressions found, then go ahead and do the replacement on
-                    // the whole expression (which is what Orcas did).
-                    if (itemVectorExpressions != null && itemVectorExpressions.Count == 1 && itemVectorExpressions[0].Value == expression && itemVectorExpressions[0].Separator == null)
+                    if (((options & ExpanderOptions.ExpandMetadata) == 0))
                     {
                         return expression;
                     }
 
-                    // otherwise, run the more complex Regex to find item metadata references not contained in transforms
-                    // With the reuseable string builder, there's no particular need to initialize the length as it will already have grown.
-                    using (var finalResultBuilder = new ReuseableStringBuilder())
+                    if (expression.Length == 0)
                     {
-                        int start = 0;
+                        return expression;
+                    }
+
+                    ErrorUtilities.VerifyThrow(metadata != null, "Cannot expand metadata without providing metadata");
+
+                    // PERF NOTE: Regex matching is expensive, so if the string doesn't contain any item metadata references, just bail
+                    // out -- pre-scanning the string is actually cheaper than running the Regex, even when there are no matches!
+                    if (s_invariantCompareInfo.IndexOf(expression, "%(", CompareOptions.Ordinal) == -1)
+                    {
+                        return expression;
+                    }
+
+                    string result = null;
+
+                    if (s_invariantCompareInfo.IndexOf(expression, "@(", CompareOptions.Ordinal) == -1)
+                    {
+                        // if there are no item vectors in the string
+                        // run a simpler Regex to find item metadata references
                         MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+                        result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                    }
+                    else
+                    {
+                        List<ExpressionShredder.ItemExpressionCapture> itemVectorExpressions = ExpressionShredder.GetReferencedItemExpressions(expression);
 
-                        if (itemVectorExpressions != null)
+                        // The most common case is where the transform is the whole expression
+                        // Also if there were no valid item vector expressions found, then go ahead and do the replacement on
+                        // the whole expression (which is what Orcas did).
+                        if (itemVectorExpressions != null && itemVectorExpressions.Count == 1 && itemVectorExpressions[0].Value == expression && itemVectorExpressions[0].Separator == null)
                         {
-                            // Move over the expression, skipping those that have been recognized as an item vector expression
-                            // Anything other than an item vector expression we want to expand bare metadata in.
-                            for (int n = 0; n < itemVectorExpressions.Count; n++)
-                            {
-                                string vectorExpression = itemVectorExpressions[n].Value;
+                            return expression;
+                        }
 
-                                // Extract the part of the expression that appears before the item vector expression
-                                // e.g. the ABC in ABC@(foo->'%(FullPath)')
-                                string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
+                        // otherwise, run the more complex Regex to find item metadata references not contained in transforms
+                        // With the reuseable string builder, there's no particular need to initialize the length as it will already have grown.
+                        using (var finalResultBuilder = new ReuseableStringBuilder())
+                        {
+                            int start = 0;
+                            MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+
+                            if (itemVectorExpressions != null)
+                            {
+                                // Move over the expression, skipping those that have been recognized as an item vector expression
+                                // Anything other than an item vector expression we want to expand bare metadata in.
+                                for (int n = 0; n < itemVectorExpressions.Count; n++)
+                                {
+                                    string vectorExpression = itemVectorExpressions[n].Value;
+
+                                    // Extract the part of the expression that appears before the item vector expression
+                                    // e.g. the ABC in ABC@(foo->'%(FullPath)')
+                                    string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
+                                    string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+
+                                    // Append the metadata replacement
+                                    finalResultBuilder.Append(replacementResult);
+
+                                    // Expand any metadata that appears in the item vector expression's separator
+                                    if (itemVectorExpressions[n].Separator != null)
+                                    {
+                                        vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
+                                    }
+
+                                    // Append the item vector expression as is
+                                    // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
+                                    finalResultBuilder.Append(vectorExpression);
+
+                                    // Move onto the next part of the expression that isn't an item vector expression
+                                    start = (itemVectorExpressions[n].Index + itemVectorExpressions[n].Length);
+                                }
+                            }
+
+                            // If there's anything left after the last item vector expression
+                            // then we need to metadata replace and then append that
+                            if (start < expression.Length)
+                            {
+                                string subExpressionToReplaceIn = expression.Substring(start);
                                 string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
-                                // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
-
-                                // Expand any metadata that appears in the item vector expression's separator
-                                if (itemVectorExpressions[n].Separator != null)
-                                {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
-                                }
-
-                                // Append the item vector expression as is
-                                // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
-                                finalResultBuilder.Append(vectorExpression);
-
-                                // Move onto the next part of the expression that isn't an item vector expression
-                                start = (itemVectorExpressions[n].Index + itemVectorExpressions[n].Length);
                             }
+
+                            result = OpportunisticIntern.InternableToString(finalResultBuilder);
                         }
-
-                        // If there's anything left after the last item vector expression
-                        // then we need to metadata replace and then append that
-                        if (start < expression.Length)
-                        {
-                            string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
-
-                            finalResultBuilder.Append(replacementResult);
-                        }
-
-                        result = OpportunisticIntern.InternableToString(finalResultBuilder);
                     }
-                }
 
-                // Don't create more strings
-                if (String.Equals(result, expression, StringComparison.Ordinal))
+                    // Don't create more strings
+                    if (String.Equals(result, expression, StringComparison.Ordinal))
+                    {
+                        result = expression;
+                    }
+
+                    return result;
+                }
+                catch (ArgumentException ex) // Blank metadata name
                 {
-                    result = expression;
+                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotExpandItemMetadata", expression, ex.Message);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotExpandItemMetadata", expression, ex.Message);
                 }
 
-                return result;
+                return null;
             }
 
             /// <summary>
