@@ -18,7 +18,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("1.1.2")]
         [InlineData("2.0.4")]
         public void It_discovers_assembly_parts(string aspnetVersion)
