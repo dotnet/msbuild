@@ -58,6 +58,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         /// <returns></returns>
         public string AspNetCoreModuleHostingModel { get; set; }
 
+        public string EnvironmentName { get; set; }
+
         public override bool Execute()
         {
             Log.LogMessage(MessageImportance.Low, $"Configuring the following project for use with IIS: '{PublishDir}'");
@@ -85,7 +87,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             string outputFile = Path.GetFileName(TargetPath);
-            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModuleHostingModel);
+            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModuleHostingModel, EnvironmentName);
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);

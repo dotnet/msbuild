@@ -10,19 +10,29 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public static class WebConfigTransform
     {
-        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreHostingModel)
+        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreHostingModel, string environmentName)
         {
             const string HandlersElementName = "handlers";
             const string aspNetCoreElementName = "aspNetCore";
+            const string envVariablesElementName = "environmentVariables";
 
-            webConfig = webConfig == null || webConfig.Root.Name.LocalName != "configuration"
-                ? XDocument.Parse("<configuration />")
-                : webConfig;
+            const string WebConfigTemplate = @"<configuration><location path=""."" inheritInChildApplications=""false"" /></configuration>";
 
-            var webServerSection = GetOrCreateChild(webConfig.Root, "system.webServer");
+            if (webConfig == null || webConfig.Root.Name.LocalName != "configuration")
+            {
+                webConfig = XDocument.Parse(WebConfigTemplate);
+            }
+
+            var rootElement = webConfig.Root.Element("location") == null ? webConfig.Root : webConfig.Root.Element("location");
+            var webServerSection = GetOrCreateChild(rootElement, "system.webServer");
 
             TransformHandlers(GetOrCreateChild(webServerSection, HandlersElementName));
-            TransformAspNetCore(GetOrCreateChild(webServerSection, aspNetCoreElementName), appName, configureForAzure, useAppHost, extension, aspNetCoreHostingModel);
+            var aspNetCoreSection = GetOrCreateChild(webServerSection, aspNetCoreElementName);
+            TransformAspNetCore(aspNetCoreSection, appName, configureForAzure, useAppHost, extension, aspNetCoreHostingModel);
+            if (!string.IsNullOrEmpty(environmentName))
+            {
+                TransformEnvironmentVariables(GetOrCreateChild(aspNetCoreSection, envVariablesElementName), environmentName);
+            }
 
             // make sure that the aspNetCore element is after handlers element
             var aspNetCoreElement = webServerSection.Element(HandlersElementName)
@@ -117,6 +127,22 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                     throw new Exception(Resources.WebConfigTransform_HostingModel_Error);
                 }
             }
+        }
+
+        private static void TransformEnvironmentVariables(XElement envVariablesElement, string environmentName)
+        {
+            var envVariableElement =
+                envVariablesElement.Elements("environmentVariable")
+                .FirstOrDefault(e => string.Equals((string)e.Attribute("name"), "ASPNETCORE_ENVIRONMENT", StringComparison.OrdinalIgnoreCase));
+
+            if (envVariableElement == null)
+            {
+                envVariableElement = new XElement("environmentVariable");
+                envVariablesElement.Add(envVariableElement);
+            }
+
+            envVariableElement.SetAttributeValue("name", "ASPNETCORE_ENVIRONMENT");
+            envVariableElement.SetAttributeValue("value", environmentName);
         }
 
         private static XElement GetOrCreateChild(XElement parent, string childName)
