@@ -3,6 +3,7 @@ trigger:
 
 phases:
 - phase: FullOnWindows
+  displayName: "Build on Windows using full MSBuild"
   queue: 'Hosted VS2017'
   steps:
   - script: set
@@ -45,6 +46,7 @@ phases:
     condition: always()
 
 - phase: CoreOnWindows
+  displayName: "Build on Windows using .NET Core MSBuild"
   queue: 'Hosted VS2017'
   steps:
   - script: set
@@ -88,6 +90,7 @@ phases:
     condition: always()
 
 - phase: CoreOnLinux
+  displayName: "Build and test on Linux using .NET Core MSBuild"
   queue: Hosted Linux Preview
   steps:
   - bash: . 'build/cibuild.sh'
@@ -113,6 +116,7 @@ phases:
 
 
 - phase: CoreOnMac
+  displayName: "Build and test on macOS using .NET Core MSBuild"
   queue: 'Hosted macOS Preview'
   steps:
   - bash: . 'build/cibuild.sh'
