@@ -83,7 +83,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
         <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version
             provided by Microsoft.NETCoreSdk.BundledVersions.props -->
-        <LatestAspNetCoreAppPatchVersion Condition="'$(LatestAspNetCoreAppPatchVersion)' == '' AND $(_TargetFrameworkVersionWithoutV)' == '$(BundledAspNetCoreAppTargetFrameworkVersion)'">$(BundledAspNetCoreAppPackageVersion)</LatestAspNetCoreAppPatchVersion>
+        <LatestAspNetCoreAppPatchVersion Condition="'$(LatestAspNetCoreAppPatchVersion)' == '' AND '$(_TargetFrameworkVersionWithoutV)' == '$(BundledAspNetCoreAppTargetFrameworkVersion)'">$(BundledAspNetCoreAppPackageVersion)</LatestAspNetCoreAppPatchVersion>
         <!-- If not covered by the previous cases use the target framework version for the latest patch version -->
         <LatestAspNetCoreAppPatchVersion Condition="'$(LatestAspNetCoreAppPatchVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</LatestAspNetCoreAppPatchVersion>
       </PropertyGroup>
