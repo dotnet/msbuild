@@ -64,4 +64,4 @@ then build any project. It will have MyCustomProperty set to Value!
 Set the property `GenerateTemporaryTargetAssemblyDebuggingInformation` on the `GenerateTemporaryTargetAssembly` task:
 https://referencesource.microsoft.com/#PresentationBuildTasks/BuildTasks/Microsoft/Build/Tasks/Windows/GenerateTemporaryTargetAssembly.cs,4571677f19ba0d24,references
 
-If this is set, the .tmp_proj generated during XAML project build will not be deleted and will be available for inspection.
+If the property `$(GenerateTemporaryTargetAssemblyDebuggingInformation)` is set, the .tmp_proj generated during XAML project build will not be deleted and will be available for inspection. This is only available in the recent versions of .NET Framework, so check if your `Microsoft.WinFX.targets` file has it.
