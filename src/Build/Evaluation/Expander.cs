@@ -799,10 +799,6 @@ namespace Microsoft.Build.Evaluation
 
                     return result;
                 }
-                catch (ArgumentException ex) // Blank metadata name
-                {
-                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotExpandItemMetadata", expression, ex.Message);
-                }
                 catch (InvalidOperationException ex)
                 {
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotExpandItemMetadata", expression, ex.Message);
