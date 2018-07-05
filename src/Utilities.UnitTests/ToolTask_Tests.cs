@@ -641,7 +641,7 @@ namespace Microsoft.Build.UnitTests
             {
                 using (var env = TestEnvironment.Create())
                 {
-                    string tempDirectory = env.CreateFolder().FolderPath;
+                    string tempDirectory = env.CreateFolder().Path;
                     env.SetCurrentDirectory(tempDirectory);
                     env.SetEnvironmentVariable("PATH", $"{tempDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}");
                     Directory.SetCurrentDirectory(tempDirectory);

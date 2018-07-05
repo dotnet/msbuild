@@ -50,7 +50,7 @@ public class MSBuildTestAssemblyFixture : IDisposable
         string newTempPath = Path.Combine(Path.GetTempPath(), subdirectory);
         var assemblyTempFolder = _testEnvironment.CreateFolder(newTempPath);
 
-        _testEnvironment.SetTempPath(assemblyTempFolder.FolderPath);
+        _testEnvironment.SetTempPath(assemblyTempFolder.Path);
 
         _testEnvironment.CreateFile(
             transientTestFolder: assemblyTempFolder,

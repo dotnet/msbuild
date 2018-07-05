@@ -56,10 +56,10 @@ namespace Microsoft.Build.UnitTests
                 "file.bak.txt"
             })
             {
-                File.WriteAllBytes(Path.Combine(testFolder.FolderPath, file), new byte[1]);
+                File.WriteAllBytes(Path.Combine(testFolder.Path, file), new byte[1]);
             }
 
-            string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.FolderPath, pattern);
+            string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, pattern);
 
             fileMatches.Length.ShouldBe(expectedMatchCount, $"Matches: '{String.Join("', '", fileMatches)}'");
         }
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
             TransientTestFolder testFolder = _env.CreateFolder();
 
             // Create directories and files
-            foreach (string fullPath in GetFilesComplexGlobbingMatchingInfo.FilesToCreate.Select(i => Path.Combine(testFolder.FolderPath, i.ToPlatformSlash())))
+            foreach (string fullPath in GetFilesComplexGlobbingMatchingInfo.FilesToCreate.Select(i => Path.Combine(testFolder.Path, i.ToPlatformSlash())))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
                 
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
 
             void Verify(string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
             {
-                string[] matchedFiles = FileMatcher.Default.GetFiles(testFolder.FolderPath, include, excludes?.ToList());
+                string[] matchedFiles = FileMatcher.Default.GetFiles(testFolder.Path, include, excludes?.ToList());
 
                 if (shouldHaveNoMatches)
                 {
@@ -1191,7 +1191,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress367780_CrashOnStarDotDot()
         {
-            string workingPath = _env.CreateFolder().FolderPath;
+            string workingPath = _env.CreateFolder().Path;
             string workingPathSubfolder = Path.Combine(workingPath, "SubDir");
             string offendingPattern = Path.Combine(workingPath, @"*\..\bar");
             string[] files = new string[0];
@@ -1205,7 +1205,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress141071_StarStarSlashStarStarIsLiteral()
         {
-            string workingPath = _env.CreateFolder().FolderPath;
+            string workingPath = _env.CreateFolder().Path;
             string fileName = Path.Combine(workingPath, "MyFile.txt");
             string offendingPattern = Path.Combine(workingPath, @"**\**");
 
@@ -1222,7 +1222,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress14090_TrailingDotMatchesNoExtension()
         {
-            string workingPath = _env.CreateFolder().FolderPath;
+            string workingPath = _env.CreateFolder().Path;
             string workingPathSubdir = Path.Combine(workingPath, "subdir");
             string workingPathSubdirBing = Path.Combine(workingPathSubdir, "bing");
 

@@ -2257,7 +2257,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             secondaryItemsByName.ImportItems(thirdItemGroup);
             secondaryItemsByName.ImportItems(trueItemGroup);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName, FileSystems.Default);
             return expander;
         }
 

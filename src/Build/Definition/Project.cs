@@ -26,6 +26,7 @@ using System.Globalization;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemExpressionFragment<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
@@ -3192,7 +3193,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
             {
                 DefaultTargets = null;
                 Properties = new PropertyDictionary<ProjectProperty>();
@@ -3200,7 +3201,7 @@ namespace Microsoft.Build.Evaluation
                 Items = new ItemDictionary<ProjectItem>();
                 ItemsIgnoringCondition = new ItemDictionary<ProjectItem>();
                 ItemsByEvaluatedIncludeCache = new MultiDictionary<string, ProjectItem>(StringComparer.OrdinalIgnoreCase);
-                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items);
+                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items, fileSystem);
                 ItemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinition>(MSBuildNameIgnoreCaseComparer.Default);
                 Targets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
                 ImportClosure = new List<ResolvedImport>();

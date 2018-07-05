@@ -1215,7 +1215,8 @@ namespace Microsoft.Build.Execution
         /// Initializes the object for evaluation.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.InitializeForEvaluation(IToolsetProvider toolsetProvider)
+        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.
+            InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
         {
             // All been done in the constructor.  We don't allow re-evaluation of project instances.
         }
@@ -1743,7 +1744,7 @@ namespace Microsoft.Build.Execution
         /// </comment>
         public string ExpandString(string unexpandedValue)
         {
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
 
             string result = expander.ExpandIntoStringAndUnescape(unexpandedValue, ExpanderOptions.ExpandPropertiesAndItems, ProjectFileLocation);
 
@@ -1761,7 +1762,7 @@ namespace Microsoft.Build.Execution
         /// </comment>
         public bool EvaluateCondition(string condition)
         {
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
 
             bool result = ConditionEvaluator.EvaluateCondition(
                 condition,

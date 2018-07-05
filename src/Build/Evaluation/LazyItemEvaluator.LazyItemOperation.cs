@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -41,7 +42,7 @@ namespace Microsoft.Build.Evaluation
 
                 _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
-                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
+                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.FileSystem);
 
                 _itemSpec.Expander = _expander;
             }

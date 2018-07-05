@@ -843,7 +843,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                string testSdkDirectory = env.CreateFolder().FolderPath;
+                string testSdkDirectory = env.CreateFolder().Path;
 
                 var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
                 {
@@ -932,8 +932,8 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                string sdk1 = env.CreateFolder().FolderPath;
-                string sdk2 = env.CreateFolder().FolderPath;
+                string sdk1 = env.CreateFolder().Path;
+                string sdk2 = env.CreateFolder().Path;
 
                 var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
                 {

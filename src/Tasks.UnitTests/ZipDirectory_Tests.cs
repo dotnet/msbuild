@@ -27,18 +27,18 @@ namespace Microsoft.Build.Tasks.UnitTests
                 testEnvironment.CreateFile(sourceFolder, "6DE6060259C44DB6B145159376751C22.txt", "6DE6060259C44DB6B145159376751C22");
                 testEnvironment.CreateFile(sourceFolder, "CDA3DD8C25A54A7CAC638A444CB1EAD0.txt", "CDA3DD8C25A54A7CAC638A444CB1EAD0");
 
-                string zipFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).FolderPath, "test.zip");
+                string zipFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.zip");
 
                 ZipDirectory zipDirectory = new ZipDirectory
                 {
                     BuildEngine = _mockEngine,
                     DestinationFile = new TaskItem(zipFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.FolderPath)
+                    SourceDirectory = new TaskItem(sourceFolder.Path)
                 };
 
                 zipDirectory.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(sourceFolder.FolderPath, () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, () => _mockEngine.Log);
                 _mockEngine.Log.ShouldContain(zipFilePath, () => _mockEngine.Log);
 
                 using (FileStream stream = new FileStream(zipFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -75,12 +75,12 @@ namespace Microsoft.Build.Tasks.UnitTests
                     BuildEngine = _mockEngine,
                     DestinationFile = new TaskItem(file.Path),
                     Overwrite = true,
-                    SourceDirectory = new TaskItem(sourceFolder.FolderPath)
+                    SourceDirectory = new TaskItem(sourceFolder.Path)
                 };
 
                 zipDirectory.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(sourceFolder.FolderPath, () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, () => _mockEngine.Log);
                 _mockEngine.Log.ShouldContain(file.Path, () => _mockEngine.Log);
 
                 using (FileStream stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     BuildEngine = _mockEngine,
                     DestinationFile = new TaskItem(file.Path),
-                    SourceDirectory = new TaskItem(folder.FolderPath)
+                    SourceDirectory = new TaskItem(folder.Path)
                 };
 
                 zipDirectory.Execute().ShouldBeFalse(() => _mockEngine.Log);

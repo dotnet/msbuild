@@ -1137,10 +1137,12 @@ namespace Microsoft.Build.Shared
         /// Locate a file in either the directory specified or a location in the
         /// directory structure above that directory.
         /// </summary>
-        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
+        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName, IFileSystem fileSystem = null)
         {
+            fileSystem = fileSystem ?? DefaultFileSystem;
+
             // Canonicalize our starting location
-            string lookInDirectory = Path.GetFullPath(startingDirectory);
+            string lookInDirectory = GetFullPath(startingDirectory);
 
             do
             {
@@ -1150,7 +1152,7 @@ namespace Microsoft.Build.Shared
                 // If we successfully locate the file in the directory that we're
                 // looking in, simply return that location. Otherwise we'll
                 // keep moving up the tree.
-                if (DefaultFileSystem.FileExists(possibleFileDirectory))
+                if (fileSystem.FileExists(possibleFileDirectory))
                 {
                     // We've found the file, return the directory we found it in
                     return lookInDirectory;
@@ -1173,9 +1175,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="file">The file to search for.</param>
         /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
-        /// of the file containing the property function.</param>
+        ///     of the file containing the property function.</param>
+        /// <param name="fileSystem">The filesystem</param>
         /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
-        internal static string GetPathOfFileAbove(string file, string startingDirectory)
+        internal static string GetPathOfFileAbove(string file, string startingDirectory, IFileSystem fileSystem = null)
         {
             // This method does not accept a path, only a file name
             if (file.Any(i => i.Equals(Path.DirectorySeparatorChar) || i.Equals(Path.AltDirectorySeparatorChar)))
@@ -1184,7 +1187,7 @@ namespace Microsoft.Build.Shared
             }
 
             // Search for a directory that contains that file
-            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file);
+            string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file, fileSystem);
 
             return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
         }

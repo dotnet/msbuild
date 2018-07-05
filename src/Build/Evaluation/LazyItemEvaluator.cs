@@ -54,9 +54,9 @@ namespace Microsoft.Build.Evaluation
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext.FileSystem);
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext.FileSystem);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;

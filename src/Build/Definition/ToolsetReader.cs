@@ -460,7 +460,7 @@ namespace Microsoft.Build.Evaluation
 
             IEnumerable<ToolsetPropertyDefinition> rawProperties = GetPropertyDefinitions(toolsVersion.Name);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties, FileSystems.Default);
 
             foreach (ToolsetPropertyDefinition property in rawProperties)
             {
@@ -677,7 +677,7 @@ namespace Microsoft.Build.Evaluation
 
             if (accumulateProperties)
             {
-                expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties);
+                expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties, FileSystems.Default);
             }
         }
 
