@@ -136,7 +136,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
   </Target>
 
-  <Target Name="RemoveZipFileSuggestedRedirect"
+  <!-- There was issue in .NET 4.7.1 where System.IO.Compression.ZipFile was not correctly in the unification table.
+       A workaround to issues that caused was to add a binding redirect for the assembly from version 4.0.3.0 down to
+       4.0.0.0.  However, with the fix to dotnet/sdk#2221, ResolveAssemblyReference now sees a conflicting version for
+       the assembly, and suggests a redirect to 4.0.3.0.  With automatic binding redirection, this overrides the redirect
+       to 4.0.0.0, which causes a runtime failure.
+       
+       So here we disable any suggested binding redirect for System.IO.Compression.ZipFile.  Assemblies in the unification
+       table generally should not need binding redirects, so it should be OK to do this for 4.7.2 and forward, and on 4.7.1
+       the assembly isn't in the unification table so this allows the original workaround redirect to be preserved. -->
+  <Target Name="_RemoveZipFileSuggestedRedirect"
           BeforeTargets="GenerateBindingRedirects"
           DependsOnTargets="ResolveAssemblyReferences"
           Condition="'$(_TargetFrameworkVersionWithoutV)' &gt;= '4.7.1' And '$(AllowZipFileRedirect)' != 'true'">
