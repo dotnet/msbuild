@@ -343,7 +343,7 @@ namespace Microsoft.Build.Framework
     public partial class MetaProjectGeneratedEventArgs : Microsoft.Build.Framework.BuildMessageEventArgs
     {
         public string metaProjectPath;
-        public MetaProjectGeneratedEventArgs(string metaProjectPath) { }
+        public MetaProjectGeneratedEventArgs(string metaProjectPath, string message) { }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(128), AllowMultiple=false, Inherited=false)]
     public sealed partial class OutputAttribute : System.Attribute

@@ -911,7 +911,8 @@ namespace Microsoft.Build.Construction
         {
             string filePath = Environment.GetEnvironmentVariable("MSBuildEmitSolution") == null ? Path.GetTempFileName() : metaProjectPath;
             metaProject.Save(filePath);
-            var eventArgs = new MetaProjectGeneratedEventArgs(metaProjectPath)
+            string message = ResourceUtilities.GetResourceString("MetaprojectGenerated");
+            var eventArgs = new MetaProjectGeneratedEventArgs(metaProjectPath, message)
             {
                 BuildEventContext = _projectBuildEventContext,
                 ProjectFile = filePath,
