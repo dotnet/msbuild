@@ -149,7 +149,7 @@
   <data name="CannotExpandItemMetadata" UESanitized="false" Visibility="Public">
     <value>MSB4248: Cannot expand metadata in expression "{0}". {1}</value>
     <comment>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
-    %(RootDir) to an item-spec that's not a valid path, would result in this error.
+    %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
   </data>
   <data name="CouldNotFindMSBuildExe">
