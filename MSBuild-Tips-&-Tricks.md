@@ -58,3 +58,10 @@ Create this file (Custom.props) in `C:\Users\username\AppData\Local\Microsoft\MS
 ```
 
 then build any project. It will have MyCustomProperty set to Value!
+
+# Diagnose WPF temporary assembly compilation issues
+
+Set the property `GenerateTemporaryTargetAssemblyDebuggingInformation` on the `GenerateTemporaryTargetAssembly` task:
+https://referencesource.microsoft.com/#PresentationBuildTasks/BuildTasks/Microsoft/Build/Tasks/Windows/GenerateTemporaryTargetAssembly.cs,4571677f19ba0d24,references
+
+If this is set, the .tmp_proj generated during XAML project build will not be deleted and will be available for inspection.
