@@ -756,12 +756,13 @@ namespace Microsoft.Build.Shared
 
                 if (!Is64BitProcess)
                 {
-                    //32 bit processes do not have access to system32. to get time for files there we must remap to a special
-                    string windowsDirectory = Environment.SystemDirectory.ToLowerInvariant();
-                    string fullPathUpper = fullPath.ToLowerInvariant();
+                    //32 bit processes do not have access to system32. to get time for files there we must remap to a special dir
+                    string windowsDirectory = Environment.SystemDirectory;
 
-                    if (fullPathUpper.StartsWith(windowsDirectory))
+                    if (fullPath.StartsWith(windowsDirectory, StringComparison.InvariantCultureIgnoreCase))
                     {
+                        string fullPathUpper = fullPath.ToLowerInvariant();
+                        windowsDirectory = windowsDirectory.ToLowerInvariant();
                         fullPath = fullPathUpper.Replace("system32", "sysnative");
                     }
                 }
@@ -910,12 +911,13 @@ namespace Microsoft.Build.Shared
 
                 if (!Is64BitProcess)
                 {
-                    //32 bit processes do not have access to system32. to get time for files there we must remap to a special
-                    string windowsDirectory = Environment.SystemDirectory.ToLowerInvariant();
-                    string fullPathUpper = fullPath.ToLowerInvariant();
+                    //32 bit processes do not have access to system32. to get time for files there we must remap to a special dir
+                    string windowsDirectory = Environment.SystemDirectory;
 
-                    if (fullPathUpper.StartsWith(windowsDirectory))
+                    if (fullPath.StartsWith(windowsDirectory, StringComparison.InvariantCultureIgnoreCase))
                     {
+                        string fullPathUpper = fullPath.ToLowerInvariant();
+                        windowsDirectory = windowsDirectory.ToLowerInvariant();
                         fullPath = fullPathUpper.Replace("system32", "sysnative");
                     }
                 }
