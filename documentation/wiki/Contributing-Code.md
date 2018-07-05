@@ -34,11 +34,3 @@ Please follow these guidelines when creating new issues in the issue tracker:
 
 ### Coding Conventions
 - Use the coding style outlined in the [.Net Foundation Coding Guidelines](https://github.com/dotnet/corefx/wiki/Contributing#c-coding-style)
-
-## Code Formatter
-
-The MSBuild team regularly uses the [.NET code formatter tool](https://github.com/dotnet/codeformatter) to ensure the code base maintains a consistent style over time.  Run:
-```
-CodeFormatter.exe <path to MSBuild.sln>
-```
-This should be done before starting a pull request.
