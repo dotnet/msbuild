@@ -809,7 +809,7 @@
   </data>
     <data name="AspNetCompiler.40NotInstalled">
     <value>MSB4205: The website project in this solution is targeting the v4.0 runtime, but it is not installed.</value>
-    <comment>{StrBegin="MSB4205: "}</comment>
+    <comment>{StrBegin="MSB4249: "}</comment>
   </data>
   <data name="AspNetCompiler.InvalidTargetFrameworkMonikerFromException">
     <value>MSB4204: {0}: Invalid TargetFrameworkMoniker {1}. {2}.</value>
@@ -1702,7 +1702,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4249.
+        Next message code should be MSB4250.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
