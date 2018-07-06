@@ -1,3 +1,9 @@
+Build Status
+
+|Windows|Mac|Linux|
+|:------:|:------:|:------:|
+|[![Build status](https://dotnet.visualstudio.com/public/_apis/build/status/websdk_windows?branch=master)](https://dotnet.visualstudio.com/public/_build/latest?definitionId=94&branch=master)|[![Build status](https://dotnet.visualstudio.com/public/_apis/build/status/websdk_mac?branch=master)](https://dotnet.visualstudio.com/public/_build/latest?definitionId=95&branch=master)|[![Build status](https://dotnet.visualstudio.com/public/_apis/build/status/websdk_linux?branch=master)](https://dotnet.visualstudio.com/public/_build/latest?definitionId=96&branch=master)|
+
 Microsoft.NET.Sdk.Web
 ======================
 ASP.NET websdk repo contains the tasks, targets and packages required to build and publish Web Applications.
