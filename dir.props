@@ -414,6 +414,7 @@
 
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
+    <IBCMergeBranch>svc/d15rtwsvc</IBCMergeBranch>
   </PropertyGroup>
 
 </Project>
