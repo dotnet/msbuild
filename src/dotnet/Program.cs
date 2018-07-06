@@ -149,6 +149,8 @@ namespace Microsoft.DotNet.Cli
                         bool skipFirstRunExperience =
                             environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
 
+                        ReportDotnetHomeUsage(environmentProvider);
+
                         topLevelCommandParserResult = new TopLevelCommandParserResult(command);
                         var hasSuperUserAccess = false;
                         if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
@@ -227,6 +229,21 @@ namespace Microsoft.DotNet.Cli
                 exitCode = result.ExitCode;
             }
             return exitCode;
+        }
+
+        private static void ReportDotnetHomeUsage(IEnvironmentProvider provider)
+        {
+            var home = provider.GetEnvironmentVariable(CliFolderPathCalculator.DotnetHomeVariableName);
+            if (string.IsNullOrEmpty(home))
+            {
+                return;
+            }
+
+            Reporter.Verbose.WriteLine(
+                string.Format(
+                    LocalizableStrings.DotnetCliHomeUsed,
+                    home,
+                    CliFolderPathCalculator.DotnetHomeVariableName));
         }
 
         private static bool IsDotnetBeingInvokedFromNativeInstaller(TopLevelCommandParserResult parseResult)

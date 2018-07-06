@@ -268,6 +268,11 @@ dotnet tool install --global {1}</source>
 dotnet 工具安装 -- 全局 {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetCliHomeUsed">
+        <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
+        <target state="new">Using home directory '{0}' set by the '{1}' environment variable.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

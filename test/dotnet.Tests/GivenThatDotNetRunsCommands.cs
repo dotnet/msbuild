@@ -49,5 +49,23 @@ namespace Microsoft.DotNet.Tests
                 .And
                 .HaveStdErrContaining(CliFolderPathCalculator.DotnetHomeVariableName);
         }
+
+        [Fact]
+        public void GivenASpecifiedDotnetCliHomeVariableItPrintsUsageMessage()
+        {
+            var home = Path.Combine(TempRoot.Root, Path.GetRandomFileName());
+
+            new TestCommand("dotnet")
+                .WithEnvironmentVariable(CliFolderPathCalculator.DotnetHomeVariableName, home)
+                .ExecuteWithCapturedOutput("-d help")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(
+                    string.Format(
+                        LocalizableStrings.DotnetCliHomeUsed,
+                        home,
+                        CliFolderPathCalculator.DotnetHomeVariableName));
+        }
     }
 }
