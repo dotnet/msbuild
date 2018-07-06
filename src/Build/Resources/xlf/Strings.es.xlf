@@ -8,6 +8,11 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
+      <trans-unit id="AspNetCompiler.40NotInstalled">
+        <source>MSB4205: The website project in this solution is targeting the v4.0 runtime, but it is not installed.</source>
+        <target state="new">MSB4205: The website project in this solution is targeting the v4.0 runtime, but it is not installed.</target>
+        <note>{StrBegin="MSB4205: "}</note>
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: No se pudieron recuperar los atributos de los parámetros de la tarea "{0}". {1}</target>

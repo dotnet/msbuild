@@ -2023,8 +2023,13 @@ EndGlobal
                 ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
-
+#if !FEATURE_INSTALLED_MSBUILD
+                Assert.Throws<InvalidProjectFileException>(() => {
+#endif
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+#if !FEATURE_INSTALLED_MSBUILD
+                });
+#endif
                 Version ver = new Version("4.34");
                 string message = ResourceUtilities.FormatResourceString("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
                 logger.AssertLogContains(message);

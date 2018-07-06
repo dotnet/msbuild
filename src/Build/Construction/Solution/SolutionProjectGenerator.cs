@@ -1397,39 +1397,13 @@ namespace Microsoft.Build.Construction
                 if (String.Equals(targetFramework.Identifier, ".NETFramework", StringComparison.OrdinalIgnoreCase))
                 {
                     isDotNetFramework = true;
-
-                    // As of .NET Framework 4.0, there are only two versions of aspnet_compiler.exe: 2.0 and 4.0.  If 
-                    // the TargetFrameworkVersion is less than 4.0, use the 2.0 version.  Otherwise, just use the 4.0
-                    // version of the executable, so that if say FV 4.1 is passed in, we don't throw an error.
-                    if (targetFramework.Version.Major >= 4)
+                    if (targetFramework.Version > _version40)
                     {
-                        newTask.SetParameter
-                            (
-                                "ToolPath",
-                                FrameworkLocationHelper.GetPathToDotNetFramework(_version40)
-                            );
-
-                        if (targetFramework.Version > _version40)
-                        {
-                            _loggingService.LogComment(_projectBuildEventContext, MessageImportance.Low,
-                                "AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", project.ProjectName,
-                                targetFramework.Version.ToString());
-                        }
+                        _loggingService.LogComment(_projectBuildEventContext, MessageImportance.Low,
+                            "AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", project.ProjectName,
+                            targetFramework.Version.ToString());
                     }
-                    else
-                    {
-                        string pathTo20 = FrameworkLocationHelper.GetPathToDotNetFramework(_version20);
-
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(pathTo20 != null,
-                            "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(_solutionFile.FullPath),
-                            "AspNetCompiler.20NotInstalled");
-
-                        newTask.SetParameter
-                            (
-                                "ToolPath",
-                                pathTo20
-                            );
-                    }
+                    SetToolPathForAspNetCompilerTask(newTask, targetFramework);
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -1457,6 +1431,23 @@ namespace Microsoft.Build.Construction
                        project.TargetFrameworkMoniker
                        );
             }
+        }
+
+        // As of .NET Framework 4.0, there are only two versions of aspnet_compiler.exe: 2.0 and 4.0.  If 
+        // the TargetFrameworkVersion is less than 4.0, use the 2.0 version.  Otherwise, just use the 4.0
+        // version of the executable, so that if say FV 4.1 is passed in, we don't throw an error.
+        private void SetToolPathForAspNetCompilerTask(ProjectTaskInstance task, FrameworkName targetFramework)
+        {
+            bool shouldDefaultToVersion40 = targetFramework.Version.Major >= 4;
+            Version aspnetCompilerVersion = shouldDefaultToVersion40 ? _version40 : _version20;
+            string aspnetCompilerPath = FrameworkLocationHelper.GetPathToDotNetFramework(aspnetCompilerVersion);
+
+            string resourceName = shouldDefaultToVersion40 ? "AspNetCompiler.40NotInstalled" : "AspNetCompiler.20NotInstalled";
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(aspnetCompilerPath != null,
+                "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(_solutionFile.FullPath),
+                resourceName);
+
+            task.SetParameter("ToolPath", aspnetCompilerPath);
         }
 
         /// <summary>
