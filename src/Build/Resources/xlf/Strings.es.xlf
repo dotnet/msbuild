@@ -11,7 +11,7 @@
       <trans-unit id="AspNetCompiler.40NotInstalled">
         <source>MSB4205: The website project in this solution is targeting the v4.0 runtime, but it is not installed.</source>
         <target state="new">MSB4205: The website project in this solution is targeting the v4.0 runtime, but it is not installed.</target>
-        <note>{StrBegin="MSB4205: "}</note>
+        <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
