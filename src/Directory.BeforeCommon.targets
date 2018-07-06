@@ -6,6 +6,7 @@
 
   <PropertyGroup>
     <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
+    <PublishDir>$(OutputPath)$(TargetFramework.ToLowerInvariant())\publish</PublishDir>
     <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
   </PropertyGroup>
 
