@@ -744,8 +744,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (IsDangerous(source.ItemSpec))
                         {
-                            // Log.LogErrorWithCodeFromResources("GenerateResource.MOTW", source.ItemSpec);
-                            Log.LogError(null, "MSB3821", null, null, 0,0,0,0, string.Format("Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.", source.ItemSpec));
+                            Log.LogErrorWithCodeFromResources("GenerateResource.MOTW", source.ItemSpec);
                             dangerousResourceFound = true;
                         }
                     }

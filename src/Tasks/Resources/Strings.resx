@@ -1096,10 +1096,10 @@
     <value>MSB3820: The path needed to store build-related temporary files is too long.  Try your project in a shorter directory, or rename some of your resources.  The full path was "{0}".</value>
     <comment>{StrBegin="MSB3820: "}</comment>
   </data>
-  <!-- <data name="GenerateResource.MOTW">
+  <data name="GenerateResource.MOTW">
     <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</value>
-    <comment>{StrBegin="MSB3821: "} "Internet zone" and "Restricted zone" are Windows concepts that may have a specific translation. Do not localize "AllowUntrustedFiles" or "true"; they're a metadata name and a boolean input.</comment>
-  </data> -->
+    <comment>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</comment>
+  </data>
 
 
 
