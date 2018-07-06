@@ -42,6 +42,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
         private string _originalVisualStudioVersion = null;
 
+        private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
+
         public SolutionProjectGenerator_Tests(ITestOutputHelper output)
         {
             this.output = output;
@@ -147,9 +149,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", buildEventContext, CreateMockLoggingService());
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal("3.5", instances[0].ToolsVersion);
         }
@@ -184,9 +185,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", buildEventContext, CreateMockLoggingService());
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal("3.5", instances[0].ToolsVersion);
         }
@@ -214,9 +214,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, buildEventContext, CreateMockLoggingService());
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
 
@@ -257,9 +256,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, buildEventContext, CreateMockLoggingService());
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
 
@@ -294,9 +292,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, buildEventContext, CreateMockLoggingService());
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
             Assert.Equal("ABC", instances[0].SubToolsetVersion);
@@ -397,8 +394,6 @@ namespace Microsoft.Build.UnitTests.Construction
 
             string previousLegacyEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
 
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
-
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
@@ -412,7 +407,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                     sp.FullPath = solutionFile;
                     sp.ParseSolutionFile();
-                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, buildEventContext, CreateMockLoggingService());
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
 
                     MockLogger logger = new MockLogger(output);
                     List<ILogger> loggers = new List<ILogger>(1);
@@ -434,7 +429,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 sp1.FullPath = solutionFileMultipleProjects;
                 sp1.ParseSolutionFile();
 
-                ProjectInstance[] instances1 = SolutionProjectGenerator.Generate(sp1, null, null, buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances1 = SolutionProjectGenerator.Generate(sp1, null, null, _buildEventContext, CreateMockLoggingService());
 
                 MockLogger logger1 = new MockLogger(output);
                 List<ILogger> loggers1 = new List<ILogger>(1);
@@ -498,9 +493,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 sp.FullPath = solutionFile;
                 sp.ParseSolutionFile();
 
-                var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
-
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
 
                 Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
                 Assert.Equal("11.0", instances[0].SubToolsetVersion);
@@ -563,8 +556,7 @@ EndGlobal
 ".Replace("`", "\"");
 
                 SolutionFile sp = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-                var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
             }
            );
         }
@@ -798,9 +790,8 @@ EndGlobal
             ObjectModelHelpers.CreateFileInTempProjectDirectory("D.csproj", projectDeltaFileContents);
             var solution = new SolutionFile { FullPath = solutionFile };
             solution.ParseSolutionFile();
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            var instances = SolutionProjectGenerator.Generate(solution, null, null, buildEventContext, CreateMockLoggingService());
+            var instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             var projectBravoMetaProject = instances[1];
             Assert.False(projectBravoMetaProject.Targets.Any(kvp => kvp.Value.Outputs.Equals("@()"))); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
@@ -1015,9 +1006,8 @@ EndGlobal
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
             var solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, buildEventContext, CreateMockLoggingService())[0];
+            var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService())[0];
 
             foreach (ITaskItem item in instance.Items)
             {
@@ -1084,9 +1074,8 @@ EndGlobal
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, buildEventContext, CreateMockLoggingService());
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService());
 
             int i = 0;
             foreach (ProjectInstance instance in instances)
@@ -1159,13 +1148,12 @@ EndGlobal
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
             string[] solutionToolsVersions = { "4.0", ObjectModelHelpers.MSBuildDefaultToolsVersion };
 
             foreach (string solutionToolsVersion in solutionToolsVersions)
             {
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, solutionToolsVersion, buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, solutionToolsVersion, _buildEventContext, CreateMockLoggingService());
 
                 Assert.Equal(2, instances.Length);
 
@@ -1221,14 +1209,13 @@ EndGlobal
 
             ProjectInstance[] instances = null;
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
             bool caughtException = false;
 
             try
             {
                 // SolutionProjectGenerator.Generate() is used at build-time, and creates evaluation- and 
                 // execution-model projects; as such it will throw if fed an explicitly invalid toolsversion
-                instances = SolutionProjectGenerator.Generate(solution, null, "invalid", buildEventContext, CreateMockLoggingService());
+                instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
             }
             catch (InvalidProjectFileException)
             {
@@ -2044,7 +2031,7 @@ EndGlobal
                 ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
 
                 Version ver = new Version("4.34");
                 string message = ResourceUtilities.FormatResourceString("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
