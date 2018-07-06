@@ -113,6 +113,15 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 sourceProject = Path.Combine(sourceProjectBase, "NetFrameworkProject", "NetFrameworkProject.csproj");
             }
 
+            //  Copy any additional files from template
+            foreach (var file in Directory.GetFiles(Path.GetDirectoryName(sourceProject)))
+            {
+                if (file != sourceProject)
+                {
+                    File.Copy(file, Path.Combine(targetFolder, Path.GetFileName(file)));
+                }
+            }
+
             var projectXml = XDocument.Load(sourceProject);
 
             var ns = projectXml.Root.Name.Namespace;
