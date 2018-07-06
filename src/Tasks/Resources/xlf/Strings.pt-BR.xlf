@@ -971,7 +971,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
-        <target state="new">MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</target>
+        <target state="translated">MSB3821: não foi possível processar o arquivo {0} porque ele está na Internet ou na zona restrita ou tem a marca da Web no arquivo. Remova a marca da Web se você quiser processar esses arquivos.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
