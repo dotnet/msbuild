@@ -117,7 +117,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
         // TODO: rework this method... it's a bit of a god-method, for very specific purposes.
         // Number of times I've deferred on reworking this method: 4
-        internal static TemplateUsageInformation GetTemplateUsageInformation(ITemplateInfo templateInfo, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
+        internal static TemplateUsageInformation? GetTemplateUsageInformation(ITemplateInfo templateInfo, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
         {
             IParameterSet allParams;
             IReadOnlyList<string> userParamsWithInvalidValues;
@@ -125,6 +125,12 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             bool hasPostActionScriptRunner;
 
             ITemplate template = environmentSettings.SettingsLoader.LoadTemplate(templateInfo, commandInput.BaselineName);
+
+            if (template == null)
+            {
+                return null;
+            }
+
             TemplateListResolver.ParseTemplateArgs(templateInfo, hostDataLoader, commandInput);
             allParams = templateCreator.SetupDefaultParamValuesFromTemplateAndHost(template, template.DefaultName ?? "testName", out IReadOnlyList<string> defaultParamsWithInvalidValues);
             templateCreator.ResolveUserParameters(template, allParams, commandInput.InputTemplateParams, out userParamsWithInvalidValues);

@@ -24,12 +24,19 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             IReadOnlyList<ITemplateInfo> templateInfoList = templateGroup.Select(x => x.Info).ToList();
             ShowTemplateDetailHeaders(templateInfoList);
 
-            TemplateGroupParameterDetails groupParameterDetails = DetermineParameterDispositionsForTemplateGroup(templateInfoList, environmentSettings, commandInput, hostDataLoader, templateCreator);
+            TemplateGroupParameterDetails? groupParameterDetails = DetermineParameterDispositionsForTemplateGroup(templateInfoList, environmentSettings, commandInput, hostDataLoader, templateCreator);
 
-            // get the input params valid for any param in the group
-            IReadOnlyDictionary<string, string> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
+            if (groupParameterDetails != null)
+            {
+                // get the input params valid for any param in the group
+                IReadOnlyDictionary<string, string> inputTemplateParams = CoalesceInputParameterValuesFromTemplateGroup(templateGroup);
 
-            ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails, environmentSettings);
+                ShowParameterHelp(inputTemplateParams, showImplicitlyHiddenParams, groupParameterDetails.Value, environmentSettings);
+            }
+            else
+            {
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, commandInput.CommandName).Bold().Red());
+            }
         }
 
         private static void ShowTemplateDetailHeaders(IReadOnlyList<ITemplateInfo> templateGroup)
@@ -260,7 +267,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             return inputValues;
         }
 
-        private static TemplateGroupParameterDetails DetermineParameterDispositionsForTemplateGroup(IReadOnlyList<ITemplateInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
+        private static TemplateGroupParameterDetails? DetermineParameterDispositionsForTemplateGroup(IReadOnlyList<ITemplateInfo> templateGroup, IEngineEnvironmentSettings environmentSettings, INewCommandInput commandInput, IHostSpecificDataLoader hostDataLoader, TemplateCreator templateCreator)
         {
             HashSet<string> groupUserParamsWithInvalidValues = new HashSet<string>(StringComparer.Ordinal);
             bool groupHasPostActionScriptRunner = false;
@@ -277,7 +284,14 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             foreach (ITemplateInfo templateInfo in templateGroup.OrderByDescending(x => x.Precedence))
             {
-                TemplateUsageInformation usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(templateInfo, environmentSettings, commandInput, hostDataLoader, templateCreator);
+                TemplateUsageInformation? usageInformationNullable = TemplateUsageHelp.GetTemplateUsageInformation(templateInfo, environmentSettings, commandInput, hostDataLoader, templateCreator);
+
+                if (usageInformationNullable == null)
+                {
+                    return null;
+                }
+
+                TemplateUsageInformation usageInformation = usageInformationNullable.Value;
                 HostSpecificTemplateData hostSpecificTemplateData = hostDataLoader.ReadHostSpecificTemplateData(templateInfo);
                 HashSet<string> parametersToExplicitlyHide = hostSpecificTemplateData?.HiddenParameterNames ?? new HashSet<string>(StringComparer.Ordinal);
 

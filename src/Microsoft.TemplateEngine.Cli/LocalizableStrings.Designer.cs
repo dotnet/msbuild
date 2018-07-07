@@ -62,6 +62,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Action would have been taken automatically:.
+        /// </summary>
+        public static string ActionWouldHaveBeenTakenAutomatically {
+            get {
+                return ResourceManager.GetString("ActionWouldHaveBeenTakenAutomatically", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to add project(s) {0} to solution file {1}.
         /// </summary>
         public static string AddProjToSlnPostActionFailed {
@@ -555,7 +564,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Commit Hash: {0}.
+        ///   Looks up a localized string similar to Commit Hash:.
         /// </summary>
         public static string CommitHash {
             get {
@@ -700,6 +709,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Displays a summary of what would happen if the given command line were run if it would result in a template creation..
+        /// </summary>
+        public static string DryRunDescription {
+            get {
+                return ResourceManager.GetString("DryRunDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to After expanding the extra args files, the command is:
         ///    dotnet {0}.
         /// </summary>
@@ -724,6 +742,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string Factory {
             get {
                 return ResourceManager.GetString("Factory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File actions would have been taken:.
+        /// </summary>
+        public static string FileActionsWouldHaveBeenTaken {
+            get {
+                return ResourceManager.GetString("FileActionsWouldHaveBeenTaken", resourceCulture);
             }
         }
         
@@ -875,7 +902,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the language of the template to create..
+        ///   Looks up a localized string similar to Filters templates based on language and specifies the language of the template to create..
         /// </summary>
         public static string LanguageParameter {
             get {
@@ -907,6 +934,15 @@ namespace Microsoft.TemplateEngine.Cli {
         public static string MissingRequiredParameter {
             get {
                 return ResourceManager.GetString("MissingRequiredParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to locate the specified template content, the template cache may be corrupted. Try running &apos;dotnet {0} --debug:reinit&apos; to fix the issue..
+        /// </summary>
+        public static string MissingTemplateContentDetected {
+            get {
+                return ResourceManager.GetString("MissingTemplateContentDetected", resourceCulture);
             }
         }
         
@@ -1479,7 +1515,7 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  Version:     {0}.
+        ///   Looks up a localized string similar to Version:.
         /// </summary>
         public static string Version {
             get {

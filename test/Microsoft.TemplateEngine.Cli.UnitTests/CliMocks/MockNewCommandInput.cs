@@ -52,6 +52,8 @@ namespace Microsoft.TemplateEngine.Cli.UnitTests.CliMocks
 
         public IList<string> ToUninstallList { get; set; }
 
+        public bool IsDryRun { get; set; }
+
         public bool IsForceFlagSpecified { get; set; }
 
         public bool IsHelpFlagSpecified { get; set; }

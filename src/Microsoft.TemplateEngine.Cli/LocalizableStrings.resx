@@ -554,10 +554,10 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
     <value>Some partially matched templates may not support these input switches:</value>
   </data>
   <data name="CommitHash" xml:space="preserve">
-    <value> Commit Hash: {0}</value>
+    <value>Commit Hash:</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value> Version:     {0}</value>
+    <value>Version:</value>
   </data>
   <data name="InstalledItems" xml:space="preserve">
     <value>Currently installed items:</value>
@@ -606,5 +606,17 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   </data>
   <data name="SwitchWithoutValueDefaultFootnote" xml:space="preserve">
     <value>* Indicates the value used if the switch is provided without a value.</value>
+  </data>
+  <data name="DryRunDescription" xml:space="preserve">
+    <value>Displays a summary of what would happen if the given command line were run if it would result in a template creation.</value>
+  </data>
+  <data name="ActionWouldHaveBeenTakenAutomatically" xml:space="preserve">
+    <value>Action would have been taken automatically:</value>
+  </data>
+  <data name="FileActionsWouldHaveBeenTaken" xml:space="preserve">
+    <value>File actions would have been taken:</value>
+  </data>
+  <data name="MissingTemplateContentDetected" xml:space="preserve">
+    <value>Unable to locate the specified template content, the template cache may be corrupted. Try running 'dotnet {0} --debug:reinit' to fix the issue.</value>
   </data>
 </root>

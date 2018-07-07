@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.Mount;
+using Microsoft.TemplateEngine.Abstractions.TemplateUpdates;
 using Microsoft.TemplateEngine.Cli.CommandParsing;
 using Microsoft.TemplateEngine.Cli.HelpAndUsage;
 using Microsoft.TemplateEngine.Edge;
@@ -243,7 +244,7 @@ namespace Microsoft.TemplateEngine.Cli
 
             try
             {
-                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, templateMatchDetails.GetValidTemplateParameters(), _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified, _commandInput.BaselineName).ConfigureAwait(false);
+                instantiateResult = await _templateCreator.InstantiateAsync(template, _commandInput.Name, fallbackName, _commandInput.OutputPath, templateMatchDetails.GetValidTemplateParameters(), _commandInput.SkipUpdateCheck, _commandInput.IsForceFlagSpecified, _commandInput.BaselineName, _commandInput.IsDryRun).ConfigureAwait(false);
             }
             catch (ContentGenerationException cx)
             {
@@ -266,9 +267,20 @@ namespace Microsoft.TemplateEngine.Cli
             switch (instantiateResult.Status)
             {
                 case CreationResultStatus.Success:
-                    Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+                    if (!_commandInput.IsDryRun)
+                    {
+                        Reporter.Output.WriteLine(string.Format(LocalizableStrings.CreateSuccessful, resultTemplateName));
+                    }
+                    else
+                    {
+                        Reporter.Output.WriteLine(LocalizableStrings.FileActionsWouldHaveBeenTaken);
+                        foreach (IFileChange change in instantiateResult.CreationEffects.FileChanges)
+                        {
+                            Reporter.Output.WriteLine($"  {change.ChangeKind}: {change.TargetRelativePath}");
+                        }
+                    }
 
-                    if(!string.IsNullOrEmpty(template.ThirdPartyNotices))
+                    if (!string.IsNullOrEmpty(template.ThirdPartyNotices))
                     {
                         Reporter.Output.WriteLine(string.Format(LocalizableStrings.ThirdPartyNotices, template.ThirdPartyNotices));
                     }
@@ -299,11 +311,23 @@ namespace Microsoft.TemplateEngine.Cli
                     break;
                 case CreationResultStatus.OperationNotSpecified:
                     break;
+                case CreationResultStatus.NotFound:
+                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, CommandName).Bold().Red());
+                    break;
                 case CreationResultStatus.InvalidParamValues:
-                    TemplateUsageInformation usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, EnvironmentSettings, _commandInput, _hostDataLoader, _templateCreator);
-                    string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.InvalidParameters);
-                    Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
-                    Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
+                    TemplateUsageInformation? usageInformation = TemplateUsageHelp.GetTemplateUsageInformation(template, EnvironmentSettings, _commandInput, _hostDataLoader, _templateCreator);
+
+                    if (usageInformation != null)
+                    {
+                        string invalidParamsError = InvalidParameterInfo.InvalidParameterListToString(usageInformation.Value.InvalidParameters);
+                        Reporter.Error.WriteLine(invalidParamsError.Bold().Red());
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunHelpForInformationAboutAcceptedParameters, $"{CommandName} {TemplateName}").Bold().Red());
+                    }
+                    else
+                    {
+                        Reporter.Error.WriteLine(string.Format(LocalizableStrings.MissingTemplateContentDetected, CommandName).Bold().Red());
+                        return CreationResultStatus.NotFound;
+                    }
                     break;
                 default:
                     break;
@@ -338,7 +362,7 @@ namespace Microsoft.TemplateEngine.Cli
                 scriptRunSettings = AllowPostActionsSetting.Prompt;
             }
 
-            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult, scriptRunSettings);
+            PostActionDispatcher postActionDispatcher = new PostActionDispatcher(EnvironmentSettings, creationResult, scriptRunSettings, _commandInput.IsDryRun);
             postActionDispatcher.Process(_inputGetter);
         }
 
@@ -390,9 +414,41 @@ namespace Microsoft.TemplateEngine.Cli
                     Console.WriteLine();
                     Console.WriteLine(LocalizableStrings.InstalledItems);
 
-                    foreach (string value in _settingsLoader.InstallUnitDescriptorCache.InstalledItems.Values)
+                    foreach (KeyValuePair<Guid, string> entry in _settingsLoader.InstallUnitDescriptorCache.InstalledItems)
                     {
-                        Console.WriteLine($" {value}");
+                        Console.WriteLine($"  {entry.Value}");
+
+                        if (_settingsLoader.InstallUnitDescriptorCache.Descriptors.TryGetValue(entry.Value, out IInstallUnitDescriptor descriptor))
+                        {
+                            if (descriptor.Details != null && descriptor.Details.TryGetValue("Version", out string versionValue))
+                            {
+                                Console.WriteLine($"    {LocalizableStrings.Version} {versionValue}");
+                            }
+                        }
+
+                        HashSet<string> displayStrings = new HashSet<string>(StringComparer.Ordinal);
+
+                        foreach (TemplateInfo info in _settingsLoader.UserTemplateCache.TemplateInfo.Where(x => x.ConfigMountPointId == entry.Key))
+                        {
+                            string str = $"      {info.Name} ({info.ShortName})";
+
+                            if (info.Tags != null && info.Tags.TryGetValue("language", out ICacheTag languageTag))
+                            {
+                                str += " " + string.Join(", ", languageTag.ChoicesAndDescriptions.Select(x => x.Key));
+                            }
+
+                            displayStrings.Add(str);
+                        }
+
+                        if (displayStrings.Count > 0)
+                        {
+                            Console.WriteLine($"    {LocalizableStrings.Templates}:");
+
+                            foreach (string displayString in displayStrings)
+                            {
+                                Console.WriteLine(displayString);
+                            }
+                        }
                     }
 
                     return CreationResultStatus.Success;
@@ -782,8 +838,9 @@ namespace Microsoft.TemplateEngine.Cli
         {
             Reporter.Output.WriteLine(LocalizableStrings.CommandDescription);
             Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.Version, GitInfo.PackageVersion));
-            Reporter.Output.WriteLine(string.Format(LocalizableStrings.CommitHash, GitInfo.CommitHash));
+            int targetLength = Math.Max(LocalizableStrings.Version.Length, LocalizableStrings.CommitHash.Length);
+            Reporter.Output.WriteLine($" {LocalizableStrings.Version.PadRight(targetLength)} {GitInfo.PackageVersion}");
+            Reporter.Output.WriteLine($" {LocalizableStrings.CommitHash.PadRight(targetLength)} {GitInfo.CommitHash}");
         }
 
         private static bool ValidateLocaleFormat(string localeToCheck)

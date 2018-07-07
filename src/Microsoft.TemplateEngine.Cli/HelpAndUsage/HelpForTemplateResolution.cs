@@ -144,7 +144,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
             }
             else if (commandInput.IsListFlagSpecified || commandInput.IsHelpFlagSpecified)
             {
-                return CreationResultStatus.Success;
+                return !templateResolutionResult.IsNoTemplatesMatchedState ? CreationResultStatus.Success :  CreationResultStatus.NotFound;
             }
             else
             {
@@ -298,56 +298,17 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 return;
             }
 
-            GetContextBasedAndOtherPartialMatches(templateResolutionResult, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups);
-            DisplayPartialNameMatchAndContextProblems(templateName, context, contextProblemMatchGroups, remainingPartialMatchGroups);
+            DisplayPartialNameMatchAndContextProblems(templateName, context, templateResolutionResult);
         }
 
-        private static void GetContextBasedAndOtherPartialMatches(TemplateListResolutionResult templateResolutionResult, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, out IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups)
+        private static void DisplayPartialNameMatchAndContextProblems(string templateName, string context, TemplateListResolutionResult templateResolutionResult)
         {
-            Dictionary<string, List<ITemplateMatchInfo>> contextProblemMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
-            Dictionary<string, List<ITemplateMatchInfo>> remainingPartialMatches = new Dictionary<string, List<ITemplateMatchInfo>>();
-
-            // this filtering / grouping ignores language differences.
-            foreach (ITemplateMatchInfo template in templateResolutionResult.GetBestTemplateMatchList(true))
-            {
-                if (template.MatchDisposition.Any(x => x.Location == MatchLocation.Context && x.Kind != MatchKind.Exact))
-                {
-                    if (!contextProblemMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
-                    {
-                        templateGroup = new List<ITemplateMatchInfo>();
-                        contextProblemMatches.Add(template.Info.GroupIdentity, templateGroup);
-                    }
-
-                    templateGroup.Add(template);
-                }
-                else if (!templateResolutionResult.UsingContextMatches
-                    && template.MatchDisposition.Any(t => t.Location != MatchLocation.Context && t.Kind != MatchKind.Mismatch && t.Kind != MatchKind.Unspecified))
-                {
-                    if (!remainingPartialMatches.TryGetValue(template.Info.GroupIdentity, out List<ITemplateMatchInfo> templateGroup))
-                    {
-                        templateGroup = new List<ITemplateMatchInfo>();
-                        remainingPartialMatches.Add(template.Info.GroupIdentity, templateGroup);
-                    }
-
-                    templateGroup.Add(template);
-                }
-            }
-
-            // context mismatches from the "matched" templates
-            contextProblemMatchGroups = contextProblemMatches.Values.ToList();
-
-            // other templates with anything matching
-            remainingPartialMatchGroups = remainingPartialMatches.Values.ToList();
-        }
-
-        private static void DisplayPartialNameMatchAndContextProblems(string templateName, string context, IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> contextProblemMatchGroups, IReadOnlyList<IReadOnlyList<ITemplateMatchInfo>> remainingPartialMatchGroups)
-        {
-            if (contextProblemMatchGroups.Count + remainingPartialMatchGroups.Count > 1)
+            if (templateResolutionResult.IsTemplateAmbiguous)
             {
                 // Unable to determine the desired template from the input template name: {0}..
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.AmbiguousInputTemplateName, templateName).Bold().Red());
             }
-            else if (contextProblemMatchGroups.Count + remainingPartialMatchGroups.Count == 0)
+            else if (templateResolutionResult.IsNoTemplatesMatchedState)
             {
                 // No templates matched the input template name: {0}
                 Reporter.Error.WriteLine(string.Format(LocalizableStrings.NoTemplatesMatchName, templateName).Bold().Red());
@@ -357,7 +318,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
 
             bool anythingReported = false;
 
-            foreach (IReadOnlyList<ITemplateMatchInfo> templateGroup in contextProblemMatchGroups)
+            foreach (IReadOnlyList<ITemplateMatchInfo> templateGroup in templateResolutionResult.ContextProblemMatchGroups)
             {
                 // all templates in a group should have the same context & name
                 if (templateGroup[0].Info.Tags != null && templateGroup[0].Info.Tags.TryGetValue("type", out ICacheTag typeTag))
@@ -380,7 +341,7 @@ namespace Microsoft.TemplateEngine.Cli.HelpAndUsage
                 }
             }
 
-            if (remainingPartialMatchGroups.Count > 0)
+            if (templateResolutionResult.RemainingPartialMatchGroups.Count > 0)
             {
                 // The following templates partially match the input. Be more specific with the template name and/or language
                 Reporter.Error.WriteLine(LocalizableStrings.TemplateMultiplePartialNameMatches.Bold().Red());
