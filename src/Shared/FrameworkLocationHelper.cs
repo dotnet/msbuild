@@ -652,7 +652,6 @@ namespace Microsoft.Build.Shared
             return GetDotNetFrameworkSpec(version).GetPathToDotNetFramework(architecture);
         }
 
-#if FEATURE_INSTALLED_MSBUILD
         /// <summary>
         /// Check the registry key and value to see if the .net Framework is installed on the machine.
         /// </summary>
@@ -661,6 +660,9 @@ namespace Microsoft.Build.Shared
         /// <returns>True if the registry key is 1 false if it is not there. This method also return true if the complus enviornment variables are set.</returns>
         private static bool CheckForFrameworkInstallation(string registryEntryToCheckInstall, string registryValueToCheckInstall)
         {
+#if !FEATURE_INSTALLED_MSBUILD
+            return false;
+#else
             // Get the complus install root and version
             string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
             string complusVersion = Environment.GetEnvironmentVariable("COMPLUS_VERSION");
@@ -682,8 +684,8 @@ namespace Microsoft.Build.Shared
             }
 
             return true;
-        }
 #endif
+        }
 
         /// <summary>
         /// Heuristic that first considers the current runtime path and then searches the base of that path for the given
@@ -1306,9 +1308,6 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetPathToDotNetFramework(DotNetFrameworkArchitecture architecture)
             {
-#if !FEATURE_INSTALLED_MSBUILD
-                return null;
-#else
                 string cachedPath;
                 if (this._pathsToDotNetFramework.TryGetValue(architecture, out cachedPath))
                 {
@@ -1350,7 +1349,6 @@ namespace Microsoft.Build.Shared
                 }
 
                 return generatedPathToDotNetFramework;
-#endif
             }
 
             /// <summary>
