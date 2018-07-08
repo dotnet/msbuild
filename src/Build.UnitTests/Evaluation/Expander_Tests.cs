@@ -30,7 +30,6 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 
 using Xunit;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 
@@ -1136,6 +1135,85 @@ namespace Microsoft.Build.UnitTests.Evaluation
 </Project>");
 
             logger.AssertLogContains("[One|Three|Four]");
+        }
+
+        [Fact]
+        public void DirectItemMetadataReferenceShouldBeCaseInsensitive()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+                <Project>
+                  <ItemGroup>
+                    <Foo Include=`Foo`>
+                      <SENSITIVE>X</SENSITIVE>
+                    </Foo>
+                  </ItemGroup>
+                  <Target Name=`Build`>
+                    <Message Importance=`high` Text=`QualifiedNotMatchCase %(Foo.FileName)=%(Foo.sensitive)`/>
+                    <Message Importance=`high` Text=`QualifiedMatchCase %(Foo.FileName)=%(Foo.SENSITIVE)`/>
+                    
+                    <Message Importance=`high` Text=`UnqualifiedNotMatchCase %(Foo.FileName)=%(sensitive)`/>
+                    <Message Importance=`high` Text=`UnqualifiedMatchCase %(Foo.FileName)=%(SENSITIVE)`/>
+                  </Target>
+                </Project>
+                ");
+
+            logger.AssertLogContains("QualifiedNotMatchCase Foo=X");
+            logger.AssertLogContains("QualifiedMatchCase Foo=X");
+            logger.AssertLogContains("UnqualifiedNotMatchCase Foo=X");
+            logger.AssertLogContains("UnqualifiedMatchCase Foo=X");
+        }
+
+        [Fact]
+        public void ItemDefinitionGroupMetadataReferenceShouldBeCaseInsensitive()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+                <Project>
+                  <ItemDefinitionGroup>
+                    <Foo>
+                        <SENSITIVE>X</SENSITIVE>
+                    </Foo>
+                  </ItemDefinitionGroup>
+                  <ItemGroup>
+                    <Foo Include=`Foo`/>
+                  </ItemGroup>
+                  <Target Name=`Build`>
+                    <Message Importance=`high` Text=`QualifiedNotMatchCase %(Foo.FileName)=%(Foo.sensitive)`/>
+                    <Message Importance=`high` Text=`QualifiedMatchCase %(Foo.FileName)=%(Foo.SENSITIVE)`/>
+                    
+                    <Message Importance=`high` Text=`UnqualifiedNotMatchCase %(Foo.FileName)=%(sensitive)`/>
+                    <Message Importance=`high` Text=`UnqualifiedMatchCase %(Foo.FileName)=%(SENSITIVE)`/>
+                  </Target>
+                </Project>
+                ");
+
+            logger.AssertLogContains("QualifiedNotMatchCase Foo=X");
+            logger.AssertLogContains("QualifiedMatchCase Foo=X");
+            logger.AssertLogContains("UnqualifiedNotMatchCase Foo=X");
+            logger.AssertLogContains("UnqualifiedMatchCase Foo=X");
+        }
+
+        [Fact]
+        public void WellKnownMetadataReferenceShouldBeCaseInsensitive()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+                <Project>
+                  <ItemGroup>
+                    <Foo Include=`Foo`/>
+                  </ItemGroup>
+                  <Target Name=`Build`>
+                    <Message Importance=`high` Text=`QualifiedNotMatchCase %(Foo.Identity)=%(Foo.FILENAME)`/>
+                    <Message Importance=`high` Text=`QualifiedMatchCase %(Foo.Identity)=%(Foo.FileName)`/>
+                    
+                    <Message Importance=`high` Text=`UnqualifiedNotMatchCase %(Foo.Identity)=%(FILENAME)`/>
+                    <Message Importance=`high` Text=`UnqualifiedMatchCase %(Foo.Identity)=%(FileName)`/>
+                  </Target>
+                </Project>
+                ");
+
+            logger.AssertLogContains("QualifiedNotMatchCase Foo=Foo");
+            logger.AssertLogContains("QualifiedMatchCase Foo=Foo");
+            logger.AssertLogContains("UnqualifiedNotMatchCase Foo=Foo");
+            logger.AssertLogContains("UnqualifiedMatchCase Foo=Foo");
         }
 
         /// <summary>
