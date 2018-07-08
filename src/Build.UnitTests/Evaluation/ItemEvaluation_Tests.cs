@@ -622,5 +622,33 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 FileMatcher.ClearFileEnumerationsCache();
             }
         }
+
+        // see https://github.com/Microsoft/msbuild/issues/3460
+        [Fact]
+        public void MetadataPropertyFunctionBug()
+        {
+            const string prefix = "SomeLongPrefix-"; // Needs to be longer than "%(FileName)"
+            var projectContent = $@"
+<Project>
+  <ItemGroup>
+    <Bar Include=`{prefix}foo`>
+      <Baz>$([System.String]::new(%(FileName)).Substring({prefix.Length}))</Baz>
+    </Bar>
+  </ItemGroup>
+</Project>
+".Cleanup();
+
+            var items = ObjectModelHelpers.GetItems(projectContent, allItems: true);
+
+            var expectedMetadata = new[]
+            {
+                new Dictionary<string, string>
+                {
+                    {"Baz", "foo"},
+                },
+            };
+
+            ObjectModelHelpers.AssertItems(new[] { $"{prefix}foo" }, items, expectedMetadata);
+        }
     }
 }

@@ -68,8 +68,12 @@ namespace Microsoft.Build.Evaluation
         BreakOnNotEmpty = 0x10,
 
         /// <summary>
-        /// When an error occurs expanding a property, just leave it unexpanded.  This should only be used when attempting to log a message with a best effort expansion of a string.
+        /// When an error occurs expanding a property, just leave it unexpanded.
         /// </summary>
+        /// <remarks>
+        /// This should only be used in cases where property evaluation isn't critcal, such as when attempting to log a
+        /// message with a best effort expansion of a string, or when discovering partial information during lazy evaluation.
+        /// </remarks>
         LeavePropertiesUnexpandedOnError = 0x20,
 
         /// <summary>
