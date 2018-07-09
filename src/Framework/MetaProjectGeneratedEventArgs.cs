@@ -13,17 +13,18 @@ namespace Microsoft.Build.Framework
     public class MetaProjectGeneratedEventArgs : BuildMessageEventArgs
     {
         /// <summary>
-        /// Path associated with metaproject.
+        /// Raw xml representing the metaproject.
         /// </summary>
-        public string metaProjectPath;
+        public string metaProjectXml;
 
         /// <summary>
         /// Initializes a new instance of the MetaProjectGeneratedEventArgs class.
         /// </summary>
-        public MetaProjectGeneratedEventArgs(string metaProjectPath, string message)
+        public MetaProjectGeneratedEventArgs(string metaProjectXml, string metaProjectPath, string message)
             : base(message, null, null, MessageImportance.Low, DateTime.UtcNow, metaProjectPath)
         {
-            this.metaProjectPath = metaProjectPath;
+            this.metaProjectXml = metaProjectXml;
+            this.ProjectFile = metaProjectPath;
         }
     }
 }

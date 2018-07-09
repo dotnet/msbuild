@@ -907,15 +907,22 @@ namespace Microsoft.Build.Construction
             return traversalInstance;
         }
 
-        private void EmitMetaProject(ProjectRootElement metaProject, string metaProjectPath)
+        private void EmitMetaProject(ProjectRootElement metaProject, string path)
         {
-            string filePath = Environment.GetEnvironmentVariable("MSBuildEmitSolution") == null ? Path.GetTempFileName() : metaProjectPath;
-            metaProject.Save(filePath);
+            if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
+            {
+                metaProject.Save(path);
+            }
+
+            var xml = new StringBuilder();
+            using (var writer = new StringWriter(xml))
+            {
+                metaProject.Save(writer);
+            }
             string message = ResourceUtilities.GetResourceString("MetaprojectGenerated");
-            var eventArgs = new MetaProjectGeneratedEventArgs(metaProjectPath, message)
+            var eventArgs = new MetaProjectGeneratedEventArgs(xml.ToString(), path, message)
             {
                 BuildEventContext = _projectBuildEventContext,
-                ProjectFile = filePath,
             };
             _loggingService.LogBuildEvent(eventArgs);
         }
