@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.NET.Build.Tasks.ConflictResolution
+namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
     /// Internal utilties copied from microsoft/MSBuild repo.
