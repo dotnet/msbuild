@@ -652,6 +652,7 @@ namespace Microsoft.Build.Shared
             return GetDotNetFrameworkSpec(version).GetPathToDotNetFramework(architecture);
         }
 
+#if FEATURE_INSTALLED_MSBUILD
         /// <summary>
         /// Check the registry key and value to see if the .net Framework is installed on the machine.
         /// </summary>
@@ -660,9 +661,6 @@ namespace Microsoft.Build.Shared
         /// <returns>True if the registry key is 1 false if it is not there. This method also return true if the complus enviornment variables are set.</returns>
         private static bool CheckForFrameworkInstallation(string registryEntryToCheckInstall, string registryValueToCheckInstall)
         {
-#if !FEATURE_INSTALLED_MSBUILD
-            return false;
-#else
             // Get the complus install root and version
             string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
             string complusVersion = Environment.GetEnvironmentVariable("COMPLUS_VERSION");
@@ -684,8 +682,8 @@ namespace Microsoft.Build.Shared
             }
 
             return true;
-#endif
         }
+#endif
 
         /// <summary>
         /// Heuristic that first considers the current runtime path and then searches the base of that path for the given
@@ -1314,17 +1312,17 @@ namespace Microsoft.Build.Shared
                     return cachedPath;
                 }
 
+#if FEATURE_WIN32_REGISTRY
                 // Otherwise, check to see if we're even installed.  If not, return null -- no point in setting the static 
                 // variables to null when that's what they are already.  
-                if (NativeMethodsShared.IsWindows)
+                if (NativeMethodsShared.IsWindows && !CheckForFrameworkInstallation(
+                    this._dotNetFrameworkRegistryKey,
+                    this._dotNetFrameworkSetupRegistryInstalledName
+                    ))
                 {
-                    if (!CheckForFrameworkInstallation(
-                            this._dotNetFrameworkRegistryKey,
-                            this._dotNetFrameworkSetupRegistryInstalledName))
-                    {
-                        return null;
-                    }
+                    return null;
                 }
+#endif
 
                 // We're installed and we haven't found this framework path yet -- so find it!
                 string generatedPathToDotNetFramework =
