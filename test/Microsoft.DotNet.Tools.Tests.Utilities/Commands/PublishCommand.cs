@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _output;
         private string _runtime;
         private List<string> _targetManifests = new List<string>();
-        private string _mode;
+        private bool? _selfContained;
 
         public PublishCommand WithFramework(string framework)
         {
@@ -44,9 +44,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             return this;
         }
 
-        public PublishCommand WithMode(string value)
+        public PublishCommand WithSelfContained(bool value)
         {
-            _mode = value;
+            _selfContained = value;
             return this;
         }
 
@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 OutputOption,
                 TargetOption,
                 RuntimeOption,
-                ModeOption);
+                SelfContainedOption);
         }
 
         private string FrameworkOption => string.IsNullOrEmpty(_framework) ? "" : $"-f {_framework}";
@@ -80,6 +80,6 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private string TargetOption => string.Join(" ", _targetManifests);
 
-        private string ModeOption => string.IsNullOrEmpty(_mode) ? "" : $"--mode {_mode}";
+        private string SelfContainedOption => _selfContained.HasValue ? $"--self-contained:{_selfContained.Value}" : "";
     }
 }
