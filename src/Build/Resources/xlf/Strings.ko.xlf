@@ -33,6 +33,11 @@
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="MetaprojectGenerated">
+        <source>Metaproject "{0}" generated.</source>
+        <target state="new">Metaproject "{0}" generated.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">BeginBuild가 아직 호출되지 않았으므로 작업을 완료할 수 없습니다.</target>
