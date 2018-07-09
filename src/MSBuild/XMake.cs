@@ -23,7 +23,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -252,7 +252,7 @@ namespace Microsoft.Build.CommandLine
         /// </comments>
         static private void AppendOutputFile(string path, Int64 elapsedTime)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
             {
                 using (StreamWriter sw = File.CreateText(path))
                 {
@@ -1650,7 +1650,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     commandLineSwitches.SetSwitchError("MissingResponseFileError", unquotedCommandLineArg);
                 }
-                else if (!File.Exists(responseFile))
+                else if (!FileSystems.Default.FileExists(responseFile))
                 {
                     commandLineSwitches.SetParameterError("ResponseFileNotFoundError", unquotedCommandLineArg);
                 }
@@ -1851,7 +1851,7 @@ namespace Microsoft.Build.CommandLine
             bool found = false;
 
             // if the auto-response file does not exist, only use the switches on the command line
-            if (File.Exists(autoResponseFile))
+            if (FileSystems.Default.FileExists(autoResponseFile))
             {
                 found = true;
                 GatherResponseFileSwitch("@" + autoResponseFile, switchesFromAutoResponseFile);
@@ -2479,7 +2479,7 @@ namespace Microsoft.Build.CommandLine
             {
                 projectFile = FileUtilities.FixFilePath(parameters[0]);
 
-                if (Directory.Exists(projectFile))
+                if (FileSystems.Default.DirectoryExists(projectFile))
                 {
                     // If the project file is actually a directory then change the directory to be searched
                     // and null out the project file
@@ -2488,7 +2488,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    InitializationException.VerifyThrow(File.Exists(projectFile), "ProjectNotFoundError", projectFile);
+                    InitializationException.VerifyThrow(FileSystems.Default.FileExists(projectFile), "ProjectNotFoundError", projectFile);
                 }
             }
 
@@ -3275,7 +3275,7 @@ namespace Microsoft.Build.CommandLine
 
             // figure out whether the assembly's identity (strong/weak name), or its filename/path is provided
             string testFile = FileUtilities.FixFilePath(loggerAssemblySpec);
-            if (File.Exists(testFile))
+            if (FileSystems.Default.FileExists(testFile))
             {
                 loggerAssemblyFile = testFile;
             }
@@ -3426,7 +3426,7 @@ namespace Microsoft.Build.CommandLine
             {
                 InitializationException.VerifyThrow(schemaFile == null, "MultipleSchemasError", parameter);
                 string fileName = FileUtilities.FixFilePath(parameter);
-                InitializationException.VerifyThrow(File.Exists(fileName), "SchemaNotFoundError", fileName);
+                InitializationException.VerifyThrow(FileSystems.Default.FileExists(fileName), "SchemaNotFoundError", fileName);
 
                 schemaFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
             }

@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -37,7 +38,7 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
-            if (!System.IO.File.Exists(File))
+            if (!FileSystems.Default.FileExists(File))
             {
                 Log.LogErrorFromResources("FileHash.FileNotFound", File);
                 return false;

@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 #if FEATURE_PFX_SIGNING
 using Microsoft.Runtime.Hosting;
 #endif
@@ -201,7 +202,7 @@ namespace Microsoft.Build.Tasks
             {
 #if FEATURE_PFX_SIGNING
                 // if the cert isn't on disk, we can't import it
-                if (!File.Exists(CertificateFile))
+                if (!FileSystems.Default.FileExists(CertificateFile))
                 {
                     Log.LogErrorWithCodeFromResources("ResolveKeySource.CertificateNotInStore");
                 }

@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
+using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using System.IO;
 using Xunit;
 
 namespace Microsoft.Build.Tasks.UnitTests
@@ -86,9 +88,29 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB3931", () => _mockEngine.Log);
         }
 
+        public static bool NotRunningAsRoot()
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                return true;
+            }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // Not really: but if we're running as root, this fails.
+            var psi = new ProcessStartInfo
+            {
+                FileName = "id",
+                Arguments = "-u",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+            };
+
+            var process = Process.Start(psi);
+
+            process.WaitForExit((int)TimeSpan.FromSeconds(2).TotalMilliseconds).ShouldBeTrue();
+
+            return process.StandardOutput.ReadToEnd().Trim() != "0";
+        }
+
+        [ConditionalFact(nameof(NotRunningAsRoot))] // root can write to read-only files
         public void LogsErrorIfReadOnlyFileCannotBeOverwitten()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())

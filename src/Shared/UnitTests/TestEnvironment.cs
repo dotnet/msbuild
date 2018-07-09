@@ -9,6 +9,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -266,7 +267,7 @@ namespace Microsoft.Build.UnitTests
         {
             var folder = WithTransientTestState(new TransientTestFolder(folderPath, createFolder));
 
-            Assert.True(!(createFolder ^ Directory.Exists(folder.FolderPath)));
+            Assert.True(!(createFolder ^ FileSystems.Default.DirectoryExists(folder.FolderPath)));
 
             return folder;
         }
@@ -534,7 +535,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (_expectedAsOutput)
                 {
-                    Assert.True(File.Exists(Path), $"A file expected as an output does not exist: {Path}");
+                    Assert.True(FileSystems.Default.FileExists(Path), $"A file expected as an output does not exist: {Path}");
                 }
             }
             finally

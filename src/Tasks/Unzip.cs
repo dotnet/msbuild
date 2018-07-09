@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -75,7 +76,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                 {
-                    if (!File.Exists(sourceFile.ItemSpec))
+                    if (!FileSystems.Default.FileExists(sourceFile.ItemSpec))
                     {
                         Log.LogErrorFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
                         continue;

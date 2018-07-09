@@ -10,7 +10,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.FileSystem;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 
@@ -257,7 +257,7 @@ namespace Microsoft.Build.Evaluation
             // When running from the command-line or from VS, use the msbuild.exe.config file.
             if (BuildEnvironmentHelper.Instance.Mode != BuildEnvironmentMode.None &&
                 !BuildEnvironmentHelper.Instance.RunningTests &&
-                File.Exists(BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile))
+                FileSystems.Default.FileExists(BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile))
             {
                 var configFile = new ExeConfigurationFileMap { ExeConfigFilename = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile };
                 return ConfigurationManager.OpenMappedExeConfiguration(configFile, ConfigurationUserLevel.None);

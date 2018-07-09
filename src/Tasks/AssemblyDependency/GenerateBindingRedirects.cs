@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Reflection;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -103,7 +104,7 @@ namespace Microsoft.Build.Tasks
 
             var writeOutput = true;
 
-            if(File.Exists(OutputAppConfigFile.ItemSpec))
+            if(FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec))
             {
                 try
                 {

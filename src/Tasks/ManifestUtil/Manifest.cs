@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -293,7 +294,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             if (Path.IsPathRooted(path))
             {
-                if (File.Exists(path))
+                if (FileSystems.Default.FileExists(path))
                 {
                     return path;
                 }
@@ -310,7 +311,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     string resolvedPath = Path.Combine(searchPath, path);
                     resolvedPath = Path.GetFullPath(resolvedPath);
-                    if (File.Exists(resolvedPath))
+                    if (FileSystems.Default.FileExists(resolvedPath))
                     {
                         return resolvedPath;
                     }

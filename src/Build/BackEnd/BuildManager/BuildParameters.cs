@@ -14,6 +14,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
 namespace Microsoft.Build.Execution
@@ -881,7 +882,7 @@ namespace Microsoft.Build.Execution
                 return true;
             }
 
-            if (File.Exists(path))
+            if (FileSystems.Default.FileExists(path))
             {
                 s_msbuildExeKnownToExistAt = path;
                 return true;

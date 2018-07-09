@@ -146,6 +146,12 @@
     %(RootDir) to an item-spec that's not a valid path, would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
   </data>
+  <data name="CannotExpandItemMetadata" UESanitized="false" Visibility="Public">
+    <value>MSB4248: Cannot expand metadata in expression "{0}". {1}</value>
+    <comment>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+    %(RootDir) to an item-spec that's not a valid path would result in this error.
+    LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
+  </data>
   <data name="CouldNotFindMSBuildExe">
     <value>MSB4193: MSBuild.exe could not be launched as a child node as it could not be found at the location "{0}". If necessary, specify the correct location in the BuildParameters, or with the MSBUILD_EXE_PATH environment variable.</value>
     <comment>{StrBegin="MSB4193: "}</comment>
@@ -1692,7 +1698,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4248.
+        Next message code should be MSB4249.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

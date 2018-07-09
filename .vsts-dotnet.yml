@@ -55,7 +55,7 @@ steps:
   displayName: Run build.cmd
   inputs:
     filename: '$(comspec)'
-    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & $(Build.Repository.LocalPath)\build.cmd -skiptests -bootstraponly -pack -sign -configuration Release -properties /p:SignType=$(SignType)"'
+    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & $(Build.Repository.LocalPath)\build.cmd -pack -sign -configuration Release -properties /p:SignType=$(SignType)"'
 
 - task: CmdLine@1
   displayName: Print bin contents

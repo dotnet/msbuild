@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -67,6 +68,11 @@ namespace Microsoft.Build.Tasks
         /// File exists delegate
         /// </summary>
         private FileExists _fileExists;
+
+        /// <summary>
+        /// When false, allow fire-and-forget background work.
+        /// </summary>
+        private bool _synchronous;
 
         /// <summary>
         /// Folder where the cache files are written to
@@ -217,17 +223,18 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p));
+            return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: false);
         }
 
         /// <summary>
         /// Execute the task
         /// </summary>
-        internal bool Execute(GetAssemblyName getAssemblyName, GetAssemblyRuntimeVersion getRuntimeVersion, FileExists fileExists)
+        internal bool Execute(GetAssemblyName getAssemblyName, GetAssemblyRuntimeVersion getRuntimeVersion, FileExists fileExists, bool synchronous)
         {
             _getAssemblyName = getAssemblyName;
             _getRuntimeVersion = getRuntimeVersion;
             _fileExists = fileExists;
+            _synchronous = synchronous;
 
             try
             {
@@ -661,9 +668,18 @@ namespace Microsoft.Build.Tasks
                 {
                     info = sdkFilesCache.GetCacheFileInfoFromSDK(sdkRoot, GetReferencePathsFromManifest(sdk));
 
-                    // On a background thread save the file to disk
                     var saveContext = new SaveContext(sdkIdentity, sdkRoot, info);
-                    ThreadPool.QueueUserWorkItem(sdkFilesCache.SaveAssemblyListToCacheFile, saveContext);
+
+                    if (_synchronous)
+                    {
+                        // In unit tests, save the file to disk synchronously to force its exercise
+                        sdkFilesCache.SaveAssemblyListToCacheFile(saveContext);
+                    }
+                    else
+                    {
+                        // On a background thread save the file to disk
+                        ThreadPool.QueueUserWorkItem(sdkFilesCache.SaveAssemblyListToCacheFile, saveContext);
+                    }
                 }
 
                 _cacheFileForSDKs.TryAdd(sdkIdentity, info);
@@ -1085,7 +1101,7 @@ namespace Microsoft.Build.Tasks
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
                     var codeBase = new Uri(currentAssembly);
                     DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
-                    if (File.Exists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
+                    if (FileSystems.Default.FileExists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
                     {
                         return true;
                     }

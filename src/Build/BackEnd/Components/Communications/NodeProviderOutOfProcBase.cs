@@ -18,6 +18,7 @@ using Microsoft.Build.Internal;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using System.Threading.Tasks;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.BackEnd
@@ -450,7 +451,7 @@ namespace Microsoft.Build.BackEnd
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, "msbuildLocation");
 
-            if (!File.Exists(msbuildLocation))
+            if (!FileSystems.Default.FileExists(msbuildLocation))
             {
                 throw new BuildAbortedException(ResourceUtilities.FormatResourceString("CouldNotFindMSBuildExe", msbuildLocation));
             }

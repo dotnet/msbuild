@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
@@ -109,7 +110,7 @@ namespace Microsoft.Build.Tasks
                 ITaskItem item = NativeReferences[reference];
                 string path = item.GetMetadata("HintPath");
                 // If no HintPath then fallback to trying to resolve from the assembly identity...
-                if (String.IsNullOrEmpty(path) || !File.Exists(path))
+                if (String.IsNullOrEmpty(path) || !FileSystems.Default.FileExists(path))
                 {
                     AssemblyIdentity ai = AssemblyIdentity.FromAssemblyName(item.ItemSpec);
                     if (ai != null)

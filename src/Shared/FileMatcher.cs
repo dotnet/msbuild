@@ -148,7 +148,13 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         internal static bool HasWildcards(string filespec)
         {
-            return -1 != filespec.IndexOfAny(s_wildcardCharacters);
+            // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
+            // regular expression that does the same thing, regardless of whether
+            // filespec contains one of the characters.
+            // Choose LastIndexOfAny instead of IndexOfAny because it seems more likely
+            // that wildcards will tend to be towards the right side.
+
+            return -1 != filespec.LastIndexOfAny(s_wildcardCharacters);
         }
 
         /// <summary>
@@ -1725,18 +1731,14 @@ namespace Microsoft.Build.Shared
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The array of files.</returns>
         internal string[] GetFiles
-        (
+            (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IEnumerable<string> excludeSpecsUnescaped = null
-        )
+            List<string> excludeSpecsUnescaped = null
+            )
         {
+
             // For performance. Short-circuit iff there is no wildcard.
-            // Perf Note: Doing a [Last]IndexOfAny(...) is much faster than compiling a
-            // regular expression that does the same thing, regardless of whether
-            // filespec contains one of the characters.
-            // Choose LastIndexOfAny instead of IndexOfAny because it seems more likely
-            // that wildcards will tend to be towards the right side.
             if (!HasWildcards(filespecUnescaped))
             {
                 return CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped);
@@ -1750,20 +1752,20 @@ namespace Microsoft.Build.Shared
                     excludeSpecsUnescaped);
             }
 
-            var filesKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+            var enumerationKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
             ImmutableArray<string> files;
-            if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+            if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
-                object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(filesKey, _ => new object());
+                object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(enumerationKey, _ => new object());
                 lock (locks)
                 {
-                    if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+                    if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
                     {
                         files =
                             _cachedGlobExpansions.GetOrAdd(
-                                filesKey,
+                                enumerationKey,
                                 (_) =>
                                     GetFilesImplementation(
                                         projectDirectoryUnescaped,
@@ -1780,11 +1782,39 @@ namespace Microsoft.Build.Shared
             return filesToReturn;
         }
 
-        private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, IEnumerable<string> excludes)
+        private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, List<string> excludes)
         {
-            var sb = new StringBuilder();
+            Debug.Assert(projectDirectoryUnescaped != null);
+            Debug.Assert(filespecUnescaped != null);
 
-            sb.Append(projectDirectoryUnescaped);
+            if (filespecUnescaped.Contains(".."))
+            {
+                filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+            }
+
+            var excludeSize = 0;
+
+            if (excludes != null)
+            {
+                foreach (var exclude in excludes)
+                {
+                    excludeSize += exclude.Length;
+                }
+            }
+
+            var sb = new StringBuilder(
+                projectDirectoryUnescaped.Length + // OK to over allocate a bit, this is a short lived object
+                filespecUnescaped.Length +
+                excludeSize
+                );
+
+            // Don't include the project directory when the glob is independent of it.
+            // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
+            if (!FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(projectDirectoryUnescaped, filespecUnescaped))
+            {
+                sb.Append(projectDirectoryUnescaped);
+            }
+
             sb.Append(filespecUnescaped);
 
             if (excludes != null)
@@ -1796,6 +1826,20 @@ namespace Microsoft.Build.Shared
             }
 
             return sb.ToString();
+
+            bool FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(string projectDirectory, string filespec)
+            {
+                try
+                {
+                    return Path.IsPathRooted(filespec) &&
+                           !filespec.StartsWith(projectDirectory, StringComparison.OrdinalIgnoreCase);
+                }
+                catch
+                {
+                    // glob expansion is "supposed" to silently fail on IO exceptions
+                    return false;
+                }
+            }
         }
 
         enum SearchAction
@@ -1996,7 +2040,7 @@ namespace Microsoft.Build.Shared
             return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
         }
 
-        static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, IEnumerable<string> excludeSpecsUnescaped)
+        static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
         {
             if (excludeSpecsUnescaped != null)
             {
@@ -2033,7 +2077,7 @@ namespace Microsoft.Build.Shared
         private string[] GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IEnumerable<string> excludeSpecsUnescaped)
+            List<string> excludeSpecsUnescaped)
         {
             // UNDONE (perf): Short circuit the complex processing when we only have a path and a wildcarded filename
 

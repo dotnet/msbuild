@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -32,17 +33,23 @@ namespace Microsoft.Build.Evaluation.Context
 
         internal SharingPolicy Policy { get; }
 
-        internal virtual ISdkResolverService SdkResolverService { get; } = new CachingSdkResolverService();
-        internal IFileSystem FileSystem { get; } = new CachingFileSystemWrapper(FileSystems.Default);
+        internal ISdkResolverService SdkResolverService { get; }
+        internal IFileSystem FileSystem { get; }
+        internal EngineFileUtilities EngineFileUtilities { get; }
 
         /// <summary>
         /// Key to file entry list. Example usages: cache glob expansion and intermediary directory expansions during glob expansion.
         /// </summary>
-        internal ConcurrentDictionary<string, ImmutableArray<string>> FileEntryExpansionCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
+        internal ConcurrentDictionary<string, ImmutableArray<string>> FileEntryExpansionCache { get; }
 
         internal EvaluationContext(SharingPolicy policy)
         {
             Policy = policy;
+
+            SdkResolverService = new CachingSdkResolverService();
+            FileEntryExpansionCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
+            FileSystem = new CachingFileSystemWrapper(FileSystems.Default);
+            EngineFileUtilities = new EngineFileUtilities(new FileMatcher(FileSystem, FileEntryExpansionCache));
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -58,7 +59,7 @@ namespace Microsoft.Build.Tasks
         {
             this.filename = FileUtilities.FixFilePath(filename);
 
-            if (File.Exists(FileName))
+            if (FileSystems.Default.FileExists(FileName))
             {
                 lastModified = File.GetLastWriteTime(FileName);
                 exists = true;

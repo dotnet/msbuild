@@ -50,7 +50,7 @@ namespace Microsoft.Build.Internal
         // this method parses the glob and extracts the fixed directory part in order to normalize it and make it absolute
         // without this normalization step, strings pointing outside the globbing cone would still match when they shouldn't
         // for example, we dont want "**/*.cs" to match "../Shared/Foo.cs"
-        // todo: glob rooting partially duplicated with MSBuildGlob.Parse
+        // todo: glob rooting knowledge partially duplicated with MSBuildGlob.Parse and FileMatcher.ComputeFileEnumerationCacheKey
         private static Regex CreateRegex(string unescapedFileSpec, string currentDirectory)
         {
             Regex regex = null;

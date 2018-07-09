@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Schema;
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -45,7 +46,7 @@ namespace Microsoft.Build.CommandLine
                 schemaFile = Path.Combine(binPath, "Microsoft.Build.xsd");
             }
 
-            if (File.Exists(schemaFile))
+            if (FileSystems.Default.FileExists(schemaFile))
             {
                 // Print the schema file we're using, particularly since it can vary 
                 // according to the toolset being used

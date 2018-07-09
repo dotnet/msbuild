@@ -1536,7 +1536,7 @@ namespace Microsoft.Build.Evaluation
                         (
                             _expander.ExpandIntoStringLeaveEscaped(itemElement.Update, ExpanderOptions.ExpandPropertiesAndItems, itemElement.Location)
                         )
-                        .SelectMany(i => EngineFileUtilities.Default.GetFileListEscaped(_projectRootElement.DirectoryPath, i))
+                        .SelectMany(i => _evaluationContext.EngineFileUtilities.GetFileListEscaped(_projectRootElement.DirectoryPath, i))
                         .Select(EscapingUtilities.UnescapeAll));
 
             var itemsToUpdate = _data.GetItems(itemElement.ItemType).Where(i => expandedItemSet.Contains(i.EvaluatedInclude)).ToList();
@@ -1567,7 +1567,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (string excludeSplit in excludeSplits)
                     {
-                        string[] excludeSplitFiles = EngineFileUtilities.Default.GetFileListEscaped(_projectRootElement.DirectoryPath, excludeSplit);
+                        string[] excludeSplitFiles = _evaluationContext.EngineFileUtilities.GetFileListEscaped(_projectRootElement.DirectoryPath, excludeSplit);
 
                         foreach (string excludeSplitFile in excludeSplitFiles)
                         {
@@ -2202,7 +2202,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = EngineFileUtilities.Default.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true);
+                    importFilesEscaped = _evaluationContext.EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {
@@ -2379,7 +2379,7 @@ namespace Microsoft.Build.Evaluation
                         // Perhaps the import tag has a typo in, for example.
 
                         // There's a specific message for file not existing
-                        if (!File.Exists(importFileUnescaped))
+                        if (!FileSystems.Default.FileExists(importFileUnescaped))
                         {
                             bool ignoreMissingImportsFlagSet = (_loadSettings & ProjectLoadSettings.IgnoreMissingImports) != 0;
                             if (!throwOnFileNotExistsError || ignoreMissingImportsFlagSet)

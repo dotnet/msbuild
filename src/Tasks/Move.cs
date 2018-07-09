@@ -7,6 +7,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -193,13 +194,13 @@ namespace Microsoft.Build.Tasks
             string destinationFile
         )
         {
-            if (Directory.Exists(destinationFile))
+            if (FileSystems.Default.DirectoryExists(destinationFile))
             {
                 Log.LogErrorWithCodeFromResources("Move.DestinationIsDirectory", sourceFile, destinationFile);
                 return false;
             }
 
-            if (Directory.Exists(sourceFile))
+            if (FileSystems.Default.DirectoryExists(sourceFile))
             {
                 // If the source file passed in is actually a directory instead of a file, log a nice
                 // error telling the user so.  Otherwise, .NET Framework's File.Move method will throw
@@ -209,21 +210,21 @@ namespace Microsoft.Build.Tasks
             }
 
             // Check the source exists.
-            if (!File.Exists(sourceFile))
+            if (!FileSystems.Default.FileExists(sourceFile))
             {
                 Log.LogErrorWithCodeFromResources("Move.SourceDoesNotExist", sourceFile);
                 return false;
             }
 
             // We can't ovewrite a file unless it's writeable
-            if (OverwriteReadOnlyFiles && File.Exists(destinationFile))
+            if (OverwriteReadOnlyFiles && FileSystems.Default.FileExists(destinationFile))
             {
                 MakeWriteableIfReadOnly(destinationFile);
             }
 
             string destinationFolder = Path.GetDirectoryName(destinationFile);
 
-            if (!string.IsNullOrEmpty(destinationFolder) && !Directory.Exists(destinationFolder))
+            if (!string.IsNullOrEmpty(destinationFolder) && !FileSystems.Default.DirectoryExists(destinationFolder))
             {
                 Log.LogMessageFromResources(MessageImportance.Normal, "Move.CreatesDirectory", destinationFolder);
                 Directory.CreateDirectory(destinationFolder);
@@ -258,7 +259,7 @@ namespace Microsoft.Build.Tasks
             // If the destination file exists, then make sure it's read-write.
             // The File.Move command copies attributes, but our move needs to
             // leave the file writeable.
-            if (File.Exists(destinationFile))
+            if (FileSystems.Default.FileExists(destinationFile))
             {
                 // Make it writable
                 MakeWriteableIfReadOnly(destinationFile);

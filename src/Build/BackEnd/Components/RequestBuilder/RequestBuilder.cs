@@ -1300,7 +1300,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     //
-                    loggingService.AddWarningsAsErrors(buildEventContext.ProjectInstanceId, new HashSet<string>());
+                    loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
                 {
@@ -1308,7 +1308,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (warningsAsErrors?.Count > 0)
                     {
-                        loggingService.AddWarningsAsErrors(buildEventContext.ProjectInstanceId, warningsAsErrors);
+                        loggingService.AddWarningsAsErrors(buildEventContext, warningsAsErrors);
                     }
                 }
 
@@ -1316,7 +1316,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (warningsAsMessages?.Count > 0)
                 {
-                    loggingService.AddWarningsAsMessages(buildEventContext.ProjectInstanceId, warningsAsMessages);
+                    loggingService.AddWarningsAsMessages(buildEventContext, warningsAsMessages);
                 }
             }
         }

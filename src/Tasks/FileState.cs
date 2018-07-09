@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -139,13 +140,13 @@ namespace Microsoft.Build.Tasks
                     else
                     {
                         // Check if we have a directory
-                        IsDirectory = Directory.Exists(_filename);
+                        IsDirectory = FileSystems.Default.DirectoryExists(_filename);
                         Exists = IsDirectory;
 
                         // If not exists, see if this is a file
                         if (!Exists)
                         {
-                            Exists = File.Exists(_filename);
+                            Exists = FileSystems.Default.FileExists(_filename);
                         }
 
                         if (IsDirectory)

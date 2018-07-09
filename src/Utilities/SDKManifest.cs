@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Utilities
 {
@@ -309,7 +310,7 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                if (File.Exists(sdkManifestPath))
+                if (FileSystems.Default.FileExists(sdkManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
                     XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };

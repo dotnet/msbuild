@@ -358,17 +358,17 @@
       </trans-unit>
       <trans-unit id="FileHash.FileNotFound">
         <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
-        <target state="new">MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB3954: '{0}' dosyası mevcut olmadığından veya dosyaya erişilemediğinden dosya için karma hesaplanamadı.</target>
         <note>{StrBegin="MSB3954: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
         <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
-        <target state="new">MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</target>
+        <target state="translated">MSB3953: '{0}' karma algoritması adı tanınmıyor. İzin verilen algoritmalar 'SHA256', 'SHA384' ve 'SHA512'dir.</target>
         <note>{StrBegin="MSB3953: "}</note>
       </trans-unit>
       <trans-unit id="FileHash.UnrecognizedHashEncoding">
         <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
-        <target state="new">MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</target>
+        <target state="translated">MSB3951: '{0}' karma kodlaması tanınmıyor. İzin verilen kodlamalar 'hex' ve 'base64'tür.</target>
         <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
@@ -1459,7 +1459,7 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
         <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
-        <target state="new">Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</target>
+        <target state="translated">'{0}' bütünleştirilmiş kod dosyası açılamadı; PE görüntüsü yönetilen meta verileri içermiyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
@@ -2206,7 +2206,7 @@
       </trans-unit>
       <trans-unit id="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
         <source>Project reference "{0}" has not been resolved.</source>
-        <target state="needs-review-translation">"{0}" proje başvurusu çözümlenmedi.</target>
+        <target state="translated">"{0}" proje başvurusu çözümlenmedi.</target>
         <note>
       UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
@@ -2435,7 +2435,7 @@
       </trans-unit>
       <trans-unit id="VerifyFileHash.HashMismatch">
         <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
-        <target state="new">MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</target>
+        <target state="translated">MSB3952: Dosya karması uyuşmazlığı. {0} dosyasının {2} şeklinde bir {1} dosya karması olması bekleniyordu ama {3} şeklindeydi.</target>
         <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">

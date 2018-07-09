@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Permissions;
 using System.Xml;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -597,7 +598,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Stream s = null;
             try
             {
-                if (File.Exists(path))
+                if (FileSystems.Default.FileExists(path))
                 {
                     s = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
                 }

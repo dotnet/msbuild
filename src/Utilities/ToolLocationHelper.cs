@@ -18,6 +18,7 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using System.Collections.ObjectModel;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 
 namespace Microsoft.Build.Utilities
@@ -824,7 +825,7 @@ namespace Microsoft.Build.Utilities
                         propsFileLocation = Path.Combine(sdkRoot, designTimeFolderName, commonConfigurationFolderName, neutralArchitectureName, targetPlatformIdentifier, targetPlatformVersion);
                     }
 
-                    if (Directory.Exists(propsFileLocation))
+                    if (FileSystems.Default.DirectoryExists(propsFileLocation))
                     {
                         return propsFileLocation;
                     }
@@ -1016,7 +1017,7 @@ namespace Microsoft.Build.Utilities
                 {
                     winmdLocation = Path.Combine(sdkRoot, referencesFolderName, commonConfigurationFolderName, neutralArchitectureName);
 
-                    if (!Directory.Exists(winmdLocation))
+                    if (!FileSystems.Default.DirectoryExists(winmdLocation))
                     {
                         ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", "Target platform location '{0}' did not exist", winmdLocation);
                         winmdLocation = null;
@@ -1116,7 +1117,7 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.DebugTraceMessage("GetApiContractReferences", "Gathering contract references for contract with name '{0}' and version '{1}", contract.Name, contract.Version);
                 string contractPath = Path.Combine(referencesRoot, contract.Name, contract.Version);
 
-                if (Directory.Exists(contractPath))
+                if (FileSystems.Default.DirectoryExists(contractPath))
                 {
                     string[] winmdPaths = Directory.GetFiles(contractPath, "*.winmd");
 
@@ -1620,7 +1621,7 @@ namespace Microsoft.Build.Utilities
             // return that directory.
             foreach (string referenceAssemblyDirectory in referenceAssemblyDirectories)
             {
-                if (File.Exists(Path.Combine(referenceAssemblyDirectory, "mscorlib.dll")))
+                if (FileSystems.Default.FileExists(Path.Combine(referenceAssemblyDirectory, "mscorlib.dll")))
                 {
                     // We found the framework reference assembly directory with mscorlib in it
                     // that's our standard lib path, so return it, with no trailing slash.
@@ -1694,7 +1695,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 string legacyMsCorlib20Path = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(targetedArchitecture);
-                if (legacyMsCorlib20Path != null && File.Exists(Path.Combine(legacyMsCorlib20Path, "mscorlib.dll")))
+                if (legacyMsCorlib20Path != null && FileSystems.Default.FileExists(Path.Combine(legacyMsCorlib20Path, "mscorlib.dll")))
                 {
                     // We found the framework reference assembly directory with mscorlib in it
                     // that's our standard lib path, so return it, with no trailing slash.
@@ -1711,7 +1712,7 @@ namespace Microsoft.Build.Utilities
             // return that directory.
             foreach (string referenceAssemblyDirectory in referenceAssemblyDirectories)
             {
-                if (File.Exists(Path.Combine(referenceAssemblyDirectory, "mscorlib.dll")))
+                if (FileSystems.Default.FileExists(Path.Combine(referenceAssemblyDirectory, "mscorlib.dll")))
                 {
                     // We found the framework reference assembly directory with mscorlib in it
                     // that's our standard lib path, so return it, with no trailing slash.
@@ -2191,7 +2192,7 @@ namespace Microsoft.Build.Utilities
             var referencePaths = new List<string>();
 
             string path = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
-            if (Directory.Exists(path))
+            if (FileSystems.Default.DirectoryExists(path))
             {
                 referencePaths.Add(path);
 
@@ -2214,7 +2215,7 @@ namespace Microsoft.Build.Utilities
                             {
                                 // On Mono, some directories contain Facades subdirectory with valid assemblies
                                 var facades = Path.Combine(path, "Facades");
-                                if (Directory.Exists(Path.Combine(path, "Facades")))
+                                if (FileSystems.Default.DirectoryExists(Path.Combine(path, "Facades")))
                                 {
                                     referencePaths.Add(facades);
                                 }
@@ -2498,7 +2499,7 @@ namespace Microsoft.Build.Utilities
                             string platformSDKManifest = Path.Combine(platformSDKDirectory, "SDKManifest.xml");
 
                             // If we are gathering the sdk platform manifests then check to see if there is a sdk manifest in the directory if not then skip over it as a platform sdk
-                            bool platformSDKManifestExists = File.Exists(platformSDKManifest);
+                            bool platformSDKManifestExists = FileSystems.Default.FileExists(platformSDKManifest);
                             if (targetPlatformSDK == null && !platformSDKs.TryGetValue(platformSDKKey, out targetPlatformSDK))
                             {
                                 targetPlatformSDK = new TargetPlatformSDK(platformSDKKey.TargetPlatformIdentifier, platformSDKKey.TargetPlatformVersion, platformSDKManifestExists ? platformSDKDirectory : null);
@@ -2770,7 +2771,7 @@ namespace Microsoft.Build.Utilities
                 if (userLocalAppData.Length > 0)
                 {
                     string localAppdataFolder = Path.Combine(userLocalAppData, "Microsoft SDKs");
-                    if (Directory.Exists(localAppdataFolder))
+                    if (FileSystems.Default.DirectoryExists(localAppdataFolder))
                     {
                         diskRoots.Add(localAppdataFolder);
                     }
@@ -2986,7 +2987,7 @@ namespace Microsoft.Build.Utilities
             string redistFile = Path.Combine(redistListFolder, "FrameworkList.xml");
 
             // If the redist list does not exist then the entire chain is incorrect.
-            if (!File.Exists(redistFile))
+            if (!FileSystems.Default.FileExists(redistFile))
             {
                 // Under MONO a directory may chain to one that has no redist list
                 var chainReference = NativeMethodsShared.IsMono ? string.Empty : null;
@@ -3081,13 +3082,13 @@ namespace Microsoft.Build.Utilities
                     pathToReturn = Path.GetFullPath(pathToReturn);
 
                     // The directory which we are chaining to does not exist, return null indicating the chain is incorrect.
-                    if (!Directory.Exists(pathToReturn))
+                    if (!FileSystems.Default.DirectoryExists(pathToReturn))
                     {
                         pathToReturn = null;
                     }
                 }
                 // We may also have a redirect path
-                else if (!string.IsNullOrEmpty(redirectPath) && Directory.Exists(redirectPath))
+                else if (!string.IsNullOrEmpty(redirectPath) && FileSystems.Default.DirectoryExists(redirectPath))
                 {
                     pathToReturn = redirectPath;
                 }
@@ -3242,7 +3243,7 @@ namespace Microsoft.Build.Utilities
 
             string filePath = Path.Combine(pathToSdk, fileName);
 
-            // Use FileInfo instead of File.Exists(...) because the latter fails silently (by design) if CAS
+            // Use FileInfo instead of FileSystems.Default.FileExists(...) because the latter fails silently (by design) if CAS
             // doesn't grant access. We want the security exception if there is going to be one.
             bool exists = new FileInfo(filePath).Exists;
             if (!exists)
@@ -3415,7 +3416,7 @@ namespace Microsoft.Build.Utilities
 
             string filePath = Path.Combine(pathToSdk, fileName);
 
-            // Use FileInfo instead of File.Exists(...) because the latter fails silently (by design) if CAS
+            // Use FileInfo instead of FileSystems.Default.FileExists(...) because the latter fails silently (by design) if CAS
             // doesn't grant access. We want the security exception if there is going to be one.
             bool exists = new FileInfo(filePath).Exists;
             if (!exists)
@@ -3482,7 +3483,7 @@ namespace Microsoft.Build.Utilities
             {
                 toolPath = Path.Combine(toolPath, fileName);
 
-                if (!File.Exists(toolPath))
+                if (!FileSystems.Default.FileExists(toolPath))
                 {
                     toolPath = null;
                 }
@@ -3703,7 +3704,7 @@ namespace Microsoft.Build.Utilities
                     string dotNetFx20Path = GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
                     if (dotNetFx20Path != null)
                     {
-                        if (Directory.Exists(dotNetFx20Path))
+                        if (FileSystems.Default.DirectoryExists(dotNetFx20Path))
                         {
                             frameworkIdentifiers.Add(FrameworkLocationHelper.dotNetFrameworkIdentifier);
                         }
@@ -3855,14 +3856,14 @@ namespace Microsoft.Build.Utilities
 
                 // check v30
                 string dotNextFx30RefPath = Path.Combine(frameworkReferenceRoot, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV30);
-                if (Directory.Exists(dotNextFx30RefPath))
+                if (FileSystems.Default.DirectoryExists(dotNextFx30RefPath))
                 {
                     versions.Add(FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV30);
                 }
 
                 // check v35
                 string dotNextFx35RefPath = Path.Combine(frameworkReferenceRoot, FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV35);
-                if (Directory.Exists(dotNextFx35RefPath))
+                if (FileSystems.Default.DirectoryExists(dotNextFx35RefPath))
                 {
                     versions.Add(FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV35);
                 }
