@@ -273,8 +273,8 @@
         <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
-        <source>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
-        <target state="translated">NETSDK1057: .NET Core SDK のプレビュー バージョンで作業をしています。現在のプロジェクトの global.json ファイルによって SDK バージョンを定義できます。詳細については、https://go.microsoft.com/fwlink/?linkid=869452 をご覧ください</target>
+        <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
+        <target state="needs-review-translation">NETSDK1057: .NET Core SDK のプレビュー バージョンで作業をしています。現在のプロジェクトの global.json ファイルによって SDK バージョンを定義できます。詳細については、https://go.microsoft.com/fwlink/?linkid=869452 をご覧ください</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
