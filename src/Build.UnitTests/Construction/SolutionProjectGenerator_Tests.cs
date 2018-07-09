@@ -2031,7 +2031,7 @@ EndGlobal
                 ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
-                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
 
                 Version ver = new Version("4.34");
                 string message = ResourceUtilities.FormatResourceString("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());

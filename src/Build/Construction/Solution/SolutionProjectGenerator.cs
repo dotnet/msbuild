@@ -742,7 +742,7 @@ namespace Microsoft.Build.Construction
             // to represent the SLN.
             foreach (ProjectInstance instance in projectInstances)
             {
-                EmitMetaProject(instance.ToProjectRootElement(), instance.FullPath);
+                EmitMetaproject(instance.ToProjectRootElement(), instance.FullPath);
             }
 
             return projectInstances.ToArray();
@@ -785,8 +785,8 @@ namespace Microsoft.Build.Construction
                 // If we cannot build the project directly, then we need to generate a metaproject for it.
                 if (!canBuildDirectly)
                 {
-                    ProjectInstance metaProject = CreateMetaproject(traversalInstance, project, projectConfiguration);
-                    projectInstances.Add(metaProject);
+                    ProjectInstance metaproject = CreateMetaproject(traversalInstance, project, projectConfiguration);
+                    projectInstances.Add(metaproject);
                 }
             }
 
@@ -880,8 +880,8 @@ namespace Microsoft.Build.Construction
             // For debugging purposes: some information is lost when evaluating into a project instance,
             // so make it possible to see what we have at this point.
             string path = traversalProject.FullPath;
-            string metaProjectPath = _solutionFile.FullPath + ".metaproj.tmp";
-            EmitMetaProject(traversalProject, metaProjectPath);
+            string metaprojectPath = _solutionFile.FullPath + ".metaproj.tmp";
+            EmitMetaproject(traversalProject, metaprojectPath);
             traversalProject.FullPath = path;
 
             // Create the instance.  From this point forward we can evaluate conditions against the traversal project directly.
@@ -907,20 +907,20 @@ namespace Microsoft.Build.Construction
             return traversalInstance;
         }
 
-        private void EmitMetaProject(ProjectRootElement metaProject, string path)
+        private void EmitMetaproject(ProjectRootElement metaproject, string path)
         {
             if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
             {
-                metaProject.Save(path);
+                metaproject.Save(path);
             }
 
             var xml = new StringBuilder();
             using (var writer = new StringWriter(xml))
             {
-                metaProject.Save(writer);
+                metaproject.Save(writer);
             }
             string message = ResourceUtilities.GetResourceString("MetaprojectGenerated");
-            var eventArgs = new MetaProjectGeneratedEventArgs(xml.ToString(), path, message)
+            var eventArgs = new MetaprojectGeneratedEventArgs(xml.ToString(), path, message)
             {
                 BuildEventContext = _projectBuildEventContext,
             };

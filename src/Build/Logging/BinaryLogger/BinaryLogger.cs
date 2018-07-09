@@ -206,9 +206,9 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFile(projectArgs.ProjectFile);
             }
-            else if (e is MetaProjectGeneratedEventArgs metaProjectArgs)
+            else if (e is MetaprojectGeneratedEventArgs metaprojectArgs)
             {
-                projectImportsCollector.AddFileFromMemory(metaProjectArgs.ProjectFile, metaProjectArgs.metaProjectXml);
+                projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
             }
         }
 

@@ -10,21 +10,21 @@ namespace Microsoft.Build.Framework
     /// Arguments for the metaproject generated event.
     /// </summary>
     [Serializable]
-    public class MetaProjectGeneratedEventArgs : BuildMessageEventArgs
+    public class MetaprojectGeneratedEventArgs : BuildMessageEventArgs
     {
         /// <summary>
         /// Raw xml representing the metaproject.
         /// </summary>
-        public string metaProjectXml;
+        public string metaprojectXml;
 
         /// <summary>
-        /// Initializes a new instance of the MetaProjectGeneratedEventArgs class.
+        /// Initializes a new instance of the MetaprojectGeneratedEventArgs class.
         /// </summary>
-        public MetaProjectGeneratedEventArgs(string metaProjectXml, string metaProjectPath, string message)
-            : base(message, null, null, MessageImportance.Low, DateTime.UtcNow, metaProjectPath)
+        public MetaprojectGeneratedEventArgs(string metaprojectXml, string metaprojectPath, string message)
+            : base(message, null, null, MessageImportance.Low, DateTime.UtcNow, metaprojectPath)
         {
-            this.metaProjectXml = metaProjectXml;
-            this.ProjectFile = metaProjectPath;
+            this.metaprojectXml = metaprojectXml;
+            this.ProjectFile = metaprojectPath;
         }
     }
 }
