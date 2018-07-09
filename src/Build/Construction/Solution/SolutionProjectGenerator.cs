@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1085,6 +1085,16 @@ namespace Microsoft.Build.Construction
 
             if (project.ProjectType == SolutionProjectType.WebProject)
             {
+#if !FEATURE_ASPNET_COMPILER
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                    (
+                    false,
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(_solutionFile.FullPath),
+                    "AspNetCompiler.UnsupportedMSBuildVersion",
+                    project.ProjectName
+                    );
+#else
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, null);
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
@@ -1094,6 +1104,7 @@ namespace Microsoft.Build.Construction
                 {
                     AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, targetName);
                 }
+#endif
             }
             else if ((project.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat) ||
                      (project.CanBeMSBuildProjectFile(out string unknownProjectTypeErrorMessage)))
@@ -2308,6 +2319,6 @@ namespace Microsoft.Build.Construction
                                                             new List<ProjectPropertyGroupTaskPropertyInstance> { property }));
         }
 
-        #endregion // Methods
+#endregion // Methods
     }
 }

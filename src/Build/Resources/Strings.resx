@@ -807,8 +807,8 @@
     <value>MSB4205: The website project in this solution is targeting the v2.0 runtime, but it is not installed.</value>
     <comment>{StrBegin="MSB4205: "}</comment>
   </data>
-    <data name="AspNetCompiler.40NotInstalled">
-    <value>MSB4205: The website project in this solution is targeting the v4.0 runtime, but it is not installed.</value>
+  <data name="AspNetCompiler.UnsupportedMSBuildVersion">
+    <value>MSB4205: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</value>
     <comment>{StrBegin="MSB4249: "}</comment>
   </data>
   <data name="AspNetCompiler.InvalidTargetFrameworkMonikerFromException">
