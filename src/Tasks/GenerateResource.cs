@@ -40,6 +40,7 @@ using System.Runtime.Versioning;
 
 using Microsoft.Build.Utilities;
 using System.Xml.Linq;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -1010,7 +1011,7 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem outputFile in outputFiles)
                     {
-                        if (!File.Exists(outputFile.ItemSpec))
+                        if (!FileSystems.Default.FileExists(outputFile.ItemSpec))
                         {
                             _unsuccessfullyCreatedOutFiles.Add(outputFile.ItemSpec);
                         }
@@ -1049,7 +1050,7 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (ITaskItem outputFile in outputFiles)
                         {
-                            if (!File.Exists(outputFile.ItemSpec))
+                            if (!FileSystems.Default.FileExists(outputFile.ItemSpec))
                             {
                                 _unsuccessfullyCreatedOutFiles.Add(outputFile.ItemSpec);
                             }
@@ -1260,7 +1261,7 @@ namespace Microsoft.Build.Tasks
                 Sources[i].CopyMetadataTo(OutputResources[i]);
                 Sources[i].SetMetadata("OutputResource", OutputResources[i].ItemSpec);
 
-                if (!File.Exists(Sources[i].ItemSpec))
+                if (!FileSystems.Default.FileExists(Sources[i].ItemSpec))
                 {
                     // Error but continue with the files that do exist
                     Log.LogErrorWithCodeFromResources("GenerateResource.ResourceNotFound", Sources[i].ItemSpec);
@@ -1285,7 +1286,7 @@ namespace Microsoft.Build.Tasks
             {
                 // We're generating a STR class file, so there must be exactly one input resource file.
                 // If that resource file itself is out of date, the STR class file is going to get generated anyway.
-                if (nothingOutOfDate && File.Exists(Sources[0].ItemSpec))
+                if (nothingOutOfDate && FileSystems.Default.FileExists(Sources[0].ItemSpec))
                 {
                     GetStronglyTypedResourceToProcess(ref inputsToProcess, ref outputsToProcess);
                 }
@@ -2383,7 +2384,7 @@ namespace Microsoft.Build.Tasks
                         ITaskItem assemblyFile = _assemblyFiles[i];
                         _assemblyNames[i] = null;
 
-                        if (assemblyFile.ItemSpec != null && File.Exists(assemblyFile.ItemSpec))
+                        if (assemblyFile.ItemSpec != null && FileSystems.Default.FileExists(assemblyFile.ItemSpec))
                         {
                             string fusionName = assemblyFile.GetMetadata(ItemMetadataNames.fusionName);
                             if (!String.IsNullOrEmpty(fusionName))
@@ -2563,7 +2564,7 @@ namespace Microsoft.Build.Tasks
                         currentOutputDirectory = Path.Combine(priDirectory,
                             reader.cultureName ?? String.Empty);
 
-                        if (!Directory.Exists(currentOutputDirectory))
+                        if (!FileSystems.Default.DirectoryExists(currentOutputDirectory))
                         {
                             currentOutputDirectoryAlreadyExisted = false;
                             Directory.CreateDirectory(currentOutputDirectory);
@@ -2633,7 +2634,7 @@ namespace Microsoft.Build.Tasks
                         _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteSTRFile",
                             _stronglyTypedFilename, e.Message);
 
-                        if (File.Exists(outFileOrDir)
+                        if (FileSystems.Default.FileExists(outFileOrDir)
                             && GetFormat(inFile) != Format.Assembly
                             // outFileOrDir is a directory when the input file is an assembly
                             && GetFormat(outFileOrDir) != Format.Assembly)
@@ -2655,7 +2656,7 @@ namespace Microsoft.Build.Tasks
                 {
                     _logger.LogErrorWithCodeFromResources("GenerateResource.CannotWriteOutput",
                         FileUtilities.GetFullPathNoThrow(currentOutputFile), io.Message);
-                    if (File.Exists(currentOutputFile))
+                    if (FileSystems.Default.FileExists(currentOutputFile))
                     {
                         if (GetFormat(currentOutputFile) != Format.Assembly)
                             // Never delete an assembly since we don't ever actually write to assemblies.
@@ -2744,7 +2745,7 @@ namespace Microsoft.Build.Tasks
             if (!success)
             {
                 string shorterPath = Path.Combine(outputDirectory ?? String.Empty, cultureName ?? String.Empty);
-                if (!Directory.Exists(shorterPath))
+                if (!FileSystems.Default.DirectoryExists(shorterPath))
                 {
                     Directory.CreateDirectory(shorterPath);
                 }
@@ -2946,7 +2947,7 @@ namespace Microsoft.Build.Tasks
         internal void ReadAssemblyResources(String name, String outFileOrDir)
         {
             // If something else in the solution failed to build...
-            if (!File.Exists(name))
+            if (!FileSystems.Default.FileExists(name))
             {
                 _logger.LogErrorWithCodeFromResources("GenerateResource.MissingFile", name);
                 return;

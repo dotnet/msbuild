@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -1100,7 +1101,7 @@ namespace Microsoft.Build.Tasks
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
                     var codeBase = new Uri(currentAssembly);
                     DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
-                    if (File.Exists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
+                    if (FileSystems.Default.FileExists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
                     {
                         return true;
                     }

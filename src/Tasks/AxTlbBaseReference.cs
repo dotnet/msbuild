@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -122,7 +123,7 @@ namespace Microsoft.Build.Tasks
             string wrapperPath = GetWrapperPath();
 
             // now see if the wrapper assembly actually exists
-            if (!File.Exists(wrapperPath))
+            if (!FileSystems.Default.FileExists(wrapperPath))
             {
                 return false;
             }
@@ -144,7 +145,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // if wrapper doesn't exist, wrapper is obviously not up to date
-            if (!File.Exists(wrapperInfo.path))
+            if (!FileSystems.Default.FileExists(wrapperInfo.path))
             {
                 return false;
             }

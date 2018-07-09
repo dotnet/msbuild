@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Build.Shared.FileSystem;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -179,7 +180,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromManifest(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
             {
                 return null;
             }
@@ -252,7 +253,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromManagedAssembly(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
             {
                 return null;
             }
@@ -290,7 +291,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromNativeAssembly(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
             {
                 return null;
             }
@@ -316,7 +317,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromFile(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
             {
                 return null;
             }
@@ -513,14 +514,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 string file = String.Format(CultureInfo.InvariantCulture, "{0}.dll", _name);
                 string path = Path.Combine(searchPath, file);
-                if (File.Exists(path) && IsEqual(this, FromFile(path), specificVersion))
+                if (FileSystems.Default.FileExists(path) && IsEqual(this, FromFile(path), specificVersion))
                 {
                     return path;
                 }
 
                 file = String.Format(CultureInfo.InvariantCulture, "{0}.manifest", _name);
                 path = Path.Combine(searchPath, file);
-                if (File.Exists(path) && IsEqual(this, FromManifest(path), specificVersion))
+                if (FileSystems.Default.FileExists(path) && IsEqual(this, FromManifest(path), specificVersion))
                 {
                     return path;
                 }

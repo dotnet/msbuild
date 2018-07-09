@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Xunit;
 
@@ -84,7 +85,7 @@ public class MSBuildTestAssemblyFixture : IDisposable
         while (currentFolder != null)
         {
             string potentialVersionsPropsPath = Path.Combine(currentFolder, "build", "Versions.props");
-            if (File.Exists(potentialVersionsPropsPath))
+            if (FileSystems.Default.FileExists(potentialVersionsPropsPath))
             {
                 var doc = XDocument.Load(potentialVersionsPropsPath);
                 var ns = doc.Root.Name.Namespace;

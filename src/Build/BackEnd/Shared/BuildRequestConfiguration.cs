@@ -10,6 +10,7 @@ using Microsoft.Build.Collections;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -840,7 +841,7 @@ namespace Microsoft.Build.BackEnd
         internal void ClearCacheFile()
         {
             string cacheFile = GetCacheFile();
-            if (File.Exists(cacheFile))
+            if (FileSystems.Default.FileExists(cacheFile))
             {
                 FileUtilities.DeleteNoThrow(cacheFile);
             }

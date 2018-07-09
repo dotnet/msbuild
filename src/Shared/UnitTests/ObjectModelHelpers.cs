@@ -17,6 +17,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -530,7 +531,7 @@ namespace Microsoft.Build.UnitTests
                 message = fileRelativePath + " doesn't exist, but it should.";
             }
 
-            Assert.True(File.Exists(Path.Combine(TempProjectDir, fileRelativePath)), message);
+            Assert.True(FileSystems.Default.FileExists(Path.Combine(TempProjectDir, fileRelativePath)), message);
         }
 
         /// <summary>
@@ -816,7 +817,7 @@ namespace Microsoft.Build.UnitTests
             {
                 try
                 {
-                    if (Directory.Exists(dir))
+                    if (FileSystems.Default.DirectoryExists(dir))
                     {
                         foreach (string directory in Directory.GetDirectories(dir))
                         {
@@ -1031,7 +1032,7 @@ namespace Microsoft.Build.UnitTests
         {
             for (int i = 0; i < files.Length; i++)
             {
-                if (File.Exists(files[i])) File.Delete(files[i]);
+                if (FileSystems.Default.FileExists(files[i])) File.Delete(files[i]);
             }
         }
 
@@ -1462,7 +1463,7 @@ namespace Microsoft.Build.UnitTests
                 return null;
             }
 
-            Assert.True(Directory.Exists(rootDirectory), $"Directory {rootDirectory} does not exist");
+            Assert.True(FileSystems.Default.DirectoryExists(rootDirectory), $"Directory {rootDirectory} does not exist");
 
             var result = new string[files.Length];
 
@@ -1479,10 +1480,10 @@ namespace Microsoft.Build.UnitTests
                 var directoryName = Path.GetDirectoryName(fullPath);
 
                 Directory.CreateDirectory(directoryName);
-                Assert.True(Directory.Exists(directoryName));
+                Assert.True(FileSystems.Default.DirectoryExists(directoryName));
 
                 File.WriteAllText(fullPath, string.Empty);
-                Assert.True(File.Exists(fullPath));
+                Assert.True(FileSystems.Default.FileExists(fullPath));
 
                 result[i] = fullPath;
             }
@@ -1514,13 +1515,13 @@ namespace Microsoft.Build.UnitTests
         {
             foreach (string path in paths)
             {
-                if (File.Exists(path))
+                if (FileSystems.Default.FileExists(path))
                 {
                     File.Delete(path);
                 }
 
                 string directory = Path.GetDirectoryName(path);
-                if (Directory.Exists(directory) && (Directory.GetFileSystemEntries(directory).Length == 0))
+                if (FileSystems.Default.DirectoryExists(directory) && (Directory.GetFileSystemEntries(directory).Length == 0))
                 {
                     Directory.Delete(directory);
                 }

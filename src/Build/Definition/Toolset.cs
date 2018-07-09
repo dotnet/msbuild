@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Evaluation
                                 }
                                 else
                                 {
-                                    overrideDirectoryExists = Directory.Exists(_overrideTasksPath);
+                                    overrideDirectoryExists = FileSystems.Default.DirectoryExists(_overrideTasksPath);
                                 }
                             }
 

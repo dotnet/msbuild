@@ -8,6 +8,7 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 using CodeDomProvider = System.CodeDom.Compiler.CodeDomProvider;
@@ -254,7 +255,7 @@ namespace Microsoft.Build.Tasks
 
                         for (int i = 0; i < outputFiles.Length; i++)
                         {
-                            if (File.Exists(outputFiles[i].ItemSpec))
+                            if (FileSystems.Default.FileExists(outputFiles[i].ItemSpec))
                             {
                                 successfullyGenerated.Add(outputFiles[i]);
                             }
@@ -271,7 +272,7 @@ namespace Microsoft.Build.Tasks
                     // was in fact generated
                     if (!success)
                     {
-                        if (!File.Exists(outputFile.ItemSpec))
+                        if (!FileSystems.Default.FileExists(outputFile.ItemSpec))
                         {
                             OutputFiles = Array.Empty<ITaskItem>();
                         }
@@ -434,8 +435,8 @@ namespace Microsoft.Build.Tasks
 
                 // Verify that the ToolPath exists -- if the tool doesn't exist in it 
                 // we'll worry about that later
-                if ((String.IsNullOrEmpty(ToolPath) || !Directory.Exists(ToolPath)) &&
-                    (String.IsNullOrEmpty(SdkToolsPath) || !Directory.Exists(SdkToolsPath)))
+                if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
+                    (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
                 {
                     Log.LogErrorWithCodeFromResources("ResGen.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                     return false;
@@ -502,7 +503,7 @@ namespace Microsoft.Build.Tasks
                     {
                         pathToTool = Path.Combine(ToolPath, ToolExe);
 
-                        if (!File.Exists(pathToTool))
+                        if (!FileSystems.Default.FileExists(pathToTool))
                         {
                             pathToTool = null;
                         }

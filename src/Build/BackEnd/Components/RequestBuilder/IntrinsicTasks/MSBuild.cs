@@ -8,6 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 // NOTE: This is nearly identical to the MSBuild task in Microsoft.Build.Tasks.  We are deprecating that task,
 // so this is the governing implementation.
@@ -322,7 +323,7 @@ namespace Microsoft.Build.BackEnd
                     break;
                 }
 
-                if (File.Exists(projectPath) || (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Build))
+                if (FileSystems.Default.FileExists(projectPath) || (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Build))
                 {
                     if (FileUtilities.IsVCProjFilename(projectPath))
                     {

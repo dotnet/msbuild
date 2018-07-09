@@ -8,7 +8,7 @@ using System.Text;
 using System.Xaml;
 using System.IO;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.FileSystem;
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
 
 namespace Microsoft.Build.Tasks.Xaml
@@ -145,7 +145,7 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 // valid *absolute* file path
 
-                if (!File.Exists(contentOrFile))
+                if (!FileSystems.Default.FileExists(contentOrFile))
                     throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.RuleFileNotFound", contentOrFile));
 
                 return ParseXamlDocument(new StreamReader(contentOrFile), desiredRule);
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 // Unable to convert to a path, parse as XML
                 return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
 
-            if (File.Exists(maybeFullPath))
+            if (FileSystems.Default.FileExists(maybeFullPath))
                 // file found, parse as a file
                 return ParseXamlDocument(new StreamReader(maybeFullPath), desiredRule);
 

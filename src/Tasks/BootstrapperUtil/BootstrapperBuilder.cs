@@ -16,6 +16,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
@@ -352,7 +353,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             string bootstrapperPath = BootstrapperPath;
             string setupSourceFile = System.IO.Path.Combine(bootstrapperPath, SETUP_BIN);
 
-            if (!File.Exists(setupSourceFile))
+            if (!FileSystems.Default.FileExists(setupSourceFile))
             {
                 _results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.MissingSetupBin", SETUP_BIN, bootstrapperPath));
                 return false;
@@ -511,13 +512,13 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             string startDirectory = System.IO.Path.Combine(BootstrapperPath, RESOURCES_PATH);
             _cultures.Clear();
 
-            if (Directory.Exists(startDirectory))
+            if (FileSystems.Default.DirectoryExists(startDirectory))
             {
                 foreach (string subDirectory in Directory.GetDirectories(startDirectory))
                 {
                     string resourceDirectory = System.IO.Path.Combine(startDirectory, subDirectory);
                     string resourceFile = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
-                    if (File.Exists(resourceFile))
+                    if (FileSystems.Default.FileExists(resourceFile))
                     {
                         var resourceDoc = new XmlDocument();
                         try
@@ -577,7 +578,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             XmlElement rootElement = _document.CreateElement("Products", BOOTSTRAPPER_NAMESPACE);
             string packagePath = PackagePath;
 
-            if (Directory.Exists(packagePath))
+            if (FileSystems.Default.DirectoryExists(packagePath))
             {
                 foreach (string strSubDirectory in Directory.GetDirectories(packagePath))
                 {
@@ -784,8 +785,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 // set up our validation logic by detecting the trace-switch enabled and whether or
                 //   not our files exist.
                 bool validate = true;
-                bool fileExists = File.Exists(filePath);
-                bool schemaExists = File.Exists(schemaPath);
+                bool fileExists = FileSystems.Default.FileExists(filePath);
+                bool schemaExists = FileSystems.Default.FileExists(schemaPath);
 
                 // if we're being asked to validate but we can't find the schema file, then
                 //   output something useful to tell user that we can't find the schema.
@@ -949,7 +950,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                 string strLangManifestFilename = System.IO.Path.Combine(strLanguageDirectory, CHILD_MANIFEST_FILE);
                                 string strLangManifestSchemaFileName = System.IO.Path.Combine(SchemaPath, MANIFEST_FILE_SCHEMA);
 
-                                if (File.Exists(strLangManifestFilename))
+                                if (FileSystems.Default.FileExists(strLangManifestFilename))
                                 {
                                     // Load Package.xml
                                     XmlValidationResults packageValidationResults = new XmlValidationResults(strLangManifestFilename);
@@ -1458,7 +1459,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         {
                             if (resourceUpdater != null)
                             {
-                                if (!File.Exists(packageFileSource.Value))
+                                if (!FileSystems.Default.FileExists(packageFileSource.Value))
                                 {
                                     _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageResourceFileNotFound", packageFileSource.Value, builder.Name));
                                     fSucceeded = false;
@@ -1476,7 +1477,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                     string strDestinationFileName = System.IO.Path.Combine(settings.OutputPath, packageFileDestination.Value);
                                     try
                                     {
-                                        if (!File.Exists(packageFileSource.Value))
+                                        if (!FileSystems.Default.FileExists(packageFileSource.Value))
                                         {
                                             _results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Error, "GenerateBootstrapper.PackageFileNotFound", packageFileDestination.Value, builder.Name));
                                             fSucceeded = false;
@@ -1529,7 +1530,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 // Add the Eula attribute correctly
                 if (eulas != null && !String.IsNullOrEmpty(eulaAttribute?.Value))
                 {
-                    if (File.Exists(eulaAttribute.Value))
+                    if (FileSystems.Default.FileExists(eulaAttribute.Value))
                     {
                         string key = GetFileHash(eulaAttribute.Value);
                         if (eulas.TryGetValue(key, out KeyValuePair<string, string> eulaInfo))
@@ -1587,7 +1588,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private static void EnsureFolderExists(string strFolderPath)
         {
-            if (!Directory.Exists(strFolderPath))
+            if (!FileSystems.Default.DirectoryExists(strFolderPath))
             {
                 Directory.CreateDirectory(strFolderPath);
             }
@@ -2045,7 +2046,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             XmlAttribute hashAttribute = packageFileNode.Attributes[HASH_ATTRIBUTE];
             XmlAttribute publicKeyAttribute = packageFileNode.Attributes[PUBLICKEY_ATTRIBUTE];
 
-            if (File.Exists(fileSource))
+            if (FileSystems.Default.FileExists(fileSource))
             {
                 string publicKey = GetPublicKeyOfFile(fileSource);
                 if (hashAttribute == null && publicKeyAttribute == null)
@@ -2111,7 +2112,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private static string GetPublicKeyOfFile(string fileSource)
         {
-            if (File.Exists(fileSource))
+            if (FileSystems.Default.FileExists(fileSource))
             {
                 try
                 {

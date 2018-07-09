@@ -3,6 +3,7 @@
 
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -81,7 +82,7 @@ namespace Microsoft.Build.Tasks
                 if (!string.IsNullOrEmpty(MSBuildProjectDirectory))
                 {
                     string fullName = Path.Combine(MSBuildProjectDirectory, CodeAnalysisRuleSet);
-                    if (File.Exists(fullName))
+                    if (FileSystems.Default.FileExists(fullName))
                     {
                         return CodeAnalysisRuleSet;
                     }
@@ -93,7 +94,7 @@ namespace Microsoft.Build.Tasks
                     foreach (string directory in CodeAnalysisRuleSetDirectories)
                     {
                         string fullName = Path.Combine(directory, CodeAnalysisRuleSet);
-                        if (File.Exists(fullName))
+                        if (FileSystems.Default.FileExists(fullName))
                         {
                             return fullName;
                         }
@@ -106,13 +107,13 @@ namespace Microsoft.Build.Tasks
                 if (!string.IsNullOrEmpty(MSBuildProjectDirectory))
                 {
                     string fullName = Path.Combine(MSBuildProjectDirectory, CodeAnalysisRuleSet);
-                    if (File.Exists(fullName))
+                    if (FileSystems.Default.FileExists(fullName))
                     {
                         return CodeAnalysisRuleSet;
                     }
                 }
             }
-            else if (File.Exists(CodeAnalysisRuleSet))
+            else if (FileSystems.Default.FileExists(CodeAnalysisRuleSet))
             {
                 // This is a full path.
                 return CodeAnalysisRuleSet;

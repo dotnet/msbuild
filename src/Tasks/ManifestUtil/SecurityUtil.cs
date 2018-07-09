@@ -21,6 +21,7 @@ using System.Security.Permissions;
 using System.Security.Policy;
 using System.Text;
 using System.Xml;
+using Microsoft.Build.Shared.FileSystem;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 string path = Path.Combine(paths[0], PermissionSetsFolder);
 
                 // PermissionSets folder doesn't exit
-                if (Directory.Exists(path))
+                if (FileSystems.Default.DirectoryExists(path))
                 {
                     string[] files = Directory.GetFiles(path, "*.xml");
                     var filesInfo = new FileInfo[files.Length];
@@ -581,7 +582,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 throw new ArgumentNullException(nameof(path));
             }
 
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
             {
                 throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path), path);
             }
@@ -709,12 +710,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
 #pragma warning disable 618 // Disabling warning on using internal ToolLocationHelper API. At some point we should migrate this.
             string toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
-            if (toolPath == null || !File.Exists(toolPath))
+            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {
                 toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.Version45,
                     VisualStudioVersion.Version110);
             }
-            if (toolPath == null || !File.Exists(toolPath))
+            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {
                 var pathToDotNetFrameworkSdk = ToolLocationHelper.GetPathToDotNetFrameworkSdk(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100);
                 if (pathToDotNetFrameworkSdk != null)
@@ -722,15 +723,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     toolPath = Path.Combine(pathToDotNetFrameworkSdk, "bin", ToolName);
                 }
             }
-            if (toolPath == null || !File.Exists(toolPath))
+            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {
                 toolPath = GetVersionIndependentToolPath(ToolName);
             }
-            if (toolPath == null || !File.Exists(toolPath))
+            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {
                 toolPath = Path.Combine(Directory.GetCurrentDirectory(), ToolName);
             }
-            if (!File.Exists(toolPath))
+            if (!FileSystems.Default.FileExists(toolPath))
             {
                 throw new ApplicationException(String.Format(CultureInfo.CurrentCulture,
                     resources.GetString("SecurityUtil.SigntoolNotFound"), toolPath));

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -72,7 +73,7 @@ namespace Microsoft.Build.Tasks
                     // For speed, eliminate duplicates caused by poor targets authoring
                     if (!deletedFilesSet.Contains(file.ItemSpec))
                     {
-                        if (File.Exists(file.ItemSpec))
+                        if (FileSystems.Default.FileExists(file.ItemSpec))
                         {
                             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                             Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);

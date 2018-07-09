@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
@@ -42,7 +43,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Read trust-info from app.manifest
-            if (BaseManifest != null && File.Exists(BaseManifest.ItemSpec))
+            if (BaseManifest != null && FileSystems.Default.FileExists(BaseManifest.ItemSpec))
             {
                 try
                 {

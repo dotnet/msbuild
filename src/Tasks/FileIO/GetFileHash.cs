@@ -7,6 +7,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -68,7 +69,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (var file in Files)
             {
-                if (!File.Exists(file.ItemSpec))
+                if (!FileSystems.Default.FileExists(file.ItemSpec))
                 {
                     Log.LogErrorFromResources("FileHash.FileNotFound", file.ItemSpec);
                 }

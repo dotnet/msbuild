@@ -1731,12 +1731,13 @@ namespace Microsoft.Build.Shared
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The array of files.</returns>
         internal string[] GetFiles
-        (
+            (
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IEnumerable<string> excludeSpecsUnescaped = null
-        )
+            List<string> excludeSpecsUnescaped = null
+            )
         {
+
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
@@ -1751,20 +1752,20 @@ namespace Microsoft.Build.Shared
                     excludeSpecsUnescaped);
             }
 
-            var filesKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+            var enumerationKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
             ImmutableArray<string> files;
-            if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+            if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
-                object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(filesKey, _ => new object());
+                object locks = _cachedGlobExpansionsLock.Value.GetOrAdd(enumerationKey, _ => new object());
                 lock (locks)
                 {
-                    if (!_cachedGlobExpansions.TryGetValue(filesKey, out files))
+                    if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
                     {
                         files =
                             _cachedGlobExpansions.GetOrAdd(
-                                filesKey,
+                                enumerationKey,
                                 (_) =>
                                     GetFilesImplementation(
                                         projectDirectoryUnescaped,
@@ -1781,17 +1782,31 @@ namespace Microsoft.Build.Shared
             return filesToReturn;
         }
 
-        private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, IEnumerable<string> excludes)
+        private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, List<string> excludes)
         {
             Debug.Assert(projectDirectoryUnescaped != null);
             Debug.Assert(filespecUnescaped != null);
-
-            var sb = new StringBuilder();
 
             if (filespecUnescaped.Contains(".."))
             {
                 filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
             }
+
+            var excludeSize = 0;
+
+            if (excludes != null)
+            {
+                foreach (var exclude in excludes)
+                {
+                    excludeSize += exclude.Length;
+                }
+            }
+
+            var sb = new StringBuilder(
+                projectDirectoryUnescaped.Length + // OK to over allocate a bit, this is a short lived object
+                filespecUnescaped.Length +
+                excludeSize
+                );
 
             // Don't include the project directory when the glob is independent of it.
             // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
@@ -2025,7 +2040,7 @@ namespace Microsoft.Build.Shared
             return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
         }
 
-        static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, IEnumerable<string> excludeSpecsUnescaped)
+        static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
         {
             if (excludeSpecsUnescaped != null)
             {
@@ -2062,7 +2077,7 @@ namespace Microsoft.Build.Shared
         private string[] GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
-            IEnumerable<string> excludeSpecsUnescaped)
+            List<string> excludeSpecsUnescaped)
         {
             // UNDONE (perf): Short circuit the complex processing when we only have a path and a wildcarded filename
 

@@ -6,6 +6,7 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Utilities
 {
@@ -39,7 +40,7 @@ namespace Microsoft.Build.Utilities
                     // Very often with TLog files we're talking about
                     // a directory and a simply wildcarded filename
                     // Optimize for that case here.
-                    if (!FileMatcher.HasWildcards(directoryName) && Directory.Exists(directoryName))
+                    if (!FileMatcher.HasWildcards(directoryName) && FileSystems.Default.DirectoryExists(directoryName))
                     {
                         files = Directory.GetFiles(directoryName, searchPattern);
                     }

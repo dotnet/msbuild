@@ -8,6 +8,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -191,8 +192,8 @@ namespace Microsoft.Build.Shared
 
             // We're not in VS, check for MSBuild.exe / dll to consider this a standalone environment.
             string msBuildPath = null;
-            if (File.Exists(msBuildExe)) msBuildPath = msBuildExe;
-            else if (File.Exists(msBuildDll)) msBuildPath = msBuildDll;
+            if (FileSystems.Default.FileExists(msBuildExe)) msBuildPath = msBuildExe;
+            else if (FileSystems.Default.FileExists(msBuildDll)) msBuildPath = msBuildDll;
 
             if (!string.IsNullOrEmpty(msBuildPath))
             {
@@ -215,7 +216,7 @@ namespace Microsoft.Build.Shared
                 Regex.IsMatch(msbuildAssembly, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*", RegexOptions.IgnoreCase))
             {
                 // In a Visual Studio path we must have MSBuild.exe
-                if (File.Exists(msbuildExe))
+                if (FileSystems.Default.FileExists(msbuildExe))
                 {
                     return new BuildEnvironment(
                         BuildEnvironmentMode.VisualStudio,
@@ -243,7 +244,7 @@ namespace Microsoft.Build.Shared
             var vsVersion = s_getEnvironmentVariable("VisualStudioVersion");
 
             if (string.IsNullOrEmpty(vsInstallDir) || string.IsNullOrEmpty(vsVersion) ||
-                vsVersion != CurrentVisualStudioVersion || !Directory.Exists(vsInstallDir)) return null;
+                vsVersion != CurrentVisualStudioVersion || !FileSystems.Default.DirectoryExists(vsInstallDir)) return null;
 
             return new BuildEnvironment(
                 BuildEnvironmentMode.VisualStudio,
@@ -264,7 +265,7 @@ namespace Microsoft.Build.Shared
 
             Version v = new Version(CurrentVisualStudioVersion);
             var instances = s_getVisualStudioInstances()
-                .Where(i => i.Version.Major == v.Major && Directory.Exists(i.Path))
+                .Where(i => i.Version.Major == v.Major && FileSystems.Default.DirectoryExists(i.Path))
                 .ToList();
 
             if (instances.Count == 0) return null;
@@ -300,7 +301,7 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromStandaloneMSBuildExe(string msBuildExePath)
         {
-            if (!string.IsNullOrEmpty(msBuildExePath) && File.Exists(msBuildExePath))
+            if (!string.IsNullOrEmpty(msBuildExePath) && FileSystems.Default.FileExists(msBuildExePath))
             {
                 // MSBuild.exe was found outside of Visual Studio. Assume Standalone mode.
                 return new BuildEnvironment(
