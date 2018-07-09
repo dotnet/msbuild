@@ -211,12 +211,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
         /// </summary>
-        private IDictionary<string, ISet<string>> _warningsAsErrorsByProject;
+        private IDictionary<int, ISet<string>> _warningsAsErrorsByProject;
 
         /// <summary>
         /// A list of warnings to treat as messages for an associated <see cref="BuildEventContext"/>.
         /// </summary>
-        private IDictionary<string, ISet<string>> _warningsAsMessagesByProject;
+        private IDictionary<int, ISet<string>> _warningsAsMessagesByProject;
 
         #region LoggingThread Data
 
@@ -514,11 +514,11 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                string key = GetWarningsAsErrorOrMessageKey(buildEventContext);
+                int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
 
                 if (_warningsAsErrorsByProject == null)
                 {
-                    _warningsAsErrorsByProject = new ConcurrentDictionary<string, ISet<string>>();
+                    _warningsAsErrorsByProject = new ConcurrentDictionary<int, ISet<string>>();
                 }
 
                 if (!_warningsAsErrorsByProject.ContainsKey(key))
@@ -533,11 +533,11 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_lockObject)
             {
-                string key = GetWarningsAsErrorOrMessageKey(buildEventContext);
+                int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
 
                 if (_warningsAsMessagesByProject == null)
                 {
-                    _warningsAsMessagesByProject = new ConcurrentDictionary<string, ISet<string>>();
+                    _warningsAsMessagesByProject = new ConcurrentDictionary<int, ISet<string>>();
                 }
 
                 if (!_warningsAsMessagesByProject.ContainsKey(key))
@@ -1113,12 +1113,15 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Private Methods
-        private static string GetWarningsAsErrorOrMessageKey(BuildEventContext buildEventContext)
+        private static int GetWarningsAsErrorOrMessageKey(BuildEventContext buildEventContext)
         {
-            return $"{buildEventContext.ProjectInstanceId}-{buildEventContext.ProjectContextId}";
+            var hash = 17;
+            hash = hash * 31 + buildEventContext.ProjectInstanceId;
+            hash = hash * 31 + buildEventContext.ProjectContextId;
+            return hash;
         }
 
-        private static string GetWarningsAsErrorOrMessageKey(BuildEventArgs buildEventArgs)
+        private static int GetWarningsAsErrorOrMessageKey(BuildEventArgs buildEventArgs)
         {
             return GetWarningsAsErrorOrMessageKey(buildEventArgs.BuildEventContext);
         }
