@@ -2,21 +2,23 @@
 <Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)/package/Layout.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Archive.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/package/MSBuildExtentions.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/package/Nupkg.targets" />
 
   <Target Name="GenerateInstallers"
-          Condition=" '$(SkipBuildingInstallers)' != 'true' And !$(Architecture.StartsWith('arm')) "
+          Condition=" '$(SkipBuildingInstallers)' != 'true' "
           DependsOnTargets="Prepare;
                             Layout;
-                            GeneratePkgs;
-                            GenerateDebs;
-                            GenerateMsis;
-                            GenerateRpms" />
+                            GenerateMSBuildExtentions" />
 
   <Target Name="Package"
           DependsOnTargets="BuildDotnetCliBuildFramework;
                             Init;
                             Layout;
                             GenerateNugetPackages;
-                            GenerateArchives"  />
+                            GenerateArchives;
+                            GenerateInstallers" />
+
+
+
 </Project>

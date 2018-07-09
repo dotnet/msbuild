@@ -13,12 +13,7 @@
           DependsOnTargets="Init;
                             Package;
                             PublishArtifacts;
-                            FinishBuild" />
-
-  <Target Name="PublishWithoutPackage"
-          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
-          DependsOnTargets="Init;
-                            PublishArtifacts;
+                            PublishNupkgToBlobFeed;
                             FinishBuild" />
 
   <!-- UploadToAzure target comes from Build Tools -->
@@ -30,7 +25,9 @@
     <ItemGroup>
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)" />
       <ForPublishing Include="$(PackagesDirectory)/Microsoft*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' != '' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.*"
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
     </ItemGroup>
 
     <ItemGroup>
