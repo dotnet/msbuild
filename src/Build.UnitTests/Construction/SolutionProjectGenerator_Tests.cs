@@ -17,6 +17,10 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 
+using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
+
 using Project = Microsoft.Build.Evaluation.Project;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
@@ -28,15 +32,22 @@ using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class SolutionProjectGenerator_Tests : IDisposable
     {
+        private readonly ITestOutputHelper output;
+
         private string _originalVisualStudioVersion = null;
 
-        public SolutionProjectGenerator_Tests()
+        private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
+
+        public SolutionProjectGenerator_Tests(ITestOutputHelper output)
         {
+            this.output = output;
+
             // Save off the value for use during cleanup
             _originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
         }
@@ -54,7 +65,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void AddNewErrorWarningMessageElement()
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(output);
 
             /**
              * <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -139,7 +150,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", new BuildEventContext(0, 0, 0, 0), null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal("3.5", instances[0].ToolsVersion);
         }
@@ -175,7 +186,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", new BuildEventContext(0, 0, 0, 0), null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal("3.5", instances[0].ToolsVersion);
         }
@@ -204,7 +215,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, new BuildEventContext(0, 0, 0, 0), null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
 
@@ -246,7 +257,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, new BuildEventContext(0, 0, 0, 0), null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
 
@@ -282,7 +293,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, new BuildEventContext(0, 0, 0, 0), null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
             Assert.Equal("ABC", instances[0].SubToolsetVersion);
@@ -396,10 +407,9 @@ namespace Microsoft.Build.UnitTests.Construction
 
                     sp.FullPath = solutionFile;
                     sp.ParseSolutionFile();
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
 
-                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, new BuildEventContext(0, 0, 0, 0), null);
-
-                    MockLogger logger = new MockLogger();
+                    MockLogger logger = new MockLogger(output);
                     List<ILogger> loggers = new List<ILogger>(1);
                     loggers.Add(logger);
 
@@ -418,9 +428,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 sp1.FullPath = solutionFileMultipleProjects;
                 sp1.ParseSolutionFile();
-                ProjectInstance[] instances1 = SolutionProjectGenerator.Generate(sp1, null, null, new BuildEventContext(0, 0, 0, 0), null);
 
-                MockLogger logger1 = new MockLogger();
+                ProjectInstance[] instances1 = SolutionProjectGenerator.Generate(sp1, null, null, _buildEventContext, CreateMockLoggingService());
+
+                MockLogger logger1 = new MockLogger(output);
                 List<ILogger> loggers1 = new List<ILogger>(1);
                 loggers1.Add(logger1);
 
@@ -482,13 +493,13 @@ namespace Microsoft.Build.UnitTests.Construction
                 sp.FullPath = solutionFile;
                 sp.ParseSolutionFile();
 
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, new BuildEventContext(0, 0, 0, 0), null);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
 
                 Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
                 Assert.Equal("11.0", instances[0].SubToolsetVersion);
                 Assert.Equal("11.0", instances[0].GetPropertyValue("VisualStudioVersion"));
 
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(output);
                 List<ILogger> loggers = new List<ILogger>(1);
                 loggers.Add(logger);
 
@@ -545,7 +556,7 @@ EndGlobal
 ".Replace("`", "\"");
 
                 SolutionFile sp = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, new BuildEventContext(0, 0, 0, 0), null);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
             }
            );
         }
@@ -771,7 +782,7 @@ EndGlobal
 </Project>";
             #endregion
 
-            var logger = new MockLogger();
+            var logger = new MockLogger(output);
             var loggers = new List<ILogger>(1) { logger };
             var solutionFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("MSBuildIssue.sln", solutionFileContents);
             ObjectModelHelpers.CreateFileInTempProjectDirectory("B.csproj", projectBravoFileContents);
@@ -780,7 +791,7 @@ EndGlobal
             var solution = new SolutionFile { FullPath = solutionFile };
             solution.ParseSolutionFile();
 
-            var instances = SolutionProjectGenerator.Generate(solution, null, null, new BuildEventContext(0, 0, 0, 0), null);
+            var instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             var projectBravoMetaProject = instances[1];
             Assert.False(projectBravoMetaProject.Targets.Any(kvp => kvp.Value.Outputs.Equals("@()"))); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
@@ -995,9 +1006,8 @@ EndGlobal
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
             var solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            var buildEventContext = new BuildEventContext(0, 0, 0, 0);
 
-            var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, buildEventContext, null)[0];
+            var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService())[0];
 
             foreach (ITaskItem item in instance.Items)
             {
@@ -1064,9 +1074,8 @@ EndGlobal
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            BuildEventContext buildEventContext = new BuildEventContext(0, 0, 0, 0);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, buildEventContext, null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService());
 
             int i = 0;
             foreach (ProjectInstance instance in instances)
@@ -1139,13 +1148,12 @@ EndGlobal
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            BuildEventContext buildEventContext = new BuildEventContext(0, 0, 0, 0);
 
             string[] solutionToolsVersions = { "4.0", ObjectModelHelpers.MSBuildDefaultToolsVersion };
 
             foreach (string solutionToolsVersion in solutionToolsVersions)
             {
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, solutionToolsVersion, buildEventContext, null);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, solutionToolsVersion, _buildEventContext, CreateMockLoggingService());
 
                 Assert.Equal(2, instances.Length);
 
@@ -1201,14 +1209,13 @@ EndGlobal
 
             ProjectInstance[] instances = null;
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
-            BuildEventContext buildEventContext = new BuildEventContext(0, 0, 0, 0);
             bool caughtException = false;
 
             try
             {
                 // SolutionProjectGenerator.Generate() is used at build-time, and creates evaluation- and 
                 // execution-model projects; as such it will throw if fed an explicitly invalid toolsversion
-                instances = SolutionProjectGenerator.Generate(solution, null, "invalid", buildEventContext, null);
+                instances = SolutionProjectGenerator.Generate(solution, null, "invalid", _buildEventContext, CreateMockLoggingService());
             }
             catch (InvalidProjectFileException)
             {
@@ -1249,7 +1256,7 @@ EndGlobal
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
             Assert.Equal(1, instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0).Count());
             Assert.Equal(1, instances[0].Targets.Where(target => String.Compare(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase) == 0).Count());
@@ -1335,7 +1342,7 @@ EndGlobal
             globalProperties.Add(new KeyValuePair<string, string>("Configuration", "Debug"));
             globalProperties.Add(new KeyValuePair<string, string>("Platform", "Mixed Platforms"));
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
             // Default for Configuration is "Debug", if present
             Assert.Equal("Debug", instances[0].GetPropertyValue("Configuration"));
@@ -1365,7 +1372,7 @@ EndGlobal
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
             // If "Debug" is not present, just pick the first configuration name
             Assert.Equal("Release", instances[0].GetPropertyValue("Configuration"));
@@ -1490,7 +1497,7 @@ EndGlobal
 
             // ToolsVersion is 4.0, TargetFrameworkVersion is v2.0 --> one item pointing to v2.0
             msbuildProject.SetProperty("TargetFrameworkVersion", "v2.0");
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(output);
             bool success = msbuildProject.Build("GetFrameworkPathAndRedistList", new ILogger[] { logger });
             Assert.True(success);
 
@@ -1620,7 +1627,7 @@ EndGlobal
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
             Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
             Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
 
@@ -1664,6 +1671,7 @@ EndGlobal
                 ";
 
             SolutionFile solution = null;
+            ProjectCollection collection = new ProjectCollection();
 
             try
             {
@@ -1674,7 +1682,7 @@ EndGlobal
                 // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
 
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
                 // Instantiating the
                 Assert.Equal(0, ProjectCollection.GlobalProjectCollection.LoadedProjects.Count());
@@ -1747,14 +1755,14 @@ EndGlobal
 
             try
             {
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(output);
 
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Nonexistent";
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
                 SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionContents.Replace('\'', '"'));
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, null);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService());
                 ProjectInstance msbuildProject = instances[0];
 
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
@@ -1839,7 +1847,7 @@ EndGlobal
                 }
 
                 File.WriteAllText(projectFilePath, solutionFileContents.Replace('\'', '"'));
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(output);
 
                 BuildParameters parameters = new BuildParameters();
                 parameters.Loggers = new ILogger[] { logger };
@@ -1931,7 +1939,7 @@ EndGlobal
                 }
 
                 File.WriteAllText(projectFilePath, solutionFileContents.Replace('\'', '"'));
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(output);
 
                 BuildParameters parameters = new BuildParameters();
                 parameters.Loggers = new ILogger[] { logger };
@@ -2013,7 +2021,7 @@ EndGlobal
 
             try
             {
-                MockLogger logger = new MockLogger();
+                MockLogger logger = new MockLogger(output);
 
                 Dictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties["Configuration"] = "Release";
@@ -2023,11 +2031,19 @@ EndGlobal
                 ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
+#if !FEATURE_ASPNET_COMPILER
+                Assert.Throws<InvalidProjectFileException>(() => {
+#endif
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+#if !FEATURE_ASPNET_COMPILER
+                });
+#endif
 
+#if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
                 string message = ResourceUtilities.FormatResourceString("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
                 logger.AssertLogContains(message);
+#endif
             }
             finally
             {
@@ -2059,26 +2075,26 @@ EndGlobal
                 EndGlobal
             ");
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "One" });
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase) == 0));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "Two", "Three", "Four" });
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
 
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase) == 0));
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase) == 0));
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase) == 0));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "Build" });
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
 
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase) == 0));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "Five", "Rebuild" });
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
 
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase) == 0));
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase) == 0));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, null, new List<string> { "My_Project:Six" });
+            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
 
             Assert.Equal(1, instances[0].Targets.Count(target => String.Compare(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase) == 0));
         }
@@ -2128,7 +2144,7 @@ EndGlobal
                 "ValidateProjects",
             })
             {
-                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, null, builtInTargetName == null ? null : new [] { builtInTargetName });
+                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), builtInTargetName == null ? null : new [] { builtInTargetName });
 
                 Assert.Equal(1, instances.Length);
 
@@ -2136,7 +2152,7 @@ EndGlobal
             }
 
 
-            instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, null, new[] { "Foo" });
+            instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Foo" });
 
             Assert.Equal(1, instances.Length);
 
@@ -2181,7 +2197,7 @@ EndGlobal
             {
                 var solutionFile = SolutionFile.Parse(solutionFilePath);
 
-                ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, null, null, BuildEventContext.Invalid, null, new[] { "MyTarget" }).FirstOrDefault();
+                ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "MyTarget" }).FirstOrDefault();
 
                 Assert.NotNull(projectInstance);
 
@@ -2204,7 +2220,7 @@ EndGlobal
         /// <summary>
         /// Create a Project derived from a Venus solution
         /// </summary>
-        private static ProjectInstance CreateVenusSolutionProject()
+        private ProjectInstance CreateVenusSolutionProject()
         {
             return CreateVenusSolutionProject(null, null);
         }
@@ -2212,7 +2228,7 @@ EndGlobal
         /// <summary>
         /// Create a Project derived from a Venus solution
         /// </summary>
-        private static ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties)
+        private ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties)
         {
             return CreateVenusSolutionProject(globalProperties, null);
         }
@@ -2220,7 +2236,7 @@ EndGlobal
         /// <summary>
         /// Create a Project derived from a Venus solution
         /// </summary>
-        private static ProjectInstance CreateVenusSolutionProject(string toolsVersion)
+        private ProjectInstance CreateVenusSolutionProject(string toolsVersion)
         {
             return CreateVenusSolutionProject(null, toolsVersion);
         }
@@ -2231,7 +2247,7 @@ EndGlobal
         /// </summary>
         /// <param name="globalProperties">The dictionary of global properties.  May be null.</param>
         /// <param name="toolsVersion">The ToolsVersion override value.  May be null.</param>
-        private static ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties, string toolsVersion)
+        private ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties, string toolsVersion)
         {
             string solutionFileContents =
                 @"
@@ -2270,10 +2286,18 @@ EndGlobal
 
             SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, toolsVersion, BuildEventContext.Invalid, null);
+            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, toolsVersion, BuildEventContext.Invalid, CreateMockLoggingService());
 
             // Index 0 is the traversal project, which will reference the sole Venus project.
             return instances[1];
+        }
+
+        private ILoggingService CreateMockLoggingService()
+        {
+            ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 0);
+            var logger = new MockLogger(output);
+            loggingService.RegisterLogger(logger);
+            return loggingService;
         }
 
         /// <summary>

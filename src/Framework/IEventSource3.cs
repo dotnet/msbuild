@@ -11,6 +11,11 @@ namespace Microsoft.Build.Framework
     public interface IEventSource3 : IEventSource2
     {
         /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        void IncludeEvaluationMetaprojects();
+
+        /// <summary>
         /// Should evaluation events include profiling information?
         /// </summary>
         void IncludeEvaluationProfiles();

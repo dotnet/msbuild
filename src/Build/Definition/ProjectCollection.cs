@@ -1799,6 +1799,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private TelemetryEventHandler _telemetryEventHandler;
 
+            private bool _includeEvaluationMetaprojects;
+
             private bool _includeEvaluationProfiles;
 
             private bool _includeTaskInputs;
@@ -1888,6 +1890,24 @@ namespace Microsoft.Build.Evaluation
             /// The telemetry sent event.
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
+
+            /// <summary>
+            /// Should evaluation events include generated metaprojects?
+            /// </summary>
+            public void IncludeEvaluationMetaprojects()
+            {
+                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
+                {
+                    buildEventSource3.IncludeEvaluationMetaprojects();
+                }
+
+                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
+                {
+                    designTimeEventSource3.IncludeEvaluationMetaprojects();
+                }
+
+                _includeEvaluationMetaprojects = true;
+            }
 
             /// <summary>
             /// Should evaluation events include profiling information?
@@ -2052,6 +2072,10 @@ namespace Microsoft.Build.Evaluation
 
                 if (eventSource is IEventSource3 eventSource3)
                 {
+                    if (_includeEvaluationMetaprojects)
+                    {
+                        eventSource3.IncludeEvaluationMetaprojects();
+                    }
                     if (_includeEvaluationProfiles)
                     {
                         eventSource3.IncludeEvaluationProfiles();

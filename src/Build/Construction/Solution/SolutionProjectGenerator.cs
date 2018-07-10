@@ -26,6 +26,7 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 
 using FrameworkName = System.Runtime.Versioning.FrameworkName;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -740,12 +741,9 @@ namespace Microsoft.Build.Construction
 
             // Special environment variable to allow people to see the in-memory MSBuild project generated
             // to represent the SLN.
-            if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
+            foreach (ProjectInstance instance in projectInstances)
             {
-                foreach (ProjectInstance instance in projectInstances)
-                {
-                    instance.ToProjectRootElement().Save(instance.FullPath);
-                }
+                EmitMetaproject(instance.ToProjectRootElement(), instance.FullPath);
             }
 
             return projectInstances.ToArray();
@@ -788,8 +786,8 @@ namespace Microsoft.Build.Construction
                 // If we cannot build the project directly, then we need to generate a metaproject for it.
                 if (!canBuildDirectly)
                 {
-                    ProjectInstance metaProject = CreateMetaproject(traversalInstance, project, projectConfiguration);
-                    projectInstances.Add(metaProject);
+                    ProjectInstance metaproject = CreateMetaproject(traversalInstance, project, projectConfiguration);
+                    projectInstances.Add(metaproject);
                 }
             }
 
@@ -882,12 +880,10 @@ namespace Microsoft.Build.Construction
 
             // For debugging purposes: some information is lost when evaluating into a project instance,
             // so make it possible to see what we have at this point.
-            if (Environment.GetEnvironmentVariable("MSBUILDEMITSOLUTION") != null)
-            {
-                string path = traversalProject.FullPath;
-                traversalProject.Save(_solutionFile.FullPath + ".metaproj.tmp");
-                traversalProject.FullPath = path;
-            }
+            string path = traversalProject.FullPath;
+            string metaprojectPath = _solutionFile.FullPath + ".metaproj.tmp";
+            EmitMetaproject(traversalProject, metaprojectPath);
+            traversalProject.FullPath = path;
 
             // Create the instance.  From this point forward we can evaluate conditions against the traversal project directly.
             var traversalInstance = new ProjectInstance
@@ -910,6 +906,29 @@ namespace Microsoft.Build.Construction
             AddStandardTraversalTargets(traversalInstance, projectsInOrder);
 
             return traversalInstance;
+        }
+
+        private void EmitMetaproject(ProjectRootElement metaproject, string path)
+        {
+            if (Traits.Instance.EmitSolutionMetaproj)
+            {
+                metaproject.Save(path);
+            }
+            if (_loggingService.IncludeEvaluationMetaprojects == true)
+            {
+                var xml = new StringBuilder();
+                using (var writer = new StringWriter(xml))
+                {
+                    metaproject.Save(writer);
+                }
+
+                string message = ResourceUtilities.GetResourceString("MetaprojectGenerated");
+                var eventArgs = new MetaprojectGeneratedEventArgs(xml.ToString(), path, message)
+                {
+                    BuildEventContext = _projectBuildEventContext,
+                };
+                _loggingService.LogBuildEvent(eventArgs);
+            }
         }
 
         /// <summary>
@@ -1085,6 +1104,16 @@ namespace Microsoft.Build.Construction
 
             if (project.ProjectType == SolutionProjectType.WebProject)
             {
+#if !FEATURE_ASPNET_COMPILER
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                    (
+                    false,
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(_solutionFile.FullPath),
+                    "AspNetCompiler.UnsupportedMSBuildVersion",
+                    project.ProjectName
+                    );
+#else
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, null);
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
@@ -1094,6 +1123,7 @@ namespace Microsoft.Build.Construction
                 {
                     AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, targetName);
                 }
+#endif
             }
             else if ((project.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat) ||
                      (project.CanBeMSBuildProjectFile(out string unknownProjectTypeErrorMessage)))
@@ -1387,76 +1417,76 @@ namespace Microsoft.Build.Construction
             newTask.SetParameter("AllowPartiallyTrustedCallers", "$(" + GenerateSafePropertyName(project, "AspNetAPTCA") + ")");
             newTask.SetParameter("FixedNames", "$(" + GenerateSafePropertyName(project, "AspNetFixedNames") + ")");
 
-            bool isDotNetFramework = false;
+            ValidateTargetFrameworkForWebProject(project);
 
-            // generate the target .NET Framework version based on the passed in TargetFrameworkMoniker.
             try
             {
-                var targetFramework = new FrameworkName(project.TargetFrameworkMoniker);
-
-                if (String.Equals(targetFramework.Identifier, ".NETFramework", StringComparison.OrdinalIgnoreCase))
-                {
-                    isDotNetFramework = true;
-
-                    // As of .NET Framework 4.0, there are only two versions of aspnet_compiler.exe: 2.0 and 4.0.  If 
-                    // the TargetFrameworkVersion is less than 4.0, use the 2.0 version.  Otherwise, just use the 4.0
-                    // version of the executable, so that if say FV 4.1 is passed in, we don't throw an error.
-                    if (targetFramework.Version.Major >= 4)
-                    {
-                        newTask.SetParameter
-                            (
-                                "ToolPath",
-                                FrameworkLocationHelper.GetPathToDotNetFramework(_version40)
-                            );
-
-                        if (targetFramework.Version > _version40)
-                        {
-                            _loggingService.LogComment(_projectBuildEventContext, MessageImportance.Low,
-                                "AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", project.ProjectName,
-                                targetFramework.Version.ToString());
-                        }
-                    }
-                    else
-                    {
-                        string pathTo20 = FrameworkLocationHelper.GetPathToDotNetFramework(_version20);
-
-                        ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(pathTo20 != null,
-                            "SubCategoryForSolutionParsingErrors", new BuildEventFileInfo(_solutionFile.FullPath),
-                            "AspNetCompiler.20NotInstalled");
-
-                        newTask.SetParameter
-                            (
-                                "ToolPath",
-                                pathTo20
-                            );
-                    }
-                }
+                SetToolPathForAspNetCompilerTask(project, newTask);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile
                     (
-                        new BuildEventFileInfo(_solutionFile.FullPath),
-                        e,
-                        "AspNetCompiler.InvalidTargetFrameworkMonikerFromException",
-                        project.ProjectName,
-                        project.TargetFrameworkMoniker,
-                        e.Message
+                    new BuildEventFileInfo(_solutionFile.FullPath),
+                    e,
+                    "AspNetCompiler.InvalidTargetFrameworkMonikerFromException",
+                    project.ProjectName,
+                    project.TargetFrameworkMoniker,
+                    e.Message
                     );
             }
+        }
 
+        private void ValidateTargetFrameworkForWebProject(ProjectInSolution project)
+        {
+            var targetFramework = new FrameworkName(project.TargetFrameworkMoniker);
+            bool isDotNetFramework = String.Equals(targetFramework.Identifier, ".NETFramework", StringComparison.OrdinalIgnoreCase);
+
+            if (targetFramework.Version > _version40)
+            {
+                _loggingService.LogComment
+                    (
+                    _projectBuildEventContext,
+                    MessageImportance.Low,
+                    "AspNetCompiler.TargetingHigherFrameworksDefaultsTo40",
+                    project.ProjectName,
+                    targetFramework.Version.ToString()
+                    );
+            }
             if (!isDotNetFramework)
             {
                 ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
-                       (
-                       false,
-                       "SubCategoryForSolutionParsingErrors",
-                       new BuildEventFileInfo(_solutionFile.FullPath),
-                       "AspNetCompiler.InvalidTargetFrameworkMonikerNotDotNET",
-                       project.ProjectName,
-                       project.TargetFrameworkMoniker
-                       );
+                    (
+                    false,
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(_solutionFile.FullPath),
+                    "AspNetCompiler.InvalidTargetFrameworkMonikerNotDotNET",
+                    project.ProjectName,
+                    project.TargetFrameworkMoniker
+                    );
             }
+        }
+
+        // As of .NET Framework 4.0, there are only two versions of aspnet_compiler.exe: 2.0 and 4.0.  If 
+        // the TargetFrameworkVersion is less than 4.0, use the 2.0 version.  Otherwise, just use the 4.0
+        // version of the executable, so that if say FV 4.1 is passed in, we don't throw an error.
+        private void SetToolPathForAspNetCompilerTask(ProjectInSolution project, ProjectTaskInstance task)
+        {
+            // generate the target .NET Framework version based on the passed in TargetFrameworkMoniker.
+            var targetFramework = new FrameworkName(project.TargetFrameworkMoniker);
+            bool shouldDefaultToVersion40 = targetFramework.Version.Major >= 4;
+            Version aspnetCompilerVersion = shouldDefaultToVersion40 ? _version40 : _version20;
+            string aspnetCompilerPath = FrameworkLocationHelper.GetPathToDotNetFramework(aspnetCompilerVersion);
+
+            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile
+                (
+                aspnetCompilerPath != null,
+                "SubCategoryForSolutionParsingErrors",
+                new BuildEventFileInfo(_solutionFile.FullPath),
+                "AspNetCompiler.20NotInstalled"
+                );
+
+            task.SetParameter("ToolPath", aspnetCompilerPath);
         }
 
         /// <summary>
@@ -2317,6 +2347,6 @@ namespace Microsoft.Build.Construction
                                                             new List<ProjectPropertyGroupTaskPropertyInstance> { property }));
         }
 
-        #endregion // Methods
+#endregion // Methods
     }
 }
