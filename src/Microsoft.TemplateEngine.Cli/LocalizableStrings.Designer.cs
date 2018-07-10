@@ -983,6 +983,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Name cannot contain any of the following characters: {0}.
+        /// </summary>
+        public static string NameContainsInvalidCharacters {
+            get {
+                return ResourceManager.GetString("NameContainsInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The name for the output being created. If no name is specified, the name of the current directory is used..
         /// </summary>
         public static string NameOfOutput {
