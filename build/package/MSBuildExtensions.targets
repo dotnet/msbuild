@@ -29,6 +29,7 @@
   <Target Name="GenerateMSBuildExtentions"
         DependsOnTargets="Init;
                           Layout;
-                          GenerateSdkMSBuildExtensionsNupkg" />
+                          GenerateSdkMSBuildExtensionsNupkg" 
+        Condition=" '$(OS)' == 'Windows_NT' "/>
 
 </Project>
