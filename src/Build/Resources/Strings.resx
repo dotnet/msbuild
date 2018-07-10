@@ -807,6 +807,10 @@
     <value>MSB4205: The website project in this solution is targeting the v2.0 runtime, but it is not installed.</value>
     <comment>{StrBegin="MSB4205: "}</comment>
   </data>
+  <data name="AspNetCompiler.UnsupportedMSBuildVersion">
+    <value>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</value>
+    <comment>{StrBegin="MSB4249: "}</comment>
+  </data>
   <data name="AspNetCompiler.InvalidTargetFrameworkMonikerFromException">
     <value>MSB4204: {0}: Invalid TargetFrameworkMoniker {1}. {2}.</value>
     <comment>{StrBegin="MSB4204: "}</comment>
@@ -1642,6 +1646,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>{StrBegin="MSB4231: "}</comment>
   </data>
 
+  <data name="MetaprojectGenerated">
+    <value>Metaproject &quot;{0}&quot; generated.</value>
+  </data>
+
   <data name="ProjectImportSkippedFalseCondition">
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</value>
   </data>
@@ -1698,7 +1706,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4249.
+        Next message code should be MSB4250.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

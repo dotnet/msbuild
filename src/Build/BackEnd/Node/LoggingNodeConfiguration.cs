@@ -9,8 +9,11 @@ namespace Microsoft.Build.BackEnd
 {
     internal sealed class LoggingNodeConfiguration : INodePacketTranslatable
     {
+        private bool _includeEvaluationMetaprojects;
         private bool _includeEvaluationProfiles;
         private bool _includeTaskInputs;
+
+        public bool IncludeEvaluationMetaprojects => _includeEvaluationMetaprojects;
 
         public bool IncludeEvaluationProfiles => _includeEvaluationProfiles;
 
@@ -20,14 +23,16 @@ namespace Microsoft.Build.BackEnd
         {
         }
 
-        public LoggingNodeConfiguration(bool includeEvaluationProfiles, bool includeTaskInputs)
+        public LoggingNodeConfiguration(bool includeEvaluationMetaprojects, bool includeEvaluationProfiles, bool includeTaskInputs)
         {
+            _includeEvaluationMetaprojects = includeEvaluationMetaprojects;
             _includeEvaluationProfiles = includeEvaluationProfiles;
             _includeTaskInputs = includeTaskInputs;
         }
 
         void INodePacketTranslatable.Translate(INodePacketTranslator translator)
         {
+            translator.Translate(ref _includeEvaluationMetaprojects);
             translator.Translate(ref _includeEvaluationProfiles);
             translator.Translate(ref _includeTaskInputs);
         }

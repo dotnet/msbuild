@@ -194,6 +194,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private int _nodeId = 0;
 
         /// <summary>
+        /// Whether to include evaluation metaprojects in events.
+        /// </summary>
+        private bool? _includeEvaluationMetaprojects;
+
+        /// <summary>
         /// Whether to include evaluation profiles in events.
         /// </summary>
         private bool? _includeEvaluationProfile;
@@ -474,6 +479,15 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         } = null;
+
+        /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        public bool IncludeEvaluationMetaprojects
+        {
+            get => (_includeEvaluationMetaprojects = _includeEvaluationMetaprojects ?? _eventSinkDictionary.Values.OfType<EventSourceSink>().Any(sink => sink.IncludeEvaluationMetaprojects)).Value;
+            set => _includeEvaluationMetaprojects = value;
+        }
 
         /// <summary>
         /// Should evaluation events include profiling information?

@@ -1307,26 +1307,23 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetPathToDotNetFramework(DotNetFrameworkArchitecture architecture)
             {
-#if !FEATURE_INSTALLED_MSBUILD
-                return null;
-#else
                 string cachedPath;
                 if (this._pathsToDotNetFramework.TryGetValue(architecture, out cachedPath))
                 {
                     return cachedPath;
                 }
 
+#if FEATURE_WIN32_REGISTRY
                 // Otherwise, check to see if we're even installed.  If not, return null -- no point in setting the static 
                 // variables to null when that's what they are already.  
-                if (NativeMethodsShared.IsWindows)
+                if (NativeMethodsShared.IsWindows && !CheckForFrameworkInstallation(
+                    this._dotNetFrameworkRegistryKey,
+                    this._dotNetFrameworkSetupRegistryInstalledName
+                    ))
                 {
-                    if (!CheckForFrameworkInstallation(
-                            this._dotNetFrameworkRegistryKey,
-                            this._dotNetFrameworkSetupRegistryInstalledName))
-                    {
-                        return null;
-                    }
+                    return null;
                 }
+#endif
 
                 // We're installed and we haven't found this framework path yet -- so find it!
                 string generatedPathToDotNetFramework =
@@ -1351,7 +1348,6 @@ namespace Microsoft.Build.Shared
                 }
 
                 return generatedPathToDotNetFramework;
-#endif
             }
 
             /// <summary>
