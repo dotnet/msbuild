@@ -9,8 +9,8 @@
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
-        <source>MSB4205: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4205: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
+        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
