@@ -9,7 +9,7 @@
           Condition=" '$(SkipBuildingInstallers)' != 'true' "
           DependsOnTargets="Prepare;
                             Layout;
-                            GenerateMSBuildExtentions" />
+                            GenerateMSBuildExtensions" />
 
   <Target Name="Package"
           DependsOnTargets="BuildDotnetCliBuildFramework;
