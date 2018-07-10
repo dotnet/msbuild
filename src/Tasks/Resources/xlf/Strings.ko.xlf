@@ -969,6 +969,11 @@
         <target state="translated">MSB3190: ClickOnce는 요청 실행 수준 '{0}'을(를) 지원하지 않습니다.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.MOTW">
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
+        <target state="translated">MSB3821: {0} 파일은 인터넷 또는 제한 영역에 있거나 파일에 웹 표시가 있으므로 처리할 수 없습니다. 이러한 파일을 처리하려면 웹 표시를 제거하세요.</target>
+        <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
         <target state="translated">MSB3552: 리소스 파일 "{0}"을(를) 찾을 수 없습니다.</target>

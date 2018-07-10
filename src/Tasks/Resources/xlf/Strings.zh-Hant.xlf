@@ -969,6 +969,11 @@
         <target state="translated">MSB3190: ClickOnce 不支援要求執行層級 '{0}'。</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.MOTW">
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
+        <target state="translated">MSB3821: 因為檔案 {0} 位於網際網路或是限制區域上，或是檔案上標有 Web 字樣，所以無法處理該檔案。若希望處理這些檔案，請移除 Web 字樣。</target>
+        <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
         <target state="translated">MSB3552: 找不到資源檔 "{0}"。</target>
