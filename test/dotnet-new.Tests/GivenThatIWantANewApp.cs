@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.New.Tests
 
         [Theory]
         [InlineData("console", "microsoft.netcore.app", "2.0.0")]
-        [InlineData("classlib", "netstandard.library", "2.0.1")]
+        [InlineData("classlib", "netstandard.library", "2.0.3")]
         public void NewProjectRestoresCorrectPackageVersion(string type, string packageName, string expectedVersion)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;
