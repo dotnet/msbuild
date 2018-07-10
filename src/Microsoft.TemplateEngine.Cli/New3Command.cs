@@ -231,13 +231,6 @@ namespace Microsoft.TemplateEngine.Cli
         //      Or do a reparse if necessary (currently occurs in one error case).
         private async Task<CreationResultStatus> CreateTemplateAsync(ITemplateMatchInfo templateMatchDetails)
         {
-            char[] invalidChars = Path.GetInvalidFileNameChars();
-            if (_commandInput?.Name != null && _commandInput.Name.IndexOfAny(invalidChars) > -1)
-            {
-                Reporter.Error.WriteLine(string.Format(LocalizableStrings.NameContainsInvalidCharacters, string.Join(", ", invalidChars.Select(x => $"'{x}'"))));
-                return CreationResultStatus.CreateFailed;
-            }
-
             ITemplateInfo template = templateMatchDetails.Info;
 
             string fallbackName = new DirectoryInfo(_commandInput.OutputPath ?? Directory.GetCurrentDirectory()).Name;
