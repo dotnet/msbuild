@@ -726,6 +726,10 @@ namespace Microsoft.Build.Execution
 
             _shutdownException = null;
 
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationMetaprojects)
+            {
+                _loggingService.IncludeEvaluationMetaprojects = true;
+            }
             if (configuration.LoggingNodeConfiguration.IncludeEvaluationProfiles)
             {
                 _loggingService.IncludeEvaluationProfile = true;

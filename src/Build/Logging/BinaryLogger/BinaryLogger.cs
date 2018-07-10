@@ -117,6 +117,11 @@ namespace Microsoft.Build.Logging
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath);
                 }
+
+                if (eventSource is IEventSource3 eventSource3)
+                {
+                    eventSource3.IncludeEvaluationMetaprojects();
+                }
             }
             catch (Exception e)
             {
@@ -198,17 +203,17 @@ namespace Microsoft.Build.Logging
 
         private void CollectImports(BuildEventArgs e)
         {
-            ProjectImportedEventArgs importArgs = e as ProjectImportedEventArgs;
-            if (importArgs != null && importArgs.ImportedProjectFile != null)
+            if (e is ProjectImportedEventArgs importArgs && importArgs.ImportedProjectFile != null)
             {
                 projectImportsCollector.AddFile(importArgs.ImportedProjectFile);
-                return;
             }
-
-            ProjectStartedEventArgs projectArgs = e as ProjectStartedEventArgs;
-            if (projectArgs != null)
+            else if (e is ProjectStartedEventArgs projectArgs)
             {
                 projectImportsCollector.AddFile(projectArgs.ProjectFile);
+            }
+            else if (e is MetaprojectGeneratedEventArgs metaprojectArgs)
+            {
+                projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
             }
         }
 

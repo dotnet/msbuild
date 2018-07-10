@@ -130,6 +130,15 @@ namespace Microsoft.Build.BackEnd.Logging
             set;
         }
 
+        /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        public bool IncludeEvaluationMetaprojects
+        {
+            get;
+            private set;
+        }
+
 
         /// <summary>
         /// Should evaluation events include profiling information?
@@ -154,6 +163,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Methods
 
         #region IEventSource3 Methods
+
+        void IEventSource3.IncludeEvaluationMetaprojects()
+        {
+            IncludeEvaluationMetaprojects = true;
+        }
 
         void IEventSource3.IncludeEvaluationProfiles()
         {
