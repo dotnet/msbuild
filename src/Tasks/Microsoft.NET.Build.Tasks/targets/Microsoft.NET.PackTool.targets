@@ -73,9 +73,13 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
     </ItemGroup>
 
+    <PropertyGroup>
+      <PackagedShimOutputRootDirectory Condition=" '$(PackagedShimOutputRootDirectory)' == '' ">$(IntermediateOutputPath)</PackagedShimOutputRootDirectory>
+    </PropertyGroup>
+
     <GenerateShims
       DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
-      PackagedShimOutputDirectory="$(IntermediateOutputPath)/$(Configuration)/shims/$(TargetFramework)"
+      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
       PackageId="$(PackageId)"
       PackageVersion="$(Version)"
       ProjectAssetsFile="$(ProjectAssetsFile)"
