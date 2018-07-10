@@ -240,6 +240,16 @@ namespace Microsoft.TemplateEngine.Cli
                 fallbackName = null;
             }
 
+            char[] invalidChars = Path.GetInvalidFileNameChars();
+
+            if (_commandInput?.Name != null && _commandInput.Name.IndexOfAny(invalidChars) > -1)
+            {
+                string printableChars = string.Join(", ", invalidChars.Where(x => !char.IsControl(x)).Select(x => $"'{x}'"));
+                string nonPrintableChars = string.Join(", ", invalidChars.Where(char.IsControl).Select(x => $"char({(int)x})"));
+                Reporter.Error.WriteLine(string.Format(LocalizableStrings.InvalidNameParameter, printableChars, nonPrintableChars).Bold().Red());
+                return CreationResultStatus.CreateFailed;
+            }
+
             TemplateCreationResult instantiateResult;
 
             try
