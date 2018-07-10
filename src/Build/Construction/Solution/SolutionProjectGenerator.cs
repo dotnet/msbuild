@@ -913,18 +913,21 @@ namespace Microsoft.Build.Construction
             {
                 metaproject.Save(path);
             }
+            if (_loggingService.IncludeEvaluationMetaprojects == true)
+            {
+                var xml = new StringBuilder();
+                using (var writer = new StringWriter(xml))
+                {
+                    metaproject.Save(writer);
+                }
 
-            var xml = new StringBuilder();
-            using (var writer = new StringWriter(xml))
-            {
-                metaproject.Save(writer);
+                string message = ResourceUtilities.GetResourceString("MetaprojectGenerated");
+                var eventArgs = new MetaprojectGeneratedEventArgs(xml.ToString(), path, message)
+                {
+                    BuildEventContext = _projectBuildEventContext,
+                };
+                _loggingService.LogBuildEvent(eventArgs);
             }
-            string message = ResourceUtilities.GetResourceString("MetaprojectGenerated");
-            var eventArgs = new MetaprojectGeneratedEventArgs(xml.ToString(), path, message)
-            {
-                BuildEventContext = _projectBuildEventContext,
-            };
-            _loggingService.LogBuildEvent(eventArgs);
         }
 
         /// <summary>

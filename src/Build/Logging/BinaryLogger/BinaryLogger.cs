@@ -117,6 +117,11 @@ namespace Microsoft.Build.Logging
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath);
                 }
+
+                if (eventSource is IEventSource3 eventSource3)
+                {
+                    eventSource3.IncludeEvaluationMetaprojects();
+                }
             }
             catch (Exception e)
             {
