@@ -15,6 +15,8 @@
 
     <TemplatePack Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" />
     <TemplatePack Include="Microsoft.DotNet.Test.ProjectTemplates.2.1" />
+
+    <TemplatePack Include="Microsoft.DotNet.Common.ProjectTemplates.2.2" />
   </ItemGroup>
 
   <Target Name="Update" Condition="'$(UpdatePackageSources)' != ''">

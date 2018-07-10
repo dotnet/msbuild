@@ -54,6 +54,13 @@
       "replaces": "netstandard2.0",
       "defaultValue": "netstandard2.0"
     },
+    "langVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "Sets langVersion in the created project file",
+      "defaultValue": "",
+      "replaces": "$(ProjectLanguageVersion)"
+    },
     "HostIdentifier": {
       "type": "bind",
       "binding": "HostIdentifier"
