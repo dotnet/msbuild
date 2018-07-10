@@ -187,6 +187,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        public bool IncludeEvaluationMetaprojects
+        {
+            get => false;
+            set { }
+        }
+
+        /// <summary>
         /// Should evaluation events include profiling information?
         /// </summary>
         public bool IncludeEvaluationProfile

@@ -117,6 +117,11 @@ namespace Microsoft.Build.Utilities
         public string Parameters { get; set; }
 
         /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        public bool IncludeEvaluationMetaprojects { get; set; }
+
+        /// <summary>
         /// Should evaluation events include profiling information?
         /// </summary>
         public bool IncludeEvaluationProfiles { get; set; }
@@ -151,6 +156,10 @@ namespace Microsoft.Build.Utilities
 
             if (_eventSourceForBuild is IEventSource3 eventSource3)
             {
+                if (IncludeEvaluationMetaprojects)
+                {
+                    eventSource3.IncludeEvaluationMetaprojects();
+                }
                 if (IncludeEvaluationProfiles)
                 {
                     eventSource3.IncludeEvaluationProfiles();
