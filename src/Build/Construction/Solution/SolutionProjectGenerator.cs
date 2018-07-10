@@ -26,6 +26,7 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 
 using FrameworkName = System.Runtime.Versioning.FrameworkName;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -909,7 +910,7 @@ namespace Microsoft.Build.Construction
 
         private void EmitMetaproject(ProjectRootElement metaproject, string path)
         {
-            if (Environment.GetEnvironmentVariable("MSBuildEmitSolution") != null)
+            if (Traits.Instance.EmitSolutionMetaproj)
             {
                 metaproject.Save(path);
             }

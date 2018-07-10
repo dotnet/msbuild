@@ -67,6 +67,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly int CopyTaskParallelism = ParseIntFromEnvironmentVariableOrDefault("MSBUILDCOPYTASKPARALLELISM", -1);
 
+        /// <summary>
+        /// Instruct MSBuild to write out the generated "metaproj" file to disk when building a solution file.
+        /// </summary>
+        public readonly bool EmitSolutionMetaproj = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildEmitSolution"));
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
