@@ -3,9 +3,8 @@
     <CoreSetupRid>$(HostRid)</CoreSetupRid>
     <CoreSetupRid Condition=" '$(HostOSName)' == 'win' or '$(HostOSName)' == 'osx' ">$(HostMonikerRid)</CoreSetupRid>
 
-    <!-- Use the portable linux-x64 Rid when downloading the shared framework compressed file.
-         NOTE: There isn't a 'linux-x64' version of the installers or the additional shared framweork. -->
     <SharedFrameworkRid>$(CoreSetupRid)</SharedFrameworkRid>
+    <SharedFrameworkRid Condition=" '$(Rid)' == 'linux-musl-x64' ">$(Rid)</SharedFrameworkRid>
     <SharedFrameworkRid Condition=" '$(UsePortableLinuxSharedFramework)' == 'true' ">linux-x64</SharedFrameworkRid>
 
     <DotNetCoreSdkLKGCompressedFileName>dotnet-sdk-$(DotNetCoreSdkLKGVersion)-$(SharedFrameworkRid)$(ArchiveExtension)</DotNetCoreSdkLKGCompressedFileName>

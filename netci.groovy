@@ -18,7 +18,7 @@ def platformList = [
   'Linux:arm64:Debug',
   'Linux-musl:x64:Debug',
   'Linux:x64:Release',
-  'opensuse.43.2:x64:Debug',
+  'opensuse.42.3:x64:Debug',
   'OSX10.12:x64:Release',
   'RHEL6:x64:Debug',
   'RHEL7.2:x64:Release',
@@ -78,7 +78,7 @@ set DOTNET_CLI_UI_LANGUAGE=es
         osUsedForMachineAffinity = 'Ubuntu16.04';
         buildCommand = "./build.sh --skip-prereqs --configuration ${configuration} --runtime-id linux-musl-x64 --docker alpine.3.6 --targets Default"
     }
-    else if (os == 'ubuntu.18.04' || os == 'fedora.27' || os == 'opensuse.43.2') {
+    else if (os == 'ubuntu.18.04' || os == 'fedora.27' || os == 'opensuse.42.3') {
         osUsedForMachineAffinity = 'Ubuntu16.04'
         osVersionUsedForMachineAffinity = 'latest-docker'
         buildCommand = "./build.sh --linux-portable --skip-prereqs --configuration ${configuration} --docker ${os} --targets Default"

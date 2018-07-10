@@ -8,6 +8,8 @@ FROM microsoft/dotnet-buildtools-prereqs:ubuntu-18.04-f90bc20-20180320154721
 
 RUN apt-get update && \
     apt-get -qqy install \
+        curl \
+        libcurl4 \
         sudo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

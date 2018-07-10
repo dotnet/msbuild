@@ -1,6 +1,6 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Product>Sdk</Product>
+    <Product>Toolset</Product>
     <IsNotOrchestratedPublish>true</IsNotOrchestratedPublish>
     <IsNotOrchestratedPublish Condition="'$(PB_PublishBlobFeedUrl)' != ''">false</IsNotOrchestratedPublish>
     <BlobStoragePartialRelativePath>$(Product)</BlobStoragePartialRelativePath>
