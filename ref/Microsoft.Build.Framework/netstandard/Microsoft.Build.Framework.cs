@@ -222,6 +222,7 @@ namespace Microsoft.Build.Framework
     }
     public partial interface IEventSource3 : Microsoft.Build.Framework.IEventSource, Microsoft.Build.Framework.IEventSource2
     {
+        void IncludeEvaluationMetaprojects();
         void IncludeEvaluationProfiles();
         void IncludeTaskInputs();
     }

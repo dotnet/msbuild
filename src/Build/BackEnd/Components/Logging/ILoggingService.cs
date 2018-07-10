@@ -171,6 +171,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        bool IncludeEvaluationMetaprojects
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Should evaluation events include profiling information?
         /// </summary>
         bool IncludeEvaluationProfile
