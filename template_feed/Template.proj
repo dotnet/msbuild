@@ -29,7 +29,7 @@
   </Target>
 
   <Target Name="Build" Outputs="%(TemplatePack.Identity)" DependsOnTargets="Update">
-    <MSBuild Targets="Restore;Pack" Projects="%(TemplatePack.FullPath)\build.csproj" Properties="NoWarn=2008" />
+    <MSBuild Targets="Restore;Pack" Projects="%(TemplatePack.FullPath)\build.csproj" Properties="NoWarn=2008%3B8021" />
     <RemoveDir Directories="..\artifacts\scratch;..\artifacts\templates\netstandard1.0" />
   </Target>
 </Project>
