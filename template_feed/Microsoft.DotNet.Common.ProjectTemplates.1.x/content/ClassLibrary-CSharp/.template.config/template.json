@@ -82,6 +82,13 @@
       ],
       "defaultValue": "netstandard1.4"
     },
+    "langVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "description": "Sets langVersion in the created project file",
+      "defaultValue": "",
+      "replaces": "$(ProjectLanguageVersion)"
+    },
     "HostIdentifier": {
       "type": "bind",
       "binding": "HostIdentifier"

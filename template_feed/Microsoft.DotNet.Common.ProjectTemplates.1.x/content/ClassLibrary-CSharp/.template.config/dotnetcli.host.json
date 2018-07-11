@@ -12,6 +12,10 @@
     "skipRestore": {
       "longName": "no-restore",
       "shortName": ""
+    },
+    "langVersion": {
+      "longName": "langVersion",
+      "shortName": ""
     }
   },
   "usageExamples": [

@@ -1,8 +1,6 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build">
-  <Import Project="..\Version.props" />
-
   <PropertyGroup>
-    <PackOutput Condition="'$(PackOutput)' == ''">$(TemplatesFolder)</PackOutput>
+    <PackOutput Condition="'$(PackOutput)' == ''">$(TemplatesDir)</PackOutput>
     <UpdateToNoTimestamp Condition="'$(UpdateToNoTimestamp)' == ''">false</UpdateToNoTimestamp>
   </PropertyGroup>
 
@@ -17,19 +15,21 @@
 
     <TemplatePack Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" />
     <TemplatePack Include="Microsoft.DotNet.Test.ProjectTemplates.2.1" />
+
+    <TemplatePack Include="Microsoft.DotNet.Common.ProjectTemplates.2.2" />
   </ItemGroup>
 
   <Target Name="Update" Condition="'$(UpdatePackageSources)' != ''">
     <Message Text="Updating packages..." Importance="High" />
-    <Message Text="dotnet exec ..\tools\DependencyUpdater\bin\debug\netcoreapp1.1\DependencyUpdater.dll &quot;$(MSBuildThisFileDirectory)&quot; $(UpdateToNoTimestamp) $(UpdatePackageSources)" Importance="High" />
-    <MSBuild Targets="Restore;Build" Projects="..\tools\DependencyUpdater\DependencyUpdater.csproj" />
+    <Message Text="dotnet exec $(ToolsDir)DependencyUpdater\bin\debug\netcoreapp1.1\DependencyUpdater.dll &quot;$(MSBuildThisFileDirectory)&quot; $(UpdateToNoTimestamp) $(UpdatePackageSources)" Importance="High" />
+    <MSBuild Targets="Restore;Build" Projects="$(ToolsDir)DependencyUpdater\DependencyUpdater.csproj" />
     <Exec 
          Command="dotnet run $(MSBuildThisFileDirectory) $(UpdateToNoTimestamp) $(UpdatePackageSources)" 
          WorkingDirectory="..\tools\DependencyUpdater\" />
   </Target>
 
   <Target Name="Build" Outputs="%(TemplatePack.Identity)" DependsOnTargets="Update">
-    <MSBuild Targets="Restore;Pack" Projects="%(TemplatePack.FullPath)\build.csproj" Properties="NoWarn=2008" />
-    <RemoveDir Directories="..\artifacts\scratch;..\artifacts\templates\netstandard1.0" />
+    <MSBuild Targets="Restore;Pack" Projects="%(TemplatePack.FullPath)\build.csproj" Properties="NoWarn=2008%3B8021" />
+    <RemoveDir Directories="$(ArtifactsDir)scratch;$(TemplatesDir)netstandard1.0" />
   </Target>
 </Project>

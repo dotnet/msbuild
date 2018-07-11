@@ -855,6 +855,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Name cannot contain any of the following characters {0} or character codes {1}.
+        /// </summary>
+        public static string InvalidNameParameter {
+            get {
+                return ResourceManager.GetString("InvalidNameParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} {1}
         ///    The default value &apos;{1}&apos; is not a valid value for {0}..
         /// </summary>
