@@ -72,6 +72,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public readonly bool EmitSolutionMetaproj = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildEmitSolution"));
 
+        /// <summary>
+        /// Log statistics about property functions which require reflection
+        /// </summary>
+        public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
+
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)

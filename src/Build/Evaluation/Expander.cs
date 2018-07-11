@@ -10,6 +10,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -3476,8 +3478,25 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
+                if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
+                {
+                    LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
+                }
+
                 returnVal = null;
                 return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private void LogFunctionCall(string fileName, object objectInstance, object[] args)
+            {
+                var logFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+
+                var argSignature = args != null
+                    ? string.Join(", ", args.Select(a => a?.GetType().Name ?? "null"))
+                    : string.Empty;
+
+                File.AppendAllText(logFile, $"ReceiverType={_receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={_methodMethodName}({argSignature})\n");
             }
 
             private static bool TryGetArg(object[] args, out int arg0)
