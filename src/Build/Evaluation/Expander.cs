@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -3316,10 +3317,77 @@ namespace Microsoft.Build.Evaluation
             /// <returns>True if the well known function call binding was successful</returns>
             private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
             {
+                returnVal = null;
+
                 if (objectInstance is string)
                 {
                     string text = (string)objectInstance;
-                    if (string.Equals(_methodMethodName, "Substring", StringComparison.OrdinalIgnoreCase))
+
+                    if (string.Equals(_methodMethodName, nameof(string.StartsWith), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.StartsWith(arg0);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Replace), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArgs(args, out string arg0, out string arg1))
+                        {
+                            returnVal = text.Replace(arg0, arg1);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Contains), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.Contains(arg0);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.ToUpperInvariant), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.ToUpperInvariant();
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.ToLowerInvariant), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.ToLowerInvariant();
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.EndsWith), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.EndsWith(arg0);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.ToLower), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.ToLower();
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.Length;
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, "Substring", StringComparison.OrdinalIgnoreCase))
                     {
                         int startIndex;
                         int length;
@@ -3416,7 +3484,26 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (objectInstance == null)
                 {
-                    if (_receiverType == typeof(Math))
+                    if (_receiverType == typeof(string))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(string.IsNullOrWhiteSpace), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = string.IsNullOrWhiteSpace(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(string.IsNullOrEmpty), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = string.IsNullOrEmpty(arg0);
+                                return true;
+                            }
+                        }
+                    }
+                    else if (_receiverType == typeof(Math))
                     {
                         if (string.Equals(_methodMethodName, "Max", StringComparison.OrdinalIgnoreCase))
                         {
@@ -3439,7 +3526,64 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (_receiverType == typeof(IntrinsicFunctions))
                     {
-                        if (string.Equals(_methodMethodName, "Add", StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.EnsureTrailingSlash(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ValueOrDefault), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = IntrinsicFunctions.ValueOrDefault(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizePath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (ElementsOfType(args, typeof(string)))
+                            {
+                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string) o));
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetDirectoryNameOfFileAbove), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = IntrinsicFunctions.GetDirectoryNameOfFileAbove(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetRegistryValueFromView), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length >= 4 &&
+                                TryGetArgs(args, out string arg0, out string arg1, enforceLength: false))
+                            {
+                                returnVal = IntrinsicFunctions.GetRegistryValueFromView(arg0, arg1, args[2], new ArraySegment<object>(args, 3, args.Length - 3));
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsRunningFromVisualStudio), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.IsRunningFromVisualStudio();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Escape), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.Escape(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, "Add", StringComparison.OrdinalIgnoreCase))
                         {
                             double arg0, arg1;
                             if (TryGetArgs(args, out arg0, out arg1))
@@ -3476,6 +3620,103 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    else if (_receiverType == typeof(Path))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(Path.Combine), StringComparison.OrdinalIgnoreCase))
+                        {
+                            string arg0, arg1, arg2, arg3;
+
+                            // Combine has fast implementations for up to 4 parameters: https://github.com/dotnet/corefx/blob/2c55db90d622fa6279184e6243f0470a3755d13c/src/Common/src/CoreLib/System/IO/Path.cs#L293-L317
+                            switch (args.Length)
+                            {
+                                case 0:
+                                    return false;
+                                case 1:
+                                    if (TryGetArg(args, out arg0))
+                                    {
+                                        returnVal = Path.Combine(arg0);
+                                        return true;
+                                    }
+                                    break;
+                                case 2:
+                                    if (TryGetArgs(args, out arg0, out arg1))
+                                    {
+                                        returnVal = Path.Combine(arg0, arg1);
+                                        return true;
+                                    }
+                                    break;
+                                case 3:
+                                    if (TryGetArgs(args, out arg0, out arg1, out arg2))
+                                    {
+                                        returnVal = Path.Combine(arg0, arg1, arg2);
+                                        return true;
+                                    }
+                                    break;
+                                case 4:
+                                    if (TryGetArgs(args, out arg0, out arg1, out arg2, out arg3))
+                                    {
+                                        returnVal = Path.Combine(arg0, arg1, arg2, arg3);
+                                        return true;
+                                    }
+                                    break;
+                                default:
+                                    if (ElementsOfType(args, typeof(string)))
+                                    {
+                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string) o));
+                                        return true;
+                                    }
+                                    break;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = Path.DirectorySeparatorChar;
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetFullPath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetFullPath(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.IsPathRooted), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.IsPathRooted(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetTempPath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = Path.GetTempPath();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileName), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetFileName(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetDirectoryName), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetDirectoryName(arg0);
+                                return true;
+                            }
+                        }
+                    }
                 }
 
                 if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
@@ -3483,20 +3724,97 @@ namespace Microsoft.Build.Evaluation
                     LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
                 }
 
-                returnVal = null;
                 return false;
             }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private void LogFunctionCall(string fileName, object objectInstance, object[] args)
+            private bool ElementsOfType(object[] args, Type type)
             {
-                var logFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+                for (var i = 0; i < args.Length; i++)
+                {
+                    if (args[i].GetType() != type)
+                    {
+                        return false;
+                    }
+                }
 
-                var argSignature = args != null
-                    ? string.Join(", ", args.Select(a => a?.GetType().Name ?? "null"))
-                    : string.Empty;
+                return true;
+            }
 
-                File.AppendAllText(logFile, $"ReceiverType={_receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={_methodMethodName}({argSignature})\n");
+            private static bool TryGetArgs(object[] args, out string arg0, out string arg1, bool enforceLength = true)
+            {
+                arg0 = null;
+                arg1 = null;
+
+                if (enforceLength && args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (args[0] is string value0 &&
+                    args[1] is string value1)
+                {
+                    arg0 = value0;
+                    arg1 = value1;
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2)
+            {
+                arg0 = null;
+                arg1 = null;
+                arg2 = null;
+
+                if (args.Length != 3)
+                {
+                    return false;
+                }
+
+                if (args[0] is string value0 &&
+                    args[1] is string value1 &&
+                    args[2] is string value2
+                    )
+                {
+                    arg0 = value0;
+                    arg1 = value1;
+                    arg2 = value2;
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2, out string arg3)
+            {
+                arg0 = null;
+                arg1 = null;
+                arg2 = null;
+                arg3 = null;
+
+                if (args.Length != 4)
+                {
+                    return false;
+                }
+
+                if (args[0] is string value0 &&
+                    args[1] is string value1 &&
+                    args[2] is string value2 &&
+                    args[3] is string value3
+                    )
+                {
+                    arg0 = value0;
+                    arg1 = value1;
+                    arg2 = value2;
+                    arg3 = value3;
+
+                    return true;
+                }
+
+                return false;
             }
 
             private static bool TryGetArg(object[] args, out int arg0)
@@ -3507,10 +3825,18 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value = args[0];
-                if (value is string && int.TryParse((string)value, out arg0))
+                return TryConvertToInt(args[0], out arg0);
+            }
+
+            private static bool TryConvertToInt(object value, out int arg0)
+            {
+                switch (value)
                 {
-                    return true;
+                    case int i:
+                        arg0 = i;
+                        return true;
+                    case string s when int.TryParse(s, out arg0):
+                        return true;
                 }
 
                 arg0 = 0;
@@ -3539,17 +3865,8 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value0 = args[0] as string;
-                var value1 = args[1] as string;
-                if (value0 != null &&
-                    value1 != null &&
-                    int.TryParse(value0, out arg0) &&
-                    int.TryParse(value1, out arg1))
-                {
-                    return true;
-                }
-
-                return false;
+                return TryConvertToInt(args[0], out arg0) &&
+                       TryConvertToInt(args[1], out arg1);
             }
 
             private static bool TryGetArgs(object[] args, out double arg0, out double arg1)
@@ -3595,6 +3912,18 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private void LogFunctionCall(string fileName, object objectInstance, object[] args)
+            {
+                var logFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+
+                var argSignature = args != null
+                    ? string.Join(", ", args.Select(a => a?.GetType().Name ?? "null"))
+                    : string.Empty;
+
+                File.AppendAllText(logFile, $"ReceiverType={_receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={_methodMethodName}({argSignature})\n");
             }
 
             /// <summary>
