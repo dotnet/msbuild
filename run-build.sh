@@ -180,8 +180,12 @@ if [ $EXIT_CODE != 0 ]; then
     exit $EXIT_CODE
 fi
 
-#ignore 1.1.2 install failure, as it is not present on all platforms
-(set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --runtime "dotnet" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" || true)
+# This install is used to test 1.x scenarios
+# Don't install in source build.
+if [[ "$DotNetBuildFromSource" != "true" ]]; then
+    #ignore 1.1.2 install failure, as it is not present on all platforms
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --runtime "dotnet" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" || true)
+fi
 
 # Put stage 0 on the PATH (for this shell only)
 PATH="$DOTNET_INSTALL_DIR:$PATH"
