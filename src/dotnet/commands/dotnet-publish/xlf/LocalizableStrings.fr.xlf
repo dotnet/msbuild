@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish the application for.
-The default is to publish a framework-dependent application without an executable.</source>
-        <target state="translated">Runtime cible pour lequel publier l'application.
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="needs-review-translation">Runtime cible pour lequel publier l'application.
 Le comportement par défaut est de publier une application dépendante du framework sans exécutable.</target>
         <note />
       </trans-unit>
@@ -54,34 +54,10 @@ Le comportement par défaut est de publier une application dépendante du framew
         <target state="translated">Configuration pour laquelle la publication est effectuée. La valeur par défaut pour la plupart des projets est 'Debug'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="ModeOptionDescription">
-        <source>The mode to use when publishing the application.
-The 'self-contained' mode publishes the application with the .NET Core runtime.
-The 'fx-dependent' mode publishes the application as framework-dependent. If a target runtime is specified, it is published with an executable.
-The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
-The default is 'fx-dependent-no-exe' when a target runtime is not specified.
-The default is 'self-contained' when a target runtime is specified.</source>
-        <target state="translated">Mode à utiliser lors de la publication de l'application.
-Le mode 'self-contained' publie l’application sans le runtime .NET Core.
-Le mode 'fx-dependent' publie l’application comme dépendante du framework. Si un runtime cible est spécifié, elle est publiée avec un exécutable.
-Le mode 'fx-dependent-no-exe' publie l’application comme dépendante du framework sans exécutable.
-Le mode par défaut est 'fx-dependent-no-exe' quand un runtime cible n’est pas spécifié.
-Le mode par défaut est 'self-contained' quand un runtime cible est spécifié.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ModeOptionName">
-        <source>MODE</source>
-        <target state="translated">MODE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PublishModeAndSelfContainedOptionsConflict">
-        <source>The '--mode' and '--self-contained' options cannot be used together. Specify only one of the options.</source>
-        <target state="translated">Les options '--mode' et '--self-contained' ne peuvent pas être utilisées ensemble. Spécifiez une seule des options.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnsupportedPublishMode">
-        <source>The specified publish mode '{0}' is not supported.</source>
-        <target state="translated">Le mode de publication spécifié '{0}' n'est pas pris en charge.</target>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Publiez le runtime .NET Core avec votre application pour éviter à l'utilisateur de l'installer sur la machine cible. La valeur par défaut est 'true' si un identificateur de runtime est spécifié.</target>
         <note />
       </trans-unit>
     </body>

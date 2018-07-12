@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish the application for.
-The default is to publish a framework-dependent application without an executable.</source>
-        <target state="translated">针对其发布应用程序的目标运行时。
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="needs-review-translation">针对其发布应用程序的目标运行时。
 默认发布不含可执行文件的依赖框架的应用程序。</target>
         <note />
       </trans-unit>
@@ -54,34 +54,10 @@ The default is to publish a framework-dependent application without an executabl
         <target state="translated">要发布的配置。大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
-      <trans-unit id="ModeOptionDescription">
-        <source>The mode to use when publishing the application.
-The 'self-contained' mode publishes the application with the .NET Core runtime.
-The 'fx-dependent' mode publishes the application as framework-dependent. If a target runtime is specified, it is published with an executable.
-The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
-The default is 'fx-dependent-no-exe' when a target runtime is not specified.
-The default is 'self-contained' when a target runtime is specified.</source>
-        <target state="translated">发布应用程序时使用的模式。
-"self-contained" 模式使用 .NET Core 运行时发布应用程序。
-"fx-dependent" 模式以依赖框架的形式发布应用程序。如果指定目标运行时，则发布时包含可执行文件。
-"fx-dependent-no-exe" 以依赖框架但不含可执行文件的形式发布应用程序。
-未指定运行时时的默认模式是 "fx-dependent-no-exe"。
-指定了运行时时的默认模式是 "self-contained"。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ModeOptionName">
-        <source>MODE</source>
-        <target state="translated">MODE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PublishModeAndSelfContainedOptionsConflict">
-        <source>The '--mode' and '--self-contained' options cannot be used together. Specify only one of the options.</source>
-        <target state="translated">"--mode" 和 "--self-contained" 无法同时使用。只指定其中一个选项。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnsupportedPublishMode">
-        <source>The specified publish mode '{0}' is not supported.</source>
-        <target state="translated">指定的发布模式“{0}”不受支持。</target>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">随附应用程序发布 .NET Core 运行时，免除在目标计算机上安装运行时的需求。如果指定了运行时标识符，则默认为 “true”。</target>
         <note />
       </trans-unit>
     </body>

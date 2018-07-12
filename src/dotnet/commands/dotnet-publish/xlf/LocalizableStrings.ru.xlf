@@ -43,9 +43,9 @@
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish the application for.
-The default is to publish a framework-dependent application without an executable.</source>
-        <target state="translated">Целевая среда выполнения, для которой публикуется приложение.
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="needs-review-translation">Целевая среда выполнения, для которой публикуется приложение.
 Значение по умолчанию — публикация зависимого от платформы приложения без исполняемого файла.</target>
         <note />
       </trans-unit>
@@ -54,34 +54,10 @@ The default is to publish a framework-dependent application without an executabl
         <target state="translated">Конфигурация для публикации. По умолчанию для большинства проектов используется "Debug".</target>
         <note />
       </trans-unit>
-      <trans-unit id="ModeOptionDescription">
-        <source>The mode to use when publishing the application.
-The 'self-contained' mode publishes the application with the .NET Core runtime.
-The 'fx-dependent' mode publishes the application as framework-dependent. If a target runtime is specified, it is published with an executable.
-The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
-The default is 'fx-dependent-no-exe' when a target runtime is not specified.
-The default is 'self-contained' when a target runtime is specified.</source>
-        <target state="translated">Режим, используемый при публикации приложения.
-В режиме self-contained приложение публикуется со средой выполнения .NET Core.
-В режиме fx-dependent приложение публикуется как зависимое от платформы. Если указать целевую среду выполнения, оно публикуется с исполняемым файлом.
-В режиме fx-dependent-no-exe приложение публикуется как зависимое от платформы без исполняемого файла.
-Если целевая среда выполнения не указана, по умолчанию используется режим fx-dependent-no-exe.
-Если целевая среда выполнения указана, по умолчанию используется режим self-contained.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ModeOptionName">
-        <source>MODE</source>
-        <target state="translated">MODE</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="PublishModeAndSelfContainedOptionsConflict">
-        <source>The '--mode' and '--self-contained' options cannot be used together. Specify only one of the options.</source>
-        <target state="translated">Параметры --mode и --self-contained недопустимо использовать вместе. Укажите только один из них.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UnsupportedPublishMode">
-        <source>The specified publish mode '{0}' is not supported.</source>
-        <target state="translated">Указанный режим публикации "{0}" не поддерживается.</target>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Опубликуйте среду выполнения .NET Core вместе с приложением, чтобы ее не нужно было устанавливать на целевом компьютере. Если идентификатор среды выполнения указан, значение по умолчанию — true.</target>
         <note />
       </trans-unit>
     </body>
