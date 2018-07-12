@@ -14,12 +14,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to store the given assemblies in.</source>
-        <target state="needs-review-translation">Ścieżka wyjściowa, w której mają być przechowywane podane zestawy.</target>
+        <target state="translated">Katalog wyjściowy, w którym mają być przechowywane podane zestawy.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
         <source>FRAMEWORK_VERSION</source>
-        <target state="needs-review-translation">WersjaPlatformy</target>
+        <target state="translated">WERSJA_PLATFORMY</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
@@ -29,12 +29,12 @@
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
         <source>WORKING_DIR</source>
-        <target state="needs-review-translation">PośredniKatalogRoboczy</target>
+        <target state="translated">KATALOG_ROBOCZY</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
         <source>The working directory used by the command to execute.</source>
-        <target state="needs-review-translation">Katalog używany do wykonania polecenia.</target>
+        <target state="translated">Katalog roboczy używany do wykonania polecenia.</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateDirExists">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
         <source>Skip the optimization phase.</source>
-        <target state="needs-review-translation">Pomija fazę optymalizacji.</target>
+        <target state="translated">Pomiń fazę optymalizacji.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectManifest">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="SkipSymbolsOptionDescription">
         <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
-        <target state="needs-review-translation">Pomija tworzenie plików symboli, za pomocą których można profilować zoptymalizowane zestawy.</target>
+        <target state="translated">Pomiń tworzenie plików symboli, za pomocą których można profilować zoptymalizowane zestawy.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyManifests">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
-        <target state="new">The target framework to store packages for. The target framework has to be specified in the project file.</target>
+        <target state="translated">Platforma docelowa, dla której mają być przechowywane pakiety. Platforma docelowa musi być określona w pliku projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to store packages for.</source>
-        <target state="new">The target runtime to store packages for.</target>
+        <target state="translated">Docelowe środowisko uruchomieniowe, dla którego mają być przechowywane pakiety.</target>
         <note />
       </trans-unit>
     </body>

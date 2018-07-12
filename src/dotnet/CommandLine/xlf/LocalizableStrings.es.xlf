@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ShowHelpInfo">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Mostrar información de ayuda</target>
+        <target state="translated">Muestra ayuda de la línea de comandos.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowVersionInfo">

@@ -129,7 +129,7 @@
       </trans-unit>
       <trans-unit id="List">
         <source>List</source>
-        <target state="translated">Liste</target>
+        <target state="translated">Listele</target>
         <note />
       </trans-unit>
       <trans-unit id="Load">
@@ -616,22 +616,22 @@
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="needs-review-translation">Komutun ayrıntı düzeyini ayarlayın. İzin verilen değerler: q[uiet], m[inimal], n[ormal], d[etailed] ve diag[nostic].</target>
+        <target state="translated">MSBuild ayrıntı düzeyini ayarlar. İzin verilen değerler: q[uiet], m[inimal], n[ormal], d[etailed] ve diag[nostic].</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
-        <target state="needs-review-translation">Projedeki $(VersionSuffix) özelliğinin değerini tanımlar.</target>
+        <target state="translated">Projeyi derlerken kullanılacak $(VersionSuffix) özelliğinin değerini ayarlar.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Yardım bilgilerini gösterir.</target>
+        <target state="translated">Komut satırı yardımını gösterir.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Do not restore the project before building.</source>
-        <target state="needs-review-translation">Komut yürütülürken örtük geri yükleme gerçekleştirmez.</target>
+        <target state="translated">Projeyi derlemeden önce geri yüklemeyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -845,7 +845,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
         <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
-        <target state="translated">PATH ortam tablosuna '{0}' eklenemedi. 'dotnet tool install' ile yüklenen araçları kullanmak için lütfen bu dizini PATH ortamınıza ekleyin.</target>
+        <target state="translated">{0}' PATH ortam değişkenine eklenemedi. 'dotnet tool install' ile yüklenen araçları kullanmak için lütfen bu dizini PATH değişkeninize ekleyin.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOnePackagedShimAvailable">
@@ -860,37 +860,37 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
+        <target state="translated">PROJE</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Üzerinde işlem yapılacak proje dosyası. Bir dosya belirtilmezse, komut geçerli dizinde böyle bir dosya arar.</target>
         <note />
       </trans-unit>
       <trans-unit id="LevelArgumentName">
         <source>LEVEL</source>
-        <target state="new">LEVEL</target>
+        <target state="translated">LEVEL</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">ÇERÇEVE</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
+        <target state="translated">ÇALIŞMA_ZAMANI_TANIMLAYICISI</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
+        <target state="translated">YAPILANDIRMA</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
+        <target state="translated">SÜRÜM_SONEKİ</target>
         <note />
       </trans-unit>
     </body>

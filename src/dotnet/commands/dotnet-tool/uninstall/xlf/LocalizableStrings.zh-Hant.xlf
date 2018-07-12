@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
-        <target state="needs-review-translation">要解除安裝之工具的 NuGet 套件識別碼。</target>
+        <target state="translated">要解除安裝之工具的 NuGet 套件識別碼。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall a tool from the current development environment.</source>
-        <target state="needs-review-translation">將工具解除安裝。</target>
+        <target state="translated">從目前的開發環境中，解除安裝工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall the tool from the current user's tools directory.</source>
-        <target state="needs-review-translation">為全部使用者解除安裝。</target>
+        <target state="translated">從目前使用者的工具目錄，解除安裝工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tool to uninstall.</source>
-        <target state="new">The directory containing the tool to uninstall.</target>
+        <target state="translated">包含要解除安裝之工具的目錄。</target>
         <note />
       </trans-unit>
     </body>

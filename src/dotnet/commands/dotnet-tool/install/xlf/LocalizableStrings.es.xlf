@@ -11,12 +11,12 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
-        <target state="needs-review-translation">Id. del paquete de NuGet que se instalará.</target>
+        <target state="translated">El id. del paquete de NuGet de la herramienta que se instalará.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install a tool for use on the command line.</source>
-        <target state="needs-review-translation">Instala una herramienta para usarla en la línea de comandos.</target>
+        <target state="translated">Instala una herramienta para usarla en la línea de comandos.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -31,7 +31,7 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
-        <target state="needs-review-translation">Versión del paquete de la herramienta en NuGet.</target>
+        <target state="translated">La versión del paquete de herramientas para instalar.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -46,7 +46,7 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool to the current user's tools directory.</source>
-        <target state="needs-review-translation">Instale para todos los usuarios.</target>
+        <target state="translated">Instala la herramienta en el directorio de herramientas del usuario actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -61,12 +61,12 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
       </trans-unit>
       <trans-unit id="ToolInstallationFailedContactAuthor">
         <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
-        <target state="translated">No se pudo instalar la herramienta “{0}”. Póngase en contacto con su creador para obtener asistencia.</target>
+        <target state="translated">No se pudo instalar la herramienta "{0}". Póngase en contacto con su creador para obtener asistencia.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolAlreadyInstalled">
         <source>Tool '{0}' is already installed.</source>
-        <target state="translated">La herramienta “{0}” ya está instalada.</target>
+        <target state="translated">La herramienta "{0}" ya está instalada.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToCreateToolShim">
@@ -101,7 +101,7 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">
         <source>Tool '{0}' failed to install.</source>
-        <target state="translated">No se pudo instalar la herramienta “{0}”.</target>
+        <target state="translated">No se pudo instalar la herramienta "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
@@ -121,37 +121,37 @@ La herramienta "{1}" (versión '{2}') se instaló correctamente.</target>
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
         <source>Add an additional NuGet package source to use during installation.</source>
-        <target state="new">Add an additional NuGet package source to use during installation.</target>
+        <target state="translated">Agrega un origen de paquetes de NuGet para utilizar durante la instalación.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">ORIGEN</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
+        <target state="translated">VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="new">FILE</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">PLATAFORMA</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
-        <target state="new">The directory where the tool will be installed. The directory will be created if it does not exist.</target>
+        <target state="translated">El directorio donde se instalará la herramienta. Si no existe, se creará el directorio.</target>
         <note />
       </trans-unit>
     </body>

@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Remove a project-to-project reference from the project.</source>
-        <target state="needs-review-translation">Příkaz rozhraní .NET pro odebrání odkazu mezi projekty</target>
+        <target state="translated">Odebrat odkaz mezi projekty z projektu</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Remove the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">Odebrat odkaz jen v případě, že cílem je konkrétní architektura</target>
+        <target state="translated">Odebere odkaz jen v případě, že cílem je konkrétní architektura.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectPathArgumentDescription">
         <source>The paths to the referenced projects to remove.</source>
-        <target state="new">The paths to the referenced projects to remove.</target>
+        <target state="translated">Cesty k odkazovaným projektům, které se mají odebrat</target>
         <note />
       </trans-unit>
     </body>

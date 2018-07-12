@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed in the current development environment.</source>
-        <target state="needs-review-translation">Liste les outils installés dans l'environnement de développement actuel.</target>
+        <target state="translated">Listez les outils installés dans l'environnement de développement actuel.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools in the current user's tools directory.</source>
-        <target state="needs-review-translation">Listez les outils pour tous les utilisateurs.</target>
+        <target state="translated">Listez les outils du répertoire des outils de l'utilisateur actuel.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -49,12 +49,12 @@
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tools to list.</source>
-        <target state="new">The directory containing the tools to list.</target>
+        <target state="translated">Répertoire contenant les outils à lister.</target>
         <note />
       </trans-unit>
     </body>

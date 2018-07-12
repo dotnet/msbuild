@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to update.</source>
-        <target state="needs-review-translation">更新するツールの NuGet パッケージ ID。</target>
+        <target state="translated">更新するツールの NuGet パッケージ ID。</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Update a tool to the latest stable version.</source>
-        <target state="needs-review-translation">ツールを、安定した最新バージョンに更新して使用します。</target>
+        <target state="translated">ツールを、最新の安定したバージョンに更新します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Update the tool in the current user's tools directory.</source>
-        <target state="needs-review-translation">ユーザー全体で更新します。</target>
+        <target state="translated">現在のユーザーのツール ディレクトリにあるツールを更新します。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFullCommandNameLocalized">
@@ -89,32 +89,32 @@
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
         <source>Add an additional NuGet package source to use during the update.</source>
-        <target state="new">Add an additional NuGet package source to use during the update.</target>
+        <target state="translated">更新中に使用する他の NuGet パッケージ ソースを追加します。</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="new">FILE</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tool to update.</source>
-        <target state="new">The directory containing the tool to update.</target>
+        <target state="translated">更新するツールが入っているディレクトリ。</target>
         <note />
       </trans-unit>
     </body>

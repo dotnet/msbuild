@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ProjectReferenceRemoved">
         <source>Project reference `{0}` removed.</source>
-        <target state="translated">Référence de projet '{0}' supprimée.</target>
+        <target state="translated">Référence de projet '{0}' retirée.</target>
         <note />
       </trans-unit>
       <trans-unit id="Project">
@@ -424,7 +424,7 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToRemove">
         <source>You must specify at least one reference to remove.</source>
-        <target state="translated">Vous devez spécifier au moins une référence à supprimer.</target>
+        <target state="translated">Vous devez spécifier au moins une référence à retirer.</target>
         <note />
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
@@ -444,7 +444,7 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOnePackageReferenceToRemove">
         <source>You must specify at least one package reference to remove.</source>
-        <target state="translated">Vous devez spécifier au moins une référence de package à supprimer.</target>
+        <target state="translated">Vous devez spécifier au moins une référence de package à retirer.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceDeleted">
@@ -616,22 +616,22 @@
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="needs-review-translation">Définissez le niveau de détail de la commande. Les valeurs autorisées sont q[uiet], m[inimal], n[ormal], d[etailed] et diag[nostic].</target>
+        <target state="translated">Définissez le niveau de détail MSBuild. Les valeurs autorisées sont q[uiet], m[inimal], n[ormal], d[etailed] et diag[nostic].</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
-        <target state="needs-review-translation">Définit la valeur de la propriété $(VersionSuffix) dans le projet.</target>
+        <target state="translated">Définissez la valeur de la propriété $(VersionSuffix) à utiliser durant la génération du projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Affichez les informations d'aide.</target>
+        <target state="translated">Affichez l'aide de la ligne de commande.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Do not restore the project before building.</source>
-        <target state="needs-review-translation">Ne fait pas de restauration implicite durant l'exécution de la commande.</target>
+        <target state="translated">Ne restaurez pas le projet avant la génération.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -785,7 +785,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FailedToRemoveShellShim">
         <source>Failed to remove tool shim for command '{0}': {1}</source>
-        <target state="translated">Échec de suppression d'un shim d'outil pour la commande '{0}' : {1}</target>
+        <target state="translated">Échec de retrait d'un shim d'outil pour la commande '{0}' : {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedSettingShimPermissions">
@@ -860,37 +860,37 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">Fichier projet à traiter. Si aucun fichier n'est spécifié, la commande en recherche un dans le répertoire actif.</target>
         <note />
       </trans-unit>
       <trans-unit id="LevelArgumentName">
         <source>LEVEL</source>
-        <target state="new">LEVEL</target>
+        <target state="translated">LEVEL</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
+        <target state="translated">CONFIGURATION</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
+        <target state="translated">SUFFIXE_VERSION</target>
         <note />
       </trans-unit>
     </body>

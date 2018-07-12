@@ -270,7 +270,7 @@ dotnet tool install --global {1}</target>
       </trans-unit>
       <trans-unit id="DotnetCliHomeUsed">
         <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
-        <target state="new">Using home directory '{0}' set by the '{1}' environment variable.</target>
+        <target state="translated">Używany jest katalog główny „{0}” ustawiony za pomocą zmiennej środowiskowej „{1}”.</target>
         <note />
       </trans-unit>
     </body>

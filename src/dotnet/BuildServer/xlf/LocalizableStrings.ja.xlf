@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="FailedToReadPidFile">
         <source>Failed to read pid file '{0}': {1}</source>
-        <target state="new">Failed to read pid file '{0}': {1}</target>
+        <target state="translated">pid ファイル '{0}' の読み取りに失敗しました: {1}</target>
         <note />
       </trans-unit>
     </body>

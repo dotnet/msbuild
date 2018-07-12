@@ -14,12 +14,12 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to store the given assemblies in.</source>
-        <target state="needs-review-translation">Diretório de saída em que armazenar os assemblies determinados.</target>
+        <target state="translated">O diretório de saída no qual os assemblies fornecidos serão armazenados.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
         <source>FRAMEWORK_VERSION</source>
-        <target state="needs-review-translation">FrameworkVersion</target>
+        <target state="translated">FRAMEWORK_VERSION</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
@@ -29,12 +29,12 @@
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
         <source>WORKING_DIR</source>
-        <target state="needs-review-translation">IntermediateWorkingDir</target>
+        <target state="translated">WORKING_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
         <source>The working directory used by the command to execute.</source>
-        <target state="needs-review-translation">O diretório usado pelo comando para executar.</target>
+        <target state="translated">O diretório de trabalho usado pelo comando para a execução.</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateDirExists">
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
         <source>Skip the optimization phase.</source>
-        <target state="needs-review-translation">Ignora a fase de otimização.</target>
+        <target state="translated">Ignorar a fase de otimização.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectManifest">
@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="SkipSymbolsOptionDescription">
         <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
-        <target state="needs-review-translation">Ignora criação de arquivos de símbolo que podem ser usados para criar o perfil de assemblies otimizados.</target>
+        <target state="translated">Ignorar a criação de arquivos de símbolo que podem ser usados para criar o perfil de assemblies otimizados.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyManifests">
@@ -69,12 +69,12 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
-        <target state="new">The target framework to store packages for. The target framework has to be specified in the project file.</target>
+        <target state="translated">A estrutura de destino cujos pacotes serão armazenados. A estrutura de destino precisa ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to store packages for.</source>
-        <target state="new">The target runtime to store packages for.</target>
+        <target state="translated">O tempo de execução de destino no qual os pacotes serão armazenados.</target>
         <note />
       </trans-unit>
     </body>

@@ -9,12 +9,12 @@
       </trans-unit>
       <trans-unit id="FrameworkOption">
         <source>FRAMEWORK</source>
-        <target state="translated">FRAMEWORK</target>
+        <target state="translated">架構</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">要為其發行的目標 Framework。其必須在專案檔中指定。</target>
+        <target state="translated">要為其進行發行的目標架構。該架構必須在專案檔中指定。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,23 +24,17 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">要放置發行之成品的輸出目錄。</target>
+        <target state="translated">放置發行之成品的輸出目錄。</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">資訊清單</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
         <target state="translated">目標資訊清單檔案的路徑，其包含要從發行步驟中排除的套件清單。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">隨著應用程式一併發行 .NET Core 執行階段，因此不需要在目標電腦上安裝此執行階段。若指定了執行階段識別碼，則預設為 'true'。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -49,15 +43,45 @@ The default is 'true' if a runtime identifier is specified.</source>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
-The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating a self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <source>The target runtime to publish the application for.
+The default is to publish a framework-dependent application without an executable.</source>
+        <target state="translated">要發佈應用程式的目標執行階段。
+預設為發佈與 Framework 相依的應用程式，不含可執行檔。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">要為其進行發行的組態。大部分的專案預設為「偵錯」。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionDescription">
+        <source>The mode to use when publishing the application.
+The 'self-contained' mode publishes the application with the .NET Core runtime.
+The 'fx-dependent' mode publishes the application as framework-dependent. If a target runtime is specified, it is published with an executable.
+The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
+The default is 'fx-dependent-no-exe' when a target runtime is not specified.
+The default is 'self-contained' when a target runtime is specified.</source>
+        <target state="translated">發佈應用程式時要使用的模式。
+'self-contained' 模式會透過 .NET Core 執行階段發佈應用程式。
+'fx-dependent' 模式會發佈與 Framework 相依的應用程式。如有指定目標執行階段，則會隨可執行檔發佈。
+'fx-dependent-no-exe' 模式會發佈與 Framework 相依的應用程式，不含可執行檔。
+當未指定目標執行階段時，預設為 'fx-dependent-no-exe'。
+當有指定目標執行階段時，預設為 'self-contained'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionName">
+        <source>MODE</source>
+        <target state="translated">模式</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishModeAndSelfContainedOptionsConflict">
+        <source>The '--mode' and '--self-contained' options cannot be used together. Specify only one of the options.</source>
+        <target state="translated">'--mode' 和 '--self-contained' 選項不得一併使用。請只指定其中一個選項。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedPublishMode">
+        <source>The specified publish mode '{0}' is not supported.</source>
+        <target state="translated">不支援指定的發佈模式 '{0}'。</target>
         <note />
       </trans-unit>
     </body>

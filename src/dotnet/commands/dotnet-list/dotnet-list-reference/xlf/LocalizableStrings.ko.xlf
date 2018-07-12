@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>List all project-to-project references of the project.</source>
-        <target state="needs-review-translation">.NET Core p2p(프로젝트 간) 종속성 뷰어</target>
+        <target state="translated">프로젝트의 모든 프로젝트 간 참조를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">

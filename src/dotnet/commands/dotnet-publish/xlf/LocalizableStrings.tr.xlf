@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="needs-review-translation">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
+        <target state="translated">Yayımlamanın yapılacağı hedef çerçeve. Hedef çerçevenin proje dosyasında belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -24,23 +24,17 @@
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place the published artifacts in.</source>
-        <target state="needs-review-translation">Yayımlanan yapıtların yerleştirileceği çıkış dizini.</target>
+        <target state="translated">Yayımlanan yapıtların yerleştirileceği çıkış dizini.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
         <source>MANIFEST</source>
-        <target state="needs-review-translation">manifest.xml</target>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
         <source>The path to a target manifest file that contains the list of packages to be excluded from the publish step.</source>
         <target state="translated">Yayımlama adımının dışında tutulacak paketlerin listesini içeren bir hedef bildirim dosyasının yolu.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
@@ -49,15 +43,45 @@ The default is 'true' if a runtime identifier is specified.</source>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
-The default is to publish a framework-dependent application.</source>
-        <target state="new">The target runtime to publish for. This is used when creating a self-contained deployment.
-The default is to publish a framework-dependent application.</target>
+        <source>The target runtime to publish the application for.
+The default is to publish a framework-dependent application without an executable.</source>
+        <target state="translated">Uygulamanın yayımlanacağı hedef çalışma zamanı.
+Varsayılan seçenek, bir yürütülebilir dosya olmadan çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to publish for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Yayımlanacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionDescription">
+        <source>The mode to use when publishing the application.
+The 'self-contained' mode publishes the application with the .NET Core runtime.
+The 'fx-dependent' mode publishes the application as framework-dependent. If a target runtime is specified, it is published with an executable.
+The 'fx-dependent-no-exe' mode publishes the application as framework-dependent without an executable.
+The default is 'fx-dependent-no-exe' when a target runtime is not specified.
+The default is 'self-contained' when a target runtime is specified.</source>
+        <target state="translated">Uygulama yayımlanırken kullanılacak mod.
+'self-contained' modu, uygulamayı .NET Core çalışma zamanı ile yayımlar.
+'fx-dependent' modu, uygulamayı çerçeveye bağımlı olarak yayımlar. Hedef çalışma zamanı belirtilirse bir yürütülebilir dosyayla yayımlanır.
+'fx-dependent-no-exe' modu, uygulamayı yürütülebilir dosya olmadan çerçeveye bağımlı olarak yayımlar.
+Hedef çalışma zamanı belirtilmediğinde varsayılan mod 'fx-dependent-no-exe' modudur.
+Hedef çalışma zamanı belirtildiğinde varsayılan mod 'self-contained' modudur.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModeOptionName">
+        <source>MODE</source>
+        <target state="translated">MOD</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PublishModeAndSelfContainedOptionsConflict">
+        <source>The '--mode' and '--self-contained' options cannot be used together. Specify only one of the options.</source>
+        <target state="translated">'--mode' ve '--self-contained' seçenekleri birlikte kullanılamaz. Seçeneklerden yalnızca birini belirtin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedPublishMode">
+        <source>The specified publish mode '{0}' is not supported.</source>
+        <target state="translated">Belirtilen '{0}' yayımlama modu desteklenmiyor.</target>
         <note />
       </trans-unit>
     </body>

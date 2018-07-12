@@ -19,22 +19,22 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The directory containing the build artifacts to clean.</source>
-        <target state="needs-review-translation">放置了生成输出的目录。</target>
+        <target state="translated">包含要清理的生成项目的目录。</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to clean for. The target framework must also be specified in the project file.</target>
+        <target state="translated">要清理的目标框架。必须在项目文件中指定目标框架。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to clean for.</source>
-        <target state="new">The target runtime to clean for.</target>
+        <target state="translated">要清理的目标运行时。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to clean for. The default for most projects is 'Debug'.</target>
+        <target state="translated">要清理的配置。大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
     </body>

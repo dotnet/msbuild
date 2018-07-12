@@ -11,12 +11,12 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to install.</source>
-        <target state="needs-review-translation">Yüklenecek aracın NuGet Paket Kimliği.</target>
+        <target state="translated">Yüklenecek aracın NuGet Paket Kimliği.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Install a tool for use on the command line.</source>
-        <target state="needs-review-translation">Komut satırında kullanılacak bir araç yükler.</target>
+        <target state="translated">Komut satırında kullanılacak bir araç yükler.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -31,7 +31,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="VersionOptionDescription">
         <source>The version of the tool package to install.</source>
-        <target state="needs-review-translation">NuGet’teki araç paketinin sürümü.</target>
+        <target state="translated">Yüklenecek araç paketinin sürümü.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -46,7 +46,7 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Install the tool to the current user's tools directory.</source>
-        <target state="needs-review-translation">Kullanıcı için yükleyin.</target>
+        <target state="translated">Aracı geçerli kullanıcının araçlar dizinine yükler.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">
@@ -121,37 +121,37 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
         <source>Add an additional NuGet package source to use during installation.</source>
-        <target state="new">Add an additional NuGet package source to use during installation.</target>
+        <target state="translated">Yükleme sırasında kullanılacak ek bir NuGet paket kaynağı ekler.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">SOURCE</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionOptionName">
         <source>VERSION</source>
-        <target state="new">VERSION</target>
+        <target state="translated">SÜRÜM</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="new">FILE</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">ÇERÇEVE</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory where the tool will be installed. The directory will be created if it does not exist.</source>
-        <target state="new">The directory where the tool will be installed. The directory will be created if it does not exist.</target>
+        <target state="translated">Aracın yükleneceği dizin. Dizin yoksa oluşturulur.</target>
         <note />
       </trans-unit>
     </body>

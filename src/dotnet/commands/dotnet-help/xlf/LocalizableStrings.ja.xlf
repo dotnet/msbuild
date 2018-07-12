@@ -34,7 +34,7 @@
       </trans-unit>
       <trans-unit id="HelpDefinition">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">ヘルプを表示します。</target>
+        <target state="translated">コマンド ラインのヘルプを表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="HostOptions">
@@ -59,42 +59,42 @@
       </trans-unit>
       <trans-unit id="NewDefinition">
         <source>Create a new .NET project or file.</source>
-        <target state="needs-review-translation">.NET プロジェクトを初期化します。</target>
+        <target state="translated">新しい .NET プロジェクトまたはファイルを作成します。</target>
         <note />
       </trans-unit>
       <trans-unit id="RestoreDefinition">
         <source>Restore dependencies specified in a .NET project.</source>
-        <target state="needs-review-translation">.NET プロジェクトに指定されている依存関係を復元します。</target>
+        <target state="translated">.NET プロジェクトに指定されている依存関係を復元します。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildDefinition">
         <source>Build a .NET project.</source>
-        <target state="needs-review-translation">.NET プロジェクトを構築します。</target>
+        <target state="translated">.NET プロジェクトをビルドします。</target>
         <note />
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publish a .NET project for deployment.</source>
-        <target state="needs-review-translation">展開用の .NET プロジェクトを発行します (ランタイムを含む)。</target>
+        <target state="translated">.NET プロジェクトを配置のために発行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
         <source>Build and run a .NET project output.</source>
-        <target state="needs-review-translation">.NET プロジェクトをコンパイルして、直ちに実行します。</target>
+        <target state="translated">.NET プロジェクトの出力をビルドして実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="TestDefinition">
         <source>Run unit tests using the test runner specified in a .NET project.</source>
-        <target state="needs-review-translation">プロジェクトに指定されているテスト ランナーを使用して、単体テストを実行します。</target>
+        <target state="translated">.NET プロジェクトに指定されているテスト ランナーを使用して、単体テストを実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackDefinition">
         <source>Create a NuGet package.</source>
-        <target state="needs-review-translation">NuGet パッケージを作成します。</target>
+        <target state="translated">NuGet パッケージを作成します。</target>
         <note />
       </trans-unit>
       <trans-unit id="MigrateDefinition">
         <source>Migrate a project.json project to an MSBuild project.</source>
-        <target state="needs-review-translation">project.json ベースのプロジェクトを msbuild ベースのプロジェクトに移行します。</target>
+        <target state="translated">project.json プロジェクトを MSBuild プロジェクトに移行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectModificationCommands">
@@ -104,12 +104,12 @@
       </trans-unit>
       <trans-unit id="AddDefinition">
         <source>Add a package or reference to a .NET project.</source>
-        <target state="needs-review-translation">参照をプロジェクトに追加します。</target>
+        <target state="translated">.NET プロジェクトにパッケージまたは参照を追加します。</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveDefinition">
         <source>Remove a package or reference from a .NET project.</source>
-        <target state="needs-review-translation">参照をプロジェクトから削除します。</target>
+        <target state="translated">.NET プロジェクトからパッケージまたは参照を削除します。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdvancedCommands">
@@ -124,12 +124,12 @@
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Run Microsoft Build Engine (MSBuild) commands.</source>
-        <target state="needs-review-translation">Microsoft Build Engine (MSBuild) を実行します。</target>
+        <target state="translated">Microsoft Build Engine (MSBuild) コマンドを実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
         <source>Run Microsoft Test Engine (VSTest) commands.</source>
-        <target state="needs-review-translation">Microsoft Test Execution Command Line Tool を実行します。</target>
+        <target state="translated">Microsoft Test Engine (VSTest) コマンドを実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="DiagnosticsDefinition">
@@ -139,22 +139,22 @@
       </trans-unit>
       <trans-unit id="CleanDefinition">
         <source>Clean build outputs of a .NET project.</source>
-        <target state="needs-review-translation">ビルド出力を消去します。</target>
+        <target state="translated">.NET プロジェクトのビルド出力をクリーンします。</target>
         <note />
       </trans-unit>
       <trans-unit id="SlnDefinition">
         <source>Modify Visual Studio solution files.</source>
-        <target state="needs-review-translation">ソリューション (SLN) ファイルを変更します。</target>
+        <target state="translated">Visual Studio ソリューション ファイルを変更します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
         <source>List project references of a .NET project.</source>
-        <target state="needs-review-translation">プロジェクトの参照またはインストール済みツールを一覧表示します。</target>
+        <target state="translated">.NET プロジェクトのプロジェクト参照を一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
         <source>Specified command '{0}' is not a valid SDK command. Please specify a valid SDK command. For more information, run dotnet help.</source>
-        <target state="needs-review-translation">指定されたコマンド '{0}' は、有効な CLI コマンドではありません。有効な CLI コマンドを指定してください。詳細については、dotnet のヘルプを参照してください。</target>
+        <target state="translated">指定されたコマンド '{0}' は、有効な SDK コマンドではありません。有効な SDK コマンドを指定してください。詳細については、dotnet のヘルプを実行してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppFullName">
@@ -164,7 +164,7 @@
       </trans-unit>
       <trans-unit id="AppDescription">
         <source>Utility to get more detailed help about each of the SDK commands.</source>
-        <target state="needs-review-translation">各 CLI コマンドに関する詳細なヘルプを取得するためのユーティリティ。</target>
+        <target state="translated">各 SDK コマンドに関する詳しいヘルプを取得するためのユーティリティ。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandArgumentName">
@@ -174,7 +174,7 @@
       </trans-unit>
       <trans-unit id="CommandArgumentDescription">
         <source>The SDK command to launch online help for.</source>
-        <target state="needs-review-translation">詳細なヘルプを表示する CLI コマンド。</target>
+        <target state="translated">オンライン ヘルプを起動する SDK コマンド。</target>
         <note />
       </trans-unit>
       <trans-unit id="PathToApplicationDefinition">
@@ -209,7 +209,7 @@
       </trans-unit>
       <trans-unit id="RunDotnetCommandHelpForMore">
         <source>Run 'dotnet [command] --help' for more information on a command.</source>
-        <target state="needs-review-translation">コマンドに関する詳細情報については、'dotnet COMMAND --help' を実行します。</target>
+        <target state="translated">コマンドに関する詳細情報については、'dotnet [command] --help' を実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalprobingpathDefinition">
@@ -244,12 +244,12 @@
       </trans-unit>
       <trans-unit id="StoreDefinition">
         <source>Store the specified assemblies in the runtime package store.</source>
-        <target state="needs-review-translation">指定されたアセンブリを実行時ストアに格納します。</target>
+        <target state="translated">指定されたアセンブリをランタイム パッケージ ストアに格納します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolDefinition">
         <source>Install or manage tools that extend the .NET experience.</source>
-        <target state="needs-review-translation">.NET のエクスペリエンスを向上するツールをインストールするか、使用します。</target>
+        <target state="translated">.NET のエクスペリエンスを向上するツールをインストールまたは管理します。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildServerDefinition">
@@ -259,42 +259,42 @@
       </trans-unit>
       <trans-unit id="DevCertsDefinition">
         <source>Create and manage development certificates.</source>
-        <target state="new">Create and manage development certificates.</target>
+        <target state="translated">開発証明書を作成し、管理します。</target>
         <note />
       </trans-unit>
       <trans-unit id="EfDefinition">
         <source>Entity Framework Core command-line tools.</source>
-        <target state="new">Entity Framework Core command-line tools.</target>
+        <target state="translated">Entity Framework Core コマンドライン ツール。</target>
         <note />
       </trans-unit>
       <trans-unit id="SqlCacheDefinition">
         <source>SQL Server cache command-line tools.</source>
-        <target state="new">SQL Server cache command-line tools.</target>
+        <target state="translated">SQL Server キャッシュ コマンドライン ツール。</target>
         <note />
       </trans-unit>
       <trans-unit id="UserSecretsDefinition">
         <source>Manage development user secrets.</source>
-        <target state="new">Manage development user secrets.</target>
+        <target state="translated">開発ユーザーのシークレットを管理します。</target>
         <note />
       </trans-unit>
       <trans-unit id="WatchDefinition">
         <source>Start a file watcher that runs a command when files change.</source>
-        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <target state="translated">ファイルが変更されたときにコマンドを実行するファイル ウォッチャーを起動します。</target>
         <note />
       </trans-unit>
       <trans-unit id="AdditionalTools">
         <source>Additional commands from bundled tools:</source>
-        <target state="new">Additional commands from bundled tools:</target>
+        <target state="translated">バンドルされたツールからの追加コマンド:</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKCommandUsageDescription">
         <source>Execute a .NET Core SDK command.</source>
-        <target state="new">Execute a .NET Core SDK command.</target>
+        <target state="translated">.NET Core SDK コマンドを実行します。</target>
         <note />
       </trans-unit>
       <trans-unit id="ExecutionUsageDescription">
         <source>Execute a .NET Core application.</source>
-        <target state="new">Execute a .NET Core application.</target>
+        <target state="translated">.NET Core アプリケーションを実行します。</target>
         <note />
       </trans-unit>
     </body>

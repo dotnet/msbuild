@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>.NET Core NuGet Package Packer</source>
-        <target state="translated">pack</target>
+        <target state="translated">.NET Core NuGet Package Packer</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The output directory to place built packages in.</source>
-        <target state="needs-review-translation">Directorio donde se ubican los paquetes compilados.</target>
+        <target state="translated">Directorio de salida en el que se ubicarán los paquetes compilados.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
-        <target state="needs-review-translation">Se incluyen los archivos PDB y de código fuente. Los archivos de código fuente van a la carpeta src del paquete NuGet resultante</target>
+        <target state="translated">Se incluyen los archivos PDB y de código fuente. Los archivos de código fuente van a la carpeta "src" del paquete de NuGet resultante</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
-        <target state="needs-review-translation">Establece la marca serviceable en el paquete. Para más información, consulte https://aka.ms/nupkgservicing.</target>
+        <target state="translated">Establece la marca serviceable en el paquete. Para obtener más información, consulte https://aka.ms/nupkgservicing.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
+        <target state="translated">La configuración que se usará para compilar el paquete. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
         <note />
       </trans-unit>
     </body>
