@@ -262,9 +262,10 @@ namespace Microsoft.Build.Tasks
             if (!linkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                string sourceFilePath = Path.GetFullPath(sourceFileState.Name);
-                string destinationFilePath = Path.GetFullPath(destinationFileState.Name);
+                string sourceFilePath = FileUtilities.GetFullPathNoThrow(sourceFileState.Name);
+                string destinationFilePath = FileUtilities.GetFullPathNoThrow(destinationFileState.Name);
                 Log.LogMessageFromResources(MessageImportance.Normal, "Copy.FileComment", sourceFilePath, destinationFilePath);
+
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
             }
 
