@@ -111,7 +111,11 @@ if ($LastExitCode -ne 0)
     Copy-Item -Recurse -Force $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
 }
 
-Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -Runtime ""dotnet"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+# This install is used to test 1.x scenarios
+# Don't install in source build.
+if ($env:DotNetBuildFromSource -ne "true") {
+    Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -Runtime ""dotnet"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
+}
 
 # Put the stage0 on the path
 $env:PATH = "$env:DOTNET_INSTALL_DIR;$env:PATH"
