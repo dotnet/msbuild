@@ -34,6 +34,8 @@ namespace Microsoft.Build.Evaluation
 
         private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
 
+        private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
+
         /// <summary>
         /// Add two doubles
         /// </summary>
@@ -224,11 +226,9 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Fake common requests to HKLM that we can resolve
 
-
                         // See if this asks for a specific SDK
-                        var m = Regex.Match(keyName,
-                            @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$",
-                            RegexOptions.IgnoreCase);
+                        var m = RegistrySdkRegex.Value.Match(keyName);
+                        
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
                             return Path.Combine(NativeMethodsShared.FrameworkBasePath, m.Groups[0].Value) + Path.DirectorySeparatorChar;
