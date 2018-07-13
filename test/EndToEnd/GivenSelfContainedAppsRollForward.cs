@@ -21,6 +21,13 @@ namespace EndToEnd
         [ClassData(typeof(SupportedNetCoreAppVersions))]
         public void ItRollsForwardToTheLatestVersion(string minorVersion)
         {
+            // https://github.com/dotnet/cli/issues/9661: remove this once the ASP.NET version bump
+            // merges from 2.1.3xx -> 2.1.4xx -> 2.2.1xx
+            if (minorVersion == "2.1")
+            {
+                return;
+            }
+
             var _testInstance = TestAssets.Get("TestAppSimple")
                 .CreateInstance(identifier: minorVersion)
                 .WithSourceFiles();
