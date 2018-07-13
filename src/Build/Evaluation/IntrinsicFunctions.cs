@@ -32,6 +32,10 @@ namespace Microsoft.Build.Evaluation
                 .Aggregate("", (a, b) => string.IsNullOrEmpty(a) ? b : $"{a}, {b}"),
             true);
 
+        private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
+
+        private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
+
         /// <summary>
         /// Add two doubles
         /// </summary>
@@ -177,29 +181,36 @@ namespace Microsoft.Build.Evaluation
             return Registry.GetValue(keyName, valueName, defaultValue);
         }
 
+        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
+        {
+            if (views == null || views.Length == 0)
+            {
+                views = DefaultRegistryViews;
+            }
+
+            return GetRegistryValueFromView(keyName, valueName, defaultValue, new ArraySegment<object>(views));
+        }
+
+
         /// <summary>
         /// Get the value of the registry key from one of the RegistryView's specified
         /// </summary>
-        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
+        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, ArraySegment<object> views)
         {
-            string subKeyName;
-
             // We will take on handing of default value
             // A we need to act on the null return from the GetValue call below
             // so we can keep searching other registry views
             object result = defaultValue;
 
             // If we haven't been passed any views, then we'll just use the default view
-            if (views == null || views.Length == 0)
+            if (views.Count == 0)
             {
-                views = new object[] { RegistryView.Default };
+                views = new ArraySegment<object>(DefaultRegistryViews);
             }
 
             foreach (object viewObject in views)
             {
-                string viewAsString = viewObject as string;
-
-                if (viewAsString != null)
+                if (viewObject is string viewAsString)
                 {
                     string typeLeafName = typeof(RegistryView).Name + ".";
                     string typeFullName = typeof(RegistryView).FullName + ".";
@@ -215,11 +226,9 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Fake common requests to HKLM that we can resolve
 
-
                         // See if this asks for a specific SDK
-                        var m = Regex.Match(keyName,
-                            @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$",
-                            RegexOptions.IgnoreCase);
+                        var m = RegistrySdkRegex.Value.Match(keyName);
+                        
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
                             return Path.Combine(NativeMethodsShared.FrameworkBasePath, m.Groups[0].Value) + Path.DirectorySeparatorChar;
@@ -228,7 +237,7 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
-                    using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
+                    using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                     {
                         if (key != null)
                         {
