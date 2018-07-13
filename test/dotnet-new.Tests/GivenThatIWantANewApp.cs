@@ -76,8 +76,7 @@ namespace Microsoft.DotNet.New.Tests
 
         // Remove the expectedVersion parameter once we have templates targetting netcoreapp2.2.
         [Theory]
-        [InlineData("console", "microsoft.netcore.app")]
-        // re-enable when this bug is resolved: https://github.com/dotnet/cli/issues/7574
+        [InlineData("console", "microsoft.netcore.app", "2.1.0")]
         [InlineData("classlib", "netstandard.library", null)]
         public void NewProjectRestoresCorrectPackageVersion(string type, string packageName, string expectedVersion)
         {
@@ -108,7 +107,7 @@ namespace Microsoft.DotNet.New.Tests
                 var sharedFxDir = dotnetDir
                     .GetDirectory("shared", "Microsoft.NETCore.App")
                     .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.1.0"));
+                    .Single(d => d.Name.StartsWith("2.2.0"));
 
                 if (packageName == "microsoft.netcore.app")
                 {
