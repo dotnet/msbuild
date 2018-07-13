@@ -41,6 +41,8 @@ namespace Microsoft.NET.Build.Tests
                 IsExe = true
             };
 
+            toolProject.AdditionalProperties.Add("PackageType", "DotnetCliTool");
+
             GenerateDepsAndRunTool(toolProject)
                 .Should()
                 .Pass()
@@ -58,6 +60,8 @@ namespace Microsoft.NET.Build.Tests
                 TargetFrameworks = "netcoreapp2.1",
                 IsExe = true
             };
+
+            toolProject.AdditionalProperties.Add("PackageType", "DotnetCliTool");
 
             toolProject.PackageReferences.Add(new TestPackageReference("Microsoft.Extensions.DependencyModel", "1.1.0", null));
 
