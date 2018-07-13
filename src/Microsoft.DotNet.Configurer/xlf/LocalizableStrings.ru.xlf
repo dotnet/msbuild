@@ -64,16 +64,16 @@ Here are some options to fix this error:
 Successfully installed the ASP.NET Core HTTPS Development Certificate.
 To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
 For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="needs-review-translation">ASP.NET Core
+        <target state="translated">ASP.NET Core
 ------------
 Сертификат разработки HTTPS для ASP.NET Core установлен.
-Чтобы сделать сертификат доверенным (только Windows и macOS), сначала установите инструмент dev-certs, выполнив команду "dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final", а затем выполните "dotnet-dev-certs https --trust".
+Чтобы сделать сертификат доверенным, выполните команду dotnet dev-certs https --trust (только для Windows и macOS). Чтобы сделать сертификат доверенным на других платформах, обратитесь к документации по этим платформам.
 Дополнительные сведения о настройке HTTPS: https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">Не удалось определить домашний каталог пользователя. Чтобы указать нужный каталог, задайте переменную среды "{0}".</target>
         <note />
       </trans-unit>
     </body>

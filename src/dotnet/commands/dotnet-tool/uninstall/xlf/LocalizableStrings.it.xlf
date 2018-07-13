@@ -4,17 +4,17 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
-        <target state="needs-review-translation">ID pacchetto NuGet dello strumento da disinstallare.</target>
+        <target state="translated">ID pacchetto NuGet dello strumento da disinstallare.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall a tool from the current development environment.</source>
-        <target state="needs-review-translation">Disinstalla uno strumento.</target>
+        <target state="translated">Disinstalla uno strumento dall'ambiente di sviluppo corrente.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
         <source>PACKAGE_ID</source>
-        <target state="translated">PACKAGE_ID</target>
+        <target state="translated">ID_PACCHETTO</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall the tool from the current user's tools directory.</source>
-        <target state="needs-review-translation">Esegue la disinstallazione a livello di utente.</target>
+        <target state="translated">Disinstalla lo strumento dalla directory degli strumenti dell'utente corrente.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PERCORSO</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tool to uninstall.</source>
-        <target state="new">The directory containing the tool to uninstall.</target>
+        <target state="translated">Directory contenente lo strumento da disinstallare.</target>
         <note />
       </trans-unit>
     </body>

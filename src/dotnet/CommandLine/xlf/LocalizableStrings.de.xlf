@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="LastArgumentMultiValueError">
         <source>The last argument '{0}' accepts multiple values. No more argument can be added.</source>
-        <target state="translated">Das letzte Argument „{0}“ akzeptiert mehrere Werte. Es kann kein weiteres Argument mehr hinzugefügt werden.</target>
+        <target state="translated">Das letzte Argument "{0}" akzeptiert mehrere Werte. Es kann kein weiteres Argument mehr hinzugefügt werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedValueForOptionError">
         <source>Unexpected value '{0}' for option '{1}'</source>
-        <target state="translated">Unerwarteter Wert „{0}“ für Option „{1}“.</target>
+        <target state="translated">Unerwarteter Wert "{0}" für Option "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="UnexpectedArgumentError">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ShowHelpInfo">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">Hilfeinformationen anzeigen</target>
+        <target state="translated">Hiermit wird die Hilfe zur Befehlszeile angezeigt.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowVersionInfo">
@@ -94,12 +94,12 @@
       </trans-unit>
       <trans-unit id="InvalidTemplateError">
         <source>Invalid template pattern '{0}'</source>
-        <target state="translated">Ungültiges Vorlagenmuster „{0}“</target>
+        <target state="translated">Ungültiges Vorlagenmuster "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildAdditionalArgsHelpText">
         <source>Any extra options that should be passed to MSBuild. See 'dotnet msbuild -h' for available options.</source>
-        <target state="translated">Alle zusätzlichen Optionen, die MSBuild übergeben werden sollen. Verfügbare Optionen siehe „dotnet msbuild -h“.</target>
+        <target state="translated">Alle zusätzlichen Optionen, die MSBuild übergeben werden sollen. Verfügbare Optionen siehe "dotnet msbuild -h".</target>
         <note />
       </trans-unit>
       <trans-unit id="OptionRequiresSingleValueWhichIsMissing">

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to update.</source>
-        <target state="needs-review-translation">Id. del paquete de NuGet que se actualizará.</target>
+        <target state="translated">El id. del paquete de NuGet que se actualizará.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Update a tool to the latest stable version.</source>
-        <target state="needs-review-translation">Actualiza una herramienta a la versión estable más reciente para utilizar.</target>
+        <target state="translated">Actualiza una herramienta a la versión estable más reciente.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Update the tool in the current user's tools directory.</source>
-        <target state="needs-review-translation">Actualización para todos los usuarios.</target>
+        <target state="translated">Actualiza la herramienta en el directorio de herramientas del usuario actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFullCommandNameLocalized">
@@ -89,32 +89,32 @@
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
         <source>Add an additional NuGet package source to use during the update.</source>
-        <target state="new">Add an additional NuGet package source to use during the update.</target>
+        <target state="translated">Agrega un origen de paquetes de NuGet para utilizar durante la actualización.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
         <source>SOURCE</source>
-        <target state="new">SOURCE</target>
+        <target state="translated">ORIGEN</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionName">
         <source>FILE</source>
-        <target state="new">FILE</target>
+        <target state="translated">FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">PLATAFORMA</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tool to update.</source>
-        <target state="new">The directory containing the tool to update.</target>
+        <target state="translated">El directorio que contiene la herramienta que se va a actualizar.</target>
         <note />
       </trans-unit>
     </body>

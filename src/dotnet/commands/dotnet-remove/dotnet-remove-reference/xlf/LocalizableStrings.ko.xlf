@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AppFullName">
         <source>Remove a project-to-project reference from the project.</source>
-        <target state="needs-review-translation">.NET 프로젝트 간 참조 제거 명령</target>
+        <target state="translated">프로젝트에서 프로젝트 간 참조를 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
         <source>Remove the reference only when targeting a specific framework.</source>
-        <target state="needs-review-translation">특정 프레임워크를 대상으로 지정할 때에만 참조를 제거합니다.</target>
+        <target state="translated">특정 프레임워크를 대상으로 지정할 때에만 참조를 제거합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectPathArgumentName">
         <source>PROJECT_PATH</source>
-        <target state="new">PROJECT_PATH</target>
+        <target state="translated">PROJECT_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectPathArgumentDescription">
         <source>The paths to the referenced projects to remove.</source>
-        <target state="new">The paths to the referenced projects to remove.</target>
+        <target state="translated">제거할 참조된 프로젝트의 경로입니다.</target>
         <note />
       </trans-unit>
     </body>
