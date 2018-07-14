@@ -97,15 +97,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
-        [InlineData("self-contained", null)]
-        [InlineData(null, null)]
-        [InlineData(null, "--self-contained")]
-        [InlineData(null, "--self-contained=true")]
-        public void ItPublishesSelfContainedWithRid(string mode, string args)
+        [InlineData(null)]
+        [InlineData("--self-contained")]
+        [InlineData("--self-contained=true")]
+        public void ItPublishesSelfContainedWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-            var outputDirectory = PublishApp(testAppName, rid, mode, args);
+            var outputDirectory = PublishApp(testAppName, rid, args);
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
@@ -116,16 +115,14 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
-        [InlineData("fx-dependent", null)]
-        [InlineData(null, "--self-contained=false")]
-        public void ItPublishesFrameworkDependentWithRid(string mode, string args)
+        [InlineData("--self-contained=false")]
+        public void ItPublishesFrameworkDependentWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-            var outputDirectory = PublishApp(testAppName, rid, mode, args);
+            var outputDirectory = PublishApp(testAppName, rid, args);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
-                $"{testAppName}{Constants.ExeSuffix}",
                 $"{testAppName}.dll",
                 $"{testAppName}.pdb",
                 $"{testAppName}.deps.json",
@@ -134,31 +131,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
-            var command = new TestCommand(outputProgram);
-            command.Environment[Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)"] = 
-                new RepoDirectoriesProvider().DotnetRoot;
-
-            command.ExecuteWithCapturedOutput()
-                .Should()
-                .Pass()
-                .And
-                .HaveStdOutContaining("Hello World");
-        }
-
-        [Fact]
-        public void ItPublishesFrameworkDependentNoExeWithRid()
-        {
-            var testAppName = "MSBuildTestApp";
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-            var outputDirectory = PublishApp(testAppName, rid, mode: "fx-dependent-no-exe");
-
-            outputDirectory.Should().OnlyHaveFiles(new[] {
-                $"{testAppName}.dll",
-                $"{testAppName}.pdb",
-                $"{testAppName}.deps.json",
-                $"{testAppName}.runtimeconfig.json",
-            });
-
             new DotnetCommand()
                 .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
                 .Should().Pass()
@@ -166,14 +138,12 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
         }
 
         [Theory]
-        [InlineData("fx-dependent-no-exe", null)]
-        [InlineData("fx-dependent", null)]
-        [InlineData(null, "--self-contained=false")]
-        [InlineData(null, null)]
-        public void ItPublishesFrameworkDependentWithoutRid(string mode, string args)
+        [InlineData("--self-contained=false")]
+        [InlineData(null)]
+        public void ItPublishesFrameworkDependentWithoutRid(string args)
         {
             var testAppName = "MSBuildTestApp";
-            var outputDirectory = PublishApp(testAppName, rid: null, mode: mode, args: args);
+            var outputDirectory = PublishApp(testAppName, rid: null, args: args);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{testAppName}.dll",
@@ -188,10 +158,10 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                      .And.HaveStdOutContaining("Hello World");
         }
 
-        private DirectoryInfo PublishApp(string testAppName, string rid, string mode, string args = null)
+        private DirectoryInfo PublishApp(string testAppName, string rid, string args = null)
         {
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance($"PublishApp_{rid ?? "none"}_{mode ?? "none"}_{args ?? "none"}")
+                .CreateInstance($"PublishApp_{rid ?? "none"}_{args ?? "none"}")
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
@@ -199,7 +169,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 
             new PublishCommand()
                 .WithRuntime(rid)
-                .WithMode(mode)
                 .WithWorkingDirectory(testProjectDirectory)
                 .Execute(args ?? "")
                 .Should().Pass();
@@ -335,25 +304,6 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .ExecuteWithCapturedOutput("-r win-x64 --no-build")
                 .Should()
                 .Fail();
-        }
-
-        [Fact]
-        public void ItFailsToPublishIfBothModeAndSelfContainedAreSpecified()
-        {
-            var testInstance = TestAssets.Get("MSBuildTestApp")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            var testProjectDirectory = testInstance.Root;
-
-            new PublishCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute("--self-contained --mode fx-dependent")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdErrContaining(LocalizableStrings.PublishModeAndSelfContainedOptionsConflict);
         }
     }
 }
