@@ -19,7 +19,7 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The output directory to place built packages in.</source>
-        <target state="needs-review-translation">빌드된 패키지를 배치할 디렉터리입니다.</target>
+        <target state="translated">빌드된 패키지를 배치할 출력 디렉터리입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
@@ -34,12 +34,12 @@
       </trans-unit>
       <trans-unit id="CmdIncludeSourceDescription">
         <source>Include PDBs and source files. Source files go into the 'src' folder in the resulting nuget package.</source>
-        <target state="needs-review-translation">PDB 및 소스 파일을 포함합니다. 소스 파일이 결과 nuget 패키지의 src 폴더로 이동합니다.</target>
+        <target state="translated">PDB 및 소스 파일을 포함합니다. 소스 파일이 결과 nuget 패키지의 'src' 폴더로 이동합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdServiceableDescription">
         <source>Set the serviceable flag in the package. See https://aka.ms/nupkgservicing for more information.</source>
-        <target state="needs-review-translation">패키지에서 서비스 가능 플래그를 설정합니다. 자세한 내용은 https://aka.ms/nupkgservicing을 참조하세요.</target>
+        <target state="translated">패키지에서 서비스 가능 플래그를 설정합니다. 자세한 내용은 https://aka.ms/nupkgservicing을 참조하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdArgumentProject">
@@ -54,7 +54,7 @@
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the package. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the package. The default for most projects is 'Debug'.</target>
+        <target state="translated">패키지 빌드에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
         <note />
       </trans-unit>
     </body>

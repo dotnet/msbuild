@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="CommandDescription">
         <source>List tools installed in the current development environment.</source>
-        <target state="needs-review-translation">현재 개발 환경에 설치된 도구를 나열합니다.</target>
+        <target state="translated">현재 개발 환경에 설치된 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>List tools in the current user's tools directory.</source>
-        <target state="needs-review-translation">사용자 전체 도구를 나열합니다.</target>
+        <target state="translated">현재 사용자의 도구 디렉터리에 있는 도구를 나열합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -49,12 +49,12 @@
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tools to list.</source>
-        <target state="new">The directory containing the tools to list.</target>
+        <target state="translated">나열할 도구를 포함하는 디렉터리입니다.</target>
         <note />
       </trans-unit>
     </body>

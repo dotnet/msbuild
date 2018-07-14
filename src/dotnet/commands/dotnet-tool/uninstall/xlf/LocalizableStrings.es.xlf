@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
-        <target state="needs-review-translation">Id. del paquete de NuGet de la herramienta que se desinstalará.</target>
+        <target state="translated">El id. del paquete de NuGet de la herramienta que se desinstalará.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
         <source>Uninstall a tool from the current development environment.</source>
-        <target state="needs-review-translation">Desinstala una herramienta.</target>
+        <target state="translated">Desinstala una herramienta del entorno de desarrollo actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
         <source>Uninstall the tool from the current user's tools directory.</source>
-        <target state="needs-review-translation">Desinstale para todos los usuarios.</target>
+        <target state="translated">Desinstala la herramienta del directorio de herramientas del usuario actual.</target>
         <note />
       </trans-unit>
       <trans-unit id="UninstallSucceeded">
@@ -64,12 +64,12 @@
       </trans-unit>
       <trans-unit id="ToolPathOptionName">
         <source>PATH</source>
-        <target state="new">PATH</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolPathOptionDescription">
         <source>The directory containing the tool to uninstall.</source>
-        <target state="new">The directory containing the tool to uninstall.</target>
+        <target state="translated">El directorio que contiene la herramienta que se va a instalar.</target>
         <note />
       </trans-unit>
     </body>

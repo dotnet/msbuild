@@ -474,7 +474,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">项目 {1} 中没有 {0} 引用。;; {0} 是正在请求的项类型(项目、包、p2p)且 {1} 是项目文件或解决方案文件上操作的对象。 </target>
+        <target state="translated">项目 {1} 中没有 {0} 引用。;; {0} 是正在请求的项类型(项目、包、p2p)，{1} 是操作的对象(项目文件或解决方案文件)。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
@@ -616,22 +616,22 @@
       </trans-unit>
       <trans-unit id="VerbosityOptionDescription">
         <source>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</source>
-        <target state="needs-review-translation">设置命令的详细级别。允许值为 q[uiet]、m[inimal]、n[ormal]、d[etailed] 和 diag[nostic]。</target>
+        <target state="translated">设置 MSBuild 详细级别。允许值为 q[uiet]、m[inimal]、n[ormal]、d[etailed] 和 diag[nostic]。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionSuffixDescription">
         <source>Set the value of the $(VersionSuffix) property to use when building the project.</source>
-        <target state="needs-review-translation">定义项目中 $(VersionSuffix) 属性的值。</target>
+        <target state="translated">设置生成项目时使用的 $(VersionSuffix) 属性的值。</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpDescription">
         <source>Show command line help.</source>
-        <target state="needs-review-translation">显示帮助信息。</target>
+        <target state="translated">显示命令行帮助。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoRestoreDescription">
         <source>Do not restore the project before building.</source>
-        <target state="needs-review-translation">请勿在执行命令时进行隐式还原。</target>
+        <target state="translated">生成前请勿还原项目。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectRemovedFromTheSolution">
@@ -860,37 +860,37 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="ProjectArgumentName">
         <source>PROJECT</source>
-        <target state="new">PROJECT</target>
+        <target state="translated">PROJECT</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectArgumentDescription">
         <source>The project file to operate on. If a file is not specified, the command will search the current directory for one.</source>
-        <target state="new">The project file to operate on. If a file is not specified, the command will search the current directory for one.</target>
+        <target state="translated">要操作的项目文件。如果未指定文件，则命令会在当前目录下搜索一个文件。</target>
         <note />
       </trans-unit>
       <trans-unit id="LevelArgumentName">
         <source>LEVEL</source>
-        <target state="new">LEVEL</target>
+        <target state="translated">LEVEL</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="new">FRAMEWORK</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">
         <source>RUNTIME_IDENTIFIER</source>
-        <target state="new">RUNTIME_IDENTIFIER</target>
+        <target state="translated">RUNTIME_IDENTIFIER</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationArgumentName">
         <source>CONFIGURATION</source>
-        <target state="new">CONFIGURATION</target>
+        <target state="translated">CONFIGURATION</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionSuffixArgumentName">
         <source>VERSION_SUFFIX</source>
-        <target state="new">VERSION_SUFFIX</target>
+        <target state="translated">VERSION_SUFFIX</target>
         <note />
       </trans-unit>
     </body>

@@ -14,7 +14,7 @@
       </trans-unit>
       <trans-unit id="CmdProjectArgument">
         <source>PATH</source>
-        <target state="needs-review-translation">PROJECT_JSON/GLOBAL_JSON/SOLUTION_FILE/PROJECT_DIR</target>
+        <target state="translated">PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdProjectArgumentDescription">
@@ -35,13 +35,15 @@ Defaults to current directory if nothing is specified.</source>
       <trans-unit id="CmdTemplateDescription">
         <source>The base MSBuild template to use for the migrated project.
 The default is the project included in dotnet new.</source>
-        <target state="needs-review-translation">移行されたアプリに使用する基本の MSBuild テンプレート。既定は dotnet new に含まれるプロジェクトです。</target>
+        <target state="translated">移行したプロジェクトに使用する基本の MSBuild テンプレート。
+既定は dotnet new に含まれるプロジェクトです。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
         <source>The version of the SDK package that will be referenced in the migrated project.
 The default is the version of the SDK in dotnet new.</source>
-        <target state="needs-review-translation">移行されたアプリで参照される SDK パッケージのバージョン。既定は dotnet new の SDK のバージョンです。</target>
+        <target state="translated">移行したプロジェクトで参照される SDK パッケージのバージョン。
+既定は dotnet new の SDK のバージョンです。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdXprojFileDescription">

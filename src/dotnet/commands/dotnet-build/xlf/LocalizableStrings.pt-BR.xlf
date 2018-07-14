@@ -14,17 +14,17 @@
       </trans-unit>
       <trans-unit id="NoDependenciesOptionDescription">
         <source>Do not build project-to-project references and only build the specified project.</source>
-        <target state="needs-review-translation">Defina esse sinalizador para ignorar as referências projeto a projeto e compilar apenas o projeto raiz</target>
+        <target state="translated">Não criar referências de projeto para projeto e criar somente o projeto especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoIncrementialOptionDescription">
         <source>Do not use incremental building.</source>
-        <target state="needs-review-translation">Desabilita o build incremental.</target>
+        <target state="translated">Não usar build incremental.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
         <source>The output directory to place built artifacts in.</source>
-        <target state="needs-review-translation">Diretório de saída no qual os artefatos compilados serão colocados.</target>
+        <target state="translated">O diretório de saída no qual os artefatos do build serão colocados.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionName">
@@ -34,17 +34,17 @@
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to build for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to build for. The target framework must also be specified in the project file.</target>
+        <target state="translated">A estrutura de destino na qual o build ocorrerá. A estrutura de destino também deve ser especificada no arquivo de projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to build for.</source>
-        <target state="new">The target runtime to build for.</target>
+        <target state="translated">O tempo de execução de destino no qual o build ocorrerá.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to use for building the project. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to use for building the project. The default for most projects is 'Debug'.</target>
+        <target state="translated">A configuração a ser usada para compilar o projeto. O padrão para a maioria dos projetos é "Debug".</target>
         <note />
       </trans-unit>
     </body>

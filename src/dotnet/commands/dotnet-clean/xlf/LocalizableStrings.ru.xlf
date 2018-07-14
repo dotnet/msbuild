@@ -19,22 +19,22 @@
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
         <source>The directory containing the build artifacts to clean.</source>
-        <target state="needs-review-translation">Каталог, в котором размещаются выходные данные сборки.</target>
+        <target state="translated">Каталог, содержащий артефакты сборки, которые нужно очистить.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
         <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
-        <target state="new">The target framework to clean for. The target framework must also be specified in the project file.</target>
+        <target state="translated">Целевая платформа для очистки. Целевая платформа также должна быть указана в файле проекта.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to clean for.</source>
-        <target state="new">The target runtime to clean for.</target>
+        <target state="translated">Целевая среда выполнения для очистки.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
-        <target state="new">The configuration to clean for. The default for most projects is 'Debug'.</target>
+        <target state="translated">Конфигурация для очистки. По умолчанию для большинства проектов используется "Debug".</target>
         <note />
       </trans-unit>
     </body>
