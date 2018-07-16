@@ -3364,12 +3364,11 @@ namespace Microsoft.Build.CommandLine
             IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
             int cpuCount)
         {
-            var replayEventSource = new Logging.BinaryLogReplayEventSource();
+            var replayEventSource = new BinaryLogReplayEventSource();
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
-                var nodeLogger = distributedLoggerRecord.CentralLogger as INodeLogger;
-                if (nodeLogger != null)
+                if (distributedLoggerRecord.CentralLogger is INodeLogger nodeLogger)
                 {
                     nodeLogger.Initialize(replayEventSource, cpuCount);
                 }
@@ -3381,8 +3380,7 @@ namespace Microsoft.Build.CommandLine
 
             foreach (var logger in loggers)
             {
-                var nodeLogger = logger as INodeLogger;
-                if (nodeLogger != null)
+                if (logger is INodeLogger nodeLogger)
                 {
                     nodeLogger.Initialize(replayEventSource, cpuCount);
                 }
