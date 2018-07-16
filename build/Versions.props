@@ -31,6 +31,8 @@
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <MicroBuildPluginsSwixBuildVersion>1.0.422</MicroBuildPluginsSwixBuildVersion>
+
+    <RoslynToolsSignToolVersion>1.0.0-beta2-dev3</RoslynToolsSignToolVersion>
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
