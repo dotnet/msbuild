@@ -3391,7 +3391,7 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                replayEventSource.Replay(binaryLogFilePath);
+                replayEventSource.Replay(binaryLogFilePath, s_cts.Token);
             }
             catch (Exception ex)
             {
