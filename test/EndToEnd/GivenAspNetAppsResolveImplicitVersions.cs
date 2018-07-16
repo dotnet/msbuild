@@ -16,8 +16,10 @@ namespace EndToEnd
     {
         private const string AspNetTestProject = "TestWebAppSimple";
 
+        private const string PinnedAspNetCoreImplicitVersion = "2.1.1";
+
         [Fact]
-        public void PortablePublishWithLatestTFMUsesBundledAspNetCoreAppVersion()
+        public void PortablePublishWithLatestTFMUsesPinnedDownAspNetCoreAppVersion()
         {
             var _testInstance = TestAssets.Get(AspNetTestProject)
                 .CreateInstance(identifier: LatestSupportedAspNetCoreAppVersion)
@@ -48,10 +50,7 @@ namespace EndToEnd
             var restoredVersion = GetAspNetCoreAppVersion(assetsFile, portable: true);
             restoredVersion.Should().NotBeNull();
 
-            var bundledVersionPath = Path.Combine(projectDirectory, ".BundledAspNetCoreVersion");
-            var bundledVersion = File.ReadAllText(bundledVersionPath).Trim();
-
-            restoredVersion.ToNormalizedString().Should().BeEquivalentTo(bundledVersion,
+            restoredVersion.ToNormalizedString().Should().BeEquivalentTo(PinnedAspNetCoreImplicitVersion,
                 "The bundled aspnetcore versions set in Microsoft.NETCoreSdk.BundledVersions.props should be idenitical to the versions set in DependencyVersions.props." +
                 "Please update MSBuildExtensions.targets in this repo so these versions match.");
         }

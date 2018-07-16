@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftAspNetCoreAllPackageVersion>2.1.1</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAllPackageVersion>2.1.2</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
     <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.1.1</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
     <MicrosoftAspNetCoreMvcPackageVersion>2.1.1</MicrosoftAspNetCoreMvcPackageVersion>
@@ -25,7 +25,10 @@
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
     <MicrosoftNETSdkPackageVersion>2.1.400-preview-63114-01</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>2.1.1</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETWebItemTemplatesPackageVersion>2.1.1</MicrosoftNETWebItemTemplatesPackageVersion>
+    <MicrosoftNETWebProjectTemplates21PackageVersion>2.1.1</MicrosoftNETWebProjectTemplates21PackageVersion>
+    <MicrosoftNETWebSpaProjectTemplatesPackageVersion>2.1.1</MicrosoftNETWebSpaProjectTemplatesPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>2.1.400-preview1-20180705-1834985</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>

@@ -4,9 +4,9 @@
     <BundledTemplate Include="Microsoft.DotNet.Common.ProjectTemplates.2.1" Version="$(MicrosoftDotNetCommonProjectTemplates20PackageVersion)" />
     <BundledTemplate Include="Microsoft.DotNet.Test.ProjectTemplates.2.1" Version="$(MicrosoftDotNetTestProjectTemplates20PackageVersion)" />
 
-    <BundledTemplate Include="Microsoft.DotNet.Web.ItemTemplates" Version="$(AspNetCoreVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.1" Version="$(AspNetCoreVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Web.Spa.ProjectTemplates" Version="$(AspNetCoreVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ItemTemplates" Version="$(MicrosoftNETWebItemTemplatesPackageVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.1" Version="$(MicrosoftNETWebProjectTemplates21PackageVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.Spa.ProjectTemplates" Version="$(MicrosoftNETWebSpaProjectTemplatesPackageVersion)" />
 
     <BundledTemplate Include="NUnit3.DotNetNew.Template" Version="$(NUnit3TemplatesVersion)" />
   </ItemGroup>
