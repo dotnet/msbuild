@@ -69,4 +69,10 @@
     <ShouldlyVersion>3.0.0</ShouldlyVersion>
   </PropertyGroup>
 
+  <Target Name="MungeSignToolArguments" BeforeTargets="Sign">
+    <ItemGroup>
+      <SignToolArgs Include='-msbuildBinaryLog "$(ArtifactsLogDir)\signtool.binlog"' />
+    </ItemGroup>
+  </Target>
+
 </Project>
