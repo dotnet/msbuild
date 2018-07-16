@@ -68,7 +68,7 @@ steps:
   displayName: Just log every file
   inputs:
     filename: dir
-    arguments: '/s /b $(Build.ArtifactStagingDirectory)\>artifacts\$(BuildConfiguration)\log\Everyfile.log'
+    arguments: '/s /b $(Build.ArtifactStagingDirectory)\..>artifacts\$(BuildConfiguration)\log\Everyfile.log'
   condition: always()
 
 - task: PublishBuildArtifacts@1
