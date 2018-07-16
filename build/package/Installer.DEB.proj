@@ -94,12 +94,12 @@
         UseHardlinksIfPossible="False" />
 
       <!-- Remove Shared Framework and Debian Packages -->
-      <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SdkDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="TestSdkDeb"
@@ -129,12 +129,12 @@
                   ToolPath="$(DebianInstalledDirectory)" />
 
       <!-- Clean up Packages -->
-      <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SdkDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
