@@ -28,23 +28,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
-        <source>Specifies a NuGet package source to use during the restore.</source>
-        <target state="translated">Especifica el origen de un paquete NuGet para usarlo durante la restauración.</target>
+        <source>The NuGet package source to use for the restore.</source>
+        <target state="translated">El origen de un paquete de NuGet para usarlo para la restauración.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>PACKAGES_DIRECTORY</source>
-        <target state="translated">DIRECTORIO_DE:PAQUETES</target>
+        <source>PACKAGES_DIR</source>
+        <target state="translated">PACKAGES_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
-        <source>Directory to install packages in.</source>
-        <target state="translated">Directorio donde se instalarán los paquetes.</target>
+        <source>The directory to restore packages to.</source>
+        <target state="translated">El directorio en el que se restauran paquetes.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
-        <source>Disables restoring multiple projects in parallel.</source>
-        <target state="translated">Deshabilita la restauración de varios proyectos en paralelo.</target>
+        <source>Prevent restoring multiple projects in parallel.</source>
+        <target state="translated">Evite la restauración de varios proyectos en paralelo.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -68,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only restore the root project.</source>
-        <target state="translated">Establezca esta marca para que se omitan las referencias de proyecto a proyecto y se restaure solo el proyecto raíz.</target>
+        <source>Do not restore project-to-project references and only restore the specified project.</source>
+        <target state="translated">No restaure referencias de proyecto a proyecto y restaure solo el proyecto especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -78,13 +78,20 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
-        <source>Target runtime to restore packages for.</source>
-        <target state="translated">Runtime de destino para el que restaurar los paquetes.</target>
+        <source>The target runtime to restore packages for.</source>
+        <target state="translated">El tiempo de ejecución de destino para el que se restauran los paquetes.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
-        <source>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</source>
-        <target state="translated">Establezca este indicador para forzar la resolución de todas las dependencias aunque la última restauración se haya realizado correctamente. Esta acción es equivalente a eliminar project.assets.json.</target>
+        <source>Force all dependencies to be resolved even if the last restore was successful.
+This is equivalent to deleting project.assets.json.</source>
+        <target state="translated">Fuerce la resolución de todas las dependencias aunque la última restauración se haya realizado correctamente.
+Esta acción es equivalente a eliminar project.assets.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
         <note />
       </trans-unit>
     </body>

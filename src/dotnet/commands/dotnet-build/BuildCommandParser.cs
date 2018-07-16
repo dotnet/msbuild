@@ -16,9 +16,8 @@ namespace Microsoft.DotNet.Cli
                 "build",
                 LocalizableStrings.AppFullName,
                 Accept.ZeroOrMoreArguments()
-                      .With(name: CommonLocalizableStrings.CmdProjectFile,
-                            description:
-                            "The MSBuild project file to build. If a project file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in `proj` and uses that file."),
+                      .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                            description: CommonLocalizableStrings.ProjectArgumentDescription),
                 CommonOptions.HelpOption(),
                 Create.Option(
                     "-o|--output",
@@ -26,9 +25,9 @@ namespace Microsoft.DotNet.Cli
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.OutputOptionName)
                           .ForwardAsSingle(o => $"-property:OutputPath={o.Arguments.Single()}")),
-                CommonOptions.FrameworkOption(),
-                CommonOptions.RuntimeOption(),
-                CommonOptions.ConfigurationOption(),
+                CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
+                CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
+                CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--no-incremental",

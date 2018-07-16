@@ -19,8 +19,9 @@ namespace Microsoft.DotNet.Cli
                     Accept.NoArguments()),
                 Create.Option(
                     "--tool-path",
-                    LocalizableStrings.ToolPathDescription,
-                    Accept.ExactlyOneArgument()),
+                    LocalizableStrings.ToolPathOptionDescription,
+                    Accept.ExactlyOneArgument()
+                          .With(name: LocalizableStrings.ToolPathOptionName)),
                 CommonOptions.HelpOption());
         }
     }

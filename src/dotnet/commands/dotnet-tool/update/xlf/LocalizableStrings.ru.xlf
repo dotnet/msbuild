@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to update.</source>
-        <target state="translated">Обновляемый идентификатор пакета NuGet инструмента.</target>
+        <source>The NuGet Package Id of the tool to update.</source>
+        <target state="translated">Идентификатор пакета NuGet обновляемого инструмента.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyExactlyOnePackageId">
@@ -23,7 +23,7 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Updates a tool to the latest stable version for use.</source>
+        <source>Update a tool to the latest stable version.</source>
         <target state="translated">Обновляет инструмент до последней стабильной версии.</target>
         <note />
       </trans-unit>
@@ -48,8 +48,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Update user wide.</source>
-        <target state="translated">Обновление на уровне пользователя.</target>
+        <source>Update the tool in the current user's tools directory.</source>
+        <target state="translated">Обновление инструмента в каталоге инструментов текущего пользователя.</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFullCommandNameLocalized">
@@ -65,11 +65,6 @@
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
         <target state="translated">(--global) конфликтует с параметром пути к средству (--tool-path). Укажите лишь один из них.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="translated">Расположение для установки средства.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -93,13 +88,33 @@
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
-        <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <source>Add an additional NuGet package source to use during the update.</source>
+        <target state="translated">Добавляет дополнительный источник пакетов NuGet, используемый при обновлении.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
-        <source>ADD_SOURCE</source>
-        <target state="new">ADD_SOURCE</target>
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to update.</source>
+        <target state="translated">Каталог, содержащий обновляемый инструмент.</target>
         <note />
       </trans-unit>
     </body>

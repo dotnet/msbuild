@@ -13,13 +13,13 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to store the given assemblies.</source>
-        <target state="translated">Ścieżka wyjściowa, w której mają być przechowywane podane zestawy.</target>
+        <source>The output directory to store the given assemblies in.</source>
+        <target state="translated">Katalog wyjściowy, w którym mają być przechowywane podane zestawy.</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOption">
-        <source>FrameworkVersion</source>
-        <target state="translated">WersjaPlatformy</target>
+        <source>FRAMEWORK_VERSION</source>
+        <target state="translated">WERSJA_PLATFORMY</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkVersionOptionDescription">
@@ -28,13 +28,13 @@
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOption">
-        <source>IntermediateWorkingDir</source>
-        <target state="translated">PośredniKatalogRoboczy</target>
+        <source>WORKING_DIR</source>
+        <target state="translated">KATALOG_ROBOCZY</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateWorkingDirOptionDescription">
-        <source>The directory used by the command to execute.</source>
-        <target state="translated">Katalog używany do wykonania polecenia.</target>
+        <source>The working directory used by the command to execute.</source>
+        <target state="translated">Katalog roboczy używany do wykonania polecenia.</target>
         <note />
       </trans-unit>
       <trans-unit id="IntermediateDirExists">
@@ -43,8 +43,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SkipOptimizationOptionDescription">
-        <source>Skips the optimization phase.</source>
-        <target state="translated">Pomija fazę optymalizacji.</target>
+        <source>Skip the optimization phase.</source>
+        <target state="translated">Pomiń fazę optymalizacji.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectManifest">
@@ -58,13 +58,23 @@
         <note />
       </trans-unit>
       <trans-unit id="SkipSymbolsOptionDescription">
-        <source>Skips creating symbol files which can be used for profiling the optimized assemblies.</source>
-        <target state="translated">Pomija tworzenie plików symboli, za pomocą których można profilować zoptymalizowane zestawy.</target>
+        <source>Skip creating symbol files which can be used for profiling the optimized assemblies.</source>
+        <target state="translated">Pomiń tworzenie plików symboli, za pomocą których można profilować zoptymalizowane zestawy.</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyManifests">
         <source>Specify at least one manifest with --manifest.</source>
         <target state="translated">Określ co najmniej jeden manifest przy użyciu elementu --manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to store packages for. The target framework has to be specified in the project file.</source>
+        <target state="translated">Platforma docelowa, dla której mają być przechowywane pakiety. Platforma docelowa musi być określona w pliku projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to store packages for.</source>
+        <target state="translated">Docelowe środowisko uruchomieniowe, dla którego mają być przechowywane pakiety.</target>
         <note />
       </trans-unit>
     </body>

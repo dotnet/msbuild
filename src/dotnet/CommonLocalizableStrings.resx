@@ -432,17 +432,11 @@
   <data name="ArgumentsProjectOrSolutionDescription" xml:space="preserve">
     <value>The project or solution to operation on. If a file is not specified, the current directory is searched.</value>
   </data>
-  <data name="ArgumentsProjectDescription" xml:space="preserve">
-    <value>The project file to operate on. If a file is not specified, the command will search the current directory for one.</value>
-  </data>
-  <data name="ArgumentsSolutionDescription" xml:space="preserve">
-    <value>Solution file to operate on. If not specified, the command will search the current directory for one.</value>
-  </data>
-  <data name="CmdSlnFile" xml:space="preserve">
-    <value>SLN_FILE</value>
-  </data>
-  <data name="CmdProjectFile" xml:space="preserve">
+  <data name="ProjectArgumentName" xml:space="preserve">
     <value>PROJECT</value>
+  </data>
+  <data name="ProjectArgumentDescription" xml:space="preserve">
+    <value>The project file to operate on. If a file is not specified, the command will search the current directory for one.</value>
   </data>
   <data name="CmdFramework" xml:space="preserve">
     <value>FRAMEWORK</value>
@@ -500,25 +494,16 @@
 {1}.</value>
   </data>
   <data name="VerbosityOptionDescription" xml:space="preserve">
-    <value>Set the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</value>
-  </data>
-  <data name="FrameworkOptionDescription" xml:space="preserve">
-    <value>Target framework to publish for. The target framework has to be specified in the project file.</value>
-  </data>
-  <data name="RuntimeOptionDescription" xml:space="preserve">
-    <value>Publish the project for a given runtime. This is used when creating self-contained deployment. Default is to publish a framework-dependent app.</value>
-  </data>
-  <data name="ConfigurationOptionDescription" xml:space="preserve">
-    <value>Configuration to use for building the project.  Default for most projects is  "Debug".</value>
+    <value>Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic].</value>
   </data>
   <data name="CmdVersionSuffixDescription" xml:space="preserve">
-    <value>Defines the value for the $(VersionSuffix) property in the project.</value>
+    <value>Set the value of the $(VersionSuffix) property to use when building the project.</value>
   </data>
   <data name="ShowHelpDescription" xml:space="preserve">
-    <value>Show help information.</value>
+    <value>Show command line help.</value>
   </data>
   <data name="NoRestoreDescription" xml:space="preserve">
-    <value>Does not do an implicit restore when executing the command.</value>
+    <value>Do not restore the project before building.</value>
   </data>
   <data name="ToolSettingsInvalidXml" xml:space="preserve">
     <value>Invalid XML: {0}</value>
@@ -645,5 +630,20 @@ setx PATH "%PATH%;{0}"
   </data>
   <data name="FailedToReadNuGetLockFile" xml:space="preserve">
     <value>Failed to read NuGet LockFile for tool package '{0}': {1}</value>
+  </data>
+  <data name="LevelArgumentName" xml:space="preserve">
+    <value>LEVEL</value>
+  </data>
+  <data name="FrameworkArgumentName" xml:space="preserve">
+    <value>FRAMEWORK</value>
+  </data>
+  <data name="RuntimeIdentifierArgumentName" xml:space="preserve">
+    <value>RUNTIME_IDENTIFIER</value>
+  </data>
+  <data name="ConfigurationArgumentName" xml:space="preserve">
+    <value>CONFIGURATION</value>
+  </data>
+  <data name="VersionSuffixArgumentName" xml:space="preserve">
+    <value>VERSION_SUFFIX</value>
   </data>
 </root>

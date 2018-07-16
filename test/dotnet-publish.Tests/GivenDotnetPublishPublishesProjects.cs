@@ -11,6 +11,7 @@ using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.DotNet.TestFramework;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
+using LocalizableStrings = Microsoft.DotNet.Tools.Publish.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Publish.Tests
 {
@@ -95,62 +96,54 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                 .And.HaveStdOutContaining("project.assets.json");
         }
 
-        [Fact]
-        public void ItPublishesARunnableSelfContainedApp()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("--self-contained")]
+        [InlineData("--self-contained=true")]
+        public void ItPublishesSelfContainedWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
-
-            var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            var testProjectDirectory = testInstance.Root;
-
             var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-
-            new PublishCommand()
-                .WithFramework("netcoreapp2.1")
-                .WithRuntime(rid)
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
-                .Should().Pass();
-
-            var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
-
-            var outputProgram = testProjectDirectory
-                .GetDirectory("bin", configuration, "netcoreapp2.1", rid, "publish", $"{testAppName}{Constants.ExeSuffix}")
-                .FullName;
-
-            EnsureProgramIsRunnable(outputProgram);
-
-            new TestCommand(outputProgram)
-                .ExecuteWithCapturedOutput()
-                .Should().Pass()
-                     .And.HaveStdOutContaining("Hello World");
-        }
-
-        [Fact]
-        public void ItPublishesARidSpecificAppSettingSelfContainedToTrue()
-        {
-            var testAppName = "MSBuildTestApp";
-            var outputDirectory = PublishAppWithSelfContained(testAppName, true);
+            var outputDirectory = PublishApp(testAppName, rid, args);
 
             var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
 
-            EnsureProgramIsRunnable(outputProgram);
-
             new TestCommand(outputProgram)
                 .ExecuteWithCapturedOutput()
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World");
         }
 
-        [Fact]
-        public void ItPublishesARidSpecificAppSettingSelfContainedToFalse()
+        [Theory]
+        [InlineData("--self-contained=false")]
+        public void ItPublishesFrameworkDependentWithRid(string args)
         {
             var testAppName = "MSBuildTestApp";
-            var outputDirectory = PublishAppWithSelfContained(testAppName, false);
+            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
+            var outputDirectory = PublishApp(testAppName, rid, args);
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                $"{testAppName}.dll",
+                $"{testAppName}.pdb",
+                $"{testAppName}.deps.json",
+                $"{testAppName}.runtimeconfig.json",
+            });
+
+            var outputProgram = Path.Combine(outputDirectory.FullName, $"{testAppName}{Constants.ExeSuffix}");
+
+            new DotnetCommand()
+                .ExecuteWithCapturedOutput(Path.Combine(outputDirectory.FullName, $"{testAppName}.dll"))
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World");
+        }
+
+        [Theory]
+        [InlineData("--self-contained=false")]
+        [InlineData(null)]
+        public void ItPublishesFrameworkDependentWithoutRid(string args)
+        {
+            var testAppName = "MSBuildTestApp";
+            var outputDirectory = PublishApp(testAppName, rid: null, args: args);
 
             outputDirectory.Should().OnlyHaveFiles(new[] {
                 $"{testAppName}.dll",
@@ -165,36 +158,24 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                      .And.HaveStdOutContaining("Hello World");
         }
 
-        private DirectoryInfo PublishAppWithSelfContained(string testAppName, bool selfContained)
+        private DirectoryInfo PublishApp(string testAppName, string rid, string args = null)
         {
             var testInstance = TestAssets.Get(testAppName)
-                .CreateInstance($"PublishesSelfContained{selfContained}")
+                .CreateInstance($"PublishApp_{rid ?? "none"}_{args ?? "none"}")
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
             var testProjectDirectory = testInstance.Root;
 
-            var rid = DotnetLegacyRuntimeIdentifiers.InferLegacyRestoreRuntimeIdentifier();
-
             new PublishCommand()
                 .WithRuntime(rid)
-                .WithSelfContained(selfContained)
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute()
+                .Execute(args ?? "")
                 .Should().Pass();
 
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             return testProjectDirectory
-                    .GetDirectory("bin", configuration, "netcoreapp2.1", rid, "publish");
-        }
-
-        private static void EnsureProgramIsRunnable(string path)
-        {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                //Workaround for https://github.com/dotnet/corefx/issues/15516
-                Process.Start("chmod", $"u+x {path}").WaitForExit();
-            }
+                    .GetDirectory("bin", configuration, "netcoreapp2.1", rid ?? "", "publish");
         }
 
         [Fact]

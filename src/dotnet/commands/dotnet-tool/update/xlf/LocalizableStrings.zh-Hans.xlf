@@ -8,7 +8,7 @@
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
-        <source>NuGet Package Id of the tool to update.</source>
+        <source>The NuGet Package Id of the tool to update.</source>
         <target state="translated">要更新的工具的 NuGet 包 ID。</target>
         <note />
       </trans-unit>
@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Updates a tool to the latest stable version for use.</source>
-        <target state="translated">将工具更新为最新稳定版本以供使用。</target>
+        <source>Update a tool to the latest stable version.</source>
+        <target state="translated">将工具更新为最新稳定版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">
@@ -48,8 +48,8 @@
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Update user wide.</source>
-        <target state="translated">更新用户范围。</target>
+        <source>Update the tool in the current user's tools directory.</source>
+        <target state="translated">更新当前用户工具目录中的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="UpdateFullCommandNameLocalized">
@@ -65,11 +65,6 @@
       <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
         <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
         <target state="translated">(--global)与工具路径选项(--tool-path)冲突。请仅指定其中一种选项。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPathDescription">
-        <source>Location where the tool will be installed.</source>
-        <target state="translated">将安装工具的位置。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolHasMultipleVersionsInstalled">
@@ -93,13 +88,33 @@
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
-        <source>Adds an additional NuGet package source to use during update.</source>
-        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <source>Add an additional NuGet package source to use during the update.</source>
+        <target state="translated">添加其他要在更新期间使用的 NuGet 包源。</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionName">
-        <source>ADD_SOURCE</source>
-        <target state="new">ADD_SOURCE</target>
+        <source>SOURCE</source>
+        <target state="translated">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionName">
+        <source>FILE</source>
+        <target state="translated">FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionName">
+        <source>FRAMEWORK</source>
+        <target state="translated">FRAMEWORK</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionName">
+        <source>PATH</source>
+        <target state="translated">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathOptionDescription">
+        <source>The directory containing the tool to update.</source>
+        <target state="translated">包含要更新的工具的目录。</target>
         <note />
       </trans-unit>
     </body>

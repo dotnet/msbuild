@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.List
         protected override string CommandName => "list";
         protected override string FullCommandNameLocalized => LocalizableStrings.NetListCommand;
         protected override string ArgumentName => Constants.ProjectArgumentName;
-        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ArgumentsProjectDescription;
+        protected override string ArgumentDescriptionLocalized => CommonLocalizableStrings.ProjectArgumentDescription;
 
         internal override Dictionary<string, Func<AppliedOption, CommandBase>> SubCommands =>
             new Dictionary<string, Func<AppliedOption, CommandBase>>

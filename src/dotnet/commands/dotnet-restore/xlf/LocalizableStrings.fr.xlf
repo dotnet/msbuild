@@ -28,23 +28,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceOptionDescription">
-        <source>Specifies a NuGet package source to use during the restore.</source>
-        <target state="translated">Spécifie une source de package NuGet à utiliser pendant la restauration.</target>
+        <source>The NuGet package source to use for the restore.</source>
+        <target state="translated">Source de package NuGet à utiliser pour la restauration.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOption">
-        <source>PACKAGES_DIRECTORY</source>
-        <target state="translated">PACKAGES_DIRECTORY</target>
+        <source>PACKAGES_DIR</source>
+        <target state="translated">PACKAGES_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackagesOptionDescription">
-        <source>Directory to install packages in.</source>
-        <target state="translated">Répertoire dans lequel installer les packages.</target>
+        <source>The directory to restore packages to.</source>
+        <target state="translated">Répertoire de restauration des packages.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdDisableParallelOptionDescription">
-        <source>Disables restoring multiple projects in parallel.</source>
-        <target state="translated">Désactive la restauration de plusieurs projets en parallèle.</target>
+        <source>Prevent restoring multiple projects in parallel.</source>
+        <target state="translated">Empêche la restauration de plusieurs projets en parallèle.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigFileOption">
@@ -68,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoDependenciesOptionDescription">
-        <source>Set this flag to ignore project to project references and only restore the root project.</source>
-        <target state="translated">Définissez cet indicateur pour ignorer les références de projet à projet et restaurer uniquement le projet racine.</target>
+        <source>Do not restore project-to-project references and only restore the specified project.</source>
+        <target state="translated">Ne restaurez pas les références de projet à projet, et restaurez uniquement le projet spécifié.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOption">
@@ -78,13 +78,20 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdRuntimeOptionDescription">
-        <source>Target runtime to restore packages for.</source>
-        <target state="translated">Runtime cible pour lequel restaurer les packages.</target>
+        <source>The target runtime to restore packages for.</source>
+        <target state="translated">Runtime cible pour lequel la restauration des packages est effectuée.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdForceRestoreOptionDescription">
-        <source>Set this flag to force all dependencies to be resolved even if the last restore was successful. This is equivalent to deleting project.assets.json.</source>
-        <target state="translated">Définissez cet indicateur pour forcer la résolution de toutes les dépendances même si la dernière restauration a réussi. Cela équivaut à supprimer project.assets.json.</target>
+        <source>Force all dependencies to be resolved even if the last restore was successful.
+This is equivalent to deleting project.assets.json.</source>
+        <target state="translated">Forcez la résolution de toutes les dépendances même si la dernière restauration a réussi.
+Cela équivaut à supprimer project.assets.json.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permet à la commande de s'arrêter et d'attendre une entrée ou une action de l'utilisateur (par exemple pour effectuer une authentification).</target>
         <note />
       </trans-unit>
     </body>

@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ru" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Add Package reference Command</source>
-        <target state="translated">Команда добавления ссылки на пакет .NET</target>
+        <source>Add a NuGet package reference to the project.</source>
+        <target state="translated">Добавление в проект ссылки на пакет NuGet.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -18,27 +18,27 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Adds reference only when targeting a specific framework.</source>
-        <target state="translated">Добавляет ссылку только при выборе конкретной целевой платформы.</target>
+        <source>Add the reference only when targeting a specific framework.</source>
+        <target state="translated">Добавление ссылки только для конкретной целевой платформы.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoRestoreDescription">
-        <source>Adds reference without performing restore preview and compatibility check.</source>
-        <target state="translated">Добавляет ссылку без предварительной проверки восстановления и совместимости.</target>
+        <source>Add the reference without performing restore preview and compatibility check.</source>
+        <target state="translated">Добавление ссылки без предварительной проверки восстановления и совместимости.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Specifies NuGet package sources to use during the restore.</source>
-        <target state="translated">Указывает источники пакетов NuGet, используемые во время восстановления.</target>
+        <source>The NuGet package source to use during the restore.</source>
+        <target state="translated">Источник пакетов NuGet, используемый во время восстановления.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectoryDescription">
-        <source>Restores the packages to the specified directory.</source>
-        <target state="translated">Восстанавливает пакеты в указанном каталоге.</target>
+        <source>The directory to restore packages to.</source>
+        <target state="translated">Каталог, в который будут восстановлены пакеты.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdVersionDescription">
-        <source>Version for the package to be added.</source>
+        <source>The version of the package to add.</source>
         <target state="translated">Версия добавляемого пакета.</target>
         <note />
       </trans-unit>
@@ -63,8 +63,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDirectory">
-        <source>PACKAGE_DIRECTORY</source>
-        <target state="translated">PACKAGE_DIRECTORY</target>
+        <source>PACKAGE_DIR</source>
+        <target state="translated">PACKAGE_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPackageDescription">
@@ -80,6 +80,11 @@
       <trans-unit id="CmdDGFileIOException">
         <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
         <target state="translated">Не удалось создать временный файл для проекта "{0}". Невозможно добавить ссылку на пакет. Очистите временный каталог и повторите попытку.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Позволяет остановить команду и ожидать ввода или действия пользователя (например, для проверки подлинности).</target>
         <note />
       </trans-unit>
     </body>

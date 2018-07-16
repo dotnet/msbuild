@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpInfo">
-        <source>Show help information</source>
-        <target state="translated">Yardım bilgilerini göster</target>
+        <source>Show command line help.</source>
+        <target state="translated">Komut satırı yardımını gösterir.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowVersionInfo">

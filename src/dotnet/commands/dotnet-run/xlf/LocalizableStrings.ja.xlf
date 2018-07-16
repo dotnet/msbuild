@@ -136,6 +136,16 @@ The current {1} is '{2}'.</source>
         <target state="translated">'{0}' は有効なプロジェクト ファイルではありません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="translated">実行する対象の構成。大部分のプロジェクトで、既定値は 'Debug' です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="translated">実行する対象のターゲット フレームワーク。ターゲット フレームワークはプロジェクト ファイルでも指定する必要があります。</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

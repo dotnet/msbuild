@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.ToolPackage
             _store = store ?? throw new ArgumentNullException(nameof(store));
             _projectRestorer = projectRestorer ?? throw new ArgumentNullException(nameof(projectRestorer));
             _tempProject = tempProject;
-            _offlineFeed = offlineFeed ?? new DirectoryPath(new CliFolderPathCalculator().CliFallbackFolderPath);
+            _offlineFeed = offlineFeed ?? new DirectoryPath(CliFolderPathCalculator.CliFallbackFolderPath);
         }
 
         public IToolPackage InstallPackage(PackageId packageId,
@@ -135,8 +135,8 @@ namespace Microsoft.DotNet.ToolPackage
             var tempProjectContent = new XDocument(
                 new XElement("Project",
                     new XElement("PropertyGroup",
-                        new XElement("BaseIntermediateOutputPath", assetJsonOutputDirectory.Value)), // change the output directory of asset.json
-                    // due to https://github.com/Microsoft/msbuild/issues/1603 -- import SDK after setting BaseIntermediateOutputPath
+                        // due to https://github.com/Microsoft/msbuild/issues/1603 -- import SDK after setting MsBuildProjectExtensionsPath
+                        new XElement("MsBuildProjectExtensionsPath", assetJsonOutputDirectory.Value)), // change the output directory of asset.json
                     new XElement(("Import"),
                         new XAttribute("Project", "Sdk.props"),
                         new XAttribute("Sdk", "Microsoft.NET.Sdk")),
@@ -155,7 +155,7 @@ namespace Microsoft.DotNet.ToolPackage
                         new XElement("PackageReference",
                             new XAttribute("Include", packageId.ToString()),
                             new XAttribute("Version",
-                                versionRange?.ToString("S", new VersionRangeFormatter()) ?? "*"))), // nuget will restore latest stable for *
+                                versionRange?.ToString("N", new VersionRangeFormatter()) ?? "*"))), // nuget will restore latest stable for * and format N is the normalization format
                     new XElement(("Import"),
                         new XAttribute("Project", "Sdk.targets"),
                         new XAttribute("Sdk", "Microsoft.NET.Sdk"))));

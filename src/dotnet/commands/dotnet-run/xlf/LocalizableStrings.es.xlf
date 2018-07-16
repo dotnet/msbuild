@@ -136,6 +136,16 @@ El actual {1} es "{2}".</target>
         <target state="translated">"{0}" no es un archivo de proyecto válido.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="translated">La configuración para la que se ejecuta. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="translated">La plataforma de destino para la que se ejecuta. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Xunit;
+using CommandLocalizableStrings = Microsoft.DotNet.Tools.Sln.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli.Sln.List.Tests
 {
@@ -17,25 +18,23 @@ namespace Microsoft.DotNet.Cli.Sln.List.Tests
         private const string HelpText = @"Usage: dotnet sln <SLN_FILE> list [options]
 
 Arguments:
-  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>   The solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
-";
+  -h, --help   Show command line help.";
 
         private const string SlnCommandHelpText = @"Usage: dotnet sln [options] <SLN_FILE> [command]
 
 Arguments:
-  <SLN_FILE>   Solution file to operate on. If not specified, the command will search the current directory for one.
+  <SLN_FILE>   The solution file to operate on. If not specified, the command will search the current directory for one.
 
 Options:
-  -h, --help   Show help information.
+  -h, --help   Show command line help.
 
 Commands:
-  add <args>      .NET Add project(s) to a solution file Command
-  list            .NET List project(s) in a solution file Command
-  remove <args>   .NET Remove project(s) from a solution file Command
-";
+  add <PROJECT_PATH>      Add one or more projects to a solution file.
+  list                    List all projects in a solution file.
+  remove <PROJECT_PATH>   Remove one or more projects from a solution file.";
 
         [Theory]
         [InlineData("--help")]
@@ -160,7 +159,7 @@ Commands:
         }
 
         [Fact]
-        public void WhenNoProjectReferencesArePresentInTheSolutionItPrintsANoProjectMessage()
+        public void WhenNoProjectsArePresentInTheSolutionItPrintsANoProjectMessage()
         {
             var projectDirectory = TestAssets
                 .Get("TestAppWithEmptySln")
@@ -177,11 +176,10 @@ Commands:
         }
 
         [Fact]
-        public void WhenProjectReferencesArePresentInTheSolutionItListsThem()
+        public void WhenProjectsPresentInTheSolutionItListsThem()
         {
-            string OutputText = CommonLocalizableStrings.ProjectReferenceOneOrMore;
-            OutputText += $@"
-{new string('-', OutputText.Length)}
+            var expectedOutput = $@"{CommandLocalizableStrings.ProjectsHeader}
+{new string('-', CommandLocalizableStrings.ProjectsHeader.Length)}
 {Path.Combine("App", "App.csproj")}
 {Path.Combine("Lib", "Lib.csproj")}";
 
@@ -196,7 +194,7 @@ Commands:
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln list");
             cmd.Should().Pass();
-            cmd.StdOut.Should().BeVisuallyEquivalentTo(OutputText);
+            cmd.StdOut.Should().BeVisuallyEquivalentTo(expectedOutput);
         }
     }
 }

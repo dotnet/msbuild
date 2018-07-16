@@ -16,8 +16,8 @@ namespace Microsoft.DotNet.Cli
                   "test",
                   LocalizableStrings.AppFullName,
                   Accept.ZeroOrMoreArguments()
-                        .With(name: LocalizableStrings.CmdArgProject,
-                              description: LocalizableStrings.CmdArgDescription),
+                        .With(name: CommonLocalizableStrings.ProjectArgumentName,
+                              description: CommonLocalizableStrings.ProjectArgumentDescription),
                   false,
                   CommonOptions.HelpOption(),
                   Create.Option(
@@ -40,22 +40,22 @@ namespace Microsoft.DotNet.Cli
                   Create.Option(
                         "-a|--test-adapter-path",
                         LocalizableStrings.CmdTestAdapterPathDescription,
-                        Accept.ExactlyOneArgument()
+                        Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.CmdTestAdapterPath)
-                              .ForwardAsSingle(o => $"-property:VSTestTestAdapterPath={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Arguments)}\"")),
                   Create.Option(
                         "-l|--logger",
                         LocalizableStrings.CmdLoggerDescription,
-                        Accept.ExactlyOneArgument()
+                        Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.CmdLoggerOption)
                               .ForwardAsSingle(o =>
                                     {
                                           var loggersString = string.Join(";", GetSemiColonEscapedArgs(o.Arguments));
 
-                                          return $"-property:VSTestLogger={loggersString}";
+                                          return $"-property:VSTestLogger=\"{loggersString}\"";
                                     })),
-                  CommonOptions.ConfigurationOption(),
-                  CommonOptions.FrameworkOption(),
+                  CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
+                  CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                   Create.Option(
                         "-o|--output",
                         LocalizableStrings.CmdOutputDescription,

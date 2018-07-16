@@ -24,7 +24,6 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
         public void GivenAFailedShutdownCommandItThrows()
         {
             const int ProcessId = 1234;
-            const string ServerPath = "path/to/rzc.dll";
             const string PipeName = "some-pipe-name";
             const string ErrorMessage = "error!";
 
@@ -33,17 +32,20 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
 
             var fileSystemMock = new FileSystemMockBuilder()
                 .AddFile(pidFilePath, "")
+                .UseCurrentSystemTemporaryDirectory()
                 .Build();
 
             fileSystemMock.File.Exists(pidFilePath).Should().BeTrue();
+
+            var serverPath = Path.Combine(fileSystemMock.Directory.CreateTemporaryDirectory().DirectoryPath, "path/to/rzc.dll");
 
             var server = new RazorServer(
                 pidFile: new RazorPidFile(
                     path: new FilePath(pidFilePath),
                     processId: ProcessId,
-                    serverPath: new FilePath(ServerPath),
+                    serverPath: new FilePath(serverPath),
                     pipeName: PipeName),
-                commandFactory: CreateCommandFactoryMock(ServerPath, PipeName, exitCode: 1, stdErr: ErrorMessage).Object,
+                commandFactory: CreateCommandFactoryMock(serverPath, PipeName, exitCode: 1, stdErr: ErrorMessage).Object,
                 fileSystem: fileSystemMock);
 
             Action a = () => server.Shutdown();
@@ -60,7 +62,6 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
         public void GivenASuccessfulShutdownItDoesNotThrow()
         {
             const int ProcessId = 1234;
-            const string ServerPath = "path/to/rzc.dll";
             const string PipeName = "some-pipe-name";
 
             string pidDirectory = Path.GetFullPath("var/pids/build");
@@ -68,17 +69,20 @@ namespace Microsoft.DotNet.Tests.BuildServerTests
 
             var fileSystemMock = new FileSystemMockBuilder()
                 .AddFile(pidFilePath, "")
+                .UseCurrentSystemTemporaryDirectory()
                 .Build();
 
             fileSystemMock.File.Exists(pidFilePath).Should().BeTrue();
+
+            var serverPath = Path.Combine(fileSystemMock.Directory.CreateTemporaryDirectory().DirectoryPath, "path/to/rzc.dll");
 
             var server = new RazorServer(
                 pidFile: new RazorPidFile(
                     path: new FilePath(pidFilePath),
                     processId: ProcessId,
-                    serverPath: new FilePath(ServerPath),
+                    serverPath: new FilePath(serverPath),
                     pipeName: PipeName),
-                commandFactory: CreateCommandFactoryMock(ServerPath, PipeName).Object,
+                commandFactory: CreateCommandFactoryMock(serverPath, PipeName).Object,
                 fileSystem: fileSystemMock);
 
             server.Shutdown();

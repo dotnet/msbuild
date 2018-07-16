@@ -118,13 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Lists installed tools in the current development environment.</value>
+    <value>List tools installed in the current development environment.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
-    <value>List user wide tools.</value>
+    <value>List tools in the current user's tools directory.</value>
   </data>
-  <data name="ToolPathDescription" xml:space="preserve">
-    <value>Location where the tools are installed.</value>
+  <data name="ToolPathOptionName" xml:space="preserve">
+    <value>PATH</value>
+  </data>
+  <data name="ToolPathOptionDescription" xml:space="preserve">
+    <value>The directory containing the tools to list.</value>
   </data>
   <data name="NeedGlobalOrToolPath" xml:space="preserve">
     <value>Please specify either the global option (--global) or the tool path option (--tool-path).</value>

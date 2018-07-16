@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>.NET Remove Project to Project reference Command</source>
-        <target state="translated">.NET-Befehl zum Entfernen von Projekt-zu-Projekt-Verweisen</target>
+        <source>Remove a project-to-project reference from the project.</source>
+        <target state="translated">Hiermit entfernen Sie einen Projekt-zu-Projekt-Verweis aus dem Projekt.</target>
         <note />
       </trans-unit>
       <trans-unit id="AppDescription">
@@ -13,13 +13,18 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdFrameworkDescription">
-        <source>Remove reference only when targeting a specific framework</source>
-        <target state="translated">Verweis nur bei Verwendung eines bestimmten Zielframeworks entfernen</target>
+        <source>Remove the reference only when targeting a specific framework.</source>
+        <target state="translated">Der Verweis wird nur dann entfernt, wenn ein bestimmtes Zielframework als Zielversion verwendet wird.</target>
         <note />
       </trans-unit>
-      <trans-unit id="AppHelpText">
-        <source>Project to project references to remove</source>
-        <target state="translated">Zu entfernende Interprojektverweise</target>
+      <trans-unit id="ProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectPathArgumentDescription">
+        <source>The paths to the referenced projects to remove.</source>
+        <target state="translated">Die Pfade zu den referenzierten Projekten, die entfernt werden sollen.</target>
         <note />
       </trans-unit>
     </body>

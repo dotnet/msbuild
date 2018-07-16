@@ -12,29 +12,19 @@
         <target state="translated">Controlador de pruebas para la plataforma .NET</target>
         <note />
       </trans-unit>
-      <trans-unit id="CmdArgProject">
-        <source>PROJECT</source>
-        <target state="translated">PROYECTO</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdArgDescription">
-        <source>The project to test. Defaults to the current directory.</source>
-        <target state="translated">Proyecto que se prueba. De forma predeterminada, se usa el directorio actual.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CmdSettingsFile">
         <source>SETTINGS_FILE</source>
         <target state="translated">ARCHIVO_CONFIGURACIÓN</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSettingsDescription">
-        <source>Settings to use when running tests.</source>
-        <target state="translated">Configuración que debe usarse para ejecutar las pruebas.</target>
+        <source>The settings file to use when running tests.</source>
+        <target state="translated">Archivo de configuración que debe usarse al ejecutar las pruebas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdListTestsDescription">
-        <source>Lists discovered tests</source>
-        <target state="translated">Enumera las pruebas detectadas</target>
+        <source>List the discovered tests instead of running the tests.</source>
+        <target state="translated">Enumera las pruebas detectadas en vez de ejecutar las pruebas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestCaseFilterExpression">
@@ -48,60 +38,38 @@
                                         Run tests with priority set to 1: --filter "Priority = 1"
                                         Run a test with the specified full name: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
                                         Run tests that contain the specified name: --filter "FullyQualifiedName~Namespace.Class"
-                                        More info on filtering support: https://aka.ms/vstest-filtering
+                                        See https://aka.ms/vstest-filtering for more information on filtering support.
                                         </source>
         <target state="translated">Ejecuta las pruebas que coinciden con una expresión dada.
                                         Ejemplos:
                                         Ejecuta las pruebas con una prioridad establecida en 1: --filter "Prioridad = 1"
                                         Ejecuta una prueba con el nombre completo especificado: --filter "FullyQualifiedName=Namespace.ClassName.MethodName"
                                         Ejecuta las pruebas que contienen el nombre especificado: --filter "FullyQualifiedName~Namespace.Class"
-                                        Más información sobre la compatibilidad con el filtrado: https://aka.ms/vstest-filtering
+                                        Consulte https://aka.ms/vstest-filtering para obtener más información sobre la compatibilidad con el filtrado.
                                         </target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPathDescription">
-        <source>Use custom adapters from the given path in the test run.
-                                        Example: --test-adapter-path &lt;PATH_TO_ADAPTER&gt;</source>
-        <target state="translated">Indica que se usen adaptadores personalizados de la ruta de acceso dada en la serie de pruebas.
-                                        Ejemplo: --test-adapter-path &lt;RUTA_DE_ADAPTADOR&gt;</target>
+        <source>The path to the custom adapters to use for the test run.</source>
+        <target state="translated">La ruta de acceso a los adaptadores personalizados que se usarán en la serie de pruebas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerOption">
-        <source>LoggerUri/FriendlyName</source>
-        <target state="translated">URIdelRegistrador/NombreDescriptivo</target>
+        <source>LOGGER</source>
+        <target state="translated">REGISTRADOR</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
-        <source>Specify a logger for test results.
+        <source>The logger to use for test results.
                                         Examples:
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="translated">Especifique un registrador para los resultados de la prueba.
-                                        Ejemplo:
-                                        Inicie sesión en formato trx mediante un nombre de archivo único: --logger trx
-                                        Inicie sesión en formato trx mediante el nombre de archivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Más informacióin sobre la compatibilidad de los argumentos del registrador: https://aka.ms/vstest-report</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfiguration">
-        <source>CONFIGURATION</source>
-        <target state="translated">CONFIGURACIÓN</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdConfigDescription">
-        <source>Configuration to use for building the project.  Default for most projects is "Debug".</source>
-        <target state="translated">Configuración que se usará para crear el proyecto. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFramework">
-        <source>FRAMEWORK</source>
-        <target state="translated">PLATAFORMA</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="CmdFrameworkDescription">
-        <source>Looks for test binaries for a specific framework</source>
-        <target state="translated">Busca archivos binarios de prueba para una plataforma específica</target>
+                                        See https://aka.ms/vstest-report for more information on logger arguments.</source>
+        <target state="translated">Registrador que se utiliza para los resultados de las pruebas.
+                                        Ejemplos:
+                                        Registrar en formato trx con un nombre de archivo único: --logger trx
+                                        Registrar en formato trx con el nombre de archivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Vea https://aka.ms/vstest-report para obtener más información sobre argumentos de registrador.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
@@ -110,20 +78,18 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDescription">
-        <source>Directory in which to find the binaries to be run</source>
-        <target state="translated">Directorio donde deben buscarse los archivos binarios para ejecutar</target>
+        <source>The output directory to place built artifacts in.</source>
+        <target state="translated">Directorio de salida en el que se ubicarán los artefactos compilados.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToLogFile">
-        <source>PATH_TO_FILE</source>
-        <target state="translated">RUTA_ACCESO_ARCHIVO</target>
+        <source>LOG_FILE</source>
+        <target state="translated">LOG_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathTologFileDescription">
-        <source>Enable verbose logs for test platform.
-                                        Logs are written to the provided file.</source>
-        <target state="translated">Habilita registros detallados para la plataforma de pruebas.
-                                        Los registros se escriben en el archivo proporcionado.</target>
+        <source>Enable verbose logging to the specified file.</source>
+        <target state="translated">Habilite el registro detallado para el archivo especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
@@ -132,54 +98,66 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
-        <source>PATH_TO_ADAPTER</source>
-        <target state="translated">RUTA_DE_ADAPTADOR</target>
+        <source>ADAPTER_PATH</source>
+        <target state="translated">ADAPTER_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdResultsDirectoryDescription">
-        <source>The directory where the test results are going to be placed. The specified directory will be created if it does not exist.
-                                        Example: --results-directory &lt;PATH_TO_RESULTS_DIRECTORY&gt;</source>
-        <target state="translated">El directorio donde se van a colocar los resultados de prueba. Si no existe, se creará el directorio especificado.
-                                        Ejemplo: --results-directory &lt;RUTA_DE_DIRECTORIO_DE_RESULTADOS&gt;</target>
+        <source>The directory where the test results will be placed.
+The specified directory will be created if it does not exist.</source>
+        <target state="translated">El directorio donde se colocarán los resultados de prueba.
+Si no existe, se creará el directorio especificado.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPathToResultsDirectory">
-        <source>PATH_TO_RESULTS_DIRECTORY</source>
-        <target state="translated">RUTA_DE_DIRECTORIO_DE_RESULTADOS</target>
+        <source>RESULTS_DIR</source>
+        <target state="translated">RESULTS_DIR</target>
         <note />
       </trans-unit>
       <trans-unit id="RunSettingsArgumentsDescription">
         <source>
 
 RunSettings arguments:
-  Arguments to pass runsettings configurations through commandline. Arguments may be specified as name-value pair of the form [name]=[value] after "-- ". Note the space after --. 
-  Use a space to separate multiple[name] =[value].
-  More info on RunSettings arguments support: https://aka.ms/vstest-runsettings-arguments
+  Arguments to pass as RunSettings configurations. Arguments are specified as '[name]=[value]' pairs after "-- " (note the space after --). 
+  Use a space to separate multiple '[name]=[value]' pairs.
+  See https://aka.ms/vstest-runsettings-arguments for more information on RunSettings arguments.
   Example: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</source>
         <target state="translated">
 
 Argumentos RunSettings:
-  Argumentos para pasar configuraciones de runsettings mediante la línea de comandos. Los argumentos se pueden especificar como pares de nombre-valor con el formato [nombre]=[valor] después de "-- ". Observe el espacio después de --. 
-  Use un espacio para separar varios pares de[nombre] =[valor].
-  Más información sobre la compatibilidad con argumentos RunSettings: https://aka.ms/vstest-runsettings-arguments
+  Argumentos para pasar configuraciones de RunSettings. Los argumentos se pueden especificar como pares "[nombre]=[valor]" después de "-- " (observe el espacio después de --). 
+  Use un espacio para separar varios pares de "[nombre] =[valor]".
+  Consulte https://aka.ms/vstest-runsettings-arguments para obtener información sobre los argumentos RunSettings:
   Ejemplo: dotnet test -- MSTest.DeploymentEnabled=false MSTest.MapInconclusiveToFailed=True</target>
         <note />
       </trans-unit>
       <trans-unit id="cmdCollectFriendlyName">
-        <source>DATA_COLLECTOR_FRIENDLY_NAME</source>
-        <target state="translated">NOMBRE_DESCRIPTIVO_DE_RECOPILADOR_DE_DATOS</target>
+        <source>DATA_COLLECTOR_NAME</source>
+        <target state="translated">DATA_COLLECTOR_NAME</target>
         <note />
       </trans-unit>
       <trans-unit id="cmdCollectDescription">
-        <source>Enables data collector for the test run.
-                                        More info here : https://aka.ms/vstest-collect</source>
-        <target state="translated">Habilita el recopilador de datos para la serie de pruebas.
+        <source>The friendly name of the data collector to use for the test run.
+                                        More info here: https://aka.ms/vstest-collect</source>
+        <target state="translated">Nombre descriptivo del recopilador de datos que se usará para la serie de pruebas.
                                         Más información aquí: https://aka.ms/vstest-collect</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdBlameDescription">
-        <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
-        <target state="translated">Ejecuta la prueba en modo de culpa. Esta opción es útil para aislar la prueba problemática que provoca el bloqueo del host de prueba. Crea un archivo de salida en el directorio actual como "Sequence.xml" que captura el orden de ejecución de la prueba antes del bloqueo.</target>
+        <source>Run the tests in blame mode. This option is helpful in isolating a problematic test causing the test host to crash.
+Outputs a 'Sequence.xml' file in the current directory that captures the order of execution of test before the crash.</source>
+        <target state="translated">Ejecuta la prueba en modo de culpa. Esta opción es útil para aislar la prueba problemática que provoca el bloqueo del host de prueba.
+Crea un archivo de salida en el directorio actual como "Sequence.xml" que captura el orden de ejecución de la prueba antes del bloqueo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run tests for. The target framework must also be specified in the project file.</source>
+        <target state="translated">La plataforma de destino para la que se ejecutan pruebas. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to use for running tests. The default for most projects is 'Debug'.</source>
+        <target state="translated">La configuración que se usará para ejecutar pruebas. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
         <note />
       </trans-unit>
     </body>

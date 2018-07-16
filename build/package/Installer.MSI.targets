@@ -14,6 +14,7 @@
       <CombinedFrameworkSdkHostBundleEngineName>$(InstallerOutputDirectory)/$(ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk)-engine.exe</CombinedFrameworkSdkHostBundleEngineName>
 
       <SdkGenerateMsiPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatemsi.ps1</SdkGenerateMsiPowershellScript>
+      <SdkStableFileIdForApphostTransform>$(RepoRoot)/packaging/windows/clisdk/stablefileidforapphosttransform.xslt</SdkStableFileIdForApphostTransform>
       <SdkGenerateBundlePowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatebundle.ps1</SdkGenerateBundlePowershellScript>
       <SdkGenerateNupkgPowershellScript>$(RepoRoot)/packaging/windows/clisdk/generatenupkg.ps1</SdkGenerateNupkgPowershellScript>
 
@@ -110,7 +111,9 @@
                       '$(SimpleVersion)'
                       '$(NugetVersion)'
                       '$(SdkInstallerUpgradeCode)'
-                      '$(Architecture)'" />
+                      '$(Architecture)'
+                      '$(SdkStableFileIdForApphostTransform)'
+                      " />
     </Target>
 
     <Target Name="GenerateMSBuildExtensionsMsi"

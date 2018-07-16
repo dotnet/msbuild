@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ShowHelpInfo">
-        <source>Show help information</source>
-        <target state="translated">도움말 정보 표시</target>
+        <source>Show command line help.</source>
+        <target state="translated">명령줄 도움말을 표시합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ShowVersionInfo">
@@ -109,12 +109,12 @@
       </trans-unit>
       <trans-unit id="CommandAcceptsOnlyOneArgument">
         <source>Command '{0}' only accepts a single argument but {1} were provided.</source>
-        <target state="translated">‘{0}’ 명령은 단일 인수만 허용하는데, {1}이(가) 제공되었습니다.</target>
+        <target state="translated">'{0}' 명령은 단일 인수만 허용하는데, {1}이(가) 제공되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandAcceptsOnlyOneSubcommand">
         <source>Command '{0}' only accepts a single subcommand but multiple were provided: {1}</source>
-        <target state="translated">‘{0}’ 명령은 단일 하위 명령만 허용하는데, 여러 하위 명령이 제공되었습니다. {1}</target>
+        <target state="translated">'{0}' 명령은 단일 하위 명령만 허용하는데, 여러 하위 명령이 제공되었습니다. {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="FileDoesNotExist">

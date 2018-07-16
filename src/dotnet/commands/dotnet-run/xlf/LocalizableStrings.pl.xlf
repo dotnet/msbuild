@@ -136,6 +136,16 @@ Bieżący element {1}: „{2}”.</target>
         <target state="translated">„{0}” nie jest prawidłowym plikiem projektu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to run for. The default for most projects is 'Debug'.</source>
+        <target state="translated">Konfiguracja, którą należy uruchomić. W przypadku większości projektów ustawienie domyślne to „Debugowanie”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to run for. The target framework must also be specified in the project file.</source>
+        <target state="translated">Platforma docelowa uruchomienia. Platforma docelowa musi być również określona w pliku projektu.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -20,18 +20,24 @@
         <![CDATA[
     <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
     <add key="aspnetcore-dev" value="https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json" />
+    <add key="templating" value="https://dotnet.myget.org/F/templating/api/v3/index.json" />
+  	<add key="websdk" value="https://dotnet.myget.org/F/dotnet-web/api/v3/index.json" />
     <add key="roslyn" value="https://dotnet.myget.org/f/roslyn/api/v3/index.json" />
     <add key="nuget-build" value="https://dotnet.myget.org/F/nuget-build/api/v3/index.json" />
     <add key="api.nuget.org" value="https://api.nuget.org/v3/index.json" />
     <add key="container-tools" value="https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json" />
     <add key="linux-musl-bootstrap-feed" value="https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json" />
     <add key="dotnet-msbuild" value="https://dotnet.myget.org/F/msbuild/api/v3/index.json" />
+    <add key="myget-vstest" value="https://dotnet.myget.org/F/vstest/api/v3/index.json" />
         ]]>
       </NugetConfigCLIFeeds>
 
       <NugetConfigSuffix>
         <![CDATA[
 </packageSources>
+<disabledPackageSources>
+   <clear/>
+</disabledPackageSources>
 </configuration>
         ]]>
       </NugetConfigSuffix>

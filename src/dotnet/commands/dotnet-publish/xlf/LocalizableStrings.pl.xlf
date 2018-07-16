@@ -13,8 +13,8 @@
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
-        <source>Target framework to publish for. The target framework has to be specified in the project file.</source>
-        <target state="translated">Docelowa platforma publikacji. Platforma docelowa musi być określona w pliku projektu.</target>
+        <source>The target framework to publish for. The target framework has to be specified in the project file.</source>
+        <target state="translated">Platforma docelowa publikacji. Platforma docelowa musi być określona w pliku projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputOption">
@@ -23,13 +23,13 @@
         <note />
       </trans-unit>
       <trans-unit id="OutputOptionDescription">
-        <source>Output directory in which to place the published artifacts.</source>
+        <source>The output directory to place the published artifacts in.</source>
         <target state="translated">Katalog wyjściowy, w którym mają zostać umieszczone opublikowane artefakty.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOption">
-        <source>manifest.xml</source>
-        <target state="translated">manifest.xml</target>
+        <source>MANIFEST</source>
+        <target state="translated">MANIFEST</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestOptionDescription">
@@ -37,14 +37,27 @@
         <target state="translated">Ścieżka do docelowego pliku manifestu zawierającego listę pakietów, które mają zostać wykluczone z kroku publikowania.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine. Defaults to 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Opublikuj środowisko uruchomieniowe programu .NET Core z aplikacją, aby nie trzeba było go instalować na maszynie docelowej. Domyślnie jest ustawiona wartość „true” w przypadku określenia identyfikatora środowiska uruchomieniowego.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">Nie kompiluj tego projektu przed opublikowaniem. Powoduje przyjęcie, że podano parametr --no-restore.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
+The default is to publish a framework-dependent application.</source>
+        <target state="needs-review-translation">Docelowe środowisko uruchomieniowe, dla którego ma zostać opublikowana aplikacja.
+Domyślnie aplikacja zależna od platformy jest publikowana bez pliku wykonywalnego.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
+        <target state="translated">Konfiguracja, dla której ma być wykonane publikowanie. W przypadku większości projektów ustawienie domyślne to „Debugowanie”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Opublikuj środowisko uruchomieniowe programu .NET Core z aplikacją, aby nie trzeba było go instalować na maszynie docelowej. Domyślnie jest ustawiona wartość „true” w przypadku określenia identyfikatora środowiska uruchomieniowego.</target>
         <note />
       </trans-unit>
     </body>

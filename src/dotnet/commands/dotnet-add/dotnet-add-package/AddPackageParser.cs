@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Cli
                               Accept.ExactlyOneArgument()
                                     .With(name: LocalizableStrings.CmdFramework)
                                     .ForwardAsSingle(o => $"--framework {o.Arguments.Single()}")),
-                Create.Option("-n|--no-restore ",
+                Create.Option("-n|--no-restore",
                               LocalizableStrings.CmdNoRestoreDescription),
                 Create.Option("-s|--source",
                               LocalizableStrings.CmdSourceDescription,
@@ -47,7 +47,11 @@ namespace Microsoft.DotNet.Cli
                               LocalizableStrings.CmdPackageDirectoryDescription,
                               Accept.ExactlyOneArgument()
                                     .With(name: LocalizableStrings.CmdPackageDirectory)
-                                    .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")));
+                                    .ForwardAsSingle(o => $"--package-directory {o.Arguments.Single()}")),
+                Create.Option("--interactive",
+                              LocalizableStrings.CmdInteractiveRestoreDescription,
+                              Accept.NoArguments()
+                                    .ForwardAs("--interactive")));
         }
 
         public static IEnumerable<string> QueryNuGet(string match)

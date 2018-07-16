@@ -7,5 +7,7 @@
     <BundledTemplate Include="Microsoft.DotNet.Web.ItemTemplates" Version="$(MicrosoftNETWebItemTemplatesPackageVersion)" />
     <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.1" Version="$(MicrosoftNETWebProjectTemplates21PackageVersion)" />
     <BundledTemplate Include="Microsoft.DotNet.Web.Spa.ProjectTemplates" Version="$(MicrosoftNETWebSpaProjectTemplatesPackageVersion)" />
+
+    <BundledTemplate Include="NUnit3.DotNetNew.Template" Version="$(NUnit3TemplatesVersion)" />
   </ItemGroup>
 </Project>

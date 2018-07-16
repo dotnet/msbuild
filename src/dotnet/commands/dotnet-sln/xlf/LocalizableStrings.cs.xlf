@@ -18,18 +18,13 @@
         <note />
       </trans-unit>
       <trans-unit id="AddAppFullName">
-        <source>.NET Add project(s) to a solution file Command</source>
-        <target state="translated">Příkaz rozhraní .NET pro přidání projektů do souboru řešení</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="AddSubcommandHelpText">
-        <source>Add one or more specified projects to the solution.</source>
-        <target state="translated">Přidá určené projekty do řešení.</target>
+        <source>Add one or more projects to a solution file.</source>
+        <target state="translated">Přidá do souboru řešení jeden nebo více projektů.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveAppFullName">
-        <source>.NET Remove project(s) from a solution file Command</source>
-        <target state="translated">Příkaz rozhraní .NET pro odebrání projektů ze souboru řešení</target>
+        <source>Remove one or more projects from a solution file.</source>
+        <target state="translated">Odebere ze souboru řešení jeden nebo více projektů.</target>
         <note />
       </trans-unit>
       <trans-unit id="RemoveSubcommandHelpText">
@@ -38,8 +33,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListAppFullName">
-        <source>.NET List project(s) in a solution file Command</source>
-        <target state="translated">Příkaz rozhraní .NET pro vypsání seznamu projektů v souboru řešení</target>
+        <source>List all projects in a solution file.</source>
+        <target state="translated">Vypíše seznam všech projektů v souboru řešení.</target>
         <note />
       </trans-unit>
       <trans-unit id="ListSubcommandHelpText">
@@ -47,14 +42,39 @@
         <target state="translated">Vypíše seznam všech projektů v řešení.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CreateAppFullName">
-        <source>.NET Create a solution file Command</source>
-        <target state="translated">Příkaz rozhraní .NET pro vytvoření souboru řešení</target>
+      <trans-unit id="SolutionArgumentName">
+        <source>SLN_FILE</source>
+        <target state="translated">SLN_FILE</target>
         <note />
       </trans-unit>
-      <trans-unit id="CreateSubcommandHelpText">
-        <source>Create a solution file.</source>
-        <target state="translated">Vytvoří soubor řešení.</target>
+      <trans-unit id="SolutionArgumentDescription">
+        <source>The solution file to operate on. If not specified, the command will search the current directory for one.</source>
+        <target state="translated">Soubor řešení, s kterým se má pracovat. Pokud není zadaný, příkaz ho bude hledat v aktuálním adresáři.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddProjectPathArgumentDescription">
+        <source>The paths to the projects to add to the solution.</source>
+        <target state="translated">Cesty k projektům, které se mají přidat do řešení</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentName">
+        <source>PROJECT_PATH</source>
+        <target state="translated">PROJECT_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RemoveProjectPathArgumentDescription">
+        <source>The paths to the projects to remove from the solution.</source>
+        <target state="translated">Cesty k projektům, které se mají z řešení odebrat</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectsHeader">
+        <source>Project(s)</source>
+        <target state="translated">Projekty</target>
         <note />
       </trans-unit>
     </body>

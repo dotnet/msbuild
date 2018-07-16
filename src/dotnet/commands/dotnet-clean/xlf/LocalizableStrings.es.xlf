@@ -18,8 +18,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed.</source>
-        <target state="translated">Directorio donde se han puesto los archivos de salida de la compilación</target>
+        <source>The directory containing the build artifacts to clean.</source>
+        <target state="translated">El directorio que contiene los artefactos compilados para limpiar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
+        <target state="translated">La plataforma de destino para la que se limpia. La plataforma de destino se debe especificar en el archivo de proyecto.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to clean for.</source>
+        <target state="translated">El entorno de tiempo de ejecución para el que se limpia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
+        <target state="translated">La configuración para la que se limpia. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
         <note />
       </trans-unit>
     </body>

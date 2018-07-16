@@ -18,8 +18,23 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDirDescription">
-        <source>Directory in which the build outputs have been placed.</source>
-        <target state="translated">Adresář, do kterého byly umístěny výstupy buildu.</target>
+        <source>The directory containing the build artifacts to clean.</source>
+        <target state="translated">Adresář obsahující artefakty sestavení, které se mají vyčistit</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to clean for. The target framework must also be specified in the project file.</source>
+        <target state="translated">Cílová architektura pro vyčištění. Cílová architektura musí být určená také v souboru projektu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to clean for.</source>
+        <target state="translated">Cílový modul runtime pro vyčištění.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigurationOptionDescription">
+        <source>The configuration to clean for. The default for most projects is 'Debug'.</source>
+        <target state="translated">Konfigurace pro vyčištění. Výchozí možností pro většinu projektů je Debug.</target>
         <note />
       </trans-unit>
     </body>

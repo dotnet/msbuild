@@ -64,11 +64,16 @@ Im Folgenden finden Sie einige Optionen, um diesen Fehler zu beheben:
 Successfully installed the ASP.NET Core HTTPS Development Certificate.
 To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
 For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
-        <target state="needs-review-translation">ASP.NET Core
+        <target state="translated">ASP.NET Core
 ------------
 Das ASP.NET Core-HTTPS-Entwicklungszertifikat wurde erfolgreich installiert.
-Um dem Zertifikat zu vertrauen (nur Windows und macOS), installieren Sie zuerst das Tool "dev-certs", indem Sie "dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final" und anschließend "dotnet-dev-certs https --trust" ausführen.
+Um dem Zertifikat zu vertrauen, führen Sie "dotnet dev-certs https --trust" aus (nur Windows und macOS). Informationen zum Einrichten einer Vertrauensstellung auf anderen Plattformen finden Sie in der Dokumentation zur jeweiligen Plattform.
 Weitere Informationen zur Konfiguration von HTTPS finden Sie unter https://go.microsoft.com/fwlink/?linkid=848054.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToDetermineUserHomeDirectory">
+        <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
+        <target state="translated">Das Startverzeichnis des Benutzers konnte nicht ermittelt werden. Legen Sie die Umgebungsvariable "{0}" fest, um das zu verwendende Verzeichnis anzugeben.</target>
         <note />
       </trans-unit>
     </body>

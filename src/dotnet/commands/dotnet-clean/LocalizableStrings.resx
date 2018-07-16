@@ -127,6 +127,15 @@
     <value>OUTPUT_DIR</value>
   </data>
   <data name="CmdOutputDirDescription" xml:space="preserve">
-    <value>Directory in which the build outputs have been placed.</value>
+    <value>The directory containing the build artifacts to clean.</value>
+  </data>
+  <data name="FrameworkOptionDescription" xml:space="preserve">
+    <value>The target framework to clean for. The target framework must also be specified in the project file.</value>
+  </data>
+  <data name="RuntimeOptionDescription" xml:space="preserve">
+    <value>The target runtime to clean for.</value>
+  </data>
+  <data name="ConfigurationOptionDescription" xml:space="preserve">
+    <value>The configuration to clean for. The default for most projects is 'Debug'.</value>
   </data>
 </root>
