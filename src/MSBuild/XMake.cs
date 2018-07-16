@@ -109,10 +109,9 @@ namespace Microsoft.Build.CommandLine
         private static ManualResetEvent s_cancelComplete = new ManualResetEvent(true);
 
         /// <summary>
-        /// Set to 1 when the cancel method has been invoked.
-        /// Never reset to false: subsequent hits of Ctrl-C should do nothing
+        /// Cancel when handling Ctrl-C
         /// </summary>
-        private static int s_receivedCancel;
+        private static CancellationTokenSource s_cts = new CancellationTokenSource();
 
         /// <summary>
         /// Static constructor
@@ -816,12 +815,12 @@ namespace Microsoft.Build.CommandLine
 
             e.Cancel = true; // do not terminate rudely
 
-            bool alreadyCalled = (Interlocked.CompareExchange(ref s_receivedCancel, 1, 0) == 1);
-
-            if (alreadyCalled)
+            if (s_cts.IsCancellationRequested)
             {
                 return;
             }
+
+            s_cts.Cancel();
 
             Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
 
@@ -1221,7 +1220,7 @@ namespace Microsoft.Build.CommandLine
 
                 // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
                 // That's so the build does not appear to have completed successfully.
-                if (s_receivedCancel == 1)
+                if (s_cts.IsCancellationRequested)
                 {
                     buildManager.CancelAllSubmissions();
                 }
