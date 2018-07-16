@@ -94,12 +94,12 @@
         UseHardlinksIfPossible="False" />
 
       <!-- Remove Shared Framework and Debian Packages -->
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(SdkDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(AspNetCoreSharedFxDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(SharedFxDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(HostFxrDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;$(HostDebianPackageName)&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(RuntimeDepsPackageName).*&quot;" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SdkDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="TestSdkDeb"
@@ -129,12 +129,12 @@
                   ToolPath="$(DebianInstalledDirectory)" />
 
       <!-- Clean up Packages -->
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(SdkDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(AspNetCoreSharedFxDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(SharedFxDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(HostFxrDebianPackageName).*&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;$(HostDebianPackageName)&quot;" />
-      <Exec ContinueOnError="WarnAndContinue" Command="sudo apt-get purge -y &quot;^$(RuntimeDepsPackageName).*&quot;" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SdkDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(HostDebianPackageName)" />
+      <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
