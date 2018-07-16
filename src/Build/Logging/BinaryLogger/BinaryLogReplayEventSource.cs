@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -18,6 +19,16 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         public void Replay(string sourceFilePath)
+        {
+            Replay(sourceFilePath, new CancellationToken(canceled: false));
+        }
+
+        /// <summary>
+        /// Read the provided binary log file and raise corresponding events for each BuildEventArgs
+        /// </summary>
+        /// <param name="sourceFilePath">The full file path of the binary log file</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
+        public void Replay(string sourceFilePath, CancellationToken cancellationToken)
         {
             using (var stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
@@ -37,6 +48,11 @@ namespace Microsoft.Build.Logging
                 var reader = new BuildEventArgsReader(binaryReader, fileFormatVersion);
                 while (true)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     BuildEventArgs instance = null;
 
                     instance = reader.Read();

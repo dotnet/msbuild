@@ -1483,6 +1483,7 @@ namespace Microsoft.Build.Logging
     {
         public BinaryLogReplayEventSource() { }
         public void Replay(string sourceFilePath) { }
+        public void Replay(string sourceFilePath, System.Threading.CancellationToken cancellationToken) { }
     }
     public delegate void ColorResetter();
     public delegate void ColorSetter(System.ConsoleColor color);
