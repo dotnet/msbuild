@@ -3134,13 +3134,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         {
             using (var env = TestEnvironment.Create())
             {
-                env.SetCurrentDirectory(env.DefaultTestDirectory.FolderPath);
+                env.SetCurrentDirectory(env.DefaultTestDirectory.Path);
 
                 string fileRef = "<data name=\"TextFile1\" type=\"System.Resources.ResXFileRef, System.Windows.Forms\">" +
                                 $"<value>.\\tmp_dir\\test_file.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value></data>";
 
                 env.CreateFile(
-                        env.CreateFolder(Path.Combine(env.DefaultTestDirectory.FolderPath, "tmp_dir")),
+                        env.CreateFolder(Path.Combine(env.DefaultTestDirectory.Path, "tmp_dir")),
                         "test_file.txt", "xyz");
 
                 string resxFile = env.CreateFile("test.resx").Path;

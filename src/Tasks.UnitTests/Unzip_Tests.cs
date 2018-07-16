@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Unzip unzip = new Unzip
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(source.FolderPath),
+                    DestinationFolder = new TaskItem(source.Path),
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Unzip unzip = new Unzip
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.FolderPath),
+                    DestinationFolder = new TaskItem(destination.Path),
                     OverwriteReadOnlyFiles = true,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
@@ -68,8 +68,8 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 unzip.Execute().ShouldBeTrue(() => _mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.FolderPath, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(Path.Combine(destination.FolderPath, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "BE78A17D30144B549D21F71D5C633F7D.txt"), () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(Path.Combine(destination.Path, "A04FF4B88DF14860B7C73A8E75A4FB76.txt"), () => _mockEngine.Log);
             }
         }
 
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Unzip unzip = new Unzip
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(source.FolderPath),
+                    DestinationFolder = new TaskItem(source.Path),
                     OverwriteReadOnlyFiles = false,
                     SkipUnchangedFiles = false,
                     SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) }
@@ -150,7 +150,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Unzip unzip = new Unzip
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFolder = new TaskItem(folder.Path),
                     SourceFiles = new ITaskItem[] { new TaskItem(file.Path), }
                 };
 
@@ -170,8 +170,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Unzip unzip = new Unzip
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
-                    SourceFiles = new ITaskItem[] { new TaskItem(Path.Combine(testEnvironment.DefaultTestDirectory.FolderPath, "foo.zip")), }
+                    DestinationFolder = new TaskItem(folder.Path),
+                    SourceFiles = new ITaskItem[] { new TaskItem(Path.Combine(testEnvironment.DefaultTestDirectory.Path, "foo.zip")), }
                 };
 
                 unzip.Execute().ShouldBeFalse(() => _mockEngine.Log);

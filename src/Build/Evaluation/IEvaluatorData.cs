@@ -10,6 +10,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -207,7 +208,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
-        void InitializeForEvaluation(IToolsetProvider toolsetProvider);
+        void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem);
 
         /// <summary>
         /// Indicates to the data block that evaluation has completed,

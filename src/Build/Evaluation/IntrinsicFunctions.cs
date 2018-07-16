@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
@@ -317,9 +318,9 @@ namespace Microsoft.Build.Evaluation
         /// <param name="startingDirectory">The directory to start the search in.</param>
         /// <param name="fileName">The name of the file to search for.</param>
         /// <returns>The full path of the directory containing the file if it is found, otherwise an empty string. </returns>
-        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
+        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName, IFileSystem fileSystem)
         {
-            return FileUtilities.GetDirectoryNameOfFileAbove(startingDirectory, fileName);
+            return FileUtilities.GetDirectoryNameOfFileAbove(startingDirectory, fileName, fileSystem);
         }
 
         /// <summary>
@@ -329,9 +330,9 @@ namespace Microsoft.Build.Evaluation
         /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
         /// of the file containing the property function.</param>
         /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
-        internal static string GetPathOfFileAbove(string file, string startingDirectory)
+        internal static string GetPathOfFileAbove(string file, string startingDirectory, IFileSystem fileSystem)
         {
-            return FileUtilities.GetPathOfFileAbove(file, startingDirectory);
+            return FileUtilities.GetPathOfFileAbove(file, startingDirectory, fileSystem);
         }
 
         /// <summary>

@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
@@ -84,7 +85,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         {
             var itemDictionary = ToItemDictionary(items);
 
-            return new ProjectInstanceExpander(new PropertyDictionary<ProjectPropertyInstance>(), itemDictionary);
+            return new ProjectInstanceExpander(new PropertyDictionary<ProjectPropertyInstance>(), itemDictionary, (IFileSystem) FileSystems.Default);
         }
 
         private static ItemDictionary<ProjectItemInstance> ToItemDictionary(Dictionary<string, string[]> itemTypes)

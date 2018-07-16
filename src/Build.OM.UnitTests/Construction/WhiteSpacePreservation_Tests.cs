@@ -440,9 +440,23 @@ multi-line comment here
             AddChildWithExistingSiblingsViaInsertBeforeChild(project, expected);
         }
 
-        private void AssertWhiteSpacePreservation(string projectContents, string updatedProject,
+        private void AssertWhiteSpacePreservation(
+            string projectContents,
+            string updatedProject,
             Action<ProjectRootElement, Project> act)
         {
+            // Each OS uses its own line endings. Using WSL on Windows leads to LF on Windows which messes up the tests. This happens due to git LF <-> CRLF conversions.
+            if (NativeMethodsShared.IsWindows)
+            {
+                projectContents = Regex.Replace(projectContents, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
+                updatedProject = Regex.Replace(updatedProject, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
+            }
+            else
+            {
+                projectContents = Regex.Replace(projectContents, @"\r\n", "\n", RegexOptions.Multiline);
+                updatedProject = Regex.Replace(updatedProject, @"\r\n", "\n", RegexOptions.Multiline);
+            }
+
             // Note: This test will write the project file to disk rather than using in-memory streams.
             // Using streams can cause issues with CRLF characters being replaced by LF going in to
             // ProjectRootElement. Saving to disk mimics the real-world behavior so we can specifically
