@@ -299,7 +299,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool IDictionary<string, T>.ContainsKey(string key)
         {
-            return PropertyNames.Contains(key);
+            return _properties.ContainsKey(key);
         }
 
         /// <summary>
