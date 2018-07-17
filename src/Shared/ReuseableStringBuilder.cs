@@ -386,7 +386,9 @@ namespace Microsoft.Build.Shared
                             return;
                         }
 
-                        s_largeSharedBuilder.Target =returningBuilder;
+                        returningBuilder.Length = 0;
+
+                        s_largeSharedBuilder.Target = returningBuilder;
 #if DEBUG
                         Interlocked.Increment(ref s_accepts);
 #endif
