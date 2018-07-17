@@ -6,24 +6,21 @@
     <!-- only the runtime OSX .pkgs have a `-internal` suffix -->
     <InstallerStartSuffix Condition="'$(HostOSName)' == 'osx'">-internal</InstallerStartSuffix>
 
-    <!-- deb and rpm based installers have the `-upgrade` suffx -->
-    <InstallerEndSuffix Condition=" '$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true' ">-upgrade</InstallerEndSuffix>
-
     <!-- Downloaded Installers + Archives -->
-    <DownloadedRuntimeDepsInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime-deps-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerEndSuffix)$(InstallerExtension)</DownloadedRuntimeDepsInstallerFileName>
+    <DownloadedRuntimeDepsInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime-deps-$(SharedHostVersion)-$(CoreSetupRid)$(InstallerExtension)</DownloadedRuntimeDepsInstallerFileName>
     <DownloadedRuntimeDepsInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedRuntimeDepsInstallerFileName)</DownloadedRuntimeDepsInstallerFile>
 
     <!-- Use the "x64" Rid when downloading Linux shared framework 'DEB' installer files. -->
     <SharedFrameworkInstallerFileRid>$(CoreSetupRid)</SharedFrameworkInstallerFileRid>
     <SharedFrameworkInstallerFileRid Condition=" '$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true' ">x64</SharedFrameworkInstallerFileRid>
 
-    <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerEndSuffix)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
+    <DownloadedSharedHostInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-host$(InstallerStartSuffix)-$(SharedHostVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedSharedHostInstallerFileName>
     <DownloadedSharedHostInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedHostInstallerFileName)</DownloadedSharedHostInstallerFile>
 
-    <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr$(InstallerStartSuffix)-$(HostFxrVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerEndSuffix)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
+    <DownloadedHostFxrInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-hostfxr$(InstallerStartSuffix)-$(HostFxrVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedHostFxrInstallerFileName>
     <DownloadedHostFxrInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedHostFxrInstallerFileName)</DownloadedHostFxrInstallerFile>
 
-    <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime$(InstallerStartSuffix)-$(MicrosoftNETCoreAppPackageVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerEndSuffix)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
+    <DownloadedSharedFrameworkInstallerFileName Condition=" '$(InstallerExtension)' != '' ">dotnet-runtime$(InstallerStartSuffix)-$(MicrosoftNETCoreAppPackageVersion)-$(SharedFrameworkInstallerFileRid)$(InstallerExtension)</DownloadedSharedFrameworkInstallerFileName>
     <DownloadedSharedFrameworkInstallerFile Condition=" '$(InstallerExtension)' != '' ">$(PackagesDirectory)/$(DownloadedSharedFrameworkInstallerFileName)</DownloadedSharedFrameworkInstallerFile>
 
     <!-- Use the portable "linux-x64" Rid when downloading Linux shared framework compressed file. -->
@@ -37,7 +34,7 @@
     <AspNetCoreSharedFxArchiveRid>$(AspNetCoreSharedFxInstallerRid)</AspNetCoreSharedFxArchiveRid>
     <AspNetCoreSharedFxInstallerRid Condition="'$(InstallerExtension)' == '.deb' OR '$(InstallerExtension)' == '.rpm'">x64</AspNetCoreSharedFxInstallerRid>
 
-    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' != '' AND '$(HostOSName)' != 'osx' ">aspnetcore-runtime-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid)$(InstallerEndSuffix)$(InstallerExtension)</DownloadedAspNetCoreSharedFxInstallerFileName>
+    <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' != '' AND '$(HostOSName)' != 'osx' ">aspnetcore-runtime-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid)$(InstallerExtension)</DownloadedAspNetCoreSharedFxInstallerFileName>
     <!-- Note: we use the "-internal" archives and installers that contain only the aspnetcore shared framework, and shouldn't overlap with Microsoft.NETCore.App. -->
     <DownloadedAspNetCoreSharedFxInstallerFileName Condition=" '$(InstallerExtension)' == '.msi' ">aspnetcore-runtime-internal-$(AspNetCoreVersion)-$(AspNetCoreSharedFxInstallerRid).wixlib</DownloadedAspNetCoreSharedFxInstallerFileName>
     <DownloadedAspNetCoreSharedFxInstallerFile Condition=" '$(InstallerExtension)' != '' AND '$(DownloadedAspNetCoreSharedFxInstallerFileName)' != '' ">$(PackagesDirectory)/$(DownloadedAspNetCoreSharedFxInstallerFileName)</DownloadedAspNetCoreSharedFxInstallerFile>

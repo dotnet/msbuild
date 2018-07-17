@@ -68,8 +68,8 @@
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">
-        <source>The paths to the projects to from from the solution.</source>
-        <target state="translated">솔루션에서 제거할 프로젝트의 경로입니다.</target>
+        <source>The paths to the projects to remove from the solution.</source>
+        <target state="needs-review-translation">솔루션에서 제거할 프로젝트의 경로입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectsHeader">

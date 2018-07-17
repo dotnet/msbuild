@@ -52,10 +52,9 @@
         <Properties>
           DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
           TemplateFillInPackageName=dotnet-watch;
-          TemplateFillInPackageVersion=$(AspNetCoreVersion);
+          TemplateFillInPackageVersion=$(DotnetWatchPackageVersion);
           PreviousStageDirectory=$(PreviousStageDirectory);
-          DotnetToolsLayoutDirectory=$(testAssetSourceRoot);
-          DotnetToolsRestoreProjectStyle=DotnetToolReference
+          DotnetToolsLayoutDirectory=$(testAssetSourceRoot)
         </Properties>
       </TestDotnetTools>
     </ItemGroup>

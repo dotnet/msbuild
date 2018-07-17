@@ -82,6 +82,11 @@
         <target state="translated">Nejde generovat dočasný soubor pro projekt {0}. Není možné přidat odkaz na balíček. Vyprázdněte prosím dočasný adresář a zkuste to znovu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

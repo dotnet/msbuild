@@ -9,8 +9,17 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
     {
         public string Value { get; }
 
+        /// <summary>
+        /// Create FilePath to repesent a absolute file path. Note it may not exist.
+        /// </summary>
+        /// <param name="value">If the value is not rooted. Path.GetFullPath will be called during the consturctor.</param>
         public FilePath(string value)
         {
+            if (!Path.IsPathRooted(value))
+            {
+                value = Path.GetFullPath(value);
+            }
+
             Value = value;
         }
 

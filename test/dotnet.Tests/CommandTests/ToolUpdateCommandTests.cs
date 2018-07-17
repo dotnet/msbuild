@@ -18,6 +18,7 @@ using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Update.LocalizableStrings;
 using Microsoft.DotNet.ShellShim;
+using System.IO;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
@@ -31,15 +32,18 @@ namespace Microsoft.DotNet.Tests.Commands
         private readonly List<MockFeed> _mockFeeds;
         private const string LowerPackageVersion = "1.0.4";
         private const string HigherPackageVersion = "1.0.5";
-        private const string ShimsDirectory = "shims";
-        private const string ToolsDirectory = "tools";
+        private readonly string _shimsDirectory;
+        private readonly string _toolsDirectory;
 
         public ToolUpdateCommandTests()
         {
             _reporter = new BufferedReporter();
-            _fileSystem = new FileSystemMockBuilder().Build();
-            _environmentPathInstructionMock = new EnvironmentPathInstructionMock(_reporter, ShimsDirectory);
-            _store = new ToolPackageStoreMock(new DirectoryPath(ToolsDirectory), _fileSystem);
+            _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
+            var tempDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
+            _shimsDirectory = Path.Combine(tempDirectory, "shims");
+            _toolsDirectory = Path.Combine(tempDirectory, "tools");
+            _environmentPathInstructionMock = new EnvironmentPathInstructionMock(_reporter, _shimsDirectory);
+            _store = new ToolPackageStoreMock(new DirectoryPath(_toolsDirectory), _fileSystem);
             _mockFeeds = new List<MockFeed>
             {
                 new MockFeed
@@ -244,7 +248,7 @@ namespace Microsoft.DotNet.Tests.Commands
         private ShellShimRepository GetMockedShellShimRepository()
         {
             return new ShellShimRepository(
-                    new DirectoryPath(ShimsDirectory),
+                    new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,
                     appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem));
         }

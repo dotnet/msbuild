@@ -13,12 +13,11 @@
           Condition="!Exists('$(DotnetToolsNuPkgPath)/$(TemplateFillInPackageName.ToLower())')">
 
     <PropertyGroup>
-      <DotnetToolsRestoreAdditionalParameters>--runtime any</DotnetToolsRestoreAdditionalParameters>
+      <DotnetToolsRestoreAdditionalParameters>--runtime any /p:RestoreProjectStyle=DotnetToolReference</DotnetToolsRestoreAdditionalParameters>
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:TargetFramework=$(CliTargetFramework)</DotnetToolsRestoreAdditionalParameters>
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:TemplateFillInPackageName=$(TemplateFillInPackageName)</DotnetToolsRestoreAdditionalParameters>
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:TemplateFillInPackageVersion=$(TemplateFillInPackageVersion)</DotnetToolsRestoreAdditionalParameters>
       <DotnetToolsRestoreAdditionalParameters>$(DotnetToolsRestoreAdditionalParameters) /p:RestorePackagesPath=$(DotnetToolsLayoutDirectory)</DotnetToolsRestoreAdditionalParameters>
-      <DotnetToolsRestoreAdditionalParameters Condition=" $(DotnetToolsRestoreProjectStyle) != '' " >$(DotnetToolsRestoreAdditionalParameters) /p:RestoreProjectStyle=$(DotnetToolsRestoreProjectStyle)</DotnetToolsRestoreAdditionalParameters>
     </PropertyGroup>
 
     <DotNetRestore ToolPath="$(PreviousStageDirectory)"

@@ -116,6 +116,13 @@
       <_AspNetCoreAllPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</_AspNetCoreAllPackageVersion>
       <_AspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</_AspNetCoreAppPackageVersion>
 
+      <!-- Default aspnetcore patch versions, specified as a stabilized version -->
+      <_DefaultPatchVersionForAspNetCoreAll2_1>2.1.1</_DefaultPatchVersionForAspNetCoreAll2_1>
+      <_DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreAll2_1)</_DefaultPatchVersionForAspNetCoreApp2_1>
+      <!-- If we are currently building a prerelease of the version that we intend to lock to, set the default version to the ingested version instead of the stabilized version. -->
+      <_DefaultPatchVersionForAspNetCoreAll2_1 Condition="$(_AspNetCoreAllPackageVersion.StartsWith('$(_DefaultPatchVersionForAspNetCoreAll2_1)-'))">$(_AspNetCoreAllPackageVersion)</_DefaultPatchVersionForAspNetCoreAll2_1>
+      <_DefaultPatchVersionForAspNetCoreApp2_1 Condition="$(_AspNetCoreAppPackageVersion.StartsWith('$(_DefaultPatchVersionForAspNetCoreApp2_1)-'))">$(_AspNetCoreAppPackageVersion)</_DefaultPatchVersionForAspNetCoreApp2_1>
+
       <!-- Use only major and minor in target framework version -->
       <_NETCoreAppTargetFrameworkVersion>$(_NETCoreAppPackageVersion.Split('.')[0]).$(_NETCoreAppPackageVersion.Split('.')[1])</_NETCoreAppTargetFrameworkVersion>
       <_NETStandardTargetFrameworkVersion>$(_NETStandardLibraryPackageVersion.Split('.')[0]).$(_NETStandardLibraryPackageVersion.Split('.')[1])</_NETStandardTargetFrameworkVersion>
@@ -124,6 +131,16 @@
 
       <_NETCoreSdkIsPreview Condition=" '$(DropSuffix)' != 'true' ">true</_NETCoreSdkIsPreview>
     </PropertyGroup>
+
+    <!--
+        Setting the property to true if patch == 0 and preview == true. SDK will set DefaultNetCorePatchVersion according to this flag.
+        So that we don't need to manually update the version selection logic between when we ship a final release and when we ship the first patch
+      -->
+    <GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion
+      BundledNETCoreAppPackageVersion="$(BundledNETCoreAppPackageVersion)">
+      <Output TaskParameter="UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion"
+              PropertyName="_UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion" />
+    </GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion>
 
     <ItemGroup>
       <BundledVersionsVariable Include="BundledAspNetCoreAllTargetFrameworkVersion" Value="$(_AspNetCoreAllTargetFrameworkVersion)" />
@@ -163,6 +180,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup>
     <BundledNETCoreAppTargetFrameworkVersion>$(_NETCoreAppTargetFrameworkVersion)</BundledNETCoreAppTargetFrameworkVersion>
     <BundledNETCoreAppPackageVersion>$(_NETCoreAppPackageVersion)</BundledNETCoreAppPackageVersion>
+    <UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion>$(_UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion)</UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion>
     <BundledNETStandardTargetFrameworkVersion>$(_NETStandardTargetFrameworkVersion)</BundledNETStandardTargetFrameworkVersion>
     <BundledNETStandardPackageVersion>$(_NETStandardLibraryPackageVersion)</BundledNETStandardPackageVersion>
     <BundledNETCorePlatformsPackageVersion>$(_NETCorePlatformsPackageVersion)</BundledNETCorePlatformsPackageVersion>
@@ -170,10 +188,14 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETCoreSdkVersion>$(SdkVersion)</NETCoreSdkVersion>
     <_NETCoreSdkIsPreview>$(_NETCoreSdkIsPreview)</_NETCoreSdkIsPreview>
 
+    <!-- Default patch versions for each minor version of ASP.NET Core -->
+    <DefaultPatchVersionForAspNetCoreAll2_1>$(_DefaultPatchVersionForAspNetCoreAll2_1)</DefaultPatchVersionForAspNetCoreAll2_1>
+    <DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreApp2_1)</DefaultPatchVersionForAspNetCoreApp2_1>
+
     <!-- Latest patch versions for each minor version of .NET Core -->
-    <LatestPatchVersionForNetCore1_0 Condition="'$(LatestPatchVersionForNetCore1_0)' == ''">1.0.11</LatestPatchVersionForNetCore1_0>
-    <LatestPatchVersionForNetCore1_1 Condition="'$(LatestPatchVersionForNetCore1_1)' == ''">1.1.8</LatestPatchVersionForNetCore1_1>
-    <LatestPatchVersionForNetCore2_0 Condition="'$(LatestPatchVersionForNetCore2_0)' == ''">2.0.7</LatestPatchVersionForNetCore2_0>
+    <LatestPatchVersionForNetCore1_0 Condition="'%24(LatestPatchVersionForNetCore1_0)' == ''">1.0.12</LatestPatchVersionForNetCore1_0>
+    <LatestPatchVersionForNetCore1_1 Condition="'%24(LatestPatchVersionForNetCore1_1)' == ''">1.1.9</LatestPatchVersionForNetCore1_1>
+    <LatestPatchVersionForNetCore2_0 Condition="'%24(LatestPatchVersionForNetCore2_0)' == ''">2.0.9</LatestPatchVersionForNetCore2_0>
   </PropertyGroup>
 </Project>
 ]]>
