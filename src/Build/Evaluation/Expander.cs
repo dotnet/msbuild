@@ -5,16 +5,20 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
@@ -150,22 +154,25 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private UsedUninitializedProperties _usedUninitializedProperties;
 
+        private readonly IFileSystem _fileSystem;
+
         /// <summary>
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties)
+        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
         {
             _properties = properties;
             _usedUninitializedProperties = new UsedUninitializedProperties();
+            _fileSystem = fileSystem;
         }
 
         /// <summary>
         /// Creates an expander passing it some properties and items to use.
         /// Either or both may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items)
-            : this(properties)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem)
+            : this(properties, fileSystem)
         {
             _items = items;
         }
@@ -174,8 +181,8 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties, items, and/or metadata to use.
         /// Any or all may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata)
-            : this(properties, items)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
+            : this(properties, items, fileSystem)
         {
             _metadata = metadata;
         }
@@ -262,7 +269,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties);
+            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
@@ -283,7 +290,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _usedUninitializedProperties);
+            return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
         }
 
         /// <summary>
@@ -331,7 +338,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(elementLocation, "elementLocation");
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _usedUninitializedProperties);
+            expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
             expression = FileUtilities.MaybeAdjustFilePath(expression);
 
             List<T> result = new List<T>();
@@ -900,9 +907,23 @@ namespace Microsoft.Build.Evaluation
             ///
             /// This method leaves the result escaped.  Callers may need to unescape on their own as appropriate.
             /// </summary>
-            internal static string ExpandPropertiesLeaveEscaped(string expression, IPropertyProvider<T> properties, ExpanderOptions options, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            internal static string ExpandPropertiesLeaveEscaped(
+                string expression,
+                IPropertyProvider<T> properties,
+                ExpanderOptions options,
+                IElementLocation elementLocation,
+                UsedUninitializedProperties usedUninitializedProperties,
+                IFileSystem fileSystem)
             {
-                return ConvertToString(ExpandPropertiesLeaveTypedAndEscaped(expression, properties, options, elementLocation, usedUninitializedProperties));
+                return
+                    ConvertToString(
+                        ExpandPropertiesLeaveTypedAndEscaped(
+                            expression,
+                            properties,
+                            options,
+                            elementLocation,
+                            usedUninitializedProperties,
+                            fileSystem));
             }
 
             /// <summary>
@@ -922,7 +943,13 @@ namespace Microsoft.Build.Evaluation
             ///
             /// This method leaves the result typed and escaped.  Callers may need to convert to string, and unescape on their own as appropriate.
             /// </summary>
-            internal static object ExpandPropertiesLeaveTypedAndEscaped(string expression, IPropertyProvider<T> properties, ExpanderOptions options, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            internal static object ExpandPropertiesLeaveTypedAndEscaped(
+                string expression,
+                IPropertyProvider<T> properties,
+                ExpanderOptions options,
+                IElementLocation elementLocation,
+                UsedUninitializedProperties usedUninitializedProperties,
+                IFileSystem fileSystem)
             {
                 if (((options & ExpanderOptions.ExpandProperties) == 0) || String.IsNullOrEmpty(expression))
                 {
@@ -1048,7 +1075,14 @@ namespace Microsoft.Build.Evaluation
                             propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
 
                             // This is likely to be a function expression
-                            propertyValue = ExpandPropertyBody(propertyBody, null, properties, options, elementLocation, usedUninitializedProperties);
+                            propertyValue = ExpandPropertyBody(
+                                propertyBody,
+                                null,
+                                properties,
+                                options,
+                                elementLocation,
+                                usedUninitializedProperties,
+                                fileSystem);
                         }
                         else // This is a regular property
                         {
@@ -1119,7 +1153,14 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Expand the body of the property, including any functions that it may contain
             /// </summary>
-            internal static object ExpandPropertyBody(string propertyBody, object propertyValue, IPropertyProvider<T> properties, ExpanderOptions options, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            internal static object ExpandPropertyBody(
+                string propertyBody,
+                object propertyValue,
+                IPropertyProvider<T> properties,
+                ExpanderOptions options,
+                IElementLocation elementLocation,
+                UsedUninitializedProperties usedUninitializedProperties,
+                IFileSystem fileSystem)
             {
                 Function<T> function = null;
                 string propertyName = propertyBody;
@@ -1145,7 +1186,12 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // This is a function
-                        function = Function<T>.ExtractPropertyFunction(propertyBody, elementLocation, propertyValue, usedUninitializedProperties);
+                        function = Function<T>.ExtractPropertyFunction(
+                            propertyBody,
+                            elementLocation,
+                            propertyValue,
+                            usedUninitializedProperties,
+                            fileSystem);
 
                         // We may not have been able to parse out a function
                         if (function != null)
@@ -1177,7 +1223,14 @@ namespace Microsoft.Build.Evaluation
                             propertyBody = propertyBody.Substring(indexerStart);
 
                             // recurse so that the function representing the indexer can be executed on the property value
-                            return ExpandPropertyBody(propertyBody, propertyValue, properties, options, elementLocation, usedUninitializedProperties);
+                            return ExpandPropertyBody(
+                                propertyBody,
+                                propertyValue,
+                                properties,
+                                options,
+                                elementLocation,
+                                usedUninitializedProperties,
+                                fileSystem);
                         }
                     }
                     else
@@ -2368,19 +2421,32 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that transforms expressions by invoking methods of System.String on the itemspec
                 /// of the item in the pipeline
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> ExecuteStringFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<Pair<string, S>> ExecuteStringFunction(
+                    Expander<P, I> expander,
+                    IElementLocation elementLocation,
+                    bool includeNullEntries,
+                    string functionName,
+                    IEnumerable<Pair<string, S>> itemsOfType,
+                    string[] arguments)
                 {
                     // Transform: expression is like @(Compile->'%(foo)'), so create completely new items,
                     // using the Include from the source items
                     foreach (Pair<string, S> item in itemsOfType)
                     {
-                        Function<P> function = new Expander<P, I>.Function<P>(typeof(string), item.Key, item.Key, functionName, arguments,
+                        Function<P> function = new Function<P>(
+                            typeof(string),
+                            item.Key,
+                            item.Key,
+                            functionName,
+                            arguments,
 #if FEATURE_TYPE_INVOKEMEMBER
                             BindingFlags.Public | BindingFlags.InvokeMethod,
 #else
                             BindingFlags.Public, InvokeType.InvokeMethod,
 #endif
-                            String.Empty, expander.UsedUninitializedProperties);
+                            string.Empty,
+                            expander.UsedUninitializedProperties,
+                            expander._fileSystem);
 
                         object result = function.Execute(item.Key, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
@@ -2793,6 +2859,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string Remainder { get; set; }
 
+            public IFileSystem FileSystem { get; set; }
+
             /// <summary>
             /// List of properties which have been used but have not been initialized yet.
             /// </summary>
@@ -2811,7 +2879,8 @@ namespace Microsoft.Build.Evaluation
                     InvokeType,
 #endif
                     Remainder,
-                    UsedUninitializedProperties
+                    UsedUninitializedProperties,
+                    FileSystem
                     );
             }
         }
@@ -2868,14 +2937,24 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private UsedUninitializedProperties _usedUninitializedProperties;
 
+            private IFileSystem _fileSystem;
+
             /// <summary>
             /// Construct a function that will be executed during property evaluation
             /// </summary>
-            internal Function(Type receiverType, string expression, string receiver, string methodName, string[] arguments, BindingFlags bindingFlags,
+            internal Function(
+                Type receiverType,
+                string expression,
+                string receiver,
+                string methodName,
+                string[] arguments,
+                BindingFlags bindingFlags,
 #if !FEATURE_TYPE_INVOKEMEMBER
                 InvokeType invokeType,
 #endif
-                string remainder, UsedUninitializedProperties usedUninitializedProperties)
+                string remainder,
+                UsedUninitializedProperties usedUninitializedProperties,
+                IFileSystem fileSystem)
             {
                 _methodMethodName = methodName;
                 if (arguments == null)
@@ -2896,6 +2975,7 @@ namespace Microsoft.Build.Evaluation
 #endif
                 _remainder = remainder;
                 _usedUninitializedProperties = usedUninitializedProperties;
+                _fileSystem = fileSystem;
             }
 
             /// <summary>
@@ -2913,10 +2993,15 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Extract the function details from the given property function expression
             /// </summary>
-            internal static Function<T> ExtractPropertyFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, UsedUninitializedProperties usedUnInitializedProperties)
+            internal static Function<T> ExtractPropertyFunction(
+                string expressionFunction,
+                IElementLocation elementLocation,
+                object propertyValue,
+                UsedUninitializedProperties usedUnInitializedProperties,
+                IFileSystem fileSystem)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T>();
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> {FileSystem = fileSystem};
 
                 // By default the expression root is the whole function expression
                 var expressionRoot = expressionFunction;
@@ -3103,10 +3188,15 @@ namespace Microsoft.Build.Evaluation
                     // Assemble our arguments ready for passing to our method
                     for (int n = 0; n < _arguments.Length; n++)
                     {
-                        object argument = PropertyExpander<T>.ExpandPropertiesLeaveTypedAndEscaped(_arguments[n], properties, options, elementLocation, _usedUninitializedProperties);
-                        string argumentValue = argument as string;
+                        object argument = PropertyExpander<T>.ExpandPropertiesLeaveTypedAndEscaped(
+                            _arguments[n],
+                            properties,
+                            options,
+                            elementLocation,
+                            _usedUninitializedProperties,
+                            _fileSystem);
 
-                        if (argumentValue != null)
+                        if (argument is string argumentValue)
                         {
                             // Unescape the value since we're about to send it out of the engine and into
                             // the function being called. If a file or a directory function, fix the path
@@ -3258,7 +3348,14 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Recursively expand the remaining property body after execution
-                    return PropertyExpander<T>.ExpandPropertyBody(_remainder, functionResult, properties, options, elementLocation, _usedUninitializedProperties);
+                    return PropertyExpander<T>.ExpandPropertyBody(
+                        _remainder,
+                        functionResult,
+                        properties,
+                        options,
+                        elementLocation,
+                        _usedUninitializedProperties,
+                        _fileSystem);
                 }
 
                 // Exceptions coming from the actual function called are wrapped in a TargetInvocationException
@@ -3314,76 +3411,132 @@ namespace Microsoft.Build.Evaluation
             /// <returns>True if the well known function call binding was successful</returns>
             private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
             {
-                if (objectInstance is string)
+                returnVal = null;
+
+                if (objectInstance is string text)
                 {
-                    string text = (string)objectInstance;
-                    if (string.Equals(_methodMethodName, "Substring", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(_methodMethodName, nameof(string.StartsWith), StringComparison.OrdinalIgnoreCase))
                     {
-                        int startIndex;
-                        int length;
-                        if (TryGetArg(args, out startIndex))
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.StartsWith(arg0);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Replace), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArgs(args, out string arg0, out string arg1))
+                        {
+                            returnVal = text.Replace(arg0, arg1);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Contains), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.Contains(arg0);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.ToUpperInvariant), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.ToUpperInvariant();
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.ToLowerInvariant), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.ToLowerInvariant();
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.EndsWith), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.EndsWith(arg0);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.ToLower), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.ToLower();
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (args.Length == 0)
+                        {
+                            returnVal = text.Length;
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Substring), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out int startIndex))
                         {
                             returnVal = text.Substring(startIndex);
                             return true;
                         }
-                        else if (TryGetArgs(args, out startIndex, out length))
+                        else if (TryGetArgs(args, out startIndex, out int length))
                         {
                             returnVal = text.Substring(startIndex, length);
                             return true;
                         }
                     }
-                    else if (string.Equals(_methodMethodName, "Split", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(_methodMethodName, nameof(string.Split), StringComparison.OrdinalIgnoreCase))
                     {
-                        string separator;
-                        if (TryGetArg(args, out separator) && separator.Length == 1)
+                        if (TryGetArg(args, out string separator) && separator.Length == 1)
                         {
                             returnVal = text.Split(separator[0]);
                             return true;
                         }
                     }
-                    else if (string.Equals(_methodMethodName, "PadLeft", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(_methodMethodName, nameof(string.PadLeft), StringComparison.OrdinalIgnoreCase))
                     {
-                        int totalWidth;
-                        string paddingChar;
-                        if (TryGetArg(args, out totalWidth))
+                        if (TryGetArg(args, out int totalWidth))
                         {
                             returnVal = text.PadLeft(totalWidth);
                             return true;
                         }
-                        else if (TryGetArgs(args, out totalWidth, out paddingChar) && paddingChar.Length == 1)
+                        else if (TryGetArgs(args, out totalWidth, out string paddingChar) && paddingChar.Length == 1)
                         {
                             returnVal = text.PadLeft(totalWidth, paddingChar[0]);
                             return true;
                         }
                     }
-                    else if (string.Equals(_methodMethodName, "PadRight", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(_methodMethodName, nameof(string.PadRight), StringComparison.OrdinalIgnoreCase))
                     {
-                        int totalWidth;
-                        string paddingChar;
-                        if (TryGetArg(args, out totalWidth))
+                        if (TryGetArg(args, out int totalWidth))
                         {
                             returnVal = text.PadRight(totalWidth);
                             return true;
                         }
-                        else if (TryGetArgs(args, out totalWidth, out paddingChar) && paddingChar.Length == 1)
+                        else if (TryGetArgs(args, out totalWidth, out string paddingChar) && paddingChar.Length == 1)
                         {
                             returnVal = text.PadRight(totalWidth, paddingChar[0]);
                             return true;
                         }
                     }
-                    else if (string.Equals(_methodMethodName, "TrimStart", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(_methodMethodName, nameof(string.TrimStart), StringComparison.OrdinalIgnoreCase))
                     {
-                        string trimChars;
-                        if (TryGetArg(args, out trimChars) && trimChars.Length > 0)
+                        if (TryGetArg(args, out string trimChars) && trimChars.Length > 0)
                         {
                             returnVal = text.TrimStart(trimChars.ToCharArray());
                             return true;
                         }
                     }
-                    else if (string.Equals(_methodMethodName, "TrimEnd", StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(_methodMethodName, nameof(string.TrimEnd), StringComparison.OrdinalIgnoreCase))
                     {
-                        string trimChars;
-                        if (TryGetArg(args, out trimChars) && trimChars.Length > 0)
+                        if (TryGetArg(args, out string trimChars) && trimChars.Length > 0)
                         {
                             returnVal = text.TrimEnd(trimChars.ToCharArray());
                             return true;
@@ -3391,8 +3544,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (string.Equals(_methodMethodName, "get_Chars", StringComparison.OrdinalIgnoreCase))
                     {
-                        int index;
-                        if (TryGetArg(args, out index))
+                        if (TryGetArg(args, out int index))
                         {
                             returnVal = text[index];
                             return true;
@@ -3404,8 +3556,7 @@ namespace Microsoft.Build.Evaluation
                     string[] stringArray = (string[])objectInstance;
                     if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
                     {
-                        int index;
-                        if (TryGetArg(args, out index))
+                        if (TryGetArg(args, out int index))
                         {
                             returnVal = stringArray[index];
                             return true;
@@ -3414,21 +3565,38 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (objectInstance == null)
                 {
-                    if (_receiverType == typeof(Math))
+                    if (_receiverType == typeof(string))
                     {
-                        if (string.Equals(_methodMethodName, "Max", StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(_methodMethodName, nameof(string.IsNullOrWhiteSpace), StringComparison.OrdinalIgnoreCase))
                         {
-                            double arg0, arg1;
-                            if (TryGetArgs(args, out arg0, out arg1))
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = string.IsNullOrWhiteSpace(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(string.IsNullOrEmpty), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = string.IsNullOrEmpty(arg0);
+                                return true;
+                            }
+                        }
+                    }
+                    else if (_receiverType == typeof(Math))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(Math.Max), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out var arg0, out double arg1))
                             {
                                 returnVal = Math.Max(arg0, arg1);
                                 return true;
                             }
                         }
-                        else if (string.Equals(_methodMethodName, "Min", StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(_methodMethodName, nameof(Math.Min), StringComparison.OrdinalIgnoreCase))
                         {
-                            double arg0, arg1;
-                            if (TryGetArgs(args, out arg0, out arg1))
+                            if (TryGetArgs(args, out double arg0, out var arg1))
                             {
                                 returnVal = Math.Min(arg0, arg1);
                                 return true;
@@ -3437,46 +3605,320 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (_receiverType == typeof(IntrinsicFunctions))
                     {
-                        if (string.Equals(_methodMethodName, "Add", StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
                         {
-                            double arg0, arg1;
-                            if (TryGetArgs(args, out arg0, out arg1))
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.EnsureTrailingSlash(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ValueOrDefault), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = IntrinsicFunctions.ValueOrDefault(arg0, arg1);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizePath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (ElementsOfType(args, typeof(string)))
+                            {
+                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string) o));
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetDirectoryNameOfFileAbove), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out string arg1))
+                            {
+                                returnVal = IntrinsicFunctions.GetDirectoryNameOfFileAbove(arg0, arg1, _fileSystem);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetRegistryValueFromView), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length >= 4 &&
+                                TryGetArgs(args, out string arg0, out string arg1, enforceLength: false))
+                            {
+                                returnVal = IntrinsicFunctions.GetRegistryValueFromView(arg0, arg1, args[2], new ArraySegment<object>(args, 3, args.Length - 3));
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsRunningFromVisualStudio), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = IntrinsicFunctions.IsRunningFromVisualStudio();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Escape), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.Escape(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetPathOfFileAbove), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out string arg0, out var arg1))
+                            {
+                                returnVal = IntrinsicFunctions.GetPathOfFileAbove(arg0, arg1, _fileSystem);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArgs(args, out double arg0, out var arg1))
                             {
                                 returnVal = arg0 + arg1;
                                 return true;
                             }
                         }
-                        else if (string.Equals(_methodMethodName, "Subtract", StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
                         {
-                            double arg0, arg1;
-                            if (TryGetArgs(args, out arg0, out arg1))
+                            if (TryGetArgs(args, out double arg0, out var arg1))
                             {
                                 returnVal = arg0 - arg1;
                                 return true;
                             }
                         }
-                        else if (string.Equals(_methodMethodName, "Multiply", StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
                         {
-                            double arg0, arg1;
-                            if (TryGetArgs(args, out arg0, out arg1))
+                            if (TryGetArgs(args, out double arg0, out var arg1))
                             {
                                 returnVal = arg0 * arg1;
                                 return true;
                             }
                         }
-                        else if (string.Equals(_methodMethodName, "Divide", StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
                         {
-                            double arg0, arg1;
-                            if (TryGetArgs(args, out arg0, out arg1))
+                            if (TryGetArgs(args, out double arg0, out var arg1))
                             {
                                 returnVal = arg0 / arg1;
                                 return true;
                             }
                         }
                     }
+                    else if (_receiverType == typeof(Path))
+                    {
+                        if (string.Equals(_methodMethodName, nameof(Path.Combine), StringComparison.OrdinalIgnoreCase))
+                        {
+                            string arg0, arg1, arg2, arg3;
+
+                            // Combine has fast implementations for up to 4 parameters: https://github.com/dotnet/corefx/blob/2c55db90d622fa6279184e6243f0470a3755d13c/src/Common/src/CoreLib/System/IO/Path.cs#L293-L317
+                            switch (args.Length)
+                            {
+                                case 0:
+                                    return false;
+                                case 1:
+                                    if (TryGetArg(args, out arg0))
+                                    {
+                                        returnVal = Path.Combine(arg0);
+                                        return true;
+                                    }
+                                    break;
+                                case 2:
+                                    if (TryGetArgs(args, out arg0, out arg1))
+                                    {
+                                        returnVal = Path.Combine(arg0, arg1);
+                                        return true;
+                                    }
+                                    break;
+                                case 3:
+                                    if (TryGetArgs(args, out arg0, out arg1, out arg2))
+                                    {
+                                        returnVal = Path.Combine(arg0, arg1, arg2);
+                                        return true;
+                                    }
+                                    break;
+                                case 4:
+                                    if (TryGetArgs(args, out arg0, out arg1, out arg2, out arg3))
+                                    {
+                                        returnVal = Path.Combine(arg0, arg1, arg2, arg3);
+                                        return true;
+                                    }
+                                    break;
+                                default:
+                                    if (ElementsOfType(args, typeof(string)))
+                                    {
+                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string) o));
+                                        return true;
+                                    }
+                                    break;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = Path.DirectorySeparatorChar;
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetFullPath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetFullPath(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.IsPathRooted), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.IsPathRooted(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetTempPath), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (args.Length == 0)
+                            {
+                                returnVal = Path.GetTempPath();
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileName), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetFileName(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetDirectoryName), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetDirectoryName(arg0);
+                                return true;
+                            }
+                        }
+                    }
                 }
 
-                returnVal = null;
+                if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
+                {
+                    LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
+                }
+
+                return false;
+            }
+
+            private bool ElementsOfType(object[] args, Type type)
+            {
+                for (var i = 0; i < args.Length; i++)
+                {
+                    if (args[i].GetType() != type)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            private static bool TryGetArgs(object[] args, out string arg0, out string arg1, bool enforceLength = true)
+            {
+                arg0 = null;
+                arg1 = null;
+
+                if (enforceLength && args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (args[0] is string value0 &&
+                    args[1] is string value1)
+                {
+                    arg0 = value0;
+                    arg1 = value1;
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2)
+            {
+                arg0 = null;
+                arg1 = null;
+                arg2 = null;
+
+                if (args.Length != 3)
+                {
+                    return false;
+                }
+
+                if (args[0] is string value0 &&
+                    args[1] is string value1 &&
+                    args[2] is string value2
+                    )
+                {
+                    arg0 = value0;
+                    arg1 = value1;
+                    arg2 = value2;
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2, out string arg3)
+            {
+                arg0 = null;
+                arg1 = null;
+                arg2 = null;
+                arg3 = null;
+
+                if (args.Length != 4)
+                {
+                    return false;
+                }
+
+                if (args[0] is string value0 &&
+                    args[1] is string value1 &&
+                    args[2] is string value2 &&
+                    args[3] is string value3
+                    )
+                {
+                    arg0 = value0;
+                    arg1 = value1;
+                    arg2 = value2;
+                    arg3 = value3;
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            private bool TryGetArgs(object[] args, out string arg0, out string arg1)
+            {
+                arg0 = null;
+                arg1 = null;
+
+                if (args.Length != 2)
+                {
+                    return false;
+                }
+
+                if (args[0] is string value0 &&
+                    args[1] is string value1)
+                {
+                    arg0 = value0;
+                    arg1 = value1;
+
+                    return true;
+                }
+
                 return false;
             }
 
@@ -3488,10 +3930,18 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value = args[0];
-                if (value is string && int.TryParse((string)value, out arg0))
+                return TryConvertToInt(args[0], out arg0);
+            }
+
+            private static bool TryConvertToInt(object value, out int arg0)
+            {
+                switch (value)
                 {
-                    return true;
+                    case int i:
+                        arg0 = i;
+                        return true;
+                    case string s when int.TryParse(s, out arg0):
+                        return true;
                 }
 
                 arg0 = 0;
@@ -3520,17 +3970,8 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value0 = args[0] as string;
-                var value1 = args[1] as string;
-                if (value0 != null &&
-                    value1 != null &&
-                    int.TryParse(value0, out arg0) &&
-                    int.TryParse(value1, out arg1))
-                {
-                    return true;
-                }
-
-                return false;
+                return TryConvertToInt(args[0], out arg0) &&
+                       TryConvertToInt(args[1], out arg1);
             }
 
             private static bool TryGetArgs(object[] args, out double arg0, out double arg1)
@@ -3543,10 +3984,8 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                var value0 = args[0] as string;
-                var value1 = args[1] as string;
-                if (value0 != null &&
-                    value1 != null &&
+                if (args[0] is string value0 &&
+                    args[1] is string value1 &&
                     double.TryParse(value0, out arg0) &&
                     double.TryParse(value1, out arg1))
                 {
@@ -3576,6 +4015,18 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return false;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private void LogFunctionCall(string fileName, object objectInstance, object[] args)
+            {
+                var logFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+
+                var argSignature = args != null
+                    ? string.Join(", ", args.Select(a => a?.GetType().Name ?? "null"))
+                    : string.Empty;
+
+                File.AppendAllText(logFile, $"ReceiverType={_receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={_methodMethodName}({argSignature})\n");
             }
 
             /// <summary>

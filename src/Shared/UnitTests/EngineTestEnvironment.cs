@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests
     {
         private readonly TransientTestFolder _folder;
 
-        public string TestRoot => _folder.FolderPath;
+        public string TestRoot => _folder.Path;
 
         public string[] CreatedFiles { get; }
 

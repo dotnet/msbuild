@@ -3206,7 +3206,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             using (var env = TestEnvironment.Create())
             {
-                var testSdkRoot = env.CreateFolder().FolderPath;
+                var testSdkRoot = env.CreateFolder().Path;
                 var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
                 Directory.CreateDirectory(testSdkDirectory);
 

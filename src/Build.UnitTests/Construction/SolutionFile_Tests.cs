@@ -708,11 +708,11 @@ namespace Microsoft.Build.UnitTests.Construction
             using (var env = TestEnvironment.Create())
             {
                 var solutionFolder = env.CreateFolder(Path.Combine(FileUtilities.GetTemporaryDirectory(), "sln"));
-                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.FolderPath, "RelativePath"));
+                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
 
                 SolutionFile p = new SolutionFile();
-                p.FullPath = Path.Combine(solutionFolder.FolderPath, "RelativePath", "project file");
-                p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.FolderPath);
+                p.FullPath = Path.Combine(solutionFolder.Path, "RelativePath", "project file");
+                p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.Path);
                 ProjectInSolution proj = new ProjectInSolution(p);
 
                 p.ParseFirstProjectLine

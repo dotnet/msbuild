@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent(new String('!', 10000000)),
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent("Success!"),
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Execute().ShouldBeTrue();
 
-                FileInfo file = new FileInfo(Path.Combine(folder.FolderPath, "foo.txt"));
+                FileInfo file = new FileInfo(Path.Combine(folder.Path, "foo.txt"));
 
                 file.Exists.ShouldBeTrue(() => file.FullName);
 
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFolder = new TaskItem(folder.Path),
                     DestinationFileName = new TaskItem(filename),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => response),
                     SourceUrl = "http://success/foo.txt"
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Execute().ShouldBeTrue();
 
-                FileInfo file = new FileInfo(Path.Combine(folder.FolderPath, filename));
+                FileInfo file = new FileInfo(Path.Combine(folder.Path, filename));
 
                 file.Exists.ShouldBeTrue(() => file.FullName);
 
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFolder = new TaskItem(folder.Path),
                     DestinationFileName = new TaskItem(filename),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Execute().ShouldBeTrue();
 
-                FileInfo file = new FileInfo(Path.Combine(folder.FolderPath, filename));
+                FileInfo file = new FileInfo(Path.Combine(folder.Path, filename));
 
                 file.Exists.ShouldBeTrue(() => file.FullName);
 
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile()
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new MockHttpContent(content.Length, stream =>
@@ -257,7 +257,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 DownloadFile downloadFile = new DownloadFile
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(folder.FolderPath),
+                    DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent("C197675A3CC64CAA80680128CF4578C9")

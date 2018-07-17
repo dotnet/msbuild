@@ -219,10 +219,12 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
 
-            // Create containers for the evaluation results
-            data.InitializeForEvaluation(toolsetProvider);
+            _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
 
-            _expander = new Expander<P, I>(data, data);
+            // Create containers for the evaluation results
+            data.InitializeForEvaluation(toolsetProvider, _evaluationContext.FileSystem);
+
+            _expander = new Expander<P, I>(data, data, _evaluationContext.FileSystem);
 
             // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
             _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
@@ -242,7 +244,6 @@ namespace Microsoft.Build.Evaluation
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
-            _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
         }
 

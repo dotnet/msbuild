@@ -13,6 +13,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -100,7 +101,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             _metadata = metadata;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(metadata));
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_lookup, _lookup, new StringMetadataTable(metadata), FileSystems.Default);
 
             _bucketSequenceNumber = bucketSequenceNumber;
         }

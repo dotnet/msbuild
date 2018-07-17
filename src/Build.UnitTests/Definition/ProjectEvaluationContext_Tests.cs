@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         public void ContextCachesItemElementGlobExpansions(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
-            var projectDirectory = _env.DefaultTestDirectory.FolderPath;
+            var projectDirectory = _env.DefaultTestDirectory.Path;
 
             var context = EvaluationContext.Create(policy);
 
@@ -286,7 +286,7 @@ namespace Microsoft.Build.UnitTests.Definition
         // projects should cache glob expansions when the glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeGlob(bool itemSpecPathIsRelative, EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
-            var testDirectory = _env.DefaultTestDirectory.FolderPath;
+            var testDirectory = _env.DefaultTestDirectory.Path;
             var globDirectory = Path.Combine(testDirectory, "GlobDirectory");
 
             var itemSpecDirectoryPart = itemSpecPathIsRelative
@@ -346,7 +346,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         public void ContextCachesImportGlobExpansions(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
-            var projectDirectory = _env.DefaultTestDirectory.FolderPath;
+            var projectDirectory = _env.DefaultTestDirectory.Path;
 
             var context = EvaluationContext.Create(policy);
 
@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         public void ContextCachesExistenceChecksInConditions(EvaluationContext.SharingPolicy policy)
         {
-            var projectDirectory = _env.DefaultTestDirectory.FolderPath;
+            var projectDirectory = _env.DefaultTestDirectory.Path;
 
             var context = EvaluationContext.Create(policy);
 
@@ -430,10 +430,118 @@ namespace Microsoft.Build.UnitTests.Definition
                 );
         }
 
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        public void ContextCachesExistenceChecksInGetDirectoryNameOfFileAbove(EvaluationContext.SharingPolicy policy)
+        {
+            var context = EvaluationContext.Create(policy);
+
+            var subdirectory = _env.DefaultTestDirectory.CreateDirectory("subDirectory");
+            var subdirectoryFile = subdirectory.CreateFile("a");
+            _env.DefaultTestDirectory.CreateFile("a");
+
+            int evaluationCount = 0;
+
+            EvaluateProjects(
+                new []
+                {
+                    $@"<Project>
+                      <PropertyGroup>
+                        <SearchedPath>$([MSBuild]::GetDirectoryNameOfFileAbove('{subdirectory.Path}', 'a'))</SearchedPath>
+                      </PropertyGroup>
+                    </Project>"
+                },
+                context,
+                project =>
+                {
+                    evaluationCount++;
+
+                    var searchedPath = project.GetProperty("SearchedPath");
+
+                    switch (policy)
+                    {
+                        case EvaluationContext.SharingPolicy.Shared:
+                            searchedPath.EvaluatedValue.ShouldBe(subdirectory.Path);
+                            break;
+                        case EvaluationContext.SharingPolicy.Isolated:
+                            searchedPath.EvaluatedValue.ShouldBe(
+                                evaluationCount == 1
+                                    ? subdirectory.Path
+                                    : _env.DefaultTestDirectory.Path);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
+                    }
+
+                    if (evaluationCount == 1)
+                    {
+                        // this will cause the upper file to get picked up in the Isolated policy
+                        subdirectoryFile.Delete();
+                    }
+                });
+
+            evaluationCount.ShouldBe(2);
+        }
+
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        public void ContextCachesExistenceChecksInGetPathOfFileAbove(EvaluationContext.SharingPolicy policy)
+        {
+            var context = EvaluationContext.Create(policy);
+
+            var subdirectory = _env.DefaultTestDirectory.CreateDirectory("subDirectory");
+            var subdirectoryFile = subdirectory.CreateFile("a");
+            var rootFile = _env.DefaultTestDirectory.CreateFile("a");
+
+            int evaluationCount = 0;
+
+            EvaluateProjects(
+                new []
+                {
+                    $@"<Project>
+                      <PropertyGroup>
+                        <SearchedPath>$([MSBuild]::GetPathOfFileAbove('a', '{subdirectory.Path}'))</SearchedPath>
+                      </PropertyGroup>
+                    </Project>"
+                },
+                context,
+                project =>
+                {
+                    evaluationCount++;
+
+                    var searchedPath = project.GetProperty("SearchedPath");
+
+                    switch (policy)
+                    {
+                        case EvaluationContext.SharingPolicy.Shared:
+                            searchedPath.EvaluatedValue.ShouldBe(subdirectoryFile.Path);
+                            break;
+                        case EvaluationContext.SharingPolicy.Isolated:
+                            searchedPath.EvaluatedValue.ShouldBe(
+                                evaluationCount == 1
+                                    ? subdirectoryFile.Path
+                                    : rootFile.Path);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
+                    }
+
+                    if (evaluationCount == 1)
+                    {
+                        // this will cause the upper file to get picked up in the Isolated policy
+                        subdirectoryFile.Delete();
+                    }
+                });
+
+            evaluationCount.ShouldBe(2);
+        }
+
         private void EvaluateProjects(IEnumerable<string> projectContents, EvaluationContext context, Action<Project> afterEvaluationAction)
         {
             EvaluateProjects(
-                projectContents.Select((p, i) => new ProjectSpecification(Path.Combine(_env.DefaultTestDirectory.FolderPath, $"Project{i}.proj"), p)),
+                projectContents.Select((p, i) => new ProjectSpecification(Path.Combine(_env.DefaultTestDirectory.Path, $"Project{i}.proj"), p)),
                 context,
                 afterEvaluationAction);
         }

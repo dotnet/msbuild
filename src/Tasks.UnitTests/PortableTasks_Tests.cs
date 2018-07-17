@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             {
                 bool successfulExit;
 
-                var folder = env.CreateFolder().FolderPath;
+                var folder = env.CreateFolder().Path;
                 var projFile = Path.Combine(folder, ProjectFileName);
 
                 foreach (var file in new DirectoryInfo(ProjectFilePath).GetFiles())
