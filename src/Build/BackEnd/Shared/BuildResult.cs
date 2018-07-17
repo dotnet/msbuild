@@ -472,7 +472,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The results for the specified target</returns>
         /// <exception>KeyNotFoundException is returned if the specified target doesn't exist when reading this property.</exception>
         /// <exception>ArgumentException is returned if the specified target already has results.</exception>
-        public TargetResult this[string target]
+        public ITargetResult this[string target]
         {
             [DebuggerStepThrough]
             get

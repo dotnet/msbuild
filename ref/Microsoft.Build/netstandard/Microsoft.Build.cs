@@ -1042,7 +1042,7 @@ namespace Microsoft.Build.Execution
         public int ConfigurationId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public System.Exception Exception { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public int GlobalRequestId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
-        public Microsoft.Build.Execution.TargetResult this[string target] { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
+        public Microsoft.Build.Execution.ITargetResult this[string target] { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public int NodeRequestId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
         public Microsoft.Build.Execution.BuildResultCode OverallResult { get { throw null; } }
         public int ParentGlobalRequestId { [System.Diagnostics.DebuggerStepThroughAttribute]get { throw null; } }
