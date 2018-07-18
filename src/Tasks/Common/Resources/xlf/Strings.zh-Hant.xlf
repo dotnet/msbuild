@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
@@ -9,22 +9,22 @@
       </trans-unit>
       <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
         <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="new">NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</target>
+        <target state="translated">NETSDK1066: 必須指定 RuntimeIdentifier，才可發行具有應用程式主機且與架構相依的應用程式。</target>
         <note>{StrBegin="NETSDK1066: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
-        <target state="new">NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</target>
+        <target state="translated">NETSDK1067: 需要獨立式應用程式，才可使用該應用程式主機。請將 SelfContained 設定為 False，或是將 UseAppHost 設定為 True。</target>
         <note>{StrBegin="NETSDK1067: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkDependentAppHostRequiresVersion21">
         <source>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</source>
-        <target state="new">NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</target>
+        <target state="translated">NETSDK1068: 與架構相依的應用程式主機，至少需要 'netcoreapp2.1' 的目標架構。</target>
         <note>{StrBegin="NETSDK1068: "}</note>
       </trans-unit>
       <trans-unit id="NETFrameworkToNonBuiltInNETStandard">
         <source>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</source>
-        <target state="new">NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</target>
+        <target state="translated">NETSDK1069: 此專案使用以 .NET Standard 1.5 或更新版本為目標的程式庫，而專案的目標 .NET Framework 版本則為尚未具備該 .NET Standard 版本內建支援的 .NET Framework。請瀏覽 https://aka.ms/net-standard-known-issues，以了解已知問題的集合。請考慮轉為以 .NET Framework 4.7.2 為目標。</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
@@ -111,6 +111,11 @@
         <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
         <target state="translated">NETSDK1018: NuGet 版本字串無效: '{0}'。</target>
         <note>{StrBegin="NETSDK1018: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="translated">NETSDK1019: {0} 為不受支援的架構。</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
@@ -232,11 +237,6 @@
         <target state="translated">NETSDK1044: 從 '{0}' 行 {1} 剖析 PlatformManifest 時發生錯誤。{2} '{3}' 無效。</target>
         <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
-      <trans-unit id="UnsupportedFramework">
-        <source>NETSDK1019: {0} is an unsupported framework.</source>
-        <target state="translated">NETSDK1019: {0} 為不受支援的架構。</target>
-        <note>{StrBegin="NETSDK1019: "}</note>
-      </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="translated">NETSDK1045: 目前的 .NET SDK 不支援以 {0} {1} 作為目標。請以 {0} {2} 或更低版本作為目標，或是使用支援 {0} {1} 的 .NET SDK 版本。</target>
@@ -252,11 +252,6 @@
         <target state="translated">NETSDK1046: TargetFramework 值 '{0}' 無效。若要設定多重目標，請改用 'TargetFrameworks' 屬性。</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
-      <trans-unit id="SkippingAdditionalProbingPaths">
-        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">NETSDK1048: 已為 GenerateRuntimeConfigurationFiles 指定了 'AdditionalProbingPaths'，但因為 'RuntimeConfigDevPath' 是空的，所以已跳過它。</target>
-        <note>{StrBegin="NETSDK1048: "}</note>
-      </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
         <target state="translated">NETSDK1049: 解析的檔案含有毀損的映像、沒有中繼資料，或有其他無法存取的情況。{0} {1}</target>
@@ -266,6 +261,11 @@
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
         <target state="translated">NETSDK1050: 此專案使用的 Microsoft.NET.Sdk 版本，無法支援以.NET Standard 1.5 或更高版本為目標的程式庫參考。請安裝 .NET Core SDK 2.0 或更高版本。</target>
         <note>{StrBegin="NETSDK1050: "}</note>
+      </trans-unit>
+      <trans-unit id="SkippingAdditionalProbingPaths">
+        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="translated">NETSDK1048: 已為 GenerateRuntimeConfigurationFiles 指定了 'AdditionalProbingPaths'，但因為 'RuntimeConfigDevPath' 是空的，所以已跳過它。</target>
+        <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
@@ -293,8 +293,8 @@
         <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
-        <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: 您目前正使用 .NET Core SDK 的預覽版本。您可透過目前專案中的 global.json 檔案，定義 SDK 版本。如需更多項目，請前往 https://go.microsoft.com/fwlink/?linkid=869452</target>
+        <source>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="translated">NETSDK1057: 您目前正使用 .NET Core SDK 的預覽版本。您可透過目前專案中的 global.json 檔案，定義 SDK 版本。如需更多項目，請前往 https://go.microsoft.com/fwlink/?linkid=869452</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
@@ -315,7 +315,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
-        <target state="needs-review-translation">NETSDK1061: 此專案先前使用了 {0} 的 {1} 版進行還原，但依據目前的設定，將改用 {2} 版。若要解決此問題，請確定還原及後續作業 (例如建置或發行) 皆使用相同的設定。若只在建置或發行期間設定了 RuntimeIdentifier 屬性，但未在還原期間設定，一般可能會發生此問題。</target>
+        <target state="translated">NETSDK1061: 專案是使用 {0} 版本 {1} 還原的，但依照目前設定，使用的版本會是 {2}。若要解決此問題，請確認用於還原與後續作業 (例如建置或發佈) 的設定相同。一般而言，若在建置或發佈期間設定了 RuntimeIdentifier，但在還原期間未加以設定，就可能發生這個問題。如需詳細資訊，請參閱 https://aka.ms/dotnet-runtime-patch-selection。</target>
         <note>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
 {1} - Restored version of platform package

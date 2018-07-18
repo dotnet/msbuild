@@ -67,7 +67,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                 compilePlatformItems = TargetFrameworkDirectories.SelectMany(tfd =>
                 {
                     return frameworkListReader.GetConflictItems(Path.Combine(tfd.ItemSpec, "RedistList", "FrameworkList.xml"), log);
-                }).ToList();
+                }).ToArray();
             }
 
             // resolve conflicts at compile time
@@ -90,7 +90,7 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             //  Remove platform items which won a conflict with a reference but subsequently lost to something else
             compilePlatformWinners.ExceptWith(allConflicts);
 
-            // resolve conflicts that class in output
+            // resolve conflicts that clash in output
             IEnumerable<ConflictItem> copyLocalItems;
             IEnumerable<ConflictItem> otherRuntimeItems;
             using (var runtimeConflictScope = new ConflictResolver<ConflictItem>(packageRanks, packageOverrides, log))
@@ -157,7 +157,12 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
             //  So what we do is keep track of Platform items that win conflicts with Reference items in
             //  the compile scope, and explicitly add references to them here.
             ReferencesWithoutConflicts = SafeConcat(ReferencesWithoutConflicts,
-                compilePlatformWinners.Select(c => new TaskItem(c.FileName)));
+                //  The Reference item we create in this case should be without the .dll extension
+                //  (which is added in FrameworkListReader in order to make the framework items
+                //  correctly conflict with DLLs from NuGet packages)
+                compilePlatformWinners.Select(c => Path.GetFileNameWithoutExtension(c.FileName))
+                                      .Select(r => new TaskItem(r)));
+
         }
 
         //  Concatanate two things, either of which may be null.  Interpret null as empty,

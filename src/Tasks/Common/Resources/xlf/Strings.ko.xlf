@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
@@ -9,22 +9,22 @@
       </trans-unit>
       <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
         <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="new">NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</target>
+        <target state="translated">NETSDK1066: 응용 프로그램 호스트와 함께 프레임워크 종속 응용 프로그램을 게시하려면 RuntimeIdentifier를 지정해야 합니다.</target>
         <note>{StrBegin="NETSDK1066: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
-        <target state="new">NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</target>
+        <target state="translated">NETSDK1067: 응용 프로그램 호스트를 사용하려면 자체 포함 응용 프로그램이 필요합니다. SelfContained를 false로 설정하거나 UseAppHost를 true로 설정하세요.</target>
         <note>{StrBegin="NETSDK1067: "}</note>
       </trans-unit>
       <trans-unit id="FrameworkDependentAppHostRequiresVersion21">
         <source>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</source>
-        <target state="new">NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</target>
+        <target state="translated">NETSDK1068: 프레임워크 종속 응용 프로그램 호스트는 'netcoreapp2.1' 이상의 대상 프레임워크가 필요합니다.</target>
         <note>{StrBegin="NETSDK1068: "}</note>
       </trans-unit>
       <trans-unit id="NETFrameworkToNonBuiltInNETStandard">
         <source>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</source>
-        <target state="new">NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</target>
+        <target state="translated">NETSDK1069: 이 프로젝트는 .NET Standard 1.5 이상을 대상으로 하는 라이브러리를 사용하며, 이 프로젝트는 해당 버전의 .NET Standard를 기본으로 제공하지 않는 .NET Framework 버전을 대상으로 합니다. 알려진 문제에 대해서는 https://aka.ms/net-standard-known-issues를 참조하세요. .NET Framework 4.7.2로 대상을 다시 지정해 보세요.</target>
         <note>{StrBegin="NETSDK1069: "}</note>
       </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
@@ -111,6 +111,11 @@
         <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
         <target state="translated">NETSDK1018: NuGet 버전 문자열 '{0}'이(가) 잘못되었습니다.</target>
         <note>{StrBegin="NETSDK1018: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="translated">NETSDK1019: {0}은(는) 지원되지 않는 프레임워크입니다.</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
@@ -232,11 +237,6 @@
         <target state="translated">NETSDK1044: '{0}' 줄 {1}에서 PlatformManifest를 구문 분석하는 중 오류가 발생했습니다. {2} '{3}'이(가) 잘못되었습니다.</target>
         <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
-      <trans-unit id="UnsupportedFramework">
-        <source>NETSDK1019: {0} is an unsupported framework.</source>
-        <target state="translated">NETSDK1019: {0}은(는) 지원되지 않는 프레임워크입니다.</target>
-        <note>{StrBegin="NETSDK1019: "}</note>
-      </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="translated">NETSDK1045: 현재 .NET SDK에서는 {0} {1}을(를) 대상으로 하는 것을 지원하지 않습니다. {0} {2} 이하를 대상으로 하거나 {0} {1}을(를) 지원하는 .NET SDK 버전을 사용하세요.</target>
@@ -252,11 +252,6 @@
         <target state="translated">NETSDK1046: TargetFramework 값 '{0}'이(가) 잘못되었습니다. 여러 대상을 지정하려면 'TargetFrameworks' 속성을 대신 사용하세요.</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
-      <trans-unit id="SkippingAdditionalProbingPaths">
-        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">NETSDK1048: GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
-        <note>{StrBegin="NETSDK1048: "}</note>
-      </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
         <target state="translated">NETSDK1049: 확인된 파일의 이미지가 잘못되었거나, 메타데이터가 없거나, 파일 자체에 액세스할 수 없습니다. {0} {1}</target>
@@ -266,6 +261,11 @@
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
         <target state="translated">NETSDK1050: 이 프로젝트에서 사용하는 Microsoft.NET.Sdk 버전은 .NET Standard 1.5 이상을 대상으로 하는 라이브러리에 대한 참조를 지원할 수 없습니다. .NET Core SDK 버전 2.0 이상을 설치하세요.</target>
         <note>{StrBegin="NETSDK1050: "}</note>
+      </trans-unit>
+      <trans-unit id="SkippingAdditionalProbingPaths">
+        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="translated">NETSDK1048: GenerateRuntimeConfigurationFiles에 대해 'AdditionalProbingPaths'가 지정되었지만 'RuntimeConfigDevPath'가 비어 있어서 건너뜁니다.</target>
+        <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
@@ -293,8 +293,8 @@
         <note>{StrBegin="NETSDK1056: "}</note>
       </trans-unit>
       <trans-unit id="UsingPreviewSdkWarning">
-        <source>NETSDK1057: You are using a preview version of .NET Core. See: https://aka.ms/dotnet-core-preview</source>
-        <target state="needs-review-translation">NETSDK1057: .NET Core SDK의 미리 보기 버전으로 작업하고 있습니다. 현재 프로젝트의 global.json 파일을 통해 SDK 버전을 정의할 수 있습니다. 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869452를 참조하세요.</target>
+        <source>NETSDK1057: You are working with a preview version of the .NET Core SDK. You can define the SDK version via a global.json file in the current project. More at https://go.microsoft.com/fwlink/?linkid=869452</source>
+        <target state="translated">NETSDK1057: .NET Core SDK의 미리 보기 버전으로 작업하고 있습니다. 현재 프로젝트의 global.json 파일을 통해 SDK 버전을 정의할 수 있습니다. 자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869452를 참조하세요.</target>
         <note>{StrBegin="NETSDK1057: "}</note>
       </trans-unit>
       <trans-unit id="InvalidItemSpecToUse">
@@ -315,7 +315,7 @@ The following are names of parameters or literal values and should not be transl
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
         <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
-        <target state="needs-review-translation">NETSDK1061: 프로젝트는 {0} 버전 {1}을(를) 사용하여 복원되었지만, 현재 설정에서는 버전 {2}이(가) 대신 사용됩니다. 이 문제를 해결하려면 복원 및 빌드나 게시 같은 후속 작업에 동일한 설정을 사용하세요. 일반적으로 이 문제는 복원 중에는 RuntimeIdentifier 속성이 설정되지 않았는데 빌드나 게시 중 RuntimeIdentifier 속성이 설정된 경우에 발생할 수 있습니다.</target>
+        <target state="translated">NETSDK1061: {0} 버전 {1}을(를) 사용하여 프로젝트가 복원되었지만, 현재 설정에서는 버전 {2}을(를) 대신 사용합니다. 이 문제를 해결하려면 복원 및 후속 작업(예: 빌드 또는 게시)에 동일한 설정을 사용해야 합니다. 일반적으로 이 문제는 RuntimeIdentifier 속성이 빌드 또는 게시 중에 설정되었지만, 복원 중에는 설정되지 않은 경우에 발생할 수 있습니다. 자세한 내용은 https://aka.ms/dotnet-runtime-patch-selection을 참조하세요.</target>
         <note>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
 {1} - Restored version of platform package

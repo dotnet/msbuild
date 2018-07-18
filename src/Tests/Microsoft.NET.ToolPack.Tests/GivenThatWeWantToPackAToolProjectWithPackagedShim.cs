@@ -114,6 +114,43 @@ namespace Microsoft.NET.ToolPack.Tests
             }
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void It_uses_customized_PackagedShimOutputRootDirectory(bool multiTarget)
+        {
+            string shimoutputPath = Path.Combine(TestContext.Current.TestExecutionDirectory, "shimoutput");
+            TestAsset helloWorldAsset = _testAssetsManager
+                .CopyTestAsset("PortableTool", "PackagedShimOutputRootDirectory" + multiTarget)
+                .WithSource()
+                .WithProjectChanges(project =>
+                {
+                    XNamespace ns = project.Root.Name.Namespace;
+                    XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
+                    propertyGroup.Add(new XElement(ns + "PackAsToolShimRuntimeIdentifiers", "win-x64;osx.10.12-x64"));
+                    propertyGroup.Add(new XElement(ns + "ToolCommandName", _customToolCommandName));
+                    propertyGroup.Add(new XElement(ns + "PackagedShimOutputRootDirectory", shimoutputPath));
+
+                    if (multiTarget)
+                    {
+                        propertyGroup.Element(ns + "TargetFramework").Remove();
+                        propertyGroup.Add(new XElement(ns + "TargetFrameworks", "netcoreapp2.1"));
+                    }
+                })
+                .Restore(Log);
+
+            _testRoot = helloWorldAsset.TestRoot;
+
+            var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
+
+            packCommand.Execute();
+
+            string windowShimPath = Path.Combine(shimoutputPath, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
+            File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
+            string osxShimPath = Path.Combine(shimoutputPath, $"shims/netcoreapp2.1/osx.10.12-x64/{_customToolCommandName}");
+            File.Exists(osxShimPath).Should().BeTrue($"Shim {osxShimPath} should exist");
+        }
+
         [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]

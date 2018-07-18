@@ -3,6 +3,7 @@
 
 using FluentAssertions;
 using Microsoft.Build.Utilities;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.NET.TestFramework;
 using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
@@ -11,7 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -86,7 +89,7 @@ namespace Microsoft.NET.Build.Tests
 
             var netStandardProject = new TestProject()
             {
-                Name="NetStandard20_Library",
+                Name = "NetStandard20_Library",
                 TargetFrameworks = "netstandard2.0",
                 IsSdkProject = true
             };
@@ -289,6 +292,172 @@ namespace Microsoft.NET.Build.Tests
                 $"{testProject.Name}.pdb",
                 $"{testProject.Name}.exe.config", // We have now added binding redirects so we should expect a config flag to be dropped to the output directory.
             }.Concat(net471Shims));
+        }
+
+        [FullMSBuildOnlyFact]
+        public void ZipFileCanBeSharedWithNetStandard16()
+        {
+            TestZipFileSharing(false);
+        }
+
+
+        [WindowsOnlyFact]
+        public void ZipFileCanBeSharedWithNetStandard16_sdk()
+        {
+            TestZipFileSharing(true);
+        }
+        private void TestZipFileSharing(bool useSdk, [CallerMemberName] string callingMethod = "")
+        {
+            var testProject = new TestProject()
+            {
+                Name = "Net471ZipFileTest",
+                IsExe = true,
+                IsSdkProject = useSdk
+
+            };
+
+            if (useSdk)
+            {
+                testProject.TargetFrameworks = "net471";
+            }
+            else
+            {
+                testProject.TargetFrameworkVersion = "v4.7.1";
+            }
+
+            testProject.PackageReferences.AddRange(new[]
+            {
+                new TestPackageReference("System.IO.Compression.ZipFile", "4.3.0")
+            });
+
+
+            var netStandardProject = new TestProject()
+            {
+                Name = "NetStandard16_Library",
+                TargetFrameworks = "netstandard1.6",
+                IsSdkProject = true
+            };
+
+            netStandardProject.PackageReferences.AddRange(new[]
+            {
+                new TestPackageReference("System.IO.Compression.ZipFile", "4.3.0")
+            });
+
+            testProject.ReferencedProjects.Add(netStandardProject);
+
+            testProject.SourceFiles["Program.cs"] = $@"
+using System;
+public static class Program
+{{
+    public static int Main()
+    {{
+        bool success = true;
+
+        Type[] nsTypes = NS16LibClass.GetTypes();
+        Type[] appTypes = new Type[]
+        {{
+            typeof(System.IO.Compression.ZipArchive),
+            typeof(System.IO.Compression.ZipArchiveEntry),
+            typeof(System.IO.Compression.ZipArchiveMode),
+            typeof(System.IO.Compression.ZipFile),
+            typeof(System.IO.Compression.ZipFileExtensions),
+        }};
+
+        if (nsTypes.Length != appTypes.Length)
+        {{
+            Console.WriteLine($""Error: Types count in NS library {{ nsTypes.Length}} is not equal to the types count in the app {{ appTypes.Length}} "");
+            return 1;
+        }}
+
+        for (int i = 0; i < nsTypes.Length; i++)
+        {{
+            if (!nsTypes[i].Equals(appTypes[i]))
+            {{
+                Console.WriteLine($""{{nsTypes[i].FullName}}"");
+                success = false;
+            }}
+        }}
+
+        if (success)
+        {{
+            Console.WriteLine(""Success"");
+            return 0;
+        }}
+        return 1;
+    }}
+}}
+";
+
+            netStandardProject.SourceFiles["NSTypes.cs"] = $@"
+using System;
+public static class NS16LibClass
+{{
+    public static Type [] GetTypes()
+    {{
+        return new Type[]
+        {{
+            typeof(System.IO.Compression.ZipArchive),
+            typeof(System.IO.Compression.ZipArchiveEntry),
+            typeof(System.IO.Compression.ZipArchiveMode),
+            typeof(System.IO.Compression.ZipFile),
+            typeof(System.IO.Compression.ZipFileExtensions),
+        }};
+    }}
+}}
+";
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod: callingMethod, identifier: useSdk ? "_sdk" : string.Empty)
+                            .WithProjectChanges((projectPath, project) =>
+                            {
+                                if (Path.GetFileNameWithoutExtension(projectPath) == testProject.Name)
+                                {
+                                    string folder = Path.GetDirectoryName(projectPath);
+
+                                    //  Adding this binding redirect is the workaround for ZipFile on .NET 4.7.1
+                                    //  See https://github.com/Microsoft/dotnet/blob/master/releases/net471/KnownIssues/623552-BCL%20Higher%20assembly%20versions%20that%204.0.0.0%20for%20System.IO.Compression.ZipFile%20cannot%20be%20loaded%20without%20a%20binding%20redirect.md
+                                    File.WriteAllText(Path.Combine(folder, "app.config"),
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
+      <dependentAssembly>
+        <assemblyIdentity name=""System.IO.Compression.ZipFile"" publicKeyToken=""b77a5c561934e089"" culture=""neutral"" />
+        <bindingRedirect oldVersion=""0.0.0.0-4.0.2.0"" newVersion=""4.0.0.0"" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+");
+                                    var ns = project.Root.Name.Namespace;
+
+                                    project.Root.Elements(ns + "ItemGroup").Last().Add(
+                                        new XElement(ns + "None", new XAttribute("Include", "app.config")));
+
+                                }
+                            })
+                            .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand
+                .Execute("/v:m")
+                .Should()
+                .Pass()
+                .And
+                //  warning MSB3836: The explicit binding redirect on "System.IO.Compression.ZipFile, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+                //  conflicts with an autogenerated binding redirect. Consider removing it from the application configuration file or disabling
+                //  autogenerated binding redirects. The build will replace it with: "<bindingRedirect oldVersion="0.0.0.0-4.0.3.0" newVersion="4.0.3.0"
+                //  xmlns="urn:schemas-microsoft-com:asm.v1" />"
+                .NotHaveStdOutContaining("MSB3836");
+
+            var exePath = Path.Combine(buildCommand.GetOutputDirectory(testProject.TargetFrameworks).FullName, testProject.Name + ".exe");
+
+            Command.Create(exePath, Array.Empty<string>())
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass();
+
+
         }
     }
 }
