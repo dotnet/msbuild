@@ -175,7 +175,7 @@
 
       <!-- Replace the line below with this line when the following issue is resolved: https://github.com/dotnet/cli/issues/9672
               <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageVersion)</SharedFxRpmPackageName> -->
-      <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxDebianPackageFileVersion)</SharedFxRpmPackageName>
+      <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageFileVersion)</SharedFxRpmPackageName>
 
       <SharedFxRpmPackageName>$(SharedFxRpmPackageName.ToLower())</SharedFxRpmPackageName>
       <SharedFxRpmPackageFileName>dotnet-runtime-$(SharedFxRpmPackageFileVersion)</SharedFxRpmPackageFileName>
