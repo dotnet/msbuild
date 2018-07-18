@@ -73,7 +73,7 @@ HTTPS を構成する方法の詳細については、https://go.microsoft.com/f
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">ユーザーのホーム ディレクトリを特定できませんでした。使用するディレクトリを指定するには、'{0}' 環境変数を設定してください。</target>
         <note />
       </trans-unit>
     </body>

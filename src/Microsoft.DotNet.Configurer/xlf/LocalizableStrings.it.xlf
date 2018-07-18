@@ -73,7 +73,7 @@ Per altre informazioni sulla configurazione di HTTPS, vedere https://go.microsof
       </trans-unit>
       <trans-unit id="FailedToDetermineUserHomeDirectory">
         <source>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</source>
-        <target state="new">The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</target>
+        <target state="translated">Non è stato possibile determinare la home directory dell'utente. Impostare la variabile di ambiente '{0}' per specificare la directory da usare.</target>
         <note />
       </trans-unit>
     </body>

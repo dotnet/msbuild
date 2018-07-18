@@ -91,7 +91,7 @@ Esta acción es equivalente a eliminar project.assets.json.</target>
       </trans-unit>
       <trans-unit id="CmdInteractiveRestoreOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
         <note />
       </trans-unit>
     </body>

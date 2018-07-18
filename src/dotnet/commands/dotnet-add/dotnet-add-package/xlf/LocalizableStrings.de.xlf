@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="CmdInteractiveRestoreDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">Hiermit wird zugelassen, dass der Befehl anhält und auf eine Benutzereingabe oder Aktion wartet (beispielsweise auf den Abschluss der Authentifizierung).</target>
         <note />
       </trans-unit>
     </body>

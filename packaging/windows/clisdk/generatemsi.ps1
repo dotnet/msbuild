@@ -10,7 +10,8 @@ param(
     [Parameter(Mandatory=$true)][string]$DotnetCLIDisplayVersion,
     [Parameter(Mandatory=$true)][string]$DotnetCLINugetVersion,
     [Parameter(Mandatory=$true)][string]$UpgradeCode,
-    [Parameter(Mandatory=$true)][string]$Architecture
+    [Parameter(Mandatory=$true)][string]$Architecture,
+    [Parameter(Mandatory=$true)][string]$StableFileIdForApphostTransform
 )
 
 . "$PSScriptRoot\..\..\..\scripts\common\_common.ps1"
@@ -26,7 +27,19 @@ function RunHeat
 
     Write-Output Running heat..
 
-    .\heat.exe dir `"$inputDir`" -template fragment -sreg -gg -var var.DotnetSrc -cg InstallFiles -srd -dr DOTNETHOME -out $InstallFileswsx | Out-Host
+    # -t $StableFileIdForApphostTransform to avoid sign check baseline apphost.exe name changes every build. Sign check uses File Id in MSI as whitelist name.
+    # Template apphost.exe get a new "File Id" in msi different every time (since File Id is generated according to file
+    # path, and file path has version number)
+    # use XSLT tranform to match the file path contains "AppHostTemplate\apphost.exe" and give it the same ID all the time.
+
+    .\heat.exe dir `"$inputDir`" -template fragment  `
+        -sreg -gg  `
+        -var var.DotnetSrc  `
+        -cg InstallFiles  `
+        -srd  `
+        -dr DOTNETHOME  `
+        -t $StableFileIdForApphostTransform  `
+        -out $InstallFileswsx | Out-Host
 
     if($LastExitCode -ne 0)
     {

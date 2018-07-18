@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">
         <source>The paths to the projects to remove from the solution.</source>
-        <target state="needs-review-translation">Çözümden kaldırılacak projelerin yolları.</target>
+        <target state="translated">Çözümden kaldırılacak projelerin yolları.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectsHeader">

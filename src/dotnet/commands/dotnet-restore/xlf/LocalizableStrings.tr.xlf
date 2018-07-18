@@ -91,7 +91,7 @@ project.assets.json öğesini silmeyle eşdeğerdir.</target>
       </trans-unit>
       <trans-unit id="CmdInteractiveRestoreOptionDescription">
         <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
-        <target state="new">Allows the command to stop and wait for user input or action (for example to complete authentication).</target>
+        <target state="translated">Komutun durup kullanıcı girişini veya eylemini (örneğin, kimlik doğrulamasının tamamlanmasını) beklemesine izin verir .</target>
         <note />
       </trans-unit>
     </body>

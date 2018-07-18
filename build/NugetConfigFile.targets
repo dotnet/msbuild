@@ -30,6 +30,7 @@
     <add key="container-tools" value="https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json" />
     <add key="linux-musl-bootstrap-feed" value="https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json" />
     <add key="dotnet-msbuild" value="https://dotnet.myget.org/F/msbuild/api/v3/index.json" />
+    <add key="myget-vstest" value="https://dotnet.myget.org/F/vstest/api/v3/index.json" />
         ]]>
       </NugetConfigCLIFeeds>
 

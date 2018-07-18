@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .HaveStdOutContaining("Hello Portable World!");;
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
         public void ItCanRunToolsThatPrefersTheCliRuntimeEvenWhenTheToolItselfDeclaresADifferentRuntime()
         {
             var testInstance = TestAssets.Get("MSBuildTestApp")
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
         public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
         {
             var repoDirectoriesProvider = new RepoDirectoriesProvider();

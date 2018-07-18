@@ -276,4 +276,7 @@
 
 dotnet tool install --global {1}</value>
   </data>
+  <data name="DotnetCliHomeUsed" xml:space="preserve">
+    <value>Using home directory '{0}' set by the '{1}' environment variable.</value>
+  </data>
 </root>
