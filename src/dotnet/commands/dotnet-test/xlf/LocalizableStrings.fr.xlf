@@ -62,10 +62,10 @@
       <trans-unit id="CmdLoggerDescription">
         <source>The logger to use for test results.
                                         Examples:
-                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">Journaliseur à utiliser pour les résultats des tests.
+        <target state="needs-review-translation">Journaliseur à utiliser pour les résultats des tests.
                                         Exemples :
                                         Journal au format trx avec un nom de fichier unique : --logger trx
                                         Journal au format trx avec le nom de fichier spécifié : --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
