@@ -111,7 +111,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Cancel when handling Ctrl-C
         /// </summary>
-        private static CancellationTokenSource s_cts = new CancellationTokenSource();
+        private static CancellationTokenSource s_buildCancellationSource = new CancellationTokenSource();
 
         /// <summary>
         /// Static constructor
@@ -815,12 +815,12 @@ namespace Microsoft.Build.CommandLine
 
             e.Cancel = true; // do not terminate rudely
 
-            if (s_cts.IsCancellationRequested)
+            if (s_buildCancellationSource.IsCancellationRequested)
             {
                 return;
             }
 
-            s_cts.Cancel();
+            s_buildCancellationSource.Cancel();
 
             Console.WriteLine(ResourceUtilities.GetResourceString("AbortingBuild"));
 
@@ -1220,7 +1220,7 @@ namespace Microsoft.Build.CommandLine
 
                 // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
                 // That's so the build does not appear to have completed successfully.
-                if (s_cts.IsCancellationRequested)
+                if (s_buildCancellationSource.IsCancellationRequested)
                 {
                     buildManager.CancelAllSubmissions();
                 }
@@ -3391,7 +3391,7 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                replayEventSource.Replay(binaryLogFilePath, s_cts.Token);
+                replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
             }
             catch (Exception ex)
             {
