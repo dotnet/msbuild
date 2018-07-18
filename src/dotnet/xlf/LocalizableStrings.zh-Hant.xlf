@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="New">
         <source>New</source>
-        <target state="translated">新增</target>
+        <target state="translated">新建</target>
         <note />
       </trans-unit>
       <trans-unit id="List">
@@ -300,7 +300,7 @@
       </trans-unit>
       <trans-unit id="XWasNotExpected">
         <source>{0} was not expected.</source>
-        <target state="translated">未預期是 {0}。</target>
+        <target state="translated">不應該是 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="XNotProvided">

@@ -95,7 +95,7 @@
       </trans-unit>
       <trans-unit id="SolutionFile">
         <source>Solution file</source>
-        <target state="translated">Archivo de la solución</target>
+        <target state="translated">Archivo de solución</target>
         <note />
       </trans-unit>
       <trans-unit id="Executable">
@@ -270,7 +270,7 @@
       </trans-unit>
       <trans-unit id="XYDoesNotExist">
         <source>{0} `{1}` does not exist.</source>
-        <target state="translated">El {0} `{1}` no existe.</target>
+        <target state="translated">El {0} "{1}" no existe.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneXFound">
@@ -495,7 +495,7 @@
       </trans-unit>
       <trans-unit id="ReferenceDeleted">
         <source>Reference `{0}` deleted.</source>
-        <target state="translated">Se ha eliminado la referencia “{0}”.</target>
+        <target state="translated">Se ha eliminado la referencia "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOneReferenceToDelete">
