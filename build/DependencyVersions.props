@@ -23,7 +23,7 @@
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
-    <MicrosoftNETSdkPackageVersion>2.1.400-preview-63114-01</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>2.1.400-preview-63118-01</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>2.1.1</MicrosoftNETSdkRazorPackageVersion>
     <MicrosoftNETSdkWebPackageVersion>2.1.400-preview1-20180705-1834985</MicrosoftNETSdkWebPackageVersion>
@@ -31,7 +31,7 @@
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta3</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates20PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
-    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3-20180614-1775839</MicrosoftDotNetTestProjectTemplates20PackageVersion>
+    <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3-20180716-1864993</MicrosoftDotNetTestProjectTemplates20PackageVersion>
     <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta3</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
