@@ -1,16 +1,17 @@
 all-mono:
-	./build.sh -host mono -configuration Release -skipTests
+	./build.sh -hostType mono -configuration Release -skipTests
 
 test-mono:
-	./build.sh -host mono -configuration Release
+	./build.sh -hostType mono -configuration Release
 
 all-coreclr:
-	./build.sh -host core -skipTests
+	./build.sh -hostType core -skipTests
 
 test-coreclr:
-	./build.sh -host core
+	./build.sh -hostType core
 
 clean-%: clean
 
 clean:
 	rm -Rf artifacts
+	rm -Rf build/obj
