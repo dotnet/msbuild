@@ -172,7 +172,11 @@
       <SdkRpmPackageName>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkRpmPackageVersion)</SdkRpmPackageName>
       <SharedFxRpmPackageVersion>$(MicrosoftNETCoreAppMajorMinorVersion)</SharedFxRpmPackageVersion>
       <SharedFxRpmPackageFileVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxRpmPackageFileVersion>
-      <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageVersion)</SharedFxRpmPackageName>
+
+      <!-- Replace the line below with this line when the following issue is resolved: https://github.com/dotnet/cli/issues/9672
+              <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxRpmPackageVersion)</SharedFxRpmPackageName> -->
+      <SharedFxRpmPackageName>dotnet-runtime-$(SharedFxDebianPackageFileVersion)</SharedFxRpmPackageName>
+
       <SharedFxRpmPackageName>$(SharedFxRpmPackageName.ToLower())</SharedFxRpmPackageName>
       <SharedFxRpmPackageFileName>dotnet-runtime-$(SharedFxRpmPackageFileVersion)</SharedFxRpmPackageFileName>
       <SharedFxRpmPackageFileName>$(SharedFxRpmPackageFileName.ToLower())</SharedFxRpmPackageFileName>
@@ -180,7 +184,11 @@
       <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
       <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
       <HostRpmPackageName>dotnet-host</HostRpmPackageName>
-      <AspNetCoreSharedFxRpmPackageName>aspnetcore-runtime-$(AspNetCoreMajorMinorVersion)</AspNetCoreSharedFxRpmPackageName>
+
+      <!-- Replace the line below with this line when the following issue is resolved: https://github.com/dotnet/cli/issues/9672
+              <AspNetCoreSharedFxRpmPackageName>aspnetcore-runtime-$(AspNetCoreMajorMinorVersion)</AspNetCoreSharedFxRpmPackageName> -->
+      <AspNetCoreSharedFxRpmPackageName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxRpmPackageName>
+
       <AspNetCoreSharedFxRpmPackageName>$(AspNetCoreSharedFxRpmPackageName.ToLower())</AspNetCoreSharedFxRpmPackageName>
       <AspNetCoreSharedFxRpmPackageFileName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxRpmPackageFileName>
       <AspNetCoreSharedFxRpmPackageFileName>$(AspNetCoreSharedFxRpmPackageFileName.ToLower())</AspNetCoreSharedFxRpmPackageFileName>
@@ -241,12 +249,12 @@
                 ToolPath="$(RpmInstalledDirectory)" />
 
     <!-- Clean up Packages -->
-    <Exec Command="sudo yum remove -y $(SdkRpmPackageName)" />
-
-    <Exec Command="sudo yum remove -y $(AspNetCoreSharedFxRpmPackageFileName)" />
-    <Exec Command="sudo yum remove -y $(SharedFxRpmPackageFileName)" />
-    <Exec Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
-    <Exec Command="sudo yum remove -y $(HostRpmPackageName)" />
-    <Exec Command="sudo yum remove -y $(RuntimeDepsPackageFileName)" />
+    <!-- Remove the "ContinueOnError="WarnAndContinue"" when the following issue is resolved: https://github.com/dotnet/cli/issues/9672 -->
+    <Exec ContinueOnError="WarnAndContinue" Command="sudo yum remove -y $(SdkRpmPackageName)" />
+    <Exec ContinueOnError="WarnAndContinue" Command="sudo yum remove -y $(AspNetCoreSharedFxRpmPackageFileName)" />
+    <Exec ContinueOnError="WarnAndContinue" Command="sudo yum remove -y $(SharedFxRpmPackageFileName)" />
+    <Exec ContinueOnError="WarnAndContinue" Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
+    <Exec ContinueOnError="WarnAndContinue" Command="sudo yum remove -y $(HostRpmPackageName)" />
+    <Exec ContinueOnError="WarnAndContinue" Command="sudo yum remove -y $(RuntimeDepsPackageFileName)" />
   </Target>
 </Project>
