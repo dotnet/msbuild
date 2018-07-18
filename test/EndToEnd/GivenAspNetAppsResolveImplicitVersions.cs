@@ -18,7 +18,7 @@ namespace EndToEnd
 
         private const string PinnedAspNetCoreImplicitVersion = "2.1.1";
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9687")]
         public void PortablePublishWithLatestTFMUsesPinnedDownAspNetCoreAppVersion()
         {
             var _testInstance = TestAssets.Get(AspNetTestProject)

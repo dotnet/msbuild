@@ -239,7 +239,7 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
         public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
         {
             var testInstance = TestAssets.Get("AppWithDirectDepWithOutputName")
@@ -369,7 +369,7 @@ namespace Microsoft.DotNet.Tests
                 .Should().Fail();
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
         public void ToolsCanAccessDependencyContextProperly()
         {
             var testInstance = TestAssets.Get("DependencyContextFromTool")
