@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "TestTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = "netcoreapp2.2",
                 IsExe = true
             };
 
