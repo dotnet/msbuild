@@ -94,6 +94,7 @@
         UseHardlinksIfPossible="False" />
 
       <!-- Remove Shared Framework and Debian Packages -->
+      <!-- Remove the "ContinueOnError="WarnAndContinue"" when the following issue is resolved: https://github.com/dotnet/cli/issues/9672 -->
       <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
       <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
@@ -129,6 +130,7 @@
                   ToolPath="$(DebianInstalledDirectory)" />
 
       <!-- Clean up Packages -->
+      <!-- Remove the "ContinueOnError="WarnAndContinue"" when the following issue is resolved: https://github.com/dotnet/cli/issues/9672 -->
       <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
       <Exec ContinueOnError="WarnAndContinue" Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
