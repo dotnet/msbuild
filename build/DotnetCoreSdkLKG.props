@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <_DownloadAndExtractItem Include="DotNetCoreSdkLKGArchive"
-                           Condition="!Exists('$(DotNetCoreSdkLKGArchive)')">
+                           Condition="!Exists('$(DotNetCoreSdkLKGArchive)') and '$(DotNetBuildFromSource)' != 'true'">
       <Url>$(DotNetCoreSdkLKGDownloadUrl)</Url>
       <DownloadFileName>$(DotNetCoreSdkLKGArchive)</DownloadFileName>
       <ExtractDestination>$(DotNetCoreSdkLKGPublishDirectory)</ExtractDestination>
