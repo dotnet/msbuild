@@ -84,6 +84,36 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
+        [WindowsOnlyFact]
+        public void ItCreatesTwoCoverageFilesForMultiTargetedProject()
+        {
+            // Copy XunitMulti project in output directory of project dotnet-test.Tests
+            string testAppName = "XunitMulti";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance("3")
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+             string resultsDirectory = Path.Combine(testProjectDirectory, "RD");
+
+            // Delete resultsDirectory if it exist
+            if (Directory.Exists(resultsDirectory))
+            {
+                Directory.Delete(resultsDirectory, true);
+            }
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                                       .WithWorkingDirectory(testProjectDirectory)
+                                       .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --collect \"Code Coverage\" --results-directory {resultsDirectory}");
+
+            // Verify
+            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
+            Assert.Equal(2, coverageFileInfos.Length);
+        }
+
         [Fact]
         public void ItCanTestAMultiTFMProjectWithImplicitRestore()
         {
