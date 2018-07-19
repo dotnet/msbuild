@@ -278,7 +278,7 @@ public static class {project.Name}
 
                     itemGroup.Add(new XElement(ns + "PackageReference",
                         new XAttribute("Include", "NETStandard.Library"),
-                        new XAttribute("Version", "$(BundledNETStandardPackageVersion)")));
+                        new XAttribute("Version", "2.0.3")));
 
                     foreach (var dependency in ConflictResolutionAssets.ConflictResolutionDependencies)
                     {
@@ -385,80 +385,6 @@ public static class {project.Name}
             valuesWithMetadata.Single(v => v.value == "System.Net.Http")
                 .metadata["HintPath"]
                 .Should().Be(correctHttpReference);
-        }
-
-        [WindowsOnlyTheory]
-        [InlineData(null)]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void It_marks_extension_references_as_externally_resolved(bool? markAsExternallyResolved)
-        {
-            var project = new TestProject
-            {
-                Name = "NETFrameworkLibrary",
-                TargetFrameworks = "net462",
-                IsSdkProject = true
-            };
-
-            var netStandard2Project = new TestProject
-            {
-                Name = "NETStandard20Project",
-                TargetFrameworks = "netstandard2.0",
-                IsSdkProject = true
-            };
-
-            project.ReferencedProjects.Add(netStandard2Project);
-
-            var asset = _testAssetsManager.CreateTestProject(
-                project,
-                "ExternallyResolvedExtensions",
-                markAsExternallyResolved.ToString())
-                .WithProjectChanges((path, p) =>
-                {
-                    if (markAsExternallyResolved != null)
-                    {
-                        var ns = p.Root.Name.Namespace;
-                        p.Root.Add(
-                            new XElement(ns + "PropertyGroup",
-                                new XElement(ns + "MarkNETFrameworkExtensionAssembliesAsExternallyResolved",
-                                    markAsExternallyResolved)));
-                    }
-                })
-                .Restore(Log, project.Name);
-
-            var command = new GetValuesCommand(
-                Log,
-                Path.Combine(asset.Path, project.Name),
-                project.TargetFrameworks,
-                "Reference",
-                GetValuesCommand.ValueType.Item);
-
-            command.MetadataNames.AddRange(new[] { "ExternallyResolved", "HintPath" });
-            command.Execute().Should().Pass();
-
-            int frameworkReferenceCount = 0;
-            int extensionReferenceCount = 0;
-            var references = command.GetValuesWithMetadata();
-
-            foreach (var (value, metadata) in references)
-            {
-                if (metadata["HintPath"] == "")
-                {
-                    // implicit framework reference (not externally resolved)
-                    metadata["ExternallyResolved"].Should().BeEmpty();
-                    frameworkReferenceCount++;
-                }
-                else
-                {
-                    // reference added by Microsoft.NET.Build.Extensions
-                    metadata["ExternallyResolved"].Should().BeEquivalentTo((markAsExternallyResolved ?? true).ToString());
-                    extensionReferenceCount++;
-                }
-            }
-
-            // make sure both cases were encountered
-            frameworkReferenceCount.Should().BeGreaterThan(0);
-            extensionReferenceCount.Should().BeGreaterThan(0);
         }
 
         [FullMSBuildOnlyFact]

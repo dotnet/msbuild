@@ -359,7 +359,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1060: "}</comment>
   </data>
   <data name="MismatchedPlatformPackageVersion" xml:space="preserve">
-    <value>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</value>
+    <value>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</value>
     <comment>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
 {1} - Restored version of platform package
@@ -380,5 +380,21 @@ The following are names of parameters or literal values and should not be transl
   <data name="CannotFindApphostForRid" xml:space="preserve">
     <value>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</value>
     <comment>{StrBegin="NETSDK1065: "}</comment>
+  </data>
+  <data name="CannotUseAppHostWithoutRuntimeIdentifier" xml:space="preserve">
+    <value>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</value>
+    <comment>{StrBegin="NETSDK1066: "}</comment>
+  </data>
+  <data name="CannotUseSelfContainedWithoutAppHost" xml:space="preserve">
+    <value>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</value>
+    <comment>{StrBegin="NETSDK1067: "}</comment>
+  </data>
+  <data name="FrameworkDependentAppHostRequiresVersion21" xml:space="preserve">
+    <value>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</value>
+    <comment>{StrBegin="NETSDK1068: "}</comment>
+  </data>
+  <data name="NETFrameworkToNonBuiltInNETStandard" xml:space="preserve">
+    <value>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</value>
+    <comment>{StrBegin="NETSDK1069: "}</comment>
   </data>
 </root>

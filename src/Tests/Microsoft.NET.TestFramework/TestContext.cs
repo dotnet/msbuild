@@ -45,7 +45,7 @@ namespace Microsoft.NET.TestFramework
             }
         }
 
-        public const string LatestRuntimePatchForNetCoreApp2_0 = "2.0.7";
+        public const string LatestRuntimePatchForNetCoreApp2_0 = "2.0.9";
 
         public void AddTestEnvironmentVariables(SdkCommandSpec command)
         {

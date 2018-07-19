@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using Microsoft.Build.Utilities;
+using NuGet.Frameworks;
 
 namespace Microsoft.NET.TestFramework.ProjectConstruction
 {
@@ -113,6 +115,15 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 sourceProject = Path.Combine(sourceProjectBase, "NetFrameworkProject", "NetFrameworkProject.csproj");
             }
 
+            //  Copy any additional files from template
+            foreach (var file in Directory.GetFiles(Path.GetDirectoryName(sourceProject)))
+            {
+                if (file != sourceProject)
+                {
+                    File.Copy(file, Path.Combine(targetFolder, Path.GetFileName(file)));
+                }
+            }
+
             var projectXml = XDocument.Load(sourceProject);
 
             var ns = projectXml.Root.Name.Namespace;
@@ -144,6 +155,15 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
                 packageReferenceItemGroup.Add(new XElement(ns + "DotNetCliToolReference",
                     new XAttribute("Include", $"{dotnetCliToolReference.ID}"),
                     new XAttribute("Version", $"{dotnetCliToolReference.Version}")));
+            }
+
+            //  If targeting .NET Framework and a required targeting pack isn't installed, add a
+            //  PackageReference to get the targeting pack from a NuGet package
+            if (NeedsReferenceAssemblyPackages())
+            {
+                packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
+                    new XAttribute("Include", $"Microsoft.NETFramework.ReferenceAssemblies"),
+                    new XAttribute("Version", $"1.0.0-alpha-004")));
             }
 
             var targetFrameworks = IsSdkProject ? TargetFrameworks.Split(';') : new[] { "net" };
@@ -297,6 +317,55 @@ namespace {this.Name}
             {
                 File.WriteAllText(Path.Combine(targetFolder, kvp.Key), kvp.Value);
             }
+        }
+
+        private bool NeedsReferenceAssemblyPackages()
+        {
+            //  Check to see if NuGet packages for reference assemblies need to be referenced (because
+            //  the targeting pack is not installed)
+            bool needsReferenceAssemblyPackages = false;
+            if (IsSdkProject)
+            {
+                foreach (var shortFrameworkName in TargetFrameworks.Split(';').Where(tf => GetShortTargetFrameworkIdentifier(tf) == "net"))
+                {
+                    //  Normalize version to the form used in the reference assemblies path
+                    var version = NuGetFramework.Parse(shortFrameworkName).Version;
+                    version = new Version(version.Major, version.Minor, version.Build);
+                    if (version.Build == 0)
+                    {
+                        version = new Version(version.Major, version.Minor);
+                    }
+                    
+                    if (!ReferenceAssembliesAreInstalled(version.ToString()))
+                    {
+                        needsReferenceAssemblyPackages = true;
+                    }
+                }
+            }
+            else
+            {
+                needsReferenceAssemblyPackages = !ReferenceAssembliesAreInstalled(TargetFrameworkVersion);
+            }
+
+            return needsReferenceAssemblyPackages;
+        }
+
+        private bool ReferenceAssembliesAreInstalled(string targetFrameworkVersion)
+        {
+            if (!targetFrameworkVersion.StartsWith('v'))
+            {
+                targetFrameworkVersion = "v" + targetFrameworkVersion;
+            }
+
+            // Use the MSBuild API to find the path to the 4.6.1 reference assemblies, and locate the desired reference assemblies relative to that.
+            var net461referenceAssemblies = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version461);
+            if (net461referenceAssemblies == null)
+            {
+                //  4.6.1 reference assemblies not found, assume that the version we want isn't available either
+                return false;
+            }
+            var requestedReferenceAssembliesPath = Path.Combine(new DirectoryInfo(net461referenceAssemblies).Parent.FullName, targetFrameworkVersion);
+            return Directory.Exists(requestedReferenceAssembliesPath);
         }
 
         public override string ToString()

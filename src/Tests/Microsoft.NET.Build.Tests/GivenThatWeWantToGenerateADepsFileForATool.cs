@@ -37,7 +37,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "TestTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = "netcoreapp2.2",
                 IsExe = true
             };
 
@@ -57,7 +57,7 @@ namespace Microsoft.NET.Build.Tests
             {
                 Name = "DependencyContextTool",
                 IsSdkProject = true,
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = "netcoreapp2.2",
                 IsExe = true
             };
 
@@ -101,13 +101,16 @@ class Program
 
             var toolProjectInstance = _testAssetsManager.CreateTestProject(toolProject, callingMethod, identifier: toolProject.Name);
 
-            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreMyGetFeed);
+            NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
-            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
+            // Workaorund https://github.com/dotnet/cli/issues/9701
+            var useBundledNETCoreAppPackage = "/p:UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion=true";
+
+            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n", useBundledNETCoreAppPackage);
 
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
-            packCommand.Execute()
+            packCommand.Execute(useBundledNETCoreAppPackage)
                 .Should()
                 .Pass();
 
@@ -133,7 +136,7 @@ class Program
                         new XAttribute("Version", "1.0.0")));
                 });
 
-            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreMyGetFeed };
+            List<string> sources = new List<string>() { NuGetConfigWriter.DotnetCoreBlobFeed };
             sources.Add(nupkgPath);
 
             NuGetConfigWriter.Write(toolReferencerInstance.TestRoot, sources);

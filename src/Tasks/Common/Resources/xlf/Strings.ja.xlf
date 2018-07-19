@@ -7,6 +7,26 @@
         <target state="translated">NETSDK1001: 可能性のあるターゲット フレームワークを少なくとも 1 つ指定する必要があります。</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
+      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
+        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
+        <target state="translated">NETSDK1066: RuntimeIdentifier を指定して、フレームワークに依存するアプリケーションをアプリケーション ホストを使用して発行する必要があります。</target>
+        <note>{StrBegin="NETSDK1066: "}</note>
+      </trans-unit>
+      <trans-unit id="CannotUseSelfContainedWithoutAppHost">
+        <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
+        <target state="translated">NETSDK1067: アプリケーション ホストを使用するには、自己完結型のアプリケーションが必要です。SelfContained を false に設定するか、UseAppHost を true に設定してください。</target>
+        <note>{StrBegin="NETSDK1067: "}</note>
+      </trans-unit>
+      <trans-unit id="FrameworkDependentAppHostRequiresVersion21">
+        <source>NETSDK1068: The framework-dependent application host requires a target framework of at least 'netcoreapp2.1'.</source>
+        <target state="translated">NETSDK1068: フレームワークに依存するアプリケーション ホストには、最低でも 'netcoreapp2.1' のターゲット フレームワークが必要です。</target>
+        <note>{StrBegin="NETSDK1068: "}</note>
+      </trans-unit>
+      <trans-unit id="NETFrameworkToNonBuiltInNETStandard">
+        <source>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</source>
+        <target state="translated">NETSDK1069: このプロジェクトは .NET Standard 1.5 以上をターゲットとするライブラリを使用します。また、このプロジェクトは、そのバージョンの .NET Standard に対するサポートが組み込まれていない .NET Framework のバージョンをターゲットとしています。一連の既知の問題について、https://aka.ms/net-standard-known-issues をご覧ください。.NET Framework 4.7.2 への再ターゲットを検討してください。</target>
+        <note>{StrBegin="NETSDK1069: "}</note>
+      </trans-unit>
       <trans-unit id="NoCompatibleTargetFramework">
         <source>NETSDK1002: Project '{0}' targets '{2}'. It cannot be referenced by a project that targets '{1}'.</source>
         <target state="translated">NETSDK1002: プロジェクト '{0}' は、'{2}' を対象としています。'{1}' を対象とするプロジェクトは、これを参照できません。</target>
@@ -91,6 +111,11 @@
         <source>NETSDK1018: Invalid NuGet version string: '{0}'.</source>
         <target state="translated">NETSDK1018: 無効な NuGet バージョン文字列: '{0}'。</target>
         <note>{StrBegin="NETSDK1018: "}</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedFramework">
+        <source>NETSDK1019: {0} is an unsupported framework.</source>
+        <target state="translated">NETSDK1019: {0} は、サポートされていないフレームワークです。</target>
+        <note>{StrBegin="NETSDK1019: "}</note>
       </trans-unit>
       <trans-unit id="DuplicateItemsError">
         <source>NETSDK1022: Duplicate '{0}' items were included. The .NET SDK includes '{0}' items from your project directory by default. You can either remove these items from your project file, or set the '{1}' property to '{2}' if you want to explicitly include them in your project file. For more information, see {4}. The duplicate items were: {3}</source>
@@ -212,11 +237,6 @@
         <target state="translated">NETSDK1044: '{0}' 行 {1} からの PlatformManifest の解析でエラーが発生しました。{2} '{3}' は無効でした。</target>
         <note>{StrBegin="NETSDK1044: "}</note>
       </trans-unit>
-      <trans-unit id="UnsupportedFramework">
-        <source>NETSDK1019: {0} is an unsupported framework.</source>
-        <target state="translated">NETSDK1019: {0} は、サポートされていないフレームワークです。</target>
-        <note>{StrBegin="NETSDK1019: "}</note>
-      </trans-unit>
       <trans-unit id="UnsupportedTargetFrameworkVersion">
         <source>NETSDK1045: The current .NET SDK does not support targeting {0} {1}.  Either target {0} {2} or lower, or use a version of the .NET SDK that supports {0} {1}.</source>
         <target state="translated">NETSDK1045: 現在の .NET SDK は、ターゲットとする {0} {1} をサポートしていません。{0} {2} 以下をターゲットとするか、{0} {1} をサポートする .NET SDK のバージョンを使用してください。</target>
@@ -232,11 +252,6 @@
         <target state="translated">NETSDK1046: TargetFramework 値 '{0}' が無効です。複数をターゲットとするには、代わりに 'TargetFrameworks' プロパティを使用してください。</target>
         <note>{StrBegin="NETSDK1046: "}</note>
       </trans-unit>
-      <trans-unit id="SkippingAdditionalProbingPaths">
-        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
-        <target state="translated">NETSDK1048: 'AdditionalProbingPaths' が GenerateRuntimeConfigurationFiles に指定されましたが、'RuntimeConfigDevPath' が空であるためスキップされます。</target>
-        <note>{StrBegin="NETSDK1048: "}</note>
-      </trans-unit>
       <trans-unit id="GetDependsOnNETStandardFailedWithException">
         <source>NETSDK1049: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0} {1}</source>
         <target state="translated">NETSDK1049: 解決されたファイルは、無効なイメージが含まれているか、メタデータが存在しないか、またはアクセスできません。{0} {1}</target>
@@ -246,6 +261,11 @@
         <source>NETSDK1050: The version of Microsoft.NET.Sdk used by this project is insufficient to support references to libraries targeting .NET Standard 1.5 or higher.  Please install version 2.0 or higher of the .NET Core SDK.</source>
         <target state="translated">NETSDK1050: このプロジェクトで使用される Microsoft.NET.Sdk のバージョンは、.NET Standard 1.5 以上を対象とするライブラリへの参照をサポートするには不十分です。.NET Core SDK のバージョン 2.0 以上をインストールしてください。</target>
         <note>{StrBegin="NETSDK1050: "}</note>
+      </trans-unit>
+      <trans-unit id="SkippingAdditionalProbingPaths">
+        <source>NETSDK1048: 'AdditionalProbingPaths' were specified for GenerateRuntimeConfigurationFiles, but are being skipped because 'RuntimeConfigDevPath' is empty.</source>
+        <target state="translated">NETSDK1048: 'AdditionalProbingPaths' が GenerateRuntimeConfigurationFiles に指定されましたが、'RuntimeConfigDevPath' が空であるためスキップされます。</target>
+        <note>{StrBegin="NETSDK1048: "}</note>
       </trans-unit>
       <trans-unit id="CannotHaveRuntimeIdentifierPlatformMismatchPlatformTarget">
         <source>NETSDK1032: The RuntimeIdentifier platform '{0}' and the PlatformTarget '{1}' must be compatible.</source>
@@ -294,8 +314,8 @@ The following are names of parameters or literal values and should not be transl
         <note>{StrBegin="NETSDK1060: "}</note>
       </trans-unit>
       <trans-unit id="MismatchedPlatformPackageVersion">
-        <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead.  To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish.  Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore.</source>
-        <target state="translated">NETSDK1061: プロジェクトは {0} バージョン {1} を使用して復元されましたが、現在の設定ではバージョン {2} を使用すべきところでした。この問題を解決するには、復元と後続の操作 (ビルドや発行など) で確実に同じ設定を使用するようにしてください。通常、この問題は、RuntimeIdentifier プロパティがビルドまたは発行の際に設定されたものの、復元の際には設定されなかったことで生じます。</target>
+        <source>NETSDK1061: The project was restored using {0} version {1}, but with current settings, version {2} would be used instead. To resolve this issue, make sure the same settings are used for restore and for subsequent operations such as build or publish. Typically this issue can occur if the RuntimeIdentifier property is set during build or publish but not during restore. For more information, see https://aka.ms/dotnet-runtime-patch-selection.</source>
+        <target state="translated">NETSDK1061: プロジェクトは {0} バージョン {1} を使用して復元されましたが、現在の設定では、バージョン {2} が代わりに使用されます。この問題を解決するには、復元およびこれ以降の操作 (ビルドや発行など) で同じ設定を使用していることをご確認ください。通常この問題は、ビルドや発行の実行時に RuntimeIdentifier プロパティを設定したが、復元時には設定していない場合に発生することがあります。詳しくは、https://aka.ms/dotnet-runtime-patch-selection を参照してください。</target>
         <note>{StrBegin="NETSDK1061: "}
 {0} - Package Identifier for platform package
 {1} - Restored version of platform package
