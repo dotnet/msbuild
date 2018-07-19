@@ -103,11 +103,14 @@ class Program
 
             NuGetConfigWriter.Write(toolProjectInstance.TestRoot, NuGetConfigWriter.DotnetCoreBlobFeed);
 
-            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n");
+            // Workaorund https://github.com/dotnet/cli/issues/9701
+            var useBundledNETCoreAppPackage = "/p:UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion=true";
+
+            toolProjectInstance.Restore(Log, toolProject.Name, "/v:n", useBundledNETCoreAppPackage);
 
             var packCommand = new PackCommand(Log, Path.Combine(toolProjectInstance.TestRoot, toolProject.Name));
 
-            packCommand.Execute()
+            packCommand.Execute(useBundledNETCoreAppPackage)
                 .Should()
                 .Pass();
 
