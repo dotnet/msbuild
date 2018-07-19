@@ -229,7 +229,7 @@ namespace Microsoft.Build.Utilities
         public string HelpKeywordPrefix { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         protected string TaskName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public System.Resources.ResourceManager TaskResources { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public string ExtractMessageCode(string message, out string messageWithoutCodePrefix) { messageWithoutCodePrefix = default(string); throw null; }
+        public string ExtractMessageCode(string message, out string messageWithoutCodePrefix) { throw null; }
         public virtual string FormatResourceString(string resourceName, params object[] args) { throw null; }
         public virtual string FormatString(string unformatted, params object[] args) { throw null; }
         public virtual string GetResourceMessage(string resourceName) { throw null; }
@@ -342,7 +342,7 @@ namespace Microsoft.Build.Utilities
         public static System.Collections.Generic.IEnumerable<string> GetPlatformsForSDK(string sdkIdentifier, System.Version sdkVersion) { throw null; }
         public static System.Collections.Generic.IEnumerable<string> GetPlatformsForSDK(string sdkIdentifier, System.Version sdkVersion, string[] diskRoots, string registryRoot) { throw null; }
         public static string GetProgramFilesReferenceAssemblyRoot() { throw null; }
-        public static string GetSDKContentFolderPath(string sdkIdentifier, string sdkVersion, string targetPlatformIdentifier, string targetPlatformMinVersion, string targetPlatformVersion, string folderName, string diskRoot=null) { throw null; }
+        public static string GetSDKContentFolderPath(string sdkIdentifier, string sdkVersion, string targetPlatformIdentifier, string targetPlatformMinVersion, string targetPlatformVersion, string folderName, string diskRoot = null) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKDesignTimeFolders(string sdkRoot) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKDesignTimeFolders(string sdkRoot, string targetConfiguration, string targetArchitecture) { throw null; }
         public static System.Collections.Generic.IList<string> GetSDKRedistFolders(string sdkRoot) { throw null; }
