@@ -40,7 +40,7 @@
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <VSWhereVersion>2.2.7</VSWhereVersion>
 
-    <GenApiVersion>2.1.0-prerelease-02404-02</GenApiVersion>
+    <GenApiVersion>2.2.0-preview1-03019-01</GenApiVersion>
     <GitVersioningVersion>2.1.23</GitVersioningVersion>
     <LargeAddressAwareVersion>1.0.3</LargeAddressAwareVersion>
   </PropertyGroup>
