@@ -5,6 +5,7 @@ phases:
 - phase: FullOnWindows
   displayName: "Build on Windows using full MSBuild"
   queue: 'Hosted VS2017'
+  timeoutInMinutes: 60
   steps:
   - script: set
     displayName: Command Line Script
@@ -48,6 +49,7 @@ phases:
 - phase: CoreOnWindows
   displayName: "Build on Windows using .NET Core MSBuild"
   queue: 'Hosted VS2017'
+  timeoutInMinutes: 60
   steps:
   - script: set
     displayName: Command Line Script
@@ -92,6 +94,7 @@ phases:
 - phase: CoreOnLinux
   displayName: "Build and test on Linux using .NET Core MSBuild"
   queue: Hosted Linux Preview
+  timeoutInMinutes: 60
   steps:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
@@ -118,6 +121,7 @@ phases:
 - phase: CoreOnMac
   displayName: "Build and test on macOS using .NET Core MSBuild"
   queue: 'Hosted macOS Preview'
+  timeoutInMinutes: 60
   steps:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
@@ -142,6 +146,7 @@ phases:
 
 #- phase: MonoOnMac
 #  queue: 'Hosted macOS Preview'
+#  timeoutInMinutes: 60
 #  steps:
 #  - script: |
 #     set -v
@@ -166,6 +171,7 @@ phases:
 
 # - phase: MonoOnLinux
 #   queue: Hosted Linux Preview
+#   timeoutInMinutes: 60
 #   steps:
 #   - bash: . 'build/install-mono.sh'
 #     displayName: Install Mono
