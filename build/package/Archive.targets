@@ -17,14 +17,14 @@
     </PropertyGroup>
 
     <ZipFileCreateFromDirectory
-        Condition=" '$(OSName)' == 'win' "
+        Condition=" $(GenerateArchivesDestinationArchive.EndsWith('.zip')) "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
         OverwriteDestination="true"
         ExcludePatterns="%(GenerateArchivesInputsOutputs.ExcludePatterns)" />
 
     <TarGzFileCreateFromDirectory
-        Condition=" '$(OSName)' != 'win' "
+        Condition=" $(GenerateArchivesDestinationArchive.EndsWith('.tar.gz')) "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
         OverwriteDestination="true"
