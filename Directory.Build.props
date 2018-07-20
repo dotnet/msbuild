@@ -17,6 +17,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <RelativeGeneratedPropsDir>bin/obj</RelativeGeneratedPropsDir>
+    <GeneratedPropsDir>$(RepoRoot)/$(RelativeGeneratedPropsDir)</GeneratedPropsDir>
+    <OrchestratedPackageVersionsProps>$(GeneratedPropsDir)/OrchestratedPackageVersionsProps.props</OrchestratedPackageVersionsProps>
 
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
     <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
