@@ -187,7 +187,7 @@ function InitializeCustomToolset {
 
   InstallDotNetSharedFramework $dotnetRoot "1.0.5"
   InstallDotNetSharedFramework $dotnetRoot "1.1.2"
-  InstallDotNetSharedFramework $dotnetRoot "2.0.0"
+  InstallDotNetSharedFramework $dotnetRoot "2.1.0"
 
   CreateBuildEnvScript
   InstallNuget
