@@ -17,14 +17,6 @@
     </PropertyGroup>
 
     <ZipFileCreateFromDirectory
-        Condition=" '$(OSName)' == 'win' "
-        SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
-        DestinationArchive="$(GenerateArchivesDestinationArchive)"
-        OverwriteDestination="true"
-        ExcludePatterns="%(GenerateArchivesInputsOutputs.ExcludePatterns)" />
-
-    <TarGzFileCreateFromDirectory
-        Condition=" '$(OSName)' != 'win' "
         SourceDirectory="%(GenerateArchivesInputsOutputs.InputDirectory)"
         DestinationArchive="$(GenerateArchivesDestinationArchive)"
         OverwriteDestination="true"

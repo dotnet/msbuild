@@ -8,6 +8,6 @@
 
     <PropertyGroup>
       <IsDesktopAvailable>False</IsDesktopAvailable>
-      <IsDesktopAvailable Condition=" '$(OSName)' == 'win' ">True</IsDesktopAvailable>
+      <IsDesktopAvailable Condition=" '$(OS)' == 'Windows_NT' ">True</IsDesktopAvailable>
     </PropertyGroup>
 </Project>
