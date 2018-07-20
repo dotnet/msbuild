@@ -68,6 +68,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string Pack = "Pack";
         public const string ReferenceSourceTarget = "ReferenceSourceTarget";
         public const string TargetPath = "TargetPath";
+        public const string CopyLocal = "CopyLocal";
 
         // Content files
         public const string PPOutputPath = "PPOutputPath";

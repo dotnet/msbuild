@@ -212,7 +212,7 @@ static class Program
 
             var exePath = Path.Combine(publishDirectory.FullName, testProject.Name + ".dll");
 
-            //  We want to test a .NET Core 2.0 app rolling forward to .NET Core 2.1.
+            //  We want to test a .NET Core 2.0 app rolling forward to .NET Core 2.2.
             //  This wouldn't happen in our test environment as we also have the .NET Core 2.0 shared
             //  framework installed.  So we get the RuntimeFrameworkVersion of an app
             //  that targets .NET Core 2.1, and then use the --fx-version parameter to the host
@@ -246,7 +246,7 @@ static class Program
             var testProject = new TestProject()
             {
                 Name = nameof(GetRollForwardNetCoreAppVersion),
-                TargetFrameworks = "netcoreapp2.1",
+                TargetFrameworks = "netcoreapp2.2",
                 IsSdkProject = true,
                 IsExe = true
             };

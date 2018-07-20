@@ -49,7 +49,9 @@ Copyright (c) .NET Foundation. All rights reserved.
        in the project file. -->
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <!-- If targeting the same release that is bundled with the .NET Core SDK, use the bundled package version provided by Microsoft.NETCoreSdk.BundledVersions.props -->
+    <!-- This is disabled due to https://github.com/dotnet/sdk/issues/2410
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETStandardTargetFrameworkVersion)'">$(BundledNETStandardPackageVersion)</NETStandardImplicitPackageVersion>
+    -->
 
     <!-- If targeting .NET Standard 1.x, use version 1.6.1 of the package.  This is so that when projects are packed, the dependency on the package produced won't change when
          updating to the 2.0 or higher SDK.  When targeting .NET Standard 2.0 or higher, the NETStandard.Library reference won't show up as a dependency of the package
@@ -57,7 +59,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' =='' And '$(_TargetFrameworkVersionWithoutV)' &lt; '2.0'">1.6.1</NETStandardImplicitPackageVersion>
     
     <!-- Default to use the latest stable release. -->
-    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">2.0.2</NETStandardImplicitPackageVersion>
+    <NETStandardImplicitPackageVersion Condition="'$(NETStandardImplicitPackageVersion)' ==''">2.0.3</NETStandardImplicitPackageVersion>
   </PropertyGroup>
 
   <!--
@@ -108,11 +110,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.0'">1.0.5</DefaultNetCorePatchVersion>
     <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '1.1'">1.1.2</DefaultNetCorePatchVersion>
 
-    <DefaultNetCorePatchVersion Condition="'$(_TargetFrameworkVersionWithoutV)' == '2.1'">2.1.0</DefaultNetCorePatchVersion>
-
     <!-- If targeting the same pre-release that is bundled with the .NET Core SDK, use the bundled package version
          provided by Microsoft.NETCoreSdk.BundledVersions.props -->
-    <DefaultNetCorePatchVersion Condition="'$(DefaultNetCorePatchVersion)' == '' and '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)'">$(BundledNETCoreAppPackageVersion)</DefaultNetCorePatchVersion>
+    <DefaultNetCorePatchVersion Condition="'$(DefaultNetCorePatchVersion)' == '' And '$(_TargetFrameworkVersionWithoutV)' == '$(BundledNETCoreAppTargetFrameworkVersion)' And '$(UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion)' == 'true'">$(BundledNETCoreAppPackageVersion)</DefaultNetCorePatchVersion>
     <!-- If not covered by the previous cases use the target framework version for the default patch version -->
     <DefaultNetCorePatchVersion Condition="'$(DefaultNetCorePatchVersion)' == ''">$(_TargetFrameworkVersionWithoutV)</DefaultNetCorePatchVersion>
   </PropertyGroup>

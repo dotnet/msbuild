@@ -93,7 +93,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <CoreCleanDependsOn>
-      _SdkBeforeClean
+      _SdkBeforeClean;
       $(CoreCleanDependsOn)
     </CoreCleanDependsOn>
   </PropertyGroup>
