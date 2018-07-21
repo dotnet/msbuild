@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Execution
         public int ConfigurationId { get { throw null; } }
         public System.Exception Exception { get { throw null; } }
         public int GlobalRequestId { get { throw null; } }
-        public Microsoft.Build.Execution.TargetResult this[string target] { get { throw null; } }
+        public Microsoft.Build.Execution.ITargetResult this[string target] { get { throw null; } }
         public int NodeRequestId { get { throw null; } }
         public Microsoft.Build.Execution.BuildResultCode OverallResult { get { throw null; } }
         public int ParentGlobalRequestId { get { throw null; } }

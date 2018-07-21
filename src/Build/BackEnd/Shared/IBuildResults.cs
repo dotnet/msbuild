@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="target">The target name</param>
         /// <returns>The target results</returns>
-        TargetResult this[string target] { get; }
+        ITargetResult this[string target] { get; }
 
         /// <summary>
         /// Returns true if there are results for the specified target
