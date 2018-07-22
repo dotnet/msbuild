@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
@@ -19,15 +20,44 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects2 creationEffects, string outputBasePath)
         {
             bool allSucceeded = true;
-            IEnumerable<string> targetFiles;
+            IEnumerable<string> targetFiles = null;
 
             if (actionConfig.Args.TryGetValue("files", out string specificFilesString))
             {
-                targetFiles = specificFilesString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).SelectMany(x => GetTargetForSource(creationEffects, x));
+                JToken config = JToken.Parse(specificFilesString);
+
+                if (config.Type == JTokenType.String)
+                {
+                    targetFiles = specificFilesString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).SelectMany(x => GetTargetForSource(creationEffects, x));
+                }
+                else if (config is JArray arr)
+                {
+                    List<string> allFiles = new List<string>();
+                    foreach (JToken child in arr)
+                    {
+                        if (child.Type != JTokenType.String)
+                        {
+                            continue;
+                        }
+
+                        allFiles.AddRange(GetTargetForSource(creationEffects, child.ToString()));
+                    }
+
+                    if (allFiles.Count > 0)
+                    {
+                        targetFiles = allFiles;
+                    }
+                }
             }
             else
             {
                 targetFiles = creationEffects.FileChanges.Select(x => x.TargetRelativePath);
+            }
+
+            if (targetFiles is null)
+            {
+                //TODO: add a message indicating that the files to restore couldn't be determined
+                return false;
             }
 
             foreach (string targetRelativePath in targetFiles)
