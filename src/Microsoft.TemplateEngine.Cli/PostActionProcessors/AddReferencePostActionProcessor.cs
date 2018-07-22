@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
@@ -15,10 +16,34 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, string outputBasePath)
         {
-            IReadOnlyList<string> allTargets;
+            IReadOnlyList<string> allTargets = null;
             if (action.Args.TryGetValue("targetFiles", out string singleTarget) && singleTarget != null)
             {
-                allTargets = singleTarget.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                JToken config = JToken.Parse(singleTarget);
+
+                if (config.Type == JTokenType.String)
+                {
+                    allTargets = singleTarget.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                }
+                else if (config is JArray arr)
+                {
+                    List<string> parts = new List<string>();
+
+                    foreach (JToken token in arr)
+                    {
+                        if (token.Type != JTokenType.String)
+                        {
+                            continue;
+                        }
+
+                        parts.Add(token.ToString());
+                    }
+
+                    if (parts.Count > 0)
+                    {
+                        allTargets = parts;
+                    }
+                }
             }
             else
             {
