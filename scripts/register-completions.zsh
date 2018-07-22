@@ -2,8 +2,6 @@
 
 _dotnet_zsh_complete() 
 {
-  local dotnetPath=$words[1]
-
   local completions=("$(dotnet complete "$words")")
 
   reply=( "${(ps:\n:)completions}" )

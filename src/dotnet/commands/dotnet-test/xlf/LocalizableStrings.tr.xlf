@@ -62,10 +62,10 @@
       <trans-unit id="CmdLoggerDescription">
         <source>The logger to use for test results.
                                         Examples:
-                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">Test sonuçları için kullanılacak günlükçü.
+        <target state="needs-review-translation">Test sonuçları için kullanılacak günlükçü.
                                         Örnekler:
                                         Benzersiz bir dosya adı kullanan trx biçiminde günlük kaydı: --logger trx
                                         Belirtilen dosya adını kullanan trx biçiminde günlük kaydı: --logger "trx;LogFileName=&lt;TestSonuçları.trx&gt;"

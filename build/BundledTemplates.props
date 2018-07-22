@@ -5,7 +5,7 @@
     <BundledTemplate Include="Microsoft.DotNet.Test.ProjectTemplates.2.1" Version="$(MicrosoftDotNetTestProjectTemplates20PackageVersion)" />
 
     <BundledTemplate Include="Microsoft.DotNet.Web.ItemTemplates" Version="$(AspNetCoreVersion)" />
-    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.1" Version="$(AspNetCoreVersion)" />
+    <BundledTemplate Include="Microsoft.DotNet.Web.ProjectTemplates.2.2" Version="$(AspNetCoreVersion)" />
     <BundledTemplate Include="Microsoft.DotNet.Web.Spa.ProjectTemplates" Version="$(AspNetCoreVersion)" />
 
     <BundledTemplate Include="NUnit3.DotNetNew.Template" Version="$(NUnit3TemplatesVersion)" />
