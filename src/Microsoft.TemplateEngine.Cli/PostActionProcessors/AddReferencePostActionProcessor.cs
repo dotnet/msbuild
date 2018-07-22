@@ -1,33 +1,51 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Utils;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public class AddReferencePostActionProcessor : IPostActionProcessor
+    public class AddReferencePostActionProcessor : PostActionProcessor2Base, IPostActionProcessor, IPostActionProcessor2
     {
         public static readonly Guid ActionProcessorId = new Guid("B17581D1-C5C9-4489-8F0A-004BE667B814");
 
         public Guid Id => ActionProcessorId;
 
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, string outputBasePath)
+        {
+            IReadOnlyList<string> allTargets;
+            if (action.Args.TryGetValue("targetFiles", out string singleTarget) && singleTarget != null)
+            {
+                allTargets = singleTarget.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            }
+            else
+            {
+                allTargets = null;
+            }
+
+            if (allTargets is null)
+            {
+                return Process(environment, action, creationEffects.CreationResult, outputBasePath);
+            }
+
+            bool success = true;
+            foreach (string target in allTargets)
+            {
+                success &= AddReference(environment, action, GetTargetForSource(creationEffects, target));
+
+                if (!success)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationResult templateCreationResult, string outputBasePath)
         {
-            if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string referenceToAdd))
-            {
-                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionMisconfigured);
-                return false;
-            }
-
-            if (!actionConfig.Args.TryGetValue("referenceType", out string referenceType))
-            {
-                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionMisconfigured);
-                return false;
-            }
-
             if (string.IsNullOrEmpty(outputBasePath))
             {
                 environment.Host.LogMessage(LocalizableStrings.AddRefPostActionUnresolvedProjFile);
@@ -46,6 +64,22 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
 
             IReadOnlyList<string> nearestProjectFilesFound = FindProjFileAtOrAbovePath(environment.Host.FileSystem, outputBasePath, extensionLimiters);
+            return AddReference(environment, actionConfig, nearestProjectFilesFound);
+        }
+
+        private bool AddReference(IEngineEnvironmentSettings environment, IPostAction actionConfig, IReadOnlyList<string> nearestProjectFilesFound)
+        {
+            if (actionConfig.Args == null || !actionConfig.Args.TryGetValue("reference", out string referenceToAdd))
+            {
+                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionMisconfigured);
+                return false;
+            }
+
+            if (!actionConfig.Args.TryGetValue("referenceType", out string referenceType))
+            {
+                environment.Host.LogMessage(LocalizableStrings.AddRefPostActionMisconfigured);
+                return false;
+            }
 
             if (nearestProjectFilesFound.Count == 1)
             {

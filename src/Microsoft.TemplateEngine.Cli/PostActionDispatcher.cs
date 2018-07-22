@@ -151,6 +151,11 @@ namespace Microsoft.TemplateEngine.Cli
 
         private bool ProcessAction(IPostAction action, IPostActionProcessor actionProcessor)
         {
+            if (actionProcessor is IPostActionProcessor2 actionProcessor2 && _creationResult.CreationEffects is ICreationEffects2 creationEffects)
+            {
+                return actionProcessor2.Process(_environment, action, creationEffects, _creationResult.OutputBaseDirectory);
+            }
+
             return actionProcessor.Process(_environment, action, _creationResult.ResultInfo, _creationResult.OutputBaseDirectory);
         }
 
