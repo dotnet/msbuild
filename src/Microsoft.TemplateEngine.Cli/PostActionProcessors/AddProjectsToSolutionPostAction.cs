@@ -1,14 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.TemplateEngine.Abstractions;
 using Microsoft.TemplateEngine.Abstractions.PhysicalFileSystem;
 using Microsoft.TemplateEngine.Utils;
 using System.IO;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 {
-    public class AddProjectsToSolutionPostAction : IPostActionProcessor
+    public class AddProjectsToSolutionPostAction : PostActionProcessor2Base, IPostActionProcessor, IPostActionProcessor2
     {
         public static readonly Guid ActionProcessorId = new Guid("D396686C-DE0E-4DE6-906D-291CD29FC5DE");
 
@@ -95,6 +96,92 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
                 projectFiles = templateCreationResult.PrimaryOutputs.Select(x => x.Path).ToList();
                 return true;
             }
+        }
+
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, string outputBasePath)
+        {
+            if (string.IsNullOrEmpty(outputBasePath))
+            {
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile));
+                return false;
+            }
+
+            IReadOnlyList<string> nearestSlnFilesFould = FindSolutionFilesAtOrAbovePath(environment.Host.FileSystem, outputBasePath);
+            if (nearestSlnFilesFould.Count != 1)
+            {
+                environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionUnresolvedSlnFile);
+                return false;
+            }
+
+            IReadOnlyList<string> projectFiles;
+
+            if (action.Args.TryGetValue("projectFiles", out string configProjectFiles))
+            {
+                JToken config = JToken.Parse(configProjectFiles);
+                List<string> allProjects = new List<string>();
+
+                if (config is JArray arr)
+                {
+                    foreach (JToken globText in arr)
+                    {
+                        if (globText.Type != JTokenType.String)
+                        {
+                            continue;
+                        }
+
+                        foreach (string path in GetTargetForSource(creationEffects, globText.ToString()))
+                        {
+                            if (Path.GetExtension(path).EndsWith("proj", StringComparison.OrdinalIgnoreCase))
+                            {
+                                allProjects.Add(path);
+                            }
+                        }
+                    }
+                }
+                else if (config.Type == JTokenType.String)
+                {
+                    foreach (string path in GetTargetForSource(creationEffects, config.ToString()))
+                    {
+                        if (Path.GetExtension(path).EndsWith("proj", StringComparison.OrdinalIgnoreCase))
+                        {
+                            allProjects.Add(path);
+                        }
+                    }
+                }
+
+                if (allProjects.Count == 0)
+                {
+                    environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
+                    return false;
+                }
+
+                projectFiles = allProjects;
+            }
+            else if (!TryGetProjectFilesToAdd(environment, action, creationEffects.CreationResult, outputBasePath, out projectFiles))
+            {
+                environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
+                return false;
+            }
+
+            Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFould[0], projectFiles);
+            addProjToSlnCommand.CaptureStdOut();
+            addProjToSlnCommand.CaptureStdErr();
+            environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionRunning, nearestSlnFilesFould[0], string.Join(" ", projectFiles)));
+            Dotnet.Result commandResult = addProjToSlnCommand.Execute();
+
+            if (commandResult.ExitCode != 0)
+            {
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionFailed, string.Join(" ", projectFiles), nearestSlnFilesFould[0]));
+                environment.Host.LogMessage(string.Format(LocalizableStrings.CommandOutput, commandResult.StdOut + Environment.NewLine + Environment.NewLine + commandResult.StdErr));
+                environment.Host.LogMessage(string.Empty);
+                return false;
+            }
+            else
+            {
+                environment.Host.LogMessage(string.Format(LocalizableStrings.AddProjToSlnPostActionSucceeded, string.Join(" ", projectFiles), nearestSlnFilesFould[0]));
+                return true;
+            }
+
         }
     }
 }
