@@ -154,7 +154,7 @@ namespace Microsoft.NET.TestFramework
             TestContext.Current = testContext;
         }
 
-        private static string GetRepoRoot()
+        public static string GetRepoRoot()
         {
             string directory = AppContext.BaseDirectory;
 
