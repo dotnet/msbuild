@@ -16,6 +16,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Import design time targets before the common crosstargeting targets, which import targets from Nuget. -->
   <PropertyGroup>
      <VisualBasicDesignTimeTargetsPath Condition="'$(VisualBasicDesignTimeTargetsPath)'==''">$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed\Microsoft.VisualBasic.DesignTime.targets</VisualBasicDesignTimeTargetsPath>
+     <DefaultProjectTypeGuid Condition=" '$(DefaultProjectTypeGuid)' == '' ">{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</DefaultProjectTypeGuid>
   </PropertyGroup>
   <Import Project="$(VisualBasicDesignTimeTargetsPath)" Condition="'$(VisualBasicDesignTimeTargetsPath)' != '' and Exists('$(VisualBasicDesignTimeTargetsPath)')" />
 
