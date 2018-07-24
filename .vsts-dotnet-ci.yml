@@ -7,8 +7,6 @@ phases:
   displayName: "Build on Windows using full MSBuild"
   queue: 'Hosted VS2017'
   steps:
-  - script: set
-    displayName: Command Line Script
   - task: BatchScript@1
     displayName: VsDevCmd
     inputs:
@@ -16,7 +14,6 @@ phases:
       modifyEnvironment: true
   - task: BatchScript@1
     displayName: cibuild.cmd
-    timeoutInMinutes: 60
     inputs:
       filename: 'build/cibuild.cmd'
   - task: PublishTestResults@2
@@ -51,8 +48,6 @@ phases:
   displayName: "Build on Windows using .NET Core MSBuild"
   queue: 'Hosted VS2017'
   steps:
-  - script: set
-    displayName: Command Line Script
   - task: BatchScript@1
     displayName: VsDevCmd
     inputs:
@@ -60,7 +55,6 @@ phases:
       modifyEnvironment: true
   - task: BatchScript@1
     displayName: cibuild.cmd
-    timeoutInMinutes: 60
     inputs:
       filename: 'build/cibuild.cmd'
       arguments: '-hostType Core'
@@ -98,7 +92,6 @@ phases:
   steps:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
-    timeoutInMinutes: 60
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.0 Test Results
     inputs:
@@ -125,7 +118,6 @@ phases:
   steps:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
-    timeoutInMinutes: 60
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.0 Test Results
     inputs:
