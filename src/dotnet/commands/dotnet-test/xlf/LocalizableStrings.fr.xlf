@@ -160,6 +160,11 @@ Elle génère dans le répertoire actif un fichier de sortie nommé 'Sequence.xm
         <target state="translated">Configuration à utiliser pour l'exécution des tests. La valeur par défaut pour la plupart des projets est 'Debug'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -160,6 +160,11 @@ Im aktuellen Verzeichnis wird eine Datei namens "Sequence.xml" ausgegeben, in de
         <target state="translated">Die für die Testausführung zu verwendende Konfiguration. Standard für die meisten Projekte ist "Debug".</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

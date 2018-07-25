@@ -160,6 +160,11 @@ Tworzy w bieżącym katalogu plik wyjściowy „Sequence.xml”, który przechwy
         <target state="translated">Konfiguracja do użycia na potrzeby uruchamiania testów. W przypadku większości projektów ustawienie domyślne to „Debugowanie”.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
