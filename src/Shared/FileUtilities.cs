@@ -361,37 +361,54 @@ namespace Microsoft.Build.Shared
         {
             // Don't bother with arrays or properties or network paths, or those that
             // have no slashes.
-            if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(value) ||
-                value.StartsWith("$(") || value.StartsWith("@(") || value.StartsWith("\\\\") ||
-                value.IndexOfAny(Slashes) == -1)
+            if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(value)
+                || value.StartsWith("$(", PathComparison) || value.StartsWith("@(", PathComparison)
+                || value.StartsWith("\\\\", PathComparison))
             {
                 return value;
             }
 
             // For Unix-like systems, we may want to convert backslashes to slashes
-            string newValue = Regex.Replace(value, @"[\\/]+", "/");
+            string newValue = ConvertToUnixSlashes(value);
 
-            string quote = string.Empty;
             // Find the part of the name we want to check, that is remove quotes, if present
-            string checkValue = newValue;
-            if (newValue.Length > 2)
+            bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
+            return shouldAdjust ? newValue : value;
+        }
+
+
+        private static string ConvertToUnixSlashes(string path)
+        {
+            if (path.IndexOf('\\') == -1)
             {
-                if (newValue.StartsWith("'"))
-                {
-                    if (newValue.EndsWith("'"))
-                    {
-                        checkValue = newValue.Substring(1, newValue.Length - 2);
-                        quote = "'";
-                    }
-                }
-                else if (newValue.StartsWith("\"") && newValue.EndsWith("\""))
-                {
-                    checkValue = newValue.Substring(1, newValue.Length - 2);
-                    quote = "\"";
+                return path;
+            }
+            var unixPath = new StringBuilder(path.Length);
+
+            // Performs Regex.Replace(path, @"[\\/]+", "/")
+            for (int i = 0; i < path.Length; i++)
+            {
+                bool isCurSlash = Array.IndexOf(Slashes, path[i]) != -1;
+                bool isPrevSlash = i > 0 && Array.IndexOf(Slashes, path[i - 1]) != -1;
+
+                if (!isCurSlash || !isPrevSlash) {
+                    unixPath.Append(path[i] == '\\' ? '/' : path[i]);
                 }
             }
+            return unixPath.ToString();
+        }
 
-            return LooksLikeUnixFilePath(checkValue, baseDirectory) ? newValue : value;
+        private static string RemoveQuotes(string path)
+        {
+            int endId = path.Length - 1;
+            char singleQuote = '\'';
+            char doubleQuote = '\"';
+
+            bool hasQuotes = path.Length > 2
+                && (path[0] == singleQuote && path[endId] == singleQuote
+                || path[0] == doubleQuote && path[endId] == doubleQuote);
+
+            return hasQuotes ? path.Substring(1, endId - 1) : path;
         }
 
         /// <summary>
