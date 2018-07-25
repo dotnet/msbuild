@@ -4,7 +4,7 @@ trigger:
 
 phases:
 - phase: FullOnWindows
-  displayName: "Build on Windows using full MSBuild"
+  displayName: "Build and test on Windows using full MSBuild"
   queue: 'Hosted VS2017'
   steps:
   - task: BatchScript@1
@@ -45,7 +45,7 @@ phases:
     condition: always()
 
 - phase: CoreOnWindows
-  displayName: "Build on Windows using .NET Core MSBuild"
+  displayName: "Build and test on Windows using .NET Core MSBuild"
   queue: 'Hosted VS2017'
   steps:
   - task: BatchScript@1
