@@ -4,7 +4,7 @@ The Microsoft Build Engine is a platform for building applications. This engine,
 
 For more information on MSBuild, see the [MSBuild documentation](https://docs.microsoft.com/visualstudio/msbuild/msbuild) on docs.microsoft.com.
 
-### Build Status [![Build Status](https://dotnet.visualstudio.com/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_apis/build/status/86/badge)](https://dotnet.visualstudio.com/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_apis/build/status/86)
+### Build Status [![Build Status](https://dotnet.visualstudio.com/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_apis/build/status/86?branchname=master)](https://dotnet.visualstudio.com/public/public%20Team/_build?definitionId=86&_a=summary&branchName=master)
 
 The current development branch is `master`. It builds for .NET Core and the full desktop .NET framework. Changes in `master` will go into the next "major" update of MSBuild.
 
