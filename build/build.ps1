@@ -23,6 +23,9 @@ Param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 
+# Opt into TLS 1.2, which is required for https://dot.net
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 function Print-Usage() {
     Write-Host "Common settings:"
     Write-Host "  -configuration <value>  Build configuration Debug, Release"
