@@ -91,8 +91,8 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
     $InstallArchitecture = "x64"
 }
 
-Write-Output "$dotnetInstallPath -version ""2.1.300"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
-Invoke-Expression "$dotnetInstallPath -version ""2.1.300"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+Write-Output "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+Invoke-Expression "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 
 if ($LastExitCode -ne 0)
 {
