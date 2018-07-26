@@ -8,7 +8,8 @@
     <MajorMinorVersion>$(VersionMajor).$(VersionMinor)</MajorMinorVersion>
     <CliVersionNoSuffix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>
     <CliVersionPrefix>$(CliVersionNoSuffix)-$(ReleaseSuffix)</CliVersionPrefix>
-    <CliBrandingVersion>$(CliVersionNoSuffix) - $(ReleaseSuffix)</CliBrandingVersion>
+    <CliBrandingVersion Condition=" '$(DropSuffix)' != 'true' ">$(CliVersionNoSuffix) - $(ReleaseSuffix)</CliBrandingVersion>
+    <CliBrandingVersion Condition=" '$(DropSuffix)' == 'true' ">$(CliVersionNoSuffix)</CliBrandingVersion>
     <SimpleVersion Condition=" '$(DropSuffix)' != 'true' ">$(CliVersionNoSuffix).$(CommitCount)</SimpleVersion>
     <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(CliVersionNoSuffix)</SimpleVersion>
 
