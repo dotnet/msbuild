@@ -1,6 +1,7 @@
 trigger:
 - master
 - exp/*
+- vs*
 
 phases:
 - phase: FullOnWindows
