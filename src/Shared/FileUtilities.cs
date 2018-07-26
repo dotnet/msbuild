@@ -386,19 +386,26 @@ namespace Microsoft.Build.Shared
                 return path;
             }
             var unixPath = StringBuilderCache.Acquire(path.Length);
+            CopyAndCollapseSlashes(path, unixPath);
+            return StringBuilderCache.GetStringAndRelease(unixPath);
+        }
 
+#if !CLR2COMPATIBILITY
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        private static void CopyAndCollapseSlashes(string str, StringBuilder copy)
+        {
             // Performs Regex.Replace(path, @"[\\/]+", "/")
-            for (int i = 0; i < path.Length; i++)
+            for (int i = 0; i < str.Length; i++)
             {
-                bool isCurSlash = IsAnySlash(path[i]);
-                bool isPrevSlash = i > 0 && IsAnySlash(path[i - 1]);
+                bool isCurSlash = IsAnySlash(str[i]);
+                bool isPrevSlash = i > 0 && IsAnySlash(str[i - 1]);
 
                 if (!isCurSlash || !isPrevSlash)
                 {
-                    unixPath.Append(path[i] == '\\' ? '/' : path[i]);
+                    copy.Append(str[i] == '\\' ? '/' : str[i]);
                 }
             }
-            return StringBuilderCache.GetStringAndRelease(unixPath);
         }
 
         private static string RemoveQuotes(string path)
@@ -414,6 +421,9 @@ namespace Microsoft.Build.Shared
             return hasQuotes ? path.Substring(1, endId - 1) : path;
         }
 
+#if !CLR2COMPATIBILITY
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         internal static bool IsAnySlash(char c) => c == '/' || c == '\\';
 
         /// <summary>
