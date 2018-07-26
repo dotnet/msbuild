@@ -1494,6 +1494,8 @@ namespace Microsoft.Build.UnitTests
                     message = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", kvp.Key, kvp.Value);
                 }
 
+                message = message.Replace("\n", Environment.NewLine);
+
                 if (expectToSeeLogging)
                 {
                     log.ShouldContain(message);
