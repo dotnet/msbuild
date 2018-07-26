@@ -359,11 +359,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string MaybeAdjustFilePath(string value, string baseDirectory = "")
         {
+            var comparisonType = StringComparison.Ordinal;
+
             // Don't bother with arrays or properties or network paths, or those that
             // have no slashes.
             if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(value)
-                || value.StartsWith("$(", PathComparison) || value.StartsWith("@(", PathComparison)
-                || value.StartsWith("\\\\", PathComparison))
+                || value.StartsWith("$(", comparisonType) || value.StartsWith("@(", comparisonType)
+                || value.StartsWith("\\\\", comparisonType))
             {
                 return value;
             }
@@ -383,19 +385,20 @@ namespace Microsoft.Build.Shared
             {
                 return path;
             }
-            var unixPath = new StringBuilder(path.Length);
+            var unixPath = StringBuilderCache.Acquire(path.Length);
 
             // Performs Regex.Replace(path, @"[\\/]+", "/")
             for (int i = 0; i < path.Length; i++)
             {
-                bool isCurSlash = Array.IndexOf(Slashes, path[i]) != -1;
-                bool isPrevSlash = i > 0 && Array.IndexOf(Slashes, path[i - 1]) != -1;
+                bool isCurSlash = IsAnySlash(path[i]);
+                bool isPrevSlash = i > 0 && IsAnySlash(path[i - 1]);
 
-                if (!isCurSlash || !isPrevSlash) {
+                if (!isCurSlash || !isPrevSlash)
+                {
                     unixPath.Append(path[i] == '\\' ? '/' : path[i]);
                 }
             }
-            return unixPath.ToString();
+            return StringBuilderCache.GetStringAndRelease(unixPath);
         }
 
         private static string RemoveQuotes(string path)
@@ -410,6 +413,8 @@ namespace Microsoft.Build.Shared
 
             return hasQuotes ? path.Substring(1, endId - 1) : path;
         }
+
+        internal static bool IsAnySlash(char c) => c == '/' || c == '\\';
 
         /// <summary>
         /// If on Unix, check if the string looks like a file path.
