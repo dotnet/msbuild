@@ -1703,6 +1703,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
         <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">$(TargetFrameworks)</TargetFrameworks>
         <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == '' and '$(TargetFramework)' == ''">$(TargetFrameworkMoniker)</TargetFrameworks>
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
         <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
