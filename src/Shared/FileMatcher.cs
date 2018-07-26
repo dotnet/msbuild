@@ -1961,7 +1961,7 @@ namespace Microsoft.Build.Shared
                 sb.Append(aString[0]);
                 sb.Append(aString[1]);
 
-                var i = SkipCharacters(aString, 2, c => FileUtilities.IsSlash(c));
+                var i = SkipCharacters(aString, 2, c => FileUtilities.IsAnySlash(c));
 
                 if (index != i)
                 {
@@ -1973,22 +1973,22 @@ namespace Microsoft.Build.Shared
             else if (aString.StartsWith("/", StringComparison.Ordinal))
             {
                 sb.Append('/');
-                index = SkipCharacters(aString, 1, c => FileUtilities.IsSlash(c));
+                index = SkipCharacters(aString, 1, c => FileUtilities.IsAnySlash(c));
             }
             else if (aString.StartsWith(@"\\", StringComparison.Ordinal))
             {
                 sb.Append(@"\\");
-                index = SkipCharacters(aString, 2, c => FileUtilities.IsSlash(c));
+                index = SkipCharacters(aString, 2, c => FileUtilities.IsAnySlash(c));
             }
             else if (aString.StartsWith(@"\", StringComparison.Ordinal))
             {
                 sb.Append(@"\");
-                index = SkipCharacters(aString, 1, c => FileUtilities.IsSlash(c));
+                index = SkipCharacters(aString, 1, c => FileUtilities.IsAnySlash(c));
             }
 
             while (index < aString.Length)
             {
-                var afterSlashesIndex = SkipCharacters(aString, index, c => FileUtilities.IsSlash(c));
+                var afterSlashesIndex = SkipCharacters(aString, index, c => FileUtilities.IsAnySlash(c));
 
                 // do not append separator at the end of the string
                 if (afterSlashesIndex >= aString.Length)
@@ -2001,7 +2001,7 @@ namespace Microsoft.Build.Shared
                     sb.Append(s_directorySeparator);
                 }
 
-                var afterNonSlashIndex = SkipCharacters(aString, afterSlashesIndex, c => !FileUtilities.IsSlash(c));
+                var afterNonSlashIndex = SkipCharacters(aString, afterSlashesIndex, c => !FileUtilities.IsAnySlash(c));
 
                 sb.Append(aString, afterSlashesIndex, afterNonSlashIndex - afterSlashesIndex);
 
