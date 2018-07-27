@@ -5,11 +5,11 @@
 
   <Import Project="Installer.DEB.targets" />
 
+  <!-- Re-enable "TestSdkDeb" when the following issue is resolved: https://github.com/dotnet/cli/issues/9672 -->
   <Target Name="GenerateDebs"
           DependsOnTargets="SetupDebProps;
                             TestDebuild;
-                            BuildSdkDeb;
-                            TestSdkDeb;"
+                            BuildSdkDeb"
           Condition=" '$(IsDebianBaseDistro)' == 'True' "
           Outputs="@(GeneratedInstallers)"/>
 
@@ -93,11 +93,14 @@
         SkipUnchangedFiles="False"
         UseHardlinksIfPossible="False" />
 
-      <!-- Remove Shared Framework and Debian Packages -->
+      <!-- Proactively remove all possible Shared Framework and Debian Packages -->
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageFileName)" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageFileName)" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
+      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageFileName)" />
       <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
       <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
   </Target>

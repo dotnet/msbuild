@@ -10,12 +10,12 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual usar.</target>
+        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
         <source>Project already has a reference to `{0}`.</source>
-        <target state="translated">O projeto já tem uma referência para ‘{0}’.</target>
+        <target state="translated">O projeto já tem uma referência a ‘{0}’.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectReferenceCouldNotBeFound">
@@ -350,7 +350,8 @@
       </trans-unit>
       <trans-unit id="FoundMoreThanOneProjectIn">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual usar.</target>
+        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundInvalidProject">
@@ -370,7 +371,8 @@
       </trans-unit>
       <trans-unit id="CouldNotFindSolutionOrDirectory">
         <source>Could not find solution or directory `{0}`.</source>
-        <target state="translated">Não foi possível encontrar a solução ou diretório ‘{0}’.</target>
+        <target state="translated">Não foi possível encontrar a solução ou o diretório ‘{0}’.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundMoreThanOneSolutionIn">
@@ -555,7 +557,8 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Não há referências {0} no projeto {1}. ;; {0} é o tipo do item sendo solicitado (projeto, pacote, p2p) e {1} é o objeto no qual ocorre a operação (um arquivo de projeto ou um arquivo de solução). </target>
+        <target state="translated">Não há referências de {0} no projeto {1}. ;; {0} é o tipo do item que está sendo solicitado (projeto, pacote, p2p) e {1} é o objeto no qual ocorre a operação (um arquivo de projeto ou de solução). 
+</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">
