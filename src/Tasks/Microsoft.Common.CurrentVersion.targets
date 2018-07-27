@@ -1570,6 +1570,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ====================================================================================
+                                        _ComputeReferringTargetFramework
+
+    Select the moniker to use for computing project compatibility if not already set. NugetTargetMoniker (NTM) is preferred by default over
+    TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and
+    has floating NTM=UAP,Version=vX.Y.Z. However, in other cases (classic PCLs), NTM contains multiple values and that will cause the MSBuild
+    invocation below to fail by passing invalid properties. Therefore we do not use the NTM if it contains a semicolon.
+
+    `ReferringTargetFrameworkForProjectReferences` is no longer a good name, but may be consumed by other projects so should be preserved.
+    ======================================================================================
+  -->
+  <Target Name="_ComputeReferringTargetFramework">
+    <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
+      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != '' and !$(NuGetTargetMoniker.Contains(';'))">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
+      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+    ====================================================================================
                                         _GetProjectReferenceTargetFrameworkProperties
 
     Builds the GetTargetFrameworks target of all existent project references to get a list
@@ -1580,18 +1599,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     ======================================================================================
   -->
-  <Target Name="_GetProjectReferenceTargetFrameworkProperties">
-    <!--
-      Select the moniker to send to each project reference  if not already set. NugetTargetMoniker (NTM) is preferred by default over
-      TargetFrameworkMoniker (TFM) because it is required to disambiguate the UWP case where TFM is fixed at .NETCore,Version=v5.0 and
-      has floating NTM=UAP,Version=vX.Y.Z. However, in other cases (classic PCLs), NTM contains multiple values and that will cause the MSBuild
-      invocation below to fail by passing invalid properties. Therefore we do not use the NTM if it contains a semicolon.
-    -->
-    <PropertyGroup Condition="'$(ReferringTargetFrameworkForProjectReferences)' == ''">
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' != '' and !$(NuGetTargetMoniker.Contains(';'))">$(NugetTargetMoniker)</ReferringTargetFrameworkForProjectReferences>
-      <ReferringTargetFrameworkForProjectReferences Condition="'$(NugetTargetMoniker)' == ''">$(TargetFrameworkMoniker)</ReferringTargetFrameworkForProjectReferences>
-    </PropertyGroup>
-
+  <Target Name="_GetProjectReferenceTargetFrameworkProperties" DependsOnTargets="_ComputeReferringTargetFramework">
     <!--
       Honor SkipGetTargetFrameworkProperties=true metadata on project references
       to mean that the project reference is known not to target multiple frameworks
@@ -1698,12 +1706,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <Target Name="GetTargetFrameworks"
+          DependsOnTargets="_ComputeReferringTargetFramework"
           Returns="@(_ThisProjectBuildMetadata)">
     <ItemGroup>
       <_ThisProjectBuildMetadata Include="$(MSBuildProjectFullPath)">
         <TargetFrameworks Condition="'$(TargetFrameworks)' != ''">$(TargetFrameworks)</TargetFrameworks>
         <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">$(TargetFramework)</TargetFrameworks>
-        <TargetFrameworks Condition="'$(TargetFrameworks)' == '' and '$(TargetFramework)' == ''">$(TargetFrameworkMoniker)</TargetFrameworks>
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == '' and '$(TargetFramework)' == ''">$(ReferringTargetFrameworkForProjectReferences)</TargetFrameworks>
         <HasSingleTargetFramework>true</HasSingleTargetFramework>
         <HasSingleTargetFramework Condition="'$(IsCrossTargetingBuild)' == 'true'">false</HasSingleTargetFramework>
         <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
