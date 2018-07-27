@@ -11,6 +11,9 @@
     <DebugType Condition=" '$(TargetFramework)' != '' and '$(DebugType)' == ''">embedded</DebugType>
     <DebugType Condition="$(TargetFramework.StartsWith('net4')) And '$(MonoBuild)' != 'true'">full</DebugType>
 
+    <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
+    <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
+
     <!-- Some hash code implementations may overflow -->
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
 
