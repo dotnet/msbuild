@@ -189,8 +189,8 @@ fi
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 if [ $BUILD -eq 1 ]; then
-    dotnet msbuild build.proj /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles ${argsnotargets[@]}
-    dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args
+    dotnet msbuild build.proj /bl:msbuild.generatepropsfile.binlog /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles ${argsnotargets[@]}
+    dotnet msbuild build.proj /bl:msbuild.mainbuild.binlog /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args
 else
     echo "Not building due to --nobuild"
     echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args'"
