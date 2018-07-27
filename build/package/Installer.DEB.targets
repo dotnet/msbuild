@@ -30,23 +30,16 @@
       <SharedFxDebianPackageVersion>$(MicrosoftNETCoreAppMajorMinorVersion)</SharedFxDebianPackageVersion>
       <SharedFxDebianPackageFileName>dotnet-runtime-$(SharedFxDebianPackageFileVersion)</SharedFxDebianPackageFileName>
       <SharedFxDebianPackageFileName>$(SharedFxDebianPackageFileName.ToLower())</SharedFxDebianPackageFileName>
-
-      <!-- Replace the line below with this line when the following issue is resolved: https://github.com/dotnet/cli/issues/9672
-              <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName> -->
-      <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageFileVersion)</SharedFxDebianPackageName>
-
+      <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
-      <HostFxrDebianPackageVersion>$(HostFxrMajorMinorVersion)</HostFxrDebianPackageVersion>
-      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
+      <HostFxrDebianPackageFileName>dotnet-hostfxr-$(HostFxrVersion)</HostFxrDebianPackageFileName>
+      <HostFxrDebianPackageFileName>$(HostFxrDebianPackageFileName.ToLower())</HostFxrDebianPackageFileName>
+      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrMajorMinorVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
       <AspNetCoreSharedFxDebianPackageFileName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxDebianPackageFileName>
       <AspNetCoreSharedFxDebianPackageFileName>$(AspNetCoreSharedFxDebianPackageFileName.ToLower())</AspNetCoreSharedFxDebianPackageFileName>
-
-      <!-- Replace the line below with this line when the following issue is resolved: https://github.com/dotnet/cli/issues/9672
-              <AspNetCoreSharedFxDebianPackageName>aspnetcore-runtime-$(AspNetCoreMajorMinorVersion)</AspNetCoreSharedFxDebianPackageName> -->
-      <AspNetCoreSharedFxDebianPackageName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxDebianPackageName>
-
+      <AspNetCoreSharedFxDebianPackageName>aspnetcore-runtime-$(AspNetCoreMajorMinorVersion)</AspNetCoreSharedFxDebianPackageName>
       <AspNetCoreSharedFxDebianPackageName>$(AspNetCoreSharedFxDebianPackageName.ToLower())</AspNetCoreSharedFxDebianPackageName>
     </PropertyGroup>
 
