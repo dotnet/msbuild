@@ -81,6 +81,7 @@ $env:VSTEST_BUILD_TRACE=1
 $env:VSTEST_TRACE_BUILD=1
 
 # install a stage0
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $dotnetInstallPath = Join-Path $env:DOTNET_INSTALL_DIR "dotnet-install.ps1"
 Invoke-WebRequest -Uri "https://dot.net/v1/dotnet-install.ps1" -OutFile "$dotnetInstallPath"
 
@@ -90,8 +91,8 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
     $InstallArchitecture = "x64"
 }
 
-Write-Output "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
-Invoke-Expression "$dotnetInstallPath -version ""2.2.0-preview1-007799"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+Write-Output "$dotnetInstallPath -version ""3.0.100-preview1-009020"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+Invoke-Expression "$dotnetInstallPath -version ""3.0.100-preview1-009020"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 
 if ($LastExitCode -ne 0)
 {

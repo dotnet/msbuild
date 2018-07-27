@@ -38,7 +38,7 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Install a stage 0
 Write-Output "Installing .NET Core CLI Stage 0"
-& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Channel "master" -Architecture $Architecture
+& "$RepoRoot\scripts\obtain\dotnet-install.ps1" -Version 2.1.302 -Architecture $Architecture
 if($LASTEXITCODE -ne 0) { throw "Failed to install stage0" }
 
 # Put the stage0 on the path
