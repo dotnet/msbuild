@@ -385,7 +385,7 @@ namespace Microsoft.Build.Shared
             {
                 return path;
             }
-            var unixPath = StringBuilderCache.Acquire(path.Length);
+            StringBuilder unixPath = StringBuilderCache.Acquire(path.Length);
             CopyAndCollapseSlashes(path, unixPath);
             return StringBuilderCache.GetStringAndRelease(unixPath);
         }
@@ -395,7 +395,7 @@ namespace Microsoft.Build.Shared
 #endif
         private static void CopyAndCollapseSlashes(string str, StringBuilder copy)
         {
-            // Performs Regex.Replace(path, @"[\\/]+", "/")
+            // Performs Regex.Replace(str, @"[\\/]+", "/")
             for (int i = 0; i < str.Length; i++)
             {
                 bool isCurSlash = IsAnySlash(str[i]);
@@ -444,10 +444,11 @@ namespace Microsoft.Build.Shared
             // The first slash will either be at the beginning of the string or after the first directory name
             int directoryLength = value.IndexOf('/', 1) + 1;
             bool shouldCheckDirectory = directoryLength != 0;
+
+            // Check for actual files or directories under / that get missed by the above logic
             bool shouldCheckFileOrDirectory = !shouldCheckDirectory && value.Length > 0 && value[0] == '/';
 
             return shouldCheckDirectory && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.Substring(0, directoryLength)))
-                // Check for actual files or directories under / that get missed by the above logic
                 || shouldCheckFileOrDirectory && DefaultFileSystem.DirectoryEntryExists(value);
         }
 
