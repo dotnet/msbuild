@@ -7,5 +7,7 @@
   <PropertyGroup>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <!-- This necessary while we have 2.2 runtime and TFM used in 3.0 branches -->
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 </Project>
