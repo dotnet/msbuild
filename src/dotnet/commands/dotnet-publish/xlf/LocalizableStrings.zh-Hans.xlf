@@ -37,28 +37,27 @@
         <target state="translated">指向目标清单文件的路径，该文件包含要通过发布步骤执行的包的列表。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">随附应用程序发布 .NET Core 运行时，免除在目标计算机上安装运行时的需求。
-如果指定了运行时标识符，则默认为 "true"。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">发布之前不要生成项目。Implies --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating self-contained deployment.
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">要发布的目标运行时。创建自包含部署时使用此项。
-默认操作为发布依赖框架的应用程序。</target>
+        <target state="needs-review-translation">针对其发布应用程序的目标运行时。
+默认发布不含可执行文件的依赖框架的应用程序。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">要发布的配置。大多数项目的默认值是 "Debug"。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">随附应用程序发布 .NET Core 运行时，免除在目标计算机上安装运行时的需求。如果指定了运行时标识符，则默认为 “true”。</target>
         <note />
       </trans-unit>
     </body>

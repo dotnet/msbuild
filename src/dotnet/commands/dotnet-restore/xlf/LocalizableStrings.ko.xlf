@@ -89,6 +89,11 @@ This is equivalent to deleting project.assets.json.</source>
 project.assets.json을 삭제하는 것과 동일합니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

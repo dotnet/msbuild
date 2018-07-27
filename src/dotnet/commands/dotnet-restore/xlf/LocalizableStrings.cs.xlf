@@ -89,6 +89,11 @@ This is equivalent to deleting project.assets.json.</source>
 Jedná se o ekvivalent odstranění project.assets.json.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Umožňuje, aby se příkaz zastavil a počkal na vstup nebo akci uživatele (například na dokončení ověření).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -37,28 +37,27 @@
         <target state="translated">Cesta k cílovému souboru manifestu obsahujícímu seznam balíčků, které se mají vyloučit z kroku publikování</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publikuje spolu s aplikací modul runtime .NET Core, aby se tento modul nemusel instalovat na cílový počítač.
-Výchozí hodnota je True, pokud je zadaný identifikátor modulu runtime.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">Nesestavujte projekt, dokud ho nepublikujete. Implikuje možnost --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating self-contained deployment.
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">Cílový modul runtime pro publikování. Používá se při vytváření nezávislého nasazení.
-Ve výchozím nastavení se publikuje aplikace závislá na architektuře.</target>
+        <target state="needs-review-translation">Cílový modul runtime pro publikování aplikace.
+Výchozí možnost je publikovat aplikaci pro určitou architekturu bez spustitelného souboru.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">Konfigurace pro publikování. Výchozí možností pro většinu projektů je Debug.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Publikuje spolu s aplikací modul runtime .NET Core, aby se tento modul nemusel instalovat na cílový počítač. Standardně se nastaví na True, pokud je zadaný identifikátor modulu runtime.</target>
         <note />
       </trans-unit>
     </body>

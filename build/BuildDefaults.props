@@ -22,9 +22,11 @@
     <!-- Only use asset target fallback that we set (not implicit one to net461). -->
     <DisableImplicitAssetTargetFallback>true</DisableImplicitAssetTargetFallback>
 
-    <!-- Disable asset target fallback warning globally since it does not work transitively on NoWarn of individual packages -->
+    <!-- NU1701: Disable asset target fallback warning globally since it does not work transitively on NoWarn of individual packages -->
     <!-- Since we disabled the implict fallback to net461, this will only kick in when we have an explicit fallback and we don't need to be warned about it doing what we asked it to do. -->
-    <NoWarn>NU1701</NoWarn>
+    <!-- NU5104: Disable 'A stable release of a package should not have a prerelease dependency' warning globally -->
+    <!-- The "pack" command under 'buildCrossTargeting' for 'Microsoft.DotNet.MSBuildSdkResolver' throws a "NU5104" warning/error while using a "2.1.300" stage0 SDK. For: Linux-x64, Linux-arm, and Linux-arm64 -->
+    <NoWarn>NU1701;NU5104</NoWarn>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>

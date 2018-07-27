@@ -37,28 +37,27 @@
         <target state="translated">発行ステップから除外されるパッケージのリストを含むターゲット マニフェスト ファイルへのパス。</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">ランタイムをターゲット マシンにインストールしなくてもよいよう、.NET Core ランタイムをアプリケーションと一緒に発行します。
-ランタイム ID が指定された場合、既定値は 'true' です。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">発行する前にプロジェクトをビルドしないでください。--no-restore を意味します。</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating self-contained deployment.
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">発行する対象のターゲット ランタイム。これは、自己完結型の配置を作成する際に使用します。
-既定では、フレームワーク依存アプリケーションを発行します。</target>
+        <target state="needs-review-translation">発行するアプリケーションのターゲット ランタイム。
+既定値は、実行可能ファイルのないフレームワーク依存のアプリケーションを発行することです。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">発行する対象の構成。大部分のプロジェクトで、既定値は 'Debug' です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">ランタイムをターゲット マシンにインストールしなくてもよいよう、.NET Core ランタイムをアプリケーションと一緒に発行します。ランタイム ID が指定される場合、既定の 'true' になります。</target>
         <note />
       </trans-unit>
     </body>

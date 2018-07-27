@@ -37,28 +37,27 @@
         <target state="translated">Chemin d'un fichier manifeste cible contenant la liste des packages à exclure de l'étape de publication.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Publiez le runtime .NET Core avec votre application pour éviter à l'utilisateur de l'installer sur la machine cible.
-La valeur par défaut est 'true' si un identificateur de runtime est spécifié.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">Ne pas générer le projet avant la publication. Implique --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating self-contained deployment.
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">Runtime cible pour lequel la publication est effectuée. S'utilise pour la création d'un déploiement autonome.
-L'action par défaut consiste à publier une application qui dépend d'un framework.</target>
+        <target state="needs-review-translation">Runtime cible pour lequel publier l'application.
+Le comportement par défaut est de publier une application dépendante du framework sans exécutable.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">Configuration pour laquelle la publication est effectuée. La valeur par défaut pour la plupart des projets est 'Debug'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Publiez le runtime .NET Core avec votre application pour éviter à l'utilisateur de l'installer sur la machine cible. La valeur par défaut est 'true' si un identificateur de runtime est spécifié.</target>
         <note />
       </trans-unit>
     </body>

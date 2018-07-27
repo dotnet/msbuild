@@ -68,7 +68,7 @@
         <note />
       </trans-unit>
       <trans-unit id="RemoveProjectPathArgumentDescription">
-        <source>The paths to the projects to from from the solution.</source>
+        <source>The paths to the projects to remove from the solution.</source>
         <target state="translated">Çözümden kaldırılacak projelerin yolları.</target>
         <note />
       </trans-unit>

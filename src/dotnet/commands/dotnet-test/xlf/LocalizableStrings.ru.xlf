@@ -65,10 +65,10 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">Средство ведения журнала для результатов теста.
+        <target state="needs-review-translation">Средство ведения журнала для результатов теста.
                                         Примеры
-                                        Журнал TRX с уникальным именем файла: --logger trx
-                                        Журнал TRX с заданным именем файла: --logger "trx;LogFileName=&lt;результаты_теста.trx&gt;"
+                                        Журнал в формате TRX с уникальным именем файла: --logger trx
+                                        Журнал в формате TRX с заданным именем файла: --logger "trx;LogFileName=&lt;результаты_теста.trx&gt;"
                                         Дополнительные сведения об аргументах средства ведения журнала: https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>

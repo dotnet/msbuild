@@ -89,6 +89,11 @@ This is equivalent to deleting project.assets.json.</source>
 Esta acción es equivalente a eliminar project.assets.json.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdInteractiveRestoreOptionDescription">
+        <source>Allows the command to stop and wait for user input or action (for example to complete authentication).</source>
+        <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

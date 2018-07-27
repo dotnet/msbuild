@@ -37,28 +37,27 @@
         <target state="translated">Yayımlama adımının dışında tutulacak paketlerin listesini içeren bir hedef bildirim dosyasının yolu.</target>
         <note />
       </trans-unit>
-      <trans-unit id="SelfContainedOptionDescription">
-        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
-The default is 'true' if a runtime identifier is specified.</source>
-        <target state="translated">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. 
-Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoBuildOptionDescription">
         <source>Do not build the project before publishing. Implies --no-restore.</source>
         <target state="translated">Yayımlamadan önce projeyi derlemeyin. --no-restore anlamına gelir.</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeOptionDescription">
-        <source>The target runtime to publish for. This is used when creating self-contained deployment.
+        <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="translated">Yayımlamanın yapılacağı hedef çalışma zamanı. Kendi içinde dağıtımlar oluşturulurken kullanılır. 
-Varsayılan seçenek, çerçeveye bağımlı bir proje yayımlamaktır.</target>
+        <target state="needs-review-translation">Uygulamanın yayımlanacağı hedef çalışma zamanı.
+Varsayılan seçenek, bir yürütülebilir dosya olmadan çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
         <source>The configuration to publish for. The default for most projects is 'Debug'.</source>
         <target state="translated">Yayımlanacak yapılandırma. Çoğu proje için varsayılan, ‘Hata Ayıklama’ seçeneğidir.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SelfContainedOptionDescription">
+        <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
+The default is 'true' if a runtime identifier is specified.</source>
+        <target state="needs-review-translation">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
         <note />
       </trans-unit>
     </body>
