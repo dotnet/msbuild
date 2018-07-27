@@ -6,28 +6,25 @@
       <!-- BaseOutputDirectory is the root output path for this stage and RID
            BaseOutputPath is the project-specific output folder that each project builds into.
            This is not confusing at all. -->
-      <BaseOutputDirectory>$(RepoRoot)/bin/$(CliBuildStage)/$(Rid)</BaseOutputDirectory>
+      <BaseOutputDirectory>$(RepoRoot)/bin/$(CliBuildStage)</BaseOutputDirectory>
       <BaseOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/bin/$(MSBuildProjectName)'))</BaseOutputPath>
 
       <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/obj/$(MSBuildProjectName)'))</BaseIntermediateOutputPath>
-      <OutputDirectory>$(BaseOutputDirectory)/dotnet</OutputDirectory>
-      <Stage2WithBackwardsCompatibleRuntimesOutputDirectory>$(BaseOutputDirectory)/dotnetWithBackwardsCompatibleRuntimes</Stage2WithBackwardsCompatibleRuntimesOutputDirectory>
-      <SdkOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</SdkOutputDirectory>
+      <OutputDirectory>$(BaseOutputDirectory)/Cli</OutputDirectory>
+      <CliOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</CliOutputDirectory>
+      <SdkOutputDirectory>$(BaseOutputDirectory)/dotnet</SdkOutputDirectory>
       <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
-      <RoslynDirectory>$(SdkOutputDirectory)/Roslyn</RoslynDirectory>
-      <FSharpDirectory>$(SdkOutputDirectory)/FSharp</FSharpDirectory>
       <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
       <IntermediateDirectory>$(BaseOutputDirectory)/int</IntermediateDirectory>
       <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
       <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
       <AspNetCoreSharedFxPublishDirectory>$(IntermediateDirectory)/aspnetSharedFxPublish</AspNetCoreSharedFxPublishDirectory>
-      <BackwardsCompatibleSharedFrameworksPublishDirectory>$(IntermediateDirectory)/backwardsCompatibleSharedFrameworksPublish</BackwardsCompatibleSharedFrameworksPublishDirectory>
       <TestOutputDir>$(BaseOutputDirectory)/test/</TestOutputDir>
-      <DotnetInOutputDirectory>$(OutputDirectory)/dotnet$(ExeExtension)</DotnetInOutputDirectory>
+      <DotnetInOutputDirectory>$(BaseOutputDirectory)/dotnet/dotnet$(ExeExtension)</DotnetInOutputDirectory>
       <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
       <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
       <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
-
+      <DotNetCoreSdkLKGPublishDirectory>$(IntermediateDirectory)/SdkLKG</DotNetCoreSdkLKGPublishDirectory>
       <NextStagePropsPath>$(BaseOutputDirectory)/PreviousStage.props</NextStagePropsPath>
   </PropertyGroup>
 </Project>

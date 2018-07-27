@@ -14,6 +14,19 @@ param(
     [Parameter(Position=0, ValueFromRemainingArguments=$true)]
     $ExtraParameters)
 
+function GetVersionsPropsVersion([string[]] $Name) {
+  $VersionsProps = Join-Path $PSScriptRoot "build\DependencyVersions.props"
+  [xml]$Xml = Get-Content $VersionsProps
+
+  foreach ($PropertyGroup in $Xml.Project.PropertyGroup) {
+    if (Get-Member -InputObject $PropertyGroup -name $Name) {
+        return $PropertyGroup.$Name
+    }
+  }
+
+  throw "Failed to locate the $Name property"
+}
+
 if($Help)
 {
     Write-Output "Usage: .\run-build.ps1 [-Configuration <CONFIGURATION>] [-Architecture <ARCHITECTURE>] [-NoPackage] [-NoBuild] [-Help]"
@@ -82,6 +95,7 @@ $env:VSTEST_TRACE_BUILD=1
 
 # install a stage0
 $dotnetInstallPath = Join-Path $RepoRoot "scripts\obtain\dotnet-install.ps1"
+$dotnetCliVersion = GetVersionsPropsVersion -Name "DotNetCoreSdkLKGVersion"
 
 $InstallArchitecture = $Architecture
 if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
@@ -89,13 +103,18 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
     $InstallArchitecture = "x64"
 }
 
-Write-Output "$dotnetInstallPath -version ""2.1.300"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
-Invoke-Expression "$dotnetInstallPath -version ""2.1.300"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+Write-Output "$dotnetInstallPath -version ""$dotnetCliVersion"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
+Invoke-Expression "$dotnetInstallPath -version ""$dotnetCliVersion"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$InstallArchitecture"""
 
 if ($LastExitCode -ne 0)
 {
-    Write-Output "The .NET CLI installation failed with exit code $LastExitCode"
-    exit $LastExitCode
+    Copy-Item -Recurse -Force $env:DOTNET_TOOL_DIR $env:DOTNET_INSTALL_DIR
+}
+
+# This install is used to test 1.x scenarios
+# Don't install in source build.
+if ($env:DotNetBuildFromSource -ne "true") {
+    Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -Runtime ""dotnet"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
 }
 
 # Put the stage0 on the path
@@ -108,7 +127,7 @@ if ($NoBuild)
 }
 else
 {
-    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParametersNoTargets
+    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:BuildDotnetCliBuildFramework $ExtraParametersNoTargets
     dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }
