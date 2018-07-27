@@ -441,26 +441,14 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            var firstSlash = value.IndexOf('/');
-
             // The first slash will either be at the beginning of the string or after the first directory name
-            if (firstSlash == 0)
-            {
-                firstSlash = value.Substring(1).IndexOf('/') + 1;
-            }
+            int directoryLength = value.IndexOf('/', 1) + 1;
+            bool shouldCheckDirectory = directoryLength != 0;
+            bool shouldCheckFileOrDirectory = !shouldCheckDirectory && value.Length > 0 && value[0] == '/';
 
-            if (firstSlash > 0 && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.Substring(0, firstSlash))))
-            {
-                return true;
-            }
-
-            // Check for actual files or directories under / that get missed by the above logic
-            if (firstSlash == 0 && value[0] == '/' && DefaultFileSystem.DirectoryEntryExists(value))
-            {
-                return true;
-            }
-
-            return false;
+            return shouldCheckDirectory && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.Substring(0, directoryLength)))
+                // Check for actual files or directories under / that get missed by the above logic
+                || shouldCheckFileOrDirectory && DefaultFileSystem.DirectoryEntryExists(value);
         }
 
         /// <summary>
