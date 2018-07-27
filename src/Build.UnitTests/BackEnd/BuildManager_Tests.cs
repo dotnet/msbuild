@@ -3554,6 +3554,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(false)]
         [InlineData(true)]
         [Trait("Category", "mono-osx-failing")] // out-of-proc nodes not working on mono yet
+        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/3552")]
         public void OutOfProcProjectInstanceBasedBuildDoesNotReloadFromDisk(bool shouldSerializeEntireState)
         {
             const string mainProject = @"<Project>
