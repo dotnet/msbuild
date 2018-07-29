@@ -74,7 +74,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 {
                     webConfigXml = XDocument.Load(webConfigPath);
                 }
-                catch (XmlException) { }
+                catch (XmlException e)
+                {
+                    Log.LogWarning($"Cannot parse web.config as XML. A new web.config will be generated. Error Details : {e.Message}");
+                }
             }
             else
             {
