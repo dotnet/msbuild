@@ -11,8 +11,8 @@
 namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     using System;
     using System.Reflection;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -1777,6 +1777,15 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         public static string WebConfigTransform_HostingModel_Error {
             get {
                 return ResourceManager.GetString("WebConfigTransform_HostingModel_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to atlease AspNetCoreModuleV2..
+        /// </summary>
+        public static string WebConfigTransform_InvalidHostingOption {
+            get {
+                return ResourceManager.GetString("WebConfigTransform_InvalidHostingOption", resourceCulture);
             }
         }
         
