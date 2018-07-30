@@ -600,6 +600,15 @@ namespace Microsoft.TemplateEngine.Cli {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t determine files to restore..
+        /// </summary>
+        public static string CouldntDetermineFilesToRestore {
+            get {
+                return ResourceManager.GetString("CouldntDetermineFilesToRestore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find something to uninstall called &apos;{0}&apos;..
         /// </summary>
         public static string CouldntUninstall {

@@ -17,7 +17,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
         {
         }
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects2 creationEffects, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction actionConfig, ICreationEffects2 creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
             bool allSucceeded = true;
             IEnumerable<string> targetFiles = null;
@@ -51,12 +51,13 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
             else
             {
-                targetFiles = creationEffects.FileChanges.Select(x => x.TargetRelativePath);
+                //If the author didn't opt in to the new behavior by using "files", do things the old way
+                return Process(environment, actionConfig, templateCreationResult, outputBasePath);
             }
 
             if (targetFiles is null)
             {
-                //TODO: add a message indicating that the files to restore couldn't be determined
+                environment.Host.LogMessage(string.Format(LocalizableStrings.CouldntDetermineFilesToRestore));
                 return false;
             }
 

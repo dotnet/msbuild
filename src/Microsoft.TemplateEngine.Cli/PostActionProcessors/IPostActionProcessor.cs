@@ -9,6 +9,6 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
     public interface IPostActionProcessor2 : IIdentifiedComponent
     {
-        bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, string outputBasePath);
+        bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, ICreationResult templateCreationResult, string outputBasePath);
     }
 }

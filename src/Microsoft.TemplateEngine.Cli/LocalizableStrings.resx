@@ -622,4 +622,7 @@ Run 'dotnet {1} --show-aliases' with no args to show all aliases.</value>
   <data name="InvalidNameParameter" xml:space="preserve">
     <value>Name cannot contain any of the following characters {0} or character codes {1}</value>
   </data>
+  <data name="CouldntDetermineFilesToRestore" xml:space="preserve">
+    <value>Couldn't determine files to restore.</value>
+  </data>
 </root>

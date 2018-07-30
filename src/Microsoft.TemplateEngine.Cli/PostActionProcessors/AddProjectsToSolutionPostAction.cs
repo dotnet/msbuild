@@ -98,7 +98,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
         }
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
             if (string.IsNullOrEmpty(outputBasePath))
             {
@@ -157,10 +157,10 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
                 projectFiles = allProjects;
             }
-            else if (!TryGetProjectFilesToAdd(environment, action, creationEffects.CreationResult, outputBasePath, out projectFiles))
+            else
             {
-                environment.Host.LogMessage(LocalizableStrings.AddProjToSlnPostActionNoProjFiles);
-                return false;
+                //If the author didn't opt in to the new behavior by specifying "projectFiles", use the old behavior
+                return Process(environment, action, templateCreationResult, outputBasePath);
             }
 
             Dotnet addProjToSlnCommand = Dotnet.AddProjectsToSolution(nearestSlnFilesFould[0], projectFiles);

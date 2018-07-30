@@ -14,7 +14,7 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
 
         public Guid Id => ActionProcessorId;
 
-        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, string outputBasePath)
+        public bool Process(IEngineEnvironmentSettings environment, IPostAction action, ICreationEffects2 creationEffects, ICreationResult templateCreationResult, string outputBasePath)
         {
             IReadOnlyList<string> allTargets = null;
             if (action.Args.TryGetValue("targetFiles", out string singleTarget) && singleTarget != null)
@@ -47,7 +47,8 @@ namespace Microsoft.TemplateEngine.Cli.PostActionProcessors
             }
             else
             {
-                allTargets = null;
+                //If the author didn't opt in to the new behavior by using "targetFiles", do things the old way
+                return Process(environment, action, templateCreationResult, outputBasePath);
             }
 
             if (allTargets is null)
