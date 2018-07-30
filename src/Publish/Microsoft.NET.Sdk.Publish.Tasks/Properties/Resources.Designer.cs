@@ -10,9 +10,8 @@
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
     using System;
-    using System.Reflection;
-
-
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -40,7 +39,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.NET.Sdk.Publish.Tasks.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.NET.Sdk.Publish.Tasks.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -1781,7 +1780,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to atlease AspNetCoreModuleV2..
+        ///   Looks up a localized string similar to In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to atleast AspNetCoreModuleV2..
         /// </summary>
         public static string WebConfigTransform_InvalidHostingOption {
             get {

@@ -1153,6 +1153,6 @@ For more information on this deploy script visit:	https://go.microsoft.com/fwlin
     <value>The acceptable value for AspNetCoreModuleHostingModel property is either "InProcess" or "OutOfProcess".</value>
   </data>
   <data name="WebConfigTransform_InvalidHostingOption" xml:space="preserve">
-    <value>In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to atlease AspNetCoreModuleV2.</value>
+    <value>In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to atleast AspNetCoreModuleV2.</value>
   </data>
 </root>
