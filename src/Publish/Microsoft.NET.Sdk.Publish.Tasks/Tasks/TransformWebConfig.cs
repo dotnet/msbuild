@@ -54,16 +54,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         public string ExecutableExtension { get; set; }
 
         /// <summary>
-        /// AspNetCoreModuleHostingModel defines whether the hosting will be InProcess or OutOfProcess.
+        /// AspNetCoreHostingModel defines whether the hosting will be InProcess or OutOfProcess.
         /// </summary>
         /// <returns></returns>
-        public string AspNetCoreModuleHostingModel { get; set; }
+        public string AspNetCoreHostingModel { get; set; }
 
         /// <summary>
         /// AspNetCoreModule defines the module name
         /// </summary>
         /// <returns></returns>
-        public string AspNetCoreModule { get; set; }
+        public string AspNetCoreModuleName { get; set; }
 
         public string EnvironmentName { get; set; }
 
@@ -97,7 +97,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             string outputFile = Path.GetFileName(TargetPath);
-            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModule, AspNetCoreModuleHostingModel, EnvironmentName);
+            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModuleName, AspNetCoreHostingModel, EnvironmentName);
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);

@@ -10,7 +10,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 {
     public static class WebConfigTransform
     {
-        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModule, string aspNetCoreHostingModel, string environmentName)
+        public static XDocument Transform(XDocument webConfig, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModuleName, string aspNetCoreHostingModel, string environmentName)
         {
             const string HandlersElementName = "handlers";
             const string aspNetCoreElementName = "aspNetCore";
@@ -27,7 +27,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             var webServerSection = GetOrCreateChild(rootElement, "system.webServer");
 
             var handlerSection = GetOrCreateChild(webServerSection, HandlersElementName);
-            TransformHandlers(handlerSection, aspNetCoreModule);
+            TransformHandlers(handlerSection, aspNetCoreModuleName);
 
             string aspNetCoreModuleValue =
                     (string)handlerSection.Elements("add")
@@ -53,7 +53,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             return webConfig;
         }
 
-        private static void TransformHandlers(XElement handlersElement, string aspNetCoreModule)
+        private static void TransformHandlers(XElement handlersElement, string aspNetCoreModuleName)
         {
             var aspNetCoreElement =
                 handlersElement.Elements("add")
@@ -65,20 +65,20 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 handlersElement.Add(aspNetCoreElement);
             }
 
-            if (string.IsNullOrEmpty(aspNetCoreModule))
+            if (string.IsNullOrEmpty(aspNetCoreModuleName))
             {
                 // This is the default ASP.NET core module.
-                aspNetCoreModule = "AspNetCoreModule";
+                aspNetCoreModuleName = "AspNetCoreModule";
             }
 
             aspNetCoreElement.SetAttributeValue("name", "aspNetCore");
             SetAttributeValueIfEmpty(aspNetCoreElement, "path", "*");
             SetAttributeValueIfEmpty(aspNetCoreElement, "verb", "*");
-            SetAttributeValueIfEmpty(aspNetCoreElement, "modules", aspNetCoreModule);
+            SetAttributeValueIfEmpty(aspNetCoreElement, "modules", aspNetCoreModuleName);
             SetAttributeValueIfEmpty(aspNetCoreElement, "resourceType", "Unspecified");
         }
 
-        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModule, string aspNetCoreHostingModel)
+        private static void TransformAspNetCore(XElement aspNetCoreElement, string appName, bool configureForAzure, bool useAppHost, string extension, string aspNetCoreModuleName, string aspNetCoreHostingModel)
         {
             // Forward slashes currently work neither in AspNetCoreModule nor in dotnet so they need to be
             // replaced with backwards slashes when the application is published on a non-Windows machine
@@ -135,7 +135,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 {
                     case "inprocess":
                         // In process is not supported for AspNetCoreModule.
-                        if (string.Equals(aspNetCoreModule, "AspNetCoreModule", StringComparison.Ordinal))
+                        if (string.Equals(aspNetCoreModuleName, "AspNetCoreModule", StringComparison.OrdinalIgnoreCase))
                         {
                             throw new Exception(Resources.WebConfigTransform_InvalidHostingOption);
                         }

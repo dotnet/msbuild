@@ -55,8 +55,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         IgnoreProjectGuid="$(IgnoreProjectGuid)" 
         ProjectFullPath="$(MSBuildProjectFullPath)" 
         SolutionPath="$(SolutionPath)"
-        AspNetCoreModule="$(AspNetCoreModuleVersion)"
-        AspNetCoreModuleHostingModel="$(AspNetCoreModuleHostingModel)"
+        AspNetCoreModuleName="$(AspNetCoreModuleName)"
+        AspNetCoreHostingModel="$(AspNetCoreHostingModel)"
         EnvironmentName="$(EnvironmentName)"/> 
   </Target>
 
