@@ -127,6 +127,9 @@ bin/
 *.svclog
 *.scc
 
+# BinLog artifacts
+msbuild.*.ProjectImports.zip
+
 # Chutzpah Test files
 _Chutzpah*
 
