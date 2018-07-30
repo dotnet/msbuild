@@ -160,6 +160,11 @@ Emite um arquivo 'Sequence.xml' no diretório atual que captura a ordem de execu
         <target state="translated">A configuração a ser usada para executar testes. O padrão para a maioria dos projetos é 'Debug'.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
