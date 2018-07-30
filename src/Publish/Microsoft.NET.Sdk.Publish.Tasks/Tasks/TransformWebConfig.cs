@@ -66,6 +66,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             XDocument webConfigXml = null;
             string webConfigPath = Path.Combine(PublishDir, "web.config");
+            webConfigPath = Path.GetFullPath(webConfigPath);
+
             if (File.Exists(webConfigPath))
             {
                 Log.LogMessage($"Updating web.config at '{webConfigPath}'");
