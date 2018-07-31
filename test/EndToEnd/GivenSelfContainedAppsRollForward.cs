@@ -21,8 +21,9 @@ namespace EndToEnd
         [ClassData(typeof(SupportedNetCoreAppVersions))]
         public void ItRollsForwardToTheLatestVersion(string minorVersion)
         {
-            // https://github.com/dotnet/cli/issues/9661: remove this once the ASP.NET version bump
-            // merges from 2.1.3xx -> 2.1.4xx -> 2.2.1xx
+            // https://github.com/dotnet/cli/issues/9661
+            // https://github.com/dotnet/sdk/issues/2446
+            // dotnet/sdk is missing handling for 2.1 when it isn't the latest runtime
             if (minorVersion == "2.1")
             {
                 return;
