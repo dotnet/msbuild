@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="AppFullName">
+        <source>List all packages references of the project.</source>
+        <target state="needs-review-translation">Wyświetl listę wszystkich odwołań między projektami w projekcie.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFramework">
+        <source>FRAMEWORK | FRAMEWORK\RID</source>
+        <target state="new">FRAMEWORK | FRAMEWORK\RID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdFrameworkDescription">
+        <source>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</source>
+        <target state="new">Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdOutdatedDescription">
+        <source>Lists packages that have newer versions.</source>
+        <target state="new">Lists packages that have newer versions.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdTransitiveDescription">
+        <source>Lists transitive and top-level packages.</source>
+        <target state="new">Lists transitive and top-level packages.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleProjectsFound">
+        <source>The directory given includes multiple projects. Please specify one of the following projects:</source>
+        <target state="new">The directory given includes multiple projects. Please specify one of the following projects:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MultipleSolutionsFound">
+        <source>The directory given includes multiple solutions. Please specify one of the following solutions:</source>
+        <target state="new">The directory given includes multiple solutions. Please specify one of the following solutions:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NoProjectsOrSolutions">
+        <source>The given directory does not include any solution or project.</source>
+        <target state="new">The given directory does not include any solution or project.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfig">
+        <source>CONFIG FILE</source>
+        <target state="new">CONFIG FILE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdConfigDescription">
+        <source>A path to a config file to specify sources. Works only with `--outdated`.</source>
+        <target state="new">A path to a config file to specify sources. Works only with `--outdated`.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestMinorDescription">
+        <source>Considers only the versions that have matching major when looking for latest version. Works only with `--outdated`.</source>
+        <target state="new">Considers only the versions that have matching major when looking for latest version. Works only with `--outdated`.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdHighestPatchDescription">
+        <source>Considers only the versions that have matching minor and major when looking for latest version. Works only with `--outdated`.</source>
+        <target state="new">Considers only the versions that have matching minor and major when looking for latest version. Works only with `--outdated`.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdPrereleaseDescription">
+        <source>Considers prerelease versions when looking for latest version. Works only with `--outdated`.</source>
+        <target state="new">Considers prerelease versions when looking for latest version. Works only with `--outdated`.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSource">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdSourceDescription">
+        <source>Sources to lookup for latest versions. Works only with `--outdated`.</source>
+        <target state="new">Sources to lookup for latest versions. Works only with `--outdated`.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutdatedOptionOnly">
+        <source>This option `{0}` can only be used with `--outdated` present.</source>
+        <target state="new">This option `{0}` can only be used with `--outdated` present.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileNotFound">
+        <source>The given file was not found. Please make sure that you are passing the correct path.</source>
+        <target state="new">The given file was not found. Please make sure that you are passing the correct path.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
