@@ -59,7 +59,12 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we will or won't accept.
 
 * [Contributing Guide](documentation/wiki/Contributing-Code.md)
-* [Developer Guide](documentation/wiki/Building-Testing-and-Debugging.md)
+
+* **Developer Guide on:**
+   - [.Net Core](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
+   - [Full Framework](documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
+   - [Mono](documentation/wiki/Building-Testing-and-Debugging-on-Mono-MSBuild.md)
+
 
 Looking for something to work on? This list of [up for grabs issues](https://github.com/Microsoft/msbuild/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs) is a great place to start.
 
