@@ -540,15 +540,18 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         static GenerateResource()
         {
-            try
+            if (NativeMethodsShared.IsWindows)
             {
-                object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
-                if (allowUntrustedFiles is String)
+                try
                 {
-                    allowMOTW = ((string)allowUntrustedFiles).Equals("true", StringComparison.OrdinalIgnoreCase);
+                    object allowUntrustedFiles = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\SDK", "AllowProcessOfUntrustedResourceFiles", null);
+                    if (allowUntrustedFiles is String)
+                    {
+                        allowMOTW = ((string)allowUntrustedFiles).Equals("true", StringComparison.OrdinalIgnoreCase);
+                    }
                 }
+                catch { }
             }
-            catch { }
         }
 #endif
 
@@ -739,20 +742,8 @@ namespace Microsoft.Build.Tasks
 
                     // Check for the mark of the web on all possibly-exploitable files
                     // to be processed.
-                    bool dangerousResourceFound = false;
-
-                    foreach (ITaskItem source in _sources)
+                    if (HasDangerousResources(_sources))
                     {
-                        if (IsDangerous(source.ItemSpec))
-                        {
-                            Log.LogErrorWithCodeFromResources("GenerateResource.MOTW", source.ItemSpec);
-                            dangerousResourceFound = true;
-                        }
-                    }
-
-                    if (dangerousResourceFound)
-                    {
-                        // Do no further processing
                         return false;
                     }
 
@@ -924,84 +915,109 @@ namespace Microsoft.Build.Tasks
 
         private static IInternetSecurityManager internetSecurityManager = null;
 
-        // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
-        // so check to see if we should trust them before analyzing them
-        private bool IsDangerous(String filename)
+        private bool HasDangerousResources(ITaskItem[] resources)
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                // This needs to use InternetSecurityManager, supported only on windows
+                return false;
+            }
+
             // If they are opted out, there's no work to do
             if (allowMOTW)
             {
                 return false;
             }
 
-            // First check the zone, if they are not an untrusted zone, they aren't dangerous
+            // Check for the mark of the web on all possibly-exploitable files
+            // to be processed.
+            bool dangerousResourceFound = false;
 
-            if (internetSecurityManager == null)
+            foreach (ITaskItem resource in resources)
             {
-                Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
-                internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
-            }
-
-            Int32 zone = 0;
-            internetSecurityManager.MapUrlToZone(Path.GetFullPath(filename), out zone, 0);
-            if (zone < ZoneInternet)
-            {
-                return false;
-            }
-
-            // By default all file types that get here are considered dangerous
-            bool dangerous = true;
-
-            if (String.Equals(Path.GetExtension(filename), ".resx", StringComparison.OrdinalIgnoreCase) ||
-                String.Equals(Path.GetExtension(filename), ".resw", StringComparison.OrdinalIgnoreCase))
-            {
-                // XML files are only dangerous if there are unrecognized objects in them
-                dangerous = false;
-
-                FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                XmlTextReader reader = new XmlTextReader(stream);
-                reader.DtdProcessing = DtdProcessing.Ignore;
-                reader.XmlResolver = null;
-                try
+                if (IsDangerous(resource.ItemSpec))
                 {
-                    while (reader.Read())
-                    {
-                        if (reader.NodeType == XmlNodeType.Element)
-                        {
-                            string s = reader.LocalName;
+                    Log.LogErrorWithCodeFromResources("GenerateResource.MOTW", resource.ItemSpec);
+                    dangerousResourceFound = true;
+                }
+            }
 
-                            // We only want to parse data nodes,
-                            // the mimetype attribute gives the serializer
-                            // that's requested.
-                            if (reader.LocalName.Equals("data"))
+            return dangerousResourceFound;
+
+            // Resources can have arbitrarily serialized objects in them which can execute arbitrary code
+            // so check to see if we should trust them before analyzing them
+            bool IsDangerous(String filename)
+            {
+                // First check the zone, if they are not an untrusted zone, they aren't dangerous
+
+                if (internetSecurityManager == null)
+                {
+                    Type iismType = Type.GetTypeFromCLSID(new Guid(CLSID_InternetSecurityManager));
+                    internetSecurityManager = (IInternetSecurityManager)Activator.CreateInstance(iismType);
+                }
+
+                Int32 zone = 0;
+                internetSecurityManager.MapUrlToZone(Path.GetFullPath(filename), out zone, 0);
+                if (zone < ZoneInternet)
+                {
+                    return false;
+                }
+
+                // By default all file types that get here are considered dangerous
+                bool dangerous = true;
+
+                if (String.Equals(Path.GetExtension(filename), ".resx", StringComparison.OrdinalIgnoreCase) ||
+                    String.Equals(Path.GetExtension(filename), ".resw", StringComparison.OrdinalIgnoreCase))
+                {
+                    // XML files are only dangerous if there are unrecognized objects in them
+                    dangerous = false;
+
+                    FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    XmlTextReader reader = new XmlTextReader(stream);
+                    reader.DtdProcessing = DtdProcessing.Ignore;
+                    reader.XmlResolver = null;
+                    try
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader.NodeType == XmlNodeType.Element)
                             {
-                                if (reader["mimetype"] != null)
+                                string s = reader.LocalName;
+
+                                // We only want to parse data nodes,
+                                // the mimetype attribute gives the serializer
+                                // that's requested.
+                                if (reader.LocalName.Equals("data"))
                                 {
-                                    dangerous = true;
+                                    if (reader["mimetype"] != null)
+                                    {
+                                        dangerous = true;
+                                    }
                                 }
-                            }
-                            else if (reader.LocalName.Equals("metadata"))
-                            {
-                                if (reader["mimetype"] != null)
+                                else if (reader.LocalName.Equals("metadata"))
                                 {
-                                    dangerous = true;
+                                    if (reader["mimetype"] != null)
+                                    {
+                                        dangerous = true;
+                                    }
                                 }
                             }
                         }
                     }
+                    catch
+                    {
+                        // If we hit an error while parsing assume there's a dangerous type in this file.
+                        dangerous = true;
+                    }
+                    stream.Close();
                 }
-                catch
-                {
-                    // If we hit an error while parsing assume there's a dangerous type in this file.
-                    dangerous = true;
-                }
-                stream.Close();
-            }
 
-            return dangerous;
+                return dangerous;
+            }
         }
+
 #else
-        private bool IsDangerous(String filename)
+        private bool HasDangerousResources(ITaskItem resources)
         {
             return false;
         }
