@@ -52,11 +52,18 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
         /// Native executable extension
         /// </summary>
         public string ExecutableExtension { get; set; }
+
         /// <summary>
-        /// AspNetCoreModuleHostingModel defines whether the hosting will be InProcess or OutOfProcess.
+        /// AspNetCoreHostingModel defines whether the hosting will be InProcess or OutOfProcess.
         /// </summary>
         /// <returns></returns>
-        public string AspNetCoreModuleHostingModel { get; set; }
+        public string AspNetCoreHostingModel { get; set; }
+
+        /// <summary>
+        /// AspNetCoreModule defines the module name
+        /// </summary>
+        /// <returns></returns>
+        public string AspNetCoreModuleName { get; set; }
 
         public string EnvironmentName { get; set; }
 
@@ -66,6 +73,8 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
 
             XDocument webConfigXml = null;
             string webConfigPath = Path.Combine(PublishDir, "web.config");
+            webConfigPath = Path.GetFullPath(webConfigPath);
+
             if (File.Exists(webConfigPath))
             {
                 Log.LogMessage($"Updating web.config at '{webConfigPath}'");
@@ -74,7 +83,10 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 {
                     webConfigXml = XDocument.Load(webConfigPath);
                 }
-                catch (XmlException) { }
+                catch (XmlException e)
+                {
+                    Log.LogWarning($"Cannot parse web.config as XML. A new web.config will be generated. Error Details : {e.Message}");
+                }
             }
             else
             {
@@ -87,7 +99,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             }
 
             string outputFile = Path.GetFileName(TargetPath);
-            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModuleHostingModel, EnvironmentName);
+            XDocument transformedConfig = WebConfigTransform.Transform(webConfigXml, outputFile, IsAzure, UseAppHost, ExecutableExtension, AspNetCoreModuleName, AspNetCoreHostingModel, EnvironmentName);
 
             // Telemetry
             transformedConfig = WebConfigTelemetry.AddTelemetry(transformedConfig, ProjectGuid, IgnoreProjectGuid, SolutionPath, ProjectFullPath);
