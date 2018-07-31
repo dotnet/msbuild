@@ -964,11 +964,8 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            else if (File.Exists(fullPath))
-            {
-                fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
-            }
 
+            fileModifiedTime = File.GetLastWriteTimeUtc(fullPath);
             return fileModifiedTime;
         }
 
