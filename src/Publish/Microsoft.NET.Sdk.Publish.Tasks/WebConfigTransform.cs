@@ -29,13 +29,14 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             var handlerSection = GetOrCreateChild(webServerSection, HandlersElementName);
             TransformHandlers(handlerSection, aspNetCoreModuleName);
 
-            string aspNetCoreModuleValue =
+            // aspNetCoreModuleName might not get set if the web.config already has a different module name defined.
+            string aspNetCoreModuleNameFinalValue =
                     (string)handlerSection.Elements("add")
-                   .Single(e => string.Equals((string)e.Attribute("name"), "aspnetcore", StringComparison.OrdinalIgnoreCase))
+                   .FirstOrDefault(e => string.Equals((string)e.Attribute("name"), "aspnetcore", StringComparison.OrdinalIgnoreCase))
                    .Attribute("modules");
 
             var aspNetCoreSection = GetOrCreateChild(webServerSection, aspNetCoreElementName);
-            TransformAspNetCore(aspNetCoreSection, appName, configureForAzure, useAppHost, extension, aspNetCoreModuleValue, aspNetCoreHostingModel);
+            TransformAspNetCore(aspNetCoreSection, appName, configureForAzure, useAppHost, extension, aspNetCoreModuleNameFinalValue, aspNetCoreHostingModel);
             if (!string.IsNullOrEmpty(environmentName))
             {
                 TransformEnvironmentVariables(GetOrCreateChild(aspNetCoreSection, envVariablesElementName), environmentName);
