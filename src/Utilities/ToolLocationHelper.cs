@@ -2108,11 +2108,6 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            lock (s_locker)
-            {
-                s_cachedReferenceAssemblyPaths[referenceAssemblyCacheKey] = dotNetFrameworkReferenceAssemblies;
-            }
-
             for (int i = 0; i < dotNetFrameworkReferenceAssemblies.Count; i++)
             {
                 if (
@@ -2120,10 +2115,13 @@ namespace Microsoft.Build.Utilities
                         Path.DirectorySeparatorChar.ToString(),
                         StringComparison.Ordinal))
                 {
-                    dotNetFrameworkReferenceAssemblies[i] = string.Concat(
-                        dotNetFrameworkReferenceAssemblies[i],
-                        Path.DirectorySeparatorChar);
+                    dotNetFrameworkReferenceAssemblies[i] += Path.DirectorySeparatorChar;
                 }
+            }
+
+            lock (s_locker)
+            {
+                s_cachedReferenceAssemblyPaths[referenceAssemblyCacheKey] = dotNetFrameworkReferenceAssemblies;
             }
 
             return dotNetFrameworkReferenceAssemblies;
