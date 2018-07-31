@@ -105,4 +105,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   -->
   <Target Name="GetPackagingOutputs" />
 
+  <!-- This exists as a workaround for https://github.com/Microsoft/msbuild/issues/3558 -->
+  <PropertyGroup Condition="'$(DefaultProjectTypeGuid)' == ''">
+    <DefaultProjectTypeGuid Condition="'$(MSBuildProjectExtension)' == '.csproj'">{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</DefaultProjectTypeGuid>
+    <DefaultProjectTypeGuid Condition="'$(MSBuildProjectExtension)' == '.vbproj'">{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</DefaultProjectTypeGuid>
+    <!-- Note: F# sets DefaultProjectTypeGuid in the F# SDK -->
+  </PropertyGroup>
+
 </Project>
