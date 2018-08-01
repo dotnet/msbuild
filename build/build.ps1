@@ -303,10 +303,8 @@ function Build {
   
   if ($ci)
   {
-#    CallMSBuild $ToolsetProj /t:restore /m /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
-    git status | Out-Null
-    git --no-pager diff HEAD --word-diff=plain --exit-code | Out-Null
-
+    # Log errors for changed lines
+    git --no-pager diff HEAD --unified=0 --no-color --exit-code | ForEach-Object { "##vso[task.logissue type=error] $_" }
     if($LASTEXITCODE -ne 0) {
       throw "[ERROR] After building, there are changed files.  Please build locally and include these changes in your pull request."
     }
