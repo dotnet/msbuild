@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli.Utils;
 using System.IO;
 using System;
 using System.Runtime.CompilerServices;
+using System.Xml;
 
 namespace Microsoft.DotNet.Cli.Test.Tests
 {
@@ -309,6 +310,100 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             }
 
             result.ExitCode.Should().Be(1);
+        }
+
+
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        public void ItCreatesCoverageFileWhenCodeCoverageEnabledByRunsettings()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("11");
+
+            string resultsDirectory = Path.Combine(testProjectDirectory, "RD");
+
+            // Delete resultsDirectory if it exist
+            if (Directory.Exists(resultsDirectory))
+            {
+                Directory.Delete(resultsDirectory, true);
+            }
+
+            var settingsPath =Path.Combine(AppContext.BaseDirectory, "CollectCodeCoverage.runsettings");
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .ExecuteWithCapturedOutput(
+                                            "--settings " + settingsPath
+                                            + " --results-directory " + resultsDirectory);
+
+            // Verify test results
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            }
+
+            // Verify coverage file.
+            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
+            Assert.Equal(1, coverageFileInfos.Length);
+
+            result.ExitCode.Should().Be(1);
+        }
+
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        public void ItCreatesCoverageFileInResultsDirectory()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
+
+            string resultsDirectory = Path.Combine(testProjectDirectory, "RD");
+
+            // Delete resultsDirectory if it exist
+            if (Directory.Exists(resultsDirectory))
+            {
+                Directory.Delete(resultsDirectory, true);
+            }
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .ExecuteWithCapturedOutput(
+                                            "--collect \"Code Coverage\" "
+                                            + "--results-directory " + resultsDirectory);
+
+            // Verify test results
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("Total tests: 2. Passed: 1. Failed: 1. Skipped: 0.");
+            }
+
+            // Verify coverage file.
+            DirectoryInfo d = new DirectoryInfo(resultsDirectory);
+            FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
+            Assert.Equal(1, coverageFileInfos.Length);
+
+            result.ExitCode.Should().Be(1);
+        }
+
+        [UnixOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        public void ItShouldShowWarningMessageOnCollectCodeCoverage()
+        {
+            var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
+
+            // Call test
+            CommandResult result = new DotnetTestCommand()
+                                        .WithWorkingDirectory(testProjectDirectory)
+                                        .ExecuteWithCapturedOutput(
+                                            "--collect \"Code Coverage\" "
+                                            + "--filter VSTestPassTest");
+
+            // Verify test results
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                result.StdOut.Should().Contain("No code coverage data available. Code coverage is currently supported only on Windows.");
+                result.StdOut.Should().Contain("Total tests: 1. Passed: 1. Failed: 0. Skipped: 0.");
+                result.StdOut.Should().Contain("Test Run Successful.");
+            }
+
+            result.ExitCode.Should().Be(0);
         }
 
         private string CopyAndRestoreVSTestDotNetCoreTestApp([CallerMemberName] string callingMethod = "")

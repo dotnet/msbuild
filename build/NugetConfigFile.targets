@@ -18,6 +18,7 @@
 
       <NugetConfigCLIFeeds>
         <![CDATA[
+    <add key="myget-vstest" value="https://dotnet.myget.org/F/vstest/api/v3/index.json" />
     <add key="BlobFeed" value="https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json" />
     <add key="aspnetcore-release" value="https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json" />
     <add key="aspnetcore-dev" value="https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json" />

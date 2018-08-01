@@ -10,6 +10,8 @@
     <BuildNumber Condition="'$(BuildNumber)' == ''">00000001-01</BuildNumber>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
+    <CliVersionNoSuffix Condition="'$(CliVersionNoSuffix)' == ''">$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>
+
     <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(BuildNumber)</SimpleVersion> 
     <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</SimpleVersion> 
 
