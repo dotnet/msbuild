@@ -72,8 +72,17 @@
         DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.NET.Sdk.Publish.Tasks.dll"
         OverwriteReadOnlyFiles="true" />
 
-    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/netstandard1.3/Microsoft.NET.Sdk.Publish.Tasks.dll"
-        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp1.0/Microsoft.NET.Sdk.Publish.Tasks.dll"
+    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/netcoreapp2.0/Microsoft.NET.Sdk.Publish.Tasks.dll"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp2.0/Microsoft.NET.Sdk.Publish.Tasks.dll"
+        OverwriteReadOnlyFiles="true" />
+
+    <!-- Copy Xdt assemblies -->
+    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/net46/win7-x86/Microsoft.Web.XmlTransform.dll"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.Web.XmlTransform.dll"
+        OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/netcoreapp2.0/Microsoft.Web.XmlTransform.dll"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp2.0/Microsoft.Web.XmlTransform.dll"
         OverwriteReadOnlyFiles="true" />
 
   </Target>

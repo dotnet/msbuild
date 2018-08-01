@@ -17,10 +17,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="TransformAppSettings" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="GenerateEFSQLScripts" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="GenerateRunCommandFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
+    <UsingTask TaskName="TransformXml" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
 
   <PropertyGroup>
     <_DotNetPublishTransformFiles>
       _TransformWebConfig;
+      _TransformXml;
       _TransformAppSettings;
       _GenerateEFSQLScripts;
       _GenerateRunCommandFile;
@@ -58,6 +60,51 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         AspNetCoreModuleName="$(AspNetCoreModuleName)"
         AspNetCoreHostingModel="$(AspNetCoreHostingModel)"
         EnvironmentName="$(EnvironmentName)"/> 
+  </Target>
+
+
+  <!--
+  ***********************************************************************************************
+  TARGET : _TransformXml
+  ***********************************************************************************************
+ -->
+  <Target Name="_TransformXml">
+    <PropertyGroup>
+      <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' == ''">true</TransformXmlStackTraceEnabled>
+      <!-- Forcing the property value to be boolean -->
+      <TransformXmlStackTraceEnabled Condition="'$(TransformXmlStackTraceEnabled)' != 'true'">false</TransformXmlStackTraceEnabled>
+    </PropertyGroup>
+    
+  <PropertyGroup Condition="'$(WebPublishProfileFile)' !=''">
+    <PublishProfileName>$([System.IO.Path]::GetFileNameWithoutExtension($(WebPublishProfileFile)))</PublishProfileName>
+  </PropertyGroup>
+    
+    <!-- Run the transform at the config level -->
+    <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(Configuration).config')"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="$(MSBuildProjectDirectory)\web.$(Configuration).config"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+  
+      <!-- Run the transform at the profile level -->
+    <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(PublishProfileName).config')"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="$(MSBuildProjectDirectory)\web.$(PublishProfileName).config"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
+  
+    <!-- Run the transform at the environment level -->
+    <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(EnvironmentName).config')"
+                  Source="$(PublishIntermediateOutputPath)web.config"
+                  Transform="$(MSBuildProjectDirectory)\web.$(EnvironmentName).config"
+                  Destination="$(PublishIntermediateOutputPath)web.config"
+                  StackTrace="$(TransformXmlStackTraceEnabled)"
+                  SourceRootPath="$(PublishIntermediateOutputPath)"
+                  TransformRootPath="$(MSBuildProjectDirectory)"/>
   </Target>
 
   <!--

@@ -11,7 +11,7 @@ done
 REPOROOT="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$REPOROOT/scripts/common/_prettyprint.sh"
-export DOTNET_VERSION=2.1.300
+export DOTNET_VERSION=2.1.302
 if [ -n "$DotNetCoreSdkDir" ]
 then
     export DOTNET_VERSION=$( ${DotNetCoreSdkDir}/dotnet --version )

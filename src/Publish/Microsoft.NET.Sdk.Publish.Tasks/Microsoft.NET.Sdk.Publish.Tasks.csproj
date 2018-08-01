@@ -7,11 +7,12 @@
   <Import Project="$(WebSdkRoot)\build\Version.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net46;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(DotNetBuildFromSource)' == 'true' ">netstandard1.3</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>$(WebSdkRoot)\bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>$(WebSdkRoot)\obj\$(Configuration)\</IntermediateOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net46'">
     <RuntimeIdentifier>win7-x86</RuntimeIdentifier>
@@ -22,9 +23,10 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Web.Xdt" Version="3.0.0-Preview1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="System.Collections.Specialized" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
   </ItemGroup>
