@@ -1389,14 +1389,14 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;file&gt;    
-                     Profile l'évaluation de MSBuild et écrit le résultat 
+        <target state="translated">  /profileevaluation:&lt;file&gt;
+                     Profile l'évaluation de MSBuild et écrit le résultat
                      dans le fichier spécifié. Si l'extension du fichier
                      spécifié est '.md', le résultat est généré au format
                      markdown. Sinon, un fichier séparé par une tabulation est créé.

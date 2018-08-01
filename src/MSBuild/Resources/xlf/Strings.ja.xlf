@@ -349,7 +349,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                        DisableConsoleColor--すべてのログ メッセージに、コンソールの既定の色を
                            使用します。
                        DisableMPLogging--マルチプロセッサ
-                           ログ出力方法を無効にします 
+                           ログ出力方法を無効にします
                            (マルチプロセッサ以外のモードで実行されている場合)。
                        EnableMPLogging--マルチプロセッサ
                            ログ出力方法を有効にします
@@ -655,7 +655,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                     /filelogger[n] スイッチの存在を暗示します。
                     "n" は (存在する場合は) 1 から 9 の数値です。
                     /fileloggerparameters も分散ファイル ロガーによって使用されます。
-                    /distributedFileLogger の説明を参照してください 
+                    /distributedFileLogger の説明を参照してください
                     (短い形式: /flp[n])。
                     コンソール ロガーと同じパラメーターを使用
                     できます。使用できるその他の主要なパラメーター:
@@ -703,7 +703,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                     パラメーター:
                     True--ビルドが完了してもノードを残し、
                            後のビルドで再利用します (既定)。
-                    False--ビルドが完了したらノードを残しません 
+                    False--ビルドが完了したらノードを残しません
                     (短い形式: /nr)。
                     例:
                       /nr:true
@@ -1310,12 +1310,12 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      ProjectImports スイッチは次のように動作を制御します。
 
                       ProjectImports=None     - プロジェクト インポートを収集しません。
-                                                
+
                       ProjectImports=Embed    - プロジェクト インポートをログ ファイルに
                                                 組み込みます。
                       ProjectImports=ZipFile  - プロジェクト ファイルを
                                                 output.projectimports.zip に保存します。
-                                                ここで、output はバイナリ ログ 
+                                                ここで、output はバイナリ ログ
                                                 ファイル名と同じ名前です。
 
                      ProjectImports の既定の設定は Embed です。
@@ -1388,16 +1388,16 @@ Copyright (C) Microsoft Corporation.All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;ファイル&gt;    
+        <target state="translated">  /profileevaluation:&lt;ファイル&gt;
                      MSBuild の評価のプロファイリングを行い、結果を
-                     指定されたファイルに書き込みます。指定されたファイルの拡張子が 
-                     '.md' の場合、結果は 
+                     指定されたファイルに書き込みます。指定されたファイルの拡張子が
+                     '.md' の場合、結果は
                      Markdown 形式 で生成されます。'.md' 以外の場合は、タブ区切りファイルが生成されます。
     </target>
         <note />

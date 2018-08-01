@@ -540,8 +540,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
    </source>
         <target state="translated">  /toolsversion:&lt;version&gt;
                      빌드 중 사용할 MSBuild 도구 집합(작업, 대상 등)의
-                     버전입니다. 이 버전은 개별 프로젝트에서 
-                     지정한 버전을 재정의합니다. (약식: 
+                     버전입니다. 이 버전은 개별 프로젝트에서
+                     지정한 버전을 재정의합니다. (약식:
                      /tv)
                      예:
                        /toolsversion:3.5
@@ -569,9 +569,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      파일은 현재 디렉터리에 있고
                      "msbuild[n].log"로 이름이 지정되어 있습니다. 모든 노드의 이벤트는 단일 로그로
                      결합됩니다. 파일의 위치 및 fileLogger의
-                     다른 매개 변수는 "/fileLoggerParameters[n]" 스위치를 
+                     다른 매개 변수는 "/fileLoggerParameters[n]" 스위치를
                      추가하여 지정할 수 있습니다.
-                     "n"은 1-9 사이의 숫자일 수 있으며 최대 10개의 
+                     "n"은 1-9 사이의 숫자일 수 있으며 최대 10개의
                      파일 로거가 추가될 수 있습니다. (약식: /fl[n])
     </target>
         <note>
@@ -651,7 +651,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </source>
         <target state="translated">  /fileloggerparameters[n]:&lt;parameters&gt;
                      파일 로거에 대한 추가 매개 변수를 제공합니다.
-                     이 스위치가 있으면 
+                     이 스위치가 있으면
                      해당 /filelogger[n] 스위치도 있습니다.
                      "n"은 1-9 사이의 숫자일 수 있습니다.
                      /fileloggerparameters는 모든 분산 파일 로거에도 사용할 수 있습니다.
@@ -1388,14 +1388,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;file&gt;    
-                     MSBuild 실행을 프로파일링하고 결과를 
+        <target state="translated">  /profileevaluation:&lt;file&gt;
+                     MSBuild 실행을 프로파일링하고 결과를
                      지정된 파일에 씁니다. 지정된 파일의 확장명이
                      '.md'이면 결과가 markdown 형식으로
                      생성됩니다. 그렇지 않으면 탭으로 구분된 파일이 생성됩니다.

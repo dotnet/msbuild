@@ -1308,7 +1308,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      包括生成期间所有导入的
                      项目和目标文件。可选的
                      ProjectImports 开关控制此行为:
-                     
+
 
                       ProjectImports=None     - 不收集项目
                                                 导入项。
@@ -1389,13 +1389,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;file&gt;    
+        <target state="translated">  /profileevaluation:&lt;file&gt;
                      解析 MSBuild 评估并将结果写入
                      指定文件。如果指定文件的扩展名
                      为“.md”，则结果将以 markdown 格式

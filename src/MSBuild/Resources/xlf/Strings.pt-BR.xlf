@@ -27,7 +27,7 @@
         <source>Microsoft (R) Build Engine version {0} for {1}
 Copyright (C) Microsoft Corporation. All rights reserved.
 </source>
-        <target state="translated">Microsoft(R) Build Engine versão {0} para {1} 
+        <target state="translated">Microsoft(R) Build Engine versão {0} para {1}
 Copyright (C) Microsoft Corporation. Todos os direitos reservados.
 </target>
         <note>LOCALIZATION: {0} contains the DLL version number. {1} contains the name of a runtime, like ".NET Framework", ".NET Core", or "Mono"</note>
@@ -154,9 +154,9 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
         <target state="translated">  @&lt;file&gt;            Insere as configurações de linha de comando com base em um arquivo de texto. Para especificar
                      vários arquivos de resposta, especifique cada arquivo de resposta
                      separadamente.
-                     
-                     Qualquer arquivo de resposta chamado "msbuild.rsp" é automaticamente 
-                     consumido das seguintes localizações: 
+
+                     Qualquer arquivo de resposta chamado "msbuild.rsp" é automaticamente
+                     consumido das seguintes localizações:
                      (1) o diretório de msbuild.exe
                      (2) o diretório do primeiro projeto ou solução compilado
 </target>
@@ -338,22 +338,22 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                         ErrorsOnly – mostra apenas erros.
                         WarningsOnly – mostra apenas avisos.
                         NoItemAndPropertyList – não mostra lista de itens e
-                            propriedades no início de cada build de projeto.    
-                        ShowCommandLine – mostra mensagens TaskCommandLineEvent  
+                            propriedades no início de cada build de projeto.
+                        ShowCommandLine – mostra mensagens TaskCommandLineEvent
                         ShowTimestamp – exibe o Carimbo de data/hora como um prefixo para qualquer
-                            mensagem.                                           
-                        ShowEventId – mostra eventId para eventos iniciados, eventos concluídos 
+                            mensagem.
+                        ShowEventId – mostra eventId para eventos iniciados, eventos concluídos
                             e mensagens
                         ForceNoAlign – não alinha o texto ao tamanho do
                             buffer de console
                         DisableConsoleColor – usa as cores do console padrão
                             para todas as mensagens de log.
                         DisableMPLogging – desabilita o estilo de log de saída
-                            do multiprocessador durante a execução no 
+                            do multiprocessador durante a execução no
                             modo não multiprocessador.
                         EnableMPLogging – habilita o estilo de log multiprocessador
                             mesmo durante a execução no modo de não
-                            multiprocessador. Esse estilo de log está ativado por padrão. 
+                            multiprocessador. Esse estilo de log está ativado por padrão.
                         ForceConsoleColor – usa as cores de console ANSI mesmo se
                             o console não der suporte para elas
                         Verbosity – substitui a configuração /verbosity para este
@@ -420,10 +420,10 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: /m[:n])
       </source>
-        <target state="translated">  /maxcpucount[:n] Especifica o número máximo de processos simultâneos a serem 
+        <target state="translated">  /maxcpucount[:n] Especifica o número máximo de processos simultâneos a serem
                      compilados. Se a opção não for usada, o valor padrão
                      usado será 1. Se a opção for usada sem um valor, o
-                     MSBuild usará o número de processadores do 
+                     MSBuild usará o número de processadores do
                      computador. (Forma abreviada: /m[:n])
       </target>
         <note>
@@ -441,7 +441,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
         <target state="translated">Exemplos:
 
         MSBuild MyApp.sln /t:Rebuild /p:Configuration=Release
-        MSBuild MyApp.csproj /t:Clean 
+        MSBuild MyApp.csproj /t:Clean
                              /p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -477,10 +477,10 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  /distributedlogger:&lt;agente central&gt;*&lt;agente de encaminhamento&gt;                     
+        <target state="translated">  /distributedlogger:&lt;agente central&gt;*&lt;agente de encaminhamento&gt;
                      Use esse agente para registrar eventos do MSBuild, anexando uma
                      instância diferente do agente a cada nó. Para especificar
-                     vários agentes, especifique cada agente separadamente. 
+                     vários agentes, especifique cada agente separadamente.
                      (Forma abreviada: /dl)
                      A sintaxe &lt;agente&gt; é:
                        [&lt;classe de agente&gt;,]&lt;assembly de agente&gt;[;&lt;parâmetros de agente&gt;]
@@ -513,8 +513,8 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                        /ignoreprojectextensions:.sln
     </source>
         <target state="translated">  /ignoreprojectextensions:&lt;extensões&gt;
-                     Lista de extensões a serem ignoradas ao determinar qual 
-                     arquivo de projeto será compilado. Use um ponto e vírgula ou uma vírgula 
+                     Lista de extensões a serem ignoradas ao determinar qual
+                     arquivo de projeto será compilado. Use um ponto e vírgula ou uma vírgula
                      para separar várias extensões.
                      (Forma abreviada: /ignore)
                      Exemplo:
@@ -540,8 +540,8 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
    </source>
         <target state="translated">  /toolsversion:&lt;versão&gt;
                      A versão do MSBuild Toolset (tarefas, destinos etc.)
-                     a ser usada durante o build. Essa versão substituirá as 
-                     versões especificadas por projetos individuais. (Forma abreviada: 
+                     a ser usada durante o build. Essa versão substituirá as
+                     versões especificadas por projetos individuais. (Forma abreviada:
                      /tv)
                      Exemplo:
                        /toolsversion:3.5
@@ -566,12 +566,12 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      10 file loggers to be attached. (Short form: /fl[n])
     </source>
         <target state="translated">  /fileLogger[n] Registra a saída do build em um arquivo. Por padrão,
-                     o arquivo está no diretório atual e tem o nome 
+                     o arquivo está no diretório atual e tem o nome
                      "msbuild[n].log". Os eventos de todos os nós são combinados em
                      um único log. A localização do arquivo e outros
-                     parâmetros do fileLogger pode ser especificada por meio 
+                     parâmetros do fileLogger pode ser especificada por meio
                      do acréscimo da opção "/fileLoggerParameters[n]".
-                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até 
+                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até
                      10 agentes de arquivo sejam anexados. (Forma abreviada: /fl[n])
     </target>
         <note>
@@ -600,14 +600,14 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
         <target state="translated">  /distributedFileLogger
                      Registra a saída do build em vários arquivos de log, um arquivo de log
                      para cada nó do MSBuild. A localização inicial desses arquivos é
-                     o diretório atual. Por padrão, os arquivos são nomeados 
+                     o diretório atual. Por padrão, os arquivos são nomeados
                      "MSBuild&lt;nodeid&gt;.log". A localização dos arquivos e
-                     outros parâmetros para fileLogger pode ser especificada 
+                     outros parâmetros para fileLogger pode ser especificada
                      com o acréscimo da opção "/fileLoggerParameters".
 
                      Se um nome de arquivo de log for definido pela opção fileLoggerParameters,
-                     o agente distribuído usará o fileName como um 
-                     modelo e anexará a ID do nó a esse fileName para 
+                     o agente distribuído usará o fileName como um
+                     modelo e anexará a ID do nó a esse fileName para
                      criar um arquivo de log para cada nó.
     </target>
         <note>
@@ -651,7 +651,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
     </source>
         <target state="translated">  /fileloggerparameters[n]:&lt;parâmetros&gt;
                      Fornece parâmetros extras para agentes de arquivo.
-                     A presença dessa opção indica a 
+                     A presença dessa opção indica a
                      opção /filelogger[n] correspondente.
                      "n", se presente, pode ser um dígito de 1 a 9.
                      /fileloggerparameters é também usado por qualquer
@@ -664,18 +664,18 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                         Append – determina se o log de build será anexado
                             ao arquivo de log ou o substituirá. A configuração da
                             opção acrescenta o log de build ao arquivo de log;
-                            A não configuração da opção substitui o 
-                            conteúdo de um arquivo de log existente. 
+                            A não configuração da opção substitui o
+                            conteúdo de um arquivo de log existente.
                             O padrão é não anexar ao arquivo de log.
-                        Encoding – especifica a codificação do arquivo, 
+                        Encoding – especifica a codificação do arquivo,
                             por exemplo, UTF-8, Unicode ou ASCII
                      O detalhamento padrão é Detailed.
                      Exemplos:
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       /flp1:warningsonly;logfile=msbuild.wrn 
+                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -724,14 +724,14 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="translated">  /preprocess[:arquivo] 
+        <target state="translated">  /preprocess[:arquivo]
                      Cria um arquivo de projeto único e agregado
                      embutindo todos os arquivos que poderiam ser importados durante um
                      build, com seus limites marcados. Isso pode ser
                      útil para descobrir quais arquivos são importados,
                      de qual localização e como contribuirão para
                      o build. Por padrão, a saída é gravada na
-                     janela do console. Se o caminho de um arquivo de saída 
+                     janela do console. Se o caminho de um arquivo de saída
                      for fornecido, ele será usado.
                      (Forma abreviada: /pp)
                      Exemplo:
@@ -749,7 +749,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
         <target state="translated">  /detailedsummary
                      Mostra informações detalhadas ao final do build
                      sobre as configurações criadas e o modo como elas foram
-                     agendadas para nós. 
+                     agendadas para nós.
                      (Forma abreviada: /ds)
     </target>
         <note />
@@ -1204,7 +1204,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                        /warnaserror:MSB4130
 
                      Quando um aviso for tratado como um erro, o destino continuará
-                     a ser executado como se ele forsse um aviso, mas o 
+                     a ser executado como se ele forsse um aviso, mas o
                      build geral falhará.
     </target>
         <note>
@@ -1297,7 +1297,7 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
         <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializa todos os eventos de build para um arquivo binário compactado.
                      Por padrão, o arquivo está no diretório atual e é chamado de
-                     "msbuild.binlog". O log binário é uma descrição detalhada 
+                     "msbuild.binlog". O log binário é uma descrição detalhada
                      do processo de build que pode mais tarde ser usado para reconstruir
                      logs de texto e serem usados por outras ferramentas de análise. Um log binário
                      normalmente é 10-20x menor que a maioria dos logs de nível
@@ -1309,11 +1309,11 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
                      de destino encontrados durante o build. A opção
                      ProjectImports opcional controla esse comportamento:
 
-                      ProjectImports=None     – Não coletar as importações 
+                      ProjectImports=None     – Não coletar as importações
                                                 do projeto.
                       ProjectImports=Embed    – Inserir as importações do projeto
                                                 no arquivo de log.
-                      ProjectImports=ZipFile  – Salvar os arquivos de projeto no 
+                      ProjectImports=ZipFile  – Salvar os arquivos de projeto no
                                                 output.projectimports.zip,
                                                 em que a saída tem o mesmo nome que o
                                                 nome do arquivo de log binário.
@@ -1388,14 +1388,14 @@ Copyright (C) Microsoft Corporation. Todos os direitos reservados.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;file&gt;    
-                     Cria o perfil da avaliação do MSBuild e grava o resultado 
+        <target state="translated">  /profileevaluation:&lt;file&gt;
+                     Cria o perfil da avaliação do MSBuild e grava o resultado
                      no arquivo especificado. Se a extensão do arquivo especificado
                      for '.md', o resultado será gerado no formato
                      markdown. Caso contrário, um arquivo separado por tabulações será produzido.

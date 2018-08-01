@@ -339,21 +339,21 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                         WarningsOnly--Yalnızca uyarıları gösterir.
                         NoItemAndPropertyList--Öğe ve özellik listesini
                             her bir proje yapısının başlangıcında göstermez.
-                        ShowCommandLine--TaskCommandLineEvent iletilerini gösterir  
+                        ShowCommandLine--TaskCommandLineEvent iletilerini gösterir
                         ShowTimestamp--Zaman Damgasını herhangi bir iletinin
                             ön eki olarak gösterir.
-                        ShowEventId--Başlatılan olaylar, biten olaylar 
+                        ShowEventId--Başlatılan olaylar, biten olaylar
                             ve iletiler için olay kimliğini gösterir
                         ForceNoAlign--Metni konsol ara belleğinin
                             boyutu ile hizalamaz
                         DisableConsoleColor--Tüm günlük iletileri için
                             varsayılan konsol renklerini kullanır.
                         DisableMPLogging-- Çok işlemcili olmayan modda çalışırken
-                            çıktının çok işlemcili günlüğe kaydetme stilini 
+                            çıktının çok işlemcili günlüğe kaydetme stilini
                             devre dışı bırakır.
                         EnableMPLogging-- Çok işlemcili olmayan modda çalışırken
                             bile çok işlemcili günlüğe kaydetme stilini
-                            etkinleştirir. Bu günlüğe kaydetme stili varsayılan olarak açıktır. 
+                            etkinleştirir. Bu günlüğe kaydetme stili varsayılan olarak açıktır.
                         ForceConsoleColor--Konsol tarafından desteklenmese bile
                             ANSI konsol renklerini kullanır
                         Verbosity--bu günlükçü için /verbosity
@@ -668,7 +668,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                             Anahtar ayarlanmadığında mevcut
                             günlük dosyasındaki içeriğin üzerine yazılır.
                             Varsayılan seçenek günlük dosyasına eklenmemesidir.
-                        Encoding--dosyada kullanılacak kodlama türünü 
+                        Encoding--dosyada kullanılacak kodlama türünü
                             (UTF-8, Unicode ya da ASCII gibi) belirler.
                      Varsayılan ayrıntı düzeyi değeri Detailed şeklindedir.
                      Örnekler:
@@ -1204,7 +1204,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                      Örnek:
                        /warnaserror:MSB4130
 
-                     Bir uyarı hata olarak işlendiğinde hedef 
+                     Bir uyarı hata olarak işlendiğinde hedef
                      bunu uyarı olarak çalıştırmaya devam eder ancak genel
                      derleme başarısız olur.
     </target>
@@ -1314,7 +1314,7 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
                                                 toplama.
                       ProjectImports=Embed    - Proje içeri aktarmalarını günlük dosyasına
                                                 ekle.
-                      ProjectImports=ZipFile  - Proje dosyalarını 
+                      ProjectImports=ZipFile  - Proje dosyalarını
                                                 çıkış.projectimports.zip
                                                 dosyasına kaydet (burada çıkış, ikili
                                                 günlük dosyası adıyla aynı ada sahiptir.
@@ -1389,15 +1389,15 @@ Telif Hakkı (C) Microsoft Corporation. Tüm hakları saklıdır.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;dosya&gt;    
-                     MSBuild değerlendirmesinin profilini oluşturur ve sonucu 
-                     belirtilen dosyaya yazar. Belirtilen dosyanın uzantısı 
+        <target state="translated">  /profileevaluation:&lt;dosya&gt;
+                     MSBuild değerlendirmesinin profilini oluşturur ve sonucu
+                     belirtilen dosyaya yazar. Belirtilen dosyanın uzantısı
                      '.md' olursa, sonuç markdown biçiminde oluşturulur.
                      Aksi takdirde, sekmeyle ayrılmış bir dosya oluşturulur.
     </target>

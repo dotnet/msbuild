@@ -155,8 +155,8 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      wiele plików odpowiedzi, określ każdy z tych plików
                      osobno.
 
-                     Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie 
-                     używane z następujących lokalizacji: 
+                     Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie
+                     używane z następujących lokalizacji:
                      (1) katalog programu msbuild.exe
                      (2) katalog pierwszej kompilacji projektu lub rozwiązania
 </target>
@@ -342,7 +342,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                         ShowCommandLine — pokazuje komunikaty TaskCommandLineEvent.
                         ShowTimestamp — wyświetla sygnaturę czasową jako
                             prefiks każdego komunikatu.
-                        ShowEventId — pokazuje identyfikator zdarzenia dla 
+                        ShowEventId — pokazuje identyfikator zdarzenia dla
                             rozpoczętych zdarzeń, zakończonych zdarzeń i komunikatów.
                         ForceNoAlign — nie dopasowuje tekstu do rozmiaru
                             buforu konsoli.
@@ -1388,13 +1388,13 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;plik&gt;    
+        <target state="translated">  /profileevaluation:&lt;plik&gt;
                      Profiluje oszacowanie programu MSBuild i zapisuje wynik
                      w określonym pliku. Jeśli rozszerzenie określonego
                      pliku to „md”, wynik jest generowany w formacie
