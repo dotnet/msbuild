@@ -408,10 +408,10 @@ function Build {
       msbuildToUse=$(QQ "$bootstrapRoot/netcoreapp2.1/MSBuild/MSBuild.dll")
     elif [ "$hostType" = "mono" ]
     then
-      msbuildToUse="$bootstrapRoot/net461/MSBuild/15.0/Bin/MSBuild.dll"
+      msbuildToUse="$bootstrapRoot/net471/MSBuild/15.0/Bin/MSBuild.dll"
       msbuildHost="mono"
 
-      properties="$properties /p:MSBuildExtensionsPath=$bootstrapRoot/net461/MSBuild/"
+      properties="$properties /p:MSBuildExtensionsPath=$bootstrapRoot/net471/MSBuild/"
     else
       ErrorHostType
     fi

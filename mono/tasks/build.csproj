@@ -3,7 +3,7 @@
         <OutputType>Library</OutputType>
         <AssemblyName>Mono.Build.Tasks</AssemblyName>
         <DebugType>full</DebugType>
-        <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     </PropertyGroup>
 
    <ItemGroup>

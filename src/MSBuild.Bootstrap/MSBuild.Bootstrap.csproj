@@ -11,7 +11,7 @@
          TF=net461 here and let this set up the `bootstrap/` folder. And to avoid the
          `MSBuild` project doing the same, we will disable the `bootstrap` bits from there,
          for mono. -->
-    <TargetFramework Condition="'$(MonoBuild)' == 'true'">net461</TargetFramework>
+    <TargetFramework Condition="'$(MonoBuild)' == 'true'">net471</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

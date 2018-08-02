@@ -11,7 +11,7 @@
             <MSBuildInstallBinDir>$(MonoInstallPrefix)\lib\mono\msbuild\$(TargetMSBuildToolsVersion)\bin</MSBuildInstallBinDir>
             <XBuildDir>$(MonoInstallPrefix)\lib\mono\xbuild</XBuildDir>
 
-            <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\$(Configuration)\bin\MSBuild.Bootstrap\net461\</MSBuildBinSrcDir>
+            <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\$(Configuration)\bin\MSBuild.Bootstrap\net471\</MSBuildBinSrcDir>
 
             <AllInstalledFiles_FileCanonical>$(MSBuildThisFileDirectory)\all_files.canon.txt</AllInstalledFiles_FileCanonical>
             <AllInstalledFiles_File>$(MSBuildThisFileDirectory)\all_files.new.txt</AllInstalledFiles_File>
