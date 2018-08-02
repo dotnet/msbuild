@@ -1,4 +1,4 @@
-
+﻿
 <!--
 ***********************************************************************************************
 NuGet.targets
@@ -243,7 +243,9 @@ Copyright (c) .NET Foundation. All rights reserved.
               AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder="$(AllowedOutputExtensionsInSymbolsPackageBuildOutputFolder)"
               NoWarn="$(NoWarn)"
               WarningsAsErrors="$(WarningsAsErrors)"
-              TreatWarningsAsErrors="$(TreatWarningsAsErrors)"/>
+              TreatWarningsAsErrors="$(TreatWarningsAsErrors)"
+              OutputFileNamesWithoutVersion="$(OutputFileNamesWithoutVersion)"
+              InstallPackageToOutputPath="$(InstallPackageToOutputPath)"/>
   </Target>
 
   <!--
@@ -272,7 +274,9 @@ Copyright (c) .NET Foundation. All rights reserved.
     </PropertyGroup>
   </Target>
   
-  <Target Name="_GetProjectReferenceVersions" DependsOnTargets="_CalculateInputsOutputsForPack;$(GetPackageVersionDependsOn)">
+  <Target Name="_GetProjectReferenceVersions" 
+          Condition="'$(NuspecFile)' == ''"
+          DependsOnTargets="_CalculateInputsOutputsForPack;$(GetPackageVersionDependsOn)">
     <ConvertToAbsolutePath Paths="$(RestoreOutputPath)">
       <Output TaskParameter="AbsolutePaths" PropertyName="RestoreOutputAbsolutePath" />
     </ConvertToAbsolutePath>

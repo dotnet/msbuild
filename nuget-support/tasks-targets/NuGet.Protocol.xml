@@ -137,7 +137,7 @@
         </member>
         <member name="T:NuGet.Protocol.Core.Types.DownloadResourceResult">
             <summary>
-            The result of <see cref="T:NuGet.Protocol.Core.Types.DownloadResource"/>.
+            The result of <see cref="T:NuGet.Protocol.Core.Types.DownloadResource" />.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.Core.Types.DownloadResourceResult.#ctor(NuGet.Protocol.Core.Types.DownloadResourceResultStatus)">
@@ -176,7 +176,7 @@
         </member>
         <member name="P:NuGet.Protocol.Core.Types.DownloadResourceResult.PackageStream">
             <summary>
-            Gets the package <see cref="P:NuGet.Protocol.Core.Types.DownloadResourceResult.PackageStream"/>.
+            Gets the package <see cref="P:NuGet.Protocol.Core.Types.DownloadResourceResult.PackageStream" />.
             </summary>
             <remarks>The value may be <c>null</c>.</remarks>
         </member>
@@ -188,7 +188,7 @@
         </member>
         <member name="P:NuGet.Protocol.Core.Types.DownloadResourceResult.PackageReader">
             <summary>
-            Gets the <see cref="T:NuGet.Packaging.PackageReaderBase"/> for the package.
+            Gets the <see cref="T:NuGet.Packaging.PackageReaderBase" /> for the package.
             </summary>
             <remarks>The value may be <c>null</c>.</remarks>
         </member>
@@ -229,7 +229,7 @@
         <member name="P:NuGet.Protocol.Core.Types.HttpSourceCacheContext.RootTempFolder">
             <summary>
             A suggested root folder to drop temporary files under, it will get cleared by the
-            disposal of the <see cref="P:NuGet.Protocol.Core.Types.HttpSourceCacheContext.SourceCacheContext"/> that was used to create this instance.
+            disposal of the <see cref="P:NuGet.Protocol.Core.Types.HttpSourceCacheContext.SourceCacheContext" /> that was used to create this instance.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Core.Types.HttpSourceCacheContext.SourceCacheContext">
@@ -412,8 +412,8 @@
             <param name="cancellationToken">A cancellation token.</param>
             <returns>A task that represents the asynchronous operation.
             The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a Tuple&lt;bool, INuGetResource&gt;</returns>
-            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="source"/> is <c>null</c>.</exception>
-            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken"/>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="source" /> is <c>null</c>.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
         </member>
         <member name="M:NuGet.Protocol.Core.Types.PluginResourceProvider.Reinitialize(NuGet.Common.IEnvironmentVariableReader,System.Lazy{NuGet.Protocol.Plugins.IPluginDiscoverer},System.Func{System.TimeSpan,NuGet.Protocol.Plugins.IPluginFactory})">
@@ -637,9 +637,9 @@
             <summary>
             Downloads a package .nupkg with the provided identity. If the package is not available
             on the source but the source itself is not down or unavailable, the
-            <see cref="P:NuGet.Protocol.Core.Types.DownloadResourceResult.Status"/> will be <see cref="F:NuGet.Protocol.Core.Types.DownloadResourceResultStatus.NotFound"/>.
-            If the operation was cancelled, the <see cref="P:NuGet.Protocol.Core.Types.DownloadResourceResult.Status"/> will be
-            <see cref="F:NuGet.Protocol.Core.Types.DownloadResourceResultStatus.Cancelled"/>.
+            <see cref="P:NuGet.Protocol.Core.Types.DownloadResourceResult.Status" /> will be <see cref="F:NuGet.Protocol.Core.Types.DownloadResourceResultStatus.NotFound" />.
+            If the operation was cancelled, the <see cref="P:NuGet.Protocol.Core.Types.DownloadResourceResult.Status" /> will be
+            <see cref="F:NuGet.Protocol.Core.Types.DownloadResourceResultStatus.Cancelled" />.
             </summary>
         </member>
         <member name="T:NuGet.Protocol.Core.Types.FindPackageByIdResource">
@@ -838,13 +838,13 @@
         </member>
         <member name="M:NuGet.Protocol.Core.Types.SearchFilter.#ctor(System.Boolean)">
             <summary>
-            Initializes an instance of a <see cref="T:NuGet.Protocol.Core.Types.SearchFilter"/> and validates required parameters.
+            Initializes an instance of a <see cref="T:NuGet.Protocol.Core.Types.SearchFilter" /> and validates required parameters.
             </summary>
             <param name="includePrerelease">Whether or not to allow prerelease results.</param>
         </member>
         <member name="M:NuGet.Protocol.Core.Types.SearchFilter.#ctor(System.Boolean,System.Nullable{NuGet.Protocol.Core.Types.SearchFilterType})">
             <summary>
-            Initializes an instance of a <see cref="T:NuGet.Protocol.Core.Types.SearchFilter"/> and validates required parameters.
+            Initializes an instance of a <see cref="T:NuGet.Protocol.Core.Types.SearchFilter" /> and validates required parameters.
             </summary>
             <param name="includePrerelease">Whether or not to allow prerelease results.</param>
             <param name="filter">The filter to apply to the results.</param>
@@ -915,15 +915,15 @@
         <member name="F:NuGet.Protocol.Core.Types.SearchFilterType.IsLatestVersion">
             <summary>
             Only select the latest stable version of a package per package ID. Given the server supports
-            <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsAbsoluteLatestVersion"/>, a package that is <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsLatestVersion"/> should never be
-            prerelease. Also, it does not make sense to look for a <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsLatestVersion"/> package when also
+            <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsAbsoluteLatestVersion" />, a package that is <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsLatestVersion" /> should never be
+            prerelease. Also, it does not make sense to look for a <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsLatestVersion" /> package when also
             including prerelease.
             </summary>
         </member>
         <member name="F:NuGet.Protocol.Core.Types.SearchFilterType.IsAbsoluteLatestVersion">
             <summary>
             Only select the absolute latest version of a package per package ID. It does not make sense to look for a
-            <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsAbsoluteLatestVersion"/> when excluding prerelease.
+            <see cref="F:NuGet.Protocol.Core.Types.SearchFilterType.IsAbsoluteLatestVersion" /> when excluding prerelease.
             </summary>
         </member>
         <member name="F:NuGet.Protocol.Core.Types.SearchOrderBy.Id">
@@ -961,7 +961,7 @@
             <summary>
             Package version lists or packages from the server older than this date will be fetched from the server.
             </summary>
-            <remarks>This will be ignored if <see cref="P:NuGet.Protocol.Core.Types.SourceCacheContext.NoCache"/> is true.</remarks>
+            <remarks>This will be ignored if <see cref="P:NuGet.Protocol.Core.Types.SourceCacheContext.NoCache" /> is true.</remarks>
             <remarks>If the value is null the default expiration will be used.</remarks>
         </member>
         <member name="P:NuGet.Protocol.Core.Types.SourceCacheContext.RefreshMemoryCache">
@@ -1222,9 +1222,9 @@
         </member>
         <member name="T:NuGet.Protocol.DownloadTimeoutStreamContent">
             <summary>
-            A wrapper around <see cref="T:System.Net.Http.StreamContent"/> that applies a <see cref="T:NuGet.Protocol.DownloadTimeoutStream"/>
-            to the contained stream. When the <see cref="T:System.Net.Http.HttpResponseMessage"/> is disposed, this
-            content is disposed which in turn disposes the <see cref="T:NuGet.Protocol.DownloadTimeoutStream"/>, which
+            A wrapper around <see cref="T:System.Net.Http.StreamContent" /> that applies a <see cref="T:NuGet.Protocol.DownloadTimeoutStream" />
+            to the contained stream. When the <see cref="T:System.Net.Http.HttpResponseMessage" /> is disposed, this
+            content is disposed which in turn disposes the <see cref="T:NuGet.Protocol.DownloadTimeoutStream" />, which
             disposes the actual network stream.
             </summary>
         </member>
@@ -1262,49 +1262,49 @@
         </member>
         <member name="T:NuGet.Protocol.HttpRequestMessageFactory">
             <summary>
-            Factory class containing methods facilitating creation of <see cref="T:System.Net.Http.HttpRequestMessage"/> 
+            Factory class containing methods facilitating creation of <see cref="T:System.Net.Http.HttpRequestMessage" /> 
             with additional custom parameters.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.HttpRequestMessageFactory.Create(System.Net.Http.HttpMethod,System.String,NuGet.Common.ILogger)">
             <summary>
-            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage"/>.
+            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage" />.
             </summary>
             <param name="method">Desired HTTP verb</param>
             <param name="requestUri">Request URI</param>
             <param name="log">Logger instance to be attached</param>
-            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage"/></returns>
+            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage" /></returns>
         </member>
         <member name="M:NuGet.Protocol.HttpRequestMessageFactory.Create(System.Net.Http.HttpMethod,System.Uri,NuGet.Common.ILogger)">
             <summary>
-            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage"/>.
+            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage" />.
             </summary>
             <param name="method">Desired HTTP verb</param>
             <param name="requestUri">Request URI</param>
             <param name="log">Logger instance to be attached</param>
-            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage"/></returns>
+            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage" /></returns>
         </member>
         <member name="M:NuGet.Protocol.HttpRequestMessageFactory.Create(System.Net.Http.HttpMethod,System.String,NuGet.Protocol.HttpRequestMessageConfiguration)">
             <summary>
-            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage"/>.
+            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage" />.
             </summary>
             <param name="method">Desired HTTP verb</param>
             <param name="requestUri">Request URI</param>
             <param name="configuration">The request configuration</param>
-            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage"/></returns>
+            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage" /></returns>
         </member>
         <member name="M:NuGet.Protocol.HttpRequestMessageFactory.Create(System.Net.Http.HttpMethod,System.Uri,NuGet.Protocol.HttpRequestMessageConfiguration)">
             <summary>
-            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage"/>.
+            Creates an instance of <see cref="T:System.Net.Http.HttpRequestMessage" />.
             </summary>
             <param name="method">Desired HTTP verb</param>
             <param name="requestUri">Request URI</param>
             <param name="configuration">The request configuration</param>
-            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage"/></returns>
+            <returns>Instance of <see cref="T:System.Net.Http.HttpRequestMessage" /></returns>
         </member>
         <member name="T:NuGet.Protocol.HttpRetryHandler">
             <summary>
-            The <see cref="T:NuGet.Protocol.HttpRetryHandler"/> is for retrying and HTTP request if it times out, has any exception,
+            The <see cref="T:NuGet.Protocol.HttpRetryHandler" /> is for retrying and HTTP request if it times out, has any exception,
             or returns a status code of 500 or greater.
             </summary>
         </member>
@@ -1313,14 +1313,14 @@
             Make an HTTP request while retrying after failed attempts or timeouts.
             </summary>
             <remarks>
-            This method accepts a factory to create instances of the <see cref="T:System.Net.Http.HttpRequestMessage"/> because
+            This method accepts a factory to create instances of the <see cref="T:System.Net.Http.HttpRequestMessage" /> because
             requests cannot always be used. For example, suppose the request is a POST and contains content
             of a stream that can only be consumed once.
             </remarks>
         </member>
         <member name="T:NuGet.Protocol.HttpRetryHandlerRequest">
             <summary>
-            A request to be handled by <see cref="T:NuGet.Protocol.HttpRetryHandler"/>. This type should contain all
+            A request to be handled by <see cref="T:NuGet.Protocol.HttpRetryHandler" />. This type should contain all
             of the knowledge necessary to make a request, while handling transient transport errors.
             </summary>
         </member>
@@ -1346,7 +1346,7 @@
             <summary>This API is intended only for testing purposes and should not be used in product code.</summary>
         </member>
         <member name="P:NuGet.Protocol.HttpRetryHandlerRequest.DownloadTimeout">
-            <summary>The timeout to apply to <see cref="T:NuGet.Protocol.DownloadTimeoutStream"/> instances.</summary>
+            <summary>The timeout to apply to <see cref="T:NuGet.Protocol.DownloadTimeoutStream" /> instances.</summary>
         </member>
         <member name="P:NuGet.Protocol.HttpRetryHandlerRequest.AddHeaders">
             <summary>
@@ -1364,7 +1364,7 @@
         </member>
         <member name="T:NuGet.Protocol.HttpSourceCachedRequest">
             <summary>
-            A cached HTTP request handled by <see cref="T:NuGet.Protocol.HttpSource"/>.
+            A cached HTTP request handled by <see cref="T:NuGet.Protocol.HttpSource" />.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.HttpSourceCachedRequest.Uri">
@@ -1386,12 +1386,12 @@
         </member>
         <member name="P:NuGet.Protocol.HttpSourceCachedRequest.AcceptHeaderValues">
             <summary>
-            The header values to apply when building the <see cref="T:System.Net.Http.HttpRequestMessage"/>.
+            The header values to apply when building the <see cref="T:System.Net.Http.HttpRequestMessage" />.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.HttpSourceCachedRequest.IgnoreNotFounds">
             <summary>
-            When processing the <see cref="T:System.Net.Http.HttpResponseMessage"/>, this flag allows
+            When processing the <see cref="T:System.Net.Http.HttpResponseMessage" />, this flag allows
             <code>404 Not Found</code> to be interpreted as a null response. This value defaults
             to <code>false</code>.
             </summary>
@@ -1407,14 +1407,14 @@
         </member>
         <member name="P:NuGet.Protocol.HttpSourceCachedRequest.RequestTimeout">
             <summary>
-            The timeout to use when fetching the <see cref="T:System.Net.Http.HttpResponseMessage"/>. Since
-            <see cref="T:NuGet.Protocol.HttpSource"/> only uses <see cref="F:System.Net.Http.HttpCompletionOption.ResponseHeadersRead"/>,
+            The timeout to use when fetching the <see cref="T:System.Net.Http.HttpResponseMessage" />. Since
+            <see cref="T:NuGet.Protocol.HttpSource" /> only uses <see cref="F:System.Net.Http.HttpCompletionOption.ResponseHeadersRead" />,
             this means that we wait this amount of time for only the HTTP headers to be returned.
             Downloading the response body is not included in this timeout.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.HttpSourceCachedRequest.DownloadTimeout">
-            <summary>The timeout to apply to <see cref="T:NuGet.Protocol.DownloadTimeoutStream"/> instances.</summary>
+            <summary>The timeout to apply to <see cref="T:NuGet.Protocol.DownloadTimeoutStream" /> instances.</summary>
         </member>
         <member name="T:NuGet.Protocol.HttpSourceCredentials">
             <summary>
@@ -1437,12 +1437,12 @@
         </member>
         <member name="P:NuGet.Protocol.HttpSourceCredentials.Version">
             <summary>
-            The latest version ID of the <see cref="P:NuGet.Protocol.HttpSourceCredentials.Credentials"/>.
+            The latest version ID of the <see cref="P:NuGet.Protocol.HttpSourceCredentials.Credentials" />.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.HttpSourceCredentials.#ctor(System.Net.ICredentials)">
             <summary>
-            Initializes a new instance of the <see cref="T:NuGet.Protocol.HttpSourceCredentials"/> class
+            Initializes a new instance of the <see cref="T:NuGet.Protocol.HttpSourceCredentials" /> class
             </summary>
             <param name="credentials">
             Optional initial credentials. May be null.
@@ -1455,7 +1455,7 @@
         </member>
         <member name="T:NuGet.Protocol.HttpSourceRequest">
             <summary>
-            A non-cached HTTP request handled by <see cref="T:NuGet.Protocol.HttpSource"/>.
+            A non-cached HTTP request handled by <see cref="T:NuGet.Protocol.HttpSource" />.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.HttpSourceRequest.RequestFactory">
@@ -1465,15 +1465,15 @@
         </member>
         <member name="P:NuGet.Protocol.HttpSourceRequest.IgnoreNotFounds">
             <summary>
-            When processing the <see cref="T:System.Net.Http.HttpResponseMessage"/>, this flag allows
+            When processing the <see cref="T:System.Net.Http.HttpResponseMessage" />, this flag allows
             <code>404 Not Found</code> to be interpreted as a null response. This value defaults
             to <code>false</code>.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.HttpSourceRequest.RequestTimeout">
             <summary>
-            The timeout to use when fetching the <see cref="T:System.Net.Http.HttpResponseMessage"/>. Since
-            <see cref="T:NuGet.Protocol.HttpSource"/> only uses <see cref="F:System.Net.Http.HttpCompletionOption.ResponseHeadersRead"/>,
+            The timeout to use when fetching the <see cref="T:System.Net.Http.HttpResponseMessage" />. Since
+            <see cref="T:NuGet.Protocol.HttpSource" /> only uses <see cref="F:System.Net.Http.HttpCompletionOption.ResponseHeadersRead" />,
             this means that we wait this amount of time for only the HTTP headers to be returned.
             Downloading the response body is not included in this timeout.
             </summary>
@@ -1482,27 +1482,27 @@
             <summary>The maximum number of times to try the request. This value includes the initial attempt.</summary>
         </member>
         <member name="P:NuGet.Protocol.HttpSourceRequest.DownloadTimeout">
-            <summary>The timeout to apply to <see cref="T:NuGet.Protocol.DownloadTimeoutStream"/> instances.</summary>
+            <summary>The timeout to apply to <see cref="T:NuGet.Protocol.DownloadTimeoutStream" /> instances.</summary>
         </member>
         <member name="T:NuGet.Protocol.HttpSourceResource">
             <summary>
-            Holds a shared <see cref="P:NuGet.Protocol.HttpSourceResource.HttpSource"/>. 
+            Holds a shared <see cref="P:NuGet.Protocol.HttpSourceResource.HttpSource" />. 
             This is expected to be shared across the app and should not be disposed of.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.HttpSourceResourceProvider.Throttle">
             <summary>
-            The throttle to apply to all <see cref="T:NuGet.Protocol.HttpSource"/> HTTP requests.
+            The throttle to apply to all <see cref="T:NuGet.Protocol.HttpSource" /> HTTP requests.
             </summary>
         </member>
         <member name="T:NuGet.Protocol.IThrottle">
             <summary>
             An interface used for throttling operations. For example, suppose the application needs to
             limit the concurrency of HTTP operations. Before executing each HTTP operation, the
-            <see cref="M:NuGet.Protocol.IThrottle.WaitAsync"/> would be executed. After the HTTP operation has been completed, the
-            application should call <see cref="M:NuGet.Protocol.IThrottle.Release"/>. The implementation of <see cref="M:NuGet.Protocol.IThrottle.WaitAsync"/>
+            <see cref="M:NuGet.Protocol.IThrottle.WaitAsync" /> would be executed. After the HTTP operation has been completed, the
+            application should call <see cref="M:NuGet.Protocol.IThrottle.Release" />. The implementation of <see cref="M:NuGet.Protocol.IThrottle.WaitAsync" />
             should only allow the application to continue if there is an appropriate number of concurrent
-            callers. The primary implementation of this interface simply wraps a <see cref="T:System.Threading.SemaphoreSlim"/>.
+            callers. The primary implementation of this interface simply wraps a <see cref="T:System.Threading.SemaphoreSlim" />.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.IThrottle.WaitAsync">
@@ -1520,7 +1520,7 @@
         <member name="T:NuGet.Protocol.NullThrottle">
             <summary>
             An throttle implementation that allows any level of concurrency. That is, the
-            <see cref="M:NuGet.Protocol.NullThrottle.WaitAsync"/> and <see cref="M:NuGet.Protocol.NullThrottle.Release"/> methods do nothing.
+            <see cref="M:NuGet.Protocol.NullThrottle.WaitAsync" /> and <see cref="M:NuGet.Protocol.NullThrottle.Release" /> methods do nothing.
             </summary>
         </member>
         <member name="T:NuGet.Protocol.ProxyAuthenticationHandler">
@@ -1652,12 +1652,12 @@
         </member>
         <member name="M:NuGet.Protocol.V2FeedParser.GetString(System.Xml.Linq.XElement,System.Xml.Linq.XName)">
             <summary>
-            Retrieve an XML <see cref="T:System.String"/> value safely
+            Retrieve an XML <see cref="T:System.String" /> value safely
             </summary>
         </member>
         <member name="M:NuGet.Protocol.V2FeedParser.GetDate(System.Xml.Linq.XElement,System.Xml.Linq.XName)">
             <summary>
-            Retrieve an XML <see cref="T:System.DateTimeOffset"/> value safely
+            Retrieve an XML <see cref="T:System.DateTimeOffset" /> value safely
             </summary>
         </member>
         <member name="T:NuGet.Protocol.V2FeedQueryBuilder">
@@ -1683,12 +1683,12 @@
         </member>
         <member name="M:NuGet.Protocol.FindLocalPackagesResourceUnzipped.GetIndex(System.Lazy{System.Collections.Generic.IReadOnlyList{NuGet.Protocol.LocalPackageInfo}})">
             <summary>
-            Id + Version -> Package
+            Id + Version -&gt; Package
             </summary>
         </member>
         <member name="M:NuGet.Protocol.FindLocalPackagesResourceUnzipped.GetPathIndex(System.Lazy{System.Collections.Generic.IReadOnlyList{NuGet.Protocol.LocalPackageInfo}})">
             <summary>
-            Uri -> Package
+            Uri -&gt; Package
             </summary>
         </member>
         <member name="T:NuGet.Protocol.FindLocalPackagesResourceV3">
@@ -1966,13 +1966,13 @@
         </member>
         <member name="T:NuGet.Protocol.PackageSearchMetadataRegistration">
             <summary>
-            Subclass of <see cref="T:NuGet.Protocol.PackageSearchMetadata"/> containing the information in the registration blobs that are not present in the V2 feed or search.
-            Returned by <see cref="T:NuGet.Protocol.PackageMetadataResourceV3"/>.
+            Subclass of <see cref="T:NuGet.Protocol.PackageSearchMetadata" /> containing the information in the registration blobs that are not present in the V2 feed or search.
+            Returned by <see cref="T:NuGet.Protocol.PackageMetadataResourceV3" />.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.PackageSearchMetadataRegistration.CatalogUri">
             <summary>
-            The <see cref="T:System.Uri"/> of this package in the catalog.
+            The <see cref="T:System.Uri" /> of this package in the catalog.
             </summary>
         </member>
         <member name="T:NuGet.Protocol.ServiceIndexEntry">
@@ -5773,8 +5773,8 @@
             <param name="cancellationToken">A cancellation token.</param>
             <returns>A task that represents the asynchronous operation.
             The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a Tuple&lt;bool, INuGetResource&gt;</returns>
-            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="source"/> is <c>null</c>.</exception>
-            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken"/>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="source" /> is <c>null</c>.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
         </member>
         <member name="T:NuGet.Protocol.ServiceIndexResourceV3Provider">
@@ -5974,7 +5974,7 @@
         </member>
         <member name="M:NuGet.Protocol.PackageUtilities.OpenNuspecFromNupkg(System.String,System.IO.Stream,NuGet.Common.ILogger)">
             <summary>
-            Create a <see cref="T:NuGet.Packaging.NuspecReader"/> from a nupkg stream.
+            Create a <see cref="T:NuGet.Packaging.NuspecReader" /> from a nupkg stream.
             </summary>
         </member>
         <member name="T:NuGet.Protocol.PluginFindPackageByIdResourceProvider">
@@ -5995,8 +5995,8 @@
             <param name="cancellationToken">A cancellation token.</param>
             <returns>A task that represents the asynchronous operation.
             The task result (<see cref="P:System.Threading.Tasks.Task`1.Result" />) returns a Tuple&lt;bool, INuGetResource&gt;</returns>
-            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="source"/> is <c>null</c>.</exception>
-            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken"/>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="source" /> is <c>null</c>.</exception>
+            <exception cref="T:System.OperationCanceledException">Thrown if <paramref name="cancellationToken" />
             is cancelled.</exception>
         </member>
         <member name="T:NuGet.Protocol.RemoteV2FindPackageByIdResource">
@@ -6326,7 +6326,7 @@
         </member>
         <member name="P:NuGet.Protocol.RegistrationResourceV3.BaseUri">
             <summary>
-            Gets the <see cref="T:System.Uri"/> for the source backing this resource.
+            Gets the <see cref="T:System.Uri" /> for the source backing this resource.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.RegistrationResourceV3.GetUri(System.String)">
@@ -6444,27 +6444,27 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.ActionResolver_UnsupportedAction">
             <summary>
-              Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
+              Looks up a localized string similar to Unrecognized Package Action '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.ActionResolver_UnsupportedDependencyBehavior">
             <summary>
-              Looks up a localized string similar to Unsupported Dependency Behavior &apos;{0}&apos;..
+              Looks up a localized string similar to Unsupported Dependency Behavior '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.AddPackage_ExistingPackageInvalid">
             <summary>
-              Looks up a localized string similar to Package &apos;{0}&apos; already exists at feed &apos;{1}&apos; and is invalid..
+              Looks up a localized string similar to Package '{0}' already exists at feed '{1}' and is invalid..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.AddPackage_PackageAlreadyExists">
             <summary>
-              Looks up a localized string similar to Package &apos;{0}&apos; already exists at feed &apos;{1}&apos;..
+              Looks up a localized string similar to Package '{0}' already exists at feed '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.AddPackage_SuccessfullyAdded">
             <summary>
-              Looks up a localized string similar to Successfully added package &apos;{0}&apos; to feed &apos;{1}&apos;..
+              Looks up a localized string similar to Successfully added package '{0}' to feed '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Argument_Cannot_Be_Null_Or_Empty">
@@ -6509,7 +6509,7 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.DownloadActionHandler_InvalidDownloadUrl">
             <summary>
-              Looks up a localized string similar to The download URL for {0} &apos;{1}&apos; is invalid..
+              Looks up a localized string similar to The download URL for {0} '{1}' is invalid..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.DownloadActionHandler_NoDownloadUrl">
@@ -6519,22 +6519,22 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Error_DownloadTimeout">
             <summary>
-              Looks up a localized string similar to The download of &apos;{0}&apos; timed out because no data was received for {1}ms..
+              Looks up a localized string similar to The download of '{0}' timed out because no data was received for {1}ms..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Http_CredentialsForForbidden">
             <summary>
-              Looks up a localized string similar to The server responded with HTTP &apos;403 Forbidden&apos; when accessing the source &apos;{0}&apos;. This suggests that the server has authenticated your identity but has not permitted you to access the requested resource. Provide credentials that have permissions to view this resource..
+              Looks up a localized string similar to The server responded with HTTP '403 Forbidden' when accessing the source '{0}'. This suggests that the server has authenticated your identity but has not permitted you to access the requested resource. Provide credentials that have permissions to view this resource..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Http_CredentialsForProxy">
             <summary>
-              Looks up a localized string similar to The server responded with HTTP &apos;407 Proxy Authentication Required&apos; when accessing the proxy &apos;{0}&apos;. This suggests that the server needs credentials to authenticate your identity to use a proxy. Provide credentials to access this resource..
+              Looks up a localized string similar to The server responded with HTTP '407 Proxy Authentication Required' when accessing the proxy '{0}'. This suggests that the server needs credentials to authenticate your identity to use a proxy. Provide credentials to access this resource..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Http_CredentialsForUnauthorized">
             <summary>
-              Looks up a localized string similar to The server responded with HTTP &apos;401 Unauthorized&apos; when accessing the source &apos;{0}&apos;. This suggests that the server needs credentials to authenticate your identity. Provide credentials to access this resource..
+              Looks up a localized string similar to The server responded with HTTP '401 Unauthorized' when accessing the source '{0}'. This suggests that the server needs credentials to authenticate your identity. Provide credentials to access this resource..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Http_RequestLog">
@@ -6549,12 +6549,12 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Http_Timeout">
             <summary>
-              Looks up a localized string similar to The HTTP request to &apos;{0} {1}&apos; has timed out after {2}ms..
+              Looks up a localized string similar to The HTTP request to '{0} {1}' has timed out after {2}ms..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.InvalidVersionFolder">
             <summary>
-              Looks up a localized string similar to The folder &apos;{0}&apos; contains an invalid version..
+              Looks up a localized string similar to The folder '{0}' contains an invalid version..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.LiveFeed">
@@ -6564,32 +6564,32 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_CanceledNupkgDownload">
             <summary>
-              Looks up a localized string similar to Downloading a package from &apos;{0}&apos; was canceled..
+              Looks up a localized string similar to Downloading a package from '{0}' was canceled..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_ErrorDownloading">
             <summary>
-              Looks up a localized string similar to Error downloading &apos;{0}&apos; from &apos;{1}&apos;..
+              Looks up a localized string similar to Error downloading '{0}' from '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToDownloadPackage">
             <summary>
-              Looks up a localized string similar to Failed to download package &apos;{0}&apos; from &apos;{1}&apos;..
+              Looks up a localized string similar to Failed to download package '{0}' from '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToFetchV2Feed">
             <summary>
-              Looks up a localized string similar to The V2 feed at &apos;{0}&apos; returned an unexpected status code &apos;{1} {2}&apos;..
+              Looks up a localized string similar to The V2 feed at '{0}' returned an unexpected status code '{1} {2}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToFetchV2FeedHttp">
             <summary>
-              Looks up a localized string similar to Failed to fetch results from V2 feed at &apos;{0}&apos; with following message : {1}.
+              Looks up a localized string similar to Failed to fetch results from V2 feed at '{0}' with following message : {1}.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToGetNuspecStream">
             <summary>
-              Looks up a localized string similar to Unable to load nuspec from package &apos;{0}&apos;..
+              Looks up a localized string similar to Unable to load nuspec from package '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToParseRepoSignInfor">
@@ -6609,62 +6609,62 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToRetrievePackage">
             <summary>
-              Looks up a localized string similar to Failed to retrieve information about &apos;{0}&apos; from remote source &apos;{1}&apos;..
+              Looks up a localized string similar to Failed to retrieve information about '{0}' from remote source '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToVerifyRootDirectory">
             <summary>
-              Looks up a localized string similar to Failed to verify the root directory of local source &apos;{0}&apos;..
+              Looks up a localized string similar to Failed to verify the root directory of local source '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FailedToVerifyValidFile">
             <summary>
-              Looks up a localized string similar to Failed to validate the file &apos;{0}&apos;..
+              Looks up a localized string similar to Failed to validate the file '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_FileIsCorrupt">
             <summary>
-              Looks up a localized string similar to The file &apos;{0}&apos; is corrupt..
+              Looks up a localized string similar to The file '{0}' is corrupt..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_InvalidCacheEntry">
             <summary>
-              Looks up a localized string similar to An invalid cache entry was found for URL &apos;{0}&apos; and will be replaced..
+              Looks up a localized string similar to An invalid cache entry was found for URL '{0}' and will be replaced..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_InvalidNupkgFromUrl">
             <summary>
-              Looks up a localized string similar to The nupkg at &apos;{0}&apos; is not valid..
+              Looks up a localized string similar to The nupkg at '{0}' is not valid..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_LocalSourceNotExist">
             <summary>
-              Looks up a localized string similar to The local source &apos;{0}&apos; doesn&apos;t exist..
+              Looks up a localized string similar to The local source '{0}' doesn't exist..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_RetryingFindPackagesById">
             <summary>
-              Looks up a localized string similar to Retrying &apos;{0}&apos; for source &apos;{1}&apos;..
+              Looks up a localized string similar to Retrying '{0}' for source '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_RetryingHttp">
             <summary>
-              Looks up a localized string similar to An error was encountered when fetching &apos;{0} {1}&apos;. The request will now be retried..
+              Looks up a localized string similar to An error was encountered when fetching '{0} {1}'. The request will now be retried..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_RetryingRepositorySignature">
             <summary>
-              Looks up a localized string similar to Retrying repository signature request for source &apos;{0}&apos;..
+              Looks up a localized string similar to Retrying repository signature request for source '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Log_RetryingServiceIndex">
             <summary>
-              Looks up a localized string similar to Retrying service index request for source &apos;{0}&apos;..
+              Looks up a localized string similar to Retrying service index request for source '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.NoApiKeyFound">
             <summary>
-              Looks up a localized string similar to No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the &apos;setApiKey&apos; command..
+              Looks up a localized string similar to No API Key was provided and no API Key could be found for {0}. To save an API Key for a source use the 'setApiKey' command..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.NuGetRepository_CannotCreateAggregateRepo">
@@ -6679,12 +6679,12 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.NupkgPath_Invalid">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; is not a valid nupkg file..
+              Looks up a localized string similar to '{0}' is not a valid nupkg file..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.NupkgPath_InvalidEx">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; is not a valid nupkg file. Error: &apos;{1}&apos;..
+              Looks up a localized string similar to '{0}' is not a valid nupkg file. Error: '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.OneOrMoreUrisMustBeSpecified">
@@ -6694,27 +6694,27 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.PackageActionDescriptionWrapper_UnrecognizedAction">
             <summary>
-              Looks up a localized string similar to Unrecognized Package Action &apos;{0}&apos;..
+              Looks up a localized string similar to Unrecognized Package Action '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.PackageNotFound">
             <summary>
-              Looks up a localized string similar to Unable to find package &apos;{0}&apos;..
+              Looks up a localized string similar to Unable to find package '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.PackageServerEndpoint_NotSupported">
             <summary>
-              Looks up a localized string similar to ERROR: This version of nuget.exe does not support updating packages to package source &apos;{0}&apos;..
+              Looks up a localized string similar to ERROR: This version of nuget.exe does not support updating packages to package source '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Path_Invalid">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; is not a valid path..
+              Looks up a localized string similar to '{0}' is not a valid path..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Path_Invalid_NotFileNotUnc">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; should be a local path or a UNC share path..
+              Looks up a localized string similar to '{0}' should be a local path or a UNC share path..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_ConnectionAlreadyStarted">
@@ -6729,32 +6729,32 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_Exception">
             <summary>
-              Looks up a localized string similar to Plugin &apos;{0}&apos; failed with the exception:  {1}.
+              Looks up a localized string similar to Plugin '{0}' failed with the exception:  {1}.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_FailedOperationForPackage">
             <summary>
-              Looks up a localized string similar to Plugin &apos;{0}&apos; failed a {1} operation for package {2}.{3}..
+              Looks up a localized string similar to Plugin '{0}' failed a {1} operation for package {2}.{3}..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_FailedToQueryPluginOperationsClaims">
             <summary>
-              Looks up a localized string similar to A failure occurred while attempting to query plugin operation claims for the plugin at &apos;{0}&apos;.  Exception:  {1}.
+              Looks up a localized string similar to A failure occurred while attempting to query plugin operation claims for the plugin at '{0}'.  Exception:  {1}.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_FailureQueryingPackageVersions">
             <summary>
-              Looks up a localized string similar to A failure occurred while attempting to query package versions for package &apos;{0}&apos; using the plugin at &apos;{1}&apos;..
+              Looks up a localized string similar to A failure occurred while attempting to query package versions for package '{0}' using the plugin at '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_Fault">
             <summary>
-              Looks up a localized string similar to Terminating plugin &apos;{0}&apos; due to an unrecoverable fault:  {1}.
+              Looks up a localized string similar to Terminating plugin '{0}' due to an unrecoverable fault:  {1}.
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_FileNotFound">
             <summary>
-              Looks up a localized string similar to A plugin was not found at path &apos;{0}&apos;..
+              Looks up a localized string similar to A plugin was not found at path '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_HandshakeFailed">
@@ -6784,17 +6784,17 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_InvalidEmbeddedSignature">
             <summary>
-              Looks up a localized string similar to The plugin at &apos;{0}&apos; did not have a valid embedded signature..
+              Looks up a localized string similar to The plugin at '{0}' did not have a valid embedded signature..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_InvalidMessageType">
             <summary>
-              Looks up a localized string similar to The message type &apos;{0}&apos; is invalid at this time..
+              Looks up a localized string similar to The message type '{0}' is invalid at this time..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_InvalidPluginFilePath">
             <summary>
-              Looks up a localized string similar to The plugin file path &apos;{0}&apos; is invalid..
+              Looks up a localized string similar to The plugin file path '{0}' is invalid..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_NotConnected">
@@ -6804,7 +6804,7 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_PackageDownloadFailed">
             <summary>
-              Looks up a localized string similar to Plugin &apos;{0}&apos; failed to download package &apos;{1}&apos;..
+              Looks up a localized string similar to Plugin '{0}' failed to download package '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_ProtocolException">
@@ -6819,17 +6819,17 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_ProtocolVersionOutOfRange">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; must be greater than or equal to &apos;{1}&apos;..
+              Looks up a localized string similar to '{0}' must be greater than or equal to '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_RequestContextDoesNotExist">
             <summary>
-              Looks up a localized string similar to Request context does not exist for request ID &apos;{0}&apos;..
+              Looks up a localized string similar to Request context does not exist for request ID '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_RequestHandlerDoesNotExist">
             <summary>
-              Looks up a localized string similar to A request handler does not exist for the message method &apos;{0}&apos;..
+              Looks up a localized string similar to A request handler does not exist for the message method '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_TimeoutOutOfRange">
@@ -6839,7 +6839,7 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_UnrecognizedEnumValue">
             <summary>
-              Looks up a localized string similar to The enum value &apos;{0}&apos; is unrecognized..
+              Looks up a localized string similar to The enum value '{0}' is unrecognized..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Plugin_UnrecognizedOperationClaims">
@@ -6849,47 +6849,47 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.ProjectInstallationTarget_ProjectIsNotTargetted">
             <summary>
-              Looks up a localized string similar to The project &apos;{0}&apos; is not one of the projects targetted by this object..
+              Looks up a localized string similar to The project '{0}' is not one of the projects targetted by this object..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_BadSource">
             <summary>
-              Looks up a localized string similar to Failed to retrieve metadata from source &apos;{0}&apos;..
+              Looks up a localized string similar to Failed to retrieve metadata from source '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_duplicateUri">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; is a duplicate url which has already been downloaded and will lead to a cyclic dependency. Please correct from server..
+              Looks up a localized string similar to '{0}' is a duplicate url which has already been downloaded and will lead to a cyclic dependency. Please correct from server..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_FlatContainerIndexVersionsNotArray">
             <summary>
-              Looks up a localized string similar to The &apos;versions&apos; property at &apos;{0}&apos; must be an array..
+              Looks up a localized string similar to The 'versions' property at '{0}' must be an array..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_IndexMissingResourcesNode">
             <summary>
-              Looks up a localized string similar to Service index document is missing the &apos;resources&apos; property..
+              Looks up a localized string similar to Service index document is missing the 'resources' property..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_InvalidJsonObject">
             <summary>
-              Looks up a localized string similar to The content at &apos;{0}&apos; is not a valid JSON object..
+              Looks up a localized string similar to The content at '{0}' is not a valid JSON object..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_InvalidServiceIndex">
             <summary>
-              Looks up a localized string similar to The source does not have the &apos;version&apos; property at &apos;{0}&apos;..
+              Looks up a localized string similar to The source does not have the 'version' property at '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_InvalidXml">
             <summary>
-              Looks up a localized string similar to The content at &apos;{0}&apos; is not valid XML..
+              Looks up a localized string similar to The content at '{0}' is not valid XML..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_MalformedMetadataError">
             <summary>
-              Looks up a localized string similar to Metadata could not be loaded from the source &apos;{0}&apos;..
+              Looks up a localized string similar to Metadata could not be loaded from the source '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_MissingRegistrationBase">
@@ -6904,22 +6904,22 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_MissingVersion">
             <summary>
-              Looks up a localized string similar to The source does not have the &apos;version&apos; property..
+              Looks up a localized string similar to The source does not have the 'version' property..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_PackageMetadataError">
             <summary>
-              Looks up a localized string similar to An error occurred while retrieving package metadata for &apos;{0}&apos; from source &apos;{1}&apos;..
+              Looks up a localized string similar to An error occurred while retrieving package metadata for '{0}' from source '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_Search_LocalSourceNotFound">
             <summary>
-              Looks up a localized string similar to The path &apos;{0}&apos; for the selected source could not be resolved..
+              Looks up a localized string similar to The path '{0}' for the selected source could not be resolved..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.Protocol_UnsupportedVersion">
             <summary>
-              Looks up a localized string similar to The source version is not supported: &apos;{0}&apos;..
+              Looks up a localized string similar to The source version is not supported: '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.PushCommandPackagePushed">
@@ -6932,9 +6932,14 @@
               Looks up a localized string similar to Pushing {0} to {1}....
             </summary>
         </member>
+        <member name="P:NuGet.Protocol.Strings.RepositoryContentUrlMustBeHttps">
+            <summary>
+              Looks up a localized string similar to Repository content URL for repository signatures must be HTTPS..
+            </summary>
+        </member>
         <member name="P:NuGet.Protocol.Strings.RequiredFeatureUnsupportedException_DefaultMessageWithFeature">
             <summary>
-              Looks up a localized string similar to The &apos;{0}&apos; installation feature was required by a package but is not supported on the current host..
+              Looks up a localized string similar to The '{0}' installation feature was required by a package but is not supported on the current host..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.RequiredFeatureUnsupportedException_DefaultMessageWithoutFeature">
@@ -6949,7 +6954,7 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.UnableToParseFolderV3Version">
             <summary>
-              Looks up a localized string similar to Unable to parse a valid version from a v3 folder: &apos;{0}&apos;..
+              Looks up a localized string similar to Unable to parse a valid version from a v3 folder: '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Protocol.Strings.v2sourceDescription">
@@ -6964,7 +6969,7 @@
         </member>
         <member name="P:NuGet.Protocol.Strings.Warning_SymbolServerNotConfigured">
             <summary>
-              Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;NuGet.exe setApiKey [your API key from http://www.NuGet.org]&apos;..
+              Looks up a localized string similar to Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'NuGet.exe setApiKey [your API key from http://www.NuGet.org]'..
             </summary>
         </member>
         <member name="M:NuGet.Protocol.FeedTypeUtility.GetFeedType(NuGet.Configuration.PackageSource)">
@@ -6974,9 +6979,9 @@
         </member>
         <member name="M:NuGet.Protocol.FindPackagesByIdNupkgDownloader.GetNuspecReaderFromNupkgAsync(NuGet.Packaging.Core.PackageIdentity,System.String,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            Gets a <see cref="T:NuGet.Packaging.NuspecReader"/> from a .nupkg. If the URL cannot be fetched or there is a problem
+            Gets a <see cref="T:NuGet.Packaging.NuspecReader" /> from a .nupkg. If the URL cannot be fetched or there is a problem
             processing the .nuspec, an exception is throw. This method uses HTTP caching to avoid downloading the
-            package over and over (unless <see cref="P:NuGet.Protocol.Core.Types.SourceCacheContext.DirectDownload"/> is specified).
+            package over and over (unless <see cref="P:NuGet.Protocol.Core.Types.SourceCacheContext.DirectDownload" /> is specified).
             </summary>
             <param name="identity">The package identity.</param>
             <param name="url">The URL of the .nupkg.</param>
@@ -6986,7 +6991,7 @@
         </member>
         <member name="M:NuGet.Protocol.FindPackagesByIdNupkgDownloader.CopyNupkgToStreamAsync(NuGet.Packaging.Core.PackageIdentity,System.String,System.IO.Stream,NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            Copies a .nupkg stream to the <paramref name="destination"/> stream. If the .nupkg cannot be found or if
+            Copies a .nupkg stream to the <paramref name="destination" /> stream. If the .nupkg cannot be found or if
             there is a network problem, no stream copy occurs.
             </summary>
             <param name="identity">The package identity.</param>
@@ -6999,8 +7004,8 @@
         <member name="M:NuGet.Protocol.FindPackagesByIdNupkgDownloader.ProcessNupkgStreamAsync(NuGet.Packaging.Core.PackageIdentity,System.String,System.Func{System.IO.Stream,System.Threading.Tasks.Task},NuGet.Protocol.Core.Types.SourceCacheContext,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
             Manages the different ways of getting a .nupkg stream when using the global HTTP cache. When a stream is
-            found, the <paramref name="processStreamAsync"/> method is invoked on said stream. This deals with the
-            complexity of <see cref="P:NuGet.Protocol.Core.Types.SourceCacheContext.DirectDownload"/>.
+            found, the <paramref name="processStreamAsync" /> method is invoked on said stream. This deals with the
+            complexity of <see cref="P:NuGet.Protocol.Core.Types.SourceCacheContext.DirectDownload" />.
             </summary>
             <param name="identity">The package identity.</param>
             <param name="url">The URL of the .nupkg to fetch.</param>
@@ -7015,7 +7020,7 @@
         <member name="M:NuGet.Protocol.GetDownloadResultUtility.CleanUpDirectDownloads(NuGet.Protocol.Core.Types.PackageDownloadContext)">
             <summary>
             Allow explicit clean-up of direct download files. This is important because although direct downloads are
-            opened with the <see cref="F:System.IO.FileOptions.DeleteOnClose"/> option, some systems (e.g. Linux) do not perform
+            opened with the <see cref="F:System.IO.FileOptions.DeleteOnClose" /> option, some systems (e.g. Linux) do not perform
             the delete if the process dies. Additionally, if the system dies before the process dies (e.g. loss of
             power), the direct download files will be left over.
             </summary>
@@ -7226,12 +7231,12 @@
         </member>
         <member name="M:NuGet.Protocol.LocalFolderUtility.GetPackagesFromNupkgs(System.Collections.Generic.IEnumerable{System.IO.FileInfo})">
             <summary>
-            Path -> LocalPackageInfo
+            Path -&gt; LocalPackageInfo
             </summary>
         </member>
         <member name="M:NuGet.Protocol.LocalFolderUtility.GetPackageFromNupkg(System.IO.FileInfo)">
             <summary>
-            Path -> LocalPackageInfo
+            Path -&gt; LocalPackageInfo
             </summary>
         </member>
         <member name="M:NuGet.Protocol.LocalFolderUtility.GetNupkgsFromDirectory(System.IO.DirectoryInfo,NuGet.Common.ILogger)">
@@ -7246,14 +7251,14 @@
         </member>
         <member name="M:NuGet.Protocol.MetadataReferenceCache.GetString(System.String)">
             <summary>
-            Checks if <paramref name="s"/> already exists in the cache.
+            Checks if <paramref name="s" /> already exists in the cache.
             If so, returns the cached instance.
-            If not, caches <paramref name="s"/> and returns it.
+            If not, caches <paramref name="s" /> and returns it.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.MetadataReferenceCache.GetVersion(System.String)">
             <summary>
-            Parses <paramref name="s"/> into a <see cref="T:NuGet.Versioning.NuGetVersion"/>.
+            Parses <paramref name="s" /> into a <see cref="T:NuGet.Versioning.NuGetVersion" />.
             </summary>
         </member>
         <member name="F:NuGet.Protocol.MetadataReferenceCache.CachableTypesMap">
@@ -7263,12 +7268,12 @@
         </member>
         <member name="P:NuGet.Protocol.MetadataReferenceCache.CachableTypes">
             <summary>
-            <see cref="T:System.Collections.Generic.IEnumerable`1"/> containing all types that can be cached.
+            <see cref="T:System.Collections.Generic.IEnumerable`1" /> containing all types that can be cached.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.MetadataReferenceCache.GetObject``1(``0)">
             <summary>
-            Iterates through the properties of <paramref name="input"/> that are either <see cref="T:System.String"/>s, <see cref="T:System.DateTimeOffset"/>s, or <see cref="T:NuGet.Versioning.NuGetVersion"/>s and checks them against the cache.
+            Iterates through the properties of <paramref name="input" /> that are either <see cref="T:System.String" />s, <see cref="T:System.DateTimeOffset" />s, or <see cref="T:NuGet.Versioning.NuGetVersion" />s and checks them against the cache.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.StreamExtensions.AsSeekableStreamAsync(System.IO.Stream)">
@@ -7289,13 +7294,13 @@
         </member>
         <member name="M:NuGet.Protocol.TimeoutUtility.StartWithTimeout``1(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task{``0}},System.TimeSpan,System.String,System.Threading.CancellationToken)">
             <summary>
-            Starts a task with a timeout. If the timeout occurs, a <see cref="T:System.TimeoutException"/>
+            Starts a task with a timeout. If the timeout occurs, a <see cref="T:System.TimeoutException" />
             with no message will be thrown.
             </summary>
         </member>
         <member name="M:NuGet.Protocol.TimeoutUtility.StartWithTimeout(System.Func{System.Threading.CancellationToken,System.Threading.Tasks.Task},System.TimeSpan,System.String,System.Threading.CancellationToken)">
             <summary>
-            Starts a task with a timeout. If the timeout occurs, a <see cref="T:System.TimeoutException"/>
+            Starts a task with a timeout. If the timeout occurs, a <see cref="T:System.TimeoutException" />
             with no message will be thrown.
             </summary>
         </member>
@@ -7403,4 +7408,4 @@
             </summary>
         </member>
     </members>
-</doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>l7gjvL+L8tLJ/fxLMid/e0IGHx4=</DigestValue></Reference></SignedInfo><SignatureValue>o4jYsNosxJxF6nmCjSW3efZ4PhLUV8Lv8adWCREJDEryLWEckW80YWaHW/YaWAtauxwAv7NpmIKnD0v98LXZmzXRkAWuTUVs/T9L9ufSRW/NL/llhmyfBn9WuXozRV4NzN2W7/NczGFCWMdoYUWAoOWJYTQAkkEsprLkncVZ5HoaOnsLMqZvSpcVqYM2h6qxUAcKbX2PNxHUbOtpRCgHsujTQFo96/sSfQGnqpO7Xf0vv0lLaXu64f8kKeHyyLuhut4GmPk9XsNeiZ1Yg8bz98l/s9kZ1ADXCaH76AqAZhSKtFbbmPf6NFfmdtGYUkN6w6aiGluG352s88rA2+IZLA==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIEwTCCA6mgAwIBAgITMwAAANd4Xn6sPypBiwAAAAAA1zANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTcxMDAyMjI1NzU3WhcNMTkwMTAyMjI1NzU3WjCBsTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMSYwJAYDVQQLEx1UaGFsZXMgVFNTIEVTTjo5NkZGLTRCQzUtQTdEQzElMCMGA1UEAxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK0R8WghBzWrkgfDoLwDByma12IHhlSPBbAGiWXRc2ixEiXWFkoH5IDW4fNnINAgbfCWThv3zAknQDa3H9IkZcvHSKEPgt7/MpC2LzuYiBGS7osE1YFJru5o3eQ15jRt+//Sk8j4fwis41AjCNiePkK8wCHusRFyEOABoMC2KjUwrAEQbsMCCcm9AYq3QXc7tvvDncJfnmSfK8KY1isAuPJcfIOsh7ugzUoklOUbkByfrwc51oWxyRhZTMGyJcvskauQzpqw8QIPJi4Upv/cW8ylaXvDD5rd+J7hJzkWpl/eg21LssBR2TdIVfJs48u99rvgf+ka05hE2lSLnnd67RUCAwEAAaOCAQkwggEFMB0GA1UdDgQWBBTYj8Ia8/dzgo7zIAVoJi/V/PwVPTAfBgNVHSMEGDAWgBQjNPjZUkZwCu1A+3b7syuwwzWzDzBUBgNVHR8ETTBLMEmgR6BFhkNodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9NaWNyb3NvZnRUaW1lU3RhbXBQQ0EuY3JsMFgGCCsGAQUFBwEBBEwwSjBIBggrBgEFBQcwAoY8aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNyb3NvZnRUaW1lU3RhbXBQQ0EuY3J0MBMGA1UdJQQMMAoGCCsGAQUFBwMIMA0GCSqGSIb3DQEBBQUAA4IBAQBtoYxTxcEg/Q/A+oGoitT3aME8OF7a1OAQqSPnV3OLGFLv3uPYX8nvdOTnhbKV6BIsW/DGukZflJjCo9I5D9+wz0s9hICPFEqvfpqZumy2T94K7veD21BOZ59xfVauLrbWtBpISdd2kmGsaYacwd/Bf7ih4gmRKWdpGeLcYvN9d8fb68btqwJLKb0B161HcM0SYJ9VxYkvDVqc8YtcH5CszKWLnR2lzBBXR8447n3RY/2ulRFWFD82SsbqpWVUo7JnVaphz9qR5Jn9iarO/SNmtmobYwDPwVpmq4ef2w6iypR3Nrn/PaDv6e7qm3mYnkYtM13zQXbBBQ6DgWferczA</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>

@@ -137,17 +137,19 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RuntimeFrameworkVersion Condition="'$(TargetLatestRuntimePatch)' != 'true' ">$(DefaultNetCorePatchVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
     <!-- This property is different than MicrosoftNETPlatformLibrary.  MicrosoftNETPlatformLibrary is
          used to trim the dependencies published with a framework-dependent app, and is overridden
          by ASP.NET packages.
          
-         The ImplicitPlatformPackageIdentifier is the package that is actually implicitly
+         ExpectedPlatformPackages is the list of packages that are actually implicitly
          referenced by the SDK, and is passed into the ResolvePackageAssets task
-         to verify that the restored version of the package matches the
-         RuntimeFrameworkVersion -->
-    <ImplicitPlatformPackageIdentifier>Microsoft.NETCore.App</ImplicitPlatformPackageIdentifier>
+         to verify that the restored versions of the packages matches the expected versions
+         -->
+    <ExpectedPlatformPackages Include="Microsoft.NETCore.App" ExpectedVersion="$(RuntimeFrameworkVersion)" />
+  </ItemGroup>
 
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
     <VerifyMatchingImplicitPackageVersion Condition="'$(VerifyMatchingImplicitPackageVersion)' == ''">true</VerifyMatchingImplicitPackageVersion>
   </PropertyGroup>
   

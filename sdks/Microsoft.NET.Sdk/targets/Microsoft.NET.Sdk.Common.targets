@@ -43,6 +43,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DotnetCliToolTargetFramework>netcoreapp$(BundledNETCoreAppTargetFrameworkVersion)</DotnetCliToolTargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <IncludeBuildOutput Condition=" '$(PackAsTool)' == 'true' ">false</IncludeBuildOutput>
+    <PackageType Condition=" '$(PackAsTool)' == 'true' ">DotnetTool</PackageType>
+    <RuntimeIdentifiers Condition=" '$(PackAsTool)' == 'true' ">$(RuntimeIdentifiers);$(PackAsToolShimRuntimeIdentifiers)</RuntimeIdentifiers>
+  </PropertyGroup>
+
   <UsingTask TaskName="GetNearestTargetFramework" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkError" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <UsingTask TaskName="NETSdkWarning" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

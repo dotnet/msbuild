@@ -66,7 +66,7 @@
         </member>
         <member name="T:NuGet.Common.AsyncLazy`1">
             <summary>
-            Wrapper class representing shorter syntax of Lazy&lt;Task&lt;T&gt;&gt;"/>.
+            Wrapper class representing shorter syntax of Lazy&lt;Task&lt;T&gt;&gt;"/&gt;.
             Useful when declaring a lazy async factory of value T.
             </summary>
             <typeparam name="T">Value type</typeparam>
@@ -195,6 +195,12 @@
             </summary>
             <param name="oid">An oid string.</param>
             <returns>NuGet.Common.HashAlgorithmName equivalent of the oid string</returns>
+        </member>
+        <member name="M:NuGet.Common.CryptoHashUtility.ConvertToOidString(NuGet.Common.SignatureAlgorithmName)">
+            <summary>
+            Extension method to convert NuGet.Common.SignatureAlgorithmName to an Oid string
+            </summary>
+            <returns>Oid string equivalent of the NuGet.Common.SignatureAlgorithmName</returns>
         </member>
         <member name="T:NuGet.Common.DatetimeUtility">
             <summary>
@@ -682,6 +688,11 @@
             Chain building failed for the repository countersignature.
             </summary>
         </member>
+        <member name="F:NuGet.Common.NuGetLogCode.NU3036">
+            <summary>
+            Timestamp Generalized time is outside certificate's valdity period
+            </summary>
+        </member>
         <member name="F:NuGet.Common.NuGetLogCode.NU5000">
             <summary>
             Undefined Package Error.
@@ -1132,10 +1143,15 @@
             Ignores codes that are unknown.
             </summary>
         </member>
+        <member name="M:NuGet.Common.MSBuildStringUtility.Convert(System.String)">
+            <summary>
+            Convert the provided string to MSBuild style.
+            </summary>
+        </member>
         <member name="M:NuGet.Common.NetworkProtocolUtility.ConfigureSupportedSslProtocols">
             <summary>
             This only has effect on .NET Framework (desktop). On .NET Core,
-            <see cref="T:System.Net.ServicePointManager"/> is not available. Additionally,
+            <see cref="T:System.Net.ServicePointManager" /> is not available. Additionally,
             no API is available to configure the supported SSL protocols.
             </summary>
         </member>
@@ -1229,7 +1245,7 @@
         </member>
         <member name="T:NuGet.Common.NuGetEnvironment.SpecialFolder">
             <summary>
-            Since <see cref="T:System.Environment.SpecialFolder"/> is not available on .NET Core, we have to
+            Since <see cref="T:System.Environment.SpecialFolder" /> is not available on .NET Core, we have to
             make our own and re-implement the functionality. On .NET Framework, we can use the
             built-in functionality.
             </summary>
@@ -1419,7 +1435,7 @@
         </member>
         <member name="P:NuGet.Common.Strings.AbsolutePathRequired">
             <summary>
-              Looks up a localized string similar to An absolute path is required: &apos;{0}&apos;..
+              Looks up a localized string similar to An absolute path is required: '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Common.Strings.Argument_Must_Be_GreaterThanOrEqualTo">
@@ -1439,7 +1455,7 @@
         </member>
         <member name="P:NuGet.Common.Strings.MissingRequiredEnvVar">
             <summary>
-              Looks up a localized string similar to Required environment variable &apos;{0}&apos; is not set. Try setting &apos;{0}&apos; and running the operation again..
+              Looks up a localized string similar to Required environment variable '{0}' is not set. Try setting '{0}' and running the operation again..
             </summary>
         </member>
         <member name="P:NuGet.Common.Strings.NoPackageFoldersFound">
@@ -1449,7 +1465,7 @@
         </member>
         <member name="P:NuGet.Common.Strings.PackageFolderNotFound">
             <summary>
-              Looks up a localized string similar to Package folder not found: &apos;{0}&apos;..
+              Looks up a localized string similar to Package folder not found: '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Common.Strings.UnableToDetemineClientVersion">
@@ -1459,17 +1475,22 @@
         </member>
         <member name="P:NuGet.Common.Strings.UnauthorizedLockFail">
             <summary>
-              Looks up a localized string similar to Unable to obtain lock file access on &apos;{0}&apos; for operations on &apos;{1}&apos;. This may mean that a different user or administator is holding this lock and that this process does not have permission to access it. If no other process is currently performing an operation on this file it may mean that an earlier NuGet process crashed and left an inaccessible lock file, in this case removing the file &apos;{0}&apos; will allow NuGet to continue..
+              Looks up a localized string similar to Unable to obtain lock file access on '{0}' for operations on '{1}'. This may mean that a different user or administator is holding this lock and that this process does not have permission to access it. If no other process is currently performing an operation on this file it may mean that an earlier NuGet process crashed and left an inaccessible lock file, in this case removing the file '{0}' will allow NuGet to continue..
             </summary>
         </member>
         <member name="P:NuGet.Common.Strings.UnsupportedHashAlgorithm">
             <summary>
-              Looks up a localized string similar to Hash algorithm &apos;{0}&apos; is unsupported. Supported algorithms include: SHA512 and SHA256..
+              Looks up a localized string similar to Hash algorithm '{0}' is unsupported. Supported algorithms include: SHA512 and SHA256..
             </summary>
         </member>
         <member name="P:NuGet.Common.Strings.UnsupportedHashAlgorithmName">
             <summary>
-              Looks up a localized string similar to The hash algorithm &apos;{0}&apos; is unsupported..
+              Looks up a localized string similar to Hash algorithm '{0}' is unsupported..
+            </summary>
+        </member>
+        <member name="P:NuGet.Common.Strings.UnsupportedSignatureAlgorithmName">
+            <summary>
+              Looks up a localized string similar to Signature algorithm '{0}' is unsupported..
             </summary>
         </member>
         <member name="T:NuGet.Common.ITelemetrySession">
@@ -1501,6 +1522,14 @@
             <summary>
             operation was cancelled
             </summary>
+        </member>
+        <member name="M:NuGet.Common.TelemetryActivity.CreateTelemetryActivityWithNewOperationIdAndEvent(System.Guid,System.String)">
+            <summary>
+            Creates a TelemetryActivity.
+            </summary>
+            <param name="parentId">OperationId of the parent event.</param>
+            <param name="eventName">Name of the event.</param>
+            <returns>TelemetryActivity with a given parentId and new operationId and a TelemetryEvent with eventName</returns>
         </member>
         <member name="T:NuGet.Common.TelemetryEvent">
             <summary>
@@ -1563,7 +1592,7 @@
         </member>
         <member name="M:NuGet.Common.UriUtility.GetAbsolutePathFromFile(System.String,System.String)">
             <summary>
-            Calls GetAbsolutePath with the directory of <paramref name="sourceFile"/>.
+            Calls GetAbsolutePath with the directory of <paramref name="sourceFile" />.
             </summary>
         </member>
         <member name="M:NuGet.Common.UriUtility.GetAbsolutePath(System.String,System.String)">
@@ -1629,4 +1658,4 @@
             </summary>
         </member>
     </members>
-</doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>KcpRV7C1rj6OFNXVW4CeuPfE/T4=</DigestValue></Reference></SignedInfo><SignatureValue>XAwkrSRgUOC+HoYtIPlb417gn0PBK/YQiSP4DcgB7zpoAewPvnIKtr7gkzTm+lsvUPg5BgU06X/sdYYPix/t8E3hjzVNCGNdXMm66/f+hMKGmaXF0KqmWJZlP1cQiVJGAMThwiay1NbEa1qRtuvbb3KyEeahwJNXvOmlgxBFAeB+zq7yjVmTh7uY362kZC6Zrs2+nPQtXr+ZPfkLi8xcO0JK7/PFlvgomJXnmzore8grLuJiheOmkdlNu4gnzNKrFagJXkkKGnn5zep9LtL3Tpf6mulgkKcr9DVEBbwjjhwdAuCGciBA5iu77VtaeCi7AZoKP8QiBYdP4hrG4RPt4g==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIEwTCCA6mgAwIBAgITMwAAANjkdflFb0j3rgAAAAAA2DANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTcxMDAyMjI1NzU3WhcNMTkwMTAyMjI1NzU3WjCBsTELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMSYwJAYDVQQLEx1UaGFsZXMgVFNTIEVTTjo3MERELTRCNUItNDU2ODElMCMGA1UEAxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMR2sf6C9y+kIdyj16QouyVvlvPjzdmE1FFIAb7gUl7UCknd2nlquXeGJHQdX22zmY18QH/8EjH8voTu57DqKJRFkqkD+PQ87+M4j2aW27QCHiHVATEHdHelT0ANUSoxETlAe4d6gd6sL/aAwkqFSqTncLfVeAenMJ7Te3tLmLYBk59CI/Tmf2YCsU+Z0nQ0S0AH6IHAKbDLLUPZ1KW4d5Mmig1YMInsaoDHJvmuXyUZ6GxluZ7GX+WxF2XoxFRuMo6OWrCER3gnx/W3omzHOc1/C/oBI8hELBQH8uTJYqI8iGx8yqDyYETHoZNdH0oFeIOfAvVFlUYTE3JWpbMtF0cCAwEAAaOCAQkwggEFMB0GA1UdDgQWBBSgHm6PHyXdykNng5Up+ne9UdYeVjAfBgNVHSMEGDAWgBQjNPjZUkZwCu1A+3b7syuwwzWzDzBUBgNVHR8ETTBLMEmgR6BFhkNodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9NaWNyb3NvZnRUaW1lU3RhbXBQQ0EuY3JsMFgGCCsGAQUFBwEBBEwwSjBIBggrBgEFBQcwAoY8aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNyb3NvZnRUaW1lU3RhbXBQQ0EuY3J0MBMGA1UdJQQMMAoGCCsGAQUFBwMIMA0GCSqGSIb3DQEBBQUAA4IBAQCFDewTPdV6/bMFMK0kqgvI8Y7t1YvHrGmvpdA/Y2zx+ERd0g9dENtHTlfAPC1X15YlDXZNPdo7LY6wMJco/rXcjzFZ/tIvGHcIaQE52tJKW+pmXfrvQWW4X3pQdbPTsCwcDSGPcDImnec0dathWPicWxBg1NIeSDDsdsqpESp0kSs9g9fLQWUi9wHlFehburgOJCWpQ1jkNspUvJ7xMmtTTEIu6WPEDGHU8LxHraClsL0/BzPNKE85uB3+5/yOurKU/V8kH/obxzB03XxI4QpbpU1D2yasOd7JVmCGEbHBRamtHVz6SnVVVviJUsoGV5/jdzHuXyUIy9LKSUwuTdyk</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>

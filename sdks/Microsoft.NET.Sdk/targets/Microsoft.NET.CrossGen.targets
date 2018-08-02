@@ -141,7 +141,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <PropertyGroup>
       <CrossgenProfilingSymbolsOutputDirectory>$([System.IO.Path]::GetDirectoryName($(_RuntimeSymbolsDir)\$(CrossgenSubOutputPath)))</CrossgenProfilingSymbolsOutputDirectory>
       <CrossgenSymbolsStagingDirectory>$([System.IO.Path]::GetDirectoryName($(StoreSymbolsStagingDir)\$(CrossgenSubOutputPath)))</CrossgenSymbolsStagingDirectory>
-      <CrossgenCommandline>$(CrossgenExe) -readytorun -in "$(CrossgenInputAssembly)" -out "$(CrossgenOutputAssembly)" -jitpath "$(CrossgenJit)" -platform_assemblies_paths "$(CrossgenPlatformAssembliesPath)"</CrossgenCommandline>
+      <CrossgenCommandline>$(CrossgenExe) -nologo -readytorun -in "$(CrossgenInputAssembly)" -out "$(CrossgenOutputAssembly)" -jitpath "$(CrossgenJit)" -platform_assemblies_paths "$(CrossgenPlatformAssembliesPath)"</CrossgenCommandline>
       <CreateProfilingSymbolsOptionName Condition="'$(OS)' == 'Windows_NT'">CreatePDB</CreateProfilingSymbolsOptionName>
       <CreateProfilingSymbolsOptionName Condition="'$(CreateProfilingSymbolsOptionName)' == ''">CreatePerfMap</CreateProfilingSymbolsOptionName>
     </PropertyGroup>
@@ -166,7 +166,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Create profiling symbols if requested -->
     <MakeDir Directories="$(CrossgenProfilingSymbolsOutputDirectory)"
              Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" />
-    <Exec Command="$(CrossgenExe) -readytorun -platform_assemblies_paths $(CrossgenPlatformAssembliesPath) -$(CreateProfilingSymbolsOptionName) $(CrossgenProfilingSymbolsOutputDirectory) $(CrossgenOutputAssembly)"
+    <Exec Command="$(CrossgenExe) -nologo -readytorun -platform_assemblies_paths $(CrossgenPlatformAssembliesPath) -$(CreateProfilingSymbolsOptionName) $(CrossgenProfilingSymbolsOutputDirectory) $(CrossgenOutputAssembly)"
           Condition="'$(CreateProfilingSymbols)' == 'true' and Exists($(CrossgenOutputAssembly))" />
 
     <ItemGroup>

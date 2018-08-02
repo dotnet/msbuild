@@ -942,22 +942,22 @@
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.DependencyHasInvalidVersion">
             <summary>
-               Looks up a localized string similar to Dependency &apos;{0}&apos; has an invalid version..
+               Looks up a localized string similar to Dependency '{0}' has an invalid version..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.DuplicateDependenciesDefined">
             <summary>
-               Looks up a localized string similar to &apos;{0}&apos; already has a dependency defined for &apos;{1}&apos;..
+               Looks up a localized string similar to '{0}' already has a dependency defined for '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.IncompatibleSchema">
             <summary>
-               Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
+               Looks up a localized string similar to The schema version of '{0}' is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.InvalidPackageId">
             <summary>
-               Looks up a localized string similar to The package ID &apos;{0}&apos; contains invalid characters. Examples of valid package IDs include &apos;MyPackage&apos; and &apos;MyPackage.Sample&apos;..
+               Looks up a localized string similar to The package ID '{0}' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_DependenciesHasMixedElements">
@@ -967,7 +967,7 @@
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ExcludeContainsInvalidCharacters">
             <summary>
-               Looks up a localized string similar to Exclude path &apos;{0}&apos; contains invalid characters..
+               Looks up a localized string similar to Exclude path '{0}' contains invalid characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_IdMaxLengthExceeded">
@@ -977,17 +977,17 @@
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidMinClientVersion">
             <summary>
-               Looks up a localized string similar to The &apos;minClientVersion&apos; attribute in the package manifest has invalid value. It must be a valid version string..
+               Looks up a localized string similar to The 'minClientVersion' attribute in the package manifest has invalid value. It must be a valid version string..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidReference">
             <summary>
-               Looks up a localized string similar to Invalid assembly reference &apos;{0}&apos;. Ensure that a file named &apos;{0}&apos; exists in the lib directory..
+               Looks up a localized string similar to Invalid assembly reference '{0}'. Ensure that a file named '{0}' exists in the lib directory..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_InvalidReferenceFile">
             <summary>
-               Looks up a localized string similar to Assembly reference &apos;{0}&apos; contains invalid characters..
+               Looks up a localized string similar to Assembly reference '{0}' contains invalid characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_ReferencesHasMixedElements">
@@ -1002,7 +1002,7 @@
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequiredElementMissing">
             <summary>
-               Looks up a localized string similar to The required element &apos;{0}&apos; is missing from the manifest..
+               Looks up a localized string similar to The required element '{0}' is missing from the manifest..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_RequiredMetadataMissing">
@@ -1017,12 +1017,12 @@
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_SourceContainsInvalidCharacters">
             <summary>
-               Looks up a localized string similar to Source path &apos;{0}&apos; contains invalid characters..
+               Looks up a localized string similar to Source path '{0}' contains invalid characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_TargetContainsInvalidCharacters">
             <summary>
-               Looks up a localized string similar to Target path &apos;{0}&apos; contains invalid characters..
+               Looks up a localized string similar to Target path '{0}' contains invalid characters..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.Manifest_UriCannotBeEmpty">
@@ -1032,12 +1032,12 @@
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.PackageAuthoring_FileNotFound">
             <summary>
-               Looks up a localized string similar to File not found: &apos;{0}&apos;..
+               Looks up a localized string similar to File not found: '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.PackageCreation.Resources.NuGetResources.UnknownSchemaVersion">
             <summary>
-               Looks up a localized string similar to Unknown schema version &apos;{0}&apos;..
+               Looks up a localized string similar to Unknown schema version '{0}'..
             </summary>
         </member>
         <member name="M:NuGet.Packaging.FrameworkNameUtility.ParseFrameworkFolderName(System.String,System.Boolean,System.String@)">
@@ -1051,7 +1051,7 @@
         </member>
         <member name="P:NuGet.Packaging.PackageExtraction.PackageExtractionBehavior.XmlDocFileSaveMode">
             <summary>
-            Gets or sets the <see cref="!:PackageExtraction.XmlDocFileSaveMode"/>.
+            Gets or sets the <see cref="!:PackageExtraction.XmlDocFileSaveMode" />.
             </summary>
         </member>
         <member name="M:NuGet.Packaging.PackageHelper.GetSatellitePackageInfoAsync(NuGet.Packaging.Core.IAsyncPackageCoreReader,System.Threading.CancellationToken)">
@@ -1069,13 +1069,13 @@
         <member name="F:NuGet.Packaging.PackageSaveMode.Defaultv2">
             <summary>
             Default package save mode for v2 (packages.config)-style restore.
-            This includes <see cref="F:NuGet.Packaging.PackageSaveMode.Files"/> and <see cref="F:NuGet.Packaging.PackageSaveMode.Nupkg"/>.
+            This includes <see cref="F:NuGet.Packaging.PackageSaveMode.Files" /> and <see cref="F:NuGet.Packaging.PackageSaveMode.Nupkg" />.
             </summary>
         </member>
         <member name="F:NuGet.Packaging.PackageSaveMode.Defaultv3">
             <summary>
             Default package save mode for v3 (project.json)-style restore.
-            This includes <see cref="F:NuGet.Packaging.PackageSaveMode.Files"/>, <see cref="F:NuGet.Packaging.PackageSaveMode.Nuspec"/>, and <see cref="F:NuGet.Packaging.PackageSaveMode.Nupkg"/>.
+            This includes <see cref="F:NuGet.Packaging.PackageSaveMode.Files" />, <see cref="F:NuGet.Packaging.PackageSaveMode.Nuspec" />, and <see cref="F:NuGet.Packaging.PackageSaveMode.Nupkg" />.
             </summary>
         </member>
         <member name="F:NuGet.Packaging.XmlDocFileSaveMode.None">
@@ -1114,6 +1114,11 @@
             True if the package was installed. False if the package already exists and therefore
             resulted in no copy operation.
             </returns>
+        </member>
+        <member name="M:NuGet.Packaging.PackageExtractor.DeleteTargetAndTempPaths(System.String,System.String)">
+            <summary>
+            Delete the target directory path and the temp nupkg path in case of a failed extraction.
+            </summary>
         </member>
         <member name="T:NuGet.Packaging.PackageFolderReader">
             <summary>
@@ -1481,42 +1486,42 @@
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.AssemblyDirectlyUnderLibWarning">
             <summary>
-              Looks up a localized string similar to The assembly &apos;{0}&apos; is placed directly under &apos;lib&apos; folder. It is recommended that assemblies be placed inside a framework-specific folder. Move it into a framework-specific folder..
+              Looks up a localized string similar to The assembly '{0}' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder. Move it into a framework-specific folder..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.AssemblyOutsideLibWarning">
             <summary>
-              Looks up a localized string similar to The assembly &apos;{0}&apos; is not inside the &apos;lib&apos; folder and hence it won&apos;t be added as a reference when the package is installed into a project. Move it into the &apos;lib&apos; folder if it needs to be referenced..
+              Looks up a localized string similar to The assembly '{0}' is not inside the 'lib' folder and hence it won't be added as a reference when the package is installed into a project. Move it into the 'lib' folder if it needs to be referenced..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.DefaultSpecValueWarning">
             <summary>
-              Looks up a localized string similar to The value &quot;{0}&quot; for {1} is a sample value and should be removed. Replace it with an appropriate value or remove it and rebuild your package..
+              Looks up a localized string similar to The value "{0}" for {1} is a sample value and should be removed. Replace it with an appropriate value or remove it and rebuild your package..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidFrameworkWarning">
             <summary>
-              Looks up a localized string similar to The folder &apos;{0}&apos; under &apos;lib&apos; is not recognized as a valid framework name or a supported culture identifier. Rename it to a valid framework name or culture identifier..
+              Looks up a localized string similar to The folder '{0}' under 'lib' is not recognized as a valid framework name or a supported culture identifier. Rename it to a valid framework name or culture identifier..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.InvalidPrereleaseDependencyWarning">
             <summary>
-              Looks up a localized string similar to A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency &quot;{0}&quot; or update the version field in the nuspec..
+              Looks up a localized string similar to A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency "{0}" or update the version field in the nuspec..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.LegacyVersionWarning">
             <summary>
-              Looks up a localized string similar to The package version &apos;{0}&apos; uses SemVer 2.0.0 or components of SemVer 1.0.0 that are not supported on legacy clients. Change the package version to a SemVer 1.0.0 string. If the version contains a release label it must start with a letter. This message can be ignored if the package is not intended for older clients..
+              Looks up a localized string similar to The package version '{0}' uses SemVer 2.0.0 or components of SemVer 1.0.0 that are not supported on legacy clients. Change the package version to a SemVer 1.0.0 string. If the version contains a release label it must start with a letter. This message can be ignored if the package is not intended for older clients..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_AssemblyDirectlyUnderLibWarning">
             <summary>
-              Looks up a localized string similar to The assembly &apos;lib\{0}&apos; will be ignored when the package is installed after the migration..
+              Looks up a localized string similar to The assembly 'lib\{0}' will be ignored when the package is installed after the migration..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_PackageHasContentFolder">
             <summary>
-              Looks up a localized string similar to &apos;content&apos; assets will not be available when the package is installed after the migration..
+              Looks up a localized string similar to 'content' assets will not be available when the package is installed after the migration..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_PackageHasInstallScript">
@@ -1526,42 +1531,42 @@
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.Migrator_XdtTransformInPackage">
             <summary>
-              Looks up a localized string similar to XDT transform file &apos;{0}&apos; will not be applied when the package is installed after the migration..
+              Looks up a localized string similar to XDT transform file '{0}' will not be applied when the package is installed after the migration..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.MisplacedInitScriptWarning">
             <summary>
-              Looks up a localized string similar to The file &apos;{0}&apos; will be ignored by NuGet because it is not directly under &apos;tools&apos; folder. Place the file directly under &apos;tools&apos; folder..
+              Looks up a localized string similar to The file '{0}' will be ignored by NuGet because it is not directly under 'tools' folder. Place the file directly under 'tools' folder..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.MisplacedTransformFileWarning">
             <summary>
-              Looks up a localized string similar to The transform file &apos;{0}&apos; is outside the &apos;content&apos; folder and hence will not be transformed during installation of this package. Move it into the &apos;content&apos; folder..
+              Looks up a localized string similar to The transform file '{0}' is outside the 'content' folder and hence will not be transformed during installation of this package. Move it into the 'content' folder..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.PlaceholderFileInPackageWarning">
             <summary>
-              Looks up a localized string similar to An empty folder placeholder file &apos;{0}&apos; is in a non-empty folder and should be removed..
+              Looks up a localized string similar to An empty folder placeholder file '{0}' is in a non-empty folder and should be removed..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.ScriptOutsideToolsWarning">
             <summary>
-              Looks up a localized string similar to The script file &apos;{0}&apos; is outside the &apos;tools&apos; folder and hence will not be executed during installation of this package. Move it into the &apos;tools&apos; folder..
+              Looks up a localized string similar to The script file '{0}' is outside the 'tools' folder and hence will not be executed during installation of this package. Move it into the 'tools' folder..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.UnrecognizedScriptWarning">
             <summary>
-              Looks up a localized string similar to The script file &apos;{0}&apos; is not recognized by NuGet and hence will not be executed during installation of this package. Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under &apos;tools&apos;..
+              Looks up a localized string similar to The script file '{0}' is not recognized by NuGet and hence will not be executed during installation of this package. Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under 'tools'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.UnspecifiedDependencyVersionWarning">
             <summary>
-              Looks up a localized string similar to The version of dependency &apos;{0}&apos; is not specified. Specify the version of dependency and rebuild your package..
+              Looks up a localized string similar to The version of dependency '{0}' is not specified. Specify the version of dependency and rebuild your package..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Rules.AnalysisResources.WinRTObsoleteWarning">
             <summary>
-              Looks up a localized string similar to The file at &apos;{0}&apos; uses the obsolete &apos;WinRT&apos; as the framework folder. Replace &apos;WinRT&apos; or &apos;WinRT45&apos; with &apos;NetCore45&apos;..
+              Looks up a localized string similar to The file at '{0}' uses the obsolete 'WinRT' as the framework folder. Replace 'WinRT' or 'WinRT45' with 'NetCore45'..
             </summary>
         </member>
         <member name="T:NuGet.Packaging.Rules.LegacyVersionRule">
@@ -1931,14 +1936,14 @@
             <param name="overwrite">A flag indicating if an existing signature should be overwritten.</param>
             <param name="signatureProvider">A provider to create a Signature that can be added to the package.</param>
             <param name="logger">A logger.</param>
-            <remarks>Signing operations cannot be done in place; therefore, <paramref name="inputPackageStream"/>
+            <remarks>Signing operations cannot be done in place; therefore, <paramref name="inputPackageStream" />
             and <paramref name="outputPackageStream" /> should be different streams.</remarks>
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="inputPackageStream" /> is <c>null</c>.</exception>
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="outputPackageStream" /> is <c>null</c>.</exception>
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="signatureProvider" /> is <c>null</c>.</exception>
             <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="logger" /> is <c>null</c>.</exception>
             <exception cref="T:System.ArgumentException">Thrown if <paramref name="inputPackageStream" /> and
-            <paramref name="outputPackageStream"/> are the same object.</exception>
+            <paramref name="outputPackageStream" /> are the same object.</exception>
         </member>
         <member name="M:NuGet.Packaging.Signing.SigningOptions.CreateFromFilePaths(System.String,System.String,System.Boolean,NuGet.Packaging.Signing.ISignatureProvider,NuGet.Common.ILogger)">
             <summary>Creates a new <see cref="T:NuGet.Packaging.Signing.SigningOptions" /> object from file paths.</summary>
@@ -1949,7 +1954,7 @@
             <param name="overwrite">A flag indicating if an existing signature should be overwritten.</param>
             <param name="signatureProvider">A provider to create a Signature that can be added to the package.</param>
             <param name="logger">A logger.</param>
-            <remarks>Signing operations cannot be done in place; therefore, <paramref name="inputPackageFilePath"/>
+            <remarks>Signing operations cannot be done in place; therefore, <paramref name="inputPackageFilePath" />
             and <paramref name="outputPackageFilePath" /> should be different file paths.</remarks>
             <exception cref="T:System.ArgumentException">Thrown if <paramref name="inputPackageFilePath" /> is <c>null</c>,
             an empty string, or equivalent to <paramref name="outputPackageFilePath" />.</exception>
@@ -2137,7 +2142,7 @@
         <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeBitString(System.Int32,System.Byte[])">
             <summary>
             Encode the segments { tag, length, value } of a bit string where the least significant
-            <paramref name="unusedBits"/> of the last byte are padding.
+            <paramref name="unusedBits" /> of the last byte are padding.
             </summary>
             <param name="unusedBits">The number of padding bits (0-7) in the last byte</param>
             <param name="data">The data to encode</param>
@@ -2146,12 +2151,12 @@
         <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeNamedBitList(System.Byte[],System.Int32)">
             <summary>
             Encode the segments { tag, length, value } of a bit string value based upon a NamedBitList.
-            ((<paramref name="bigEndianBytes"/>[0] >> 7) &amp; 1) is considered the "leading" bit, proceeding
-            through the array for up to <paramref name="namedBitsCount"/>.
+            ((<paramref name="bigEndianBytes" />[0] &gt;&gt; 7) &amp; 1) is considered the "leading" bit, proceeding
+            through the array for up to <paramref name="namedBitsCount" />.
             </summary>
             <param name="bigEndianBytes">
             The data in big endian order, the most significant bit of byte 0 is the leading bit
-            (corresponds to the named value for "bit 0"). Any bits beyond <paramref name="namedBitsCount"/>
+            (corresponds to the named value for "bit 0"). Any bits beyond <paramref name="namedBitsCount" />
             are ignored, and any missing bits are assumed to be unset.
             </param>
             <param name="namedBitsCount">
@@ -2199,8 +2204,8 @@
             Encode a substring as a UTF8String value.
             </summary>
             <param name="chars">The characters whose substring is to be encoded.</param>
-            <param name="offset">The character offset into <paramref name="chars"/> at which to start.</param>
-            <param name="count">The total number of characters from <paramref name="chars"/> to read.</param>
+            <param name="offset">The character offset into <paramref name="chars" /> at which to start.</param>
+            <param name="count">The total number of characters from <paramref name="chars" /> to read.</param>
             <returns>The encoded segments { tag, length, value }</returns>
         </member>
         <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSegmentedSequence(System.Byte[][][])">
@@ -2246,7 +2251,7 @@
             </summary>
             <param name="chars">The characters to test.</param>
             <returns>
-            <c>true</c> if all of the characters in <paramref name="chars"/> are valid PrintableString characters,
+            <c>true</c> if all of the characters in <paramref name="chars" /> are valid PrintableString characters,
             <c>false</c> otherwise.
             </returns>
         </member>
@@ -2256,10 +2261,10 @@
             PrintableString restricted character set.
             </summary>
             <param name="chars">The character string to test.</param>
-            <param name="offset">The starting character position within <paramref name="chars"/>.</param>
-            <param name="count">The number of characters from <paramref name="chars"/> to read.</param>
+            <param name="offset">The starting character position within <paramref name="chars" />.</param>
+            <param name="count">The number of characters from <paramref name="chars" /> to read.</param>
             <returns>
-            <c>true</c> if all of the indexed characters in <paramref name="chars"/> are valid PrintableString
+            <c>true</c> if all of the indexed characters in <paramref name="chars" /> are valid PrintableString
             characters, <c>false</c> otherwise.
             </returns>
         </member>
@@ -2275,8 +2280,8 @@
             Encode a substring as a PrintableString value.
             </summary>
             <param name="chars">The character string whose substring is to be encoded.</param>
-            <param name="offset">The character offset into <paramref name="chars"/> at which to start.</param>
-            <param name="count">The total number of characters from <paramref name="chars"/> to read.</param>
+            <param name="offset">The character offset into <paramref name="chars" /> at which to start.</param>
+            <param name="count">The total number of characters from <paramref name="chars" /> to read.</param>
             <returns>The encoded segments { tag, length, value }</returns>
         </member>
         <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.SegmentedEncodeIA5String(System.Char[])">
@@ -2291,8 +2296,8 @@
             Encode a substring as a IA5String value.
             </summary>
             <param name="chars">The characters whose substring is to be encoded.</param>
-            <param name="offset">The character offset into <paramref name="chars"/> at which to start.</param>
-            <param name="count">The total number of characters from <paramref name="chars"/> to read.</param>
+            <param name="offset">The character offset into <paramref name="chars" /> at which to start.</param>
+            <param name="count">The total number of characters from <paramref name="chars" /> to read.</param>
             <returns>The encoded segments { tag, length, value }</returns>
         </member>
         <member name="M:NuGet.Packaging.Signing.DerEncoding.DerEncoder.ConstructSequence(System.Byte[][][])">
@@ -2538,18 +2543,19 @@
             SignerInfo for this signature.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.GetValidTimestamp(NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+        <member name="M:NuGet.Packaging.Signing.Signature.TryGetValidTimestamp(NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog},NuGet.Packaging.Signing.SignatureVerificationStatusFlags@,NuGet.Packaging.Signing.Timestamp@)">
             <summary>
-            
+            Get a valid timestamp from the unsigned attributes if present
             </summary>
-            <param name="allowMultipleTimestamps"></param>
-            <param name="allowIgnoreTimestamp"></param>
-            <param name="allowNoTimestamp"></param>
-            <param name="allowUnknownRevocation"></param>
-            <param name="issues"></param>
-            <returns></returns>
+            <param name="settings">Specify what is allowed in the validation for timestamp</param>
+            <param name="fingerprintAlgorithm">fingerprint algorithm for displaying timestamp's certificate information</param>
+            <param name="issues">List of log messages.</param>
+            <param name="verificationFlags">Flags that specify the status of the verification</param>
+            <param name="validTimestamp">TTimestamp found in the signature that passes validation with the given <see cref="!:settings" /></param>
+            <remarks>If <see cref="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoTimestamp" /> is set to true this method return true with a <see cref="!:validTimestamp" /> set to null.</remarks>
+            <returns>true if a valid timestamp was found</returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+        <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignatureVerifySettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
             <summary>
             Verify if the signature object meets the specification trust and validity requirements.
             </summary>
@@ -2560,9 +2566,10 @@
             <param name="fingerprintAlgorithm">Algorithm used to calculate and display the certificate's fingerprint.</param>
             <param name="certificateExtraStore">Collection of certificates to help the chain building engine as an extra store.</param>
             <param name="issues">List of log messages.</param>
+            <remarks>This is only public for ease of testing</remarks>
             <returns>Status of trust for signature.</returns>
         </member>
-        <member name="M:NuGet.Packaging.Signing.Signature.GetTimestamps(System.Security.Cryptography.Pkcs.SignerInfo)">
+        <member name="M:NuGet.Packaging.Signing.Signature.GetTimestamps(System.Security.Cryptography.Pkcs.SignerInfo,System.String)">
             <summary>
             Get timestamps from the signer info
             </summary>
@@ -2604,6 +2611,39 @@
             Signed by the repository.
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.Signing.SignatureVerifySettings">
+            <summary>
+            Settings to customize Signature.Verify behavior. 
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.TreatIssuesAsErrors">
+            <summary>
+            Treat any issue as fatal.
+            </summary>
+            <remarks>If set true, any issue will be an error instead of a warning</remarks>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUntrustedRoot">
+            <summary>
+            Specifies that a signing certificate's chain that chains to an untrusted root is allowed
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUnknownRevocation">
+            <summary>
+            Specifies that a signing certificate's chain with unknown revocation is allowed.
+            If set to true, offline revocation is allowed.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.LogOnSignatureExpired">
+            <summary>
+            Specifies that an error should be logged when the signature is expired.
+            If set to false, this won't allow expired signatures, only skip the logging of the failure.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.Default">
+            <summary>
+            Get default settings values for relaxed verification on a signature
+            </summary>
+        </member>
         <member name="T:NuGet.Packaging.Signing.SigningCertificate">
             <remarks>This is public only to facilitate testing.</remarks>
         </member>
@@ -2640,6 +2680,16 @@
             Returns the set of allowed hash algorithm Oids.
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.AllowedSignatureAlgorithms">
+            <summary>
+            Returns the set of allowed signature algorithms.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SigningSpecifications.AllowedSignatureAlgorithmOids">
+            <summary>
+            Returns the set of allowed signature algorithm Oids.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Signing.SigningSpecifications.RSAPublicKeyMinLength">
             <summary>
             Returns minumum length required for RSA public keys.
@@ -2663,6 +2713,16 @@
         <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedHashAlgorithmOids">
             <summary>
             Allowed digest algorithm Oids for signature and timestamp hashing.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedSignatureAlgorithms">
+            <summary>
+            Allowed signature algorithms.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedSignatureAlgorithmOids">
+            <summary>
+            Allowed signature algorithm Oids.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SigningSpecificationsV1.Version">
@@ -2696,6 +2756,11 @@
         <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.GetTimestamp(NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
             Timestamps data present in the TimestampRequest.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.GetNameOrOidString(System.Security.Cryptography.Oid)">
+            <summary>
+            Returns the FriendlyName of an Oid. If FriendlyName is null, then the Oid string is returned.
             </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampRequest">
@@ -2880,13 +2945,13 @@
         </member>
         <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureType(System.String)">
             <summary>
-            Oid -> SignatureType
+            Oid -&gt; SignatureType
             </summary>
             <param name="oid">The commitment-type-indication value.</param>
         </member>
         <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetSignatureTypeOid(NuGet.Packaging.Signing.SignatureType)">
             <summary>
-            SignatureType -> Oid
+            SignatureType -&gt; Oid
             </summary>
             <param name="signatureType">The signature type.</param>
         </member>
@@ -2916,7 +2981,7 @@
         </member>
         <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetCommitmentTypeIndicationRawValues(System.Security.Cryptography.CryptographicAttributeObject)">
             <summary>
-            Attribute -> SignatureType values with no validation.
+            Attribute -&gt; SignatureType values with no validation.
             </summary>
         </member>
         <member name="M:NuGet.Packaging.Signing.AttributeUtility.GetAttribute(System.Security.Cryptography.CryptographicAttributeObjectCollection,System.String)">
@@ -3138,6 +3203,14 @@
             finalizer impact.
             </remarks>
         </member>
+        <member name="M:NuGet.Packaging.Signing.AllowListVerificationProvider.VerifyAllowList(NuGet.Packaging.Signing.AllowListVerificationProvider.CertificateListVerificationRequest)">
+            <summary>
+            Verify an allow list with a given request
+            </summary>
+            <param name="request">Information about the allow list verification to perform</param>
+            <remarks>This method should never return a status unknown. Min is used to take the most severe status in <see cref="M:NuGet.Packaging.Signing.AllowListVerificationProvider.GetValidity(System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.PackageVerificationResult})" />
+            therefore, if unknown is returned the verification process will return an unknown status for the whole operation</remarks>
+        </member>
         <member name="T:NuGet.Packaging.Signing.IPackageSignatureVerifier">
             <summary>
             Loads trust providers and verifies package signatures.
@@ -3189,10 +3262,19 @@
             PackageVerificationResult
             </summary>
         </member>
+        <member name="T:NuGet.Packaging.Signing.RepositorySignatureVerifier">
+            <remarks>
+            This is used by NuGetGallery to determine repository signature validity.
+            </remarks>
+        </member>
         <member name="T:NuGet.Packaging.Signing.SignatureVerificationStatus">
             <summary>
             Represents the trust result of a signature.
             </summary>
+            <remarks>The order of the elements on this enum is important.
+            It should be ordered from most severe to valid.
+            When a verification with multiple steps wants to be strict it should take the min
+            out of each step as the status for the whole verification.</remarks>
         </member>
         <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Unknown">
             <summary>
@@ -3220,6 +3302,139 @@
             Signature is valid for the verification step.
             </summary>
         </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoErrors">
+            <summary>
+            There was no error found
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoSignature">
+            <summary>
+            A signature was not found
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoCertificate">
+            <summary>
+            Signer certificate was not found
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.MultipleSignatures">
+            <summary>
+            Multiple signatures were found
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.SignatureCheckFailed">
+            <summary>
+            A call to SignedCms.CheckSignature failed
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.SignatureAlgorithmUnsupported">
+            <summary>
+            Signature algorithm is not supported
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificatePublicKeyInvalid">
+            <summary>
+            Public key does not conform with the requirements of the spec
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.HasLifetimeSigningEku">
+            <summary>
+            Signing certificate has lifetimeSigningEku
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificateValidityInTheFuture">
+            <summary>
+            Signer certificate's validity is in the future
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificateExpired">
+            <summary>
+            Signing certificate has expired
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.HashAlgorithmUnsupported">
+            <summary>
+            Hashing algorithm is not supported
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.MessageImprintUnsupportedAlgorithm">
+            <summary>
+            Message imprint uses a hash algorithm that is not supported
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.IntegrityCheckFailed">
+            <summary>
+            Integrity check of the signature failed
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.ChainBuildingFailure">
+            <summary>
+            Chain building failures.
+            Some specific chain building failures (like revocation, revocation status unavailable, certificate expired, etc.)
+            are not covered by this flag because they are covered specially by another status flag.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.UnknownRevocation">
+            <summary>
+            Revocation information was unavailable or was offline for the signer certificate
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificateRevoked">
+            <summary>
+            Signing certificate was revoked
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.UntrustedRoot">
+            <summary>
+            Signing certificate chains to a certificate untrusted by the computer performing the verification
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.GeneralizedTimeOutsideValidity">
+            <summary>
+            The Timestamp's generalized time was outside certificate's validity period
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Suspect">
+            <summary>
+            Flags which indicate that the signed package is suspect.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Illegal">
+            <summary>
+            Flags which indicate that the signed package is illegal.
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Untrusted">
+            <summary>
+            Flags which indicate that the signed package is untrusted.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.SignatureType">
+            <summary>
+            Type of the signature that was verified
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Status">
+            <summary>
+            Status of the verification
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Flags">
+            <summary>
+            Reasons for the status.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Timestamp">
+            <summary>
+            Timestamp used to validate certificate.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.ExpirationTime">
+            <summary>
+            Expiration Date and Time for signature
+            </summary>
+            <remarks>This field will only be set if the flag CertificateExpired is present <see cref="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Flags" /></remarks>
+        </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerificationResult.Signature">
             <summary>
             Signature
@@ -3245,11 +3460,6 @@
             Allow packages that have not been explicitly trusted by the consumer.
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUntrustedSelfIssuedCertificate">
-            <summary>
-            Allow packages that do not chain to a trusted root certificate.
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowIgnoreTimestamp">
             <summary>
             Allow ignoring timestamp.
@@ -3263,6 +3473,11 @@
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoTimestamp">
             <summary>
             Allow no timestamp.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AlwaysVerifyCountersignature">
+            <summary>
+            Always verify the countersignature if present
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUnknownRevocation">
@@ -3295,14 +3510,47 @@
             Default settings.
             </summary>
         </member>
-        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVSClientDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetAcceptModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
             <summary>
-            Default policy for scenarios in VS.
+            The aceept mode policy.
+            </summary>
+        </member>
+        <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetRequireModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+            <summary>
+            The require mode policy.
             </summary>
         </member>
         <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVerifyCommandDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
             <summary>
             Default policy for nuget.exe verify --signatures command.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.VerificationAllowListEntry.Target">
+            <summary>
+            Target type of signature to verify.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Signing.VerificationAllowListEntry.Placement">
+            <summary>
+            Signature placement to verify.
+            </summary>
+        </member>
+        <member name="T:NuGet.Packaging.Signing.VerificationTarget">
+            <summary>
+            Indicates the type of signature a verification is targeting
+            </summary>
+            <remarks>This target makes no assumption about the placement of the signature.
+            It only refers to author or repository type of signature.
+            If a specific placement is needed use the <see cref="T:NuGet.Packaging.Signing.SignaturePlacement" /> enum.</remarks>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.VerificationTarget.Author">
+            <summary>
+            Target Author signatures
+            </summary>
+        </member>
+        <member name="F:NuGet.Packaging.Signing.VerificationTarget.Repository">
+            <summary>
+            Target Repository signatures
             </summary>
         </member>
         <member name="T:NuGet.Packaging.Signing.VerifySignaturesResult">
@@ -3359,6 +3607,11 @@
         <member name="P:NuGet.Packaging.Strings.ArgumentCannotBeNullOrEmpty">
             <summary>
               Looks up a localized string similar to The argument cannot be null or empty..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.AuthorPrimarySignatureFriendlyName">
+            <summary>
+              Looks up a localized string similar to author primary signature.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.CertificateChainBuildFailed">
@@ -3418,12 +3671,12 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_InvalidTargetFramework">
             <summary>
-              Looks up a localized string similar to Unsupported targetFramework value &apos;{0}&apos;..
+              Looks up a localized string similar to Unsupported targetFramework value '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NoClientAllowList">
             <summary>
-              Looks up a localized string similar to The package signature certificate cannot be trusted as no client allow list found..
+              Looks up a localized string similar to A list of trusted signers is required by the client but none was found..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NoMatchingClientCertificate">
@@ -3438,7 +3691,7 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NoRepoAllowList">
             <summary>
-              Looks up a localized string similar to The package signature certificate cannot be trusted as no repository allow list found..
+              Looks up a localized string similar to A repository announced that their packages should be signed but an empty list of trusted certificates was found..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.Error_NotOnePrimarySignature">
@@ -3456,6 +3709,11 @@
               Looks up a localized string similar to A repository primary signature must not have a repository countersignature..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.ErrorAuthorTargetCannotBeACountersignature">
+            <summary>
+              Looks up a localized string similar to Cannot target author signatures that are countersignatures..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.ErrorByteSignatureNotFound">
             <summary>
               Looks up a localized string similar to Byte signature not found in package archive:  0x{0}.
@@ -3466,11 +3724,6 @@
               Looks up a localized string similar to Byte signature too big to seek in current stream position..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorCertificateHasLifetimeSigningEKU">
-            <summary>
-              Looks up a localized string similar to The lifetime signing EKU is not supported..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.ErrorDuplicatePackages">
             <summary>
               Looks up a localized string similar to There are duplicate packages: {0}.
@@ -3478,12 +3731,7 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidAllowedVersions">
             <summary>
-              Looks up a localized string similar to Invalid allowedVersions for package id &apos;{0}&apos;: &apos;{1}&apos;.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChain">
-            <summary>
-              Looks up a localized string similar to Certificate chain validation failed with error(s): {0}.
+              Looks up a localized string similar to Invalid allowedVersions for package id '{0}': '{1}'.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChainUnspecifiedReason">
@@ -3493,7 +3741,7 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidMinClientVersion">
             <summary>
-              Looks up a localized string similar to Invalid minClientVersion: &apos;{0}&apos;.
+              Looks up a localized string similar to Invalid minClientVersion: '{0}'.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageArchive">
@@ -3503,17 +3751,17 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageVersion">
             <summary>
-              Looks up a localized string similar to Invalid package version for package id &apos;{0}&apos;: &apos;{1}&apos;.
+              Looks up a localized string similar to Invalid package version for package id '{0}': '{1}'.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorInvalidPackageVersionForDependency">
             <summary>
-              Looks up a localized string similar to Invalid package version for a dependency with id &apos;{0}&apos; in package &apos;{1}&apos;: &apos;{2}&apos;.
+              Looks up a localized string similar to Invalid package version for a dependency with id '{0}' in package '{1}': '{2}'.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorManifestFileNotFound">
             <summary>
-              Looks up a localized string similar to Manifest file not found at &apos;{0}&apos;.
+              Looks up a localized string similar to Manifest file not found at '{0}'.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorMultipleTimestamps">
@@ -3521,14 +3769,9 @@
               Looks up a localized string similar to Multiple timestamps are not accepted..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorNoCertificate">
-            <summary>
-              Looks up a localized string similar to The primary signature does not have a signing certificate..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.ErrorNoTimestamp">
             <summary>
-              Looks up a localized string similar to The primary signature should be timestamped to enable long-term signature validity after the certificate has expired..
+              Looks up a localized string similar to The signature should be timestamped to enable long-term signature validity after the certificate has expired..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorNullOrEmptyPackageId">
@@ -3546,14 +3789,9 @@
               Looks up a localized string similar to The package signature is invalid or cannot be verified on this platform..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.ErrorSignatureVerificationFailed">
-            <summary>
-              Looks up a localized string similar to Primary signature validation failed..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
             <summary>
-              Looks up a localized string similar to Unable to delete temporary file &apos;{0}&apos;. Error: &apos;{1}&apos;..
+              Looks up a localized string similar to Unable to delete temporary file '{0}'. Error: '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.ErrorZip64NotSupported">
@@ -3583,12 +3821,12 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.FailToWritePackagesConfig">
             <summary>
-              Looks up a localized string similar to Failed to write packages.config as XML file &apos;{0}&apos;. Error: &apos;{1}&apos;..
+              Looks up a localized string similar to Failed to write packages.config as XML file '{0}'. Error: '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.FallbackFolderNotFound">
             <summary>
-              Looks up a localized string similar to Unable to find fallback package folder &apos;{0}&apos;..
+              Looks up a localized string similar to Unable to find fallback package folder '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidArgument">
@@ -3603,17 +3841,22 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidNuspecElement">
             <summary>
-              Looks up a localized string similar to {0} This validation error occurred in a &apos;{1}&apos; element..
+              Looks up a localized string similar to {0} This validation error occurred in a '{1}' element..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidNuspecEntry">
             <summary>
-              Looks up a localized string similar to The nuspec contains an invalid entry &apos;{0}&apos; in package &apos;{1}&apos; ..
+              Looks up a localized string similar to The nuspec contains an invalid entry '{0}' in package '{1}' ..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidPackageFrameworkFolderName">
             <summary>
-              Looks up a localized string similar to The framework in the folder name of &apos;{0}&apos; in package &apos;{1}&apos; could not be parsed..
+              Looks up a localized string similar to The framework in the folder name of '{0}' in package '{1}' could not be parsed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.InvalidPackageNupkg">
+            <summary>
+              Looks up a localized string similar to The file is not a valid nupkg. File path: {0}.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidPackageSignature">
@@ -3633,12 +3876,12 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidPackageSignatureFileEntryCentralDirectoryHeader">
             <summary>
-              Looks up a localized string similar to The central directory header field &apos;{0}&apos; has an invalid value ({1})..
+              Looks up a localized string similar to The central directory header field '{0}' has an invalid value ({1})..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidPackageSignatureFileEntryLocalFileHeader">
             <summary>
-              Looks up a localized string similar to The local file header field &apos;{0}&apos; has an invalid value ({1})..
+              Looks up a localized string similar to The local file header field '{0}' has an invalid value ({1})..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.InvalidPrimarySignature">
@@ -3698,12 +3941,17 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.MustContainAbsolutePath">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; must contain an absolute path &apos;{1}&apos;..
+              Looks up a localized string similar to '{0}' must contain an absolute path '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.NoPackageSignatureFile">
             <summary>
               Looks up a localized string similar to The package does not contain a valid package signature file..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.NoRepositorySignature">
+            <summary>
+              Looks up a localized string similar to The package does not have a repository signature (primary or countersignature)..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.NuGetPackageOwners">
@@ -3748,7 +3996,7 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.PackageMinVersionNotSatisfied">
             <summary>
-              Looks up a localized string similar to The &apos;{0}&apos; package requires NuGet client version &apos;{1}&apos; or above, but the current NuGet version is &apos;{2}&apos;. To upgrade NuGet, please go to http://docs.nuget.org/consume/installing-nuget.
+              Looks up a localized string similar to The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'. To upgrade NuGet, please go to http://docs.nuget.org/consume/installing-nuget.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.PackagesNodeNotExist">
@@ -3761,6 +4009,11 @@
               Looks up a localized string similar to Package stream should be seekable.
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.PrimarySignatureFriendlyName">
+            <summary>
+              Looks up a localized string similar to primary signature.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.PrimarySignatureHasNoTimestamp">
             <summary>
               Looks up a localized string similar to The primary signature does not have a timestamp..
@@ -3771,6 +4024,11 @@
               Looks up a localized string similar to Arguments {0} and {1} were out of bounds for the array..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureFriendlyName">
+            <summary>
+              Looks up a localized string similar to repository countersignature.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureHasNoCertificate">
             <summary>
               Looks up a localized string similar to The repository countersignature does not have a signing certificate..
@@ -3779,6 +4037,11 @@
         <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureHasNoTimestamp">
             <summary>
               Looks up a localized string similar to The repository countersignature does not have a timestamp..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.RepositoryPrimarySignatureFriendlyName">
+            <summary>
+              Looks up a localized string similar to repository primary signature.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureContainsInvalidAttribute">
@@ -3796,6 +4059,11 @@
               Looks up a localized string similar to The package hash uses an unsupported hash algorithm..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.SignatureFriendlyName">
+            <summary>
+              Looks up a localized string similar to signature.
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.SignatureHashAlgorithm">
             <summary>
               Looks up a localized string similar to Signature Hash Algorithm: {0}.
@@ -3803,17 +4071,7 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.SignatureInvalidGeneralPurposeBits">
             <summary>
-              Looks up a localized string similar to Invalid general purpose bit flags. Expected &apos;{0}&apos;, actual &apos;{1}&apos;..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.SignatureNotTimeValid">
-            <summary>
-              Looks up a localized string similar to The primary signature validity period has expired..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.SignatureNotYetValid">
-            <summary>
-              Looks up a localized string similar to The signing certificate is not yet valid..
+              Looks up a localized string similar to Invalid general purpose bit flags. Expected '{0}', actual '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SignaturePackageIntegrityFailure">
@@ -3861,6 +4119,36 @@
               Looks up a localized string similar to The package was not opened correctly to perform signature operations. Please use a Stream-based constructor to have access to signature attributes of the package..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.SignError_TimestampCertificateFailsPublicKeyLengthRequirement">
+            <summary>
+              Looks up a localized string similar to The timestamp certificate does not meet a minimum public key length requirement..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignError_TimestampGeneralizedTimeInvalid">
+            <summary>
+              Looks up a localized string similar to The timestamp's generalized time is outside the timestamping certificate's validity period..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignError_TimestampIntegrityCheckFailed">
+            <summary>
+              Looks up a localized string similar to The timestamp integrity check failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignError_TimestampNoCertificate">
+            <summary>
+              Looks up a localized string similar to The timestamp does not have a signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignError_TimestampNotYetValid">
+            <summary>
+              Looks up a localized string similar to The timestamp signing certificate is not yet valid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SignError_TimestampSignatureValidationFailed">
+            <summary>
+              Looks up a localized string similar to The timestamp signature validation failed..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.SignFailureCertificateInvalidProviderType">
             <summary>
               Looks up a localized string similar to The following certificate cannot be used for package signing as the private key provider is unsupported:.
@@ -3879,16 +4167,6 @@
         <member name="P:NuGet.Packaging.Strings.SigningCertificateCertificateNotFound">
             <summary>
               Looks up a localized string similar to A certificate referenced by the signing-certificate attribute could not be found..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.SigningCertificateFailsPublicKeyLengthRequirement">
-            <summary>
-              Looks up a localized string similar to The signing certificate does not meet a minimum public key length requirement..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.SigningCertificateHasUnsupportedSignatureAlgorithm">
-            <summary>
-              Looks up a localized string similar to The signing certificate has an unsupported signature algorithm..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.SigningCertificateInvalid">
@@ -3921,6 +4199,26 @@
               Looks up a localized string similar to The signing-certificate-v2 attribute uses an unsupported hash algorithm..
             </summary>
         </member>
+        <member name="P:NuGet.Packaging.Strings.SigningError_CertificateFailsPublicKeyLengthRequirement">
+            <summary>
+              Looks up a localized string similar to The signing certificate does not meet a minimum public key length requirement..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningError_CertificateHasLifetimeSigningEKU">
+            <summary>
+              Looks up a localized string similar to The lifetime signing EKU in the signing certificate is not supported..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningError_CertificateHasUnsupportedSignatureAlgorithm">
+            <summary>
+              Looks up a localized string similar to The signing certificate has an unsupported signature algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.SigningError_NotYetValid">
+            <summary>
+              Looks up a localized string similar to The signing certificate is not yet valid..
+            </summary>
+        </member>
         <member name="P:NuGet.Packaging.Strings.StreamMustBeReadable">
             <summary>
               Looks up a localized string similar to The stream must be readable..
@@ -3933,22 +4231,22 @@
         </member>
         <member name="P:NuGet.Packaging.Strings.StringCannotBeNullOrEmpty">
             <summary>
-              Looks up a localized string similar to String argument &apos;{0}&apos; cannot be null or empty.
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampCertificateFailsPublicKeyLengthRequirement">
-            <summary>
-              Looks up a localized string similar to The timestamp certificate does not meet a minimum public key length requirement..
+              Looks up a localized string similar to String argument '{0}' cannot be null or empty.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampCertificateInvalid">
             <summary>
-              Looks up a localized string similar to The timestamp service&apos;s certificate has a valid time in the future: {0}.
+              Looks up a localized string similar to The timestamp service's certificate has a valid time in the future: {0}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.TimestampCertificateUnsupportedSignatureAlgorithm">
+            <summary>
+              Looks up a localized string similar to The timestamp certificate has an unsupported signature algorithm ({0}). The following algorithms are supported: {1}..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHttpScheme">
             <summary>
-              Looks up a localized string similar to The timestamper URL &apos;{0}&apos; has an invalid URI scheme. The supported schemes are &apos;{1}&apos; and &apos;{2}&apos;..
+              Looks up a localized string similar to The timestamper URL '{0}' has an invalid URI scheme. The supported schemes are '{1}' and '{2}'..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampFailureNonceMismatch">
@@ -3956,44 +4254,14 @@
               Looks up a localized string similar to The timestamp response is invalid.  Nonces did not match..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampIntegrityCheckFailed">
-            <summary>
-              Looks up a localized string similar to The timestamp integrity check failed..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampInvalid">
-            <summary>
-              Looks up a localized string similar to The signature contains an invalid timestamp..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampMessageImprintUnsupportedHashAlgorithm">
-            <summary>
-              Looks up a localized string similar to The timestamp&apos;s message imprint uses an unsupported hash algorithm..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampNoCertificate">
-            <summary>
-              Looks up a localized string similar to The timestamp signature does not have a signing certificate..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampNotYetValid">
-            <summary>
-              Looks up a localized string similar to The timestamp signing certificate is not yet valid..
-            </summary>
-        </member>
         <member name="P:NuGet.Packaging.Strings.TimestampResponseExceptionGeneral">
             <summary>
-              Looks up a localized string similar to Timestamp service&apos;s response does not meet the NuGet package signature specification: &apos;{0}&apos;..
+              Looks up a localized string similar to Timestamp service's response does not meet the NuGet package signature specification: '{0}'..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampSignatureValidationFailed">
+        <member name="P:NuGet.Packaging.Strings.TimestampResponseUnsupportedDigestAlgorithm">
             <summary>
-              Looks up a localized string similar to Timestamp signature validation failed..
-            </summary>
-        </member>
-        <member name="P:NuGet.Packaging.Strings.TimestampUnsupportedSignatureAlgorithm">
-            <summary>
-              Looks up a localized string similar to The timestamp certificate has an unsupported signature algorithm..
+              Looks up a localized string similar to The timestamp response has an unsupported digest algorithm ({0}). The following algorithms are supported: {1}..
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.TimestampValue">
@@ -4036,14 +4304,109 @@
               Looks up a localized string similar to The package signature format version is not supported. Updating your client may solve this problem..
             </summary>
         </member>
-        <member name="P:NuGet.Packaging.Strings.VerificationAuthorCertDisplay">
+        <member name="P:NuGet.Packaging.Strings.VerificationCertDisplay">
             <summary>
-              Looks up a localized string similar to Verifying signature with author certificate: {0}.
+              Looks up a localized string similar to Verifying the {0} with certificate: {1}.
             </summary>
         </member>
         <member name="P:NuGet.Packaging.Strings.VerificationTimestamperCertDisplay">
             <summary>
-              Looks up a localized string similar to Verifying timestamp with timestamping service certificate: {0}.
+              Looks up a localized string similar to Verifying {0}'s timestamp with timestamping service certificate: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.Verify_ErrorNoCertificate">
+            <summary>
+              Looks up a localized string similar to The {0} does not have a signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyChainBuildingIssue">
+            <summary>
+              Looks up a localized string similar to The {0} found a chain building issue: {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateFailsPublicKeyLengthRequirement">
+            <summary>
+              Looks up a localized string similar to The {0}'s certificate does not meet a minimum public key length requirement..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateHasLifetimeSigningEKU">
+            <summary>
+              Looks up a localized string similar to The lifetime signing EKU in the {0}'s certificate is not supported..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateHasUnsupportedSignatureAlgorithm">
+            <summary>
+              Looks up a localized string similar to The {0}'s certificate has an unsupported signature algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateNotYetValid">
+            <summary>
+              Looks up a localized string similar to The {0}'s certificate is not yet valid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_InvalidCertificateChain">
+            <summary>
+              Looks up a localized string similar to The {0}'s certificate chain validation failed with error(s): {1}.
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_SignatureNotTimeValid">
+            <summary>
+              Looks up a localized string similar to The {0} validity period has expired..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_SignatureVerificationFailed">
+            <summary>
+              Looks up a localized string similar to The {0} validation failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampCertificateFailsPublicKeyLengthRequirement">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp certificate does not meet a minimum public key length requirement..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampGeneralizedTimeInvalid">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp's generalized time is outside the timestamping certificate's validity period..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampIntegrityCheckFailed">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp integrity check failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampInvalid">
+            <summary>
+              Looks up a localized string similar to The {0} contains an invalid timestamp..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampMessageImprintUnsupportedHashAlgorithm">
+            <summary>
+              Looks up a localized string similar to The {0} timestamp's message imprint uses an unsupported hash algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampNoCertificate">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp does not have a signing certificate..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampNotYetValid">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp signing certificate is not yet valid..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampSignatureValidationFailed">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp signature validation failed..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampUnsupportedSignatureAlgorithm">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp certificate has an unsupported signature algorithm..
+            </summary>
+        </member>
+        <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampVerifyChainBuildingIssue">
+            <summary>
+              Looks up a localized string similar to The {0}'s timestamp found a chain building issue: {1}.
             </summary>
         </member>
         <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder``1(System.Collections.Generic.IEnumerable{``0},System.StringComparer,System.Func{``0,System.String},System.Func{``0,System.String[]})">
@@ -4246,14 +4609,14 @@
              <summary>
              Gets the JSON for the object.
             
-             Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJson"/> is called, no further writing is allowed.
+             Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJson" /> is called, no further writing is allowed.
              </summary>
         </member>
         <member name="M:NuGet.RuntimeModel.JsonObjectWriter.GetJObject">
             <summary>
             Gets the JObject (in-memory JSON model) for the object.
             
-            Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJObject"/> is called, no further writing is allowed.
+            Once <see cref="M:NuGet.RuntimeModel.JsonObjectWriter.GetJObject" /> is called, no further writing is allowed.
             </summary>
             <returns></returns>
         </member>
@@ -4330,7 +4693,7 @@
         </member>
         <member name="T:NuGet.RuntimeModel.RuntimeGraph.RuntimeCompatKey">
             <summary>
-            RID -> RID compatibility key
+            RID -&gt; RID compatibility key
             </summary>
         </member>
         <member name="T:NuGet.RuntimeModel.RuntimePackageDependency">
@@ -4401,4 +4764,4 @@
             </summary>
         </member>
     </members>
-</doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>4on2SbJsGzmuADPqIkz46QO2fhM=</DigestValue></Reference></SignedInfo><SignatureValue>c8+PXtYeSgRGlk6EpQs+H9zLZi6CdKBRuQHSYNuH10feQm1gXoM+Ctq/U9vY53yvTWR6dkIJ9uZj+HiBeqn+HbWuQf2BdiMX5ZGAgUW+KnHGKoRY6dzJ5X4xzM9rXxbmmxhKGIvFDVf3TvoUynMinb+BVEbzCsuZYgblCuHfPY5O/cFcja5UIyh+rkmIxBKHjd1IaE1mvHwNsjzOBWuc8PeZvILlQLrk31oiHUykS9XRiv0Ig5uDrPTP3Uasfr0bGu4atXUrUtbDzS3Zb3wAhExUzxLIPDzq1iiM5GRnlkdJD7djNYFcPxdfJ/ks/ny2OWvRBX20CJjJlF4nh3BvoA==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIEwjCCA6qgAwIBAgITMwAAAL6kD/XJpQ7hMAAAAAAAvjANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODQ5WhcNMTgwOTA3MTc1ODQ5WjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046ODQzRC0zN0Y2LUYxMDQxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCROfFjRVxKmgTCtN14U6jxq1vAK7TBi39qS2BIU56Xw1IeOFNjg7bw6O8DMLr04Ghia8ath6lj3yabPSyXiYULrfk/7PkLUAqDbr6CFA/kuvoLYmePEgYKgI2vtruq05MABGYyw4WpUfLtchCNiBYWawyrdeHaw80xvfUrb7cDAU8st94bIkgyboaDN7f3oIzQHqyxok8XSSaZJKTyqNtEtDo7p6ZJ3ygCa98lCk/SjpVnLkGlX0lJ3y/H2FM28gNnfQZQO8Pe0ICv3KCpi4CPqx9LEuPgQoJrYK573I1LJlbjTV+l73UHPbo2w40W9L1SGu5UWrwNb6tZqk4RwEvJAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUHG4NXaJsQp0+3x29Li7nwpc0kH8wHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAbmBxbLeCqxsZFPMYFz/20DMP8Q12dH/1cNQursRMH0Yg0cTwLn1IF3DGypfHZJwbyl9HWNVf+2Jq05zMajfjxiEu+khzmMnA9/BJ1utPwR0nPyyLbN+0IGBMfYLeIAdC81e0CW9TpWpc6lH/jgWbhviUt4Mvt2DQMWIQ7WwJAdBeGjCntLINPxC9RmHysFGexMsXS+hYNR2z/h/PmvsNwhq7CtM6bM71ZvYFaBSCmtdQ8/KQCPiN6acb2V/28VuZEwjq3GFAJfcKMvhssewRgCYsKxhvWZHUkBrUxWnsvxNCOWPpenBiVSYl5nT9jBoVoTDChMITR35gr//DmhzXsw==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>

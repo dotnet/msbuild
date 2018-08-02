@@ -361,7 +361,7 @@
             Indicates if this token will pro-actively raise callbacks. Callbacks are still guaranteed to fire, eventually.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands328525.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands329239.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -373,41 +373,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands328525.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands329239.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands328525.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands329239.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Commands328525.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Commands329239.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands328525.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Commands329239.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands328525.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Commands329239.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands328525.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands329239.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Commands328525.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Commands329239.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -3038,7 +3038,7 @@
     </member>
     <member name="P:NuGet.Commands.Strings.VerifyCommand_Success">
       <summary>
-              Looks up a localized string similar to Successfully verified package(s)..
+              Looks up a localized string similar to Successfully verified package '{0}'..
             </summary>
     </member>
     <member name="P:NuGet.Commands.Strings.VerifyCommand_VerificationTypeNotSupported">
@@ -3243,7 +3243,7 @@
       <param name="token">Cancellation token.</param>
       <returns>SecureString containing the user input password. The SecureString should be disposed after use.</returns>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common471597.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common473484.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -3255,41 +3255,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common471597.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common473484.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common471597.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common473484.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Common471597.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Common473484.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common471597.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Common473484.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common471597.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Common473484.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common471597.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common473484.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Common471597.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Common473484.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -3485,6 +3485,12 @@
             </summary>
       <param name="oid">An oid string.</param>
       <returns>NuGet.Common.HashAlgorithmName equivalent of the oid string</returns>
+    </member>
+    <member name="M:NuGet.Common.CryptoHashUtility.ConvertToOidString(NuGet.Common.SignatureAlgorithmName)">
+      <summary>
+            Extension method to convert NuGet.Common.SignatureAlgorithmName to an Oid string
+            </summary>
+      <returns>Oid string equivalent of the NuGet.Common.SignatureAlgorithmName</returns>
     </member>
     <member name="T:NuGet.Common.DatetimeUtility">
       <summary>
@@ -3973,6 +3979,11 @@
             Chain building failed for the repository countersignature.
             </summary>
     </member>
+    <member name="F:NuGet.Common.NuGetLogCode.NU3036">
+      <summary>
+            Timestamp Generalized time is outside certificate's valdity period
+            </summary>
+    </member>
     <member name="F:NuGet.Common.NuGetLogCode.NU5000">
       <summary>
             Undefined Package Error.
@@ -4423,6 +4434,11 @@
             Ignores codes that are unknown.
             </summary>
     </member>
+    <member name="M:NuGet.Common.MSBuildStringUtility.Convert(System.String)">
+      <summary>
+            Convert the provided string to MSBuild style.
+            </summary>
+    </member>
     <member name="M:NuGet.Common.NetworkProtocolUtility.ConfigureSupportedSslProtocols">
       <summary>
             This only has effect on .NET Framework (desktop). On .NET Core,
@@ -4762,7 +4778,12 @@
     </member>
     <member name="P:NuGet.Common.Strings.UnsupportedHashAlgorithmName">
       <summary>
-              Looks up a localized string similar to The hash algorithm '{0}' is unsupported..
+              Looks up a localized string similar to Hash algorithm '{0}' is unsupported..
+            </summary>
+    </member>
+    <member name="P:NuGet.Common.Strings.UnsupportedSignatureAlgorithmName">
+      <summary>
+              Looks up a localized string similar to Signature algorithm '{0}' is unsupported..
             </summary>
     </member>
     <member name="T:NuGet.Common.ITelemetrySession">
@@ -4794,6 +4815,14 @@
       <summary>
             operation was cancelled
             </summary>
+    </member>
+    <member name="M:NuGet.Common.TelemetryActivity.CreateTelemetryActivityWithNewOperationIdAndEvent(System.Guid,System.String)">
+      <summary>
+            Creates a TelemetryActivity.
+            </summary>
+      <param name="parentId">OperationId of the parent event.</param>
+      <param name="eventName">Name of the event.</param>
+      <returns>TelemetryActivity with a given parentId and new operationId and a TelemetryEvent with eventName</returns>
     </member>
     <member name="T:NuGet.Common.TelemetryEvent">
       <summary>
@@ -4869,7 +4898,7 @@
       <param name="path">Source path.</param>
       <returns>The absolute source path or the original source. Noops for non-file paths.</returns>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration507365.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration509541.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -4881,41 +4910,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration507365.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration509541.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration507365.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration509541.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Configuration507365.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Configuration509541.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration507365.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Configuration509541.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration507365.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Configuration509541.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration507365.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration509541.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Configuration507365.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Configuration509541.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -5765,7 +5794,7 @@
             Throw if a path is relative.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core551735.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -5777,41 +5806,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core551735.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core551735.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.DependencyResolver.Core551735.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.DependencyResolver.Core553911.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core551735.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core551735.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core551735.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core551735.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.DependencyResolver.Core553911.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -6105,7 +6134,7 @@
               Looks up a localized string similar to The feed '{0}' lists package '{1}' but multiple attempts to download the nupkg have failed. The feed is either invalid or required packages were removed while the current operation was in progress. Verify the package exists on the feed and try again..
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks573206.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks575382.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -6117,41 +6146,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks573206.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks575382.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks573206.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks575382.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Frameworks573206.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Frameworks575382.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks573206.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Frameworks575382.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks573206.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Frameworks575382.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks573206.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks575382.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Frameworks573206.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Frameworks575382.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -6960,7 +6989,7 @@
               Looks up a localized string similar to Invalid portable frameworks for '{0}'. A portable framework must have at least one framework in the profile..
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel609416.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -6972,41 +7001,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel609416.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel609416.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.LibraryModel609416.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.LibraryModel611592.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel609416.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel609416.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel609416.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.LibraryModel609416.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.LibraryModel611592.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -7144,7 +7173,7 @@
             Indicates that the library could not be resolved
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core622030.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -7156,41 +7185,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core622030.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core622030.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Packaging.Core622030.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Packaging.Core624206.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core622030.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core622030.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core622030.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging.Core622030.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging.Core624206.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -7879,7 +7908,7 @@
               Looks up a localized string similar to String argument '{0}' cannot be null or empty.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging638384.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging640560.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -7891,41 +7920,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging638384.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging640560.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging638384.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging640560.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Packaging638384.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Packaging640560.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging638384.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Packaging640560.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging638384.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Packaging640560.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging638384.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging640560.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Packaging638384.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Packaging640560.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -8929,6 +8958,11 @@
             resulted in no copy operation.
             </returns>
     </member>
+    <member name="M:NuGet.Packaging.PackageExtractor.DeleteTargetAndTempPaths(System.String,System.String)">
+      <summary>
+            Delete the target directory path and the temp nupkg path in case of a failed extraction.
+            </summary>
+    </member>
     <member name="T:NuGet.Packaging.PackageFolderReader">
       <summary>
             Reads an unzipped nupkg folder.
@@ -9319,6 +9353,11 @@
               Looks up a localized string similar to The argument cannot be null or empty..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.AuthorPrimarySignatureFriendlyName">
+      <summary>
+              Looks up a localized string similar to author primary signature.
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.CertificateChainBuildFailed">
       <summary>
               Looks up a localized string similar to A complete certificate chain could not be built for the signing certificate..
@@ -9381,7 +9420,7 @@
     </member>
     <member name="P:NuGet.Packaging.Strings.Error_NoClientAllowList">
       <summary>
-              Looks up a localized string similar to The package signature certificate cannot be trusted as no client allow list found..
+              Looks up a localized string similar to A list of trusted signers is required by the client but none was found..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.Error_NoMatchingClientCertificate">
@@ -9396,7 +9435,7 @@
     </member>
     <member name="P:NuGet.Packaging.Strings.Error_NoRepoAllowList">
       <summary>
-              Looks up a localized string similar to The package signature certificate cannot be trusted as no repository allow list found..
+              Looks up a localized string similar to A repository announced that their packages should be signed but an empty list of trusted certificates was found..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.Error_NotOnePrimarySignature">
@@ -9414,6 +9453,11 @@
               Looks up a localized string similar to A repository primary signature must not have a repository countersignature..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.ErrorAuthorTargetCannotBeACountersignature">
+      <summary>
+              Looks up a localized string similar to Cannot target author signatures that are countersignatures..
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.ErrorByteSignatureNotFound">
       <summary>
               Looks up a localized string similar to Byte signature not found in package archive:  0x{0}.
@@ -9424,11 +9468,6 @@
               Looks up a localized string similar to Byte signature too big to seek in current stream position..
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Strings.ErrorCertificateHasLifetimeSigningEKU">
-      <summary>
-              Looks up a localized string similar to The lifetime signing EKU is not supported..
-            </summary>
-    </member>
     <member name="P:NuGet.Packaging.Strings.ErrorDuplicatePackages">
       <summary>
               Looks up a localized string similar to There are duplicate packages: {0}.
@@ -9437,11 +9476,6 @@
     <member name="P:NuGet.Packaging.Strings.ErrorInvalidAllowedVersions">
       <summary>
               Looks up a localized string similar to Invalid allowedVersions for package id '{0}': '{1}'.
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChain">
-      <summary>
-              Looks up a localized string similar to Certificate chain validation failed with error(s): {0}.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.ErrorInvalidCertificateChainUnspecifiedReason">
@@ -9479,14 +9513,9 @@
               Looks up a localized string similar to Multiple timestamps are not accepted..
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Strings.ErrorNoCertificate">
-      <summary>
-              Looks up a localized string similar to The primary signature does not have a signing certificate..
-            </summary>
-    </member>
     <member name="P:NuGet.Packaging.Strings.ErrorNoTimestamp">
       <summary>
-              Looks up a localized string similar to The primary signature should be timestamped to enable long-term signature validity after the certificate has expired..
+              Looks up a localized string similar to The signature should be timestamped to enable long-term signature validity after the certificate has expired..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.ErrorNullOrEmptyPackageId">
@@ -9502,11 +9531,6 @@
     <member name="P:NuGet.Packaging.Strings.ErrorPackageSignatureInvalid">
       <summary>
               Looks up a localized string similar to The package signature is invalid or cannot be verified on this platform..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.ErrorSignatureVerificationFailed">
-      <summary>
-              Looks up a localized string similar to Primary signature validation failed..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.ErrorUnableToDeleteFile">
@@ -9572,6 +9596,11 @@
     <member name="P:NuGet.Packaging.Strings.InvalidPackageFrameworkFolderName">
       <summary>
               Looks up a localized string similar to The framework in the folder name of '{0}' in package '{1}' could not be parsed..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.InvalidPackageNupkg">
+      <summary>
+              Looks up a localized string similar to The file is not a valid nupkg. File path: {0}.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.InvalidPackageSignature">
@@ -9664,6 +9693,11 @@
               Looks up a localized string similar to The package does not contain a valid package signature file..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.NoRepositorySignature">
+      <summary>
+              Looks up a localized string similar to The package does not have a repository signature (primary or countersignature)..
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.NuGetPackageOwners">
       <summary>
               Looks up a localized string similar to nuget-package-owners: {0}.
@@ -9719,6 +9753,11 @@
               Looks up a localized string similar to Package stream should be seekable.
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.PrimarySignatureFriendlyName">
+      <summary>
+              Looks up a localized string similar to primary signature.
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.PrimarySignatureHasNoTimestamp">
       <summary>
               Looks up a localized string similar to The primary signature does not have a timestamp..
@@ -9729,6 +9768,11 @@
               Looks up a localized string similar to Arguments {0} and {1} were out of bounds for the array..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureFriendlyName">
+      <summary>
+              Looks up a localized string similar to repository countersignature.
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureHasNoCertificate">
       <summary>
               Looks up a localized string similar to The repository countersignature does not have a signing certificate..
@@ -9737,6 +9781,11 @@
     <member name="P:NuGet.Packaging.Strings.RepositoryCountersignatureHasNoTimestamp">
       <summary>
               Looks up a localized string similar to The repository countersignature does not have a timestamp..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.RepositoryPrimarySignatureFriendlyName">
+      <summary>
+              Looks up a localized string similar to repository primary signature.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.SignatureContainsInvalidAttribute">
@@ -9754,6 +9803,11 @@
               Looks up a localized string similar to The package hash uses an unsupported hash algorithm..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.SignatureFriendlyName">
+      <summary>
+              Looks up a localized string similar to signature.
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.SignatureHashAlgorithm">
       <summary>
               Looks up a localized string similar to Signature Hash Algorithm: {0}.
@@ -9762,16 +9816,6 @@
     <member name="P:NuGet.Packaging.Strings.SignatureInvalidGeneralPurposeBits">
       <summary>
               Looks up a localized string similar to Invalid general purpose bit flags. Expected '{0}', actual '{1}'..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.SignatureNotTimeValid">
-      <summary>
-              Looks up a localized string similar to The primary signature validity period has expired..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.SignatureNotYetValid">
-      <summary>
-              Looks up a localized string similar to The signing certificate is not yet valid..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.SignaturePackageIntegrityFailure">
@@ -9819,6 +9863,36 @@
               Looks up a localized string similar to The package was not opened correctly to perform signature operations. Please use a Stream-based constructor to have access to signature attributes of the package..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.SignError_TimestampCertificateFailsPublicKeyLengthRequirement">
+      <summary>
+              Looks up a localized string similar to The timestamp certificate does not meet a minimum public key length requirement..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SignError_TimestampGeneralizedTimeInvalid">
+      <summary>
+              Looks up a localized string similar to The timestamp's generalized time is outside the timestamping certificate's validity period..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SignError_TimestampIntegrityCheckFailed">
+      <summary>
+              Looks up a localized string similar to The timestamp integrity check failed..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SignError_TimestampNoCertificate">
+      <summary>
+              Looks up a localized string similar to The timestamp does not have a signing certificate..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SignError_TimestampNotYetValid">
+      <summary>
+              Looks up a localized string similar to The timestamp signing certificate is not yet valid..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SignError_TimestampSignatureValidationFailed">
+      <summary>
+              Looks up a localized string similar to The timestamp signature validation failed..
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.SignFailureCertificateInvalidProviderType">
       <summary>
               Looks up a localized string similar to The following certificate cannot be used for package signing as the private key provider is unsupported:.
@@ -9837,16 +9911,6 @@
     <member name="P:NuGet.Packaging.Strings.SigningCertificateCertificateNotFound">
       <summary>
               Looks up a localized string similar to A certificate referenced by the signing-certificate attribute could not be found..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.SigningCertificateFailsPublicKeyLengthRequirement">
-      <summary>
-              Looks up a localized string similar to The signing certificate does not meet a minimum public key length requirement..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.SigningCertificateHasUnsupportedSignatureAlgorithm">
-      <summary>
-              Looks up a localized string similar to The signing certificate has an unsupported signature algorithm..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.SigningCertificateInvalid">
@@ -9879,6 +9943,26 @@
               Looks up a localized string similar to The signing-certificate-v2 attribute uses an unsupported hash algorithm..
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Strings.SigningError_CertificateFailsPublicKeyLengthRequirement">
+      <summary>
+              Looks up a localized string similar to The signing certificate does not meet a minimum public key length requirement..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SigningError_CertificateHasLifetimeSigningEKU">
+      <summary>
+              Looks up a localized string similar to The lifetime signing EKU in the signing certificate is not supported..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SigningError_CertificateHasUnsupportedSignatureAlgorithm">
+      <summary>
+              Looks up a localized string similar to The signing certificate has an unsupported signature algorithm..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.SigningError_NotYetValid">
+      <summary>
+              Looks up a localized string similar to The signing certificate is not yet valid..
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Strings.StreamMustBeReadable">
       <summary>
               Looks up a localized string similar to The stream must be readable..
@@ -9894,14 +9978,14 @@
               Looks up a localized string similar to String argument '{0}' cannot be null or empty.
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampCertificateFailsPublicKeyLengthRequirement">
-      <summary>
-              Looks up a localized string similar to The timestamp certificate does not meet a minimum public key length requirement..
-            </summary>
-    </member>
     <member name="P:NuGet.Packaging.Strings.TimestampCertificateInvalid">
       <summary>
               Looks up a localized string similar to The timestamp service's certificate has a valid time in the future: {0}.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.TimestampCertificateUnsupportedSignatureAlgorithm">
+      <summary>
+              Looks up a localized string similar to The timestamp certificate has an unsupported signature algorithm ({0}). The following algorithms are supported: {1}..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.TimestampFailureInvalidHttpScheme">
@@ -9914,44 +9998,14 @@
               Looks up a localized string similar to The timestamp response is invalid.  Nonces did not match..
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampIntegrityCheckFailed">
-      <summary>
-              Looks up a localized string similar to The timestamp integrity check failed..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampInvalid">
-      <summary>
-              Looks up a localized string similar to The signature contains an invalid timestamp..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampMessageImprintUnsupportedHashAlgorithm">
-      <summary>
-              Looks up a localized string similar to The timestamp's message imprint uses an unsupported hash algorithm..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampNoCertificate">
-      <summary>
-              Looks up a localized string similar to The timestamp signature does not have a signing certificate..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampNotYetValid">
-      <summary>
-              Looks up a localized string similar to The timestamp signing certificate is not yet valid..
-            </summary>
-    </member>
     <member name="P:NuGet.Packaging.Strings.TimestampResponseExceptionGeneral">
       <summary>
               Looks up a localized string similar to Timestamp service's response does not meet the NuGet package signature specification: '{0}'..
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampSignatureValidationFailed">
+    <member name="P:NuGet.Packaging.Strings.TimestampResponseUnsupportedDigestAlgorithm">
       <summary>
-              Looks up a localized string similar to Timestamp signature validation failed..
-            </summary>
-    </member>
-    <member name="P:NuGet.Packaging.Strings.TimestampUnsupportedSignatureAlgorithm">
-      <summary>
-              Looks up a localized string similar to The timestamp certificate has an unsupported signature algorithm..
+              Looks up a localized string similar to The timestamp response has an unsupported digest algorithm ({0}). The following algorithms are supported: {1}..
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.TimestampValue">
@@ -9994,14 +10048,109 @@
               Looks up a localized string similar to The package signature format version is not supported. Updating your client may solve this problem..
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Strings.VerificationAuthorCertDisplay">
+    <member name="P:NuGet.Packaging.Strings.VerificationCertDisplay">
       <summary>
-              Looks up a localized string similar to Verifying signature with author certificate: {0}.
+              Looks up a localized string similar to Verifying the {0} with certificate: {1}.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Strings.VerificationTimestamperCertDisplay">
       <summary>
-              Looks up a localized string similar to Verifying timestamp with timestamping service certificate: {0}.
+              Looks up a localized string similar to Verifying {0}'s timestamp with timestamping service certificate: {1}.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.Verify_ErrorNoCertificate">
+      <summary>
+              Looks up a localized string similar to The {0} does not have a signing certificate..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyChainBuildingIssue">
+      <summary>
+              Looks up a localized string similar to The {0} found a chain building issue: {1}.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateFailsPublicKeyLengthRequirement">
+      <summary>
+              Looks up a localized string similar to The {0}'s certificate does not meet a minimum public key length requirement..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateHasLifetimeSigningEKU">
+      <summary>
+              Looks up a localized string similar to The lifetime signing EKU in the {0}'s certificate is not supported..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateHasUnsupportedSignatureAlgorithm">
+      <summary>
+              Looks up a localized string similar to The {0}'s certificate has an unsupported signature algorithm..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_CertificateNotYetValid">
+      <summary>
+              Looks up a localized string similar to The {0}'s certificate is not yet valid..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_InvalidCertificateChain">
+      <summary>
+              Looks up a localized string similar to The {0}'s certificate chain validation failed with error(s): {1}.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_SignatureNotTimeValid">
+      <summary>
+              Looks up a localized string similar to The {0} validity period has expired..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_SignatureVerificationFailed">
+      <summary>
+              Looks up a localized string similar to The {0} validation failed..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampCertificateFailsPublicKeyLengthRequirement">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp certificate does not meet a minimum public key length requirement..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampGeneralizedTimeInvalid">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp's generalized time is outside the timestamping certificate's validity period..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampIntegrityCheckFailed">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp integrity check failed..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampInvalid">
+      <summary>
+              Looks up a localized string similar to The {0} contains an invalid timestamp..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampMessageImprintUnsupportedHashAlgorithm">
+      <summary>
+              Looks up a localized string similar to The {0} timestamp's message imprint uses an unsupported hash algorithm..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampNoCertificate">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp does not have a signing certificate..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampNotYetValid">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp signing certificate is not yet valid..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampSignatureValidationFailed">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp signature validation failed..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampUnsupportedSignatureAlgorithm">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp certificate has an unsupported signature algorithm..
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Strings.VerifyError_TimestampVerifyChainBuildingIssue">
+      <summary>
+              Looks up a localized string similar to The {0}'s timestamp found a chain building issue: {1}.
             </summary>
     </member>
     <member name="M:NuGet.Packaging.TopologicalSortUtility.SortPackagesByDependencyOrder``1(System.Collections.Generic.IEnumerable{``0},System.StringComparer,System.Func{``0,System.String},System.Func{``0,System.String[]})">
@@ -10814,23 +10963,19 @@
             Package signature information.
             </summary>
     </member>
-    <member name="M:NuGet.Packaging.Signing.Signature.GetValidTimestamp(NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+    <member name="M:NuGet.Packaging.Signing.Signature.TryGetValidTimestamp(NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog},NuGet.Packaging.Signing.SignatureVerificationStatusFlags@,NuGet.Packaging.Signing.Timestamp@)">
       <summary>
-      </summary>
-      <param name="allowMultipleTimestamps">
-      </param>
-      <param name="allowIgnoreTimestamp">
-      </param>
-      <param name="allowNoTimestamp">
-      </param>
-      <param name="allowUnknownRevocation">
-      </param>
-      <param name="issues">
-      </param>
-      <returns>
-      </returns>
+            Get a valid timestamp from the unsigned attributes if present
+            </summary>
+      <param name="settings">Specify what is allowed in the validation for timestamp</param>
+      <param name="fingerprintAlgorithm">fingerprint algorithm for displaying timestamp's certificate information</param>
+      <param name="issues">List of log messages.</param>
+      <param name="verificationFlags">Flags that specify the status of the verification</param>
+      <param name="validTimestamp">TTimestamp found in the signature that passes validation with the given <see cref="!:settings" /></param>
+      <remarks>If <see cref="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoTimestamp" /> is set to true this method return true with a <see cref="!:validTimestamp" /> set to null.</remarks>
+      <returns>true if a valid timestamp was found</returns>
     </member>
-    <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignedPackageVerifierSettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
+    <member name="M:NuGet.Packaging.Signing.Signature.Verify(NuGet.Packaging.Signing.Timestamp,NuGet.Packaging.Signing.SignatureVerifySettings,NuGet.Common.HashAlgorithmName,System.Security.Cryptography.X509Certificates.X509Certificate2Collection,System.Collections.Generic.List{NuGet.Packaging.Signing.SignatureLog})">
       <summary>
             Verify if the signature object meets the specification trust and validity requirements.
             </summary>
@@ -10841,9 +10986,10 @@
       <param name="fingerprintAlgorithm">Algorithm used to calculate and display the certificate's fingerprint.</param>
       <param name="certificateExtraStore">Collection of certificates to help the chain building engine as an extra store.</param>
       <param name="issues">List of log messages.</param>
+      <remarks>This is only public for ease of testing</remarks>
       <returns>Status of trust for signature.</returns>
     </member>
-    <member name="M:NuGet.Packaging.Signing.Signature.GetTimestamps(System.Security.Cryptography.Pkcs.SignerInfo)">
+    <member name="M:NuGet.Packaging.Signing.Signature.GetTimestamps(System.Security.Cryptography.Pkcs.SignerInfo,System.String)">
       <summary>
             Get timestamps from the signer info
             </summary>
@@ -10902,6 +11048,39 @@
             Signed by the repository.
             </summary>
     </member>
+    <member name="T:NuGet.Packaging.Signing.SignatureVerifySettings">
+      <summary>
+            Settings to customize Signature.Verify behavior. 
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.TreatIssuesAsErrors">
+      <summary>
+            Treat any issue as fatal.
+            </summary>
+      <remarks>If set true, any issue will be an error instead of a warning</remarks>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUntrustedRoot">
+      <summary>
+            Specifies that a signing certificate's chain that chains to an untrusted root is allowed
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.AllowUnknownRevocation">
+      <summary>
+            Specifies that a signing certificate's chain with unknown revocation is allowed.
+            If set to true, offline revocation is allowed.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.LogOnSignatureExpired">
+      <summary>
+            Specifies that an error should be logged when the signature is expired.
+            If set to false, this won't allow expired signatures, only skip the logging of the failure.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerifySettings.Default">
+      <summary>
+            Get default settings values for relaxed verification on a signature
+            </summary>
+    </member>
     <member name="T:NuGet.Packaging.Signing.SigningCertificate">
       <remarks>This is public only to facilitate testing.</remarks>
     </member>
@@ -10943,6 +11122,16 @@
             Returns the set of allowed hash algorithm Oids.
             </summary>
     </member>
+    <member name="P:NuGet.Packaging.Signing.SigningSpecifications.AllowedSignatureAlgorithms">
+      <summary>
+            Returns the set of allowed signature algorithms.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SigningSpecifications.AllowedSignatureAlgorithmOids">
+      <summary>
+            Returns the set of allowed signature algorithm Oids.
+            </summary>
+    </member>
     <member name="P:NuGet.Packaging.Signing.SigningSpecifications.RSAPublicKeyMinLength">
       <summary>
             Returns minumum length required for RSA public keys.
@@ -10961,6 +11150,16 @@
     <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedHashAlgorithmOids">
       <summary>
             Allowed digest algorithm Oids for signature and timestamp hashing.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedSignatureAlgorithms">
+      <summary>
+            Allowed signature algorithms.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SigningSpecificationsV1._allowedSignatureAlgorithmOids">
+      <summary>
+            Allowed signature algorithm Oids.
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Signing.SigningSpecificationsV1.Version">
@@ -10994,6 +11193,11 @@
     <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.GetTimestamp(NuGet.Packaging.Signing.TimestampRequest,NuGet.Common.ILogger,System.Threading.CancellationToken)">
       <summary>
             Timestamps data present in the TimestampRequest.
+            </summary>
+    </member>
+    <member name="M:NuGet.Packaging.Signing.Rfc3161TimestampProvider.GetNameOrOidString(System.Security.Cryptography.Oid)">
+      <summary>
+            Returns the FriendlyName of an Oid. If FriendlyName is null, then the Oid string is returned.
             </summary>
     </member>
     <member name="T:NuGet.Packaging.Signing.Rfc3161TimestampRequest">
@@ -11437,6 +11641,14 @@
             finalizer impact.
             </remarks>
     </member>
+    <member name="M:NuGet.Packaging.Signing.AllowListVerificationProvider.VerifyAllowList(NuGet.Packaging.Signing.AllowListVerificationProvider.CertificateListVerificationRequest)">
+      <summary>
+            Verify an allow list with a given request
+            </summary>
+      <param name="request">Information about the allow list verification to perform</param>
+      <remarks>This method should never return a status unknown. Min is used to take the most severe status in <see cref="M:NuGet.Packaging.Signing.AllowListVerificationProvider.GetValidity(System.Collections.Generic.IEnumerable{NuGet.Packaging.Signing.PackageVerificationResult})" />
+            therefore, if unknown is returned the verification process will return an unknown status for the whole operation</remarks>
+    </member>
     <member name="T:NuGet.Packaging.Signing.IPackageSignatureVerifier">
       <summary>
             Loads trust providers and verifies package signatures.
@@ -11488,10 +11700,19 @@
             List of issues found in the verification process
             </summary>
     </member>
+    <member name="T:NuGet.Packaging.Signing.RepositorySignatureVerifier">
+      <remarks>
+            This is used by NuGetGallery to determine repository signature validity.
+            </remarks>
+    </member>
     <member name="T:NuGet.Packaging.Signing.SignatureVerificationStatus">
       <summary>
             Represents the trust result of a signature.
             </summary>
+      <remarks>The order of the elements on this enum is important.
+            It should be ordered from most severe to valid.
+            When a verification with multiple steps wants to be strict it should take the min
+            out of each step as the status for the whole verification.</remarks>
     </member>
     <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatus.Unknown">
       <summary>
@@ -11519,6 +11740,139 @@
             Signature is valid for the verification step.
             </summary>
     </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoErrors">
+      <summary>
+            There was no error found
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoSignature">
+      <summary>
+            A signature was not found
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.NoCertificate">
+      <summary>
+            Signer certificate was not found
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.MultipleSignatures">
+      <summary>
+            Multiple signatures were found
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.SignatureCheckFailed">
+      <summary>
+            A call to SignedCms.CheckSignature failed
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.SignatureAlgorithmUnsupported">
+      <summary>
+            Signature algorithm is not supported
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificatePublicKeyInvalid">
+      <summary>
+            Public key does not conform with the requirements of the spec
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.HasLifetimeSigningEku">
+      <summary>
+            Signing certificate has lifetimeSigningEku
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificateValidityInTheFuture">
+      <summary>
+            Signer certificate's validity is in the future
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificateExpired">
+      <summary>
+            Signing certificate has expired
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.HashAlgorithmUnsupported">
+      <summary>
+            Hashing algorithm is not supported
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.MessageImprintUnsupportedAlgorithm">
+      <summary>
+            Message imprint uses a hash algorithm that is not supported
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.IntegrityCheckFailed">
+      <summary>
+            Integrity check of the signature failed
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.ChainBuildingFailure">
+      <summary>
+            Chain building failures.
+            Some specific chain building failures (like revocation, revocation status unavailable, certificate expired, etc.)
+            are not covered by this flag because they are covered specially by another status flag.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.UnknownRevocation">
+      <summary>
+            Revocation information was unavailable or was offline for the signer certificate
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.CertificateRevoked">
+      <summary>
+            Signing certificate was revoked
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.UntrustedRoot">
+      <summary>
+            Signing certificate chains to a certificate untrusted by the computer performing the verification
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.GeneralizedTimeOutsideValidity">
+      <summary>
+            The Timestamp's generalized time was outside certificate's validity period
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Suspect">
+      <summary>
+            Flags which indicate that the signed package is suspect.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Illegal">
+      <summary>
+            Flags which indicate that the signed package is illegal.
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.SignatureVerificationStatusFlags.Untrusted">
+      <summary>
+            Flags which indicate that the signed package is untrusted.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.SignatureType">
+      <summary>
+            Type of the signature that was verified
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Status">
+      <summary>
+            Status of the verification
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Flags">
+      <summary>
+            Reasons for the status.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Timestamp">
+      <summary>
+            Timestamp used to validate certificate.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignatureVerificationSummary.ExpirationTime">
+      <summary>
+            Expiration Date and Time for signature
+            </summary>
+      <remarks>This field will only be set if the flag CertificateExpired is present <see cref="P:NuGet.Packaging.Signing.SignatureVerificationSummary.Flags" /></remarks>
+    </member>
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerificationResult.Signature">
       <summary>
             Signature
@@ -11534,9 +11888,14 @@
             Default settings.
             </summary>
     </member>
-    <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVSClientDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+    <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetAcceptModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
       <summary>
-            Default policy for scenarios in VS.
+            The aceept mode policy.
+            </summary>
+    </member>
+    <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetRequireModeDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
+      <summary>
+            The require mode policy.
             </summary>
     </member>
     <member name="M:NuGet.Packaging.Signing.SignedPackageVerifierSettings.GetVerifyCommandDefaultPolicy(System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry},System.Collections.Generic.IReadOnlyList{NuGet.Packaging.Signing.VerificationAllowListEntry})">
@@ -11559,11 +11918,6 @@
             Allow packages that have not been explicitly trusted by the consumer.
             </summary>
     </member>
-    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUntrustedSelfIssuedCertificate">
-      <summary>
-            Allow packages that do not chain to a trusted root certificate.
-            </summary>
-    </member>
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowIgnoreTimestamp">
       <summary>
             Allow ignoring timestamp.
@@ -11577,6 +11931,11 @@
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowNoTimestamp">
       <summary>
             Allow no timestamp.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AlwaysVerifyCountersignature">
+      <summary>
+            Always verify the countersignature if present
             </summary>
     </member>
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.AllowUnknownRevocation">
@@ -11602,6 +11961,34 @@
     <member name="P:NuGet.Packaging.Signing.SignedPackageVerifierSettings.ClientCertificateList">
       <summary>
             Allowlist of client side certificate hashes.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.VerificationAllowListEntry.Target">
+      <summary>
+            Target type of signature to verify.
+            </summary>
+    </member>
+    <member name="P:NuGet.Packaging.Signing.VerificationAllowListEntry.Placement">
+      <summary>
+            Signature placement to verify.
+            </summary>
+    </member>
+    <member name="T:NuGet.Packaging.Signing.VerificationTarget">
+      <summary>
+            Indicates the type of signature a verification is targeting
+            </summary>
+      <remarks>This target makes no assumption about the placement of the signature.
+            It only refers to author or repository type of signature.
+            If a specific placement is needed use the <see cref="T:NuGet.Packaging.Signing.SignaturePlacement" /> enum.</remarks>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.VerificationTarget.Author">
+      <summary>
+            Target Author signatures
+            </summary>
+    </member>
+    <member name="F:NuGet.Packaging.Signing.VerificationTarget.Repository">
+      <summary>
+            Target Repository signatures
             </summary>
     </member>
     <member name="T:NuGet.Packaging.Signing.VerifySignaturesResult">
@@ -12291,7 +12678,7 @@
             Pattern used to identify Tools assets for global tools
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel821151.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -12303,41 +12690,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel821151.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel821151.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.ProjectModel821151.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.ProjectModel827628.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel821151.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel821151.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel821151.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.ProjectModel821151.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.ProjectModel827628.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -13091,7 +13478,7 @@
             Indicates if all warnings should be ignored.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol878118.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol884765.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -13103,41 +13490,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol878118.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol884765.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol878118.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol884765.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Protocol878118.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Protocol884765.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol878118.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Protocol884765.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol878118.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Protocol884765.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol878118.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol884765.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Protocol878118.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Protocol884765.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -15414,6 +15801,11 @@
     <member name="P:NuGet.Protocol.Strings.PushCommandPushingPackage">
       <summary>
               Looks up a localized string similar to Pushing {0} to {1}....
+            </summary>
+    </member>
+    <member name="P:NuGet.Protocol.Strings.RepositoryContentUrlMustBeHttps">
+      <summary>
+              Looks up a localized string similar to Repository content URL for repository signatures must be HTTPS..
             </summary>
     </member>
     <member name="P:NuGet.Protocol.Strings.RequiredFeatureUnsupportedException_DefaultMessageWithFeature">
@@ -20503,7 +20895,7 @@
             </summary>
       <param name="client">Http client</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1141040.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1147738.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two enumberables for equality, ordered according to the specified key and optional comparer. Handles null values gracefully.
             </summary>
@@ -20515,41 +20907,41 @@
       <param name="orderComparer">An optional comparer for comparing keys</param>
       <param name="sequenceComparer">An optional comparer for sequences</param>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1141040.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1147738.EqualityUtility.SequenceEqualWithNullCheck``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sequence for equality, allowing either sequence to be null. If one is null, both have to be
             null for equality.
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1141040.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1147738.EqualityUtility.SetEqualsWithNullCheck``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Compares two sets for equality, allowing either sequence to be null.
             If one is null, both have to be null for equality.
             </summary>
     </member>
-    <member name="T:NuGet.Shared.NuGet.Versioning1141040.HashCodeCombiner">
+    <member name="T:NuGet.Shared.NuGet.Versioning1147738.HashCodeCombiner">
       <summary>
             Hash code creator, based on the original NuGet hash code combiner/ASP hash code combiner implementations
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1141040.HashCodeCombiner.GetHashCode``2(``0,``1)">
+    <member name="M:NuGet.Shared.NuGet.Versioning1147738.HashCodeCombiner.GetHashCode``2(``0,``1)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1141040.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
+    <member name="M:NuGet.Shared.NuGet.Versioning1147738.HashCodeCombiner.GetHashCode``3(``0,``1,``2)">
       <summary>
             Create a unique hash code for the given set of items
             </summary>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1141040.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1147738.Extensions.AsList``1(System.Collections.Generic.IEnumerable{``0})">
       <summary>
             Return the enumerable as a List of T, copying if required. Optimized for common case where it is an List of T.
             Avoid mutating the return value.
             </summary>
       <remarks>https://aspnetwebstack.codeplex.com/SourceControl/latest#src/Common/CollectionExtensions.cs</remarks>
     </member>
-    <member name="M:NuGet.Shared.NuGet.Versioning1141040.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
+    <member name="M:NuGet.Shared.NuGet.Versioning1147738.Extensions.AsHashSet``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEqualityComparer{``0})">
       <summary>
             Return the ISet as a HashSet of T, copying if required. Optimized for common case where it is a HashSet of T.
             Avoid mutating the return value.
@@ -21689,4 +22081,4 @@
             </summary>
     </member>
   </members>
-</doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>7XBrXC+rTkVBF1AICFyey83RVeI=</DigestValue></Reference></SignedInfo><SignatureValue>hhhEZP1HktXqA+u+xZzNnWYmB6C8iz7nK02NemDIRqsKOaCJgOLjr1vxG+6N1hkPRXB2489Nvg4CFDXJTiF/K2T6KHybZAOE3J/KL05TQKr9p+6LHx4m2hEVB59BcBpazTwj02r3OYWM+MF8DRPpzZ7utRvG2vxaKQKPt+I1BQANDFMAUVJredgAgdfbSHY6je84J2SRBUMkhzLLjwRWd201JZaZMMD3YohGiP6x/eZ/31TI9nw9aZseZEXpTYme7ty/VjSKdnyITokQHHy8o9eg5/skBKCkSfZ4i4G5DWtOsyYADI081SnfhH8Uqm7G0+TsdL25YHwT/OsPoLvsPQ==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIEwjCCA6qgAwIBAgITMwAAAMRudtBNPf6pZQAAAAAAxDANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODUyWhcNMTgwOTA3MTc1ODUyWjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046MjEzNy0zN0EwLTRBQUExJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoA5rFUpl2jKM9/L26GuVj6Beo87YdPTwuOL0C+QObtrYvih7LDNDAeWLw+wYlSkAmfmaSXFpiRHM1dBzq+VcuF8YGmZm/LKWIAB3VTj6df05JH8kgtp4gN2myPTR+rkwoMoQ3muR7zb1nvNiLsEpgJ2EuwX5M/71uYrK6DHAPbbD3ryFizZAfqYcGUWuDhEE6ZV+onexUulZ6DK6IoLjtQvUbH1ZMEWvNVTliPYOgNYLTIcJ5mYphnUMABoKdvGDcVpSmGn6sLKGgiFC82nun9h7koj7+ZpSHElsLwhWQiGVWCRVk8ZMbec+qhu+/9HwzdVJYb4HObmwNDaqpqe17AgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUiAUj6xG9EI77i5amFSZrXv1V3lAwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAcDh+kjmXvCnoEO5AcUWfp4/4fWCqiBQL8uUFq6cuBuYp8ML4UyHSLKNPOoJmzzy1OT3GFGYrmprgO6c2d1tzuSaN3HeFGENXDbn7N2RBvJtSl0UkahSyak4TsRUPk/WwMQ0GOGNbxjolrOR41LVsSmHVnn8IWDOCWBj1c+1jkPkzG51jCiAnWzHU1Q25A/0txrhLYjNtI4P3f0T0vv65X7rZAIz3ecQS/EglmADfQk/zrLgKqJdxZKy3tXS7+35zIrDegdAH2G7d3jvCNTjatrV7cxKH+ZX9oEsFl10uh/U83KA2QiQJQMtbjGSzQV2xRpcNf2GpHBRPW0sK4yL3ww==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">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</CounterSignature></Object></Signature></doc>
