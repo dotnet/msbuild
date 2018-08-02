@@ -155,8 +155,8 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      varios archivos de respuesta, especifique cada uno de ellos
                      por separado.
 
-                     Todo archivo de respuesta denominado "msbuild.rsp" se usa 
-                     automáticamente desde las siguientes ubicaciones: 
+                     Todo archivo de respuesta denominado "msbuild.rsp" se usa
+                     automáticamente desde las siguientes ubicaciones:
                      (1) el directorio de msbuild.exe
                      (2) el directorio del primer proyecto o solución compilada
 </target>
@@ -342,7 +342,7 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                         ShowCommandLine: mostrar los mensajes de TaskCommandLineEvent
                         ShowTimestamp: mostrar la marca de tiempo como un prefijo en
                             los mensajes.
-                        ShowEventId: mostrar el identificador de evento para los eventos iniciados, los eventos 
+                        ShowEventId: mostrar el identificador de evento para los eventos iniciados, los eventos
                             finalizados y los mensajes.
                         ForceNoAlign: no alinear el texto al tamaño del
                             búfer de la consola
@@ -606,8 +606,8 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
                      agregando el modificador "/fileLoggerParameters".
 
                      Si se define un nombre de archivo de registro mediante el modificador fileLoggerParameters,
-                     el registrador distribuido usará el nombre de archivo como 
-                     plantilla y agregará el identificador de nodo a ese nombre de archivo para 
+                     el registrador distribuido usará el nombre de archivo como
+                     plantilla y agregará el identificador de nodo a ese nombre de archivo para
                      crear un archivo de registro para cada nodo.
     </target>
         <note>
@@ -1396,13 +1396,13 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;archivo&gt;    
+        <target state="translated">  /profileevaluation:&lt;archivo&gt;
                      Genera un perfil de la evaluación de MSBuild y escribe el resultado
                      en el archivo especificado. Si la extensión del archivo especificado
                      es ".md", el resultado se genera en formato Markdown.

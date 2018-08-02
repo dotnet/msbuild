@@ -539,7 +539,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                        /toolsversion:3.5
    </source>
         <target state="translated">  /toolsversion:&lt;版本&gt;
-                     在建置期間要使用的 
+                     在建置期間要使用的
                     MSBuild 工具組 (工作、目標等) 版本。此版本會覆寫
                      個別專案指定的版本。(簡短形式:
                      /tv)
@@ -1390,15 +1390,15 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;檔案&gt;    
+        <target state="translated">  /profileevaluation:&lt;檔案&gt;
                      分析 MSBuild 評估並將結果寫入
-                     指定的檔案。若所指定檔案的副檔名為 
+                     指定的檔案。若所指定檔案的副檔名為
                      '.md'，結果會以 Markdown 格式
                      產生。否則會產生定位字元分隔檔案。
     </target>
@@ -1420,7 +1420,7 @@ Copyright (C) Microsoft Corporation. 著作權所有，並保留一切權利。
                      請僅在還原期間設定或覆寫這些專案層級
                      的屬性，並請勿使用以 /property 引數
                      指定的屬性。&lt;n&gt; 為屬性名稱，
-                     &lt;v&gt; 則為屬性值。請使用分號或點 (.) 
+                     &lt;v&gt; 則為屬性值。請使用分號或點 (.)
                      分隔多個屬性，
                      或個別指定各屬性。
                      (簡短形式: /rp)

@@ -341,7 +341,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                         WarningsOnly: visualizza solo gli avvisi.
                         NoItemAndPropertyList: non visualizza l'elenco di
                                                elementi e proprietà all'inizio
-                                               di ogni compilazione del 
+                                               di ogni compilazione del
                                                progetto.
                         ShowCommandLine: visualizza i messaggi
                                          TaskCommandLineEvent.
@@ -614,7 +614,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      è la directory corrente. Per impostazione predefinita, ai
                      file viene assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il
                      percorso dei file e altri parametri di fileLogger possono
-                     essere specificati aggiungendo l'opzione 
+                     essere specificati aggiungendo l'opzione
                      "/fileLoggerParameters".
 
                      Se il nome di un file di log viene impostato con l'opzione
@@ -667,7 +667,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      corrispondente opzione /filelogger[n].
                      Se presente, "n" può essere un numero compreso tra 1 e 9.
                      /fileloggerparameters viene usato anche dal file di logger
-                     distribuito. Vedere la descrizione di 
+                     distribuito. Vedere la descrizione di
                      /distributedFileLogger. Forma breve: /flp[n].
                      Sono disponibili gli stessi parametri elencati per il
                      logger di console. Altri parametri disponibili:
@@ -687,8 +687,8 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       /flp1:warningsonly;logfile=msbuild.wrn 
+                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1237,7 +1237,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </source>
         <target state="translated">  /warnasmessage[:codice[;codice2]]
                      Elenco di codici avviso da considerare come messaggi non
-                     importanti. Usare un punto e virgola o una virgola per 
+                     importanti. Usare un punto e virgola o una virgola per
                      separare più codici avviso.
                      Forma breve: /nowarn[:c;[c2]].
 
@@ -1308,10 +1308,10 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                        /binaryLogger
     </source>
         <target state="translated">  /binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializza tutti gli eventi di compilazione in un file 
+                     Serializza tutti gli eventi di compilazione in un file
                      binario compresso. Per impostazione predefinita, il file
                      si trova nella directory corrente e si chiama
-                     "msbuild.binlog". Il log binario è una descrizione 
+                     "msbuild.binlog". Il log binario è una descrizione
                      dettagliata del processo di compilazione utilizzabile in
                      seguito per ricostruire i log di testo e viene usato da
                      altri strumenti di analisi. Un log binario è in genere
@@ -1322,7 +1322,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                      Per impostazione predefinita, il logger binario raccoglie
                      il testo di origine di file di progetto, inclusi tutti i
                      progetti importati e i file di destinazione rilevati
-                     durante la compilazione. L'opzione facoltativa 
+                     durante la compilazione. L'opzione facoltativa
                      ProjectImports controlla questo comportamento:
 
                       ProjectImports=None     - Non viene eseguita la raccolta
@@ -1331,7 +1331,7 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
                                                 vengono incorporate nel file
                                                 di log.
                       ProjectImports=ZipFile  - I file del progetto vengono
-                                                salvati in 
+                                                salvati in
                                                 output.projectimports.zip
                                                 dove output corrisponde allo
                                                 stesso nome del file di
@@ -1411,17 +1411,17 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;file&gt;    
-                     Esegue la profilatura della valutazione di MSBuild e scrive 
+        <target state="translated">  /profileevaluation:&lt;file&gt;
+                     Esegue la profilatura della valutazione di MSBuild e scrive
                      il risultato nel file specificato. Se l'estensione del file
                      specificato è '.md', il risultato viene generato in formato
-                     markdown. In caso contrario, viene prodotto un file 
+                     markdown. In caso contrario, viene prodotto un file
                      delimitato da tabulazioni.
     </target>
         <note />
@@ -1440,8 +1440,8 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
     </source>
         <target state="translated">  /restoreProperty:&lt;n&gt;=&lt;v&gt;
                      Imposta le proprietà specificate a livello di progetto o ne
-                     esegue l'override solo durante il ripristino e non usa le 
-                     proprietà specificate con l'argomento /property. &lt;n&gt; è 
+                     esegue l'override solo durante il ripristino e non usa le
+                     proprietà specificate con l'argomento /property. &lt;n&gt; è
                      il nome della proprietà, mentre &lt;v&gt; è il valore della
                      proprietà. Usare un punto e virgola o una virgola per
                      separare più proprietà oppure specificare ogni proprietà

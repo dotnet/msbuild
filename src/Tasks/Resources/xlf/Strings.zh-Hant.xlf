@@ -1507,7 +1507,7 @@
 			but its name "{1}"
 			didn't match the expected name "{2}".</source>
         <target state="translated">已考慮 "{0}"，
-			但其名稱 "{1}" 
+			但其名稱 "{1}"
 			與預期名稱 "{2}" 不相符。</target>
         <note />
       </trans-unit>
