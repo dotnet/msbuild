@@ -21,6 +21,14 @@ namespace EndToEnd
         [ClassData(typeof(SupportedNetCoreAppVersions))]
         public void ItRollsForwardToTheLatestVersion(string minorVersion)
         {
+            // https://github.com/dotnet/cli/issues/9661
+            // https://github.com/dotnet/sdk/issues/2446
+            // dotnet/sdk is missing handling for 2.1 when it isn't the latest runtime
+            if (minorVersion == "2.1")
+            {
+                return;
+            }
+
             var _testInstance = TestAssets.Get("TestAppSimple")
                 .CreateInstance(identifier: minorVersion)
                 .WithSourceFiles();

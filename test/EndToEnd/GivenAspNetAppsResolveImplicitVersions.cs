@@ -16,8 +16,10 @@ namespace EndToEnd
     {
         private const string AspNetTestProject = "TestWebAppSimple";
 
-        [Fact]
-        public void PortablePublishWithLatestTFMUsesBundledAspNetCoreAppVersion()
+        private const string PinnedAspNetCoreImplicitVersion = "2.1.1";
+
+        [Fact(Skip="https://github.com/dotnet/cli/issues/9687")]
+        public void PortablePublishWithLatestTFMUsesPinnedDownAspNetCoreAppVersion()
         {
             var _testInstance = TestAssets.Get(AspNetTestProject)
                 .CreateInstance(identifier: LatestSupportedAspNetCoreAppVersion)
@@ -209,7 +211,7 @@ namespace EndToEnd
                 ?.Version;
         }
 
-        public static string LatestSupportedAspNetCoreAppVersion = "2.1";
+        public static string LatestSupportedAspNetCoreAppVersion = "2.2";
 
         public static IEnumerable<object[]> SupportedAspNetCoreAppVersions
         {
