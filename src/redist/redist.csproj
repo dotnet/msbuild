@@ -40,7 +40,7 @@
   <Target Name="PublishVersionFile"
           BeforeTargets="Publish">
 
-    <WriteLinesToFile File="$(PublishDir)/.version"
+    <WriteLinesToFile File="$(PublishDir)/.toolsetversion"
                       Lines="$(CommitHash);$(SdkVersion);$(Rid)"
                       Overwrite="true" />
   </Target>
