@@ -2,14 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Runtime.InteropServices.ComTypes;
 using System.Globalization;
-
-
-using Microsoft.Build.Shared;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
 using COMException = System.Runtime.InteropServices.COMException;
@@ -28,10 +23,10 @@ namespace Microsoft.Build.Tasks
     {
         // Dependencies of all analyzed typelibs. Can be cleared to allow for analyzing typelibs one by one while
         // still skipping already seen types
-        private HashSet<TYPELIBATTR> _dependencies;
+        private readonly HashSet<TYPELIBATTR> _dependencies;
 
         // History of already seen types.
-        private HashSet<AnalyzedTypesInfoKey> _analyzedTypes;
+        private readonly HashSet<AnalyzedTypesInfoKey> _analyzedTypes;
 
         private sealed class TYPELIBATTRComparer : IEqualityComparer<TYPELIBATTR>
         {
@@ -97,20 +92,12 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private MarshalReleaseComObject _marshalReleaseComObject;
-
-        private List<Exception> _encounteredProblems;
+        private readonly MarshalReleaseComObject _marshalReleaseComObject;
 
         /// <summary>
         /// List of exceptions thrown by the components during scanning
         /// </summary>
-        internal List<Exception> EncounteredProblems
-        {
-            get
-            {
-                return _encounteredProblems;
-            }
-        }
+        internal List<Exception> EncounteredProblems { get; }
 
         /// <summary>
         /// Internal constructor
@@ -119,7 +106,7 @@ namespace Microsoft.Build.Tasks
         {
             _dependencies = new HashSet<TYPELIBATTR>(TYPELIBATTRComparer.Instance);
             _analyzedTypes = new HashSet<AnalyzedTypesInfoKey>(AnalyzedTypesInfoKeyComparer.Instance);
-            _encounteredProblems = new List<Exception>();
+            EncounteredProblems = new List<Exception>();
 
             _marshalReleaseComObject = marshalReleaseComObject;
         }
@@ -159,7 +146,7 @@ namespace Microsoft.Build.Tasks
             // that we got lots of exceptions thrown which was not only not very useful for the end user, but also horribly slow.
             catch (COMException ex)
             {
-                _encounteredProblems.Add(ex);
+                EncounteredProblems.Add(ex);
             }
         }
 
@@ -170,24 +157,21 @@ namespace Microsoft.Build.Tasks
         private void AnalyzeTypeInfo(ITypeInfo typeInfo)
         {
             ITypeLib containingTypeLib = null;
-            int indexInContainingTypeLib;
 
             try
             {
-                typeInfo.GetContainingTypeLib(out containingTypeLib, out indexInContainingTypeLib);
+                typeInfo.GetContainingTypeLib(out containingTypeLib, out int indexInContainingTypeLib);
 
-                TYPELIBATTR containingTypeLibAttributes;
-                ComReference.GetTypeLibAttrForTypeLib(ref containingTypeLib, out containingTypeLibAttributes);
+                ComReference.GetTypeLibAttrForTypeLib(ref containingTypeLib, out TYPELIBATTR containingTypeLibAttributes);
 
                 // Have we analyzed this type info already? If so skip it.
-                AnalyzedTypesInfoKey typeInfoId = new AnalyzedTypesInfoKey(
+                var typeInfoId = new AnalyzedTypesInfoKey(
                     containingTypeLibAttributes.guid, containingTypeLibAttributes.wMajorVerNum,
                     containingTypeLibAttributes.wMinorVerNum, containingTypeLibAttributes.lcid, indexInContainingTypeLib);
 
                 // Get enough information about the type to figure out if we want to register it as a dependency
-                TYPEATTR typeAttributes;
 
-                ComReference.GetTypeAttrForTypeInfo(typeInfo, out typeAttributes);
+                ComReference.GetTypeAttrForTypeInfo(typeInfo, out TYPEATTR typeAttributes);
 
                 // Is it one of the types we don't care about?
                 if (!CanSkipType(typeInfo, containingTypeLib, typeAttributes, containingTypeLibAttributes))
@@ -220,12 +204,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns true if we don't need to analyze this particular type.
         /// </summary>
-        /// <param name="typeInfo"></param>
-        /// <param name="typeLib"></param>
-        /// <param name="typeAttributes"></param>
-        /// <param name="typeLibAttributes"></param>
-        /// <returns></returns>
-        private bool CanSkipType(ITypeInfo typeInfo, ITypeLib typeLib, TYPEATTR typeAttributes, TYPELIBATTR typeLibAttributes)
+        private static bool CanSkipType(ITypeInfo typeInfo, ITypeLib typeLib, TYPEATTR typeAttributes, TYPELIBATTR typeLibAttributes)
         {
             // Well known OLE type?
             if ((typeAttributes.guid == NativeMethods.IID_IUnknown) ||
@@ -240,10 +219,7 @@ namespace Microsoft.Build.Tasks
             // Is this the Guid type? If so we should be using the corresponding .NET type. 
             if (typeLibAttributes.guid == NativeMethods.IID_StdOle)
             {
-                string typeName, ignoredDocString, ignoredHelpFile;
-                int ignoredHelpContext;
-
-                typeInfo.GetDocumentation(-1, out typeName, out ignoredDocString, out ignoredHelpContext, out ignoredHelpFile);
+                typeInfo.GetDocumentation(-1, out string typeName, out _, out _, out _);
 
                 if (string.CompareOrdinal(typeName, "GUID") == 0)
                 {
@@ -252,12 +228,9 @@ namespace Microsoft.Build.Tasks
             }
 
             // Skip types exported from .NET assemblies
-            ITypeLib2 typeLib2 = typeLib as ITypeLib2;
-
-            if (typeLib2 != null)
+            if (typeLib is ITypeLib2 typeLib2)
             {
-                object exportedFromComPlusObj;
-                typeLib2.GetCustData(ref NativeMethods.GUID_ExportedFromComPlus, out exportedFromComPlusObj);
+                typeLib2.GetCustData(ref NativeMethods.GUID_ExportedFromComPlus, out object exportedFromComPlusObj);
 
                 string exportedFromComPlus = exportedFromComPlusObj as string;
 
@@ -273,8 +246,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// For a given type, analyze recursively all the types implemented by it.
         /// </summary>
-        /// <param name="typeInfo"></param>
-        /// <param name="typeAttributes"></param>
         private void ScanImplementedTypes(ITypeInfo typeInfo, TYPEATTR typeAttributes)
         {
             for (int implTypeIndex = 0; implTypeIndex < typeAttributes.cImplTypes; implTypeIndex++)
@@ -283,9 +254,8 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    IntPtr hRef;
-                    IFixedTypeInfo fixedTypeInfo = (IFixedTypeInfo)typeInfo;
-                    fixedTypeInfo.GetRefTypeOfImplType(implTypeIndex, out hRef);
+                    var fixedTypeInfo = (IFixedTypeInfo)typeInfo;
+                    fixedTypeInfo.GetRefTypeOfImplType(implTypeIndex, out IntPtr hRef);
                     fixedTypeInfo.GetRefTypeInfo(hRef, out implementedType);
 
                     AnalyzeTypeInfo((ITypeInfo)implementedType);
@@ -303,8 +273,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// For a given type, analyze all the variables defined by it
         /// </summary>
-        /// <param name="typeInfo"></param>
-        /// <param name="typeAttributes"></param>
         private void ScanDefinedVariables(ITypeInfo typeInfo, TYPEATTR typeAttributes)
         {
             for (int definedVarIndex = 0; definedVarIndex < typeAttributes.cVars; definedVarIndex++)
@@ -313,8 +281,7 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    VARDESC varDesc;
-                    ComReference.GetVarDescForVarIndex(typeInfo, definedVarIndex, out varDesc, out varDescHandleToRelease);
+                    ComReference.GetVarDescForVarIndex(typeInfo, definedVarIndex, out VARDESC varDesc, out varDescHandleToRelease);
                     AnalyzeElement(typeInfo, varDesc.elemdescVar);
                 }
                 finally
@@ -330,8 +297,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// For a given type, analyze all the functions implemented by it. That means all the argument and return types.
         /// </summary>
-        /// <param name="typeInfo"></param>
-        /// <param name="typeAttributes"></param>
         private void ScanDefinedFunctions(ITypeInfo typeInfo, TYPEATTR typeAttributes)
         {
             for (int definedFuncIndex = 0; definedFuncIndex < typeAttributes.cFuncs; definedFuncIndex++)
@@ -340,15 +305,14 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    FUNCDESC funcDesc;
-                    ComReference.GetFuncDescForDescIndex(typeInfo, definedFuncIndex, out funcDesc, out funcDescHandleToRelease);
+                    ComReference.GetFuncDescForDescIndex(typeInfo, definedFuncIndex, out FUNCDESC funcDesc, out funcDescHandleToRelease);
 
                     int offset = 0;
 
                     // Analyze the argument types
                     for (int paramIndex = 0; paramIndex < funcDesc.cParams; paramIndex++)
                     {
-                        ELEMDESC elemDesc = (ELEMDESC)Marshal.PtrToStructure(
+                        var elemDesc = (ELEMDESC)Marshal.PtrToStructure(
                             new IntPtr(funcDesc.lprgelemdescParam.ToInt64() + offset), typeof(ELEMDESC));
 
                         AnalyzeElement(typeInfo, elemDesc);
@@ -372,8 +336,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Analyze the given element (i.e. composite type of an argument) recursively
         /// </summary>
-        /// <param name="elementDesc"></param>
-        /// <param name="typeInfo"></param>
         private void AnalyzeElement(ITypeInfo typeInfo, ELEMDESC elementDesc)
         {
             TYPEDESC typeDesc = elementDesc.tdesc;
@@ -381,7 +343,7 @@ namespace Microsoft.Build.Tasks
             // If the current type is a pointer or an array, determine the child type and analyze that.
             while (((VarEnum)typeDesc.vt == VarEnum.VT_PTR) || ((VarEnum)typeDesc.vt == VarEnum.VT_SAFEARRAY))
             {
-                TYPEDESC childTypeDesc = (TYPEDESC)Marshal.PtrToStructure(typeDesc.lpValue, typeof(TYPEDESC));
+                var childTypeDesc = (TYPEDESC)Marshal.PtrToStructure(typeDesc.lpValue, typeof(TYPEDESC));
                 typeDesc = childTypeDesc;
             }
 
@@ -414,7 +376,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal TYPELIBATTR[] GetDependencies()
         {
-            TYPELIBATTR[] returnArray = new TYPELIBATTR[_dependencies.Count];
+            var returnArray = new TYPELIBATTR[_dependencies.Count];
             _dependencies.CopyTo(returnArray);
             return returnArray;
         }
@@ -425,7 +387,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ICollection<string> GetAnalyzedTypeNames()
         {
-            string[] names = new string[_analyzedTypes.Count];
+            var names = new string[_analyzedTypes.Count];
             int i = 0;
             foreach (AnalyzedTypesInfoKey analyzedType in _analyzedTypes)
             {

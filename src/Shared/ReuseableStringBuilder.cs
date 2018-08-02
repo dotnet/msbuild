@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A utility class that mediates access to a shared string builder.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Concurrent;

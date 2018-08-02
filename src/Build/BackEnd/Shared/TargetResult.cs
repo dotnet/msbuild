@@ -1,14 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Represents results for a specific target.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Globalization;
 using System.IO.Compression;
 using Microsoft.Build.BackEnd;
@@ -17,6 +12,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Execution
 {
@@ -52,8 +48,8 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The overall result for the target.</param>
         internal TargetResult(TaskItem[] items, WorkUnitResult result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(items, "items");
-            ErrorUtilities.VerifyThrowArgumentNull(result, "result");
+            ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
+            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
             _itemsStore = new ItemsStore(items);
             _result = result;
         }
@@ -70,11 +66,9 @@ namespace Microsoft.Build.Execution
         /// Returns the exception which aborted this target, if any.
         /// </summary>
         /// <value>The exception which aborted this target, if any.</value>
-        public Exception Exception
-        {
+        public Exception Exception {
             [DebuggerStepThrough]
-            get
-            { return _result.Exception; }
+            get => _result.Exception;
         }
 
         /// <summary>
@@ -132,8 +126,7 @@ namespace Microsoft.Build.Execution
         internal WorkUnitResult WorkUnitResult
         {
             [DebuggerStepThrough]
-            get
-            { return _result; }
+            get => _result;
         }
 
         /// <summary>
@@ -142,12 +135,10 @@ namespace Microsoft.Build.Execution
         internal bool TargetFailureDoesntCauseBuildFailure
         {
             [DebuggerStepThrough]
-            get
-            { return _targetFailureDoesntCauseBuildFailure; }
+            get => _targetFailureDoesntCauseBuildFailure;
 
             [DebuggerStepThrough]
-            set
-            { _targetFailureDoesntCauseBuildFailure = value; }
+            set => _targetFailureDoesntCauseBuildFailure = value;
         }
 
         #region INodePacketTranslatable Members
@@ -176,7 +167,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal TargetResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static TargetResult FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new TargetResult(translator);
         }
@@ -278,13 +269,13 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private INodePacketTranslator GetResultsCacheTranslator(int configId, string targetToCache, TranslationDirection direction)
+        private static INodePacketTranslator GetResultsCacheTranslator(int configId, string targetToCache, TranslationDirection direction)
         {
             string cacheFile = GetCacheFile(configId, targetToCache);
             if (direction == TranslationDirection.WriteToStream)
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                if (File.Exists(cacheFile))
+                if (FileSystems.Default.FileExists(cacheFile))
                 {
                     // If the file already exists, then we have cached this once before.  No need to cache it again since it cannot have changed.
                     return null;
@@ -304,39 +295,23 @@ namespace Microsoft.Build.Execution
         private struct CacheInfo
         {
             /// <summary>
-            /// The configuration ID for these results.
-            /// </summary>
-            private int _configId;
-
-            /// <summary>
-            /// The target with which these results are associated.
-            /// </summary>
-            private string _targetName;
-
-            /// <summary>
             /// Constructor.
             /// </summary>
             public CacheInfo(int configId, string targetName)
             {
-                _configId = configId;
-                _targetName = targetName;
+                ConfigId = configId;
+                TargetName = targetName;
             }
 
             /// <summary>
             /// Retrieves the configuration id.
             /// </summary>
-            public int ConfigId
-            {
-                get { return _configId; }
-            }
+            public int ConfigId { get; }
 
             /// <summary>
             /// Retrieves the target name.
             /// </summary>
-            public string TargetName
-            {
-                get { return _targetName; }
-            }
+            public string TargetName { get; }
         }
 
         /// <summary>
@@ -363,13 +338,13 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// The compressed set of items, if any.
             /// </summary>
-            private byte[] _compressedItems = null;
+            private byte[] _compressedItems;
 
             /// <summary>
             /// The count of items, stored here so that we don't have to decompress the items if we are
             /// only looking at the count.
             /// </summary>
-            private int _itemsCount = 0;
+            private int _itemsCount;
 
             /// <summary>
             /// The items produced by this target.
@@ -383,14 +358,14 @@ namespace Microsoft.Build.Execution
             {
                 if (Int32.TryParse(Environment.GetEnvironmentVariable("MSBUILDTARGETRESULTCOMPRESSIONTHRESHOLD"), out ItemsStore.s_compressionThreshold))
                 {
-                    if (ItemsStore.s_compressionThreshold < 0)
+                    if (s_compressionThreshold < 0)
                     {
-                        ItemsStore.s_compressionThreshold = 0;
+                        s_compressionThreshold = 0;
                     }
                 }
                 else
                 {
-                    ItemsStore.s_compressionThreshold = ItemsStore.DefaultCompressionThreshold;
+                    s_compressionThreshold = DefaultCompressionThreshold;
                 }
             }
 
@@ -415,10 +390,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Gets the count of items.
             /// </summary>
-            public int ItemsCount
-            {
-                get { return _itemsCount; }
-            }
+            public int ItemsCount => _itemsCount;
 
             /// <summary>
             /// Retrieves the items.
@@ -478,7 +450,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Factory for the serializer.
             /// </summary>
-            static internal ItemsStore FactoryForDeserialization(INodePacketTranslator translator)
+            internal static ItemsStore FactoryForDeserialization(INodePacketTranslator translator)
             {
                 return new ItemsStore(translator);
             }
@@ -537,16 +509,16 @@ namespace Microsoft.Build.Execution
                 // rough guess for an average number of bytes needed to store them compressed.  This doesn't have to be accurate, just
                 // big enough to avoid unnecessary buffer reallocations in most cases.
                 int defaultCompressedBufferCapacity = _uncompressedItems.Length * 64;
-                using (MemoryStream serializedStream = new MemoryStream(defaultCompressedBufferCapacity))
+                using (var serializedStream = new MemoryStream(defaultCompressedBufferCapacity))
                 {
-                    using (DeflateStream deflateStream = new DeflateStream(serializedStream, CompressionMode.Compress))
+                    using (var deflateStream = new DeflateStream(serializedStream, CompressionMode.Compress))
                     {
                         INodePacketTranslator serializedBufferTranslator = NodePacketTranslator.GetWriteTranslator(deflateStream);
 
                         // Again, a rough calculation of buffer size, this time for an uncompressed buffer.  We assume compression 
                         // will give us 2:1, as it's all text.
                         int defaultUncompressedBufferCapacity = defaultCompressedBufferCapacity * 2;
-                        using (MemoryStream itemsStream = new MemoryStream(defaultUncompressedBufferCapacity))
+                        using (var itemsStream = new MemoryStream(defaultUncompressedBufferCapacity))
                         {
                             INodePacketTranslator itemTranslator = NodePacketTranslator.GetWriteTranslator(itemsStream);
 
@@ -556,9 +528,9 @@ namespace Microsoft.Build.Execution
                             // being the same (and thus interning.)  This is a hueristic meant to get us in the ballpark to avoid 
                             // too many reallocations when growing the collections.
                             LookasideStringInterner interner = new LookasideStringInterner(StringComparer.Ordinal, _uncompressedItems.Length);
-                            for (int i = 0; i < _uncompressedItems.Length; i++)
+                            foreach (TaskItem t in _uncompressedItems)
                             {
-                                _uncompressedItems[i].TranslateWithInterning(itemTranslator, interner);
+                                t.TranslateWithInterning(itemTranslator, interner);
                             }
 
                             interner.Translate(serializedBufferTranslator);

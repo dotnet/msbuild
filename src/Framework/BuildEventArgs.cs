@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Event args for any build event.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Runtime.InteropServices;
@@ -255,13 +251,7 @@ namespace Microsoft.Build.Framework
         {
             if (buildEventContext == null)
             {
-                buildEventContext = new BuildEventContext
-                                       (
-                                       BuildEventContext.InvalidNodeId,
-                                       BuildEventContext.InvalidTargetId,
-                                       BuildEventContext.InvalidProjectContextId,
-                                       BuildEventContext.InvalidTaskId
-                                       );
+                buildEventContext = BuildEventContext.Invalid;
             }
         }
 #endregion

@@ -3,11 +3,8 @@
 
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Resources;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -17,15 +14,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class ConvertToAbsolutePath : TaskExtension
     {
-        /// <summary>
-        /// Default constructor.  Does nothing.
-        /// </summary>
-        public ConvertToAbsolutePath()
-        {
-        }
-
         private ITaskItem[] _paths;
-        private ITaskItem[] _absolutePaths;
 
         /// <summary>
         /// The list of paths to convert to absolute paths.
@@ -35,32 +24,18 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_paths, "paths");
+                ErrorUtilities.VerifyThrowArgumentNull(_paths, nameof(Paths));
                 return _paths;
             }
 
-            set
-            {
-                _paths = value;
-            }
+            set => _paths = value;
         }
 
         /// <summary>
         /// This is the output of the task, a list of absolute paths for the items passed in
         /// </summary>
         [Output]
-        public ITaskItem[] AbsolutePaths
-        {
-            get
-            {
-                return _absolutePaths;
-            }
-
-            set
-            {
-                _absolutePaths = value;
-            }
-        }
+        public ITaskItem[] AbsolutePaths { get; set; }
 
         /// <summary>
         /// Calls Path.GetFullPath for each of the inputs.  Preserves metadata.
@@ -68,9 +43,9 @@ namespace Microsoft.Build.Tasks
         /// <returns>true on success, false on failure</returns>
         public override bool Execute()
         {
-            List<ITaskItem> absolutePathsList = new List<ITaskItem>();
+            var absolutePathsList = new List<ITaskItem>();
 
-            foreach (ITaskItem path in this.Paths)
+            foreach (ITaskItem path in Paths)
             {
                 try
                 {
@@ -78,9 +53,9 @@ namespace Microsoft.Build.Tasks
                     // going to disk when it is not necessary
                     if (!Path.IsPathRooted(path.ItemSpec))
                     {
-                        if (path is ITaskItem2)
+                        if (path is ITaskItem2 item2)
                         {
-                            ((ITaskItem2)path).EvaluatedIncludeEscaped = ((ITaskItem2)path).GetMetadataValueEscaped("FullPath");
+                            item2.EvaluatedIncludeEscaped = item2.GetMetadataValueEscaped("FullPath");
                         }
                         else
                         {
@@ -95,7 +70,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            this.AbsolutePaths = absolutePathsList.ToArray();
+            AbsolutePaths = absolutePathsList.ToArray();
             return !Log.HasLoggedErrors;
         }
     }

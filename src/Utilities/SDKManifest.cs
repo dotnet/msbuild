@@ -1,22 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Loads and stores contents SDKManifest.xml - The sdkmanifest parser has been factored out from ResolveSDKReference.cs</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
-using System.Xml;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Xml;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Utilities
 {
@@ -50,22 +43,22 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Pattern in path to extension SDK used to help determine if manifest is from a framework SDK
         /// </summary>
-        static private string s_extensionSDKPathPattern = @"\MICROSOFT SDKS\WINDOWS\V8.0\EXTENSIONSDKS";
+        private static string s_extensionSDKPathPattern = @"\MICROSOFT SDKS\WINDOWS\V8.0\EXTENSIONSDKS";
 
         /// <summary>
         /// Default version of MaxPlatformVersion in framework extension SDKs with manifest not containing such a property
         /// </summary>
-        static private string s_defaultMaxPlatformVersion = "8.0";
+        private static string s_defaultMaxPlatformVersion = "8.0";
 
         /// <summary>
         /// Default version of MinOSVersion in framework extension SDKs with manifest not containing such a property
         /// </summary>
-        static private string s_defaultMinOSVersion = "6.2.1";
+        private static string s_defaultMinOSVersion = "6.2.1";
 
         /// <summary>
         /// Default version of MaxOSVersionTested in framework extension SDKs with manifest not containing such a property
         /// </summary>
-        static private string s_defaultMaxOSVersionTested = "6.2.1";
+        private static string s_defaultMaxOSVersionTested = "6.2.1";
 
         /// <summary>
         /// What should happen if this sdk is resolved with other sdks of the same productfamily or same sdk name.
@@ -75,7 +68,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Path to where the file SDKManifest.xml is stored
         /// </summary>
-        private string _pathToSdk;
+        private readonly string _pathToSdk;
 
         /// <summary>
         /// Whatever appx locations we found in the manifest
@@ -113,7 +106,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public SDKManifest(string pathToSdk)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pathToSdk, "pathToSdk");
+            ErrorUtilities.VerifyThrowArgumentLength(pathToSdk, nameof(pathToSdk));
             _pathToSdk = pathToSdk;
             LoadManifestFile();
         }
@@ -121,278 +114,135 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Whatever information regarding support for multiple versions is found in the manifest
         /// </summary>
-        public MultipleVersionSupport SupportsMultipleVersions
-        {
-            get
-            {
-                return _supportsMultipleVersions;
-            }
-        }
+        public MultipleVersionSupport SupportsMultipleVersions => _supportsMultipleVersions;
 
         /// <summary>
         /// Whatever framework identities we found in the manifest.
         /// </summary>
-        public IDictionary<string, string> FrameworkIdentities
-        {
-            get
-            {
-                if (_frameworkIdentities != null)
-                {
-                    return new ReadOnlyDictionary<string, string>(_frameworkIdentities);
-                }
-
-                return null;
-            }
-        }
+        public IDictionary<string, string> FrameworkIdentities => _frameworkIdentities != null ? new ReadOnlyDictionary<string, string>(_frameworkIdentities) : null;
 
         /// <summary>
         /// Whatever appx locations we found in the manifest
         /// </summary>
-        public IDictionary<string, string> AppxLocations
-        {
-            get
-            {
-                if (_appxLocations != null)
-                {
-                    return new ReadOnlyDictionary<string, string>(_appxLocations);
-                }
-
-                return null;
-            }
-        }
+        public IDictionary<string, string> AppxLocations => _appxLocations != null ? new ReadOnlyDictionary<string, string>(_appxLocations) : null;
 
         /// <summary>
         /// PlatformIdentity if it exists in the appx manifest for this sdk.
         /// </summary>
-        public string PlatformIdentity
-        {
-            get;
-            private set;
-        }
+        public string PlatformIdentity { get; private set; }
 
         /// <summary>
         /// The FrameworkIdentity for the sdk, this may be a single name or a | delimited name
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Necessary for compatibility with specs of SDKManifest.xml")]
-        public string FrameworkIdentity
-        {
-            get;
-            private set;
-        }
+        public string FrameworkIdentity { get; private set; }
 
         /// <summary>
         /// Support Prefer32bit found in the sdk manifest
         /// </summary>
-        public string SupportPrefer32Bit
-        {
-            get;
-            private set;
-        }
+        public string SupportPrefer32Bit { get; private set; }
 
         /// <summary>
         /// SDKType found in the sdk manifest
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Want to keep same case as the attribute in SDKManifest.xml")]
-        public SDKType SDKType
-        {
-            get
-            {
-                return _sdkType;
-            }
-        }
+        public SDKType SDKType => _sdkType;
 
         /// <summary>
         /// CopyRedistToSubDirectory specifies where the redist files should be copied to relative to the root of the package.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "SubDirectory", Justification = "Want to keep case compliant with the attributes in the SDKManifest.xml")]
-        public string CopyRedistToSubDirectory
-        {
-            get;
-            private set;
-        }
+        public string CopyRedistToSubDirectory { get; private set; }
 
         /// <summary>
         /// Supported Architectures is a semicolon delimited list of architectures that the SDK supports.
         /// </summary>
-        public string SupportedArchitectures
-        {
-            get;
-            private set;
-        }
+        public string SupportedArchitectures { get; private set; }
 
         /// <summary>
         /// DependsOnSDK is a semicolon delimited list of SDK identities that the SDK requires be resolved in order to function.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "SDK", Justification = "Not worth breaking consumers")]
-        public string DependsOnSDK
-        {
-            get;
-            private set;
-        }
+        public string DependsOnSDK { get; private set; }
 
         /// <summary>
         /// ProductFamilyName specifies the product family for the SDK. This is offered up as metadata on the resolved sdkreference and is used to detect sdk conflicts.
         /// </summary>
-        public string ProductFamilyName
-        {
-            get;
-            private set;
-        }
+        public string ProductFamilyName { get; private set; }
 
         /// <summary>
         /// The platform the SDK targets.
         /// </summary>
-        public string TargetPlatform
-        {
-            get;
-            private set;
-        }
+        public string TargetPlatform { get; private set; }
 
         /// <summary>
         /// Minimum version of the platform the SDK supports.
         /// </summary>
-        public string TargetPlatformMinVersion
-        {
-            get;
-            private set;
-        }
+        public string TargetPlatformMinVersion { get; private set; }
 
         /// <summary>
         /// Maximum version of the platform that the SDK supports.
         /// </summary>
-        public string TargetPlatformVersion
-        {
-            get;
-            private set;
-        }
+        public string TargetPlatformVersion { get; private set; }
 
         /// <summary>
         /// DisplayName found in the sdk manifest
         /// </summary>
-        public string DisplayName
-        {
-            get;
-            private set;
-        }
+        public string DisplayName { get; private set; }
 
         /// <summary>
         /// MinVSVersion found in the sdk manifest
         /// </summary>
-        public string MinVSVersion
-        {
-            get;
-            private set;
-        }
+        public string MinVSVersion { get; private set; }
 
         /// <summary>
         /// MinOSVersion found in the sdk manifest, defaults to 6.2.1 for framework extension SDKs when manifest does not have this property set
         /// </summary>
-        public string MinOSVersion
-        {
-            get
-            {
-                if (_minOSVersion == null && IsFrameworkExtensionSdkManifest)
-                {
-                    return s_defaultMinOSVersion;
-                }
-                else
-                {
-                    return _minOSVersion;
-                }
-            }
-        }
+        public string MinOSVersion => _minOSVersion == null && IsFrameworkExtensionSdkManifest
+            ? s_defaultMinOSVersion
+            : _minOSVersion;
 
         /// <summary>
         /// MaxPlatformVersion found in the sdk manifest, defaults to 8.0 for framework extension SDKs when manifest does not have this property set
         /// </summary>
-        public string MaxPlatformVersion
-        {
-            get
-            {
-                if (_maxPlatformVersion == null && IsFrameworkExtensionSdkManifest)
-                {
-                    return s_defaultMaxPlatformVersion;
-                }
-                else
-                {
-                    return _maxPlatformVersion;
-                }
-            }
-        }
+        public string MaxPlatformVersion => _maxPlatformVersion == null && IsFrameworkExtensionSdkManifest
+            ? s_defaultMaxPlatformVersion
+            : _maxPlatformVersion;
 
         /// <summary>
         /// MaxOSVersionTested found in the sdk manifest, defaults to 6.2.1 for framework extension SDKs when manifest does not have this property set
         /// </summary>
-        public string MaxOSVersionTested
-        {
-            get
-            {
-                if (_maxOSVersionTested == null && IsFrameworkExtensionSdkManifest)
-                {
-                    return s_defaultMaxOSVersionTested;
-                }
-                else
-                {
-                    return _maxOSVersionTested;
-                }
-            }
-        }
+        public string MaxOSVersionTested => _maxOSVersionTested == null && IsFrameworkExtensionSdkManifest
+            ? s_defaultMaxOSVersionTested
+            : _maxOSVersionTested;
 
         /// <summary>
         /// MoreInfo as found in the sdk manifest
         /// </summary>
-        public string MoreInfo
-        {
-            get;
-            private set;
-        }
+        public string MoreInfo { get; private set; }
 
         /// <summary>
         /// Flag set to true if an exception occurred while reading the manifest
         /// </summary>
-        public bool ReadError
-        {
-            get;
-            private set;
-        }
+        public bool ReadError { get; private set; }
 
         /// <summary>
         /// Message from exception thrown while reading manifest
         /// </summary>
-        public string ReadErrorMessage
-        {
-            get;
-            private set;
-        }
+        public string ReadErrorMessage { get; private set; }
 
         /// <summary>
         /// The contracts contained by this manifest, if any
         /// Item1: Contract name
         /// Item2: Contract version
         /// </summary>
-        internal ICollection<ApiContract> ApiContracts
-        {
-            get;
-            private set;
-        }
+        internal ICollection<ApiContract> ApiContracts { get; private set; }
 
         /// <summary>
         /// Decide on whether it is a framework extension sdk based on manifest's FrameworkIdentify and path
         /// </summary>
-        private bool IsFrameworkExtensionSdkManifest
-        {
-            get
-            {
-                if (_frameworkIdentities != null && _frameworkIdentities.Count > 0 && _pathToSdk != null && _pathToSdk.ToUpperInvariant().Contains(s_extensionSDKPathPattern))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
+        private bool IsFrameworkExtensionSdkManifest => _frameworkIdentities?.Count > 0
+                                                        && _pathToSdk?.ToUpperInvariant().Contains(s_extensionSDKPathPattern) == true;
 
         /// <summary>
         /// Load content of SDKManifest.xml
@@ -460,11 +310,10 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                if (File.Exists(sdkManifestPath))
+                if (FileSystems.Default.FileExists(sdkManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
-                    XmlReaderSettings readerSettings = new XmlReaderSettings();
-                    readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
                     using (XmlReader xmlReader = XmlReader.Create(sdkManifestPath, readerSettings))
                     {
@@ -476,7 +325,7 @@ namespace Microsoft.Build.Utilities
                     foreach (XmlNode childNode in doc.ChildNodes)
                     {
                         if (childNode.NodeType == XmlNodeType.Element &&
-                            String.Equals(childNode.Name, Elements.FileList, StringComparison.Ordinal))
+                            string.Equals(childNode.Name, Elements.FileList, StringComparison.Ordinal))
                         {
                             rootElement = (XmlElement)childNode;
                             break;
@@ -510,8 +359,8 @@ namespace Microsoft.Build.Utilities
                     throw;
                 }
 
-                this.ReadError = true;
-                this.ReadErrorMessage = e.Message;
+                ReadError = true;
+                ReadErrorMessage = e.Message;
             }
         }
 
@@ -525,7 +374,7 @@ namespace Microsoft.Build.Utilities
                 string value = attribute.Value.Trim();
                 if (value.Length > 0)
                 {
-                    if (attribute.Name.StartsWith(SDKManifest.Attributes.FrameworkIdentity, StringComparison.OrdinalIgnoreCase))
+                    if (attribute.Name.StartsWith(Attributes.FrameworkIdentity, StringComparison.OrdinalIgnoreCase))
                     {
                         if (_frameworkIdentities == null)
                         {
@@ -536,7 +385,7 @@ namespace Microsoft.Build.Utilities
                         continue;
                     }
 
-                    if (attribute.Name.StartsWith(SDKManifest.Attributes.APPX, StringComparison.OrdinalIgnoreCase))
+                    if (attribute.Name.StartsWith(Attributes.APPX, StringComparison.OrdinalIgnoreCase))
                     {
                         if (_appxLocations == null)
                         {
@@ -549,59 +398,55 @@ namespace Microsoft.Build.Utilities
 
                     switch (attribute.Name)
                     {
-                        case SDKManifest.Attributes.TargetPlatform:
+                        case Attributes.TargetPlatform:
                             TargetPlatform = value;
                             break;
-                        case SDKManifest.Attributes.TargetPlatformMinVersion:
+                        case Attributes.TargetPlatformMinVersion:
                             TargetPlatformMinVersion = value;
                             break;
-                        case SDKManifest.Attributes.TargetPlatformVersion:
+                        case Attributes.TargetPlatformVersion:
                             TargetPlatformVersion = value;
                             break;
-                        case SDKManifest.Attributes.MinVSVersion:
+                        case Attributes.MinVSVersion:
                             MinVSVersion = value;
                             break;
-                        case SDKManifest.Attributes.MinOSVersion:
+                        case Attributes.MinOSVersion:
                             _minOSVersion = value;
                             break;
-                        case SDKManifest.Attributes.MaxOSVersionTested:
+                        case Attributes.MaxOSVersionTested:
                             _maxOSVersionTested = value;
                             break;
-                        case SDKManifest.Attributes.MaxPlatformVersion:
+                        case Attributes.MaxPlatformVersion:
                             _maxPlatformVersion = value;
                             break;
-                        case SDKManifest.Attributes.PlatformIdentity:
+                        case Attributes.PlatformIdentity:
                             PlatformIdentity = value;
                             break;
-                        case SDKManifest.Attributes.SupportPrefer32Bit:
+                        case Attributes.SupportPrefer32Bit:
                             SupportPrefer32Bit = value;
                             break;
-                        case SDKManifest.Attributes.SupportsMultipleVersions:
-                            if (!ParseSupportMultipleVersions(value))
-                            {
-                                _supportsMultipleVersions = MultipleVersionSupport.Allow;
-                            }
-
+                        case Attributes.SupportsMultipleVersions:
+                            _supportsMultipleVersions = ParseSupportMultipleVersions(value);
                             break;
-                        case SDKManifest.Attributes.SDKType:
-                            Enum.TryParse<SDKType>(value, out _sdkType);
+                        case Attributes.SDKType:
+                            Enum.TryParse(value, out _sdkType);
                             break;
-                        case SDKManifest.Attributes.DisplayName:
+                        case Attributes.DisplayName:
                             DisplayName = value;
                             break;
-                        case SDKManifest.Attributes.MoreInfo:
+                        case Attributes.MoreInfo:
                             MoreInfo = value;
                             break;
-                        case SDKManifest.Attributes.CopyRedistToSubDirectory:
+                        case Attributes.CopyRedistToSubDirectory:
                             CopyRedistToSubDirectory = value;
                             break;
-                        case SDKManifest.Attributes.SupportedArchitectures:
+                        case Attributes.SupportedArchitectures:
                             SupportedArchitectures = value;
                             break;
-                        case SDKManifest.Attributes.DependsOnSDK:
+                        case Attributes.DependsOnSDK:
                             DependsOnSDK = value;
                             break;
-                        case SDKManifest.Attributes.ProductFamilyName:
+                        case Attributes.ProductFamilyName:
                             ProductFamilyName = value;
                             break;
                     }
@@ -610,12 +455,12 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Parse the multipleversions string and set supportsMultipleVersions if it can be parsed correctly.
+        /// Parse the multipleversions string. Returns MultipleVersionSupport.Allow if it cannot be parsed correctly.
         /// </summary>
-        private bool ParseSupportMultipleVersions(string multipleVersionsValue)
-        {
-            return !String.IsNullOrEmpty(multipleVersionsValue) && Enum.TryParse<MultipleVersionSupport>(multipleVersionsValue, /*ignoreCase*/true, out _supportsMultipleVersions);
-        }
+        private static MultipleVersionSupport ParseSupportMultipleVersions(string multipleVersionsValue)
+            => !string.IsNullOrEmpty(multipleVersionsValue) && Enum.TryParse(multipleVersionsValue, /*ignoreCase*/true, out MultipleVersionSupport supportsMultipleVersions)
+            ? supportsMultipleVersions
+            : MultipleVersionSupport.Allow;
 
         /// <summary>
         /// Helper class with attributes of SDKManifest.xml
@@ -760,7 +605,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Helper class with elements of SDKManifest.xml
         /// </summary>
-        internal static class Elements
+        private static class Elements
         {
             /// <summary>
             /// Root element 

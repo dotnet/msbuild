@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -40,15 +42,12 @@ namespace Microsoft.Build.Evaluation
 
                 _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
-                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
+                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.FileSystem);
 
                 _itemSpec.Expander = _expander;
             }
 
-            /// <summary>
-            /// Cache used for caching IO operation results
-            /// </summary>
-            protected ConcurrentDictionary<string, ImmutableArray<string>> EntriesCache => _lazyEvaluator._entriesCache;
+            protected EngineFileUtilities EngineFileUtilities => _lazyEvaluator.EngineFileUtilities;
 
             public virtual void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
@@ -195,7 +194,15 @@ namespace Microsoft.Build.Evaluation
                         {
                             // Because of the checking above, it should be safe to expand metadata in conditions; the condition
                             // will be true for either all the items or none
-                            if (!EvaluateCondition(metadataElement.Condition, metadataElement, metadataExpansionOptions, ParserOptions.AllowAll, _expander, _lazyEvaluator))
+                            if (
+                                !EvaluateCondition(
+                                    metadataElement.Condition,
+                                    metadataElement,
+                                    metadataExpansionOptions,
+                                    ParserOptions.AllowAll,
+                                    _expander,
+                                    _lazyEvaluator
+                                    ))
                             {
                                 continue;
                             }

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
 
 
 using System;
@@ -184,7 +183,7 @@ namespace Microsoft.Build.Globbing
                 bool needsRecursion;
                 bool isLegalFileSpec;
 
-                FileMatcher.GetFileSpecInfo(
+                FileMatcher.Default.GetFileSpecInfo(
                     fileSpec,
                     out fixedDirectoryPart,
                     out wildcardDirectoryPart,
@@ -192,7 +191,6 @@ namespace Microsoft.Build.Globbing
                     out matchFileExpression,
                     out needsRecursion,
                     out isLegalFileSpec,
-                    FileMatcher.s_defaultGetFileSystemEntries,
                     (fixedDirPart, wildcardDirPart, filePart) =>
                     {
                         var normalizedFixedPart = NormalizeTheFixedDirectoryPartAgainstTheGlobRoot(fixedDirPart, globRoot);

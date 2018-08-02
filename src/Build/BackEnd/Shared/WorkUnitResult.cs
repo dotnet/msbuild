@@ -1,13 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The class representing a result from running a task.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -104,27 +98,21 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Get the result code.
         /// </summary>
-        internal WorkUnitResultCode ResultCode
-        {
-            get { return _resultCode; }
-        }
+        internal WorkUnitResultCode ResultCode => _resultCode;
 
         /// <summary>
         /// Get the action code.
         /// </summary>
         internal WorkUnitActionCode ActionCode
         {
-            get { return _actionCode; }
-            set { _actionCode = value; }
+            get => _actionCode;
+            set => _actionCode = value;
         }
 
         /// <summary>
         /// Get the exception
         /// </summary>
-        internal Exception Exception
-        {
-            get { return _exception; }
-        }
+        internal Exception Exception => _exception;
 
         #region INodePacketTranslatable Members
 
@@ -143,7 +131,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal WorkUnitResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static WorkUnitResult FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new WorkUnitResult(translator);
         }

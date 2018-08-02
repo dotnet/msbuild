@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Wraps a task factory and provides helper methods to gather the parameters</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Reflection;

@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Test the logging service component</summary>
-//-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd;
@@ -19,6 +16,8 @@ using System.IO;
 using System.Threading;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.Logging
@@ -756,6 +755,288 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         #endregion
+
+        private static readonly BuildWarningEventArgs BuildWarningEventForTreatAsErrorOrMessageTests = new BuildWarningEventArgs("subcategory", "C94A41A90FFB4EF592BF98BA59BEE8AF", "file", 1, 2, 3, 4, "message", "helpKeyword", "senderName");
+
+        /// <summary>
+        /// Verifies that a warning is logged as an error when it's warning code specified.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0, 2)]
+        [InlineData(1, 1)]
+        [InlineData(1, 2)]
+        public void TreatWarningsAsErrorWhenSpecified(int loggerMode, int nodeId)
+        {
+            HashSet<string> warningsAsErrors = new HashSet<string>
+            {
+                "123",
+                BuildWarningEventForTreatAsErrorOrMessageTests.Code,
+                "ABC",
+            };
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsErrors);
+
+            BuildErrorEventArgs actualBuildEvent = logger.Errors.ShouldHaveSingleItem();
+
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Code, actualBuildEvent.Code);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.File, actualBuildEvent.File);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Message, actualBuildEvent.Message);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Timestamp, actualBuildEvent.Timestamp);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is not treated as an error when other warning codes are specified.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsErrorWhenNotSpecified()
+        {
+            HashSet<string> warningsAsErrors = new HashSet<string>
+            {
+                "123",
+                "ABC",
+            };
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, warningsAsErrors: warningsAsErrors);
+
+            var actualEvent = logger.Warnings.ShouldHaveSingleItem();
+
+            actualEvent.ShouldBe(BuildWarningEventForTreatAsErrorOrMessageTests);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is not treated as an error when other warning codes are specified.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0, 2)]
+        [InlineData(1, 1)]
+        [InlineData(1, 2)]
+        public void TreatWarningsAsErrorWhenAllSpecified(int loggerMode, int nodeId)
+        {
+            HashSet<string> warningsAsErrors = new HashSet<string>();
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsErrors);
+
+            logger.Errors.ShouldHaveSingleItem();
+        }
+
+        /// <summary>
+        /// Verifies that a warning is logged as a low importance message when it's warning code is specified.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0, 2)]
+        [InlineData(1, 1)]
+        [InlineData(1, 2)]
+        public void TreatWarningsAsMessagesWhenSpecified(int loggerMode, int nodeId)
+        {
+            HashSet<string> warningsAsMessages = new HashSet<string>
+            {
+                "FOO",
+                BuildWarningEventForTreatAsErrorOrMessageTests.Code,
+                "BAR",
+            };
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsMessages: warningsAsMessages);
+
+            BuildMessageEventArgs actualBuildEvent = logger.BuildMessageEvents.ShouldHaveSingleItem();
+
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Code, actualBuildEvent.Code);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.File, actualBuildEvent.File);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(MessageImportance.Low, actualBuildEvent.Importance);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Message, actualBuildEvent.Message);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Timestamp, actualBuildEvent.Timestamp);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is not treated as a low importance message when other warning codes are specified.
+        /// </summary>
+        [Fact]
+        public void NotTreatWarningsAsMessagesWhenNotSpecified()
+        {
+            HashSet<string> warningsAsMessages = new HashSet<string>
+            {
+                "FOO",
+                "BAR",
+            };
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, warningsAsMessages: warningsAsMessages);
+
+            logger.Warnings.ShouldHaveSingleItem();
+        }
+
+        /// <summary>
+        /// Verifies that warnings are treated as an error for a particular project when codes are specified.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0, 2)]
+        [InlineData(1, 1)]
+        [InlineData(1, 2)]
+        public void TreatWarningsAsErrorByProjectWhenSpecified(int loggerMode, int nodeId)
+        {
+            HashSet<string> warningsAsErrorsForProject = new HashSet<string>
+            {
+                "123",
+                BuildWarningEventForTreatAsErrorOrMessageTests.Code,
+                "ABC"
+            };
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsErrorsForProject: warningsAsErrorsForProject);
+
+            BuildErrorEventArgs actualBuildEvent = logger.Errors.ShouldHaveSingleItem();
+
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Code, actualBuildEvent.Code);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.File, actualBuildEvent.File);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Message, actualBuildEvent.Message);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Timestamp, actualBuildEvent.Timestamp);
+        }
+
+        /// <summary>
+        /// Verifies that all warnings are treated as errors for a particular project.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0, 2)]
+        [InlineData(1, 1)]
+        [InlineData(1, 2)]
+        public void TreatWarningsAsErrorByProjectWhenAllSpecified(int loggerMode, int nodeId)
+        {
+            HashSet<string> warningsAsErrorsForProject = new HashSet<string>();
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsErrorsForProject: warningsAsErrorsForProject);
+
+            logger.Errors.ShouldHaveSingleItem();
+        }
+
+        /// <summary>
+        /// Verifies that warnings are treated as messages for a particular project.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 1)]
+        [InlineData(0, 2)]
+        [InlineData(1, 1)]
+        [InlineData(1, 2)]
+        public void TreatWarningsAsMessagesByProjectWhenSpecified(int loggerMode, int nodeId)
+        {
+            HashSet<string> warningsAsMessagesForProject = new HashSet<string>
+            {
+                "123",
+                BuildWarningEventForTreatAsErrorOrMessageTests.Code,
+                "ABC"
+            };
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsMessagesForProject: warningsAsMessagesForProject);
+
+            BuildMessageEventArgs actualBuildEvent = logger.BuildMessageEvents.ShouldHaveSingleItem();
+
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.BuildEventContext, actualBuildEvent.BuildEventContext);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Code, actualBuildEvent.Code);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ColumnNumber, actualBuildEvent.ColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndColumnNumber, actualBuildEvent.EndColumnNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.EndLineNumber, actualBuildEvent.EndLineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.File, actualBuildEvent.File);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.HelpKeyword, actualBuildEvent.HelpKeyword);
+            Assert.Equal(MessageImportance.Low, actualBuildEvent.Importance);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.LineNumber, actualBuildEvent.LineNumber);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Message, actualBuildEvent.Message);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.ProjectFile, actualBuildEvent.ProjectFile);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.SenderName, actualBuildEvent.SenderName);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Subcategory, actualBuildEvent.Subcategory);
+            Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Timestamp, actualBuildEvent.Timestamp);
+        }
+
+        private MockLogger GetLoggedEventsWithWarningsAsErrorsOrMessages(
+            BuildEventArgs buildEvent,
+            LoggerMode loggerMode = LoggerMode.Synchronous,
+            int nodeId = 1,
+            ISet<string> warningsAsErrors = null,
+            ISet<string> warningsAsMessages = null,
+            ISet<string> warningsAsErrorsForProject = null,
+            ISet<string> warningsAsMessagesForProject = null)
+        {
+            IBuildComponentHost host = new MockHost();
+
+            BuildEventContext buildEventContext = new BuildEventContext(
+                submissionId: 0,
+                nodeId: 1,
+                projectInstanceId: 2,
+                projectContextId: -1,
+                targetId: -1,
+                taskId: -1);
+
+            BuildRequestData buildRequestData = new BuildRequestData("projectFile", new Dictionary<string, string>(), "15.0", new[] { "Build" }, null);
+
+            ConfigCache configCache = host.GetComponent(BuildComponentType.ConfigCache) as ConfigCache;
+
+            configCache.AddConfiguration(new BuildRequestConfiguration(buildEventContext.ProjectInstanceId, buildRequestData, buildRequestData.ExplicitlySpecifiedToolsVersion));
+
+            MockLogger logger = new MockLogger();
+
+            ILoggingService loggingService = LoggingService.CreateLoggingService(loggerMode, nodeId);
+
+            ((IBuildComponent)loggingService).InitializeComponent(host);
+
+            loggingService.RegisterLogger(logger);
+
+            BuildEventContext projectStarted = loggingService.LogProjectStarted(buildEventContext, 0, buildEventContext.ProjectInstanceId, BuildEventContext.Invalid, "projectFile", "Build", Enumerable.Empty<DictionaryEntry>(), Enumerable.Empty<DictionaryEntry>());
+
+            if (warningsAsErrorsForProject != null)
+            {
+                loggingService.AddWarningsAsErrors(projectStarted, warningsAsErrorsForProject);
+            }
+
+            if (warningsAsMessagesForProject != null)
+            {
+                loggingService.AddWarningsAsMessages(projectStarted, warningsAsMessagesForProject);
+            }
+
+            loggingService.WarningsAsErrors = warningsAsErrors;
+            loggingService.WarningsAsMessages = warningsAsMessages;
+
+            buildEvent.BuildEventContext = projectStarted;
+
+            loggingService.LogBuildEvent(buildEvent);
+
+            loggingService.LogProjectFinished(projectStarted, "projectFile", true);
+
+            while (logger.ProjectFinishedEvents.Count == 0)
+            {
+                Thread.Sleep(100);
+            }
+
+            ((IBuildComponent)loggingService).ShutdownComponent();
+
+            return logger;
+        }
 
         #region PrivateMethods
 

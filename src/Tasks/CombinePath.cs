@@ -3,9 +3,7 @@
 
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -17,33 +15,13 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class CombinePath : TaskExtension
     {
-        /// <summary>
-        /// Default constructor.  Does nothing.
-        /// </summary>
-        public CombinePath()
-        {
-        }
-
-        private string _basePath;
         private ITaskItem[] _paths;
-        private ITaskItem[] _combinedPaths;
 
         /// <summary>
         /// The base path, the first parameter into Path.Combine.  Can be a relative path,
         /// absolute path, or (blank).
         /// </summary>
-        public string BasePath
-        {
-            get
-            {
-                return _basePath;
-            }
-
-            set
-            {
-                _basePath = value;
-            }
-        }
+        public string BasePath { get; set; }
 
         /// <summary>
         /// The list of paths to combine with the base path.  These can be relative paths
@@ -54,14 +32,11 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_paths, "paths");
+                ErrorUtilities.VerifyThrowArgumentNull(_paths, nameof(Paths));
                 return _paths;
             }
 
-            set
-            {
-                _paths = value;
-            }
+            set => _paths = value;
         }
 
         /// <summary>
@@ -69,18 +44,7 @@ namespace Microsoft.Build.Tasks
         /// path with each of the paths passed in.
         /// </summary>
         [Output]
-        public ITaskItem[] CombinedPaths
-        {
-            get
-            {
-                return _combinedPaths;
-            }
-
-            set
-            {
-                _combinedPaths = value;
-            }
-        }
+        public ITaskItem[] CombinedPaths { get; set; }
 
         /// <summary>
         /// Calls Path.Combine for each of the inputs.  Preserves metadata.
@@ -88,20 +52,20 @@ namespace Microsoft.Build.Tasks
         /// <returns>true on success, false on failure</returns>
         public override bool Execute()
         {
-            if (this.BasePath == null)
+            if (BasePath == null)
             {
-                this.BasePath = String.Empty;
+                BasePath = String.Empty;
             }
 
-            List<ITaskItem> combinedPathsList = new List<ITaskItem>();
+            var combinedPathsList = new List<ITaskItem>();
 
-            foreach (ITaskItem path in this.Paths)
+            foreach (ITaskItem path in Paths)
             {
-                TaskItem combinedPath = new TaskItem(path);
+                var combinedPath = new TaskItem(path);
 
                 try
                 {
-                    combinedPath.ItemSpec = Path.Combine(_basePath, path.ItemSpec);
+                    combinedPath.ItemSpec = Path.Combine(BasePath, path.ItemSpec);
                     combinedPathsList.Add(combinedPath);
                 }
                 catch (ArgumentException e)
@@ -110,7 +74,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            this.CombinedPaths = combinedPathsList.ToArray();
+            CombinedPaths = combinedPathsList.ToArray();
             return !Log.HasLoggedErrors;
         }
     }

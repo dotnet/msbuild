@@ -23,7 +23,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildErrorEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildErrorEventArgs e, bool showProjectFile)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "error" should not be localized
             return FormatEventMessage("error", e.Subcategory, e.Message,
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildWarningEventArgs e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildWarningEventArgs e, bool showProjectFile)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "warning" should not be localized
             return FormatEventMessage("warning", e.Subcategory, e.Message,
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted message string.</returns>
         internal static string FormatEventMessage(BuildMessageEventArgs e, bool showProjectFile)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(e, "e");
+            ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
 
             // "message" should not be localized
             return FormatEventMessage("message", e.Subcategory, e.Message,

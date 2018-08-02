@@ -535,20 +535,12 @@ namespace Microsoft.Build.Internal
 
             if (String.IsNullOrEmpty(localAppData))
             {
-#if FEATURE_SPECIAL_FOLDERS
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-#else
-                localAppData = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.LocalApplicationData);
-#endif
             }
 
             if (String.IsNullOrEmpty(localAppData))
             {
-#if FEATURE_SPECIAL_FOLDERS
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-#else
-                localAppData = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ApplicationData);
-#endif
             }
 
             if (String.IsNullOrEmpty(localAppData))
@@ -573,7 +565,7 @@ namespace Microsoft.Build.Internal
                     string environmentVariableName = environmentVariable.Key;
 
                     if (XmlUtilities.IsValidElementName(environmentVariableName) &&
-                        XMakeElements.IllegalItemPropertyNames[environmentVariableName] == null &&
+                        !XMakeElements.ReservedItemNames.Contains(environmentVariableName) &&
                         !ReservedPropertyNames.IsReservedProperty(environmentVariableName))
                     {
                         ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);

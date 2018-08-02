@@ -37,18 +37,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     public sealed class OutputMessage
     {
         private readonly string[] _arguments;
-        private readonly string _name;
-        private readonly string _text;
-        private readonly OutputMessageType _type;
 
         internal OutputMessage(OutputMessageType type, string name, string text, params string[] arguments)
         {
-            if (name == null) throw new ArgumentNullException("name");
-            if (arguments == null) throw new ArgumentNullException("arguments");
-            _type = type;
-            _name = name;
-            _arguments = arguments;
-            _text = text;
+            Type = type;
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            _arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
+            Text = text;
         }
 
         /// <summary>
@@ -60,17 +55,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <summary>
         /// Specifies an identifier for the message.
         /// </summary>
-        public string Name { get { return _name; } }
+        public string Name { get; }
 
         /// <summary>
         /// Contains the text of the message.
         /// </summary>
-        public string Text { get { return _text; } }
+        public string Text { get; }
 
         /// <summary>
         /// Indicates whether the message is an error, warning, or informational message.
         /// </summary>
-        public OutputMessageType Type { get { return _type; } }
+        public OutputMessageType Type { get; }
     }
 
     /// <summary>
@@ -79,10 +74,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class OutputMessageCollection : IEnumerable
     {
-        private readonly System.Resources.ResourceManager _taskResources = Microsoft.Build.Shared.AssemblyResources.PrimaryResources;
+        private readonly System.Resources.ResourceManager _taskResources = Shared.AssemblyResources.PrimaryResources;
         private readonly List<OutputMessage> _list = new List<OutputMessage>();
-        private int _errorCount = 0;
-        private int _warningCount = 0;
 
         internal OutputMessageCollection()
         {
@@ -93,26 +86,27 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <param name="index">The zero-based index of the entry to get.</param>
         /// <returns>The file reference instance.</returns>
-        public OutputMessage this[int index]
-        {
-            get { return (OutputMessage)_list[index]; }
-        }
+        public OutputMessage this[int index] => _list[index];
 
         internal void AddErrorMessage(string taskResourceName, params string[] arguments)
         {
-            ++_errorCount;
+            ++ErrorCount;
             string taskText = _taskResources.GetString(taskResourceName);
             if (!String.IsNullOrEmpty(taskText))
+            {
                 taskText = String.Format(CultureInfo.CurrentCulture, taskText, arguments);
+            }
             _list.Add(new OutputMessage(OutputMessageType.Error, taskResourceName, taskText, arguments));
         }
 
         internal void AddWarningMessage(string taskResourceName, params string[] arguments)
         {
-            ++_warningCount;
+            ++WarningCount;
             string taskText = _taskResources.GetString(taskResourceName);
             if (!String.IsNullOrEmpty(taskText))
+            {
                 taskText = String.Format(CultureInfo.CurrentCulture, taskText, arguments);
+            }
             _list.Add(new OutputMessage(OutputMessageType.Warning, taskResourceName, taskText, arguments));
         }
 
@@ -122,20 +116,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public void Clear()
         {
             _list.Clear();
-            _errorCount = 0;
-            _warningCount = 0;
+            ErrorCount = 0;
+            WarningCount = 0;
         }
 
         /// <summary>
         /// Gets the number of error messages in the collecction.
         /// </summary>
-        public int ErrorCount
-        {
-            get
-            {
-                return _errorCount;
-            }
-        }
+        public int ErrorCount { get; private set; }
 
         /// <summary>
         /// Returns an enumerator that can iterate through the collection.
@@ -160,18 +148,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         break;
                 }
             }
-            return _errorCount <= 0;
+            return ErrorCount <= 0;
         }
 
         /// <summary>
         /// Gets the number of warning messages in the collecction.
         /// </summary>
-        public int WarningCount
-        {
-            get
-            {
-                return _warningCount;
-            }
-        }
+        public int WarningCount { get; private set; }
     }
 }

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.Utilities
 {
     [Microsoft.Build.Framework.LoadInSeparateAppDomainAttribute]
@@ -18,18 +20,17 @@ namespace Microsoft.Build.Utilities
     public partial class AssemblyFoldersExInfo
     {
         public AssemblyFoldersExInfo(Microsoft.Win32.RegistryHive hive, Microsoft.Win32.RegistryView view, string registryKey, string directoryPath, System.Version targetFrameworkVersion) { }
-        public string DirectoryPath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public Microsoft.Win32.RegistryHive Hive { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string Key { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.Version TargetFrameworkVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public Microsoft.Win32.RegistryView View { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string DirectoryPath { get { throw null; } }
+        public Microsoft.Win32.RegistryHive Hive { get { throw null; } }
+        public string Key { get { throw null; } }
+        public System.Version TargetFrameworkVersion { get { throw null; } }
+        public Microsoft.Win32.RegistryView View { get { throw null; } }
     }
-    [System.Diagnostics.DebuggerDisplayAttribute("DirectoryPath: {DirectoryPath}, TargetFrameworkVersion = {TargetFrameworkVersion}")]
     public partial class AssemblyFoldersFromConfigInfo
     {
         public AssemblyFoldersFromConfigInfo(string directoryPath, System.Version targetFrameworkVersion) { }
-        public string DirectoryPath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.Version TargetFrameworkVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string DirectoryPath { get { throw null; } }
+        public System.Version TargetFrameworkVersion { get { throw null; } }
     }
     public partial class CanonicalTrackedInputFiles
     {
@@ -224,8 +225,11 @@ namespace Microsoft.Build.Utilities
     public partial class MuxLogger : Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger
     {
         public MuxLogger() { }
-        public string Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public Microsoft.Build.Framework.LoggerVerbosity Verbosity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool IncludeEvaluationMetaprojects { get { throw null; } set { } }
+        public bool IncludeEvaluationProfiles { get { throw null; } set { } }
+        public bool IncludeTaskInputs { get { throw null; } set { } }
+        public string Parameters { get { throw null; } set { } }
+        public Microsoft.Build.Framework.LoggerVerbosity Verbosity { get { throw null; } set { } }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource) { }
         public void Initialize(Microsoft.Build.Framework.IEventSource eventSource, int maxNodeCount) { }
         public void RegisterLogger(int submissionId, Microsoft.Build.Framework.ILogger logger) { }
@@ -245,27 +249,27 @@ namespace Microsoft.Build.Utilities
     {
         public SDKManifest(string pathToSdk) { }
         public System.Collections.Generic.IDictionary<string, string> AppxLocations { get { throw null; } }
-        public string CopyRedistToSubDirectory { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string DependsOnSDK { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string DisplayName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string CopyRedistToSubDirectory { get { throw null; } }
+        public string DependsOnSDK { get { throw null; } }
+        public string DisplayName { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, string> FrameworkIdentities { get { throw null; } }
-        public string FrameworkIdentity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string FrameworkIdentity { get { throw null; } }
         public string MaxOSVersionTested { get { throw null; } }
         public string MaxPlatformVersion { get { throw null; } }
         public string MinOSVersion { get { throw null; } }
-        public string MinVSVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string MoreInfo { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string PlatformIdentity { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string ProductFamilyName { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public bool ReadError { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string ReadErrorMessage { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string MinVSVersion { get { throw null; } }
+        public string MoreInfo { get { throw null; } }
+        public string PlatformIdentity { get { throw null; } }
+        public string ProductFamilyName { get { throw null; } }
+        public bool ReadError { get { throw null; } }
+        public string ReadErrorMessage { get { throw null; } }
         public Microsoft.Build.Utilities.SDKType SDKType { get { throw null; } }
-        public string SupportedArchitectures { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string SupportPrefer32Bit { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string SupportedArchitectures { get { throw null; } }
+        public string SupportPrefer32Bit { get { throw null; } }
         public Microsoft.Build.Utilities.MultipleVersionSupport SupportsMultipleVersions { get { throw null; } }
-        public string TargetPlatform { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string TargetPlatformMinVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public string TargetPlatformVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string TargetPlatform { get { throw null; } }
+        public string TargetPlatformMinVersion { get { throw null; } }
+        public string TargetPlatformVersion { get { throw null; } }
         public static partial class Attributes
         {
             public const string APPX = "APPX";
@@ -318,6 +322,7 @@ namespace Microsoft.Build.Utilities
         Version462 = 10,
         Version47 = 11,
         Version471 = 12,
+        Version472 = 13,
         VersionLatest = 10,
     }
     public partial class TargetPlatformSDK : System.IEquatable<Microsoft.Build.Utilities.TargetPlatformSDK>
@@ -327,8 +332,8 @@ namespace Microsoft.Build.Utilities
         public System.Version MinOSVersion { get { throw null; } }
         public System.Version MinVSVersion { get { throw null; } }
         public string Path { get { throw null; } set { } }
-        public string TargetPlatformIdentifier { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
-        public System.Version TargetPlatformVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public string TargetPlatformIdentifier { get { throw null; } }
+        public System.Version TargetPlatformVersion { get { throw null; } }
         public bool ContainsPlatform(string targetPlatformIdentifier, string targetPlatformVersion) { throw null; }
         public bool Equals(Microsoft.Build.Utilities.TargetPlatformSDK other) { throw null; }
         public override bool Equals(object obj) { throw null; }
@@ -461,11 +466,11 @@ namespace Microsoft.Build.Utilities
         public static System.Collections.Generic.IList<string> GetPathToReferenceAssemblies(string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths, System.Runtime.Versioning.FrameworkName frameworkName) { throw null; }
         public static System.Collections.Generic.IList<string> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile) { throw null; }
         public static System.Collections.Generic.IList<string> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string targetFrameworkRootPath) { throw null; }
-        public static System.Collections.Generic.IList<string> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths=null) { throw null; }
+        public static System.Collections.Generic.IList<string> GetPathToReferenceAssemblies(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths) { throw null; }
         public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile) { throw null; }
         public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget) { throw null; }
         public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget, string targetFrameworkRootPath) { throw null; }
-        public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths=null) { throw null; }
+        public static string GetPathToStandardLibraries(string targetFrameworkIdentifier, string targetFrameworkVersion, string targetFrameworkProfile, string platformTarget, string targetFrameworkRootPath, string targetFrameworkFallbackSearchPaths) { throw null; }
         public static string GetPathToSystemFile(string fileName) { throw null; }
         [System.ObsoleteAttribute("Consider using GetPlatformSDKLocation instead")]
         public static string GetPathToWindowsSdk(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version, Microsoft.Build.Utilities.VisualStudioVersion visualStudioVersion) { throw null; }
@@ -517,10 +522,10 @@ namespace Microsoft.Build.Utilities
         protected ToolTask() { }
         protected ToolTask(System.Resources.ResourceManager taskResources) { }
         protected ToolTask(System.Resources.ResourceManager taskResources, string helpKeywordPrefix) { }
-        public bool EchoOff { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool EchoOff { get { throw null; } set { } }
         [System.ObsoleteAttribute("Use EnvironmentVariables property")]
         protected virtual System.Collections.Generic.Dictionary<string, string> EnvironmentOverride { get { throw null; } }
-        public string[] EnvironmentVariables { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string[] EnvironmentVariables { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public int ExitCode { get { throw null; } }
         protected virtual bool HasLoggedErrors { get { throw null; } }
@@ -534,14 +539,14 @@ namespace Microsoft.Build.Utilities
         public string StandardOutputImportance { get { throw null; } set { } }
         protected Microsoft.Build.Framework.MessageImportance StandardOutputImportanceToUse { get { throw null; } }
         protected virtual Microsoft.Build.Framework.MessageImportance StandardOutputLoggingImportance { get { throw null; } }
-        protected int TaskProcessTerminationTimeout { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        protected int TaskProcessTerminationTimeout { get { throw null; } set { } }
         public virtual int Timeout { get { throw null; } set { } }
-        protected System.Threading.ManualResetEvent ToolCanceled { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        protected System.Threading.ManualResetEvent ToolCanceled { get { throw null; } }
         public virtual string ToolExe { get { throw null; } set { } }
         protected abstract string ToolName { get; }
         public string ToolPath { get { throw null; } set { } }
-        public bool UseCommandProcessor { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public bool YieldDuringToolExecution { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool UseCommandProcessor { get { throw null; } set { } }
+        public bool YieldDuringToolExecution { get { throw null; } set { } }
         protected virtual string AdjustCommandsForOperatingSystem(string input) { throw null; }
         protected virtual bool CallHostObjectToExecute() { throw null; }
         public virtual void Cancel() { }

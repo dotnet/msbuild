@@ -1,14 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface for the build request engine.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
 
@@ -128,10 +121,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the current engine status.
         /// </summary>
-        BuildRequestEngineStatus Status
-        {
-            get;
-        }
+        BuildRequestEngineStatus Status { get; }
         #endregion
 
         #region Methods

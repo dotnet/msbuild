@@ -5,8 +5,10 @@ using Microsoft.Build.Collections;
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -275,14 +277,14 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.GetTarget(targetName);
             }
 
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
             {
-                _wrappedData.InitializeForEvaluation(toolsetProvider);
+                _wrappedData.InitializeForEvaluation(toolsetProvider, fileSystem);
             }
 
-            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
+            public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
             {
-                _wrappedData.RecordImport(importElement, import, versionEvaluated);
+                _wrappedData.RecordImport(importElement, import, versionEvaluated, sdkResult);
             }
 
             public void RecordImportWithDuplicates(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)

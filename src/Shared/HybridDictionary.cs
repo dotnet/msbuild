@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A dictionary which changes its backing store to keep memory use low.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -309,7 +305,7 @@ namespace Microsoft.Build.Collections
 
                 if (store is KeyValuePair<TKey, TValue>)
                 {
-                    var single = ((KeyValuePair<TKey, TValue>)store);
+                    var single = (KeyValuePair<TKey, TValue>)store;
                     if (comparer.Equals(single.Key, key))
                     {
                         store = new KeyValuePair<TKey, TValue>(key, value);
@@ -352,7 +348,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(TKey key, TValue value)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(key, "key");
+            ErrorUtilities.VerifyThrowArgumentNull(key, nameof(key));
 
             if (store == null)
             {
@@ -362,7 +358,7 @@ namespace Microsoft.Build.Collections
 
             if (store is KeyValuePair<TKey, TValue>)
             {
-                var single = ((KeyValuePair<TKey, TValue>)store);
+                var single = (KeyValuePair<TKey, TValue>)store;
                 if (comparer.Equals(single.Key, key))
                 {
                     throw new ArgumentException("A value with the same key is already in the collection.");
@@ -403,7 +399,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(TKey key)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(key, "key");
+            ErrorUtilities.VerifyThrowArgumentNull(key, nameof(key));
 
             if (store == null)
             {
@@ -421,8 +417,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            var list = store as List<KeyValuePair<TKey, TValue>>;
-            if (list != null)
+            if (store is List<KeyValuePair<TKey, TValue>> list)
             {
                 for (int i = 0; i < list.Count; i++)
                 {
@@ -436,8 +431,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            var dictionary = store as Dictionary<TKey, TValue>;
-            if (dictionary != null)
+            if (store is Dictionary<TKey, TValue> dictionary)
             {
                 return dictionary.Remove(key);
             }
@@ -453,74 +447,61 @@ namespace Microsoft.Build.Collections
         {
             value = null;
 
-            if (store == null)
+            switch (store)
             {
-                return false;
-            }
-
-            if (store is KeyValuePair<TKey, TValue>)
-            {
-                var single = ((KeyValuePair<TKey, TValue>)store);
-                if (comparer.Equals(single.Key, key))
-                {
-                    value = single.Value;
-                    return true;
-                }
-                else
+                case null:
                 {
                     return false;
                 }
-            }
-
-            var list = store as List<KeyValuePair<TKey, TValue>>;
-            if (list != null)
-            {
-                foreach (var entry in list)
+                case KeyValuePair<TKey, TValue> pair:
                 {
-                    if (comparer.Equals(entry.Key, key))
+                    if (comparer.Equals(pair.Key, key))
                     {
-                        value = entry.Value;
+                        value = pair.Value;
                         return true;
                     }
+
+                    return false;
                 }
+                case List<KeyValuePair<TKey, TValue>> list:
+                {
+                    foreach (KeyValuePair<TKey, TValue> entry in list)
+                    {
+                        if (comparer.Equals(entry.Key, key))
+                        {
+                            value = entry.Value;
+                            return true;
+                        }
+                    }
 
-                return false;
+                    return false;
+                }
+                case Dictionary<TKey, TValue> dictionary:
+                {
+                    return dictionary.TryGetValue(key, out value);
+                }
+                default:
+                {
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    return false;
+                }
             }
-
-            var dictionary = store as Dictionary<TKey, TValue>;
-            if (dictionary != null)
-            {
-                return dictionary.TryGetValue(key, out value);
-            }
-
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-            return false;
         }
 
         /// <summary>
         /// Adds a key/value pair to the dictionary.
         /// </summary>
-        public void Add(KeyValuePair<TKey, TValue> item)
-        {
-            Add(item.Key, item.Value);
-        }
+        public void Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
 
         /// <summary>
         /// Clears the dictionary.
         /// </summary>
-        public void Clear()
-        {
-            store = null;
-        }
+        public void Clear() => store = null;
 
         /// <summary>
         /// Returns true of the dictionary contains the key/value pair.
         /// </summary>
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            TValue value;
-            return (TryGetValue(item.Key, out value) && (item.Value == value));
-        }
+        public bool Contains(KeyValuePair<TKey, TValue> item) => TryGetValue(item.Key, out TValue value) && item.Value == value;
 
         /// <summary>
         /// Copies the contents of the dictionary to the specified array.
@@ -528,7 +509,7 @@ namespace Microsoft.Build.Collections
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
             int i = arrayIndex;
-            foreach (var entry in this)
+            foreach (KeyValuePair<TKey, TValue> entry in this)
             {
                 array[i] = new KeyValuePair<TKey, TValue>(entry.Key, entry.Value);
             }
@@ -538,49 +519,43 @@ namespace Microsoft.Build.Collections
         /// Removed the specified key/value pair from the dictionary.
         /// NOT IMPLEMENTED.
         /// </summary>
-        public bool Remove(KeyValuePair<TKey, TValue> item)
-        {
-            return (Contains(item) && Remove(item.Key));
-        }
+        public bool Remove(KeyValuePair<TKey, TValue> item) => Contains(item) && Remove(item.Key);
 
         /// <summary>
         /// Gets an enumerator over the key/value pairs in the dictionary.
         /// </summary>
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            if (store == null)
+            switch (store)
             {
-                return ReadOnlyEmptyCollection<KeyValuePair<TKey, TValue>>.Instance.GetEnumerator();
+                case null:
+                {
+                    return ReadOnlyEmptyCollection<KeyValuePair<TKey, TValue>>.Instance.GetEnumerator();
+                }
+                case KeyValuePair<TKey, TValue> pair:
+                {
+                    return new SingleEnumerator(pair);
+                }
+                case List<KeyValuePair<TKey, TValue>> list:
+                {
+                    return list.GetEnumerator();
+                }
+                case Dictionary<TKey, TValue> dictionary:
+                {
+                    return dictionary.GetEnumerator();
+                }
+                default:
+                {
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    return null;
+                }
             }
-
-            if (store is KeyValuePair<TKey, TValue>)
-            {
-                return new SingleEnumerator((KeyValuePair<TKey, TValue>)store);
-            }
-
-            var list = store as List<KeyValuePair<TKey, TValue>>;
-            if (list != null)
-            {
-                return list.GetEnumerator();
-            }
-
-            var dictionary = store as Dictionary<TKey, TValue>;
-            if (dictionary != null)
-            {
-                return dictionary.GetEnumerator();
-            }
-
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-            return null;
         }
 
         /// <summary>
         /// Gets an enumerator over the key/value pairs in the dictionary.
         /// </summary>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         /// Copies the contents of the dictionary to the specified Array.
@@ -588,7 +563,7 @@ namespace Microsoft.Build.Collections
         public void CopyTo(Array array, int index)
         {
             int i = index;
-            foreach (var entry in this)
+            foreach (KeyValuePair<TKey, TValue> entry in this)
             {
                 array.SetValue(new DictionaryEntry(entry.Key, entry.Value), i);
             }
@@ -597,57 +572,48 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Adds the specified key/value pair to the dictionary.
         /// </summary>
-        public void Add(object key, object value)
-        {
-            Add((TKey)key, (TValue)value);
-        }
+        public void Add(object key, object value) => Add((TKey)key, (TValue)value);
 
         /// <summary>
         /// Returns true if the dictionary contains the specified key.
         /// </summary>
-        public bool Contains(object key)
-        {
-            return ContainsKey((TKey)key);
-        }
+        public bool Contains(object key) => ContainsKey((TKey)key);
 
         /// <summary>
         /// Returns an enumerator over the key/value pairs in the dictionary.
         /// </summary>
         IDictionaryEnumerator IDictionary.GetEnumerator()
         {
-            if (store == null)
+            switch (store)
             {
-                return ((IDictionary)(ReadOnlyEmptyDictionary<TKey, TValue>.Instance)).GetEnumerator();
+                case null:
+                {
+                    return ((IDictionary) ReadOnlyEmptyDictionary<TKey, TValue>.Instance).GetEnumerator();
+                }
+                case KeyValuePair<TKey, TValue> pair:
+                {
+                    return new SingleDictionaryEntryEnumerator(new DictionaryEntry(pair.Key, pair.Value));
+                }
+                case List<KeyValuePair<TKey, TValue>> list:
+                {
+                    return new ListDictionaryEntryEnumerator<TKey, TValue>(list);
+                }
+                case IDictionary dictionary:
+                {
+                    return dictionary.GetEnumerator();
+                }
+                default:
+                {
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    return null;
+                }
             }
-
-            if (store is KeyValuePair<TKey, TValue>)
-            {
-                return new SingleDictionaryEntryEnumerator(new DictionaryEntry(((KeyValuePair<TKey, TValue>)store).Key, ((KeyValuePair<TKey, TValue>)store).Value));
-            }
-
-            var list = store as List<KeyValuePair<TKey, TValue>>;
-            if (list != null)
-            {
-                return new ListDictionaryEntryEnumerator<TKey, TValue>(list);
-            }
-
-            var dictionary = store as IDictionary;
-            if (dictionary != null)
-            {
-                return dictionary.GetEnumerator();
-            }
-
-            ErrorUtilities.ThrowInternalErrorUnreachable();
-            return null;
         }
 
         /// <summary>
         /// Removes the specified key from the dictionary.
         /// </summary>
-        public void Remove(object key)
-        {
-            Remove((TKey)key);
-        }
+        public void Remove(object key) => Remove((TKey)key);
 
         /// <summary>
         /// Adds a value to the list, growing it to a dictionary if necessary

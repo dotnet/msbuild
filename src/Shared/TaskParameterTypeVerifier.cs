@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>TaskParameterTypeVerifier verifies the correct type for both input and output parameters.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Framework;

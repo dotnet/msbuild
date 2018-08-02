@@ -14,11 +14,6 @@ namespace Microsoft.Build.Tasks
     internal sealed class AppConfig
     {
         /// <summary>
-        /// Corresponds to the contents of the &lt;runtime&gt; element.
-        /// </summary>
-        private RuntimeSection _runtime = new RuntimeSection();
-
-        /// <summary>
         /// Read the .config from a file.
         /// </summary>
         /// <param name="appConfigFile"></param>
@@ -27,8 +22,7 @@ namespace Microsoft.Build.Tasks
             XmlReader reader = null;
             try
             {
-                var readerSettings = new XmlReaderSettings();
-                readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 reader = XmlReader.Create(appConfigFile, readerSettings);
                 Read(reader);
             }
@@ -37,10 +31,10 @@ namespace Microsoft.Build.Tasks
                 int lineNumber = 0;
                 int linePosition = 0;
 
-                if (reader != null && reader is IXmlLineInfo)
+                if (reader is IXmlLineInfo info)
                 {
-                    lineNumber = ((IXmlLineInfo)reader).LineNumber;
-                    linePosition = ((IXmlLineInfo)reader).LinePosition;
+                    lineNumber = info.LineNumber;
+                    linePosition = info.LinePosition;
                 }
 
                 throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
@@ -50,10 +44,10 @@ namespace Microsoft.Build.Tasks
                 int lineNumber = 0;
                 int linePosition = 0;
 
-                if (reader != null && reader is IXmlLineInfo)
+                if (reader is IXmlLineInfo info)
                 {
-                    lineNumber = ((IXmlLineInfo)reader).LineNumber;
-                    linePosition = ((IXmlLineInfo)reader).LinePosition;
+                    lineNumber = info.LineNumber;
+                    linePosition = info.LinePosition;
                 }
 
                 throw new AppConfigException(e.Message, appConfigFile, lineNumber, linePosition, e);
@@ -76,7 +70,7 @@ namespace Microsoft.Build.Tasks
                 // Look for the <runtime> section
                 if (reader.NodeType == XmlNodeType.Element && StringEquals(reader.Name, "runtime"))
                 {
-                    _runtime.Read(reader);
+                    Runtime.Read(reader);
                 }
             }
         }
@@ -84,11 +78,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Access the Runtime section of the application .config file.
         /// </summary>
-        /// <value></value>
-        internal RuntimeSection Runtime
-        {
-            get { return _runtime; }
-        }
+        internal RuntimeSection Runtime { get; } = new RuntimeSection();
 
         /// <summary>
         /// App.config files seem to come with mixed casing for element and attribute names.
@@ -97,7 +87,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        static internal bool StringEquals(string a, string b)
+        internal static bool StringEquals(string a, string b)
         {
             return String.Compare(a, b, StringComparison.OrdinalIgnoreCase) == 0;
         }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
@@ -9,14 +10,13 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     /// <summary>
     /// This class contains a collection of ProductBuilder objects. Used for the BootstrapperBuilder's Build method.
     /// </summary>
-    [ComVisible(true), GuidAttribute("D25C0741-99CA-49f7-9460-95E5F25EEF43"), ClassInterface(ClassInterfaceType.None)]
+    [ComVisible(true), Guid("D25C0741-99CA-49f7-9460-95E5F25EEF43"), ClassInterface(ClassInterfaceType.None)]
     public class ProductBuilderCollection : IProductBuilderCollection, IEnumerable
     {
-        private ArrayList _list;
+        private readonly List<ProductBuilder> _list = new List<ProductBuilder>();
 
         internal ProductBuilderCollection()
         {
-            _list = new ArrayList();
         }
 
         /// <summary>
@@ -37,14 +37,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return _list.GetEnumerator();
         }
 
-        internal int Count
-        {
-            get { return _list.Count; }
-        }
+        internal int Count => _list.Count;
 
         internal ProductBuilder Item(int index)
         {
-            return (ProductBuilder)_list[index];
+            return _list[index];
         }
 
         internal void Insert(int index, ProductBuilder builder)

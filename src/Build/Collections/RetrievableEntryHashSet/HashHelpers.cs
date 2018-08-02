@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 #if !SILVERLIGHT
 #if FEATURE_CONSTRAINED_EXECUTION
 using System.Runtime.ConstrainedExecution;
 #endif
 #endif
-using System.Text;
 
 namespace Microsoft.Build.Collections
 {
@@ -93,8 +90,10 @@ namespace Microsoft.Build.Collections
 
             // Allow the hashtables to grow to maximum possible size (~2G elements) before encoutering capacity overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-            if ((uint)newSize > MaxPrimeArrayLength)
+            if ((uint) newSize > MaxPrimeArrayLength)
+            {
                 return MaxPrimeArrayLength;
+            }
 
             return GetPrime(newSize);
         }

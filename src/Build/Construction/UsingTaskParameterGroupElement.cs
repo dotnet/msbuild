@@ -1,14 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of UsingTaskParameterGroupElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
@@ -28,7 +24,7 @@ namespace Microsoft.Build.Construction
         internal UsingTaskParameterGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
             VerifyCorrectParent(parent);
         }
 
@@ -46,30 +42,14 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override string Condition
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
-            }
+            get => null;
+            set => ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
         }
 
         /// <summary>
         /// Get any contained parameters.
         /// </summary>
-        public ICollection<ProjectUsingTaskParameterElement> Parameters
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectUsingTaskParameterElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectUsingTaskParameterElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectUsingTaskParameterElement> Parameters => new ReadOnlyCollection<ProjectUsingTaskParameterElement>(Children.OfType<ProjectUsingTaskParameterElement>());
 
         /// <summary>
         /// This does not allow conditions, so it should not be called.
@@ -89,7 +69,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskParameterElement AddParameter(string name, string output, string required, string parameterType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             ProjectUsingTaskParameterElement newParameter = ContainingProject.CreateUsingTaskParameterElement(name, output, required, parameterType);
             AppendChild(newParameter);

@@ -21,9 +21,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public AssemblyFoldersExInfo(RegistryHive hive, RegistryView view, string registryKey, string directoryPath, Version targetFrameworkVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(registryKey, "registryKey");
-            ErrorUtilities.VerifyThrowArgumentNull(directoryPath, "directoryPath");
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion, "targetFrameworkVersion");
+            ErrorUtilities.VerifyThrowArgumentNull(registryKey, nameof(registryKey));
+            ErrorUtilities.VerifyThrowArgumentNull(directoryPath, nameof(directoryPath));
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion, nameof(targetFrameworkVersion));
 
             Hive = hive;
             View = view;
@@ -35,47 +35,27 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Registry hive used
         /// </summary>
-        public RegistryHive Hive
-        {
-            get;
-            private set;
-        }
+        public RegistryHive Hive { get; }
 
         /// <summary>
         /// Registry view used
         /// </summary>
-        public RegistryView View
-        {
-            get;
-            private set;
-        }
+        public RegistryView View { get; }
 
         /// <summary>
         /// The registry key to the component
         /// </summary>
-        public string Key
-        {
-            get;
-            private set;
-        }
+        public string Key { get; }
 
         /// <summary>
         /// Folder found at the registry keys default value
         /// </summary>
-        public string DirectoryPath
-        {
-            get;
-            private set;
-        }
+        public string DirectoryPath { get; }
 
         /// <summary>
         /// Target framework version for the registry key
         /// </summary>
-        public Version TargetFrameworkVersion
-        {
-            get;
-            private set;
-        }
+        public Version TargetFrameworkVersion { get; }
     }
 }
 #endif

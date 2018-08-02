@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Wraps an evaluated property for build purposes.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;
@@ -11,7 +7,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -38,7 +33,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Private constructor
         /// </summary>
-        private ProjectPropertyInstance(string name, string escapedValue, bool mayBeReserved)
+        private ProjectPropertyInstance(string name, string escapedValue)
         {
             _name = name;
             _escapedValue = escapedValue;
@@ -52,12 +47,7 @@ namespace Microsoft.Build.Execution
         /// the project's properties table.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public string Name
-        {
-            [DebuggerStepThrough]
-            get
-            { return _name; }
-        }
+        public string Name => _name;
 
         /// <summary>
         /// Evaluated value of the property.
@@ -76,7 +66,7 @@ namespace Microsoft.Build.Execution
             set
             {
                 ProjectInstance.VerifyThrowNotImmutable(IsImmutable);
-                ErrorUtilities.VerifyThrowArgumentNull(value, "value");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(value));
                 _escapedValue = EscapingUtilities.Escape(value);
             }
         }
@@ -85,46 +75,26 @@ namespace Microsoft.Build.Execution
         /// Whether this object is immutable.
         /// An immutable object can not be made mutable.
         /// </summary>
-        public virtual bool IsImmutable
-        {
-            get { return false; }
-        }
+        public virtual bool IsImmutable => false;
 
         /// <summary>
         /// Evaluated value of the property, escaped as necessary.
         /// Setter assumes caller has protected global properties, if necessary.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IProperty.EvaluatedValueEscaped
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return _escapedValue;
-            }
-        }
+        string IProperty.EvaluatedValueEscaped => _escapedValue;
 
         /// <summary>
         /// Implementation of IKeyed exposing the property name
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IKeyed.Key
-        {
-            [DebuggerStepThrough]
-            get
-            { return Name; }
-        }
+        string IKeyed.Key => Name;
 
         /// <summary>
         /// Implementation of IValued
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        string IValued.EscapedValue
-        {
-            [DebuggerStepThrough]
-            get
-            { return _escapedValue; }
-        }
+        string IValued.EscapedValue => _escapedValue;
 
         #region IEquatable<ProjectPropertyInstance> Members
 
@@ -135,7 +105,7 @@ namespace Microsoft.Build.Execution
         /// <returns>True if the properties are equivalent, false otherwise.</returns>
         bool IEquatable<ProjectPropertyInstance>.Equals(ProjectPropertyInstance other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
@@ -321,28 +291,25 @@ namespace Microsoft.Build.Execution
         private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable)
         {
             // Does not check immutability as this is only called during build (which is already protected) or evaluation
-            ErrorUtilities.VerifyThrowArgumentNull(escapedValue, "escapedValue");
+            ErrorUtilities.VerifyThrowArgumentNull(escapedValue, nameof(escapedValue));
             if (location == null)
             {
-                ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[name] == null, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
                 ErrorUtilities.VerifyThrowArgument(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), "OM_CannotCreateReservedProperty", name);
                 XmlUtilities.VerifyThrowArgumentValidElementName(name);
             }
             else
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject(XMakeElements.IllegalItemPropertyNames[name] == null, location, "CannotModifyReservedProperty", name);
+                ProjectErrorUtilities.VerifyThrowInvalidProject(!XMakeElements.ReservedItemNames.Contains(name), location, "CannotModifyReservedProperty", name);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), location, "CannotModifyReservedProperty", name);
                 XmlUtilities.VerifyThrowProjectValidElementName(name, location);
             }
 
             if (isImmutable)
             {
-                return new ProjectPropertyInstance.ProjectPropertyInstanceImmutable(name, escapedValue, mayBeReserved);
+                return new ProjectPropertyInstanceImmutable(name, escapedValue);
             }
-            else
-            {
-                return new ProjectPropertyInstance(name, escapedValue, mayBeReserved);
-            }
+            return new ProjectPropertyInstance(name, escapedValue);
         }
 
         /// <summary>
@@ -356,8 +323,8 @@ namespace Microsoft.Build.Execution
             /// Private constructor.
             /// Called by outer class factory method.
             /// </summary>
-            internal ProjectPropertyInstanceImmutable(string name, string escapedValue, bool mayBeReserved)
-                : base(name, escapedValue, mayBeReserved)
+            internal ProjectPropertyInstanceImmutable(string name, string escapedValue)
+                : base(name, escapedValue)
             {
             }
 
@@ -368,10 +335,7 @@ namespace Microsoft.Build.Execution
             /// <remarks>
             /// Usually gotten from the parent ProjectInstance.
             /// </remarks>
-            public override bool IsImmutable
-            {
-                get { return true; }
-            }
+            public override bool IsImmutable => true;
         }
     }
 }

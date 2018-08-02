@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A class which implements IEnumerable by creating an optionally-deep copy of the backing collection.</summary>
-//-----------------------------------------------------------------------
 
 using System.Collections;
 using System.Collections.Generic;
@@ -25,12 +21,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// The backing collection.
         /// </summary>
-        private IEnumerable<T> _backingEnumerable;
+        private readonly IEnumerable<T> _backingEnumerable;
 
         /// <summary>
         /// The object used to synchronize access for copying.
         /// </summary>
-        private object _syncRoot;
+        private readonly object _syncRoot;
 
         /// <summary>
         /// Constructor.
@@ -39,8 +35,8 @@ namespace Microsoft.Build.Collections
         /// <param name="syncRoot">The object used to synchronize access for copying.</param>
         public CopyOnReadEnumerable(IEnumerable<T> backingEnumerable, object syncRoot)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(backingEnumerable, "backingCollection");
-            ErrorUtilities.VerifyThrowArgumentNull(syncRoot, "syncRoot");
+            ErrorUtilities.VerifyThrowArgumentNull(backingEnumerable, nameof(backingEnumerable));
+            ErrorUtilities.VerifyThrowArgumentNull(syncRoot, nameof(syncRoot));
 
             _backingEnumerable = backingEnumerable;
             _syncRoot = syncRoot;
@@ -55,8 +51,7 @@ namespace Microsoft.Build.Collections
         public IEnumerator<T> GetEnumerator()
         {
             List<T> list;
-            ICollection backingCollection = _backingEnumerable as ICollection;
-            if (backingCollection != null)
+            if (_backingEnumerable is ICollection backingCollection)
             {
                 list = new List<T>(backingCollection.Count);
             }
@@ -97,7 +92,7 @@ namespace Microsoft.Build.Collections
         /// Returns an numerator over the collection.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<T>)this).GetEnumerator();
         }

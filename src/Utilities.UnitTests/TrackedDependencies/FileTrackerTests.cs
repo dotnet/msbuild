@@ -6,36 +6,28 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Xml;
-using System.Threading;
-using System.Collections;
+using System.Linq;
 using System.Runtime.InteropServices;
-
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-
-
-
-using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using ObjectModelHelpers = Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Microsoft.CodeAnalysis.BuildTasks;
 using Xunit;
-using System.Linq;
+using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
 #if FEATURE_FILE_TRACKER
 
 namespace Microsoft.Build.UnitTests.FileTracking
 {
-    sealed public class FileTrackerTests : IDisposable
+    public sealed class FileTrackerTests : IDisposable
     {
         private static string s_defaultFileTrackerPathUnquoted;
         private static string s_defaultFileTrackerPath;
         private static string s_defaultTrackerPath;
 
-        private static string s_oldPath = null;
+        private static string s_oldPath;
 
         private static string s_cmd32Path;
         private static string s_cmd64Path;
@@ -51,18 +43,18 @@ namespace Microsoft.Build.UnitTests.FileTracking
             s_defaultFileTrackerPath = "\"" + s_defaultFileTrackerPathUnquoted + "\"";
             s_defaultTrackerPath = FileTracker.GetTrackerPath(ExecutableType.SameAsCurrentProcess);
 
-            s_cmd32Path = (IntPtr.Size == sizeof(Int32))
+            s_cmd32Path = (IntPtr.Size == sizeof(int))
                 ? Environment.ExpandEnvironmentVariables(@"%windir%\System32\cmd.exe")
                 : Environment.ExpandEnvironmentVariables(@"%windir%\syswow64\cmd.exe");
 
-            s_cmd64Path = (IntPtr.Size == sizeof(Int32))
+            s_cmd64Path = (IntPtr.Size == sizeof(int))
                 ? Environment.ExpandEnvironmentVariables(@"%windir%\sysnative\cmd.exe")
                 : Environment.ExpandEnvironmentVariables(@"%windir%\System32\cmd.exe");
 
             // blank out the path so that we know we're not inadvertently depending on it.
             s_oldPath = Environment.GetEnvironmentVariable("PATH");
 
-            if (Environment.OSVersion.Platform == System.PlatformID.MacOSX || Environment.OSVersion.Platform == System.PlatformID.Unix)
+            if (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 Environment.SetEnvironmentVariable("PATH", "/sbin:/bin");
             }
@@ -106,8 +98,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
         {
             Console.WriteLine("Test: FileTrackerBadArg");
 
-            string log;
-            int exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, "/q", out log);
+            int exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, "/q", out string log);
 
             Assert.Equal(1, exit);
             Assert.True(log.Contains("TRK0000")); // bad arg
@@ -133,8 +124,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
                 Directory.CreateDirectory(testDirectory);
                 File.Copy(s_defaultTrackerPath, testTrackerPath);
 
-                string log;
-                int exit = FileTrackerTestHelper.RunCommandWithLog(testTrackerPath, "/?", out log);
+                int exit = FileTrackerTestHelper.RunCommandWithLog(testTrackerPath, "/?", out string log);
 
                 Assert.Equal(9, exit);
                 // It's OK to look for the English message since that's all we're capable of printing when we can't find
@@ -158,8 +148,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
-            string log;
-            int exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " @abc.rsp /c findstr /ip foo test.in", out log);
+            int exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, "/d " + s_defaultFileTrackerPath + " @abc.rsp /c findstr /ip foo test.in", out string log);
             Console.WriteLine("");
 
             // missing rsp file is a non-fatal error
@@ -191,7 +180,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
             File.Delete(tlog);
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
-            string log = null;
             try
             {
                 int exit = FileTrackerTestHelper.RunCommand(s_defaultTrackerPath, trackerCommand);
@@ -201,7 +189,7 @@ namespace Microsoft.Build.UnitTests.FileTracking
 
                 File.SetAttributes(tlog, FileAttributes.ReadOnly);
 
-                exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, trackerCommand, out log);
+                exit = FileTrackerTestHelper.RunCommandWithLog(s_defaultTrackerPath, trackerCommand, out string log);
                 Console.WriteLine("");
                 Assert.Equal(0, exit);
                 Assert.True(log.Contains("FTK1011")); // could not create new log:  the file exists.
@@ -432,7 +420,7 @@ namespace ConsoleApplication4
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
                 csc.BuildEngine = new MockEngine();
-                csc.Sources = new TaskItem[] { new TaskItem(codeFile) };
+                csc.Sources = new[] { new TaskItem(codeFile) };
                 csc.OutputAssembly = new TaskItem(outputFile);
                 csc.Execute();
 
@@ -470,14 +458,13 @@ namespace ConsoleApplication4
             }
 
             Directory.CreateDirectory(testDirectory);
-            string codeFile = null;
-            string writeFile = null;
+            string writeFile;
             string outputFile = Path.Combine(testDirectory, "writenoread.exe");
 
             try
             {
                 writeFile = Path.Combine(testDirectory, "test.out");
-                codeFile = Path.Combine(testDirectory, "code.cs");
+                string codeFile = Path.Combine(testDirectory, "code.cs");
                 string codeContent = @"
 using System.IO; 
 using System.Runtime.InteropServices;
@@ -494,7 +481,7 @@ class X
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
                 csc.BuildEngine = new MockEngine();
-                csc.Sources = new TaskItem[] { new TaskItem(codeFile) };
+                csc.Sources = new[] { new TaskItem(codeFile) };
                 csc.OutputAssembly = new TaskItem(outputFile);
                 bool success = csc.Execute();
 
@@ -516,15 +503,8 @@ class X
                 ObjectModelHelpers.DeleteDirectory(testDirectory);
             }
 
-            if (writeFile != null)
-            {
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.read.1.tlog");
-                FileTrackerTestHelper.AssertFoundStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.write.1.tlog");
-            }
-            else
-            {
-                Assert.True(false, "The output file was never assigned or written to");
-            }
+            FileTrackerTestHelper.AssertDidntFindStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.read.1.tlog");
+            FileTrackerTestHelper.AssertFoundStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.write.1.tlog");
         }
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/Microsoft/msbuild/issues/649")]
@@ -692,7 +672,7 @@ class X
 
             File.Delete("sort.read.1.tlog");
             File.Delete("sort.write.1.tlog");
-            File.WriteAllLines("test.in", new string[] {
+            File.WriteAllLines("test.in", new[] {
                                                             "bfoo",
                                                             "afoo"
                                                        });
@@ -719,7 +699,7 @@ class X
             Directory.CreateDirectory("outdir");
             File.Delete("outdir\\sort.read.1.tlog");
             File.Delete("outdir\\sort.write.1.tlog");
-            File.WriteAllLines("test.in", new string[] {
+            File.WriteAllLines("test.in", new[] {
                                                             "bfoo",
                                                             "afoo"
                                                        });
@@ -750,7 +730,7 @@ class X
                 Directory.Delete("outdir", true);
             }
 
-            File.WriteAllLines("test.in", new string[] {
+            File.WriteAllLines("test.in", new[] {
                                                             "bfoo",
                                                             "afoo"
                                                        });
@@ -959,7 +939,7 @@ class X
         {
             string sourceFile = "inlinetrackingtest.txt";
             string tlogRootName = "foo_inline";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
 
             File.Delete(tlogWriteFile);
 
@@ -990,7 +970,7 @@ class X
         {
             string sourceFile = "inlinetrackingtest.txt";
             string tlogRootName = "foo_inline";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
 
             File.Delete(tlogWriteFile);
 
@@ -1029,7 +1009,7 @@ class X
             {
                 string sourceFile = "inlinetrackingtest.txt";
                 string tlogRootName = "foo_inline";
-                string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
+                string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
 
                 File.Delete(tlogWriteFile);
                 File.Delete(sourceFile);
@@ -1054,12 +1034,12 @@ class X
             FileTracker.StopTrackingAndCleanup();
         }
 
-        public void InProcTrackingTesterNoStop(int iteration)
+        private static void InProcTrackingTesterNoStop(int iteration)
         {
-            string sourceFile = String.Format("inlinetrackingtest{0}.txt", iteration);
-            string tlogRootName = String.Format("foo_nonstopinline{0}", iteration);
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-            string tlogReadFile = String.Format("{0}.read.1.tlog", tlogRootName);
+            string sourceFile = $"inlinetrackingtest{iteration}.txt";
+            string tlogRootName = $"foo_nonstopinline{iteration}";
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+            string tlogReadFile = $"{tlogRootName}.read.1.tlog";
 
             File.Delete(tlogWriteFile);
             File.Delete(tlogReadFile);
@@ -1092,9 +1072,9 @@ class X
 
         private static void InProcTrackingTester(int iteration)
         {
-            string sourceFile = String.Format("inlinetrackingtest{0}.txt", iteration);
-            string tlogRootName = String.Format("foo_inline{0}", iteration);
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
+            string sourceFile = $"inlinetrackingtest{iteration}.txt";
+            string tlogRootName = $"foo_inline{iteration}";
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
 
             File.Delete(tlogWriteFile);
 
@@ -1139,8 +1119,8 @@ class X
             string sourceFile2 = "inlinetrackingtest2.txt";
             string sourceFile3 = "inlinetrackingtest3.txt";
             string tlogRootName = "foo_inline";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-            string tlogWriteFile2 = String.Format("{0}2.write.1.tlog", tlogRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+            string tlogWriteFile2 = $"{tlogRootName}2.write.1.tlog";
 
             File.Delete(tlogWriteFile);
             File.Delete(tlogWriteFile2);
@@ -1180,8 +1160,8 @@ class X
             string sourceFile2 = "vi\u00FCes\u00E4tato633833475975527668.txt";
             string sourceFile3 = "inlinetrackingtest3.txt";
             string tlogRootName = "foo_inline";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-            string tlogWriteFile2 = String.Format("{0}2.write.1.tlog", tlogRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+            string tlogWriteFile2 = $"{tlogRootName}2.write.1.tlog";
 
             string rootMarker = FileTracker.FormatRootingMarker(new TaskItem(sourceFile2));
             string responseFile = FileTracker.CreateRootingMarkerResponseFile(rootMarker);
@@ -1214,7 +1194,7 @@ class X
                 Assert.Equal(Path.GetFullPath(sourceFile).ToUpperInvariant(), lines[1]);
                 Assert.Equal(Path.GetFullPath(sourceFile3).ToUpperInvariant(), lines[2]);
                 Assert.Equal("^" + rootMarker, lines2[1]);
-                Assert.True(String.Equals(rootMarker, lines2[2], StringComparison.OrdinalIgnoreCase));
+                Assert.True(string.Equals(rootMarker, lines2[2], StringComparison.OrdinalIgnoreCase));
             }
             finally
             {
@@ -1232,7 +1212,7 @@ class X
             string sourceFile = intermediateDir + @"inlinetracking1.txt";
             string commandFile = intermediateDir + @"command.bat";
             string tlogRootName = "inproc_spawn";
-            string tlogWriteFile = intermediateDir + String.Format("{0}-cmd.write.1.tlog", tlogRootName);
+            string tlogWriteFile = intermediateDir + $"{tlogRootName}-cmd.write.1.tlog";
             string rootMarker = @"\\THIS\IS\MY\ROOT|\\IT\IS\COMPOUND\TOO";
             string rootMarkerRsp = intermediateDir + @"rootmarker.rsp";
 
@@ -1280,7 +1260,7 @@ class X
             string sourceFile = intermediateDir + @"inlinetracking1.txt";
             string commandFile = intermediateDir + @"command.bat";
             string tlogRootName = "inproc_spawn_env";
-            string tlogWriteFile = intermediateDir + String.Format("{0}-cmd.write.1.tlog", tlogRootName);
+            string tlogWriteFile = intermediateDir + $"{tlogRootName}-cmd.write.1.tlog";
             string rootMarker = @"\\THIS\IS\MY\ROOT|\\IT\IS\COMPOUND\TOO";
             string rootMarkerRsp = intermediateDir + @"rootmarker.rsp";
 
@@ -1346,8 +1326,8 @@ class X
                 string sourceFile = "inlinetrackingtest.txt";
                 string sourceFile2 = "inlinetrackingtest2.txt";
                 string tlogRootName = "foo_inline";
-                string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-                string tlogWriteFile2 = String.Format("{0}2.write.1.tlog", tlogRootName);
+                string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+                string tlogWriteFile2 = $"{tlogRootName}2.write.1.tlog";
 
                 try
                 {
@@ -1385,7 +1365,7 @@ class X
         public void InProcTrackingStartProcessFindStrIn()
         {
             Console.WriteLine("Test: InProcTrackingStartProcessFindStrIn");
-            int exit = 0;
+            int exit;
 
             try
             {
@@ -1497,8 +1477,8 @@ class X
             string sourceFile = "inlinetrackingtest.txt";
             string tlogRootName = "foo_inline_parent";
             string tlogChildRootName = "InProcTrackingChildThreadTrackedAuto";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-            string tlogChildWriteFile = String.Format("{0}.write.2.tlog", tlogChildRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+            string tlogChildWriteFile = $"{tlogChildRootName}.write.2.tlog";
 
             File.Delete(tlogWriteFile);
             File.Delete(tlogChildWriteFile);
@@ -1508,7 +1488,7 @@ class X
 
             File.WriteAllText(sourceFile, "parent thread\r\n");
 
-            System.Threading.Thread t = new Thread(new ThreadStart(ThreadProcAutoTLog));
+            Thread t = new Thread(ThreadProcAutoTLog);
             t.Start();
             t.Join(); // wait for our child to complete
 
@@ -1538,8 +1518,8 @@ class X
             string sourceFile = "inlinetrackingtest.txt";
             string tlogRootName = "foo_inline_parent";
             string tlogChildRootName = "foo_inline_child";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-            string tlogChildWriteFile = String.Format("{0}.write.2.tlog", tlogChildRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+            string tlogChildWriteFile = $"{tlogChildRootName}.write.2.tlog";
 
             File.Delete(tlogWriteFile);
 
@@ -1547,7 +1527,7 @@ class X
 
             File.WriteAllText(sourceFile, "parent thread\r\n");
 
-            System.Threading.Thread t = new Thread(new ThreadStart(ThreadProcManualTLog));
+            Thread t = new Thread(ThreadProcManualTLog);
             t.Start();
             t.Join(); // wait for our child to complete
 
@@ -1577,8 +1557,8 @@ class X
             string sourceFile = "inlinetrackingtest.txt";
             string tlogRootName = "foo_inline_parent";
             string tlogChildRootName = "ThreadProcTrackedAutoTLog";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-            string tlogChildWriteFile = String.Format("{0}.write.2.tlog", tlogChildRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+            string tlogChildWriteFile = $"{tlogChildRootName}.write.2.tlog";
 
             File.Delete(tlogWriteFile);
 
@@ -1587,7 +1567,7 @@ class X
 
             File.WriteAllText(sourceFile, "parent thread\r\n");
 
-            System.Threading.Thread t = new Thread(new ThreadStart(ThreadProcAutoTLog));
+            Thread t = new Thread(ThreadProcAutoTLog);
             t.Start();
             t.Join(); // wait for our child to complete
 
@@ -1613,8 +1593,8 @@ class X
             string sourceFile = "inlinetrackingtest.txt";
             string tlogRootName = "foo_inline_parent";
             string tlogChildRootName = "ThreadProcLocallyTracked";
-            string tlogWriteFile = String.Format("{0}.write.1.tlog", tlogRootName);
-            string tlogChildWriteFile = String.Format("{0}.write.2.tlog", tlogChildRootName);
+            string tlogWriteFile = $"{tlogRootName}.write.1.tlog";
+            string tlogChildWriteFile = $"{tlogChildRootName}.write.2.tlog";
 
             File.Delete(tlogWriteFile);
 
@@ -1623,7 +1603,7 @@ class X
 
             File.WriteAllText(sourceFile, "parent thread\r\n");
 
-            System.Threading.Thread t = new Thread(new ThreadStart(ThreadProcLocallyTracked));
+            Thread t = new Thread(ThreadProcLocallyTracked);
             t.Start();
             t.Join(); // wait for our child to complete
 
@@ -1644,7 +1624,7 @@ class X
             File.Delete(sourceFile);
         }
 
-        public void ThreadProcLocallyTracked()
+        private static void ThreadProcLocallyTracked()
         {
             FileTracker.StartTrackingContext(Path.GetFullPath("."), "ThreadProcLocallyTracked");
             string sourceFile = "inlinetrackingtest.txt";
@@ -1653,13 +1633,13 @@ class X
             FileTracker.EndTrackingContext();
         }
 
-        public void ThreadProcAutoTLog()
+        private static void ThreadProcAutoTLog()
         {
             string sourceFile = "inlinetrackingtest.txt";
             File.AppendAllText(sourceFile, "child thread\r\n");
         }
 
-        public void ThreadProcManualTLog()
+        private static void ThreadProcManualTLog()
         {
             string tlogRootName = "foo_inline_child";
             string sourceFile = "inlinetrackingtest.txt";
@@ -1674,8 +1654,8 @@ class X
             string sourceFile = "allenvironment.txt";
             string commandFile = "inlinetrackingtest.cmd";
             string tlogRootName = "CustomEnvironment";
-            string tlogReadFile = String.Format("{0}-cmd.read.1.tlog", tlogRootName);
-            string tlogWriteFile = String.Format("{0}-cmd.write.1.tlog", tlogRootName);
+            string tlogReadFile = $"{tlogRootName}-cmd.read.1.tlog";
+            string tlogWriteFile = $"{tlogRootName}-cmd.write.1.tlog";
             File.Delete(tlogWriteFile);
 
             File.WriteAllText(commandFile, "SET > " + sourceFile);
@@ -1684,7 +1664,6 @@ class X
 
             ProcessStartInfo ps = new ProcessStartInfo("cmd.exe", "/C " + commandFile);
 
-            int envVarCount = ps.EnvironmentVariables.Count;
             ps.EnvironmentVariables.Add("TESTVAR", "THE_RIGHT_VALUE");
             ps.UseShellExecute = false;
 
@@ -1756,7 +1735,7 @@ class X
 
                 FileTracker.StartTrackingContext(testDir, tlogRootName);
 
-                byte[] buffer = new byte[10];
+                var buffer = new byte[10];
                 using (FileStream fs = File.Open(readFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                 {
                     fs.Read(buffer, 0, 10);
@@ -2269,7 +2248,6 @@ class X
                 File.WriteAllText(tempFilePath, "");
 
                 // Sample app that runs findstr.
-                string codeFile = null;
                 string outputFile = Path.Combine(testDir, "FindstrLauncher.exe");
                 string codeContent = @"
 using System;
@@ -2295,7 +2273,7 @@ namespace ConsoleApplication4
 
                 File.Delete(outputFile);
 
-                codeFile = Path.Combine(testDir, "Program.cs");
+                string codeFile = Path.Combine(testDir, "Program.cs");
                 File.WriteAllText(codeFile, codeContent);
                 Csc csc = new Csc();
                 csc.BuildEngine = new MockEngine();
@@ -2337,7 +2315,7 @@ namespace ConsoleApplication4
             }
         }
 
-        private void InProcTrackingSpawnsToolWithTracker(bool useTrackerResponseFile)
+        private static void InProcTrackingSpawnsToolWithTracker(bool useTrackerResponseFile)
         {
             const string testInFile = "test.in";
             const string testInFileContent = "foo";
@@ -2393,12 +2371,7 @@ namespace ConsoleApplication4
             }
         }
 
-        private void LaunchDuplicateToolsAndVerifyTlogExistsForEach(string tlogPath, IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications, IList<Tuple<string, int>> tlogPatterns)
-        {
-            LaunchDuplicateToolsAndVerifyTlogExistsForEach(tlogPath, contextSpecifications, tlogPatterns, createTestDirectory: true);
-        }
-
-        private void LaunchDuplicateToolsAndVerifyTlogExistsForEach(string tlogPath, IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications, IList<Tuple<string, int>> tlogPatterns, bool createTestDirectory)
+        private static void LaunchDuplicateToolsAndVerifyTlogExistsForEach(string tlogPath, IList<Tuple<string, IList<Tuple<string, string, int>>>> contextSpecifications, IList<Tuple<string, int>> tlogPatterns, bool createTestDirectory)
         {
             try
             {
@@ -2483,33 +2456,16 @@ namespace ConsoleApplication4
         }
     }
 
-    internal class FileTrackerTestHelper
+    internal static class FileTrackerTestHelper
     {
         public static int RunCommand(string command, string arguments)
-        {
-            int exitCode = 0;
-            string throwawayLog = null;
-
-            exitCode = RunCommandWithOptions(command, arguments, true /* print stdout & stderr */, out throwawayLog);
-            return exitCode;
-        }
+            => RunCommandWithOptions(command, arguments, true /* print stdout & stderr */, out string _);
 
         public static int RunCommandNoStdOut(string command, string arguments)
-        {
-            int exitCode = 0;
-            string throwawayLog = null;
-
-            exitCode = RunCommandWithOptions(command, arguments, false /* don't print stdout & stderr */, out throwawayLog);
-            return exitCode;
-        }
+            => RunCommandWithOptions(command, arguments, false /* don't print stdout & stderr */, out string _);
 
         public static int RunCommandWithLog(string command, string arguments, out string outputAsLog)
-        {
-            int exitCode = 0;
-
-            exitCode = RunCommandWithOptions(command, arguments, true /* print stdout & stderr */, out outputAsLog);
-            return exitCode;
-        }
+            => RunCommandWithOptions(command, arguments, true /* print stdout & stderr */, out outputAsLog);
 
         private static int RunCommandWithOptions(string command, string arguments, bool printOutput, out string outputAsLog)
         {
@@ -2535,17 +2491,9 @@ namespace ConsoleApplication4
             return p.ExitCode;
         }
 
-        public static string ReadLineFromFile(string filename, int linenumber)
-        {
-            string[] lines = File.ReadAllLines(filename);
-            return lines[linenumber];
-        }
+        public static string ReadLineFromFile(string filename, int linenumber) => File.ReadAllLines(filename)[linenumber];
 
-        public static string[] ReadLinesFromFile(string filename)
-        {
-            string[] lines = File.ReadAllLines(filename);
-            return lines;
-        }
+        public static string[] ReadLinesFromFile(string filename) => File.ReadAllLines(filename);
 
         public static void CleanTlogs()
         {
@@ -2566,20 +2514,15 @@ namespace ConsoleApplication4
             }
         }
 
-        public static void WriteAll(string filename, string content)
-        {
-            File.WriteAllText(filename, content);
-        }
+        public static void WriteAll(string filename, string content) => File.WriteAllText(filename, content);
 
 
         public static bool FindStringInTlog(string file, string tlog)
-        {
-            return FileTrackerTestHelper.ReadLinesFromFile(tlog).ToList<string>().Contains<string>(file, StringComparer.OrdinalIgnoreCase);
-        }
+            => ReadLinesFromFile(tlog).Contains(file, StringComparer.OrdinalIgnoreCase);
 
         public static void AssertDidntFindStringInTLog(string file, string tlog)
         {
-            string[] lines = FileTrackerTestHelper.ReadLinesFromFile(tlog);
+            string[] lines = ReadLinesFromFile(tlog);
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -2593,7 +2536,7 @@ namespace ConsoleApplication4
         public static void AssertFoundStringInTLog(string file, string tlog, int timesFound)
         {
             int timesFoundSoFar = 0;
-            string[] lines = FileTrackerTestHelper.ReadLinesFromFile(tlog);
+            string[] lines = ReadLinesFromFile(tlog);
 
             foreach (string line in lines)
             {
@@ -2614,10 +2557,7 @@ namespace ConsoleApplication4
             }
         }
 
-        public static void AssertFoundStringInTLog(string file, string tlog)
-        {
-            AssertFoundStringInTLog(file, tlog, 1);
-        }
+        public static void AssertFoundStringInTLog(string file, string tlog) => AssertFoundStringInTLog(file, tlog, 1);
     }
 }
 #endif

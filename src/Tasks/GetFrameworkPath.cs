@@ -28,6 +28,7 @@ namespace Microsoft.Build.Tasks
             s_version462Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version462));
             s_version47Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version47));
             s_version471Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version471));
+            s_version472Path = new Lazy<string>(() => ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version472));
         }
 
         #region ITask Members
@@ -49,20 +50,21 @@ namespace Microsoft.Build.Tasks
         // In a large build, this adds up.
         // PERF NOTE: We also only find paths we are actually asked for (via <Output> tags)
 
-        private static Lazy<string> s_path;
-        private static Lazy<string> s_version11Path;
-        private static Lazy<string> s_version20Path;
-        private static Lazy<string> s_version30Path;
-        private static Lazy<string> s_version35Path;
-        private static Lazy<string> s_version40Path;
-        private static Lazy<string> s_version45Path;
-        private static Lazy<string> s_version451Path;
-        private static Lazy<string> s_version452Path;
-        private static Lazy<string> s_version46Path;
-        private static Lazy<string> s_version461Path;
-        private static Lazy<string> s_version462Path;
-        private static Lazy<string> s_version47Path;
-        private static Lazy<string> s_version471Path;
+        private static readonly Lazy<string> s_path;
+        private static readonly Lazy<string> s_version11Path;
+        private static readonly Lazy<string> s_version20Path;
+        private static readonly Lazy<string> s_version30Path;
+        private static readonly Lazy<string> s_version35Path;
+        private static readonly Lazy<string> s_version40Path;
+        private static readonly Lazy<string> s_version45Path;
+        private static readonly Lazy<string> s_version451Path;
+        private static readonly Lazy<string> s_version452Path;
+        private static readonly Lazy<string> s_version46Path;
+        private static readonly Lazy<string> s_version461Path;
+        private static readonly Lazy<string> s_version462Path;
+        private static readonly Lazy<string> s_version47Path;
+        private static readonly Lazy<string> s_version471Path;
+        private static readonly Lazy<string> s_version472Path;
 
         /// <summary>
         /// Path to the latest framework, whatever version it happens to be
@@ -147,6 +149,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public string FrameworkVersion471Path => s_version471Path.Value;
+
+        /// <summary>
+        /// Path to the v4.7.2 framework, if available
+        /// </summary>
+        [Output]
+        public string FrameworkVersion472Path => s_version471Path.Value;
+
         #endregion
     }
 }

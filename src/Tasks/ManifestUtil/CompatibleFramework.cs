@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
-using System.Xml;
 using System.Xml.Serialization;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -16,36 +13,29 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class CompatibleFramework
     {
-        private string _version = null;
-        private string _profile = null;
-        private string _supportedRuntime = null;
-
-        /// <summary>
-        /// Initializes a new instance of the CompatibleFramework class
-        /// </summary>
-        public CompatibleFramework()
-        {
-        }
+        private string _version;
+        private string _profile;
+        private string _supportedRuntime;
 
         [XmlIgnore]
         public string Version
         {
-            get { return _version; }
-            set { _version = value; }
+            get => _version;
+            set => _version = value;
         }
 
         [XmlIgnore]
         public string Profile
         {
-            get { return _profile; }
-            set { _profile = value; }
+            get => _profile;
+            set => _profile = value;
         }
 
         [XmlIgnore]
         public string SupportedRuntime
         {
-            get { return _supportedRuntime; }
-            set { _supportedRuntime = value; }
+            get => _supportedRuntime;
+            set => _supportedRuntime = value;
         }
 
         #region " XmlSerializer "
@@ -55,8 +45,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Version")]
         public string XmlVersion
         {
-            get { return _version; }
-            set { _version = value; }
+            get => _version;
+            set => _version = value;
         }
 
         [Browsable(false)]
@@ -64,8 +54,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Profile")]
         public string XmlProfile
         {
-            get { return _profile; }
-            set { _profile = value; }
+            get => _profile;
+            set => _profile = value;
         }
 
         [Browsable(false)]
@@ -73,8 +63,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("SupportedRuntime")]
         public string XmlSupportedRuntime
         {
-            get { return _supportedRuntime; }
-            set { _supportedRuntime = value; }
+            get => _supportedRuntime;
+            set => _supportedRuntime = value;
         }
 
         #endregion

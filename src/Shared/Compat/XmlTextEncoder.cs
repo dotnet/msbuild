@@ -1,10 +1,3 @@
-//------------------------------------------------------------------------------
-// <copyright file="XmlTextWriter.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// <owner current="true" primary="true">[....]</owner>
-//------------------------------------------------------------------------------
-
 using System;
 using System.IO;
 using System.Text;

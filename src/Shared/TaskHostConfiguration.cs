@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A packet which contains information needed for the task host to 
-// configure itself for to execute a particular task.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

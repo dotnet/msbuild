@@ -2,11 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Xml;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
-using System.Text.RegularExpressions;
 
 using Microsoft.Build.Collections;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -79,7 +75,7 @@ namespace Microsoft.Build.BackEnd
         /// Determines how many times the batchable object needs to be executed (each execution is termed a "batch"), and prepares
         /// buckets of items to pass to the object in each batch.
         /// </summary>
-        /// <returns>ArrayList containing ItemBucket objects, each one representing an execution batch.</returns>
+        /// <returns>List containing ItemBucket objects, each one representing an execution batch.</returns>
         internal static List<ItemBucket> PrepareBatchingBuckets
         (
             List<string> batchableObjectParameters,
@@ -99,7 +95,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup"></param>
         /// <param name="implicitBatchableItemType">Any item type that can be considered an implicit input to this batchable object.
         /// This is useful for items inside targets, where the item name is plainly an item type that's an "input" to the object.</param>
-        /// <returns>ArrayList containing ItemBucket objects, each one representing an execution batch.</returns>
+        /// <returns>List containing ItemBucket objects, each one representing an execution batch.</returns>
         internal static List<ItemBucket> PrepareBatchingBuckets
         (
             List<string> batchableObjectParameters,
@@ -213,7 +209,7 @@ namespace Microsoft.Build.BackEnd
         {
             // The keys in this hashtable are the names of the items that we will batch on.
             // The values are always String.Empty (not used).
-            Dictionary<string, ICollection<ProjectItemInstance>> itemListsToBeBatched = new Dictionary<string, ICollection<ProjectItemInstance>>(MSBuildNameIgnoreCaseComparer.Default);
+            var itemListsToBeBatched = new Dictionary<string, ICollection<ProjectItemInstance>>(MSBuildNameIgnoreCaseComparer.Default);
 
             // Loop through all the metadata references and find the ones that are qualified
             // with an item name.
@@ -297,7 +293,7 @@ namespace Microsoft.Build.BackEnd
         /// from the array and metadata operations that are performed. However, those operations are extremely cheap compared
         /// to the comparison operations, which dominate the time spent in this method.
         /// </remarks>
-        /// <returns>ArrayList containing ItemBucket objects (can be empty), each one representing an execution batch.</returns>
+        /// <returns>List containing ItemBucket objects (can be empty), each one representing an execution batch.</returns>
         private static List<ItemBucket> BucketConsumedItems
         (
             Lookup lookup,
@@ -309,19 +305,15 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(itemListsToBeBatched.Count > 0, "Need item types consumed by the batchable object.");
             ErrorUtilities.VerifyThrow(consumedMetadataReferences.Count > 0, "Need item metadata consumed by the batchable object.");
 
-            List<ItemBucket> buckets = new List<ItemBucket>();
+            var buckets = new List<ItemBucket>();
 
             // Get and iterate through the list of item names that we're supposed to batch on.
             foreach (KeyValuePair<string, ICollection<ProjectItemInstance>> entry in itemListsToBeBatched)
             {
-                string itemName = (string)entry.Key;
+                string itemName = entry.Key;
 
                 // Use the previously-fetched items, if possible
-                ICollection<ProjectItemInstance> items = entry.Value;
-                if (items == null)
-                {
-                    items = lookup.GetItems(itemName);
-                }
+                ICollection<ProjectItemInstance> items = entry.Value ?? lookup.GetItems(itemName);
 
                 if (items != null)
                 {
@@ -338,7 +330,7 @@ namespace Microsoft.Build.BackEnd
                         int matchingBucketIndex = buckets.BinarySearch(dummyBucket);
 
                         ItemBucket matchingBucket = (matchingBucketIndex >= 0)
-                            ? (ItemBucket)buckets[matchingBucketIndex]
+                            ? buckets[matchingBucketIndex]
                             : null;
 
                         // If we didn't find a bucket that matches this item, create a new one, adding
@@ -351,7 +343,7 @@ namespace Microsoft.Build.BackEnd
                             // in the sorted list as indicated by the binary search
                             // NOTE: observe the ~ operator (bitwise complement) in front of
                             // the index -- see MSDN for more information on the return value
-                            // from the ArrayList.BinarySearch() method
+                            // from the List.BinarySearch() method
                             buckets.Insert(~matchingBucketIndex, matchingBucket);
                         }
 
@@ -364,7 +356,7 @@ namespace Microsoft.Build.BackEnd
 
             // Put the buckets back in the order in which they were discovered, so that the first
             // item declared in the project file ends up in the first batch passed into the target/task.
-            List<ItemBucket> orderedBuckets = new List<ItemBucket>(buckets.Count);
+            var orderedBuckets = new List<ItemBucket>(buckets.Count);
             for (int i = 0; i < buckets.Count; ++i)
             {
                 orderedBuckets.Add(null);
@@ -393,7 +385,7 @@ namespace Microsoft.Build.BackEnd
             ElementLocation elementLocation
         )
         {
-            Dictionary<string, string> itemMetadataValues = new Dictionary<string, string>(consumedMetadataReferences.Count, MSBuildNameIgnoreCaseComparer.Default);
+            var itemMetadataValues = new Dictionary<string, string>(consumedMetadataReferences.Count, MSBuildNameIgnoreCaseComparer.Default);
 
             foreach (KeyValuePair<string, MetadataReference> consumedMetadataReference in consumedMetadataReferences)
             {

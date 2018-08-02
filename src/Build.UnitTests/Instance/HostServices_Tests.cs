@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for TaskItem internal members</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -416,18 +412,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 </Project>
 ");
 
-#if FEATURE_XMLTEXTREADER
             Project project = new Project(new XmlTextReader(new StringReader(contents)), new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
-#else
-            Project project;
-            using (StringReader sr = new StringReader(contents))
-            {
-                using (XmlReader xr = XmlReader.Create(sr))
-                {
-                    project = new Project(xr, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
-                }
-            }
-#endif
             project.FullPath = fileName;
             ProjectInstance instance = project.CreateProjectInstance();
 
@@ -449,25 +434,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Dictionary<string, string> globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globals["UniqueDummy"] = Guid.NewGuid().ToString();
 
-#if FEATURE_XMLTEXTREADER
             Project project =
                 ProjectCollection.GlobalProjectCollection.LoadProject(
                     new XmlTextReader(new StringReader(contents)),
                     globals,
                     ObjectModelHelpers.MSBuildDefaultToolsVersion);
-#else
-            Project project;
-            using (StringReader sr = new StringReader(contents))
-            {
-                using (XmlReader xr = XmlReader.Create(sr))
-                {
-                    project = ProjectCollection.GlobalProjectCollection.LoadProject(
-                        xr,
-                        globals,
-                        ObjectModelHelpers.MSBuildDefaultToolsVersion);
-                }
-            }
-#endif
             project.FullPath = fileName;
 
             return project;

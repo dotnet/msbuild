@@ -1,11 +1,3 @@
-
-//------------------------------------------------------------------------------
-// <copyright file="BinHexEncoder.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>                                                                
-// <owner current="true" primary="true">[....]</owner>
-//------------------------------------------------------------------------------
-
 namespace System.Xml {
     internal static partial class BinHexEncoder {
 

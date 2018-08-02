@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for TaskItem internal members</summary>
-//-----------------------------------------------------------------------
 
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
@@ -198,11 +194,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-#if FEATURE_XMLTEXTREADER
             ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
-#else
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-#endif
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -259,11 +251,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-#if FEATURE_XMLTEXTREADER
             ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
-#else
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-#endif
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -301,11 +289,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-#if FEATURE_XMLTEXTREADER
             ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
-#else
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-#endif
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();

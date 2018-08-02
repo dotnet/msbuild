@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An entry on the TargetBuilder's target stack.  This class 
-//          does most of the work of building an individual target.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -17,6 +12,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MessageImportance = Microsoft.Build.Framework.MessageImportance;
@@ -183,7 +179,7 @@ namespace Microsoft.Build.BackEnd
             _targetSpecification = targetSpecification;
             _parentTarget = parentTarget;
             _buildReason = buildReason;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup, FileSystems.Default);
             _state = TargetEntryState.Dependencies;
             _baseLookup = baseLookup;
             _host = host;
@@ -360,8 +356,8 @@ namespace Microsoft.Build.BackEnd
                 _requestEntry.ProjectRootDirectory,
                 _target.ConditionLocation,
                 projectLoggingContext.LoggingService,
-                projectLoggingContext.BuildEventContext
-                );
+                projectLoggingContext.BuildEventContext,
+                FileSystems.Default);
 
             if (!condition)
             {
@@ -626,8 +622,7 @@ namespace Microsoft.Build.BackEnd
                                  requestEntry.ProjectRootDirectory,
                                  _target.KeepDuplicateOutputsLocation,
                                  projectLoggingContext.LoggingService,
-                                 projectLoggingContext.BuildEventContext
-                                 );
+                                 projectLoggingContext.BuildEventContext, FileSystems.Default);
 
                         // NOTE: we need to gather the outputs in batches, because the output specification may reference item metadata
                         // Also, we are using the baseLookup, which has possibly had changes made to it since the project started.  Because of this, the
@@ -718,8 +713,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.ProjectRootDirectory,
                     errorTargetInstance.ConditionLocation,
                     projectLoggingContext.LoggingService,
-                    projectLoggingContext.BuildEventContext
-                );
+                    projectLoggingContext.BuildEventContext, FileSystems.Default);
 
                 if (condition)
                 {

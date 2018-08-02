@@ -26,6 +26,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _cache.TryRemove(submissionId, out _);
         }
 
+        public override void ClearCaches()
+        {
+            base.ClearCaches();
+
+            _cache.Clear();
+        }
+
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
         {
             SdkResult result;
@@ -50,7 +57,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
 
             if (result != null &&
-                !SdkResolverService.IsReferenceSameVersion(sdk, result.Sdk.Version) &&
+                !SdkResolverService.IsReferenceSameVersion(sdk, result.SdkReference.Version) &&
                 !SdkResolverService.IsReferenceSameVersion(sdk, result.Version))
             {
                 // MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.

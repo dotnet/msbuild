@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for the basic scheduler.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Xml;
@@ -677,11 +673,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
 
             _parameters.DetailedSummary = true;
-#if FEATURE_XMLTEXTREADER
             Project project = new Project(new XmlTextReader(new StringReader(contents)));
-#else
-            Project project = new Project(XmlReader.Create(new StringReader(contents)));
-#endif
             BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" });
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);

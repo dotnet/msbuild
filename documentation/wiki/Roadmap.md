@@ -10,7 +10,8 @@ Our goal is the enable a subset of MSBuild to run cross-platform and build appli
 
 # Desktop MSBuild
 This version of MSBuild is the version we ship with Visual Studio (previously shipped as part of the .NET Framework) and runs on the full .NET Framework. Our goal is to maintain a single code base with a high degree of compatibility and stability between releases. As such, the bar for new features or behavior change should be very high.
-##Quality
+
+## Quality
  * Performance-related fixes to improve the end-to-end experience for developers in Visual Studio. [ongoing]
  * Fix top-hitting issues gathered from feedback and Watson events (crash data). [ongoing]
 
@@ -31,4 +32,4 @@ This version of MSBuild is the version we ship with Visual Studio (previously sh
  * `master`: Work for Desktop MSBuild for Visual Studio "15", for now manually mirrored into internal source control.
  * Microsoft Internal: At the moment, the "official" location that produces builds that ship with Visual Studio and its updates.  Changes are manually mirrored from GitHub `master` as we go along.
  * Stabilization: when we're preparing a release, we'll start a branch for that release. Most commits should be pushed to `master` as usual. Last-minute bugfixes can have pull requests targeting the update branch. Any commit to the release branch should be followed immediately by a merge of the release branch to `master`, so that `master` is always up to date. Since `master` is now destined to release with Visual Studio "15", commits intended to be included in an update for Visual Studio 2015 (MSBuild 14.0) should go to `dev14-update`.
- * Mono support: Still TBD. See [#302](/Microsoft/msbuild/issues/302). LKG xplat [`@f9d8cc7`] (https://github.com/Microsoft/msbuild/commit/f9d8cc725ca2cd46d7e01015afba0defea95ce37)
+ * Mono support: Still TBD. See [#302](/Microsoft/msbuild/issues/302). LKG xplat [`@f9d8cc7`](https://github.com/Microsoft/msbuild/commit/f9d8cc725ca2cd46d7e01015afba0defea95ce37)

@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks.Hosting
 {
@@ -18,9 +17,9 @@ namespace Microsoft.Build.Tasks.Hosting
     public interface IVbcHostObject5 : IVbcHostObject4
     {
         IVbcHostObjectFreeThreaded GetFreeThreadedHostObject();
-        [PreserveSig()]
+        [PreserveSig]
         int CompileAsync(out IntPtr buildSucceededEvent, out IntPtr buildFailedEvent);
-        [PreserveSig()]
+        [PreserveSig]
         int EndCompile(bool buildSuccess);
 
         bool SetPlatformWith32BitPreference(string platformWith32BitPreference);

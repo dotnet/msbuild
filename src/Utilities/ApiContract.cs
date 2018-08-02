@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Loads and represents API contract definitions</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Xml;
@@ -29,7 +25,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Constructor.
         /// </summary>
-        internal ApiContract(string name, string version)
+        private ApiContract(string name, string version)
         {
             Name = name;
             Version = version;
@@ -38,15 +34,9 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Returns true if this element is a "ContainedApiContracts" element. 
         /// </summary>
-        internal static bool IsContainedApiContractsElement(string elementName)
-        {
-            return String.Equals(elementName, Elements.ContainedApiContracts, StringComparison.Ordinal);
-        }
+        internal static bool IsContainedApiContractsElement(string elementName) => string.Equals(elementName, Elements.ContainedApiContracts, StringComparison.Ordinal);
 
-        internal static bool IsVersionedContentElement(string elementName)
-        {
-            return string.Equals(elementName, Elements.VersionedContent, StringComparison.Ordinal);
-        }
+        internal static bool IsVersionedContentElement(string elementName) => string.Equals(elementName, Elements.VersionedContent, StringComparison.Ordinal);
 
         /// <summary>
         /// Given an XML element containing API contracts, read out all contracts within that element. 
@@ -60,18 +50,13 @@ namespace Microsoft.Build.Utilities
                 // </ContainedApiContracts>
                 foreach (XmlNode contractNode in element.ChildNodes)
                 {
-                    XmlElement contractElement = contractNode as XmlElement;
-
-                    if (contractElement == null || !String.Equals(contractNode.Name, Elements.ApiContract, StringComparison.Ordinal))
+                    if (contractNode is XmlElement contractElement && string.Equals(contractNode.Name, Elements.ApiContract, StringComparison.Ordinal))
                     {
-                        continue;
-                    }
-
-                    apiContracts.Add(new ApiContract
-                        (
+                        apiContracts.Add(new ApiContract(
                             contractElement.GetAttribute(Attributes.Name),
                             contractElement.GetAttribute(Attributes.Version)
                         ));
+                    }
                 }
             }
         }
@@ -79,7 +64,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Helper class with ApiContract element names
         /// </summary>
-        internal static class Elements
+        private static class Elements
         {
             /// <summary>
             /// Element containing a bucket of contracts

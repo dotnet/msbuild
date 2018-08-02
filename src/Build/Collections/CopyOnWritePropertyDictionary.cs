@@ -1,19 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A dictionary over properties or metadata with copy-on-write semantics.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Collections
 {
@@ -86,13 +78,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Accessor for the list of property names
         /// </summary>
-        ICollection<string> IDictionary<string, T>.Keys
-        {
-            get
-            {
-                return PropertyNames;
-            }
-        }
+        ICollection<string> IDictionary<string, T>.Keys => PropertyNames;
 
         /// <summary>
         /// Accessor for the list of properties
@@ -125,13 +111,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Whether the collection is read-only.
         /// </summary>
-        bool ICollection<KeyValuePair<string, T>>.IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection<KeyValuePair<string, T>>.IsReadOnly => false;
 
         /// <summary>
         /// Returns the number of property in the collection.
@@ -173,15 +153,8 @@ namespace Microsoft.Build.Collections
         T IDictionary<string, T>.this[string name]
         {
             // The backing properties dictionary is locked in the indexor
-            get
-            {
-                return this[name];
-            }
-
-            set
-            {
-                this[name] = value;
-            }
+            get => this[name];
+            set => this[name] = value;
         }
 
         /// <summary>
@@ -283,7 +256,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
@@ -326,7 +299,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool IDictionary<string, T>.ContainsKey(string key)
         {
-            return PropertyNames.Contains(key);
+            return _properties.ContainsKey(key);
         }
 
         /// <summary>
@@ -373,10 +346,9 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> item)
         {
-            T value;
             lock (_properties)
             {
-                if (_properties.TryGetValue(item.Key, out value))
+                if (_properties.TryGetValue(item.Key, out T value))
                 {
                     return EqualityComparer<T>.Default.Equals(value, item.Value);
                 }
@@ -434,7 +406,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name, bool clearIfEmpty)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             lock (_properties)
             {
@@ -454,7 +426,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty, "projectProperty");
+            ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
 
             lock (_properties)
             {
@@ -493,7 +465,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal IDictionary<string, string> ToDictionary()
         {
-            Dictionary<string, string> dictionary = null;
+            Dictionary<string, string> dictionary;
 
             lock (_properties)
             {

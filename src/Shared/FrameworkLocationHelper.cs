@@ -19,6 +19,7 @@ using PropertyElement = Microsoft.Build.Evaluation.ToolsetElement.PropertyElemen
 #endif
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -66,6 +67,7 @@ namespace Microsoft.Build.Shared
         internal static readonly Version dotNetFrameworkVersion462 = new Version(4, 6, 2);
         internal static readonly Version dotNetFrameworkVersion47 = new Version(4, 7);
         internal static readonly Version dotNetFrameworkVersion471 = new Version(4, 7, 1);
+        internal static readonly Version dotNetFrameworkVersion472 = new Version(4, 7, 2);
 
         // visual studio versions.
         internal static readonly Version visualStudioVersion100 = new Version(10, 0);
@@ -129,11 +131,7 @@ namespace Microsoft.Build.Shared
         /// By default when a root path is not specified we would like to use the program files directory \ reference assemblies\framework as the root location
         /// to generate the reference assembly paths from.
         /// </summary>
-#if FEATURE_SPECIAL_FOLDERS
         internal static readonly string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-#else
-        internal static readonly string programFiles = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles);
-#endif
         internal static readonly string programFiles32 = GenerateProgramFiles32();
         internal static readonly string programFiles64 = GenerateProgramFiles64();
         internal static readonly string programFilesReferenceAssemblyLocation = GenerateProgramFilesReferenceAssemblyRoot();
@@ -213,6 +211,9 @@ namespace Microsoft.Build.Shared
 
             // v4.7.1
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion471, visualStudioVersion150),
+
+            // v4.7.2
+            CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion472, visualStudioVersion150),
         };
 
         /// <summary>
@@ -282,7 +283,8 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion461,
                 dotNetFrameworkVersion462,
                 dotNetFrameworkVersion47,
-                dotNetFrameworkVersion471
+                dotNetFrameworkVersion471,
+                dotNetFrameworkVersion472,
             }),
         };
 
@@ -315,6 +317,7 @@ namespace Microsoft.Build.Shared
             { Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion461, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion47, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion462, visualStudioVersion150) },
             { Tuple.Create(dotNetFrameworkVersion471, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion47, visualStudioVersion150) },
+            { Tuple.Create(dotNetFrameworkVersion472, visualStudioVersion150), Tuple.Create(dotNetFrameworkVersion471, visualStudioVersion150) },
        };
 
         private static readonly IReadOnlyDictionary<Version, DotNetFrameworkSpec> s_dotNetFrameworkSpecDict;
@@ -812,11 +815,7 @@ namespace Microsoft.Build.Shared
 
             // On a 64 bit machine we always want to use the program files x86.  If we are running as a 64 bit process then this variable will be set correctly
             // If we are on a 32 bit machine or running as a 32 bit process then this variable will be null and the programFiles variable will be correct.
-#if FEATURE_SPECIAL_FOLDERS
             string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
-#else
-            string programFilesX86 = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFilesX86);
-#endif
             if (String.IsNullOrEmpty(programFilesX86))
             {
                 // 32 bit box
@@ -866,7 +865,7 @@ namespace Microsoft.Build.Shared
             if (!String.IsNullOrEmpty(combinedPath))
             {
                 combinedPath = Path.GetFullPath(combinedPath);
-                if (Directory.Exists(combinedPath))
+                if (FileSystems.Default.DirectoryExists(combinedPath))
                 {
                     return combinedPath;
                 }
@@ -919,8 +918,8 @@ namespace Microsoft.Build.Shared
         /// <returns>The path to the reference assembly location</returns>
         internal static string GenerateReferenceAssemblyPath(string targetFrameworkRootPath, FrameworkName frameworkName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath, "targetFrameworkRootPath");
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, "frameworkName");
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath, nameof(targetFrameworkRootPath));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, nameof(frameworkName));
 
             try
             {
@@ -952,7 +951,7 @@ namespace Microsoft.Build.Shared
         /// </comments>
         internal static string RemoveDirectories(string path, int numberOfLevelsToRemove)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(numberOfLevelsToRemove > 0, "what are you doing passing a negative number to this function??");
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(numberOfLevelsToRemove > 0, nameof(numberOfLevelsToRemove));
 
             string fixedPath = null;
             if (path != null)
@@ -1043,7 +1042,7 @@ namespace Microsoft.Build.Shared
             string programFilesReferenceAssemblyDirectory = Path.Combine(programFilesReferenceAssemblyLocation, versionPrefix);
             string referenceAssemblyDirectory = null;
 
-            if (Directory.Exists(programFilesReferenceAssemblyDirectory))
+            if (FileSystems.Default.DirectoryExists(programFilesReferenceAssemblyDirectory))
             {
                 referenceAssemblyDirectory = programFilesReferenceAssemblyDirectory;
             }
@@ -1171,6 +1170,10 @@ namespace Microsoft.Build.Shared
             {
                 string sdkVersionFolder = "4.6"; // Default for back-compat
 
+                if (dotNetSdkVersion == dotNetFrameworkVersion472)
+                {
+                    sdkVersionFolder = "4.7.2";
+                }
                 if (dotNetSdkVersion == dotNetFrameworkVersion471)
                 {
                     sdkVersionFolder = "4.7.1";
@@ -1304,26 +1307,23 @@ namespace Microsoft.Build.Shared
             /// </summary>
             public virtual string GetPathToDotNetFramework(DotNetFrameworkArchitecture architecture)
             {
-#if !FEATURE_INSTALLED_MSBUILD
-                return null;
-#else
                 string cachedPath;
                 if (this._pathsToDotNetFramework.TryGetValue(architecture, out cachedPath))
                 {
                     return cachedPath;
                 }
 
+#if FEATURE_WIN32_REGISTRY
                 // Otherwise, check to see if we're even installed.  If not, return null -- no point in setting the static 
                 // variables to null when that's what they are already.  
-                if (NativeMethodsShared.IsWindows)
+                if (NativeMethodsShared.IsWindows && !CheckForFrameworkInstallation(
+                    this._dotNetFrameworkRegistryKey,
+                    this._dotNetFrameworkSetupRegistryInstalledName
+                    ))
                 {
-                    if (!CheckForFrameworkInstallation(
-                            this._dotNetFrameworkRegistryKey,
-                            this._dotNetFrameworkSetupRegistryInstalledName))
-                    {
-                        return null;
-                    }
+                    return null;
                 }
+#endif
 
                 // We're installed and we haven't found this framework path yet -- so find it!
                 string generatedPathToDotNetFramework =
@@ -1337,7 +1337,7 @@ namespace Microsoft.Build.Shared
                 // .net was improperly uninstalled: msbuild.exe isn't there
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
-                    !File.Exists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")))
+                    !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")))
                 {
                     return null;
                 }
@@ -1348,7 +1348,6 @@ namespace Microsoft.Build.Shared
                 }
 
                 return generatedPathToDotNetFramework;
-#endif
             }
 
             /// <summary>
@@ -1373,7 +1372,7 @@ namespace Microsoft.Build.Shared
                         frameworkPath = Path.Combine(frameworkPath, this.Version.ToString());
                     }
 
-                    if (!string.IsNullOrEmpty(frameworkPath) && Directory.Exists(frameworkPath))
+                    if (!string.IsNullOrEmpty(frameworkPath) && FileSystems.Default.DirectoryExists(frameworkPath))
                     {
                         generatedPathToDotNetFrameworkSdkTools = frameworkPath;
                     }
@@ -1475,7 +1474,7 @@ namespace Microsoft.Build.Shared
                     // when a user requests the 40 reference assembly path we don't need to read the redist list because we will not be chaining so we may as well just
                     // generate the path and save us some time.
                     string referencePath = GenerateReferenceAssemblyPath(FrameworkLocationHelper.programFilesReferenceAssemblyLocation, this.FrameworkName);
-                    if (Directory.Exists(referencePath))
+                    if (FileSystems.Default.DirectoryExists(referencePath))
                     {
                         this._pathToDotNetFrameworkReferenceAssemblies = FileUtilities.EnsureTrailingSlash(referencePath);
                     }

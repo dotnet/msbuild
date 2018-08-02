@@ -1,12 +1,4 @@
 {
-  "version": "15.8-preview",
-  "assemblyVersion": "15.1",
-  "cloudBuild": {
-    "buildNumber": {
-      "enabled": true,
-      "includeCommitId": {
-        "where": "fourthVersionComponent"
-      }
-    }
-  }
+  "version": "16.0-preview",
+  "assemblyVersion": "15.1"
 }

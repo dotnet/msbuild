@@ -2,15 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Diagnostics;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
-using System.Collections;
-using System.Globalization;
-using System.Reflection;
-using System.Resources;
 
 namespace Microsoft.Build.Tasks
 {
@@ -21,53 +16,15 @@ namespace Microsoft.Build.Tasks
     {
         #region Properties
 
-        private ITaskItem[] _include;
-        private ITaskItem[] _exclude;
-        private string[] _additionalMetadata;
-        private bool _preserveExistingMetadata = false;
-
         [Output]
-        public ITaskItem[] Include
-        {
-            get
-            {
-                return _include;
-            }
+        public ITaskItem[] Include { get; set; }
 
-            set
-            {
-                _include = value;
-            }
-        }
-
-        public ITaskItem[] Exclude
-        {
-            get
-            {
-                return _exclude;
-            }
-
-            set
-            {
-                _exclude = value;
-            }
-        }
+        public ITaskItem[] Exclude { get; set; }
 
         /// <summary>
         /// Only apply the additional metadata is none already exists
         /// </summary>
-        public bool PreserveExistingMetadata
-        {
-            get
-            {
-                return _preserveExistingMetadata;
-            }
-
-            set
-            {
-                _preserveExistingMetadata = value;
-            }
-        }
+        public bool PreserveExistingMetadata { get; set; } = false;
 
         /// <summary>
         /// A list of metadata name/value pairs to apply to the output items.  
@@ -83,17 +40,7 @@ namespace Microsoft.Build.Tasks
         ///     <CreateItem
         ///         AdditionalMetadata="@(OutputPathItem->'TargetPath=%(Identity)')" />
         /// </remarks>
-        public string[] AdditionalMetadata
-        {
-            get
-            {
-                return _additionalMetadata;
-            }
-            set
-            {
-                _additionalMetadata = value;
-            }
-        }
+        public string[] AdditionalMetadata { get; set; }
 
         #endregion
 
@@ -105,7 +52,7 @@ namespace Microsoft.Build.Tasks
         {
             if (Include == null)
             {
-                _include = Array.Empty<TaskItem>();
+                Include = Array.Empty<ITaskItem>();
                 return true;
             }
 
@@ -121,20 +68,18 @@ namespace Microsoft.Build.Tasks
             }
 
             // Parse the global properties into a hashtable.
-            Hashtable metadataTable;
-            if (!PropertyParser.GetTable(Log, "AdditionalMetadata", this.AdditionalMetadata, out metadataTable))
+            if (!PropertyParser.GetTable(Log, "AdditionalMetadata", AdditionalMetadata, out Dictionary<string, string> metadataTable))
             {
                 return false;
             }
 
-
             // Build a table of unique items.
-            Hashtable excludeItems = GetUniqueItems(Exclude);
+            Dictionary<string, string> excludeItems = GetUniqueItems(Exclude);
 
             // Produce the output items, add attribute and honor exclude.
-            ArrayList outputItems = CreateOutputItems(metadataTable, excludeItems);
+            List<ITaskItem> outputItems = CreateOutputItems(metadataTable, excludeItems);
 
-            _include = (ITaskItem[])outputItems.ToArray(typeof(ITaskItem));
+            Include = outputItems.ToArray();
 
             return !Log.HasLoggedErrors;
         }
@@ -142,36 +87,34 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Create the list of output items.
         /// </summary>
-        /// <param name="needToSetAttributes">Whether attributes need to be set.</param>
-        /// <param name="excludeItems">Items to exclude.</param>
-        private ArrayList CreateOutputItems(Hashtable metadataTable, Hashtable excludeItems)
+        private List<ITaskItem> CreateOutputItems(Dictionary<string, string> metadataTable, Dictionary<string, string> excludeItems)
         {
-            ArrayList outputItems = new ArrayList();
+            var outputItems = new List<ITaskItem>();
 
-            for (int i = 0; i < Include.Length; i++)
+            foreach (ITaskItem i in Include)
             {
                 if (
                     (excludeItems.Count == 0) ||        // minor perf optimization
-                    (!excludeItems.ContainsKey(Include[i].ItemSpec))
-                   )
+                    (!excludeItems.ContainsKey(i.ItemSpec))
+                )
                 {
-                    ITaskItem newItem = _include[i];
+                    ITaskItem newItem = i;
                     if (null != metadataTable)
                     {
-                        foreach (DictionaryEntry nameAndValue in metadataTable)
+                        foreach (KeyValuePair<string, string> nameAndValue in metadataTable)
                         {
                             // 1. If we have been asked to not preserve existing metadata then overwrite
                             // 2. If there is no existing metadata then apply the new
-                            if ((!_preserveExistingMetadata) || String.IsNullOrEmpty(newItem.GetMetadata((string)nameAndValue.Key)))
+                            if ((!PreserveExistingMetadata) || String.IsNullOrEmpty(newItem.GetMetadata(nameAndValue.Key)))
                             {
-                                if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier((string)nameAndValue.Key))
+                                if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(nameAndValue.Key))
                                 {
                                     // Explicitly setting built-in metadata, is not allowed. 
-                                    Log.LogErrorWithCodeFromResources("CreateItem.AdditionalMetadataError", (string)nameAndValue.Key);
+                                    Log.LogErrorWithCodeFromResources("CreateItem.AdditionalMetadataError", nameAndValue.Key);
                                     break;
                                 }
 
-                                newItem.SetMetadata((string)nameAndValue.Key, (string)nameAndValue.Value);
+                                newItem.SetMetadata(nameAndValue.Key, nameAndValue.Value);
                             }
                         }
                     }
@@ -184,8 +127,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Expand wildcards in the item list.
         /// </summary>
-        /// <param name="expand"></param>
-        /// <returns></returns>
         private static ITaskItem[] ExpandWildcards(ITaskItem[] expand)
         {
             if (expand == null)
@@ -194,22 +135,21 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                ArrayList expanded = new ArrayList();
+                var expanded = new List<ITaskItem>();
                 foreach (ITaskItem i in expand)
                 {
                     if (FileMatcher.HasWildcards(i.ItemSpec))
                     {
-                        string[] files = FileMatcher.GetFiles(null /* use current directory */, i.ItemSpec);
+                        string[] files = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
                         foreach (string file in files)
                         {
-                            TaskItem newItem = new TaskItem((ITaskItem)i);
-                            newItem.ItemSpec = file;
+                            TaskItem newItem = new TaskItem(i) { ItemSpec = file };
 
                             // Compute the RecursiveDir portion.
-                            FileMatcher.Result match = FileMatcher.FileMatch(i.ItemSpec, file);
+                            FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
                             if (match.isLegalFileSpec && match.isMatch)
                             {
-                                if (match.wildcardDirectoryPart != null && match.wildcardDirectoryPart.Length > 0)
+                                if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
                                 {
                                     newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
                                 }
@@ -223,17 +163,16 @@ namespace Microsoft.Build.Tasks
                         expanded.Add(i);
                     }
                 }
-                return (ITaskItem[])expanded.ToArray(typeof(ITaskItem));
+                return expanded.ToArray();
             }
         }
 
         /// <summary>
         /// Create a table of unique items
         /// </summary>
-        /// <returns></returns>
-        private static Hashtable GetUniqueItems(ITaskItem[] items)
+        private static Dictionary<string, string> GetUniqueItems(ITaskItem[] items)
         {
-            Hashtable uniqueItems = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            var uniqueItems = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             if (items != null)
             {

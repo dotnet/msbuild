@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//------------------------------------------------------------------------------
-// <copyright from='1997' to='2015' company='Microsoft Corporation'>           
-//    Information Contained Herein is Proprietary and Confidential.            
-// </copyright>                                                                
-//------------------------------------------------------------------------------
 
 using System;
 using System.Reflection;

@@ -1,15 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectChooseElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
@@ -28,7 +23,7 @@ namespace Microsoft.Build.Construction
         internal ProjectChooseElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -45,15 +40,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override string Condition
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
-            }
+            get => null;
+            set => ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
         }
 
         #region ChildEnumerators
@@ -61,16 +49,7 @@ namespace Microsoft.Build.Construction
         /// Get the When children.
         /// Will contain at least one entry.
         /// </summary>
-        public ICollection<ProjectWhenElement> WhenElements
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectWhenElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectWhenElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectWhenElement> WhenElements => new ReadOnlyCollection<ProjectWhenElement>(Children.OfType<ProjectWhenElement>());
 
         /// <summary>
         /// Get any Otherwise child.
@@ -80,8 +59,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ProjectOtherwiseElement otherwise = (LastChild == null) ? null : LastChild as ProjectOtherwiseElement;
-
+                ProjectOtherwiseElement otherwise = LastChild as ProjectOtherwiseElement;
                 return otherwise;
             }
         }
@@ -106,7 +84,6 @@ namespace Microsoft.Build.Construction
         internal static ProjectChooseElement CreateDisconnected(ProjectRootElement containingProject)
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.choose);
-
             return new ProjectChooseElement(element, containingProject);
         }
 

@@ -1,15 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectOutputElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -28,7 +22,7 @@ namespace Microsoft.Build.Construction
         internal ProjectOutputElement(XmlElement xmlElement, ProjectTaskElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -54,7 +48,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, "value");
+                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.taskParameter, value);
                 MarkDirty("Set Output TaskParameter {0}", value);
             }
@@ -63,18 +57,12 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Whether this represents an output item (as opposed to an output property)
         /// </summary>
-        public bool IsOutputItem
-        {
-            get { return ItemType.Length > 0; }
-        }
+        public bool IsOutputItem => ItemType.Length > 0;
 
         /// <summary>
         /// Whether this represents an output property (as opposed to an output item)
         /// </summary>
-        public bool IsOutputProperty
-        {
-            get { return PropertyName.Length > 0; }
-        }
+        public bool IsOutputProperty => PropertyName.Length > 0;
 
         /// <summary>
         /// Gets or sets the ItemType value. 
@@ -124,26 +112,17 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the task parameter attribute
         /// </summary>
-        public ElementLocation TaskParameterLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.taskParameter); }
-        }
+        public ElementLocation TaskParameterLocation => XmlElement.GetAttributeLocation(XMakeAttributes.taskParameter);
 
         /// <summary>
         /// Location of the property name attribute, if any
         /// </summary>
-        public ElementLocation PropertyNameLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.propertyName); }
-        }
+        public ElementLocation PropertyNameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.propertyName);
 
         /// <summary>
         /// Location of the item type attribute, if any
         /// </summary>
-        public ElementLocation ItemTypeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.itemName); }
-        }
+        public ElementLocation ItemTypeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.itemName);
 
         /// <summary>
         /// Creates an unparented ProjectOutputElement, wrapping an unparented XmlElement.
@@ -164,9 +143,7 @@ namespace Microsoft.Build.Construction
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.output);
 
-            ProjectOutputElement output = new ProjectOutputElement(element, containingProject);
-
-            output.TaskParameter = taskParameter;
+            var output = new ProjectOutputElement(element, containingProject) { TaskParameter = taskParameter };
 
             if (!String.IsNullOrEmpty(itemType))
             {
@@ -192,7 +169,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateOutputElement(this.TaskParameter, this.ItemType, this.PropertyName);
+            return owner.CreateOutputElement(TaskParameter, ItemType, PropertyName);
         }
     }
 }

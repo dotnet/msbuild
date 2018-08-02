@@ -923,8 +923,8 @@ namespace Microsoft.Build.Tasks
         private bool LogResults
         (
             ReferenceTable dependencyTable,
-            DependentAssembly[] idealAssemblyRemappings,
-            AssemblyNameReference[] idealAssemblyRemappingsIdentities,
+            List<DependentAssembly> idealAssemblyRemappings,
+            List<AssemblyNameReference> idealAssemblyRemappingsIdentities,
             ArrayList generalResolutionExceptions
         )
         {
@@ -994,15 +994,15 @@ namespace Microsoft.Build.Tasks
                         var ns = XNamespace.Get("urn:schemas-microsoft-com:asm.v1");
 
                         // A high-priority message for each individual redirect.
-                        for (int i = 0; i < idealAssemblyRemappings.Length; i++)
+                        for (int i = 0; i < idealAssemblyRemappings.Count; i++)
                         {
                             DependentAssembly idealRemapping = idealAssemblyRemappings[i];
                             AssemblyName idealRemappingPartialAssemblyName = idealRemapping.PartialAssemblyName;
                             Reference reference = idealAssemblyRemappingsIdentities[i].reference;
 
-                            AssemblyNameExtension[] conflictVictims = reference.GetConflictVictims();
+                            List<AssemblyNameExtension> conflictVictims = reference.GetConflictVictims();
 
-                            for (int j = 0; j < idealRemapping.BindingRedirects.Length; j++)
+                            for (int j = 0; j < idealRemapping.BindingRedirects.Count; j++)
                             {
                                 foreach (AssemblyNameExtension conflictVictim in conflictVictims)
                                 {
@@ -1065,7 +1065,7 @@ namespace Microsoft.Build.Tasks
                                 }
                             }
 
-                            if (conflictVictims.Length == 0)
+                            if (conflictVictims.Count == 0)
                             {
                                 // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
                                 // chosen was not the conflict victor in a version comparison, in other words it was older.
@@ -1074,7 +1074,7 @@ namespace Microsoft.Build.Tasks
                         }
 
                         // Log the warning
-                        if (idealAssemblyRemappings.Length > 0 && foundAtLeastOneValidBindingRedirect)
+                        if (idealAssemblyRemappings.Count > 0 && foundAtLeastOneValidBindingRedirect)
                         {
                             if (SupportsBindingRedirectGeneration)
                             {
@@ -1869,8 +1869,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Read the app.config and get any assembly remappings from it.
         /// </summary>
-        /// <returns></returns>
-        private DependentAssembly[] GetAssemblyRemappingsFromAppConfig()
+        private List<DependentAssembly> GetAssemblyRemappingsFromAppConfig()
         {
             if (_appConfigFile != null)
             {
@@ -2090,7 +2089,7 @@ namespace Microsoft.Build.Tasks
                     FilterBySubtypeAndTargetFramework();
 
                     // Compute the set of bindingRedirect remappings.
-                    DependentAssembly[] appConfigRemappedAssemblies = null;
+                    List<DependentAssembly> appConfigRemappedAssemblies = null;
                     if (FindDependencies)
                     {
                         try
@@ -2163,8 +2162,8 @@ namespace Microsoft.Build.Tasks
                     subsetOrProfileName = targetingSubset && String.IsNullOrEmpty(_targetedFrameworkMoniker) ? subsetOrProfileName : _targetedFrameworkMoniker;
                     bool excludedReferencesExist = false;
 
-                    DependentAssembly[] autoUnifiedRemappedAssemblies = null;
-                    AssemblyNameReference[] autoUnifiedRemappedAssemblyReferences = null;
+                    List<DependentAssembly> autoUnifiedRemappedAssemblies = null;
+                    List<AssemblyNameReference> autoUnifiedRemappedAssemblyReferences = null;
                     if (AutoUnify && FindDependencies)
                     {
                         // Compute all dependencies.
@@ -2207,7 +2206,7 @@ namespace Microsoft.Build.Tasks
                         );
                     }
 
-                    DependentAssembly[] allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
+                    IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
 
                     // Compute all dependencies.
                     dependencyTable.ComputeClosure(allRemappedAssemblies, _assemblyFiles, _assemblyNames, generalResolutionExceptions);
@@ -2232,13 +2231,10 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Resolve any conflicts.
-                    DependentAssembly[] idealAssemblyRemappings = null;
-                    AssemblyNameReference[] idealAssemblyRemappingsIdentities = null;
-
                     dependencyTable.ResolveConflicts
                     (
-                        out idealAssemblyRemappings,
-                        out idealAssemblyRemappingsIdentities
+                        out List<DependentAssembly> idealAssemblyRemappings,
+                        out List<AssemblyNameReference> idealAssemblyRemappingsIdentities
                     );
 
                     // Build the output tables.
@@ -2259,8 +2255,8 @@ namespace Microsoft.Build.Tasks
                         // Build the table of suggested redirects. If we're auto-unifying, we want to output all the 
                         // assemblies that we auto-unified so that GenerateBindingRedirects can consume them, 
                         // not just the required ones for build to succeed
-                        DependentAssembly[] remappings = AutoUnify ? autoUnifiedRemappedAssemblies : idealAssemblyRemappings;
-                        AssemblyNameReference[] remappedReferences = AutoUnify ? autoUnifiedRemappedAssemblyReferences : idealAssemblyRemappingsIdentities;
+                        List<DependentAssembly> remappings = AutoUnify ? autoUnifiedRemappedAssemblies : idealAssemblyRemappings;
+                        List<AssemblyNameReference> remappedReferences = AutoUnify ? autoUnifiedRemappedAssemblyReferences : idealAssemblyRemappingsIdentities;
                         PopulateSuggestedRedirects(remappings, remappedReferences);
                     }
 
@@ -2448,7 +2444,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Combines two DependentAssembly arrays into one.
         /// </summary>
-        private static DependentAssembly[] CombineRemappedAssemblies(DependentAssembly[] first, DependentAssembly[] second)
+        private static IReadOnlyCollection<DependentAssembly> CombineRemappedAssemblies(IReadOnlyCollection<DependentAssembly> first, IReadOnlyCollection<DependentAssembly> second)
         {
             if (first == null)
                 return second;
@@ -2456,9 +2452,9 @@ namespace Microsoft.Build.Tasks
             if (second == null)
                 return first;
 
-            DependentAssembly[] combined = new DependentAssembly[first.Length + second.Length];
-            first.CopyTo(combined, 0);
-            second.CopyTo(combined, first.Length);
+            var combined = new List<DependentAssembly>(first.Count + second.Count);
+            combined.AddRange(first);
+            combined.AddRange(second);
 
             return combined;
         }
@@ -2720,26 +2716,26 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="idealAssemblyRemappings">The list of ideal remappings.</param>
         /// <param name="idealAssemblyRemappedReferences">The list of of references to ideal assembly remappings.</param>
-        private void PopulateSuggestedRedirects(DependentAssembly[] idealAssemblyRemappings, AssemblyNameReference[] idealAssemblyRemappedReferences)
+        private void PopulateSuggestedRedirects(List<DependentAssembly> idealAssemblyRemappings, List<AssemblyNameReference> idealAssemblyRemappedReferences)
         {
-            ArrayList holdSuggestedRedirects = new ArrayList();
+            var holdSuggestedRedirects = new List<ITaskItem>();
             if (idealAssemblyRemappings != null)
             {
-                for (int i = 0; i < idealAssemblyRemappings.Length; i++)
+                for (int i = 0; i < idealAssemblyRemappings.Count; i++)
                 {
                     DependentAssembly idealRemapping = idealAssemblyRemappings[i];
                     string itemSpec = idealRemapping.PartialAssemblyName.ToString();
 
                     Reference reference = idealAssemblyRemappedReferences[i].reference;
-                    AssemblyNameExtension[] conflictVictims = reference.GetConflictVictims();
+                    List<AssemblyNameExtension> conflictVictims = reference.GetConflictVictims();
 
                     // Skip any remapping that has no conflict victims since a redirect will not help.
-                    if (null == conflictVictims || 0 == conflictVictims.Length)
+                    if (null == conflictVictims || 0 == conflictVictims.Count)
                     {
                         continue;
                     }
 
-                    for (int j = 0; j < idealRemapping.BindingRedirects.Length; j++)
+                    for (int j = 0; j < idealRemapping.BindingRedirects.Count; j++)
                     {
                         ITaskItem suggestedRedirect = new TaskItem();
                         suggestedRedirect.ItemSpec = itemSpec;
@@ -2748,9 +2744,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            _suggestedRedirects = (ITaskItem[])holdSuggestedRedirects.ToArray(typeof(ITaskItem));
+            _suggestedRedirects = holdSuggestedRedirects.ToArray();
         }
-
 
         /// <summary>
         /// Process TargetFrameworkDirectories and an array of InstalledAssemblyTables.
@@ -2853,11 +2848,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void FilterBySubtypeAndTargetFramework()
         {
-            ArrayList assembliesLeft = new ArrayList();
+            var assembliesLeft = new List<ITaskItem>();
             foreach (ITaskItem assembly in Assemblies)
             {
                 string subType = assembly.GetMetadata(ItemMetadataNames.subType);
-                if (subType != null && subType.Length > 0)
+                if (!string.IsNullOrEmpty(subType))
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "ResolveAssemblyReference.IgnoringBecauseNonEmptySubtype", assembly.ItemSpec, subType);
                 }
@@ -2872,7 +2867,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Save the array of assemblies filtered by SubType==''.
-            _assemblyNames = (ITaskItem[])assembliesLeft.ToArray(typeof(ITaskItem));
+            _assemblyNames = assembliesLeft.ToArray();
         }
 
         /// <summary>
@@ -2949,12 +2944,12 @@ namespace Microsoft.Build.Tasks
         /// Execute the task.
         /// </summary>
         /// <returns>True if there was success.</returns>
-        override public bool Execute()
+        public override bool Execute()
         {
             return Execute
             (
-                new FileExists(FileUtilities.FileExistsNoThrow),
-                new DirectoryExists(FileUtilities.DirectoryExistsNoThrow),
+                new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
+                new DirectoryExists(p => FileUtilities.DirectoryExistsNoThrow(p)),
                 new GetDirectories(Directory.GetDirectories),
                 new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
                 new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),

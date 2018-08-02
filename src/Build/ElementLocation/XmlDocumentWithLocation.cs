@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Improvement to XmlDocument that during load attaches location information to all elements and attributes.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
@@ -359,11 +355,7 @@ namespace Microsoft.Build.Construction
                             ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
                             string directory = Path.GetDirectoryName(fullPath);
 
-#if FEATURE_SPECIAL_FOLDERS
                             string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-#else
-                            string windowsFolder = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.Windows);
-#endif
 
                             if ((!String.IsNullOrEmpty(windowsFolder) && directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase)) ||
                                 (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles32) && directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||

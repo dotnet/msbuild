@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Wraps a logical property on an item.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;
@@ -503,7 +499,7 @@ namespace Microsoft.Build.Evaluation
             {
                 ErrorUtilities.VerifyThrowArgumentLength(name, "name");
                 ErrorUtilities.VerifyThrowInvalidOperation(isGlobalProperty || !ProjectHasMatchingGlobalProperty(project, name), "OM_GlobalProperty", name);
-                ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[name] == null, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
                 ErrorUtilities.VerifyThrowArgument(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), "OM_ReservedName", name);
 
                 _name = name;

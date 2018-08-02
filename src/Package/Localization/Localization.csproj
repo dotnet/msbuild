@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="RoslynTools.RepoToolset">
   <PropertyGroup>
     <TargetFramework Condition="$(MonoBuild) != 'true'">netcoreapp2.1</TargetFramework>
     <TargetFramework Condition="$(MonoBuild) == 'true'">net461</TargetFramework>

@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Abstract base class for objects reading toolsets.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
@@ -15,6 +11,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.FileSystem;
 using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
@@ -196,7 +193,7 @@ namespace Microsoft.Build.Evaluation
 
                         // Other toolsets are installed in the xbuild directory
                         var xbuildToolsetsDir = Path.Combine(libraryPath, $"xbuild{Path.DirectorySeparatorChar}");
-                        if (Directory.Exists(xbuildToolsetsDir))
+                        if (FileSystems.Default.DirectoryExists(xbuildToolsetsDir))
                         {
                             var r = new Regex(Regex.Escape(xbuildToolsetsDir) + @"\d+\.\d+");
                             foreach (var d in Directory.GetDirectories(xbuildToolsetsDir).Where(d => r.IsMatch(d)))
@@ -208,9 +205,9 @@ namespace Microsoft.Build.Evaluation
                                     continue;
                                 }
 
-                                if (NativeMethodsShared.IsMono && float.TryParse(version, out float floatVersion) && floatVersion > 14.0)
+                                if (NativeMethodsShared.IsMono && Version.TryParse(version, out Version parsedVersion) && parsedVersion.Major > 14)
                                 {
-                                        continue;
+                                    continue;
                                 }
 
                                 // Create standard properties. On Mono they are well known
@@ -463,7 +460,7 @@ namespace Microsoft.Build.Evaluation
 
             IEnumerable<ToolsetPropertyDefinition> rawProperties = GetPropertyDefinitions(toolsVersion.Name);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties, FileSystems.Default);
 
             foreach (ToolsetPropertyDefinition property in rawProperties)
             {
@@ -680,7 +677,7 @@ namespace Microsoft.Build.Evaluation
 
             if (accumulateProperties)
             {
-                expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties);
+                expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(initialProperties, FileSystems.Default);
             }
         }
 

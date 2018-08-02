@@ -1,11 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
-using System.Globalization;
-using System.IO;
 using System;
-
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -15,11 +11,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class OperatorExpressionNode : GenericExpressionNode
     {
-        /// <summary>
-        /// Storage for the left and right children of the operator
-        /// </summary>
-        private GenericExpressionNode _leftChild, _rightChild;
-
         /// <summary>
         /// Numeric evaluation is never allowed for operators
         /// </summary>
@@ -89,34 +80,26 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal override void ResetState()
         {
-            if (_leftChild != null)
+            if (LeftChild != null)
             {
-                _leftChild.ResetState();
+                LeftChild.ResetState();
             }
 
-            if (_rightChild != null)
+            if (RightChild != null)
             {
-                _rightChild.ResetState();
+                RightChild.ResetState();
             }
         }
 
         /// <summary>
         /// Storage for the left child
         /// </summary>
-        internal GenericExpressionNode LeftChild
-        {
-            set { _leftChild = value; }
-            get { return _leftChild; }
-        }
+        internal GenericExpressionNode LeftChild { set; get; }
 
         /// <summary>
         /// Storage for the right child
         /// </summary>
-        internal GenericExpressionNode RightChild
-        {
-            set { _rightChild = value; }
-            get { return _rightChild; }
-        }
+        internal GenericExpressionNode RightChild { set; get; }
 
         #region REMOVE_COMPAT_WARNING
         internal override bool DetectAnd()

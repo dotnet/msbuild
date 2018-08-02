@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface representing an object which can execute tasks.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -59,10 +55,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag to determine whether or not to log task inputs.
         /// </summary>
-        bool LogTaskInputs
-        {
-            get;
-        }
+        bool LogTaskInputs { get; }
 
         /// <summary>
         /// Initialize the host with the objects required to communicate with the host process.

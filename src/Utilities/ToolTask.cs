@@ -3,19 +3,18 @@
 
 using System;
 using System.Collections;
-using System.Collections.Specialized;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Resources;
-using System.Threading;
-using System.Diagnostics;
 using System.ComponentModel;
-
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Resources;
+using System.Text;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Utilities
 {
@@ -61,7 +60,7 @@ namespace Microsoft.Build.Utilities
     /// </remarks>
     public abstract class ToolTask : Task, ICancelableTask
     {
-        private static bool s_preserveTempFiles = String.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
+        private static readonly bool s_preserveTempFiles = string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
 
         #region Constructors
 
@@ -70,13 +69,17 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         protected ToolTask()
         {
-            _logPrivate = new TaskLoggingHelper(this);
-            _logPrivate.TaskResources = AssemblyResources.PrimaryResources;
-            _logPrivate.HelpKeywordPrefix = "MSBuild.";
+            LogPrivate = new TaskLoggingHelper(this)
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
 
-            _logShared = new TaskLoggingHelper(this);
-            _logShared.TaskResources = AssemblyResources.SharedResources;
-            _logShared.HelpKeywordPrefix = "MSBuild.";
+            LogShared = new TaskLoggingHelper(this)
+            {
+                TaskResources = AssemblyResources.SharedResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
 
             // 5 second is the default termination timeout.
             TaskProcessTerminationTimeout = 5000;
@@ -90,7 +93,7 @@ namespace Microsoft.Build.Utilities
         protected ToolTask(ResourceManager taskResources)
             : this()
         {
-            this.TaskResources = taskResources;
+            TaskResources = taskResources;
         }
 
         /// <summary>
@@ -101,7 +104,7 @@ namespace Microsoft.Build.Utilities
         protected ToolTask(ResourceManager taskResources, string helpKeywordPrefix)
             : this(taskResources)
         {
-            this.HelpKeywordPrefix = helpKeywordPrefix;
+            HelpKeywordPrefix = helpKeywordPrefix;
         }
 
         #endregion
@@ -113,61 +116,33 @@ namespace Microsoft.Build.Utilities
         /// had an exit code of 0 (success), this will be set to -1.
         /// </summary>
         [Output]
-        public int ExitCode
-        {
-            get
-            {
-                return _exitCode;
-            }
-        }
+        public int ExitCode { get; private set; }
 
         /// <summary>
         /// When set to true, this task will yield the node when its task is executing.
         /// </summary>
-        public bool YieldDuringToolExecution
-        {
-            get;
-            set;
-        }
+        public bool YieldDuringToolExecution { get; set; }
 
         /// <summary>
         /// When set to true, the tool task will create a batch file for the command-line and execute that using the command-processor,
         /// rather than executing the command directly.
         /// </summary>
-        public bool UseCommandProcessor
-        {
-            get;
-            set;
-        }
+        public bool UseCommandProcessor { get; set; }
 
         /// <summary>
         /// When set to true, it passes /Q to the cmd.exe command line such that the command line does not get echo-ed on stdout
         /// </summary>
-        public bool EchoOff
-        {
-            get;
-            set;
-        }
+        public bool EchoOff { get; set; }
 
         /// <summary>
         /// A timeout to wait for a task to terminate before killing it.  In milliseconds.
         /// </summary>
-        protected int TaskProcessTerminationTimeout
-        {
-            get;
-            set;
-        }
+        protected int TaskProcessTerminationTimeout { get; set; }
 
         /// <summary>
         /// Used to signal when a tool has been cancelled.
         /// </summary>
-        protected ManualResetEvent ToolCanceled
-        {
-            get;
-            private set;
-        }
-
-        private int _exitCode;
+        protected ManualResetEvent ToolCanceled { get; private set; }
 
         /// <summary>
         /// This is the batch file created when UseCommandProcessor is set to true.
@@ -179,7 +154,7 @@ namespace Microsoft.Build.Utilities
         /// Only used by the ToolExe getter.
         /// </summary>
         /// <value>Name of tool.</value>
-        abstract protected string ToolName { get; }
+        protected abstract string ToolName { get; }
 
         /// <summary>
         /// Projects may set this to override a task's ToolName.
@@ -189,7 +164,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (!String.IsNullOrEmpty(_toolExe))
+                if (!string.IsNullOrEmpty(_toolExe))
                 {
                     // If the ToolExe has been overridden then return the value
                     return _toolExe;
@@ -197,24 +172,17 @@ namespace Microsoft.Build.Utilities
                 else
                 {
                     // We have no override, so simply delegate to ToolName
-                    return this.ToolName;
+                    return ToolName;
                 }
             }
-            set
-            {
-                _toolExe = value;
-            }
+            set => _toolExe = value;
         }
 
         /// <summary>
         /// Project-visible property allows the user to override the path to the executable.
         /// </summary>
         /// <value>Path to tool.</value>
-        public string ToolPath
-        {
-            set { _toolPath = value; }
-            get { return _toolPath; }
-        }
+        public string ToolPath { set; get; }
 
         /// <summary>
         /// Array of equals-separated pairs of environment
@@ -225,43 +193,25 @@ namespace Microsoft.Build.Utilities
         /// Using this instead of EnvironmentOverride as that takes a Dictionary,
         /// which cannot be set from an MSBuild project.
         /// </remarks>
-        public string[] EnvironmentVariables
-        {
-            get;
-            set;
-        }
-
-        private string _toolPath;
+        public string[] EnvironmentVariables { get; set; }
 
         /// <summary>
         /// Project visible property that allows the user to specify an amount of time after which the task executable
         /// is terminated. 
         /// </summary>
         /// <value>Time-out in milliseconds. Default is <see cref="System.Threading.Timeout.Infinite"/> (no time-out).</value>
-        virtual public int Timeout
-        {
-            set { _timeout = value; }
-            get { return _timeout; }
-        }
-
-        private int _timeout = System.Threading.Timeout.Infinite;
+        public virtual int Timeout { set; get; } = System.Threading.Timeout.Infinite;
 
         /// <summary>
         /// Overridable property specifying the encoding of the response file, UTF8 by default
         /// </summary>
-        virtual protected Encoding ResponseFileEncoding
-        {
-            get { return Encoding.UTF8; }
-        }
+        protected virtual Encoding ResponseFileEncoding => Encoding.UTF8;
 
         /// <summary>
         /// Overridable method to escape content of the response file
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "Shipped this way in Dev11 Beta (go-live)")]
-        virtual protected string ResponseFileEscape(string responseString)
-        {
-            return responseString;
-        }
+        protected virtual string ResponseFileEscape(string responseString) => responseString;
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard output stream
@@ -271,10 +221,7 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        virtual protected Encoding StandardOutputEncoding
-        {
-            get { return EncodingUtilities.CurrentSystemOemEncoding; }
-        }
+        protected virtual Encoding StandardOutputEncoding => EncodingUtilities.CurrentSystemOemEncoding;
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard error stream
@@ -284,113 +231,58 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        virtual protected Encoding StandardErrorEncoding
-        {
-            get { return EncodingUtilities.CurrentSystemOemEncoding; }
-        }
+        protected virtual Encoding StandardErrorEncoding => EncodingUtilities.CurrentSystemOemEncoding;
 
         /// <summary>
         /// Gets the Path override value.
         /// </summary>
         /// <returns>The new value for the Environment for the task.</returns>
         [Obsolete("Use EnvironmentVariables property")]
-        virtual protected Dictionary<string, string> EnvironmentOverride
-        {
-            get { return null; }
-        }
+        protected virtual Dictionary<string, string> EnvironmentOverride => null;
 
         /// <summary>
         /// Importance with which to log text from the
         /// standard error stream.
         /// </summary>
-        virtual protected MessageImportance StandardErrorLoggingImportance
-        {
-            get { return MessageImportance.Normal; }
-        }
+        protected virtual MessageImportance StandardErrorLoggingImportance => MessageImportance.Normal;
 
         /// <summary>
         /// Whether this ToolTask has logged any errors
         /// </summary>
-        protected virtual bool HasLoggedErrors
-        {
-            get
-            {
-                return (Log.HasLoggedErrors || LogPrivate.HasLoggedErrors || LogShared.HasLoggedErrors);
-            }
-        }
+        protected virtual bool HasLoggedErrors => Log.HasLoggedErrors || LogPrivate.HasLoggedErrors || LogShared.HasLoggedErrors;
 
         /// <summary>
         /// Task Parameter: Importance with which to log text from the
         /// standard out stream.
         /// </summary>
-        public string StandardOutputImportance
-        {
-            get
-            {
-                return _standardOutputImportance;
-            }
-            set
-            {
-                _standardOutputImportance = value;
-            }
-        }
+        public string StandardOutputImportance { get; set; } = null;
 
         /// <summary>
         /// Task Parameter: Importance with which to log text from the
         /// standard error stream.
         /// </summary>
-        public string StandardErrorImportance
-        {
-            get
-            {
-                return _standardErrorImportance;
-            }
-            set
-            {
-                _standardErrorImportance = value;
-            }
-        }
+        public string StandardErrorImportance { get; set; } = null;
 
         /// <summary>
         /// Should ALL messages received on the standard error stream be logged as errors.
         /// </summary>
-        public bool LogStandardErrorAsError
-        {
-            get
-            {
-                return _logStandardErrorAsError;
-            }
-
-            set
-            {
-                _logStandardErrorAsError = value;
-            }
-        }
+        public bool LogStandardErrorAsError { get; set; } = false;
 
         /// <summary>
         /// Importance with which to log text from in the
         /// standard out stream.
         /// </summary>
-        virtual protected MessageImportance StandardOutputLoggingImportance
-        {
-            get { return MessageImportance.Low; }
-        }
+        protected virtual MessageImportance StandardOutputLoggingImportance => MessageImportance.Low;
 
         /// <summary>
         /// The actual importance at which standard out messages will be logged.
         /// </summary>
-        protected MessageImportance StandardOutputImportanceToUse
-        {
-            get { return _standardOutputImportanceToUse; }
-        }
+        protected MessageImportance StandardOutputImportanceToUse => _standardOutputImportanceToUse;
 
         /// <summary>
         /// The actual importance at which standard error messages will be logged.
         /// </summary>
-        protected MessageImportance StandardErrorImportanceToUse
-        {
-            get { return _standardErrorImportanceToUse; }
-        }
+        protected MessageImportance StandardErrorImportanceToUse => _standardErrorImportanceToUse;
 
         #endregion
 
@@ -402,16 +294,9 @@ namespace Microsoft.Build.Utilities
         /// and needs its own separate resources.
         /// </summary>
         /// <value>The logging helper object.</value>
-        private TaskLoggingHelper LogPrivate
-        {
-            get
-            {
-                return _logPrivate;
-            }
-        }
+        private TaskLoggingHelper LogPrivate { get; }
 
         // the private logging helper
-        private TaskLoggingHelper _logPrivate;
 
         /// <summary>
         /// Gets an instance of a shared resources TaskLoggingHelper class containing task logging methods.
@@ -419,16 +304,9 @@ namespace Microsoft.Build.Utilities
         /// and needs its own separate resources.
         /// </summary>
         /// <value>The logging helper object.</value>
-        private TaskLoggingHelper LogShared
-        {
-            get
-            {
-                return _logShared;
-            }
-        }
+        private TaskLoggingHelper LogShared { get; }
 
         // the shared resources logging helper
-        private TaskLoggingHelper _logShared;
 
         #endregion
 
@@ -439,7 +317,7 @@ namespace Microsoft.Build.Utilities
         /// in the system path. If ToolPath is set, this is ignored.
         /// </summary>
         /// <returns>Path string.</returns>
-        abstract protected string GenerateFullPathToTool();
+        protected abstract string GenerateFullPathToTool();
 
         /// <summary>
         /// Gets the working directory to use for the process. Should return null if ToolTask should use the
@@ -448,40 +326,26 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This is a method rather than a property so that derived classes (like Exec) can choose to
         /// expose a public WorkingDirectory property, and it would be confusing to have two properties.</remarks>
         /// <returns></returns>
-        virtual protected string GetWorkingDirectory()
-        {
-            return null;
-        }
+        protected virtual string GetWorkingDirectory() => null;
 
         /// <summary>
         /// Implemented in the derived class
         /// </summary>
         /// <returns>true, if successful</returns>
-        protected internal virtual bool ValidateParameters()
-        {
-            // Default is no validation. This is useful for tools that don't need validation.
-            return true;
-        }
+        protected internal virtual bool ValidateParameters() => true; // Default is no validation (ie. parameters are always valid, hence the true return value). This is useful for tools that don't need validation.
 
         /// <summary>
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
         /// </summary>
         /// <returns></returns>
-        virtual protected bool SkipTaskExecution()
-        {
-            return false;
-        }
+        protected virtual bool SkipTaskExecution() => false;
 
         /// <summary>
         /// Returns a string with those switches and other information that can go into a response file.
         /// Called after ValidateParameters and SkipTaskExecution
         /// </summary>
         /// <returns></returns>
-        virtual protected string GenerateResponseFileCommands()
-        {
-            // Default is nothing. This is useful for tools that don't need or support response files.
-            return string.Empty;
-        }
+        protected virtual string GenerateResponseFileCommands() => string.Empty; // Default is nothing. This is useful for tools that don't need or support response files.
 
         /// <summary>
         /// Returns a string with those switches and other information that can't go into a response file and
@@ -489,11 +353,7 @@ namespace Microsoft.Build.Utilities
         /// Called after ValidateParameters and SkipTaskExecution
         /// </summary>
         /// <returns></returns>
-        virtual protected string GenerateCommandLineCommands()
-        {
-            // Default is nothing. This is useful for tools where all the parameters can go into a response file.
-            return string.Empty;
-        }
+        protected virtual string GenerateCommandLineCommands() => string.Empty; // Default is nothing. This is useful for tools where all the parameters can go into a response file.
 
         /// <summary>
         /// Returns the command line switch used by the tool executable to specify the response file.
@@ -502,32 +362,28 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="responseFilePath">full path to the temporarily created response file</param>
         /// <returns></returns>
-        virtual protected string GetResponseFileSwitch(string responseFilePath)
-        {
-            // by default, return @"<responseFilePath>"
-            return "@\"" + responseFilePath + "\"";
-        }
+        protected virtual string GetResponseFileSwitch(string responseFilePath) => "@\"" + responseFilePath + "\""; // by default, return @"<responseFilePath>"
 
         /// <summary>
         /// Allows tool to handle the return code.
         /// This method will only be called with non-zero exitCode.
         /// </summary>
         /// <returns>The return value of this method will be used as the task return value</returns>
-        virtual protected bool HandleTaskExecutionErrors()
+        protected virtual bool HandleTaskExecutionErrors()
         {
-            Debug.Assert(_exitCode != 0, "HandleTaskExecutionErrors should only be called if there were problems executing the task");
+            Debug.Assert(ExitCode != 0, "HandleTaskExecutionErrors should only be called if there were problems executing the task");
 
             if (HasLoggedErrors)
             {
                 // Emit a message.
-                LogPrivate.LogMessageFromResources(MessageImportance.Low, "General.ToolCommandFailedNoErrorCode", _exitCode);
+                LogPrivate.LogMessageFromResources(MessageImportance.Low, "General.ToolCommandFailedNoErrorCode", ExitCode);
             }
             else
             {
                 // If the tool itself did not log any errors on its own, then we log one now simply saying
                 // that the tool exited with a non-zero exit code.  This way, the customer nevers sees
                 // "Build failed" without at least one error being logged.
-                LogPrivate.LogErrorWithCodeFromResources("ToolTask.ToolCommandFailed", ToolExe, _exitCode);
+                LogPrivate.LogErrorWithCodeFromResources("ToolTask.ToolCommandFailed", ToolExe, ExitCode);
             }
 
             // by default, always fail the task
@@ -540,10 +396,7 @@ namespace Microsoft.Build.Utilities
         /// call Compile() on the host object.
         /// </summary>
         /// <returns>The return value indicates success (true) or failure (false) if the host object was actually called to do the work.</returns>
-        virtual protected bool CallHostObjectToExecute()
-        {
-            return false;
-        }
+        protected virtual bool CallHostObjectToExecute() => false;
 
         /// <summary>
         /// We expect tasks to override this method if they support host objects.  The implementation should
@@ -551,10 +404,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <returns>The return value indicates what steps to take next.  The default is to assume that there
         /// is no host object provided, and therefore we should fallback to calling the command-line tool.</returns>
-        virtual protected HostObjectInitializationStatus InitializeHostObject()
-        {
-            return HostObjectInitializationStatus.UseAlternateToolToExecute;
-        }
+        protected virtual HostObjectInitializationStatus InitializeHostObject() => HostObjectInitializationStatus.UseAlternateToolToExecute;
 
         /// <summary>
         /// Logs the actual command line about to be executed (or what the task wants the log to show)
@@ -562,14 +412,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="message">
         /// Descriptive message about what is happening - usually the command line to be executed.
         /// </param>
-        virtual protected void LogToolCommand
-        (
-            string message
-        )
-        {
-            // Log a descriptive message about what's happening.
-            LogPrivate.LogCommandLine(MessageImportance.High, message);
-        }
+        protected virtual void LogToolCommand(string message) => LogPrivate.LogCommandLine(MessageImportance.High, message); // Log a descriptive message about what's happening.
 
         /// <summary>
         /// Logs the tool name and the path from where it is being run.
@@ -580,11 +423,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="pathToTool">
         /// The path from where the tool is being run.
         /// </param>
-        virtual protected void LogPathToTool
-        (
-            string toolName,
-            string pathToTool
-        )
+        protected virtual void LogPathToTool(string toolName, string pathToTool)
         {
             // We don't do anything here any more, as it was just duplicative and noise.
             // The method only remains for backwards compatibility - to avoid breaking tasks that override it
@@ -608,20 +447,20 @@ namespace Microsoft.Build.Utilities
                 return ToolExe;
             }
 
-            if (ToolPath != null && ToolPath.Length > 0)
+            if (!string.IsNullOrEmpty(ToolPath))
             {
                 // If the project author passed in a ToolPath, always use that.
                 pathToTool = Path.Combine(ToolPath, ToolExe);
             }
 
-            if (string.IsNullOrWhiteSpace(pathToTool) || (ToolPath == null && !File.Exists(pathToTool)))
+            if (string.IsNullOrWhiteSpace(pathToTool) || ToolPath == null && !FileSystems.Default.FileExists(pathToTool))
             {
                 // Otherwise, try to find the tool ourselves.
                 pathToTool = GenerateFullPathToTool();
 
                 // We have no toolpath, but we have been given an override
                 // for the tool exe, fix up the path, assuming that the tool is in the same location
-                if (pathToTool != null && !String.IsNullOrEmpty(_toolExe))
+                if (pathToTool != null && !string.IsNullOrEmpty(_toolExe))
                 {
                     string directory = Path.GetDirectoryName(pathToTool);
                     pathToTool = Path.Combine(directory, ToolExe);
@@ -632,10 +471,10 @@ namespace Microsoft.Build.Utilities
             // look for it in the path
             if (pathToTool != null)
             {
-                bool isOnlyFileName = (Path.GetFileName(pathToTool).Length == pathToTool.Length);
+                bool isOnlyFileName = Path.GetFileName(pathToTool).Length == pathToTool.Length;
                 if (!isOnlyFileName)
                 {
-                    bool isExistingFile = File.Exists(pathToTool);
+                    bool isExistingFile = FileSystems.Default.FileExists(pathToTool);
                     if (!isExistingFile)
                     {
                         LogPrivate.LogErrorWithCodeFromResources("ToolTask.ToolExecutableNotFound", pathToTool);
@@ -645,7 +484,7 @@ namespace Microsoft.Build.Utilities
                 else
                 {
                     // if we just have the file name, search for the file on the system path
-                    string actualPathToTool = ToolTask.FindOnPath(pathToTool);
+                    string actualPathToTool = FindOnPath(pathToTool);
 
                     // if we find the file
                     if (actualPathToTool != null)
@@ -687,7 +526,7 @@ namespace Microsoft.Build.Utilities
             responseFileSwitch = null;
 
             // if this tool supports response files
-            if (!String.IsNullOrEmpty(responseFileCommands))
+            if (!string.IsNullOrEmpty(responseFileCommands))
             {
                 // put all the parameters into a temporary response file so we don't
                 // have to worry about how long the command-line is going to be
@@ -696,7 +535,7 @@ namespace Microsoft.Build.Utilities
                 responseFile = FileUtilities.GetTemporaryFile(".rsp");
 
                 // Use the encoding specified by the overridable ResponseFileEncoding property
-                using (StreamWriter responseFileStream = FileUtilities.OpenWrite(responseFile, false, this.ResponseFileEncoding))
+                using (StreamWriter responseFileStream = FileUtilities.OpenWrite(responseFile, false, ResponseFileEncoding))
                 {
                     responseFileStream.Write(ResponseFileEscape(responseFileCommands));
                 }
@@ -714,7 +553,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="commandLineCommands"></param>
         /// <param name="responseFileSwitch"></param>
         /// <returns>The information required to start the process.</returns>
-        virtual protected ProcessStartInfo GetProcessStartInfo
+        protected virtual ProcessStartInfo GetProcessStartInfo
         (
             string pathToTool,
             string commandLineCommands,
@@ -726,7 +565,7 @@ namespace Microsoft.Build.Utilities
 
             if (!UseCommandProcessor)
             {
-                if (!String.IsNullOrEmpty(responseFileSwitch))
+                if (!string.IsNullOrEmpty(responseFileSwitch))
                 {
                     commandLine += " " + responseFileSwitch;
                 }
@@ -741,7 +580,7 @@ namespace Microsoft.Build.Utilities
             // so we can go past 8K easily.
             if (commandLine.Length > 32000)
             {
-                LogPrivate.LogWarningWithCodeFromResources("ToolTask.CommandTooLong", this.GetType().Name);
+                LogPrivate.LogWarningWithCodeFromResources("ToolTask.CommandTooLong", GetType().Name);
             }
 
             ProcessStartInfo startInfo = new ProcessStartInfo(pathToTool, commandLine);
@@ -809,7 +648,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="responseFileCommands">Command line arguments that should go into a temporary response file</param>
         /// <param name="commandLineCommands">Command line arguments that should be passed to the tool executable directly</param>
         /// <returns>exit code from the tool - if errors were logged and the tool has an exit code of zero, then we sit it to -1</returns>
-        virtual protected int ExecuteTool
+        protected virtual int ExecuteTool
         (
             string pathToTool,
             string responseFileCommands,
@@ -837,8 +676,7 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                string responseFileSwitch;
-                responseFile = GetTemporaryResponseFile(responseFileCommands, out responseFileSwitch);
+                responseFile = GetTemporaryResponseFile(responseFileCommands, out string responseFileSwitch);
 
                 // create/initialize the process to run the tool
                 proc = new Process();
@@ -847,16 +685,16 @@ namespace Microsoft.Build.Utilities
                 // turn on the Process.Exited event
                 proc.EnableRaisingEvents = true;
                 // sign up for the exit notification
-                proc.Exited += new EventHandler(ReceiveExitNotification);
+                proc.Exited += ReceiveExitNotification;
 
                 // turn on async stderr notifications
-                proc.ErrorDataReceived += new DataReceivedEventHandler(ReceiveStandardErrorData);
+                proc.ErrorDataReceived += ReceiveStandardErrorData;
                 // turn on async stdout notifications
-                proc.OutputDataReceived += new DataReceivedEventHandler(ReceiveStandardOutputData);
+                proc.OutputDataReceived += ReceiveStandardOutputData;
 
                 // if we've got this far, we expect to get an exit code from the process. If we don't
                 // get one from the process, we want to use an exit code value of -1.
-                _exitCode = -1;
+                ExitCode = -1;
 
                 // Start the process
                 proc.Start();
@@ -874,7 +712,7 @@ namespace Microsoft.Build.Utilities
                 proc.BeginOutputReadLine();
 
                 // start the time-out timer
-                _toolTimer = new Timer(new TimerCallback(ReceiveTimeoutNotification), null, Timeout, System.Threading.Timeout.Infinite /* no periodic timeouts */);
+                _toolTimer = new Timer(ReceiveTimeoutNotification, null, Timeout, System.Threading.Timeout.Infinite /* no periodic timeouts */);
 
                 // deal with the various notifications
                 HandleToolNotifications(proc);
@@ -892,7 +730,7 @@ namespace Microsoft.Build.Utilities
                 {
                     try
                     {
-                        _exitCode = proc.ExitCode;
+                        ExitCode = proc.ExitCode;
                     }
                     catch (InvalidOperationException)
                     {
@@ -905,9 +743,9 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // If the tool exited cleanly, but logged errors then assign a failing exit code (-1)
-                if ((_exitCode == 0) && HasLoggedErrors)
+                if (ExitCode == 0 && HasLoggedErrors)
                 {
-                    _exitCode = -1;
+                    ExitCode = -1;
                 }
 
                 // release all the OS resources
@@ -922,23 +760,17 @@ namespace Microsoft.Build.Utilities
                     _toolExited.Dispose();
                     _toolTimeoutExpired.Dispose();
 
-                    if (_toolTimer != null)
-                    {
-                        _toolTimer.Dispose();
-                    }
+                    _toolTimer?.Dispose();
                 }
             }
 
-            return _exitCode;
+            return ExitCode;
         }
 
         /// <summary>
         /// Cancels the process executing the task by asking it to close nicely, then after a short period, forcing termination.
         /// </summary>
-        public virtual void Cancel()
-        {
-            ToolCanceled.Set();
-        }
+        public virtual void Cancel() => ToolCanceled.Set();
 
         /// <summary>
         /// Delete temporary file. If the delete fails for some reason (e.g. file locked by anti-virus) then
@@ -986,14 +818,14 @@ namespace Microsoft.Build.Utilities
             // 2) if a tool exits, we first want to flush its stderr/stdout queues
             // 3) if a tool exits and times-out at the same time, we want to let
             //    it exit gracefully
-            WaitHandle[] notifications = new WaitHandle[]
-                                            {
-                                                _toolTimeoutExpired,
-                                                ToolCanceled,
-                                                _standardErrorDataAvailable,
-                                                _standardOutputDataAvailable,
-                                                _toolExited
-                                            };
+            WaitHandle[] notifications =
+            {
+                _toolTimeoutExpired,
+                ToolCanceled,
+                _standardErrorDataAvailable,
+                _standardOutputDataAvailable,
+                _toolExited
+            };
 
             bool isToolRunning = true;
 
@@ -1095,7 +927,7 @@ namespace Microsoft.Build.Utilities
                     ErrorUtilities.VerifyThrow(Timeout != System.Threading.Timeout.Infinite,
                         "A time-out value must have been specified or the task must be cancelled.");
 
-                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcess", processName, this.Timeout);
+                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcess", processName, Timeout);
                 }
                 else
                 {
@@ -1106,8 +938,7 @@ namespace Microsoft.Build.Utilities
                 string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
                 {
-                    int result = 0;
-                    if (int.TryParse(timeoutFromEnvironment, out result) && result >= 0)
+                    if (int.TryParse(timeoutFromEnvironment, out int result) && result >= 0)
                     {
                         timeout = result;
                     }
@@ -1155,14 +986,14 @@ namespace Microsoft.Build.Utilities
         /// Process.WaitForExit() and Process.Kill().
         /// </remarks>
         /// <param name="proc"></param>
-        private void WaitForProcessExit(Process proc)
+        private static void WaitForProcessExit(Process proc)
         {
             proc.WaitForExit();
 
             // Process.WaitForExit() may return prematurely. We need to check to be sure.
             while (!proc.HasExited)
             {
-                System.Threading.Thread.Sleep(50);
+                Thread.Sleep(50);
             }
         }
 
@@ -1171,18 +1002,14 @@ namespace Microsoft.Build.Utilities
         /// are read out of the stderr data queue.
         /// </summary>
         private void LogMessagesFromStandardError()
-        {
-            LogMessagesFromStandardErrorOrOutput(_standardErrorData, _standardErrorDataAvailable, _standardErrorImportanceToUse, StandardOutputOrErrorQueueType.StandardError);
-        }
+            => LogMessagesFromStandardErrorOrOutput(_standardErrorData, _standardErrorDataAvailable, _standardErrorImportanceToUse, StandardOutputOrErrorQueueType.StandardError);
 
         /// <summary>
         /// Logs all the messages that the tool wrote to stdout. The messages
         /// are read out of the stdout data queue.
         /// </summary>
         private void LogMessagesFromStandardOutput()
-        {
-            LogMessagesFromStandardErrorOrOutput(_standardOutputData, _standardOutputDataAvailable, _standardOutputImportanceToUse, StandardOutputOrErrorQueueType.StandardOutput);
-        }
+            => LogMessagesFromStandardErrorOrOutput(_standardOutputData, _standardOutputDataAvailable, _standardOutputImportanceToUse, StandardOutputOrErrorQueueType.StandardOutput);
 
         /// <summary>
         /// Logs all the messages that the tool wrote to either stderr or stdout.
@@ -1224,10 +1051,10 @@ namespace Microsoft.Build.Utilities
             {
                 while (dataQueue.Count > 0)
                 {
-                    string errorOrOutMessage = dataQueue.Dequeue() as String;
+                    string errorOrOutMessage = dataQueue.Dequeue() as string;
                     if (!LogStandardErrorAsError || queueType == StandardOutputOrErrorQueueType.StandardOutput)
                     {
-                        this.LogEventsFromTextOutput(errorOrOutMessage, messageImportance);
+                        LogEventsFromTextOutput(errorOrOutMessage, messageImportance);
                     }
                     else if (LogStandardErrorAsError && queueType == StandardOutputOrErrorQueueType.StandardError)
                     {
@@ -1254,14 +1081,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="singleLine"></param>
         /// <param name="messageImportance"></param>
-        virtual protected void LogEventsFromTextOutput
-        (
-            string singleLine,
-            MessageImportance messageImportance
-        )
-        {
-            Log.LogMessageFromText(singleLine, messageImportance);
-        }
+        protected virtual void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance) => Log.LogMessageFromText(singleLine, messageImportance);
 
         /// <summary>
         /// Signals when the tool times-out. The tool timer calls this method
@@ -1312,10 +1132,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e)
-        {
-            ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
-        }
+        private void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
 
         /// <summary>
         /// Queues up the output from the stdout stream of the process executing
@@ -1326,10 +1143,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e)
-        {
-            ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
-        }
+        private void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
 
         /// <summary>
         /// Queues up the output from either the stderr or stdout stream of the
@@ -1340,12 +1154,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="e"></param>
         /// <param name="dataQueue"></param>
         /// <param name="dataAvailableSignal"></param>
-        private void ReceiveStandardErrorOrOutputData
-        (
-            DataReceivedEventArgs e,
-            Queue dataQueue,
-            ManualResetEvent dataAvailableSignal
-        )
+        private void ReceiveStandardErrorOrOutputData(DataReceivedEventArgs e, Queue dataQueue, ManualResetEvent dataAvailableSignal)
         {
             // NOTE: don't ignore empty string, because we need to log that
             if (e.Data != null)
@@ -1392,7 +1201,7 @@ namespace Microsoft.Build.Utilities
         private bool AssignStandardStreamLoggingImportance()
         {
             // Gather the importance for the Standard Error stream:
-            if ((_standardErrorImportance == null) || (_standardErrorImportance.Length == 0))
+            if (string.IsNullOrEmpty(StandardErrorImportance))
             {
                 // If we have no task parameter override then ask the task for its default
                 _standardErrorImportanceToUse = StandardErrorLoggingImportance;
@@ -1402,17 +1211,17 @@ namespace Microsoft.Build.Utilities
                 try
                 {
                     // Parse the raw importance string into a strongly typed enumeration.  
-                    _standardErrorImportanceToUse = (MessageImportance)Enum.Parse(typeof(MessageImportance), _standardErrorImportance, true /* case-insensitive */);
+                    _standardErrorImportanceToUse = (MessageImportance)Enum.Parse(typeof(MessageImportance), StandardErrorImportance, true /* case-insensitive */);
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", _standardErrorImportance);
+                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", StandardErrorImportance);
                     return false;
                 }
             }
 
             // Gather the importance for the Standard Output stream:
-            if ((_standardOutputImportance == null) || (_standardOutputImportance.Length == 0))
+            if (string.IsNullOrEmpty(StandardOutputImportance))
             {
                 // If we have no task parameter override then ask the task for its default
                 _standardOutputImportanceToUse = StandardOutputLoggingImportance;
@@ -1422,11 +1231,11 @@ namespace Microsoft.Build.Utilities
                 try
                 {
                     // Parse the raw importance string into a strongly typed enumeration.  
-                    _standardOutputImportanceToUse = (MessageImportance)Enum.Parse(typeof(MessageImportance), _standardOutputImportance, true /* case-insensitive */);
+                    _standardOutputImportanceToUse = (MessageImportance)Enum.Parse(typeof(MessageImportance), StandardOutputImportance, true /* case-insensitive */);
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", _standardOutputImportance);
+                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", StandardOutputImportance);
                     return false;
                 }
             }
@@ -1449,7 +1258,7 @@ namespace Microsoft.Build.Utilities
                     try
                     {
                         // The PATH can contain anything, including bad characters
-                        return Directory.Exists(path);
+                        return FileSystems.Default.DirectoryExists(path);
                     }
                     catch (Exception)
                     {
@@ -1457,7 +1266,7 @@ namespace Microsoft.Build.Utilities
                     }
                 })
                 .Select(folderPath => Path.Combine(folderPath, filename))
-                .FirstOrDefault(fullPath => !String.IsNullOrEmpty(fullPath) && File.Exists(fullPath));
+                .FirstOrDefault(fullPath => !string.IsNullOrEmpty(fullPath) && FileSystems.Default.FileExists(fullPath));
         }
 
         #endregion
@@ -1485,7 +1294,7 @@ namespace Microsoft.Build.Utilities
                 {
                     string[] nameValuePair = entry.Split(s_equalsSplitter, 2);
 
-                    if (nameValuePair.Length == 1 || (nameValuePair.Length == 2 && nameValuePair[0].Length == 0))
+                    if (nameValuePair.Length == 1 || nameValuePair.Length == 2 && nameValuePair[0].Length == 0)
                     {
                         LogPrivate.LogErrorWithCodeFromResources("ToolTask.InvalidEnvironmentParameter", nameValuePair[0]);
                         return false;
@@ -1557,7 +1366,7 @@ namespace Microsoft.Build.Utilities
                         }
 
                         // /D: Do not load AutoRun configuration from the registry (perf)
-                        commandLineCommands = $"{(Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd ? String.Empty : "/D ")}/C \"{batchFileForCommandLine}\"";
+                        commandLineCommands = $"{(Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd ? string.Empty : "/D ")}/C \"{batchFileForCommandLine}\"";
 
                         if (EchoOff)
                         {
@@ -1567,9 +1376,9 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // ensure the command line arguments string is not null
-                if ((commandLineCommands == null) || (commandLineCommands.Length == 0))
+                if (string.IsNullOrEmpty(commandLineCommands))
                 {
-                    commandLineCommands = String.Empty;
+                    commandLineCommands = string.Empty;
                 }
                 // add a leading space to the command line arguments (if any) to
                 // separate them from the tool path
@@ -1588,7 +1397,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else if (nextAction == HostObjectInitializationStatus.NoActionReturnFailure)
                 {
-                    _exitCode = 1;
+                    ExitCode = 1;
                     return HandleTaskExecutionErrors();
                 }
 
@@ -1639,7 +1448,7 @@ namespace Microsoft.Build.Utilities
                     // Log that we are about to invoke the specified command.  
                     LogToolCommand(pathToTool + commandLineCommands + " " + responseFileCommands);
                 }
-                _exitCode = 0;
+                ExitCode = 0;
 
                 if (nextAction == HostObjectInitializationStatus.UseHostObjectToExecute)
                 {
@@ -1649,7 +1458,7 @@ namespace Microsoft.Build.Utilities
                     {
                         if (!CallHostObjectToExecute())
                         {
-                            _exitCode = 1;
+                            ExitCode = 1;
                         }
                     }
                     catch (Exception e)
@@ -1665,7 +1474,7 @@ namespace Microsoft.Build.Utilities
 
                     // No host object was provided, or at least not one that supports all of the
                     // switches/parameters we need.  So shell out to the command-line tool.
-                    _exitCode = ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
+                    ExitCode = ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
                 }
 
                 // Raise a comment event to notify that the process completed
@@ -1673,7 +1482,7 @@ namespace Microsoft.Build.Utilities
                 {
                     return false;
                 }
-                else if (_exitCode != 0)
+                else if (ExitCode != 0)
                 {
                     return HandleTaskExecutionErrors();
                 }
@@ -1717,7 +1526,7 @@ namespace Microsoft.Build.Utilities
             finally
             {
                 // Clean up after ourselves.
-                if (_temporaryBatchFile != null && File.Exists(_temporaryBatchFile))
+                if (_temporaryBatchFile != null && FileSystems.Default.FileExists(_temporaryBatchFile))
                 {
                     DeleteTempFile(_temporaryBatchFile);
                 }
@@ -1733,7 +1542,7 @@ namespace Microsoft.Build.Utilities
         /// override with more-specific knowledge of what backslashes
         /// are likely to be correct.
         /// </remarks>
-        virtual protected string AdjustCommandsForOperatingSystem(string input)
+        protected virtual string AdjustCommandsForOperatingSystem(string input)
         {
             if (NativeMethodsShared.IsWindows)
             {
@@ -1770,7 +1579,7 @@ namespace Microsoft.Build.Utilities
         /// stack trace when a shorter message was better
         /// </summary>
         /// <returns>exception message</returns>
-        private string GetErrorMessageWithDiagnosticsCheck(Exception e)
+        private static string GetErrorMessageWithDiagnosticsCheck(Exception e)
         {
             // If MSBuildDiagnostics is set show stack trace information
             if (Environment.GetEnvironmentVariable("MSBuildDiagnostics") != null)
@@ -1808,27 +1617,12 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// An object to hold the event shutdown lock
         /// </summary>
-        private object _eventCloseLock = new object();
+        private readonly object _eventCloseLock = new object();
 
         /// <summary>
         /// Splitter for environment variables
         /// </summary>
-        private static char[] s_equalsSplitter = new char[] { '=' };
-
-        /// <summary>
-        /// Task Parameter: Override the importance at which standard out messages will be logged 
-        /// </summary>
-        private string _standardOutputImportance = null;
-
-        /// <summary>
-        /// Task Parameter: Override the importance at which standard error messages will be logged 
-        /// </summary>
-        private string _standardErrorImportance = null;
-
-        /// <summary>
-        /// Task Parameter: Should messages received on the standard error stream be logged as errros
-        /// </summary>
-        private bool _logStandardErrorAsError = false;
+        private static readonly char[] s_equalsSplitter = new char[] { '=' };
 
         /// <summary>
         /// The actual importance at which standard out messages will be logged 
@@ -1886,7 +1680,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Used to support overriding the toolExe name.
         /// </summary>
-        private string _toolExe = null;
+        private string _toolExe;
 
         /// <summary>
         /// Set when the events are about to be disposed, so that tardy

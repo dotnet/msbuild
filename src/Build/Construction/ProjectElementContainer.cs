@@ -1,23 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A container for project elements.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Collections.ObjectModel;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Internal;
-using System.Reflection;
 
 namespace Microsoft.Build.Construction
 {
@@ -26,12 +16,7 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public abstract class ProjectElementContainer : ProjectElement
     {
-        const string DEFAULT_INDENT = "  ";
-
-        /// <summary>
-        /// Number of children of any kind
-        /// </summary>
-        private int _count;
+        private const string DEFAULT_INDENT = "  ";
 
         /// <summary>
         /// Constructor called by ProjectRootElement only.
@@ -41,7 +26,6 @@ namespace Microsoft.Build.Construction
         /// Should ideally be protected+internal.
         /// </comment> 
         internal ProjectElementContainer()
-            : base()
         {
         }
 
@@ -61,10 +45,7 @@ namespace Microsoft.Build.Construction
         /// Get an enumerator over all children, gotten recursively.
         /// Walks the children in a depth-first manner.
         /// </summary>
-        public IEnumerable<ProjectElement> AllChildren
-        {
-            get { return GetChildrenRecursively(); }
-        }
+        public IEnumerable<ProjectElement> AllChildren => GetChildrenRecursively();
 
         /// <summary>
         /// Get enumerable over all the children
@@ -74,7 +55,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return new Microsoft.Build.Collections.ReadOnlyCollection<ProjectElement>
+                return new Collections.ReadOnlyCollection<ProjectElement>
                     (
                         new ProjectElementSiblingEnumerable(FirstChild)
                     );
@@ -89,7 +70,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return new Microsoft.Build.Collections.ReadOnlyCollection<ProjectElement>
+                return new Collections.ReadOnlyCollection<ProjectElement>
                     (
                         new ProjectElementSiblingEnumerable(LastChild, false /* reverse */)
                     );
@@ -99,36 +80,19 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Number of children of any kind
         /// </summary>
-        public int Count
-        {
-            [DebuggerStepThrough]
-            get
-            { return _count; }
-        }
+        public int Count { get; private set; }
 
         /// <summary>
         /// First child, if any, otherwise null.
         /// Cannot be set directly; use <see cref="PrependChild">PrependChild()</see>.
         /// </summary>
-        public ProjectElement FirstChild
-        {
-            [DebuggerStepThrough]
-            get;
-            [DebuggerStepThrough]
-            private set;
-        }
+        public ProjectElement FirstChild { get; private set; }
 
         /// <summary>
         /// Last child, if any, otherwise null.
         /// Cannot be set directly; use <see cref="AppendChild">AppendChild()</see>.
         /// </summary>
-        public ProjectElement LastChild
-        {
-            [DebuggerStepThrough]
-            get;
-            [DebuggerStepThrough]
-            private set;
-        }
+        public ProjectElement LastChild { get; private set; }
 
         /// <summary>
         /// Insert the child after the reference child.
@@ -144,7 +108,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertAfterChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, "child");
+            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
 
             if (reference == null)
             {
@@ -176,7 +140,7 @@ namespace Microsoft.Build.Construction
 
             AddToXml(child);
 
-            _count++;
+            Count++;
             MarkDirty("Insert element {0}", child.ElementName);
         }
 
@@ -194,7 +158,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertBeforeChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, "child");
+            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
 
             if (reference == null)
             {
@@ -226,7 +190,7 @@ namespace Microsoft.Build.Construction
 
             AddToXml(child);
 
-            _count++;
+            Count++;
             MarkDirty("Insert element {0}", child.ElementName);
         }
 
@@ -265,7 +229,6 @@ namespace Microsoft.Build.Construction
             {
                 ErrorUtilities.VerifyThrow(LastChild != null, "Invalid structure");
                 InsertBeforeChild(child, FirstChild);
-                return;
             }
         }
 
@@ -284,7 +247,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void RemoveChild(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, "child");
+            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
 
             ErrorUtilities.VerifyThrowArgument(child.Parent == this, "OM_NodeNotAlreadyParentedByThis");
 
@@ -300,19 +263,19 @@ namespace Microsoft.Build.Construction
                 child.NextSibling.PreviousSibling = child.PreviousSibling;
             }
 
-            if (Object.ReferenceEquals(child, FirstChild))
+            if (ReferenceEquals(child, FirstChild))
             {
                 FirstChild = child.NextSibling;
             }
 
-            if (Object.ReferenceEquals(child, LastChild))
+            if (ReferenceEquals(child, LastChild))
             {
                 LastChild = child.PreviousSibling;
             }
 
             RemoveFromXml(child);
 
-            _count--;
+            Count--;
             MarkDirty("Remove element {0}", child.ElementName);
         }
 
@@ -337,27 +300,26 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void DeepCopyFrom(ProjectElementContainer element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, "element");
-            ErrorUtilities.VerifyThrowArgument(this.GetType().IsEquivalentTo(element.GetType()), "element");
+            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
+            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
 
             if (this == element)
             {
                 return;
             }
 
-            this.RemoveAllChildren();
-            this.CopyFrom(element);
+            RemoveAllChildren();
+            CopyFrom(element);
 
-            foreach (var child in element.Children)
+            foreach (ProjectElement child in element.Children)
             {
-                var childContainer = child as ProjectElementContainer;
-                if (childContainer != null)
+                if (child is ProjectElementContainer childContainer)
                 {
-                    childContainer.DeepClone(this.ContainingProject, this);
+                    childContainer.DeepClone(ContainingProject, this);
                 }
                 else
                 {
-                    this.AppendChild(child.Clone(this.ContainingProject));
+                    AppendChild(child.Clone(ContainingProject));
                 }
             }
         }
@@ -388,7 +350,7 @@ namespace Microsoft.Build.Construction
 
             LastChild = child;
 
-            _count++;
+            Count++;
         }
 
         /// <summary>
@@ -399,16 +361,12 @@ namespace Microsoft.Build.Construction
         /// <returns>The cloned element.</returns>
         protected internal virtual ProjectElementContainer DeepClone(ProjectRootElement factory, ProjectElementContainer parent)
         {
-            var clone = (ProjectElementContainer)this.Clone(factory);
-            if (parent != null)
-            {
-                parent.AppendChild(clone);
-            }
+            var clone = (ProjectElementContainer)Clone(factory);
+            parent?.AppendChild(clone);
 
-            foreach (var child in this.Children)
+            foreach (ProjectElement child in Children)
             {
-                var childContainer = child as ProjectElementContainer;
-                if (childContainer != null)
+                if (child is ProjectElementContainer childContainer)
                 {
                     childContainer.DeepClone(clone.ContainingProject, clone);
                 }
@@ -427,7 +385,7 @@ namespace Microsoft.Build.Construction
             Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
                 nameof(child.ExpressedAsAttribute) + " property of child is true");
 
-            string value = Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(child.XmlElement);
+            string value = Internal.Utilities.GetXmlNodeInnerContents(child.XmlElement);
             ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, child.XmlElement.Name, value);
         }
 
@@ -479,10 +437,9 @@ namespace Microsoft.Build.Construction
                 // Therefore, we need to traverse both directions to find the first sibling of the same type as the one being added.
                 // If none is found, then the node being added is inserted as the only node of its kind
 
-                ProjectElement referenceSibling;
-                Predicate<ProjectElement> siblingIsExplicitElement = _ => _.ExpressedAsAttribute == false;
+                bool SiblingIsExplicitElement(ProjectElement _) => _.ExpressedAsAttribute == false;
 
-                if (TrySearchLeftSiblings(child.PreviousSibling, siblingIsExplicitElement, out referenceSibling))
+                if (TrySearchLeftSiblings(child.PreviousSibling, SiblingIsExplicitElement, out ProjectElement referenceSibling))
                 {
                     //  Add after previous sibling
                     XmlElement.InsertAfter(child.XmlElement, referenceSibling.XmlElement);
@@ -498,7 +455,7 @@ namespace Microsoft.Build.Construction
                         }
                     }
                 }
-                else if (TrySearchRightSiblings(child.NextSibling, siblingIsExplicitElement, out referenceSibling))
+                else if (TrySearchRightSiblings(child.NextSibling, SiblingIsExplicitElement, out referenceSibling))
                 {
                     //  Add as first child
                     XmlElement.InsertBefore(child.XmlElement, referenceSibling.XmlElement);
@@ -540,7 +497,7 @@ namespace Microsoft.Build.Construction
             }
         }
 
-        private string GetElementIndentation(XmlElementWithLocation xmlElement)
+        private static string GetElementIndentation(XmlElementWithLocation xmlElement)
         {
             if (xmlElement.PreviousSibling?.NodeType != XmlNodeType.Whitespace)
             {
@@ -618,7 +575,7 @@ namespace Microsoft.Build.Construction
 
             AddToXml(child);
 
-            _count++;
+            Count++;
 
             MarkDirty("Add child element named '{0}'", child.ElementName);
         }
@@ -629,10 +586,10 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void VerifyForInsertBeforeAfterFirst(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(this.Parent != null || this.ContainingProject == this, "OM_ParentNotParented");
+            ErrorUtilities.VerifyThrowInvalidOperation(Parent != null || ContainingProject == this, "OM_ParentNotParented");
             ErrorUtilities.VerifyThrowInvalidOperation(reference == null || reference.Parent == this, "OM_ReferenceDoesNotHaveThisParent");
             ErrorUtilities.VerifyThrowInvalidOperation(child.Parent == null, "OM_NodeAlreadyParented");
-            ErrorUtilities.VerifyThrowInvalidOperation(child.ContainingProject == this.ContainingProject, "OM_MustBeSameProject");
+            ErrorUtilities.VerifyThrowInvalidOperation(child.ContainingProject == ContainingProject, "OM_MustBeSameProject");
 
             // In RemoveChild() we do not update the victim's NextSibling (or PreviousSibling) to null, to allow RemoveChild to be
             // called within an enumeration. So we can't expect these to be null if the child was previously removed. However, we
@@ -670,9 +627,7 @@ namespace Microsoft.Build.Construction
             {
                 yield return child;
 
-                ProjectElementContainer container = child as ProjectElementContainer;
-
-                if (container != null)
+                if (child is ProjectElementContainer container)
                 {
                     foreach (ProjectElement grandchild in container.AllChildren)
                     {
@@ -726,20 +681,12 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// The enumerator
             /// </summary>
-            private ProjectElementSiblingEnumerator _enumerator;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            internal ProjectElementSiblingEnumerable(ProjectElement initial)
-                : this(initial, true)
-            {
-            }
+            private readonly ProjectElementSiblingEnumerator _enumerator;
 
             /// <summary>
             /// Constructor allowing reverse enumeration
             /// </summary>
-            internal ProjectElementSiblingEnumerable(ProjectElement initial, bool forwards)
+            internal ProjectElementSiblingEnumerable(ProjectElement initial, bool forwards = true)
             {
                 _enumerator = new ProjectElementSiblingEnumerator(initial, forwards);
             }
@@ -768,19 +715,14 @@ namespace Microsoft.Build.Construction
                 /// <summary>
                 /// First element
                 /// </summary>
-                private ProjectElement _initial;
-
-                /// <summary>
-                /// Current element
-                /// </summary>
-                private ProjectElement _current;
+                private readonly ProjectElement _initial;
 
                 /// <summary>
                 /// Whether enumeration should go forwards or backwards.
                 /// If backwards, the "initial" will be the first returned, then each previous
                 /// node in turn.
                 /// </summary>
-                private bool _forwards;
+                private readonly bool _forwards;
 
                 /// <summary>
                 /// Constructor taking the first element
@@ -788,7 +730,7 @@ namespace Microsoft.Build.Construction
                 internal ProjectElementSiblingEnumerator(ProjectElement initial, bool forwards)
                 {
                     _initial = initial;
-                    _current = null;
+                    Current = null;
                     _forwards = forwards;
                 }
 
@@ -796,10 +738,7 @@ namespace Microsoft.Build.Construction
                 /// Current element
                 /// Returns null if MoveNext() hasn't been called
                 /// </summary>
-                public ProjectElement Current
-                {
-                    get { return _current; }
-                }
+                public ProjectElement Current { get; private set; }
 
                 /// <summary>
                 /// Current element.
@@ -809,9 +748,9 @@ namespace Microsoft.Build.Construction
                 {
                     get
                     {
-                        if (_current != null)
+                        if (Current != null)
                         {
-                            return _current;
+                            return Current;
                         }
 
                         throw new InvalidOperationException();
@@ -832,18 +771,18 @@ namespace Microsoft.Build.Construction
                 {
                     ProjectElement next;
 
-                    if (_current == null)
+                    if (Current == null)
                     {
                         next = _initial;
                     }
                     else
                     {
-                        next = _forwards ? _current.NextSibling : _current.PreviousSibling;
+                        next = _forwards ? Current.NextSibling : Current.PreviousSibling;
                     }
 
                     if (next != null)
                     {
-                        _current = next;
+                        Current = next;
                         return true;
                     }
 
@@ -855,7 +794,7 @@ namespace Microsoft.Build.Construction
                 /// </summary>
                 public void Reset()
                 {
-                    _current = null;
+                    Current = null;
                 }
             }
         }

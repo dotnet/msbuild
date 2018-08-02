@@ -1,14 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A code task factory which uses code dom to generate tasks</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -49,14 +46,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Handles the <see cref="AppDomain.AssemblyResolve"/> event to return assemblies loaded from custom references.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
         private static Assembly CurrentDomainOnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            Assembly assembly = null;
             // Return the assembly loaded from the custom reference if the FullName matches what is being looked for
-            s_knownReferenceAssemblies.TryGetValue(args.Name, out assembly);
+            s_knownReferenceAssemblies.TryGetValue(args.Name, out Assembly assembly);
 
             return assembly;
         }
@@ -75,7 +68,7 @@ namespace Microsoft.Build.Tasks
         /// A collection of task assemblies which have been instantiated by any CodeTaskFactory.  Used to prevent us from creating
         /// duplicate assemblies.
         /// </summary>
-        private static ConcurrentDictionary<FullTaskSpecification, Assembly> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, Assembly>();
+        private static readonly ConcurrentDictionary<FullTaskSpecification, Assembly> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, Assembly>();
 
         /// <summary>
         /// The default assemblies to reference when compiling inline code. 
@@ -85,12 +78,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Merged set of assembly reference paths (default + specified)
         /// </summary>
-        private string[] _referencedAssemblies;
+        private List<string> _referencedAssemblies;
 
         /// <summary>
         /// Merged set of namespaces (default + specified) 
         /// </summary>
-        private string[] _usingNamespaces;
+        private List<string> _usingNamespaces;
 
         /// <summary>
         /// Type of code fragment, ie   Fragment, Class, Method
@@ -150,13 +143,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// MSBuild engine uses this for logging where the task comes from
         /// </summary>
-        public string FactoryName
-        {
-            get
-            {
-                return "Code Task Factory";
-            }
-        }
+        public string FactoryName => "Code Task Factory";
 
         /// <summary>
         /// Gets the type of the generated task.
@@ -204,7 +191,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            TaskPropertyInfo[] properties = new TaskPropertyInfo[_taskParameterTypeInfo.Count];
+            var properties = new TaskPropertyInfo[_taskParameterTypeInfo.Count];
             _taskParameterTypeInfo.Values.CopyTo(properties, 0);
             return properties;
         }
@@ -215,12 +202,13 @@ namespace Microsoft.Build.Tasks
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
             _nameOfTask = taskName;
-            _log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName);
-            _log.TaskResources = AssemblyResources.PrimaryResources;
-            _log.HelpKeywordPrefix = "MSBuild.";
+            _log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
 
             XmlNode taskContent = ExtractTaskContent(taskElementContents);
-
             if (taskContent == null)
             {
                 // Just return false because we have already logged the error in ExtractTaskContents
@@ -228,7 +216,6 @@ namespace Microsoft.Build.Tasks
             }
 
             bool validatedTaskNode = ValidateTaskNode();
-
             if (!validatedTaskNode)
             {
                 return false;
@@ -335,8 +322,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                this.TaskType = fullNameMatch ?? partialNameMatch;
-                if (this.TaskType == null)
+                TaskType = fullNameMatch ?? partialNameMatch;
+                if (TaskType == null)
                 {
                     _log.LogErrorWithCodeFromResources("CodeTaskFactory.CouldNotFindTaskInAssembly", _nameOfTask);
                 }
@@ -354,11 +341,13 @@ namespace Microsoft.Build.Tasks
             if (_compiledAssembly != null)
             {
                 // In order to use the resource strings from the tasks assembly we need to register the resources with the task logging helper.
-                TaskLoggingHelper log = new TaskLoggingHelper(loggingHost, _nameOfTask);
-                log.TaskResources = AssemblyResources.PrimaryResources;
-                log.HelpKeywordPrefix = "MSBuild.";
+                var log = new TaskLoggingHelper(loggingHost, _nameOfTask)
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
 
-                ITask taskInstance = Activator.CreateInstance(this.TaskType) as ITask;
+                ITask taskInstance = Activator.CreateInstance(TaskType) as ITask;
                 if (taskInstance == null)
                 {
                     log.LogErrorWithCodeFromResources("CodeTaskFactory.NeedsITaskInterface", _nameOfTask);
@@ -366,10 +355,7 @@ namespace Microsoft.Build.Tasks
 
                 return taskInstance;
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
 
         /// <summary>
@@ -383,7 +369,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, "task");
+            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
         }
 
         /// <summary>
@@ -391,8 +377,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void CreateProperty(CodeTypeDeclaration ctd, string propertyName, Type propertyType, object defaultValue)
         {
-            CodeMemberField field = new CodeMemberField(new CodeTypeReference(propertyType), "_" + propertyName);
-            field.Attributes = MemberAttributes.Private;
+            var field = new CodeMemberField(new CodeTypeReference(propertyType), "_" + propertyName)
+            {
+                Attributes = MemberAttributes.Private
+            };
             if (defaultValue != null)
             {
                 field.InitExpression = new CodePrimitiveExpression(defaultValue);
@@ -400,20 +388,23 @@ namespace Microsoft.Build.Tasks
 
             ctd.Members.Add(field);
 
-            CodeMemberProperty prop = new CodeMemberProperty();
-            prop.Name = propertyName;
-            prop.Type = new CodeTypeReference(propertyType);
-            prop.Attributes = MemberAttributes.Public;
-            prop.HasGet = true;
-            prop.HasSet = true;
+            var prop = new CodeMemberProperty
+            {
+                Name = propertyName,
+                Type = new CodeTypeReference(propertyType),
+                Attributes = MemberAttributes.Public,
+                HasGet = true,
+                HasSet = true
+            };
 
-            CodeFieldReferenceExpression fieldRef = new CodeFieldReferenceExpression();
-            fieldRef.FieldName = field.Name;
+            var fieldRef = new CodeFieldReferenceExpression { FieldName = field.Name };
             prop.GetStatements.Add(new CodeMethodReturnStatement(fieldRef));
 
-            CodeAssignStatement fieldAssign = new CodeAssignStatement();
-            fieldAssign.Left = fieldRef;
-            fieldAssign.Right = new CodeArgumentReferenceExpression("value");
+            var fieldAssign = new CodeAssignStatement
+            {
+                Left = fieldRef,
+                Right = new CodeArgumentReferenceExpression("value")
+            };
             prop.SetStatements.Add(fieldAssign);
             ctd.Members.Add(prop);
         }
@@ -423,9 +414,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void CreateExecuteMethodFromFragment(CodeTypeDeclaration codeTypeDeclaration, string executeCode)
         {
-            CodeMemberMethod executeMethod = new CodeMemberMethod();
-            executeMethod.Name = "Execute";
-            executeMethod.Attributes = MemberAttributes.Override | MemberAttributes.Public;
+            var executeMethod = new CodeMemberMethod
+            {
+                Name = "Execute",
+                Attributes = MemberAttributes.Override | MemberAttributes.Public
+            };
             executeMethod.Statements.Add(new CodeSnippetStatement(executeCode));
             executeMethod.ReturnType = new CodeTypeReference(typeof(Boolean));
             executeMethod.Statements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(null, "_Success")));
@@ -437,7 +430,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void CreateTaskBody(CodeTypeDeclaration codeTypeDeclaration, string taskCode)
         {
-            CodeSnippetTypeMember snippet = new CodeSnippetTypeMember(taskCode);
+            var snippet = new CodeSnippetTypeMember(taskCode);
             codeTypeDeclaration.Members.Add(snippet);
         }
 
@@ -453,15 +446,15 @@ namespace Microsoft.Build.Tasks
         /// Extract the <Reference /> elements from the <UsingTask />
         /// </summary>
         /// <returns>string[] of reference paths</returns>
-        private string[] ExtractReferencedAssemblies()
+        private List<string> ExtractReferencedAssemblies()
         {
             XmlNodeList referenceNodes = _taskNode.SelectNodes("//*[local-name()='Reference']");
-            List<string> references = new List<string>();
+            var references = new List<string>();
             for (int i = 0; i < referenceNodes.Count; i++)
             {
                 XmlAttribute attribute = referenceNodes[i].Attributes["Include"];
 
-                bool hasInvalidChildNodes = HasInvalidChildNodes(referenceNodes[i], new XmlNodeType[] { XmlNodeType.Comment, XmlNodeType.Whitespace });
+                bool hasInvalidChildNodes = HasInvalidChildNodes(referenceNodes[i], new[] { XmlNodeType.Comment, XmlNodeType.Whitespace });
 
                 if (hasInvalidChildNodes)
                 {
@@ -477,21 +470,21 @@ namespace Microsoft.Build.Tasks
                 references.Add(attribute.Value);
             }
 
-            return references.ToArray();
+            return references;
         }
 
         /// <summary>
         /// Extract the <Using /> elements from the <UsingTask />
         /// </summary>
         /// <returns>string[] of using's</returns>
-        private string[] ExtractUsingNamespaces()
+        private List<string> ExtractUsingNamespaces()
         {
             XmlNodeList usingNodes = _taskNode.SelectNodes("//*[local-name()='Using']");
 
-            List<string> usings = new List<string>();
+            var usings = new List<string>();
             for (int i = 0; i < usingNodes.Count; i++)
             {
-                bool hasInvalidChildNodes = HasInvalidChildNodes(usingNodes[i], new XmlNodeType[] { XmlNodeType.Comment, XmlNodeType.Whitespace });
+                bool hasInvalidChildNodes = HasInvalidChildNodes(usingNodes[i], new[] { XmlNodeType.Comment, XmlNodeType.Whitespace });
 
                 if (hasInvalidChildNodes)
                 {
@@ -508,7 +501,7 @@ namespace Microsoft.Build.Tasks
                 usings.Add(attribute.Value);
             }
 
-            return usings.ToArray();
+            return usings;
         }
 
         /// <summary>
@@ -520,7 +513,7 @@ namespace Microsoft.Build.Tasks
         {
             // We need to get the InnerXml of the <Task /> node back into
             // a root node so that we can execute the appropriate XPath on it
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
 
             _taskNode = document.CreateElement("Task");
             document.AppendChild(_taskNode);
@@ -541,7 +534,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            bool hasInvalidChildNodes = HasInvalidChildNodes(codeNodes[0], new XmlNodeType[] { XmlNodeType.Comment, XmlNodeType.Whitespace, XmlNodeType.Text, XmlNodeType.CDATA });
+            bool hasInvalidChildNodes = HasInvalidChildNodes(codeNodes[0], new[] { XmlNodeType.Comment, XmlNodeType.Whitespace, XmlNodeType.Text, XmlNodeType.CDATA });
 
             if (hasInvalidChildNodes)
             {
@@ -556,11 +549,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool ValidateTaskNode()
         {
-            bool foundInvalidNode = false;
             if (_taskNode.HasChildNodes)
             {
                 foreach (XmlNode childNode in _taskNode.ChildNodes)
                 {
+                    bool foundInvalidNode;
                     switch (childNode.NodeType)
                     {
                         case XmlNodeType.Comment:
@@ -640,13 +633,12 @@ namespace Microsoft.Build.Tasks
             if (referenceAssemblyList != null)
             {
                 string candidateAssemblyLocation = null;
-                string extension = String.Empty;
 
                 if (!String.IsNullOrEmpty(referenceAssembly))
                 {
                     try
                     {
-                        bool fileExists = File.Exists(referenceAssembly);
+                        bool fileExists = FileSystems.Default.FileExists(referenceAssembly);
                         if (!fileExists)
                         {
                             if (!referenceAssembly.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || !referenceAssembly.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
@@ -666,10 +658,10 @@ namespace Microsoft.Build.Tasks
                                         NativeMethodsShared.FrameworkCurrentPath,
                                         "Facades",
                                         Path.GetFileName(referenceAssembly));
-                                    if (!File.Exists(path))
+                                    if (!FileSystems.Default.FileExists(path))
                                     {
                                         var newPath = path + ".dll";
-                                        path = !File.Exists(newPath) ? path + ".exe" : newPath;
+                                        path = !FileSystems.Default.FileExists(newPath) ? path + ".exe" : newPath;
                                     }
                                     candidateAssembly = Assembly.UnsafeLoadFrom(path);
                                     if (candidateAssembly != null)
@@ -702,7 +694,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e)
                     {
-                        if (Microsoft.Build.Shared.ExceptionHandling.IsCriticalException(e))
+                        if (ExceptionHandling.IsCriticalException(e))
                         {
                             throw;
                         }
@@ -729,7 +721,7 @@ namespace Microsoft.Build.Tasks
         private Assembly CompileInMemoryAssembly()
         {
             // Combine our default assembly references with those specified
-            List<string> finalReferencedAssemblies = new List<string>();
+            var finalReferencedAssemblies = new List<string>();
             CombineReferencedAssemblies(finalReferencedAssemblies);
 
             // Combine our default using's with those specified
@@ -739,30 +731,33 @@ namespace Microsoft.Build.Tasks
             // "c#;cs;csharp", "vb;vbs;visualbasic;vbscript", "js;jscript;javascript", "vj#;vjs;vjsharp", "c++;mc;cpp"
             using (CodeDomProvider provider = CodeDomProvider.CreateProvider(_language))
             {
-                if (provider is Microsoft.CSharp.CSharpCodeProvider)
+                if (provider is CSharp.CSharpCodeProvider)
                 {
                     AddReferenceAssemblyToReferenceList(finalReferencedAssemblies, "System");
                 }
 
-                CompilerParameters compilerParameters = new CompilerParameters(finalReferencedAssemblies.ToArray());
+                var compilerParameters =
+                    new CompilerParameters(finalReferencedAssemblies.ToArray())
+                    {
+                        // We don't need debug information
+                        IncludeDebugInformation = true,
 
-                // We don't need debug information
-                compilerParameters.IncludeDebugInformation = true;
+                        // Not a file based assembly
+                        GenerateInMemory = true,
 
-                // Not a file based assembly
-                compilerParameters.GenerateInMemory = true;
-
-                // Indicates that a .dll should be generated.
-                compilerParameters.GenerateExecutable = false;
+                        // Indicates that a .dll should be generated.
+                        GenerateExecutable = false
+                    };
 
                 // Horrible code dom / compilation declarations
-                CodeTypeDeclaration codeTypeDeclaration;
-                StringBuilder codeBuilder = new StringBuilder();
-                StringWriter writer = new StringWriter(codeBuilder, CultureInfo.CurrentCulture);
-                CodeGeneratorOptions codeGeneratorOptions = new CodeGeneratorOptions();
-                codeGeneratorOptions.BlankLinesBetweenMembers = true;
-                codeGeneratorOptions.VerbatimOrder = true;
-                CodeCompileUnit compilationUnit = new CodeCompileUnit();
+                var codeBuilder = new StringBuilder();
+                var writer = new StringWriter(codeBuilder, CultureInfo.CurrentCulture);
+                var codeGeneratorOptions = new CodeGeneratorOptions
+                {
+                    BlankLinesBetweenMembers = true,
+                    VerbatimOrder = true
+                };
+                var compilationUnit = new CodeCompileUnit();
 
                 // If our code is in a separate file, then read it in here
                 if (_sourcePath != null)
@@ -770,14 +765,12 @@ namespace Microsoft.Build.Tasks
                     _sourceCode = File.ReadAllText(_sourcePath);
                 }
 
-                string fullCode = _sourceCode;
-
                 // A fragment is essentially the contents of the execute method (except the final return true/false)
                 // A method is the whole execute method specified
                 // Anything else assumes that the whole class is being supplied
                 if (_typeIsFragment || _typeIsMethod)
                 {
-                    codeTypeDeclaration = CreateTaskClass();
+                    CodeTypeDeclaration codeTypeDeclaration = CreateTaskClass();
 
                     CreateTaskProperties(codeTypeDeclaration);
 
@@ -790,7 +783,7 @@ namespace Microsoft.Build.Tasks
                         CreateTaskBody(codeTypeDeclaration, _sourceCode);
                     }
 
-                    CodeNamespace codeNamespace = new CodeNamespace("InlineCode");
+                    var codeNamespace = new CodeNamespace("InlineCode");
                     foreach (string importname in finalUsingNamespaces)
                     {
                         codeNamespace.Imports.Add(new CodeNamespaceImport(importname));
@@ -809,11 +802,10 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Our code generation is complete, grab the source from the builder ready for compilation
-                fullCode = codeBuilder.ToString();
+                string fullCode = codeBuilder.ToString();
 
-                FullTaskSpecification fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
-                Assembly existingAssembly;
-                if (!s_compiledTaskCache.TryGetValue(fullSpec, out existingAssembly))
+                var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
+                if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
                 {
                     // Invokes compilation. 
 
@@ -884,15 +876,12 @@ namespace Microsoft.Build.Tasks
 
             if (_usingNamespaces != null)
             {
-                usingNamespaceCount += _usingNamespaces.Length;
+                usingNamespaceCount += _usingNamespaces.Count;
             }
 
-            string[] finalUsingNamespaces = new string[usingNamespaceCount];
+            var finalUsingNamespaces = new string[usingNamespaceCount];
             _defaultUsingNamespaces.CopyTo(finalUsingNamespaces, 0);
-            if (_usingNamespaces != null)
-            {
-                _usingNamespaces.CopyTo(finalUsingNamespaces, _defaultUsingNamespaces.Length);
-            }
+            _usingNamespaces?.CopyTo(finalUsingNamespaces, _defaultUsingNamespaces.Length);
 
             return finalUsingNamespaces;
         }
@@ -920,11 +909,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private CodeTypeDeclaration CreateTaskClass()
         {
-            CodeTypeDeclaration codeTypeDeclaration = new CodeTypeDeclaration();
-            codeTypeDeclaration.IsClass = true;
-            codeTypeDeclaration.Name = _nameOfTask;
-            codeTypeDeclaration.TypeAttributes = TypeAttributes.Public;
-            codeTypeDeclaration.Attributes = MemberAttributes.Final;
+            CodeTypeDeclaration codeTypeDeclaration = new CodeTypeDeclaration
+            {
+                IsClass = true,
+                Name = _nameOfTask,
+                TypeAttributes = TypeAttributes.Public,
+                Attributes = MemberAttributes.Final
+            };
             codeTypeDeclaration.BaseTypes.Add("Microsoft.Build.Utilities.Task");
             return codeTypeDeclaration;
         }
@@ -937,12 +928,12 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// The set of assemblies referenced by this task.
             /// </summary>
-            private List<string> _referenceAssemblies;
+            private readonly List<string> _referenceAssemblies;
 
             /// <summary>
             /// The complete source code for the task.
             /// </summary>
-            private string _fullCode;
+            private readonly string _fullCode;
 
             /// <summary>
             /// Constructor
@@ -966,13 +957,12 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public override bool Equals(object other)
             {
-                if (Object.ReferenceEquals(this, other))
+                if (ReferenceEquals(this, other))
                 {
                     return true;
                 }
 
-                FullTaskSpecification otherSpec = other as FullTaskSpecification;
-                if (otherSpec == null)
+                if (!(other is FullTaskSpecification otherSpec))
                 {
                     return false;
                 }

@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Represents a target for build purposes.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -298,10 +294,7 @@ namespace Microsoft.Build.Execution
         {
             get
             {
-                return new ReadOnlyCollection<ProjectTaskInstance>
-                    (
-                        new FilteringEnumerable<ProjectTargetInstanceChild, ProjectTaskInstance>(Children)
-                    );
+                return new ReadOnlyCollection<ProjectTaskInstance>(Children.OfType<ProjectTaskInstance>());
             }
         }
 

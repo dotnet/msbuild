@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Attribute which tells MSBuild the task must run in an STA thread.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics.CodeAnalysis;

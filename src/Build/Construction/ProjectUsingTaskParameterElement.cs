@@ -1,13 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectUsingTaskParameterElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
@@ -27,7 +21,7 @@ namespace Microsoft.Build.Construction
         internal ProjectUsingTaskParameterElement(XmlElementWithLocation xmlElement, UsingTaskParameterGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -44,15 +38,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override string Condition
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
-            }
+            get => null;
+            set => ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
         }
 
         /// <summary>
@@ -60,15 +47,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Name
         {
-            [DebuggerStepThrough]
-            get
-            {
-                return XmlElement.Name;
-            }
+            get => XmlElement.Name;
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, "Name");
+                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(Name));
                 ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.name, value);
                 MarkDirty("Set usingtaskparameter {0}", value);
             }
@@ -83,13 +66,7 @@ namespace Microsoft.Build.Construction
             get
             {
                 string typeAttribute = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.parameterType);
-
-                if (String.IsNullOrEmpty(typeAttribute))
-                {
-                    return typeof(String).FullName;
-                }
-
-                return typeAttribute;
+                return String.IsNullOrEmpty(typeAttribute) ? typeof(String).FullName : typeAttribute;
             }
 
             set
@@ -108,17 +85,12 @@ namespace Microsoft.Build.Construction
             get
             {
                 string outputAttribute = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.output);
-                if (String.IsNullOrEmpty(outputAttribute))
-                {
-                    return bool.FalseString;
-                }
-
-                return outputAttribute;
+                return String.IsNullOrEmpty(outputAttribute) ? bool.FalseString : outputAttribute;
             }
 
             set
             {
-                XmlAttribute typeAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.output, value);
+                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.output, value);
                 MarkDirty("Set usingtaskparameter Output {0}", value);
             }
         }
@@ -131,17 +103,12 @@ namespace Microsoft.Build.Construction
             get
             {
                 string requiredAttribute = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.required);
-                if (String.IsNullOrEmpty(requiredAttribute))
-                {
-                    return bool.FalseString;
-                }
-
-                return requiredAttribute;
+                return String.IsNullOrEmpty(requiredAttribute) ? bool.FalseString : requiredAttribute;
             }
 
             set
             {
-                XmlAttribute typeAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.required, value);
+                ProjectXmlUtilities.SetOrRemoveAttribute(XmlElement, XMakeAttributes.required, value);
                 MarkDirty("Set usingtaskparameter Required {0}", value);
             }
         }
@@ -163,30 +130,21 @@ namespace Microsoft.Build.Construction
         /// If there is no such attribute, returns the location of the element,
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
-        public ElementLocation ParameterTypeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.parameterType) ?? Location; }
-        }
+        public ElementLocation ParameterTypeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.parameterType) ?? Location;
 
         /// <summary>
         /// Location of the Output attribute.
         /// If there is no such attribute, returns the location of the element,
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
-        public ElementLocation OutputLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.output) ?? Location; }
-        }
+        public ElementLocation OutputLocation => XmlElement.GetAttributeLocation(XMakeAttributes.output) ?? Location;
 
         /// <summary>
         /// Location of the Required attribute.
         /// If there is no such attribute, returns the location of the element,
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
-        public ElementLocation RequiredLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.required) ?? Location; }
-        }
+        public ElementLocation RequiredLocation => XmlElement.GetAttributeLocation(XMakeAttributes.required) ?? Location;
 
         /// <summary>
         /// Creates an unparented UsingTaskParameterElement, wrapping an unparented XmlElement.
@@ -196,10 +154,13 @@ namespace Microsoft.Build.Construction
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(parameterName);
             XmlElementWithLocation element = containingProject.CreateElement(parameterName);
-            ProjectUsingTaskParameterElement parameter = new ProjectUsingTaskParameterElement(element, containingProject);
-            parameter.Output = output;
-            parameter.Required = required;
-            parameter.ParameterType = parameterType;
+            var parameter =
+                new ProjectUsingTaskParameterElement(element, containingProject)
+                {
+                    Output = output,
+                    Required = required,
+                    ParameterType = parameterType
+                };
 
             return parameter;
         }
@@ -216,7 +177,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateUsingTaskParameterElement(this.Name, this.Output, this.Required, this.ParameterType);
+            return owner.CreateUsingTaskParameterElement(Name, Output, Required, ParameterType);
         }
     }
 }

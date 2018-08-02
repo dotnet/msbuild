@@ -1,18 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectMetadataElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
-
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
-using Utilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -28,7 +18,7 @@ namespace Microsoft.Build.Construction
         internal ProjectMetadataElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -44,8 +34,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Name
         {
-            get { return XmlElement.Name; }
-            set { ChangeName(value); }
+            get => XmlElement.Name;
+            set => ChangeName(value);
         }
 
         //  Add a new property with the same name here because this attribute should be public for ProjectMetadataElement,
@@ -59,12 +49,12 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public new bool ExpressedAsAttribute
         {
-            get { return base.ExpressedAsAttribute; }
+            get => base.ExpressedAsAttribute;
             set
             {
                 if (value)
                 {
-                    ValidateValidMetadataAsAttributeName(this.Name, Parent?.ElementName ?? "null" , Parent?.Location);
+                    ValidateValidMetadataAsAttributeName(Name, Parent?.ElementName ?? "null" , Parent?.Location);
                 }
                 base.ExpressedAsAttribute = value;
             }
@@ -76,15 +66,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Value
         {
-            get
-            {
-                return Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
-            }
+            get => Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "Value");
-                Microsoft.Build.Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Value));
+                Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
                 Parent?.UpdateElementValue(this);
                 MarkDirty("Set metadata Value {0}", value);
             }
@@ -98,7 +85,7 @@ namespace Microsoft.Build.Construction
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
-            ErrorUtilities.VerifyThrowInvalidOperation(XMakeElements.IllegalItemPropertyNames[name] == null, "CannotModifyReservedItemMetadata", name);
+            ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 
@@ -113,9 +100,9 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeName(string newName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newName, "newName");
+            ErrorUtilities.VerifyThrowArgumentLength(newName, nameof(newName));
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newName] == null, "CannotModifyReservedItemMetadata", newName);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedItemMetadata", newName);
 
             if (ExpressedAsAttribute)
             {
@@ -124,7 +111,7 @@ namespace Microsoft.Build.Construction
 
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
-            XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newName, XmlElement.NamespaceURI);
+            XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, newName, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
         }
@@ -139,10 +126,7 @@ namespace Microsoft.Build.Construction
 
         internal static bool AttributeNameIsValidMetadataName(string name)
         {
-            bool isReservedAttributeName;
-            bool isValidMetadataNameInAttribute;
-
-            ProjectParser.CheckMetadataAsAttributeName(name, out isReservedAttributeName, out isValidMetadataNameInAttribute);
+            ProjectParser.CheckMetadataAsAttributeName(name, out bool isReservedAttributeName, out bool isValidMetadataNameInAttribute);
 
             return !isReservedAttributeName && isValidMetadataNameInAttribute;
         }
@@ -159,7 +143,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateMetadataElement(this.Name);
+            return owner.CreateMetadataElement(Name);
         }
     }
 }

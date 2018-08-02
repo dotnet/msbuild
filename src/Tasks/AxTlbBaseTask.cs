@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>ToolTask that contains shared functionality between the AxImp and TlbImp tasks.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
@@ -23,7 +20,7 @@ namespace Microsoft.Build.Tasks
         /// we should pass the file using the /publickey: parameter instead of
         /// /keyfile. 
         /// </summary>
-        private bool _delaySigningAndKeyFileOnlyContainsPublicKey = false;
+        private bool _delaySigningAndKeyFileOnlyContainsPublicKey;
 
         #endregion
 
@@ -33,8 +30,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool DelaySign
         {
-            get { return GetBoolParameterWithDefault("DelaySign", false); }
-            set { Bag["DelaySign"] = value; }
+            get => GetBoolParameterWithDefault(nameof(DelaySign), false);
+            set => Bag[nameof(DelaySign)] = value;
         }
 
         /// <summary>
@@ -42,8 +39,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string KeyContainer
         {
-            get { return (string)Bag["KeyContainer"]; }
-            set { Bag["KeyContainer"] = value; }
+            get => (string)Bag[nameof(KeyContainer)];
+            set => Bag[nameof(KeyContainer)] = value;
         }
 
         /// <summary>
@@ -51,8 +48,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string KeyFile
         {
-            get { return (string)Bag["KeyFile"]; }
-            set { Bag["KeyFile"] = value; }
+            get => (string)Bag[nameof(KeyFile)];
+            set => Bag[nameof(KeyFile)] = value;
         }
 
         /// <summary>
@@ -60,8 +57,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string SdkToolsPath
         {
-            get { return (string)Bag["SdkToolsPath"]; }
-            set { Bag["SdkToolsPath"] = value; }
+            get => (string)Bag[nameof(SdkToolsPath)];
+            set => Bag[nameof(SdkToolsPath)] = value;
         }
 
         #endregion // Properties
@@ -73,13 +70,7 @@ namespace Microsoft.Build.Tasks
         /// executable, so return null for the ToolName -- And make sure that 
         /// Execute() logs an error!
         /// </summary>
-        protected override string ToolName
-        {
-            get
-            {
-                return null;
-            }
-        }
+        protected override string ToolName { get; } = null;
 
         /// <summary>
         /// Invokes the ToolTask with the given parameters
@@ -119,7 +110,7 @@ namespace Microsoft.Build.Tasks
             pathToTool = SdkToolsPathUtility.GeneratePathToTool
             (
                 SdkToolsPathUtility.FileInfoExists,
-                Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
+                Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                 SdkToolsPath,
                 ToolName,
                 Log,
@@ -137,8 +128,8 @@ namespace Microsoft.Build.Tasks
         {
             // Verify that a path for the tool exists -- if the tool doesn't exist in it 
             // we'll worry about that later
-            if ((String.IsNullOrEmpty(ToolPath) || !Directory.Exists(ToolPath)) &&
-                (String.IsNullOrEmpty(SdkToolsPath) || !Directory.Exists(SdkToolsPath)))
+            if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
+                (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
             {
                 Log.LogErrorWithCodeFromResources("AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid", SdkToolsPath ?? "", ToolPath ?? "");
                 return false;
@@ -150,10 +141,7 @@ namespace Microsoft.Build.Tasks
                 // as we're concerned, parameters check out properly
                 return base.ValidateParameters();
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         /// <summary>
@@ -190,12 +178,11 @@ namespace Microsoft.Build.Tasks
         private bool ValidateStrongNameParameters()
         {
             bool keyFileExists = false;
-            bool keyContainerSpecified = false;
 
             // Make sure that if KeyFile is defined, it's a real file.
             if (!String.IsNullOrEmpty(KeyFile))
             {
-                if (File.Exists(KeyFile))
+                if (FileSystems.Default.FileExists(KeyFile))
                 {
                     keyFileExists = true;
                 }
@@ -207,7 +194,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Check if KeyContainer name is specified
-            keyContainerSpecified = !String.IsNullOrEmpty(KeyContainer);
+            bool keyContainerSpecified = !String.IsNullOrEmpty(KeyContainer);
 
             // Cannot define both KeyFile and KeyContainer
             if (keyFileExists && keyContainerSpecified)
@@ -227,7 +214,7 @@ namespace Microsoft.Build.Tasks
             // even just a public key)
             if (keyFileExists || keyContainerSpecified)
             {
-                StrongNameKeyPair keyPair = null;
+                StrongNameKeyPair keyPair;
                 byte[] publicKey = null;
 
                 try
@@ -249,7 +236,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogErrorWithCodeFromResources("AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified");
                         return false;
                     }
-                    else if (keyPair == null)
+                    if (keyPair == null)
                     {
                         // record this so we know which switch to pass to the task
                         _delaySigningAndKeyFileOnlyContainsPublicKey = true;
@@ -264,7 +251,7 @@ namespace Microsoft.Build.Tasks
                             Log.LogErrorWithCodeFromResources("AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer", KeyContainer);
                             return false;
                         }
-                        else if (!String.IsNullOrEmpty(KeyFile))
+                        if (!String.IsNullOrEmpty(KeyFile))
                         {
                             Log.LogErrorWithCodeFromResources("AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile", KeyFile);
                             return false;

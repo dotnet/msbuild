@@ -1,31 +1,17 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class implementing an in-proc node.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-
-using BuildEventArgTransportSink = Microsoft.Build.BackEnd.Logging.BuildEventArgTransportSink;
-using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
-using LoggingServiceFactory = Microsoft.Build.BackEnd.Logging.LoggingServiceFactory;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using LoggingExceptionDelegate = Microsoft.Build.BackEnd.Logging.LoggingExceptionDelegate;
 using Microsoft.Build.BackEnd.Components.Caching;
 
 namespace Microsoft.Build.BackEnd
@@ -38,7 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The build component host.
         /// </summary>
-        private IBuildComponentHost _componentHost;
+        private readonly IBuildComponentHost _componentHost;
 
         /// <summary>
         /// The environment at the time the build is started.
@@ -58,27 +44,22 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The build request engine.
         /// </summary>
-        private IBuildRequestEngine _buildRequestEngine;
-
-        /// <summary>
-        /// The current node configuration
-        /// </summary>
-        private NodeConfiguration _currentConfiguration;
+        private readonly IBuildRequestEngine _buildRequestEngine;
 
         /// <summary>
         /// The queue of packets we have received but which have not yet been processed.
         /// </summary>
-        private ConcurrentQueue<INodePacket> _receivedPackets;
+        private readonly ConcurrentQueue<INodePacket> _receivedPackets;
 
         /// <summary>
         /// The event which is set when we receive packets.
         /// </summary>
-        private AutoResetEvent _packetReceivedEvent;
+        private readonly AutoResetEvent _packetReceivedEvent;
 
         /// <summary>
         /// The event which is set when we should shut down.
         /// </summary>
-        private AutoResetEvent _shutdownEvent;
+        private readonly AutoResetEvent _shutdownEvent;
 
         /// <summary>
         /// The reason we are shutting down.
@@ -91,34 +72,29 @@ namespace Microsoft.Build.BackEnd
         private Exception _shutdownException;
 
         /// <summary>
-        /// The set of configurations which have had projects loaded.
-        /// </summary>
-        private HashSet<NGen<int>> _configurationProjectsLoaded;
-
-        /// <summary>
         /// The node endpoint
         /// </summary>
-        private INodeEndpoint _nodeEndpoint;
+        private readonly INodeEndpoint _nodeEndpoint;
 
         /// <summary>
         /// Handler for engine exceptions.
         /// </summary>
-        private EngineExceptionDelegate _engineExceptionEventHandler;
+        private readonly EngineExceptionDelegate _engineExceptionEventHandler;
 
         /// <summary>
         /// Handler for new configuration requests.
         /// </summary>
-        private NewConfigurationRequestDelegate _newConfigurationRequestEventHandler;
+        private readonly NewConfigurationRequestDelegate _newConfigurationRequestEventHandler;
 
         /// <summary>
         /// Handler for blocked request events.
         /// </summary>
-        private RequestBlockedDelegate _requestBlockedEventHandler;
+        private readonly RequestBlockedDelegate _requestBlockedEventHandler;
 
         /// <summary>
         /// Handler for request completed events.
         /// </summary>
-        private RequestCompleteDelegate _requestCompleteEventHandler;
+        private readonly RequestCompleteDelegate _requestCompleteEventHandler;
 
         /// <summary>
         /// Constructor.
@@ -131,14 +107,12 @@ namespace Microsoft.Build.BackEnd
             _packetReceivedEvent = new AutoResetEvent(false);
             _shutdownEvent = new AutoResetEvent(false);
 
-            _configurationProjectsLoaded = new HashSet<NGen<int>>();
-
             _buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
 
-            _engineExceptionEventHandler = new EngineExceptionDelegate(OnEngineException);
-            _newConfigurationRequestEventHandler = new NewConfigurationRequestDelegate(OnNewConfigurationRequest);
-            _requestBlockedEventHandler = new RequestBlockedDelegate(OnNewRequest);
-            _requestCompleteEventHandler = new RequestCompleteDelegate(OnRequestComplete);
+            _engineExceptionEventHandler = OnEngineException;
+            _newConfigurationRequestEventHandler = OnNewConfigurationRequest;
+            _requestBlockedEventHandler = OnNewRequest;
+            _requestCompleteEventHandler = OnRequestComplete;
         }
 
         #region INode Members
@@ -152,10 +126,10 @@ namespace Microsoft.Build.BackEnd
         {
             try
             {
-                _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
+                _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
                 _nodeEndpoint.Listen(this);
 
-                WaitHandle[] waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
+                var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
                 _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
@@ -176,9 +150,8 @@ namespace Microsoft.Build.BackEnd
                             }
 
                         case 1:
-                            INodePacket packet = null;
 
-                            while (_receivedPackets.TryDequeue(out packet))
+                            while (_receivedPackets.TryDequeue(out INodePacket packet))
                             {
                                 if (packet != null)
                                 {
@@ -369,7 +342,7 @@ namespace Microsoft.Build.BackEnd
 
             if (null != _loggingContext)
             {
-                _loggingContext.LoggingService.OnLoggingThreadException -= new LoggingExceptionDelegate(OnLoggingThreadException);
+                _loggingContext.LoggingService.OnLoggingThreadException -= OnLoggingThreadException;
                 _loggingContext = null;
             }
 
@@ -399,7 +372,7 @@ namespace Microsoft.Build.BackEnd
                     break;
 
                 case NodePacketType.BuildRequestConfiguration:
-                    HandleBuildRequestConfiguration(packet as BuildRequestConfiguration);
+                    HandleBuildRequestConfiguration();
                     break;
 
                 case NodePacketType.BuildRequestConfigurationResponse:
@@ -452,7 +425,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Handles the BuildRequestConfiguration packet.
         /// </summary>
-        private void HandleBuildRequestConfiguration(BuildRequestConfiguration configuration)
+        private static void HandleBuildRequestConfiguration()
         {
             // Configurations are already in the cache, which we share with the BuildManager.
         }
@@ -502,7 +475,7 @@ namespace Microsoft.Build.BackEnd
 
             // Set the logging exception handler
             ILoggingService loggingService = _componentHost.LoggingService;
-            loggingService.OnLoggingThreadException += new LoggingExceptionDelegate(OnLoggingThreadException);
+            loggingService.OnLoggingThreadException += OnLoggingThreadException;
 
             // Now prep the buildRequestEngine for the build.
             _loggingContext = new NodeLoggingContext(loggingService, configuration.NodeId, true /* inProcNode */);
@@ -514,15 +487,11 @@ namespace Microsoft.Build.BackEnd
 
             if (_shutdownException != null)
             {
-                Exception exception;
-                HandleShutdown(out exception);
+                HandleShutdown(out Exception exception);
                 throw exception;
             }
 
             _buildRequestEngine.InitializeForBuild(_loggingContext);
-
-            // Finally store off this configuration packet.
-            _currentConfiguration = configuration;
         }
 
         /// <summary>

@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An improvement to ITaskItem that makes it possible for implementations to avoid losing escaping information.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

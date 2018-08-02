@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for preprocessor</summary>
-//-----------------------------------------------------------------------
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
@@ -13,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Unittest;
 using Xunit;
 
@@ -363,11 +360,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             Project project;
             using (StringReader sr = new StringReader(one))
             {
-#if FEATURE_XMLTEXTREADER
                 using (XmlReader xr = XmlTextReader.Create(sr))
-#else
-                using (XmlReader xr = XmlReader.Create(sr))
-#endif
                 {
                     project = new Project(xr);
                 }
@@ -850,13 +843,12 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                string testSdkDirectory = env.CreateFolder().FolderPath;
+                string testSdkDirectory = env.CreateFolder().Path;
 
-                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolverFileMapping(
-                    new Dictionary<string, string>
-                    {
-                        {"MSBuildUnitTestSdk", testSdkDirectory}
-                    });
+                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
+                {
+                    {"MSBuildUnitTestSdk", testSdkDirectory}
+                }));
 
 
                 string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
@@ -940,15 +932,14 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                string sdk1 = env.CreateFolder().FolderPath;
-                string sdk2 = env.CreateFolder().FolderPath;
+                string sdk1 = env.CreateFolder().Path;
+                string sdk2 = env.CreateFolder().Path;
 
-                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolverFileMapping(
-                    new Dictionary<string, string>
-                    {
-                        {"MSBuildUnitTestSdk1", sdk1},
-                        {"MSBuildUnitTestSdk2", sdk2},
-                    });
+                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
+                {
+                    {"MSBuildUnitTestSdk1", sdk1},
+                    {"MSBuildUnitTestSdk2", sdk2},
+                }));
 
                 string sdkPropsPath1 = Path.Combine(sdk1, "Sdk.props");
                 string sdkTargetsPath1 = Path.Combine(sdk1, "Sdk.targets");

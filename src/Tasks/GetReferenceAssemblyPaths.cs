@@ -1,15 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
-// <summary>Get the reference assembly paths for a given target framework version / moniker.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
@@ -26,7 +22,7 @@ namespace Microsoft.Build.Tasks
         /// This is the sentinel assembly for .NET FX 3.5 SP1
         /// Used to determine if SP1 of 3.5 is installed
         /// </summary>
-        private static readonly string s_NET35SP1SentinelAssemblyName = "System.Data.Entity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL";
+        private const string NET35SP1SentinelAssemblyName = "System.Data.Entity, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL";
 
         /// <summary>
         /// Cache in a static whether or not we have found the 35sp1sentinel assembly.
@@ -44,36 +40,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private IList<string> _tfmPathsNoProfile;
 
-        /// <summary>
-        /// Target framework moniker string passed into the task
-        /// </summary>
-        private string _targetFrameworkMoniker;
-
-        /// <summary>
-        /// The root path to use to generate the reference assemblyPaths
-        /// </summary>
-        private string _rootPath;
-
-        /// <summary>
-        /// Target frameworks are looked up in @RootPath. If it cannot be found
-        /// there, then paths in @TargetFrameworkFallbackSearchPaths
-        /// are used for the lookup, in order. This can have multiple paths, separated
-        /// by ';'
-        /// </summary>
-        public string TargetFrameworkFallbackSearchPaths
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// By default GetReferenceAssemblyPaths performs simple checks
-        /// to ensure that certain runtime frameworks are installed depending on the
-        /// target framework.
-        /// set bypassFrameworkInstallChecks to true in order to bypass those checks.
-        /// </summary>
-        private bool _bypassFrameworkInstallChecks;
-
         #endregion
 
         #region Properties
@@ -89,7 +55,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (_tfmPaths != null)
                 {
-                    string[] pathsToReturn = new string[_tfmPaths.Count];
+                    var pathsToReturn = new string[_tfmPaths.Count];
                     _tfmPaths.CopyTo(pathsToReturn, 0);
                     return pathsToReturn;
                 }
@@ -125,34 +91,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The target framework moniker to get the reference assembly paths for
         /// </summary>
-        public string TargetFrameworkMoniker
-        {
-            get
-            {
-                return _targetFrameworkMoniker;
-            }
-
-            set
-            {
-                _targetFrameworkMoniker = value;
-            }
-        }
+        public string TargetFrameworkMoniker { get; set; }
 
         /// <summary>
         /// The root path to use to generate the reference assembly path
         /// </summary>
-        public string RootPath
-        {
-            get
-            {
-                return _rootPath;
-            }
-
-            set
-            {
-                _rootPath = value;
-            }
-        }
+        public string RootPath { get; set; }
 
         /// <summary>
         /// By default GetReferenceAssemblyPaths performs simple checks
@@ -160,18 +104,7 @@ namespace Microsoft.Build.Tasks
         /// target framework.
         /// set BypassFrameworkInstallChecks to true in order to bypass those checks.
         /// </summary>        
-        public bool BypassFrameworkInstallChecks
-        {
-            get
-            {
-                return _bypassFrameworkInstallChecks;
-            }
-
-            set
-            {
-                _bypassFrameworkInstallChecks = value;
-            }
-        }
+        public bool BypassFrameworkInstallChecks { get; set; }
 
         /// <summary>
         /// If set to true, the task will not generate an error (or a warning) if the reference assemblies cannot be found.
@@ -183,7 +116,15 @@ namespace Microsoft.Build.Tasks
         /// Gets the display name for the targetframeworkmoniker
         /// </summary>
         [Output]
-        public string TargetFrameworkMonikerDisplayName
+        public string TargetFrameworkMonikerDisplayName { get; set; }
+
+        /// <summary>
+        /// Target frameworks are looked up in @RootPath. If it cannot be found
+        /// there, then paths in @TargetFrameworkFallbackSearchPaths
+        /// are used for the lookup, in order. This can have multiple paths, separated
+        /// by ';'
+        /// </summary>
+        public string TargetFrameworkFallbackSearchPaths
         {
             get;
             set;
@@ -198,11 +139,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            FrameworkNameVersioning moniker = null;
+            FrameworkNameVersioning moniker;
             FrameworkNameVersioning monikerWithNoProfile = null;
 
             // Are we targeting a profile. 
-            bool targetingProfile = false;
+            bool targetingProfile;
 
             try
             {
@@ -220,16 +161,16 @@ namespace Microsoft.Build.Tasks
                 // This is a very specific "hack" to ensure that when we're targeting certain .NET Framework versions that
                 // WPF gets to rely on .NET FX 3.5 SP1 being installed on the build machine.
                 // This only needs to occur when we are targeting a .NET FX prior to v4.0
-                if (!_bypassFrameworkInstallChecks && moniker.Identifier.Equals(".NETFramework", StringComparison.OrdinalIgnoreCase) &&
+                if (!BypassFrameworkInstallChecks && moniker.Identifier.Equals(".NETFramework", StringComparison.OrdinalIgnoreCase) &&
                     moniker.Version.Major < 4)
                 {
                     // We have not got a value for whether or not the 35 sentinel assembly has been found
                     if (!s_net35SP1SentinelAssemblyFound.HasValue)
                     {
                         // get an assemblyname from the string representation of the sentinel assembly name
-                        AssemblyNameExtension sentinelAssemblyName = new AssemblyNameExtension(s_NET35SP1SentinelAssemblyName);
+                        var sentinelAssemblyName = new AssemblyNameExtension(NET35SP1SentinelAssemblyName);
 
-                        string path = GlobalAssemblyCache.GetLocation(sentinelAssemblyName, SystemProcessorArchitecture.MSIL, runtimeVersion => "v2.0.50727", new Version("2.0.57027"), false, new FileExists(FileUtilities.FileExistsNoThrow), GlobalAssemblyCache.pathFromFusionName, GlobalAssemblyCache.gacEnumerator, false);
+                        string path = GlobalAssemblyCache.GetLocation(sentinelAssemblyName, SystemProcessorArchitecture.MSIL, runtimeVersion => "v2.0.50727", new Version("2.0.57027"), false, new FileExists(p => FileUtilities.FileExistsNoThrow(p)), GlobalAssemblyCache.pathFromFusionName, GlobalAssemblyCache.gacEnumerator, false);
                         s_net35SP1SentinelAssemblyFound = !String.IsNullOrEmpty(path);
                     }
 
@@ -249,7 +190,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                _tfmPaths = GetPaths(_rootPath, TargetFrameworkFallbackSearchPaths, moniker);
+                _tfmPaths = GetPaths(RootPath, TargetFrameworkFallbackSearchPaths, moniker);
 
                 if (_tfmPaths != null && _tfmPaths.Count > 0)
                 {
@@ -260,7 +201,7 @@ namespace Microsoft.Build.Tasks
                 // There is no point in generating the full framework paths if profile path could not be found.
                 if (targetingProfile && _tfmPaths != null)
                 {
-                    _tfmPathsNoProfile = GetPaths(_rootPath, TargetFrameworkFallbackSearchPaths, monikerWithNoProfile);
+                    _tfmPathsNoProfile = GetPaths(RootPath, TargetFrameworkFallbackSearchPaths, monikerWithNoProfile);
                 }
 
                 // The path with out the profile is just the reference assembly paths.
@@ -290,7 +231,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Generate the set of chained reference assembly paths
         /// </summary>
-        /// FIXME: do we really need the new arg? or should we just use the property?
         private IList<String> GetPaths(string rootPath, string targetFrameworkFallbackSearchPaths, FrameworkNameVersioning frameworkmoniker)
         {
             IList<String> pathsToReturn = ToolLocationHelper.GetPathToReferenceAssemblies(

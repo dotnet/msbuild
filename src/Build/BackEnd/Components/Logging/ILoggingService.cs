@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
-// <summary>Interface for the logging services.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -172,6 +169,34 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
+        /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        bool IncludeEvaluationMetaprojects
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        bool IncludeEvaluationProfile
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
+        bool IncludeTaskInputs
+        {
+            get;
+            set;
+        }
+
         #endregion
 
         /// <summary>
@@ -179,14 +204,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="projectInstanceId">A <see cref="BuildEventContext.ProjectInstanceId"/> to associate with the list of warning codes.</param>
         /// <param name="codes">The list of warning codes to treat as low importance messsages.</param>
-        void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes);
+        void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes);
 
         /// <summary>
         /// Adds a set of warning codes to treat as errors for the specified project instance ID.
         /// </summary>
         /// <param name="projectInstanceId">A <see cref="BuildEventContext.ProjectInstanceId"/> to associate with the list of warning codes.</param>
         /// <param name="codes">The list of warning codes to treat as errors.</param>
-        void AddWarningsAsErrors(int projectInstanceId, ISet<string> codes);
+        void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes);
 
         /// <summary>
         /// Determines if the specified submission has logged an errors.
@@ -511,48 +536,6 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
-
-        /// <summary>
-        /// A list of warnings to treat as errors.  If null, nothing is treated as an error.  If an empty set, all warnings are treated as errors.
-        /// </summary>
-        ISet<string> WarningsAsErrors
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext.ProjectInstanceId"/>.
-        /// </summary>
-        IDictionary<int, ISet<string>> WarningsAsErrorsByProject
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// A list of warnings to treat as low importance messages.
-        /// </summary>
-        ISet<string> WarningsAsMessages
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// A list of warnings to treat as low importance messages for an associated <see cref="BuildEventContext.ProjectInstanceId"/>.
-        /// </summary>
-        IDictionary<int, ISet<string>> WarningsAsMessagesByProject
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// A list of build submissions that have logged errors.
-        /// </summary>
-        ISet<int> BuildSubmissionIdsThatHaveLoggedErrors { get; }
-
         #endregion
         /// <summary>
         /// Entry point for a sink to consume an event.

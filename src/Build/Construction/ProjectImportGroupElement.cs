@@ -1,19 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectImportGroupElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -31,7 +23,7 @@ namespace Microsoft.Build.Construction
         internal ProjectImportGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -49,16 +41,8 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any contained properties.
         /// </summary>
-        public ICollection<ProjectImportElement> Imports
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectImportElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectImportElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(Children.OfType<ProjectImportElement>());
+
         #endregion // Properties
 
         #region Methods
@@ -69,7 +53,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement AddImport(string project)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(project, "project");
+            ErrorUtilities.VerifyThrowArgumentLength(project, nameof(project));
 
             ProjectImportElement newImport = ContainingProject.CreateImportElement(project);
             AppendChild(newImport);

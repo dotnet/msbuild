@@ -25,64 +25,32 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      * 
      **************************************************************************/
-    sealed internal class MockEngine : IBuildEngine3
+    internal sealed class MockEngine : IBuildEngine3
     {
-        private bool _isRunningMultipleNodes;
-        private int _messages = 0;
-        private int _warnings = 0;
-        private int _errors = 0;
-        private int _commandLine = 0;
         private StringBuilder _log = new StringBuilder();
-        private MessageImportance _minimumMessageImportance = MessageImportance.Low;
 
-        public MessageImportance MinimumMessageImportance
-        {
-            get { return _minimumMessageImportance; }
-            set { _minimumMessageImportance = value; }
-        }
+        public MessageImportance MinimumMessageImportance { get; set; } = MessageImportance.Low;
 
-        internal int Messages
-        {
-            set { _messages = value; }
-            get { return _messages; }
-        }
+        internal int Messages { set; get; }
 
-        internal int Warnings
-        {
-            set { _warnings = value; }
-            get { return _warnings; }
-        }
+        internal int Warnings { set; get; }
 
-        internal int Errors
-        {
-            set { _errors = value; }
-            get { return _errors; }
-        }
+        internal int Errors { set; get; }
 
-        internal int CommandLine
-        {
-            set { _commandLine = value; }
-            get { return _commandLine; }
-        }
-
-        public bool IsRunningMultipleNodes
-        {
-            get { return _isRunningMultipleNodes; }
-            set { _isRunningMultipleNodes = value; }
-        }
+        public bool IsRunningMultipleNodes { get; set; }
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
-            ++_errors;
+            ++Errors;
         }
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
-            ++_warnings;
+            ++Warnings;
         }
 
         public void LogCustomEvent(CustomBuildEventArgs eventArgs)
@@ -94,123 +62,56 @@ namespace Microsoft.Build.UnitTests
         public void LogMessageEvent(BuildMessageEventArgs eventArgs)
         {
             // Only if the message is above the minimum importance should we record the log message
-            if (eventArgs.Importance <= _minimumMessageImportance)
+            if (eventArgs.Importance <= MinimumMessageImportance)
             {
                 Console.WriteLine(eventArgs.Message);
                 _log.AppendLine(eventArgs.Message);
-                ++_messages;
+                ++Messages;
             }
         }
 
-        public void LogCommandLine(TaskCommandLineEventArgs eventArgs)
-        {
-            Console.WriteLine(eventArgs.Message);
-            _log.AppendLine(eventArgs.Message);
-            ++_commandLine;
-        }
+        public bool ContinueOnError => false;
 
-        public bool ContinueOnError
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public string ProjectFileOfTaskNode => string.Empty;
 
-        public string ProjectFileOfTaskNode
-        {
-            get
-            {
-                return String.Empty;
-            }
-        }
+        public int LineNumberOfTaskNode => 0;
 
-        public int LineNumberOfTaskNode
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        public int ColumnNumberOfTaskNode
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int ColumnNumberOfTaskNode => 0;
 
         internal string Log
         {
-            set { _log = new StringBuilder(value); }
-            get { return _log.ToString(); }
+            set => _log = new StringBuilder(value);
+            get => _log.ToString();
         }
 
-        public bool BuildProjectFile
-            (
-            string projectFileName,
-            string[] targetNames,
-            IDictionary globalProperties,
-            IDictionary targetOutputs
-            )
-        {
-            return false;
-        }
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs) => false;
 
-        public bool BuildProjectFile
-            (
-            string projectFileName,
-            string[] targetNames,
-            IDictionary globalProperties,
-            IDictionary targetOutputs,
-            string toolsVersion
-            )
-        {
-            return false;
-        }
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion) => false;
 
         /// <summary>
         /// Assert that the log file contains the given string.
         /// Case insensitive.
         /// </summary>
         /// <param name="contains"></param>
-        internal void AssertLogContains(string contains)
-        {
-            Assert.Contains(
-                contains,
-                Log,
-                StringComparison.OrdinalIgnoreCase
-            );
-        }
+        internal void AssertLogContains(string contains) => Assert.Contains(contains, Log, StringComparison.OrdinalIgnoreCase);
 
-        public bool BuildProjectFilesInParallel
-        (
+        public bool BuildProjectFilesInParallel(
             string[] projectFileNames,
             string[] targetNames,
             IDictionary[] globalProperties,
             IDictionary[] targetOutputsPerProject,
             string[] toolsVersion,
             bool useResultsCache,
-            bool unloadProjectsOnCompletion
-        )
-        {
-            return false;
-        }
+            bool unloadProjectsOnCompletion) => false;
 
 
-        public BuildEngineResult BuildProjectFilesInParallel
-        (
+        public BuildEngineResult BuildProjectFilesInParallel(
             string[] projectFileNames,
             string[] targetNames,
             IDictionary[] globalProperties,
             IList<string>[] undefineProperties,
             string[] toolsVersion,
-            bool includeTargetOutputs
-        )
-        {
-            return new BuildEngineResult(false, null);
-        }
+            bool includeTargetOutputs) => new BuildEngineResult(false, null);
 
         public void Yield()
         {
@@ -224,9 +125,6 @@ namespace Microsoft.Build.UnitTests
         /// Assert that the log doesn't contain the given string.
         /// </summary>
         /// <param name="contains"></param>
-        internal void AssertLogDoesntContain(string contains)
-        {
-            Assert.DoesNotContain(contains, Log, StringComparison.OrdinalIgnoreCase);
-        }
+        internal void AssertLogDoesntContain(string contains) => Assert.DoesNotContain(contains, Log, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -1,13 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Dictionary that does not prevent values from being garbage collected.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
@@ -25,7 +20,7 @@ namespace Microsoft.Build.Collections
         /// The dictionary used internally to store the keys and values.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private Dictionary<K, WeakReference<V>> _dictionary;
+        private readonly Dictionary<K, WeakReference<V>> _dictionary;
 
         /// <summary>
         /// Improvised capacity. See comment in item setter.
@@ -54,10 +49,7 @@ namespace Microsoft.Build.Collections
         /// Some entries may represent keys or values that have already been garbage collected.
         /// To clean these out call <see cref="Scavenge"/>.
         /// </summary>
-        public int Count
-        {
-            get { return _dictionary.Count; }
-        }
+        public int Count => _dictionary.Count;
 
         /// <summary>
         /// Return keys
@@ -66,11 +58,11 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                List<K> keys = new List<K>();
+                var keys = new List<K>();
 
                 foreach (KeyValuePair<K, WeakReference<V>> pair in _dictionary)
                 {
-                    if (pair.Value != null && pair.Value.Target != null)
+                    if (pair.Value?.TryGetTarget(out _) ?? false)
                     {
                         keys.Add(pair.Key);
                     }
@@ -100,9 +92,7 @@ namespace Microsoft.Build.Collections
                     return null;
                 }
 
-                V value = wrappedValue.Target;
-
-                if (value == null)
+                if (!wrappedValue.TryGetTarget(out V value))
                 {
                     _dictionary.Remove(key);
 
@@ -150,8 +140,7 @@ namespace Microsoft.Build.Collections
         /// </remarks>
         public bool Contains(K key)
         {
-            V value;
-            bool contained = TryGetValue(key, out value);
+            bool contained = TryGetValue(key, out _);
             return contained;
         }
 
@@ -165,10 +154,7 @@ namespace Microsoft.Build.Collections
         /// </remarks>
         public bool TryGetValue(K key, out V value)
         {
-            WeakReference<V> wrappedValue;
-            bool result = _dictionary.TryGetValue(key, out wrappedValue);
-
-            if (!result)
+            if (!_dictionary.TryGetValue(key, out WeakReference<V> wrappedValue))
             {
                 value = null;
                 return false;
@@ -182,15 +168,13 @@ namespace Microsoft.Build.Collections
                 return true;
             }
 
-            value = wrappedValue.Target;
-
-            if (value == null)
+            if (!wrappedValue.TryGetTarget(out value))
             {
                 _dictionary.Remove(key);
                 return false;
             }
 
-            return result;
+            return true;
         }
 
         /// <summary>
@@ -220,9 +204,7 @@ namespace Microsoft.Build.Collections
                     continue;
                 }
 
-                V value = entry.Value.Target;
-
-                if (value == null)
+                if (!entry.Value.TryGetTarget(out _))
                 {
                     remove = remove ?? new List<K>();
                     remove.Add(entry.Key);

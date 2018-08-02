@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Wraps an evaluated item.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -21,6 +17,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Construction;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Execution
 {
@@ -694,7 +691,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
             ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
             XmlUtilities.VerifyThrowArgumentValidElementName(itemTypeToUse);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[itemTypeToUse] == null, "OM_ReservedName", itemTypeToUse);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(itemTypeToUse), "OM_ReservedName", itemTypeToUse);
 
             // TaskItems don't have an item type. So for their benefit, we have to lookup and add the regular item definition.
             List<ProjectItemDefinitionInstance> inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions);
@@ -1246,7 +1243,7 @@ namespace Microsoft.Build.Execution
 
                 if (null != metadatum && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                 {
-                    Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this));
+                    Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
                     value = expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);

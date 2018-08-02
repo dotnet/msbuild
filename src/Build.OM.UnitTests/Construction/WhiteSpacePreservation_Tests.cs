@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Test white space preservation.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
@@ -444,9 +440,23 @@ multi-line comment here
             AddChildWithExistingSiblingsViaInsertBeforeChild(project, expected);
         }
 
-        private void AssertWhiteSpacePreservation(string projectContents, string updatedProject,
+        private void AssertWhiteSpacePreservation(
+            string projectContents,
+            string updatedProject,
             Action<ProjectRootElement, Project> act)
         {
+            // Each OS uses its own line endings. Using WSL on Windows leads to LF on Windows which messes up the tests. This happens due to git LF <-> CRLF conversions.
+            if (NativeMethodsShared.IsWindows)
+            {
+                projectContents = Regex.Replace(projectContents, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
+                updatedProject = Regex.Replace(updatedProject, @"[^\r]\n", "\r\n", RegexOptions.Multiline);
+            }
+            else
+            {
+                projectContents = Regex.Replace(projectContents, @"\r\n", "\n", RegexOptions.Multiline);
+                updatedProject = Regex.Replace(updatedProject, @"\r\n", "\n", RegexOptions.Multiline);
+            }
+
             // Note: This test will write the project file to disk rather than using in-memory streams.
             // Using streams can cause issues with CRLF characters being replaced by LF going in to
             // ProjectRootElement. Saving to disk mimics the real-world behavior so we can specifically
@@ -476,9 +486,7 @@ multi-line comment here
 
             VerifyAssertLineByLine(expected, actual);
 
-#if FEATURE_XMLTEXTREADER
             VerifyLineEndings(actual);
-#endif
         }
 
         private void VerifyAssertLineByLine(string expected, string actual)

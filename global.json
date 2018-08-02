@@ -1,0 +1,5 @@
+{
+  "msbuild-sdks": {
+    "RoslynTools.RepoToolset": "1.0.0-beta2-62901-01"
+  }
+}

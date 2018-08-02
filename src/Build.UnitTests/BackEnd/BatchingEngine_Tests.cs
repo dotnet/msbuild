@@ -13,7 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using System.Collections.Generic;
-
+using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using Xunit;
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 XmlAttribute tempXmlAttribute = (new XmlDocument()).CreateAttribute("attrib");
                 tempXmlAttribute.Value = "'$(Obj)'=='obj'";
 
-                Assert.True(ConditionEvaluator.EvaluateCondition(tempXmlAttribute.Value, ParserOptions.AllowAll, bucket.Expander, ExpanderOptions.ExpandAll, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4)));
+                Assert.True(ConditionEvaluator.EvaluateCondition(tempXmlAttribute.Value, ParserOptions.AllowAll, bucket.Expander, ExpanderOptions.ExpandAll, Directory.GetCurrentDirectory(), MockElementLocation.Instance, null, new BuildEventContext(1, 2, 3, 4), FileSystems.Default));
                 Assert.Equal("a.doc;b.doc;c.doc;d.doc;e.doc", bucket.Expander.ExpandIntoStringAndUnescape("@(doc)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
                 Assert.Equal("unittests.foo", bucket.Expander.ExpandIntoStringAndUnescape("$(bogus)$(UNITTESTS)", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
             }
@@ -468,7 +468,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private static Lookup CreateLookup(ItemDictionary<ProjectItemInstance> itemsByType, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            return new Lookup(itemsByType, properties, null);
+            return new Lookup(itemsByType, properties);
         }
     }
 }

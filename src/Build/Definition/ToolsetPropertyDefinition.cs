@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A property class used internally by the Toolset readers.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

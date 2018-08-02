@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An interface for objects which can have project xml evaluated into them.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +9,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -210,7 +208,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
-        void InitializeForEvaluation(IToolsetProvider toolsetProvider);
+        void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem);
 
         /// <summary>
         /// Indicates to the data block that evaluation has completed,
@@ -289,7 +287,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Record an import opened during evaluation, if appropriate.
         /// </summary>
-        void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated);
+        void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult);
 
         /// <summary>
         /// Record an import opened during evaluation, if appropriate.

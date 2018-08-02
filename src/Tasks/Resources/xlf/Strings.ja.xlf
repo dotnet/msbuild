@@ -291,6 +291,36 @@
         <target state="translated">ファイル "{0}" は存在しません。省略します。</target>
         <note />
       </trans-unit>
+      <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
+        <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
+        <target state="translated">"{2}" パラメーターがプロジェクトで "{3}" に設定されているため、またファイルのサイズが一致するため、"{0}" から "{1}" にファイルをダウンロードしませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.Downloading">
+        <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
+        <target state="translated">"{0}" から "{1}" にダウンロードしています ({2:N0} バイト)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorDownloading">
+        <source>MSB3923: Failed to download file "{0}".  {1}</source>
+        <target state="translated">MSB3923: ファイル "{0}" をダウンロードできませんでした。{1}</target>
+        <note>{StrBegin="MSB3923: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorInvalidUrl">
+        <source>MSB3921: The specified URL "{0}" is not valid.</source>
+        <target state="translated">MSB3921: 指定した URL "{0}" が無効です。</target>
+        <note>{StrBegin="MSB3921: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorUnknownFileName">
+        <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
+        <target state="translated">MSB3922: URL "{0}" からファイル名を決定できませんでした。ファイル名を "{1}" パラメーターで指定してください。</target>
+        <note>{StrBegin="MSB3922: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.Retrying">
+        <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
+        <target state="translated">MSB3924: ファイル "{0}" をダウンロードできませんでした。{2} ミリ秒以内に {1} を再試行します。{3}</target>
+        <note>{StrBegin="MSB3924: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
         <target state="translated">MSB3071: A: から Z: までのすべてのドライブ文字は使用中です。作業ディレクトリ "{0}" は UNC パスであるため、"Exec" タスクには UNC パスをマップできる使用可能なドライブ文字が必要です。このコマンドを再度試してみる前に、1 つ以上の共有リソースを切断してドライブ文字を解放するか、ローカルの作業ディレクトリを指定してください。</target>
@@ -325,6 +355,21 @@
         <source>The working directory "{0}" does not exist.</source>
         <target state="translated">作業ディレクトリ "{0}" が存在しません。</target>
         <note>No error code because an error will be prefixed.</note>
+      </trans-unit>
+      <trans-unit id="FileHash.FileNotFound">
+        <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB3954: ファイル '{0}' が存在しないかアクセスできないため、そのファイルのハッシュを計算できませんでした。</target>
+        <note>{StrBegin="MSB3954: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
+        <target state="translated">MSB3953: ハッシュ アルゴリズム名 '{0}' は認識できません。許可されているアルゴリズムは、'SHA256'、'SHA384'、'SHA512' です。</target>
+        <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashEncoding">
+        <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
+        <target state="translated">MSB3951: ハッシュ エンコード '{0}' は認識できません。許可されているエンコードは、'hex' と 'base64' です。</target>
+        <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
@@ -836,7 +881,7 @@
       </trans-unit>
       <trans-unit id="GenerateManifest.ExcludedPermissionsNotSupported">
         <source>MSB3133: The ExcludePermissions property is deprecated. The permission set requested by the application has been set to the permissions defined in Internet or Local Intranet zone. To continue using a custom Permission Set, define your custom permission set in the Security Page of the Project Designer.</source>
-        <target state="translated">MSB3133: ExcludePermissions プロパティは使用しないでください。アプリケーションによって要求されたアクセス許可セットが、インターネットまたはローカル イントラネット ゾーンで定義されたアクセス許可に設定されています。カスタム アクセス許可セットを使用して続行するには、プロジェクト デザイナーの [セキュリティ] ページでカスタム アクセス許可セットを定義します。</target>
+        <target state="translated">MSB3133: ExcludePermissions プロパティは非推奨です。アプリケーションによって要求されたアクセス許可セットが、インターネットまたはローカル イントラネット ゾーンで定義されたアクセス許可に設定されています。カスタム アクセス許可セットを使用して続行するには、プロジェクト デザイナーの [セキュリティ] ページでカスタム アクセス許可セットを定義します。</target>
         <note>{StrBegin="MSB3133: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.KnownTargetZoneCannotHaveAdditionalPermissionType">
@@ -923,6 +968,11 @@
         <source>MSB3190: ClickOnce does not support the request execution level '{0}'.</source>
         <target state="translated">MSB3190: ClickOnce では、要求の実行レベル '{0}' はサポートされていません。</target>
         <note>{StrBegin="MSB3190: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.MOTW">
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
+        <target state="translated">MSB3821: ファイル {0} を処理できませんでした。インターネットまたは制限付きゾーン内にあるか、ファイルに Web のマークがあるためです。これらのファイルを処理するには、Web のマークを削除してください。</target>
+        <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
@@ -1108,7 +1158,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.BadImageFormat">
         <source>MSB3574: Did not recognize "{0}" as a managed assembly.</source>
-        <target state="translated">MSB3574: "{0}" はマネージ アセンブリとして認識されませんでした。</target>
+        <target state="translated">MSB3574: "{0}" はマネージド アセンブリとして認識されませんでした。</target>
         <note>{StrBegin="MSB3574: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteAssembly">
@@ -1183,7 +1233,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MissingFile">
         <source>MSB3819: Cannot find assembly "{0}", which may contain managed resources that need to be included in this app package.  Please ensure that this assembly exists.</source>
-        <target state="translated">MSB3819: アセンブリ "{0}" が見つかりません。このアセンブリには、アプリケーション パッケージに含める必要があるマネージ リソースが含まれている可能性があります。このアセンブリが存在することを確認してください。</target>
+        <target state="translated">MSB3819: アセンブリ "{0}" が見つかりません。このアセンブリには、アプリケーション パッケージに含める必要があるマネージド リソースが含まれている可能性があります。このアセンブリが存在することを確認してください。</target>
         <note>{StrBegin="MSB3819: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.PathTooLong">
@@ -1411,6 +1461,11 @@
         <source>MSB3455: ResGen.exe may not run because the command line is {0} characters long, which exceeds the maximum length of the command. To fix this problem, please either (1) remove unnecessary assembly references, or (2) make the paths to those references shorter.</source>
         <target state="translated">MSB3455: コマンド ラインの文字数が {0} で、これはコマンドの最大長を超えているため、ResGen.exe を実行できない可能性があります。この問題を解決するには、次のいずれかを行ってください。(1) 不要なアセンブリ参照を削除する。(2) これらの参照へのパスを短くする。</target>
         <note>{StrBegin="MSB3455: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="translated">アセンブリ ファイル '{0}' を開くことができませんでした -- PE イメージには管理されたメタデータが含まれていません。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
@@ -2158,7 +2213,7 @@
         <source>Project reference "{0}" has not been resolved.</source>
         <target state="translated">プロジェクト参照 "{0}" は解決されませんでした。</target>
         <note>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </note>
@@ -2328,6 +2383,46 @@
         <target state="translated">MSB3394: タイプ ライブラリ "{0}" は登録されていないため、登録解除できません。</target>
         <note>{StrBegin="MSB3394: "}</note>
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
+        <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="translated">"{2}" パラメーターがプロジェクトで "{3}" に設定されているため、またファイルのサイズとタイムスタンプが一致するため、ファイル "{0}" からファイル "{1}" に解凍しませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
+        <target state="translated">MSB3931: ディレクトリ "{0}" への解凍は、そのディレクトリを作成できなかったため、失敗しました。{1}</target>
+        <note>{StrBegin="MSB3931: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotExtractFile">
+        <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
+        <target state="translated">MSB3936: ファイル "{0}" を "{1}" に解凍して開くことができませんでした。{2}</target>
+        <note>{StrBegin="MSB3936: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
+        <target state="translated">MSB3935: 解凍先のファイル "{1}" が読み取り専用で、書き込み可能にすることができないため、ファイル "{0}" を解凍できませんでした。{2}</target>
+        <note>{StrBegin="MSB3935: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotOpenFile">
+        <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
+        <target state="translated">MSB3933: zip ファイル "{0}" を開くことができませんでした。{1}</target>
+        <note>{StrBegin="MSB3933: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="translated">MSB3934: ファイル "{0}" を "{1}" に解凍できませんでした。解凍先が宛先ディレクトリの外側です。</target>
+        <note>{StrBegin="MSB3934: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorFileDoesNotExist">
+        <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="translated">MSB3932: ファイルが存在しないか、アクセスできないため、ファイル "{0}" を解凍できませんでした。</target>
+        <note>{StrBegin="MSB3932: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.FileComment">
+        <source>Unzipping file "{0}" to "{1}".</source>
+        <target state="translated">ファイル "{0}" を "{1}" に解凍しています。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}" は "{0}" パラメーターに対して無効な値です。有効な値は {2} です。</target>
@@ -2342,6 +2437,11 @@
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
         <target state="translated">"{1}" は "{0}" パラメーターに対して無効な値です。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.HashMismatch">
+        <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
+        <target state="translated">MSB3952: ファイルのハッシュが一致しません。{0} には {2} の {1} ファイル ハッシュが想定されますが、実際は {3} でした。</target>
+        <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
@@ -2639,18 +2739,18 @@
         <note>{StrBegin="MSB3754: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
-        <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors."</source>
-        <target state="translated">MSB3755: 参照 "{0}" が見つかりませんでした。この参照がコードで必要とされる場合は、コンパイル エラーが発生する可能性があります。"</target>
+        <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</source>
+        <target state="translated">MSB3755: 参照 "{0}" が見つかりませんでした。この参照がコードで必要とされる場合は、コンパイル エラーが発生する可能性があります。</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
-        <source>MSB3756: The xml element "{0}" is not valid under the xml element "{1}".</source>
-        <target state="translated">MSB3756: xml 要素 "{0}" は xml 要素 "{1}" の下では無効です。</target>
+        <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
+        <target state="translated">MSB3756: 要素 &lt;{0}&gt; は &lt;{1}&gt; の無効な子要素です。有効な子要素は &lt;Code&gt;、&lt;Reference&gt;、および &lt;Using&gt; です。</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
-        <source>MSB3757: Multiple Code xml elements have been found, this is not allowed. To fix this issue remove any additional Code xml elements from the task.</source>
-        <target state="translated">MSB3757: 複数のコード xml 要素が見つかりました。これは無効です。この問題を解決するには、タスクから余分なコード xml 要素を削除してください。</target>
+        <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
+        <target state="translated">MSB3757: 指定できるのは &lt;Code&gt; 要素 1 つだけです。</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3007,6 +3107,61 @@
         <source>The file is locked by: "{0}"</source>
         <target state="translated">このファイルは "{0}" によってロックされています。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeType">
+        <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
+        <target state="translated">MSB3759: 指定されたコードの種類 "{0}" が無効です。サポートされているコードの種類は "{1}" です。</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
+        <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
+        <target state="translated">MSB3759: 指定されたコード言語 "{0}" が無効です。サポートされているコード言語は "{1}" です。</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.NoSourceCode">
+        <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
+        <target state="translated">MSB3760: Code 要素内にソース コード、またはソース コードを含むファイルへのパスを指定する必要があります。</target>
+        <note>{StrBegin="MSB3760: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.CompilingAssembly">
+        <source>Compiling task source code</source>
+        <target state="translated">タスク ソース コードのコンパイル</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidTaskXml">
+        <source>MSB3761: The specified task XML is invalid.  {0}</source>
+        <target state="translated">MSB3761: 指定されたタスク XML が無効です。{0}</target>
+        <note>{StrBegin="MSB3761: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
+        <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
+        <target state="translated">MSB3756: 属性 "{0}" は &lt;Code&gt; 要素には無効です。有効な属性は "Language"、"Source"、および "Type" です。</target>
+        <note>{StrBegin="MSB3756: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
+        <target state="translated">MSB3752: &lt;{1}&gt; 要素の "{0}" 属性が設定されていますが空白です。"{0}" 属性を設定する場合は空白にはできません。</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.Comment">
+        <source>Zipping directory "{0}" to "{1}".</source>
+        <target state="translated">ディレクトリ "{0}" を "{1}" に zip 圧縮しています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB3941: ディレクトリが存在しないか、アクセスできないため、ディレクトリ "{0}" を zip 圧縮できませんでした。</target>
+        <note>{StrBegin="MSB3941: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFailed">
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
+        <target state="translated">MSB3943: ディレクトリ "{0}" をファイル "{1}" に zip 圧縮できませんでした。{2}</target>
+        <note>{StrBegin="MSB3943: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFileExists">
+        <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="translated">MSB3942: 既に存在するため、zip ファイル "{0}" を作成できませんでした。そのファイルを削除するか、名前を変更して、もう一度お試しください。</target>
+        <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>
   </file>

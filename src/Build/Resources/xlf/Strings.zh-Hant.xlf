@@ -8,6 +8,11 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
+      <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
+        <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
+        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <note>{StrBegin="MSB4249: "}</note>
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: 擷取 "{0}" 工作中參數的屬性時發生失敗。{1}</target>
@@ -24,6 +29,18 @@
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">無法完成作業，因為建置已經在進行中。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandItemMetadata">
+        <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
+        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+    %(RootDir) to an item-spec that's not a valid path would result in this error.
+    LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
+      </trans-unit>
+      <trans-unit id="MetaprojectGenerated">
+        <source>Metaproject "{0}" generated.</source>
+        <target state="new">Metaproject "{0}" generated.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -174,7 +191,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: 子節點 "{0}" 不當結束。即將關閉。在 "{1}" 的檔案中可能有診斷資訊，且會命名為 MSBuild_*.failure.txt。可透過將 MSBUILDDEBUGPATH 環境變數設定成不同的目錄來變更此位置。</target>
+        <target state="translated">MSB4166: 子節點 "{0}" 已永久結束。正在關閉。診斷資訊可在 "{1}" 中的檔案內找到，且會命名為 MSBuild_*.failure.txt。您可將 MSBUILDDEBUGPATH 環境變數設定為其他目錄來變更此位置。</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -221,7 +238,7 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: 對於定義於 "{1}" 的 ToolsVersion "{0}"，MSBuildToolsPath 與 MSBuildBinPath 不相同。若兩者都出現時，其值必須相同。</target>
+        <target state="translated">MSB4142: 對於定義在 "{1}" 的 ToolsVersion "{0}"，MSBuildToolsPath 與 MSBuildBinPath 不相同。如果兩者都出現時，它們的值必須相同。</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
@@ -806,7 +823,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: 專案的預設 XML 命名空間必須是 MSBuild XML 命名空間或沒有命名空間。若使用 MSBuild 2003 格式設計專案，請將 xmlns="{0}" 加入 &lt;Project&gt; 項目中。若是使用舊版的 1.0 或 1.2 格式設計專案，請將專案轉換為 MSBuild 2003 格式。</target>
+        <target state="translated">MSB4041: 專案的預設 XML 命名空間必須是 MSBuild XML 命名空間或沒有命名空間。若使用 MSBuild 2003 格式設計專案，請將 xmlns="{0}" 新增至 &lt;Project&gt; 項目。若是使用舊版的 1.0 或 1.2 格式設計專案，請將專案轉換為 MSBuild 2003 格式。</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1948,7 +1965,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: 無法從 "{1}" 具現化 "{0}" 工作。此版本的 MSBuild 不支援 {2}。</target>
+        <target state="translated">MSB4802: 無法從 "{1}" 具現化 "{0}" 工作。此版的 MSBuild 不支援 {2}。</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -2043,7 +2060,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="translated">已略過目標 "{0}"。目標不在專案中，且 SkipNonexistentTargets 設為 true。</target>
+        <target state="translated">目標 "{0}" 已跳過。目標不在專案中，且 SkipNonexistentTargets 設為 true。</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
@@ -2068,7 +2085,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: NuGet 型 SDK 解析程式無法執行，因為找不到 NuGet 組件。請檢查 MSBuild 安裝，或將環境變數 "{0}" 設定為包含必要 NuGet 組件的資料夾。{1}</target>
+        <target state="translated">MSB4243: 因為找不到 NuGet 組件，所以 NuGet 型 SDK 解析程式無法執行。請檢查您的 MSBuild 安裝，或將環境變數 "{0}" 設定為包含必要 NuGet 組件的資料夾。{1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2098,14 +2115,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: 無法指定相同 SDK "{0}" 的多個版本。將會使用來自位置 "{2}" 的已解析 SDK 版本 "{1}"，並忽略版本 "{3}"。</target>
+        <target state="translated">MSB4240: 無法指定相同 SDK "{0}" 的多個版本。會使用先前從位置 "{2}" 解析的 SDK 版本 "{1}"，而版本 "{3}" 則會略過。</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: SDK 參考 "{0}" 版本 "{1}" 已改為解析成版本 "{2}"。若您未將參考的版本更新為符合的版本，則可能使用了與預期不同的版本。</target>
+        <target state="translated">MSB4241: SDK 參考 "{0}" 版本 "{1}" 已改為解析成版本 {2}"。若您未將參考的版本更新為符合的版本，您可能使用了與預期不同的版本。</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2116,6 +2133,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
+      </trans-unit>
+      <trans-unit id="SdkResolverManifestInvalid">
+        <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
+        <target state="translated">MSB4245: SDK 解析程式資訊清單檔案無效。這可能代表 MSBuild 的安裝損毀或無效。資訊清單檔案路徑 '{0}'。訊息: {1}</target>
+        <note>{StrBegin="MSB4245: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverNoDllOrManifest">
+        <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
+        <target state="translated">MSB4246: SDK 解析程式資料夾存在，但缺少 SDK 解析程式 DLL 或資訊清單檔案。這可能代表 MSBuild 的安裝損毀或無效。SDK 解析程式路徑: {0}</target>
+        <note>{StrBegin="MSB4246: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverDllInManifestMissing">
+        <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
+        <target state="translated">MSB4247: 無法載入 SDK 解析程式。資訊清單檔案存在，但找不到 SDK 解析程式 DLL 檔案的路徑。資訊清單檔案路徑 '{0}'。SDK 解析程式路徑: {1}</target>
+        <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>
   </file>

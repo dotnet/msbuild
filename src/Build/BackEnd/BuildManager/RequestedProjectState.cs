@@ -20,8 +20,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public List<string> PropertyFilters
         {
-            get { return _propertyFilters; }
-            set { _propertyFilters = value; }
+            get => _propertyFilters;
+            set => _propertyFilters = value;
         }
 
         /// <summary>
@@ -29,8 +29,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public IDictionary<string, List<string>> ItemFilters
         {
-            get { return _itemFilters; }
-            set { _itemFilters = value; }
+            get => _itemFilters;
+            set => _itemFilters = value;
         }
 
         void INodePacketTranslatable.Translate(INodePacketTranslator translator)
@@ -39,17 +39,17 @@ namespace Microsoft.Build.Execution
             translator.TranslateDictionary(ref _itemFilters, TranslateString, TranslateMetadataForItem, CreateItemMetadataDictionary);
         }
 
-        private IDictionary<string, List<string>> CreateItemMetadataDictionary(int capacity)
+        private static IDictionary<string, List<string>> CreateItemMetadataDictionary(int capacity)
         {
             return new Dictionary<string, List<string>>(capacity, StringComparer.OrdinalIgnoreCase);
         }
 
-        private void TranslateMetadataForItem(ref List<string> list, INodePacketTranslator translator)
+        private static void TranslateMetadataForItem(ref List<string> list, INodePacketTranslator translator)
         {
             translator.Translate(ref list);
         }
 
-        private void TranslateString(ref string s, INodePacketTranslator translator)
+        private static void TranslateString(ref string s, INodePacketTranslator translator)
         {
             translator.Translate(ref s);
         }

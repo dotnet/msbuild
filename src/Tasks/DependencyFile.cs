@@ -5,12 +5,15 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
     /// Represents a single input to a compilation-style task.
     /// Keeps track of timestamp for later comparison.
+    /// 
+    /// On-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
     [Serializable]
     internal class DependencyFile
@@ -27,7 +30,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the file.
         /// </summary>
-        /// <value></value>
         internal string FileName
         {
             get { return filename; }
@@ -36,7 +38,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The last-modified timestamp when the class was instantiated.
         /// </summary>
-        /// <value></value>
         internal DateTime LastModified
         {
             get { return lastModified; }
@@ -45,7 +46,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Returns true if the file existed when this class was instantiated.
         /// </summary>
-        /// <value></value>
         internal bool Exists
         {
             get { return exists; }
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
         {
             this.filename = FileUtilities.FixFilePath(filename);
 
-            if (File.Exists(FileName))
+            if (FileSystems.Default.FileExists(FileName))
             {
                 lastModified = File.GetLastWriteTime(FileName);
                 exists = true;

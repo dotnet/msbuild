@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -287,7 +288,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set the GetLastWriteTime delegate.
         /// </summary>
-        /// <param name="getLastWriteTime">Delegate used to get the last write time.</param>
+        /// <param name="getLastWriteTimeValue">Delegate used to get the last write time.</param>
         internal void SetGetLastWriteTime(GetLastWriteTime getLastWriteTimeValue)
         {
             getLastWriteTime = getLastWriteTimeValue;
@@ -296,7 +297,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a GetAssemblyName delegate. 
         /// </summary>
-        /// <param name="getAssemblyName">The delegate.</param>
+        /// <param name="getAssemblyNameValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal GetAssemblyName CacheDelegate(GetAssemblyName getAssemblyNameValue)
         {
@@ -307,7 +308,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a GetAssemblyMetadata delegate. 
         /// </summary>
-        /// <param name="getAssemblyMetadata">The delegate.</param>
+        /// <param name="getAssemblyMetadataValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal GetAssemblyMetadata CacheDelegate(GetAssemblyMetadata getAssemblyMetadataValue)
         {
@@ -318,7 +319,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a FileExists delegate. 
         /// </summary>
-        /// <param name="fileExists">The delegate.</param>
+        /// <param name="fileExistsValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal FileExists CacheDelegate(FileExists fileExistsValue)
         {
@@ -335,7 +336,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache the results of a GetDirectories delegate. 
         /// </summary>
-        /// <param name="getDirectories">The delegate.</param>
+        /// <param name="getDirectoriesValue">The delegate.</param>
         /// <returns>Cached version of the delegate.</returns>
         internal GetDirectories CacheDelegate(GetDirectories getDirectoriesValue)
         {
@@ -381,7 +382,7 @@ namespace Microsoft.Build.Tasks
             // Is it in the process-wide cache?
             FileState cacheFileState = null;
             FileState processFileState = null;
-            SystemState.s_processWideFileStateCache.TryGetValue(path, out processFileState);
+            s_processWideFileStateCache.TryGetValue(path, out processFileState);
             FileState instanceLocalFileState = instanceLocalFileState = (FileState)instanceLocalFileStateCache[path];
 
             // Sync the caches.
@@ -473,25 +474,24 @@ namespace Microsoft.Build.Tasks
                 string extension = Path.GetExtension(path);
                 if (String.Compare(extension, ".dll", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    AssemblyEntry[] assemblyNames = redistList.FindAssemblyNameFromSimpleName
+                    IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName
                         (
                             Path.GetFileNameWithoutExtension(path)
                         );
 
-                    for (int i = 0; i < assemblyNames.Length; ++i)
+                    foreach (AssemblyEntry a in assemblyNames)
                     {
                         string filename = Path.GetFileName(path);
-                        string pathFromRedistList = Path.Combine(assemblyNames[i].FrameworkDirectory, filename);
+                        string pathFromRedistList = Path.Combine(a.FrameworkDirectory, filename);
 
                         if (String.Equals(path, pathFromRedistList, StringComparison.OrdinalIgnoreCase))
                         {
-                            return new AssemblyNameExtension(assemblyNames[i].FullName);
+                            return new AssemblyNameExtension(a.FullName);
                         }
                     }
                 }
             }
-
-
+            
             // Not a well-known FX assembly so now check the cache.
             FileState fileState = GetFileState(path);
             if (fileState.Assembly == null)

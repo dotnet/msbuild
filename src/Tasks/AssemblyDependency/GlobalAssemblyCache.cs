@@ -17,28 +17,28 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Methods for dealing with the GAC.
     /// </summary>
-    static internal class GlobalAssemblyCache
+    internal static class GlobalAssemblyCache
     {
         /// <summary>
         /// Default delegate to get the path based on a fusion name.
         /// </summary>
-        internal static readonly GetPathFromFusionName pathFromFusionName = new GetPathFromFusionName(RetrievePathFromFusionName);
+        internal static readonly GetPathFromFusionName pathFromFusionName = RetrievePathFromFusionName;
 
         /// <summary>
         /// Default delegate to get the gac enumerator.
         /// </summary>
-        internal static readonly GetGacEnumerator gacEnumerator = new GetGacEnumerator(GetGacNativeEnumerator);
+        internal static readonly GetGacEnumerator gacEnumerator = GetGacNativeEnumerator;
 
         /// <summary>
         /// Given a strong name, find its path in the GAC.
         /// </summary>
-        /// <param name="strongName">The strong name.</param>
+        /// <param name="assemblyName">The assembly name.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
         private static string GetLocationImpl(AssemblyNameExtension assemblyName, string targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, "assemblyName");
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
             ErrorUtilities.VerifyThrow(assemblyName.FullName != null, "Got a null assembly name fullname.");
 
             string strongName = assemblyName.FullName;
@@ -81,19 +81,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static IEnumerable<AssemblyNameExtension> GetGacNativeEnumerator(string strongName)
         {
-            IEnumerable<AssemblyNameExtension> gacEnumerator = null;
             try
             {
                 // Will fail if the publickeyToken is null but will not fail if it is missing.
-                gacEnumerator = new Microsoft.Build.Tasks.NativeMethods.AssemblyCacheEnum(strongName);
+                return new NativeMethods.AssemblyCacheEnum(strongName);
             }
             catch (FileLoadException)
             {
                 // We could not handle the name passed in
                 return null;
             }
-
-            return gacEnumerator;
         }
 
         /// <summary>
@@ -101,7 +98,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static SortedDictionary<Version, SortedDictionary<AssemblyNameExtension, string>> GenerateListOfAssembliesByRuntime(string strongName, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetedRuntime, "targetedRuntime");
+            ErrorUtilities.VerifyThrowArgumentNull(targetedRuntime, nameof(targetedRuntime));
 
             IEnumerable<AssemblyNameExtension> gacEnum = getGacEnumerator(strongName);
 
@@ -162,20 +159,17 @@ namespace Microsoft.Build.Tasks
         internal static string RetrievePathFromFusionName(string strongName)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(strongName, "assemblyName");
+            ErrorUtilities.VerifyThrowArgumentNull(strongName, nameof(strongName));
 
             string value;
 
             if (NativeMethodsShared.IsWindows)
             {
-                IAssemblyCache assemblyCache;
-
-                uint hr = NativeMethods.CreateAssemblyCache(out assemblyCache, 0);
+                uint hr = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
 
                 ErrorUtilities.VerifyThrow(hr == NativeMethodsShared.S_OK, "CreateAssemblyCache failed, hr {0}", hr);
 
-                ASSEMBLY_INFO assemblyInfo = new ASSEMBLY_INFO();
-                assemblyInfo.cbAssemblyInfo = (uint)Marshal.SizeOf<ASSEMBLY_INFO>();
+                var assemblyInfo = new ASSEMBLY_INFO { cbAssemblyInfo = (uint) Marshal.SizeOf<ASSEMBLY_INFO>() };
 
                 assemblyCache.QueryAssemblyInfo(0, strongName, ref assemblyInfo);
 
@@ -273,8 +267,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (fusionNameToResolvedPath.ContainsKey(strongName))
                     {
-                        string fusionName = null;
-                        fusionNameToResolvedPath.TryGetValue(strongName, out fusionName);
+                        fusionNameToResolvedPath.TryGetValue(strongName, out string fusionName);
                         return fusionName;
                     }
                 }
@@ -283,17 +276,11 @@ namespace Microsoft.Build.Tasks
             // Optimize out the case where the public key token is null, if it is null it is not a strongly named assembly and CANNOT be in the gac.
             // also passing it would cause the gac enumeration method to throw an exception indicating the assembly is not a strongnamed assembly.
 
-            string location = null;
-
             // If the publickeyToken is null and the publickeytoken is in the fusion name then this means we are passing in a null or empty PublicKeyToken and then this cannot possibly be in the gac.
             if ((strongName.GetPublicKeyToken() == null || strongName.GetPublicKeyToken().Length == 0) && strongName.FullName.IndexOf("PublicKeyToken", StringComparison.OrdinalIgnoreCase) != -1)
             {
-                if (fusionNameToResolvedPath != null)
-                {
-                    fusionNameToResolvedPath.TryAdd(strongName, location);
-                }
-
-                return location;
+                fusionNameToResolvedPath?.TryAdd(strongName, null);
+                return null;
             }
 
             // A delegate was not passed in to use the default one
@@ -303,6 +290,7 @@ namespace Microsoft.Build.Tasks
             getGacEnumerator = getGacEnumerator ?? gacEnumerator;
 
             // If we have no processor architecture set then we can tryout a number of processor architectures.
+            string location;
             if (!strongName.HasProcessorArchitectureInFusionName)
             {
                 if (targetProcessorArchitecture != ProcessorArchitecture.MSIL && targetProcessorArchitecture != ProcessorArchitecture.None)
@@ -318,12 +306,9 @@ namespace Microsoft.Build.Tasks
                         location = GetLocationImpl(strongName, processorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, getPathFromFusionName, getGacEnumerator, specificVersion);
                     }
 
-                    if (location != null && location.Length > 0)
+                    if (!string.IsNullOrEmpty(location))
                     {
-                        if (fusionNameToResolvedPath != null)
-                        {
-                            fusionNameToResolvedPath.TryAdd(strongName, location);
-                        }
+                        fusionNameToResolvedPath?.TryAdd(strongName, location);
                         return location;
                     }
                 }
@@ -337,12 +322,9 @@ namespace Microsoft.Build.Tasks
                 {
                     location = GetLocationImpl(strongName, "MSIL", getRuntimeVersion, targetedRuntimeVersion, fileExists, getPathFromFusionName, getGacEnumerator, specificVersion);
                 }
-                if (location != null && location.Length > 0)
+                if (!string.IsNullOrEmpty(location))
                 {
-                    if (fusionNameToResolvedPath != null)
-                    {
-                        fusionNameToResolvedPath.TryAdd(strongName, location);
-                    }
+                    fusionNameToResolvedPath?.TryAdd(strongName, location);
                     return location;
                 }
             }
@@ -357,19 +339,13 @@ namespace Microsoft.Build.Tasks
                 location = GetLocationImpl(strongName, null, getRuntimeVersion, targetedRuntimeVersion, fileExists, getPathFromFusionName, getGacEnumerator, specificVersion);
             }
 
-            if (location != null && location.Length > 0)
+            if (!string.IsNullOrEmpty(location))
             {
-                if (fusionNameToResolvedPath != null)
-                {
-                    fusionNameToResolvedPath.TryAdd(strongName, location);
-                }
+                fusionNameToResolvedPath?.TryAdd(strongName, location);
                 return location;
             }
 
-            if (fusionNameToResolvedPath != null)
-            {
-                fusionNameToResolvedPath.TryAdd(strongName, null);
-            }
+            fusionNameToResolvedPath?.TryAdd(strongName, null);
 
             return null;
         }
@@ -377,7 +353,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Return the root path of the GAC
         /// </summary>
-        /// <returns></returns>
         internal static string GetGacPath()
         {
             int gacPathLength = 0;

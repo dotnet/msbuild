@@ -3,12 +3,9 @@
 
 using System;
 using System.IO;
-using System.Resources;
-using System.Reflection;
-
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 

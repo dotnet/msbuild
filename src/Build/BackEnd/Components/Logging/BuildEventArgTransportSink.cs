@@ -1,11 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>BuildEventArg sink which will consume a buildEventArg, wrap it in a INodePacket, and
-//          send it to the transport component to be sent accross the wire
-// </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

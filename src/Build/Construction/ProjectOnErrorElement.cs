@@ -1,16 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectOnErrorElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
-using System.Reflection;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -29,7 +20,7 @@ namespace Microsoft.Build.Construction
         internal ProjectOnErrorElement(XmlElementWithLocation xmlElement, ProjectTargetElement parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -66,10 +57,7 @@ namespace Microsoft.Build.Construction
         /// Location of the "ExecuteTargets" attribute on this element, if any.
         /// If there is no such attribute, returns null;
         /// </summary>
-        public ElementLocation ExecuteTargetsLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.executeTargets); }
-        }
+        public ElementLocation ExecuteTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.executeTargets);
 
         /// <summary>
         /// Creates an unparented ProjectOnErrorElement, wrapping an unparented XmlElement.
@@ -79,10 +67,8 @@ namespace Microsoft.Build.Construction
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.onError);
 
-            ProjectOnErrorElement onError = new ProjectOnErrorElement(element, containingProject);
-
-            onError.ExecuteTargetsAttribute = executeTargets;
-
+            var onError = new ProjectOnErrorElement(element, containingProject) { ExecuteTargetsAttribute = executeTargets };
+            
             return onError;
         }
 
@@ -98,7 +84,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateOnErrorElement(this.ExecuteTargetsAttribute);
+            return owner.CreateOnErrorElement(ExecuteTargetsAttribute);
         }
     }
 }

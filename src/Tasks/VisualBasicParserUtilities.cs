@@ -1,13 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.IO;
 using System.Text;
-using System.Resources;
-using System.Reflection;
 
-using System.Collections;
 using Microsoft.Build.Shared.LanguageParser;
 
 namespace Microsoft.Build.Tasks
@@ -22,7 +18,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="binaryStream"></param>
         /// <returns></returns>
-        static internal ExtractedClassName GetFirstClassNameFullyQualified(Stream binaryStream)
+        internal static ExtractedClassName GetFirstClassNameFullyQualified(Stream binaryStream)
         {
             try
             {
@@ -44,8 +40,8 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private static ExtractedClassName Extract(VisualBasicTokenizer tokens)
         {
-            ParseState state = new ParseState();
-            ExtractedClassName result = new ExtractedClassName();
+            var state = new ParseState();
+            var result = new ExtractedClassName();
 
             foreach (Token t in tokens)
             {

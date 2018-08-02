@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Performance tracker for evaluation.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -37,7 +33,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Contains each evaluated location with its associated timed entry
         /// </summary>
-        public ProfilerResult ProfiledResult => new ProfilerResult(_timeSpent);
+        public ProfilerResult? ProfiledResult => _shouldTrackElements ? (ProfilerResult?)new ProfilerResult(_timeSpent) : null;
 
         /// <nodoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -143,8 +139,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 //  Add elapsed times to evaluation counter dictionaries
-                ProfiledLocation previousTimeSpent;
-                if (!_evaluationProfiler.ProfiledResult.ProfiledLocations.TryGetValue(Location, out previousTimeSpent))
+                if (!_evaluationProfiler.ProfiledResult.Value.ProfiledLocations.TryGetValue(Location, out var previousTimeSpent))
                 {
                     previousTimeSpent = new ProfiledLocation(TimeSpan.Zero, TimeSpan.Zero, 0);
                 }

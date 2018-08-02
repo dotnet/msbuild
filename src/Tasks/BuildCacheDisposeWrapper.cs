@@ -1,15 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>
-// This class is an IDisposable object which will call the delegate which is passed into it 
-// when its dispose method is called.
-// </summary>
-//-----------------------------------------------------------------------
 
 using System;
-using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
@@ -26,7 +18,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Delegate to call when we are in dispose
         /// </summary>
-        private CallDuringDispose _callDuringDispose;
+        private readonly CallDuringDispose _callDuringDispose;
 
         /// <summary>
         /// Constructor
@@ -59,10 +51,7 @@ namespace Microsoft.Build.Tasks
             if (!_disposed && disposing)
             {
                 _disposed = true;
-                if (_callDuringDispose != null)
-                {
-                    _callDuringDispose();
-                }
+                _callDuringDispose?.Invoke();
             }
         }
     }
