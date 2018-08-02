@@ -418,6 +418,17 @@ namespace Microsoft.Build.Tasks
                             _frameworkName = new FrameworkName(arguments[0]);
                         }
                     }
+
+                    var assemblyFilesCollection = metadataReader.AssemblyFiles;
+
+                    List<string> assemblyFiles = new List<string>(assemblyFilesCollection.Count);
+
+                    foreach (var fileHandle in assemblyFilesCollection)
+                    {
+                        assemblyFiles.Add(metadataReader.GetString(metadataReader.GetAssemblyFile(fileHandle).Name));
+                    }
+
+                    _assemblyFiles = assemblyFiles.ToArray();
                 }
 
                 _metadataRead = true;
@@ -656,11 +667,6 @@ namespace Microsoft.Build.Tasks
         /// <returns>The extra files of assembly dependencies.</returns>
         private string[] ImportFiles()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return Array.Empty<string>();
-            }
-
 #if FEATURE_ASSEMBLY_LOADFROM
             var files = new List<string>();
             IntPtr fileEnum = IntPtr.Zero;
@@ -699,7 +705,8 @@ namespace Microsoft.Build.Tasks
 
             return files.ToArray();
 #else
-            return Array.Empty<string>();
+            CorePopulateMetadata();
+            return _assemblyFiles;
 #endif
         }
 
