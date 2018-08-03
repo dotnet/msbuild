@@ -6,6 +6,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.PlatformAbstractions;
 
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
+
 namespace Microsoft.DotNet.Cli.Build.Framework
 {
     public static class CurrentPlatform

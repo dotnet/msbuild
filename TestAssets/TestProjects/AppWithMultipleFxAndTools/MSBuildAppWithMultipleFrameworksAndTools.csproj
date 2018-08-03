@@ -11,10 +11,6 @@
     <PackageReference Include="dotnet-desktop-and-portable" Version="1.0.0-*" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.0' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
-
   <ItemGroup>
     <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*" />
   </ItemGroup>

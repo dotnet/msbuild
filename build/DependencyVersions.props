@@ -4,8 +4,7 @@
     <DotNetCoreSdkLKGVersion>3.0.100-alpha1-009402</DotNetCoreSdkLKGVersion>
     <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview1-34355</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.2.0-preview1-26620-03</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>2.1.2</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.8.166</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>

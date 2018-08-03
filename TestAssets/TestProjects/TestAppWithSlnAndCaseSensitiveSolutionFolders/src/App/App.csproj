@@ -10,8 +10,4 @@
     <ProjectReference Include="..\src\Lib\Lib.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
-
 </Project>
