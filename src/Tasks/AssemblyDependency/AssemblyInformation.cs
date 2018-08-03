@@ -363,33 +363,17 @@ namespace Microsoft.Build.Tasks
                 {
                     var metadataReader = peFile.GetMetadataReader();
 
-                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
+                    var assemblyReferences = metadataReader.AssemblyReferences;
 
-                    foreach (var handle in metadataReader.AssemblyReferences)
+                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>(assemblyReferences.Count);
+
+                    foreach (var handle in assemblyReferences)
                     {
-                        var entry = metadataReader.GetAssemblyReference(handle);
-
-                        var assemblyName = new AssemblyName
-                        {
-                            Name = metadataReader.GetString(entry.Name),
-                            Version = entry.Version,
-                            CultureName = metadataReader.GetString(entry.Culture)
-                        };
-                        var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
-                        if (publicKeyOrToken != null)
-                        {
-                            if (publicKeyOrToken.Length <= 8)
-                            {
-                                assemblyName.SetPublicKeyToken(publicKeyOrToken);
-                            }
-                            else
-                            {
-                                assemblyName.SetPublicKey(publicKeyOrToken);
-                            }
-                        }
-                        assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
-
-                        ret.Add(new AssemblyNameExtension(assemblyName));
+                        ret.Add(
+                            new AssemblyNameExtension(
+                                metadataReader
+                                .GetAssemblyReference(handle)
+                                .GetAssemblyName()));
                     }
 
                     _assemblyDependencies = ret.ToArray();
