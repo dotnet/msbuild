@@ -28,7 +28,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
 
     <!-- Target frameworks for Exe and unit test projects (ie projects with runtime output) -->
-    <RuntimeOutputTargetFrameworks>netcoreapp2.0;netcoreapp2.1</RuntimeOutputTargetFrameworks>
+    <RuntimeOutputTargetFrameworks>netcoreapp2.1</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;$(RuntimeOutputTargetFrameworks)</RuntimeOutputTargetFrameworks>
     <RuntimeOutputTargetFrameworks Condition="'$(MonoBuild)' == 'true'">net461</RuntimeOutputTargetFrameworks>
 

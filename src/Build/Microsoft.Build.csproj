@@ -5,8 +5,8 @@
   <PropertyGroup>
     <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
          in .NETStandard. -->
-    <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netstandard2.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netcoreapp2.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
