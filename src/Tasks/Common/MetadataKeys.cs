@@ -27,6 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string SDKPackageItemSpec = "SDKPackageItemSpec";
         public const string OriginalItemSpec = "OriginalItemSpec";
         public const string SDKRootFolder = "SDKRootFolder";
+        public const string ShimRuntimeIdentifier = "ShimRuntimeIdentifier";
 
         // Foreign Keys
         public const string ParentTarget = "ParentTarget";
