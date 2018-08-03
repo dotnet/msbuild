@@ -313,7 +313,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
         }
 
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        [WindowsOnlyFact]
         public void ItCreatesCoverageFileWhenCodeCoverageEnabledByRunsettings()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("11");
@@ -349,7 +349,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        [WindowsOnlyFact]
         public void ItCreatesCoverageFileInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
@@ -383,7 +383,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [UnixOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        [UnixOnlyFact]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");
