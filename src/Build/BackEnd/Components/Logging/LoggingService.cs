@@ -786,7 +786,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
-            ProcessLoggingEvent(loggingPacket.NodeBuildEvent, allowThrottling: true);
+            ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }
 
         /// <summary>
@@ -1060,24 +1060,19 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This method will becalled from multiple threads in asynchronous mode.
         /// 
         /// Determine where to send the buildevent either to the filters or to a specific sink.
-        /// When in Asynchronous mode the event should to into the logging queue (as long as we are initialized).
+        /// When in Asynchronous mode the event should go into the logging queue (as long as we are initialized).
         /// In Synchronous mode the event should be routed to the correct sink or logger right away
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
-        /// <param name="allowThrottling"><code>true</code> to allow throttling, otherwise <code>false</code>.</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
+        internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
                 // If the queue is at capacity, this call will block - the task returned by SendAsync only completes 
                 // when the message is actually consumed or rejected (permanently) by the buffer.
-                var task = _loggingQueue.SendAsync(buildEvent);
-                if (allowThrottling)
-                {
-                    task.Wait();
-                }
+                _loggingQueue.SendAsync(buildEvent).Wait();
             }
             else
             {
