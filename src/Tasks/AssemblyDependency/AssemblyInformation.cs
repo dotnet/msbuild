@@ -394,11 +394,10 @@ namespace Microsoft.Build.Tasks
 
                     _assemblyDependencies = ret.ToArray();
 
-                    var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
-                        .Select(ah => metadataReader.GetCustomAttribute(ah));
-
-                    foreach (var attr in attrs)
+                    foreach (var attrHandle in metadataReader.GetAssemblyDefinition().GetCustomAttributes())
                     {
+                        var attr = metadataReader.GetCustomAttribute(attrHandle);
+
                         var ctorHandle = attr.Constructor;
                         if (ctorHandle.Kind != HandleKind.MemberReference)
                         {
