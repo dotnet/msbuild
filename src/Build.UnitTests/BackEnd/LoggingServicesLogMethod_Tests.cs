@@ -1772,7 +1772,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// Override the method to log which event was processed so it can be verified in a test
             /// </summary>
             /// <param name="buildEvent">Build event which was asked to be processed</param>
-            internal override void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
+            internal override void ProcessLoggingEvent(object buildEvent)
             {
                 if (buildEvent is BuildEventArgs)
                 {
