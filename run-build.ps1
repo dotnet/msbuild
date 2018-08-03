@@ -112,8 +112,8 @@ if ($LastExitCode -ne 0)
 }
 
 # These are used to test 1.x/2.x scenarios
-# Don't install in source build.
-if ($env:DotNetBuildFromSource -ne "true") {
+# Don't install in source build or when cross compiling
+if ($env:DotNetBuildFromSource -ne "true" -and  $Architecture -eq $InstallArchitecture) {
     Invoke-Expression "$dotnetInstallPath -Version ""1.1.2"" -Runtime ""dotnet"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
     Invoke-Expression "$dotnetInstallPath -Version ""2.0.0"" -Runtime ""dotnet"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
     Invoke-Expression "$dotnetInstallPath -Version ""2.1.0"" -Runtime ""dotnet"" -InstallDir $env:DOTNET_INSTALL_DIR -Architecture ""$Architecture"""
