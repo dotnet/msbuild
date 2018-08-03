@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             {
                 string projectDirectory = directory.Path;
 
-                string newArgs = "console -f netcoreapp2.1 --debug:ephemeral-hive --no-restore";
+                string newArgs = "console -f netcoreapp2.2 --debug:ephemeral-hive --no-restore";
                 new NewCommandShim()
                     .WithWorkingDirectory(projectDirectory)
                     .Execute(newArgs)
