@@ -1,15 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Loads and stores the contents of Platform.xml</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
 using System.Xml;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Utilities
 {
@@ -21,7 +18,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Location of Platform.xml 
         /// </summary>
-        private string _pathToManifest;
+        private readonly string _pathToManifest;
 
         /// <summary>
         /// Constructor
@@ -29,7 +26,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public PlatformManifest(string pathToManifest)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pathToManifest, "pathToManifest");
+            ErrorUtilities.VerifyThrowArgumentLength(pathToManifest, nameof(pathToManifest));
             _pathToManifest = pathToManifest;
             LoadManifestFile();
         }
@@ -37,77 +34,43 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Platform name
         /// </summary>
-        public string Name
-        {
-            get;
-            private set;
-        }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Platform friendly name
         /// </summary>
-        public string FriendlyName
-        {
-            get;
-            private set;
-        }
+        public string FriendlyName { get; private set; }
 
         /// <summary>
         /// Platform version
         /// </summary>
-        public string PlatformVersion
-        {
-            get;
-            private set;
-        }
+        public string PlatformVersion { get; private set; }
 
         /// <summary>
         /// The platforms that this platform depends on.  
         /// Item1: Platform name
         /// Item2: Platform version
         /// </summary>
-        public ICollection<DependentPlatform> DependentPlatforms
-        {
-            get;
-            private set;
-        }
+        public ICollection<DependentPlatform> DependentPlatforms { get; private set; }
 
         /// <summary>
         /// The contracts contained by this platform
         /// Item1: Contract name
         /// Item2: Contract version
         /// </summary>
-        public ICollection<ApiContract> ApiContracts
-        {
-            get;
-            private set;
-        }
+        public ICollection<ApiContract> ApiContracts { get; private set; }
 
-        public bool VersionedContent
-        {
-            get;
-            private set;
-        }
+        public bool VersionedContent { get; private set; }
 
         /// <summary>
         /// Flag set to true if an exception occurred while reading the manifest
         /// </summary>
-        public bool ReadError
-        {
-            get
-            {
-                return !String.IsNullOrEmpty(ReadErrorMessage);
-            }
-        }
+        public bool ReadError => !string.IsNullOrEmpty(ReadErrorMessage);
 
         /// <summary>
         /// Message from exception thrown while reading manifest
         /// </summary>
-        public string ReadErrorMessage
-        {
-            get;
-            private set;
-        }
+        public string ReadErrorMessage { get; private set; }
 
         /// <summary>
         /// Load content of Platform.xml
@@ -128,11 +91,10 @@ namespace Microsoft.Build.Utilities
             {
                 string platformManifestPath = Path.Combine(_pathToManifest, "Platform.xml");
 
-                if (File.Exists(platformManifestPath))
+                if (FileSystems.Default.FileExists(platformManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
-                    XmlReaderSettings readerSettings = new XmlReaderSettings();
-                    readerSettings.DtdProcessing = DtdProcessing.Ignore;
+                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
                     using (XmlReader xmlReader = XmlReader.Create(platformManifestPath, readerSettings))
                     {
@@ -144,7 +106,7 @@ namespace Microsoft.Build.Utilities
                     foreach (XmlNode childNode in doc.ChildNodes)
                     {
                         if (childNode.NodeType == XmlNodeType.Element &&
-                            String.Equals(childNode.Name, Elements.ApplicationPlatform, StringComparison.Ordinal))
+                            string.Equals(childNode.Name, Elements.ApplicationPlatform, StringComparison.Ordinal))
                         {
                             rootElement = (XmlElement)childNode;
                             break;
@@ -162,8 +124,7 @@ namespace Microsoft.Build.Utilities
 
                         foreach (XmlNode childNode in rootElement.ChildNodes)
                         {
-                            XmlElement childElement = childNode as XmlElement;
-                            if (childElement == null)
+                            if (!(childNode is XmlElement childElement))
                             {
                                 continue;
                             }
@@ -174,11 +135,10 @@ namespace Microsoft.Build.Utilities
                             }
                             else if(ApiContract.IsVersionedContentElement(childElement.Name))
                             {
-                                bool versionedContent = false;
-                                bool.TryParse(childElement.InnerText, out versionedContent);
-                                this.VersionedContent = versionedContent;
+                                bool.TryParse(childElement.InnerText, out bool versionedContent);
+                                VersionedContent = versionedContent;
                             }
-                            else if (String.Equals(childElement.Name, Elements.DependentPlatform, StringComparison.Ordinal))
+                            else if (string.Equals(childElement.Name, Elements.DependentPlatform, StringComparison.Ordinal))
                             {
                                 DependentPlatforms.Add(new DependentPlatform(childElement.GetAttribute(Attributes.Name), childElement.GetAttribute(Attributes.Version)));
                             }
@@ -187,7 +147,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    this.ReadErrorMessage = ResourceUtilities.FormatResourceString("PlatformManifest.MissingPlatformXml", platformManifestPath);
+                    ReadErrorMessage = ResourceUtilities.FormatResourceString("PlatformManifest.MissingPlatformXml", platformManifestPath);
                 }
             }
             catch (Exception e)
@@ -197,7 +157,7 @@ namespace Microsoft.Build.Utilities
                     throw;
                 }
 
-                this.ReadErrorMessage = e.Message;
+                ReadErrorMessage = e.Message;
             }
         }
 
@@ -209,12 +169,12 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// Name of the platform on which this platform depends
             /// </summary>
-            internal string Name;
+            internal readonly string Name;
 
             /// <summary>
             /// Version of the platform on which this platform depends 
             /// </summary>
-            internal string Version;
+            internal readonly string Version;
 
             /// <summary>
             /// Constructor
@@ -261,16 +221,6 @@ namespace Microsoft.Build.Utilities
             /// Version associated with this element
             /// </summary>
             public const string Version = "version";
-
-            /// <summary>
-            /// Architecture associated with this element
-            /// </summary>
-            public const string Architecture = "architecture";
-
-            /// <summary>
-            /// Config associated with this element
-            /// </summary>
-            public const string Configuration = "configuration";
         }
     }
 }

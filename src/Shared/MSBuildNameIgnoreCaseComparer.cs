@@ -1,12 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>
-// A custom string comparer restricted to valid item/property names and with the
-// ability to work on an indexed substring.
-// </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -27,11 +20,11 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// The processor architecture on which we are running, but default it will be x86
         /// </summary>
-        private static NativeMethodsShared.ProcessorArchitectures s_runningProcessorArchitecture = NativeMethodsShared.ProcessorArchitectures.X86;
+        private static readonly NativeMethodsShared.ProcessorArchitectures s_runningProcessorArchitecture;
 
         /// <summary>
         /// We need a static constructor to retrieve the running ProcessorArchitecture that way we can
-        /// Avoid using optimized code that will not run correctly on IA64 due to alignment issues
+        /// avoid using optimized code that will not run correctly on IA64 due to alignment issues
         /// </summary>
         static MSBuildNameIgnoreCaseComparer()
         {
@@ -63,12 +56,12 @@ namespace Microsoft.Build.Collections
                 ErrorUtilities.ThrowInternalError("Invalid lengthToCompare '{0}' {1} {2}", constrainedString, start, lengthToCompare);
             }
 
-            if (start < 0 || start > (constrainedString == null ? 0 : constrainedString.Length) - lengthToCompare)
+            if (start < 0 || start > (constrainedString?.Length ?? 0) - lengthToCompare)
             {
                 ErrorUtilities.ThrowInternalError("Invalid start '{0}' {1} {2}", constrainedString, start, lengthToCompare);
             }
 
-            if (Object.ReferenceEquals(compareToString, constrainedString))
+            if (ReferenceEquals(compareToString, constrainedString))
             {
                 return true;
             }
@@ -98,8 +91,8 @@ namespace Microsoft.Build.Collections
                         {
                             for (int i = 0; i < compareToString.Length; i++)
                             {
-                                int chx = (int)px[i];
-                                int chy = (int)py[i + start];
+                                int chx = px[i];
+                                int chy = py[i + start];
                                 chx = chx & 0x00DF; // Extract the uppercase character
                                 chy = chy & 0x00DF; // Extract the uppercase character
 
@@ -143,7 +136,7 @@ namespace Microsoft.Build.Collections
                         int hash2 = hash1;
 
                         char* src2 = src + start;
-                        int* pint = (int*)src2;
+                        var pint = (int*)src2;
 
                         while (length > 0)
                         {

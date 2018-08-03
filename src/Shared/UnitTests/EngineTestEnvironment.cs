@@ -1,9 +1,9 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Shouldly;
 
 namespace Microsoft.Build.UnitTests
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests
     {
         private readonly TransientTestFolder _folder;
 
-        public string TestRoot => _folder.FolderPath;
+        public string TestRoot => _folder.Path;
 
         public string[] CreatedFiles { get; }
 
@@ -61,19 +61,13 @@ namespace Microsoft.Build.UnitTests
 
         internal MockLogger BuildProjectExpectFailure(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
         {
-            MockLogger logger;
-
-            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeFalse();
-
+            BuildProject(globalProperties, toolsVersion, out MockLogger logger).ShouldBeFalse();
             return logger;
         }
 
         internal MockLogger BuildProjectExpectSuccess(IDictionary<string, string> globalProperties = null, string toolsVersion = null)
         {
-            MockLogger logger;
-
-            BuildProject(globalProperties, toolsVersion, out logger).ShouldBeTrue();
-
+            BuildProject(globalProperties, toolsVersion, out MockLogger logger).ShouldBeTrue();
             return logger;
         }
 

@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A dictionary that has copy-on-write semantics.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -11,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Collections
 {
@@ -47,20 +42,11 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private static readonly bool s_forceWrite = (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDFORCECOWCOPY")));
 #endif
-        /// <summary>
-        /// The equality comparer to use when the dictionary is created.
-        /// </summary>
-        private readonly IEqualityComparer<K> keyComparer;
 
         /// <summary>
         /// The default capacity.
         /// </summary>
         private readonly int capacity;
-
-        /// <summary>
-        /// A special single dummy instance that always appears empty.
-        /// </summary>
-        private static CopyOnWriteDictionary<K, V> s_dummy = new CopyOnWriteDictionary<K, V>();
 
         /// <summary>
         /// The backing dictionary.
@@ -97,7 +83,7 @@ namespace Microsoft.Build.Collections
         internal CopyOnWriteDictionary(int capacity, IEqualityComparer<K> keyComparer)
         {
             this.capacity = capacity;
-            this.keyComparer = keyComparer;
+            Comparer = keyComparer;
         }
 
         /// <summary>
@@ -114,7 +100,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         private CopyOnWriteDictionary(CopyOnWriteDictionary<K, V> that)
         {
-            keyComparer = that.keyComparer;
+            Comparer = that.Comparer;
             backing = that.backing;
             if (backing != null)
             {
@@ -127,7 +113,7 @@ namespace Microsoft.Build.Collections
 
         public CopyOnWriteDictionary(IDictionary<K, V> dictionary)
         {
-            foreach (var pair in dictionary)
+            foreach (KeyValuePair<K, V> pair in dictionary)
             {
                 this[pair.Key] = pair.Value;
             }
@@ -136,101 +122,62 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the collection of keys in the dictionary.
         /// </summary>
-        public ICollection<K> Keys
-        {
-            get
-            {
-                return ReadOperation.Keys;
-            }
-        }
+        public ICollection<K> Keys => ReadOperation.Keys;
 
         /// <summary>
         /// Returns the collection of values in the dictionary.
         /// </summary>
-        public ICollection<V> Values
-        {
-            get { return ReadOperation.Values; }
-        }
+        public ICollection<V> Values => ReadOperation.Values;
 
         /// <summary>
         /// Returns the number of items in the collection.
         /// </summary>
-        public int Count
-        {
-            get { return ReadOperation.Count; }
-        }
+        public int Count => ReadOperation.Count;
 
         /// <summary>
         /// Returns true if the collection is read-only.
         /// </summary>
-        public bool IsReadOnly
-        {
-            get { return ((IDictionary<K, V>)ReadOperation).IsReadOnly; }
-        }
+        public bool IsReadOnly => ((IDictionary<K, V>)ReadOperation).IsReadOnly;
 
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        bool IDictionary.IsFixedSize
-        {
-            get { return false; }
-        }
+        bool IDictionary.IsFixedSize => false;
 
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        bool IDictionary.IsReadOnly
-        {
-            get { return IsReadOnly; }
-        }
+        bool IDictionary.IsReadOnly => IsReadOnly;
 
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        ICollection IDictionary.Keys
-        {
-            get { return (ICollection)Keys; }
-        }
+        ICollection IDictionary.Keys => (ICollection)Keys;
 
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        ICollection IDictionary.Values
-        {
-            get { return (ICollection)Values; }
-        }
+        ICollection IDictionary.Values => (ICollection)Values;
 
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        int ICollection.Count
-        {
-            get { return Count; }
-        }
+        int ICollection.Count => Count;
 
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        bool ICollection.IsSynchronized
-        {
-            get { return false; }
-        }
+        bool ICollection.IsSynchronized => false;
 
         /// <summary>
         /// IDictionary implementation
         /// </summary>
-        object ICollection.SyncRoot
-        {
-            get { return this; }
-        }
+        object ICollection.SyncRoot => this;
 
         /// <summary>
         /// A special single dummy instance that always appears empty.
         /// </summary>
-        internal static CopyOnWriteDictionary<K, V> Dummy
-        {
-            get { return s_dummy; }
-        }
+        internal static CopyOnWriteDictionary<K, V> Dummy { get; } = new CopyOnWriteDictionary<K, V>();
 
         /// <summary>
         /// Whether this is a dummy instance that always appears empty.
@@ -239,7 +186,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                if (Object.ReferenceEquals(this, Dummy))
+                if (ReferenceEquals(this, Dummy))
                 {
                     ErrorUtilities.VerifyThrow(backing == null || backing.Count == 0, "count"); // check count without recursion
                     return true;
@@ -252,10 +199,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Comparer used for keys
         /// </summary>
-        internal IEqualityComparer<K> Comparer
-        {
-            get { return keyComparer; }
-        }
+        internal IEqualityComparer<K> Comparer { get; private set; }
 
         /// <summary>
         /// Gets the backing dictionary for reading.
@@ -294,7 +238,7 @@ namespace Microsoft.Build.Collections
 
                 if (backing == null)
                 {
-                    backing = new CopyOnWriteBackingDictionary<K, V>(capacity, keyComparer);
+                    backing = new CopyOnWriteBackingDictionary<K, V>(capacity, Comparer);
                 }
                 else
                 {
@@ -313,10 +257,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public V this[K key]
         {
-            get
-            {
-                return ReadOperation[key];
-            }
+            get => ReadOperation[key];
 
             set
             {
@@ -329,8 +270,7 @@ namespace Microsoft.Build.Collections
                     else
                     {
                         // Try to avoid a clone if it already is present with the same value
-                        V existingValue = default(V);
-                        if (!ReadOperation.TryGetValue(key, out existingValue) || !EqualityComparer<V>.Default.Equals(existingValue, value))
+                        if (!ReadOperation.TryGetValue(key, out V existingValue) || !EqualityComparer<V>.Default.Equals(existingValue, value))
                         {
                             WriteOperation[key] = value;
                         }
@@ -346,18 +286,11 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                if (!ContainsKey((K)key))
-                {
-                    return null;
-                }
-
-                return this[(K)key];
+                TryGetValue((K) key, out V val);
+                return val;
             }
 
-            set
-            {
-                this[(K)key] = (V)value;
-            }
+            set => this[(K)key] = (V)value;
         }
 
         /// <summary>
@@ -473,7 +406,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Implementation of IEnumerable.GetEnumerator()
         /// </summary>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable<KeyValuePair<K, V>>)this).GetEnumerator();
         }
@@ -544,7 +477,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool HasSameBacking(CopyOnWriteDictionary<K, V> other)
         {
-            return Object.ReferenceEquals(other.backing, backing);
+            return ReferenceEquals(other.backing, backing);
         }
 
         /// <summary>
@@ -590,7 +523,6 @@ namespace Microsoft.Build.Collections
             /// Empty constructor.
             /// </summary>
             private CopyOnWriteBackingDictionary()
-                : base()
             {
             }
 
@@ -606,13 +538,7 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// Returns a read-only empty instance.
             /// </summary>
-            public static CopyOnWriteBackingDictionary<K1, V1> ReadOnlyEmptyInstance
-            {
-                get
-                {
-                    return s_readOnlyEmptyDictionary;
-                }
-            }
+            public static CopyOnWriteBackingDictionary<K1, V1> ReadOnlyEmptyInstance => s_readOnlyEmptyDictionary;
 
             /// <summary>
             /// Returns true if this collection has no clones.

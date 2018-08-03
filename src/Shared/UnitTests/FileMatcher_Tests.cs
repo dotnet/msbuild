@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -55,10 +56,10 @@ namespace Microsoft.Build.UnitTests
                 "file.bak.txt"
             })
             {
-                File.WriteAllBytes(Path.Combine(testFolder.FolderPath, file), new byte[1]);
+                File.WriteAllBytes(Path.Combine(testFolder.Path, file), new byte[1]);
             }
 
-            string[] fileMatches = FileMatcher.GetFiles(testFolder.FolderPath, pattern);
+            string[] fileMatches = FileMatcher.Default.GetFiles(testFolder.Path, pattern);
 
             fileMatches.Length.ShouldBe(expectedMatchCount, $"Matches: '{String.Join("', '", fileMatches)}'");
         }
@@ -70,7 +71,7 @@ namespace Microsoft.Build.UnitTests
             TransientTestFolder testFolder = _env.CreateFolder();
 
             // Create directories and files
-            foreach (string fullPath in GetFilesComplexGlobbingMatchingInfo.FilesToCreate.Select(i => Path.Combine(testFolder.FolderPath, i.ToPlatformSlash())))
+            foreach (string fullPath in GetFilesComplexGlobbingMatchingInfo.FilesToCreate.Select(i => Path.Combine(testFolder.Path, i.ToPlatformSlash())))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
                 
@@ -79,7 +80,7 @@ namespace Microsoft.Build.UnitTests
 
             void Verify(string include, string[] excludes, bool shouldHaveNoMatches = false, string customMessage = null)
             {
-                string[] matchedFiles = FileMatcher.GetFiles(testFolder.FolderPath, include, excludes);
+                string[] matchedFiles = FileMatcher.Default.GetFiles(testFolder.Path, include, excludes?.ToList());
 
                 if (shouldHaveNoMatches)
                 {
@@ -1156,7 +1157,7 @@ namespace Microsoft.Build.UnitTests
         public void IllegalTooLongPath()
         {
             string longString = new string('X', 500) + "*"; // need a wildcard to do anything
-            string[] result = FileMatcher.GetFiles(@"c:\", longString);
+            string[] result = FileMatcher.Default.GetFiles(@"c:\", longString);
 
             Assert.Equal(longString, result[0]); // Does not throw
 
@@ -1190,7 +1191,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress367780_CrashOnStarDotDot()
         {
-            string workingPath = _env.CreateFolder().FolderPath;
+            string workingPath = _env.CreateFolder().Path;
             string workingPathSubfolder = Path.Combine(workingPath, "SubDir");
             string offendingPattern = Path.Combine(workingPath, @"*\..\bar");
             string[] files = new string[0];
@@ -1198,19 +1199,19 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubfolder);
 
-            files = FileMatcher.GetFiles(workingPath, offendingPattern);
+            files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
         }
 
         [Fact]
         public void Regress141071_StarStarSlashStarStarIsLiteral()
         {
-            string workingPath = _env.CreateFolder().FolderPath;
+            string workingPath = _env.CreateFolder().Path;
             string fileName = Path.Combine(workingPath, "MyFile.txt");
             string offendingPattern = Path.Combine(workingPath, @"**\**");
 
             Directory.CreateDirectory(workingPath);
             File.WriteAllText(fileName, "Hello there.");
-            var files = FileMatcher.GetFiles(workingPath, offendingPattern);
+            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
@@ -1221,7 +1222,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress14090_TrailingDotMatchesNoExtension()
         {
-            string workingPath = _env.CreateFolder().FolderPath;
+            string workingPath = _env.CreateFolder().Path;
             string workingPathSubdir = Path.Combine(workingPath, "subdir");
             string workingPathSubdirBing = Path.Combine(workingPathSubdir, "bing");
 
@@ -1230,7 +1231,7 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(workingPath);
             Directory.CreateDirectory(workingPathSubdir);
             File.AppendAllText(workingPathSubdirBing, "y");
-            var files = FileMatcher.GetFiles(workingPath, offendingPattern);
+            var files = FileMatcher.Default.GetFiles(workingPath, offendingPattern);
 
             string result = String.Join(", ", files);
             Console.WriteLine(result);
@@ -1255,15 +1256,15 @@ namespace Microsoft.Build.UnitTests
 
                     var testProject = env.CreateTestProjectWithFiles(string.Empty, new[] {"a.cs", "b.cs", "c.cs"});
 
-                    var files = FileMatcher.GetFiles(testProject.TestRoot, "**/*.cs");
+                    var files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs");
                     Array.Sort(files);
                     Assert.Equal(new []{"a.cs", "b.cs", "c.cs"}, files);
 
-                    files = FileMatcher.GetFiles(testProject.TestRoot, "**/*.cs", new []{"a.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.GetFiles(testProject.TestRoot, "**/*.cs", new []{"a.cs", "c.cs"});
+                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string>{"a.cs", "c.cs"});
                     Array.Sort(files);
                     Assert.Equal(new[] {"b.cs" }, files);
                 }
@@ -2000,13 +2001,14 @@ namespace Microsoft.Build.UnitTests
         private static void MatchDriver(string filespec, string[] excludeFilespecs, string[] matchingFiles, string[] nonmatchingFiles, string[] untouchableFiles, bool normalizeAllPaths = true, bool normalizeExpectedMatchingFiles = false)
         {
             MockFileSystem mockFileSystem = new MockFileSystem(matchingFiles, nonmatchingFiles, untouchableFiles);
-            string[] files = FileMatcher.GetFiles
+
+            var fileMatcher = new FileMatcher(new FileSystemAdapter(mockFileSystem), mockFileSystem.GetAccessibleFileSystemEntries);
+
+            string[] files = fileMatcher.GetFiles
             (
                 String.Empty, /* we don't need project directory as we use mock filesystem */
                 filespec,
-                excludeFilespecs?.ToList(),
-                new FileMatcher.GetFileSystemEntries(mockFileSystem.GetAccessibleFileSystemEntries),
-                new DirectoryExists(mockFileSystem.DirectoryExists)
+                excludeFilespecs?.ToList()
             );
 
             Func<string[], string[]> normalizeAllFunc = (paths => normalizeAllPaths ? paths.Select(MockFileSystem.Normalize).ToArray() : paths);
@@ -2073,6 +2075,9 @@ namespace Microsoft.Build.UnitTests
          * Validate that SplitFileSpec(...) is returning the expected constituent values.
          *************************************************************************************/
 
+        private static FileMatcher loopBackFileMatcher = new FileMatcher(FileSystems.Default, GetFileSystemEntriesLoopBack);
+
+
         private static void ValidateSplitFileSpec
             (
             string filespec,
@@ -2084,13 +2089,13 @@ namespace Microsoft.Build.UnitTests
             string fixedDirectoryPart;
             string wildcardDirectoryPart;
             string filenamePart;
-            FileMatcher.SplitFileSpec
+
+            loopBackFileMatcher.SplitFileSpec
             (
                 filespec,
                 out fixedDirectoryPart,
                 out wildcardDirectoryPart,
-                out filenamePart,
-                new FileMatcher.GetFileSystemEntries(GetFileSystemEntriesLoopBack)
+                out filenamePart
             );
 
             expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
@@ -2192,13 +2197,12 @@ namespace Microsoft.Build.UnitTests
             Regex regexFileMatch;
             bool needsRecursion;
             bool isLegalFileSpec;
-            FileMatcher.GetFileSpecInfoWithRegexObject
+            loopBackFileMatcher.GetFileSpecInfoWithRegexObject
             (
                 filespec,
                 out regexFileMatch,
                 out needsRecursion,
-                out isLegalFileSpec,
-                new FileMatcher.GetFileSystemEntries(GetFileSystemEntriesLoopBack)
+                out isLegalFileSpec
             );
 
             if (isLegalFileSpec)
@@ -2227,7 +2231,7 @@ namespace Microsoft.Build.UnitTests
             bool shouldBeRecursive
         )
         {
-            FileMatcher.Result match = FileMatcher.FileMatch(filespec, fileToMatch);
+            FileMatcher.Result match = FileMatcher.Default.FileMatch(filespec, fileToMatch);
 
             if (!match.isLegalFileSpec)
             {
@@ -2244,6 +2248,46 @@ namespace Microsoft.Build.UnitTests
         }
 
         #endregion
+
+        private class FileSystemAdapter : IFileSystem
+        {
+            private readonly MockFileSystem _mockFileSystem;
+
+            public FileSystemAdapter(MockFileSystem mockFileSystem)
+            {
+                _mockFileSystem = mockFileSystem;
+            }
+
+            public IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            {
+                return FileSystems.Default.EnumerateFiles(path, searchPattern, searchOption);
+            }
+
+            public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            {
+                return FileSystems.Default.EnumerateDirectories(path, searchPattern, searchOption);
+            }
+
+            public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            {
+                return FileSystems.Default.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+            }
+
+            public bool DirectoryExists(string path)
+            {
+                return _mockFileSystem.DirectoryExists(path);
+            }
+
+            public bool FileExists(string path)
+            {
+                return FileSystems.Default.FileExists(path);
+            }
+
+            public bool DirectoryEntryExists(string path)
+            {
+                return FileSystems.Default.DirectoryEntryExists(path);
+            }
+        }
     }
 }
 

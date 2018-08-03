@@ -1,23 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An unevaluated element in MSBuild XML.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Collections.ObjectModel;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Collections;
-
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
-using System.Reflection;
 
 namespace Microsoft.Build.Construction
 {
@@ -55,12 +45,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlElement, "xmlElement");
-            ErrorUtilities.VerifyThrowArgumentNull(containingProject, "containingProject");
+            ErrorUtilities.VerifyThrowArgumentNull(xmlElement, nameof(xmlElement));
+            ErrorUtilities.VerifyThrowArgumentNull(containingProject, nameof(containingProject));
 
-            this.XmlElement = (XmlElementWithLocation)xmlElement;
+            XmlElement = (XmlElementWithLocation)xmlElement;
             _parent = parent;
-            this.ContainingProject = containingProject;
+            ContainingProject = containingProject;
         }
 
         /// <summary>
@@ -72,7 +62,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal virtual bool ExpressedAsAttribute
         {
-            get { return _expressedAsAttribute; }
+            get => _expressedAsAttribute;
             set
             {
                 if (value != _expressedAsAttribute)
@@ -101,12 +91,8 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                if (_condition == null)
-                {
-                    _condition = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.condition);
-                }
-
-                return _condition;
+                return _condition ??
+                       (_condition = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.condition));
             }
 
             [DebuggerStepThrough]
@@ -240,8 +226,7 @@ namespace Microsoft.Build.Construction
             get
             {
                 // If this element is unparented, we have hijacked the 'parent' field and stored the owning PRE in a special wrapper; get it from that.
-                var wrapper = _parent as WrapperForProjectRootElement;
-                if (wrapper != null)
+                if (_parent is WrapperForProjectRootElement wrapper)
                 {
                     return wrapper.ContainingProject;
                 }
@@ -268,19 +253,13 @@ namespace Microsoft.Build.Construction
         /// Location of the "Condition" attribute on this element, if any.
         /// If there is no such attribute, returns null.
         /// </summary>
-        public virtual ElementLocation ConditionLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.condition); }
-        }
+        public virtual ElementLocation ConditionLocation => XmlElement.GetAttributeLocation(XMakeAttributes.condition);
 
         /// <summary>
         /// Location of the "Label" attribute on this element, if any.
         /// If there is no such attribute, returns null;
         /// </summary>
-        public ElementLocation LabelLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.label); }
-        }
+        public ElementLocation LabelLocation => XmlElement.GetAttributeLocation(XMakeAttributes.label);
 
         /// <summary>
         /// Location of the corresponding Xml element.
@@ -289,16 +268,10 @@ namespace Microsoft.Build.Construction
         /// In the case of an unsaved edit, the location only
         /// contains the path to the file that the element originates from.
         /// </summary>
-        public ElementLocation Location
-        {
-            get { return XmlElement.Location; }
-        }
+        public ElementLocation Location => XmlElement.Location;
 
         /// <inheritdoc/>
-        public string ElementName
-        {
-            get { return XmlElement.Name; }
-        }
+        public string ElementName => XmlElement.Name;
 
         /// <summary>
         /// Gets the XmlElement associated with this project element.
@@ -309,11 +282,7 @@ namespace Microsoft.Build.Construction
         /// This should be protected, but "protected internal" means "OR" not "AND",
         /// so this is not possible.
         /// </remarks>
-        internal XmlElementWithLocation XmlElement
-        {
-            get;
-            private set;
-        }
+        internal XmlElementWithLocation XmlElement { get; private set; }
 
         /// <summary>
         /// Gets the XmlDocument associated with this project element.
@@ -328,7 +297,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                return (XmlElement == null) ? null : (XmlDocumentWithLocation)XmlElement.OwnerDocument;
+                return (XmlDocumentWithLocation) XmlElement?.OwnerDocument;
             }
         }
 
@@ -338,7 +307,7 @@ namespace Microsoft.Build.Construction
         /// <returns>The cloned element.</returns>
         public ProjectElement Clone()
         {
-            return this.Clone(this.ContainingProject);
+            return Clone(ContainingProject);
         }
 
         /// <summary>
@@ -347,8 +316,8 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, "element");
-            ErrorUtilities.VerifyThrowArgument(this.GetType().IsEquivalentTo(element.GetType()), "element");
+            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
+            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
 
             if (this == element)
             {
@@ -356,33 +325,33 @@ namespace Microsoft.Build.Construction
             }
 
             // Remove all the current attributes and textual content.
-            this.XmlElement.RemoveAllAttributes();
-            if (this.XmlElement.ChildNodes.Count == 1 && this.XmlElement.FirstChild.NodeType == XmlNodeType.Text)
+            XmlElement.RemoveAllAttributes();
+            if (XmlElement.ChildNodes.Count == 1 && XmlElement.FirstChild.NodeType == XmlNodeType.Text)
             {
-                this.XmlElement.RemoveChild(this.XmlElement.FirstChild);
+                XmlElement.RemoveChild(XmlElement.FirstChild);
             }
 
             // Ensure the element name itself matches.
-            this.ReplaceElement(XmlUtilities.RenameXmlElement(this.XmlElement, element.XmlElement.Name, XmlElement.NamespaceURI));
+            ReplaceElement(XmlUtilities.RenameXmlElement(XmlElement, element.XmlElement.Name, XmlElement.NamespaceURI));
 
             // Copy over the attributes from the template element.
             foreach (XmlAttribute attribute in element.XmlElement.Attributes)
             {
                 if (ShouldCloneXmlAttribute(attribute))
                 {
-                    this.XmlElement.SetAttribute(attribute.LocalName, attribute.NamespaceURI, attribute.Value);
+                    XmlElement.SetAttribute(attribute.LocalName, attribute.NamespaceURI, attribute.Value);
                 }
             }
 
             // If this element has pure text content, copy that over.
             if (element.XmlElement.ChildNodes.Count == 1 && element.XmlElement.FirstChild.NodeType == XmlNodeType.Text)
             {
-                this.XmlElement.AppendChild(this.XmlElement.OwnerDocument.CreateTextNode(element.XmlElement.FirstChild.Value));
+                XmlElement.AppendChild(XmlElement.OwnerDocument.CreateTextNode(element.XmlElement.FirstChild.Value));
             }
 
-            this._expressedAsAttribute = element._expressedAsAttribute;
+            _expressedAsAttribute = element._expressedAsAttribute;
 
-            this.MarkDirty("CopyFrom", null);
+            MarkDirty("CopyFrom", null);
         }
 
         /// <summary>
@@ -399,8 +368,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void SetProjectRootElementFromParser(XmlElementWithLocation xmlElement, ProjectRootElement projectRootElement)
         {
-            this.XmlElement = xmlElement;
-            this.ContainingProject = projectRootElement;
+            XmlElement = xmlElement;
+            ContainingProject = projectRootElement;
         }
 
         /// <summary>
@@ -428,7 +397,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ReplaceElement(XmlElementWithLocation newElement)
         {
-            if (Object.ReferenceEquals(newElement, XmlElement))
+            if (ReferenceEquals(newElement, XmlElement))
             {
                 return;
             }
@@ -455,10 +424,7 @@ namespace Microsoft.Build.Construction
         /// </comment>
         internal virtual void MarkDirty(string reason, string param)
         {
-            if (Parent != null)
-            {
-                Parent.MarkDirty(reason, param);
-            }
+            Parent?.MarkDirty(reason, param);
         }
 
         /// <summary>
@@ -476,10 +442,10 @@ namespace Microsoft.Build.Construction
         /// <returns>The cloned element.</returns>
         protected internal virtual ProjectElement Clone(ProjectRootElement factory)
         {
-            var clone = this.CreateNewInstance(factory);
-            if (!clone.GetType().IsEquivalentTo(this.GetType()))
+            var clone = CreateNewInstance(factory);
+            if (!clone.GetType().IsEquivalentTo(GetType()))
             {
-                ErrorUtilities.ThrowInternalError("{0}.Clone() returned an instance of type {1}.", this.GetType().Name, clone.GetType().Name);
+                ErrorUtilities.ThrowInternalError("{0}.Clone() returned an instance of type {1}.", GetType().Name, clone.GetType().Name);
             }
 
             clone.CopyFrom(this);
@@ -505,18 +471,14 @@ namespace Microsoft.Build.Construction
             /// </summary>
             internal WrapperForProjectRootElement(ProjectRootElement containingProject)
             {
-                ErrorUtilities.VerifyThrowInternalNull(containingProject, "containingProject");
-                this.ContainingProject = containingProject;
+                ErrorUtilities.VerifyThrowInternalNull(containingProject, nameof(containingProject));
+                ContainingProject = containingProject;
             }
 
             /// <summary>
             /// Wrapped ProjectRootElement
             /// </summary>
-            internal new ProjectRootElement ContainingProject
-            {
-                get;
-                private set;
-            }
+            internal new ProjectRootElement ContainingProject { get; }
 
             /// <summary>
             /// Dummy required implementation
@@ -529,7 +491,7 @@ namespace Microsoft.Build.Construction
             /// <inheritdoc />
             protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
             {
-                return new WrapperForProjectRootElement(this.ContainingProject);
+                return new WrapperForProjectRootElement(ContainingProject);
             }
         }
     }

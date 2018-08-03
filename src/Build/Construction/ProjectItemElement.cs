@@ -1,17 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectItemElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
@@ -48,7 +43,7 @@ namespace Microsoft.Build.Construction
         /// Whether the include value has wildcards, 
         /// cached for performance.
         /// </summary>
-        private bool? _includeHasWildcards = null;
+        private bool? _includeHasWildcards;
 
         /// <summary>
         /// Initialize a parented ProjectItemElement instance
@@ -56,7 +51,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemElement(XmlElementWithLocation xmlElement, ProjectItemGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -73,9 +68,8 @@ namespace Microsoft.Build.Construction
         public string ItemType
         {
             [DebuggerStepThrough]
-            get
-            { return XmlElement.Name; }
-            set { ChangeItemType(value); }
+            get => XmlElement.Name;
+            set => ChangeItemType(value);
         }
 
         /// <summary>
@@ -89,12 +83,9 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                if (_include == null)
-                {
-                    _include = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.include);
-                }
-
-                return _include;
+                return _include ?? (_include = ProjectXmlUtilities.GetAttributeValue(
+                           XmlElement,
+                           XMakeAttributes.include));
             }
 
             set
@@ -118,12 +109,9 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                if (_exclude == null)
-                {
-                    _exclude = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.exclude);
-                }
-
-                return _exclude;
+                return _exclude ?? (_exclude = ProjectXmlUtilities.GetAttributeValue(
+                           XmlElement,
+                           XMakeAttributes.exclude));
             }
 
             set
@@ -147,12 +135,7 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                if (_remove == null)
-                {
-                    _remove = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.remove);
-                }
-
-                return _remove;
+                return _remove ?? (_remove = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.remove));
             }
 
             set
@@ -173,12 +156,7 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                if (_update == null)
-                {
-                    _update = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.update);
-                }
-
-                return _update;
+                return _update ?? (_update = ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.update));
             }
 
             set
@@ -263,10 +241,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any child metadata.
         /// </summary>
-        public ICollection<ProjectMetadataElement> Metadata => new ReadOnlyCollection<ProjectMetadataElement>
-            (
-            new FilteringEnumerable<ProjectElement, ProjectMetadataElement>(Children)
-            );
+        public ICollection<ProjectMetadataElement> Metadata => new ReadOnlyCollection<ProjectMetadataElement>(Children.OfType<ProjectMetadataElement>());
 
         /// <summary>
         /// Location of the include attribute
@@ -314,7 +289,7 @@ namespace Microsoft.Build.Construction
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
                 if (!_includeHasWildcards.HasValue)
                 {
-                    _includeHasWildcards = (Include == null) ? false : FileMatcher.HasWildcards(_include);
+                    _includeHasWildcards = (Include != null) && FileMatcher.HasWildcards(_include);
                 }
 
                 return _includeHasWildcards.Value;
@@ -362,12 +337,12 @@ namespace Microsoft.Build.Construction
         /// </param>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, "unevaluatedValue");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
 
             if (expressAsAttribute)
             {
-                ProjectMetadataElement.ValidateValidMetadataAsAttributeName(name, this.ElementName, this.Location);
+                ProjectMetadataElement.ValidateValidMetadataAsAttributeName(name, ElementName, Location);
             }
 
             ProjectMetadataElement metadata = ContainingProject.CreateMetadataElement(name);
@@ -398,7 +373,7 @@ namespace Microsoft.Build.Construction
         internal static ProjectItemElement CreateDisconnected(string itemType, ProjectRootElement containingProject)
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(itemType);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[itemType] == null, "CannotModifyReservedItem", itemType);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(itemType), "CannotModifyReservedItem", itemType);
 
             XmlElementWithLocation element = containingProject.CreateElement(itemType);
 
@@ -415,13 +390,13 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeItemType(string newItemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newItemType, "itemType");
+            ErrorUtilities.VerifyThrowArgumentLength(newItemType, nameof(newItemType));
             XmlUtilities.VerifyThrowArgumentValidElementName(newItemType);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newItemType] == null, "CannotModifyReservedItem", newItemType);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newItemType), "CannotModifyReservedItem", newItemType);
 
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
-            XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newItemType, XmlElement.NamespaceURI);
+            XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, newItemType, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
         }
@@ -447,8 +422,7 @@ namespace Microsoft.Build.Construction
             {
                 // This is our indication that we just got attached to a parent
                 // Update its children-with-wildcards flag
-                ProjectItemGroupElement groupParent = parent as ProjectItemGroupElement;
-                if (groupParent != null && groupParent.DefinitelyAreNoChildrenWithWildcards && IncludeHasWildcards)
+                if (parent is ProjectItemGroupElement groupParent && groupParent.DefinitelyAreNoChildrenWithWildcards && IncludeHasWildcards)
                 {
                     groupParent.DefinitelyAreNoChildrenWithWildcards = false;
                 }
@@ -458,7 +432,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateItemElement(this.ItemType, this.Include);
+            return owner.CreateItemElement(ItemType, Include);
         }
 
         /// <summary>

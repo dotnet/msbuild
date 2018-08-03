@@ -481,13 +481,7 @@ namespace Microsoft.Build.Framework
         {
             if (parentProjectBuildEventContext == null)
             {
-                parentProjectBuildEventContext = new BuildEventContext
-                                                (
-                                                    BuildEventContext.InvalidNodeId,
-                                                    BuildEventContext.InvalidTargetId,
-                                                    BuildEventContext.InvalidProjectContextId,
-                                                    BuildEventContext.InvalidTaskId
-                                                 );
+                parentProjectBuildEventContext = BuildEventContext.Invalid;
             }
         }
         #endregion

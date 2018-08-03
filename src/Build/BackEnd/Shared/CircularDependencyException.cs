@@ -1,15 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The exception which gets thrown if a circular dependency is indicated by the BuildManager.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.Serialization;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -27,7 +20,6 @@ namespace Microsoft.Build.BackEnd
         /// Constructs a standard BuildAbortedException.
         /// </summary>
         internal CircularDependencyException()
-            : base()
         {
         }
 

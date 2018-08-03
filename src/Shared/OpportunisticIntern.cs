@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Selectively intern strings.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 #if !CLR2COMPATIBILITY
@@ -21,7 +17,6 @@ using MSBuildConstants = Microsoft.Build.Tasks.MSBuildConstants;
 #else
 using MSBuildConstants = Microsoft.Build.Shared.MSBuildConstants;
 #endif
-    
 
 namespace Microsoft.Build
 {
@@ -37,7 +32,7 @@ namespace Microsoft.Build
     /// The thresholds and sizes were determined by experimentation to give the best number of bytes saved
     /// at reasonable elapsed time cost.
     /// </summary>
-    static internal class OpportunisticIntern
+    internal static class OpportunisticIntern
     {
         private static readonly bool s_useSimpleConcurrency = Traits.Instance.UseSimpleInternConcurrency;
 
@@ -59,28 +54,28 @@ namespace Microsoft.Build
         /// <summary>
         /// The smallest size a string can be to be considered small.
         /// </summary>
-        private static readonly int s_smallMruThreshhold = AssignViaEnvironment("MSBUILDSMALLINTERNTHRESHOLD", 50);
+        private static readonly int s_smallMruThreshold = AssignViaEnvironment("MSBUILDSMALLINTERNTHRESHOLD", 50);
 
         /// <summary>
         /// The smallest size a string can be to be considered large.
         /// </summary>
-        private static readonly int s_largeMruThreshhold = AssignViaEnvironment("MSBUILDLARGEINTERNTHRESHOLD", 70);
+        private static readonly int s_largeMruThreshold = AssignViaEnvironment("MSBUILDLARGEINTERNTHRESHOLD", 70);
 
         /// <summary>
         /// The smallest size a string can be to be considered huge.
         /// </summary>
-        private static readonly int s_hugeMruThreshhold = AssignViaEnvironment("MSBUILDHUGEINTERNTHRESHOLD", 200);
+        private static readonly int s_hugeMruThreshold = AssignViaEnvironment("MSBUILDHUGEINTERNTHRESHOLD", 200);
 
         /// <summary>
         /// The smallest size a string can be to be ginormous.
         /// 8K for large object heap.
         /// </summary>
-        private static readonly int s_ginormousThreshhold = AssignViaEnvironment("MSBUILDGINORMOUSINTERNTHRESHOLD", 8000);
+        private static readonly int s_ginormousThreshold = AssignViaEnvironment("MSBUILDGINORMOUSINTERNTHRESHOLD", 8000);
 
         /// <summary>
         /// Manages the separate MRU lists.
         /// </summary>
-        private static BucketedPrioritizedStringList s_si = new BucketedPrioritizedStringList(/*gatherStatistics*/ false, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshhold, s_largeMruThreshhold, s_hugeMruThreshhold, s_ginormousThreshhold, s_useSimpleConcurrency);
+        private static BucketedPrioritizedStringList s_si = new BucketedPrioritizedStringList(/*gatherStatistics*/ false, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
 
         #region Statistics
         /// <summary>
@@ -118,10 +113,7 @@ namespace Microsoft.Build
             /// <summary>
             /// Indexer into the target. Presumed to be fast.
             /// </summary>
-            char this[int index]
-            {
-                get;
-            }
+            char this[int index] { get; }
 
             /// <summary>
             /// Convert target to string. Presumed to be slow (and will be called just once).
@@ -143,13 +135,12 @@ namespace Microsoft.Build
         /// <summary>
         /// Assign an int from an environment variable. If its not present, use the default.
         /// </summary>
-        static internal int AssignViaEnvironment(string env, int @default)
+        internal static int AssignViaEnvironment(string env, int @default)
         {
-            string threshhold = Environment.GetEnvironmentVariable(env);
-            if (!String.IsNullOrEmpty(threshhold))
+            string threshold = Environment.GetEnvironmentVariable(env);
+            if (!string.IsNullOrEmpty(threshold))
             {
-                int result;
-                if (Int32.TryParse(threshhold, out result))
+                if (int.TryParse(threshold, out int result))
                 {
                     return result;
                 }
@@ -164,11 +155,11 @@ namespace Microsoft.Build
         internal static void EnableStatisticsGathering()
         {
             // Statistics include several 'what if' scenarios such as doubling the size of the MRU lists.
-            s_si = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshhold, s_largeMruThreshhold, s_hugeMruThreshhold, s_ginormousThreshhold, s_useSimpleConcurrency);
-            s_whatIfInfinite = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, Int32.MaxValue, Int32.MaxValue, Int32.MaxValue, s_smallMruThreshhold, s_largeMruThreshhold, s_hugeMruThreshhold, s_ginormousThreshhold, s_useSimpleConcurrency);
-            s_whatIfDoubled = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize * 2, s_largeMruSize * 2, s_hugeMruSize * 2, s_smallMruThreshhold, s_largeMruThreshhold, s_hugeMruThreshhold, s_ginormousThreshhold, s_useSimpleConcurrency);
-            s_whatIfHalved = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize / 2, s_largeMruSize / 2, s_hugeMruSize / 2, s_smallMruThreshhold, s_largeMruThreshhold, s_hugeMruThreshhold, s_ginormousThreshhold, s_useSimpleConcurrency);
-            s_whatIfZero = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, 0, 0, 0, s_smallMruThreshhold, s_largeMruThreshhold, s_hugeMruThreshhold, s_ginormousThreshhold, s_useSimpleConcurrency);
+            s_si = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize, s_largeMruSize, s_hugeMruSize, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
+            s_whatIfInfinite = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, int.MaxValue, int.MaxValue, int.MaxValue, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
+            s_whatIfDoubled = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize * 2, s_largeMruSize * 2, s_hugeMruSize * 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
+            s_whatIfHalved = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, s_smallMruSize / 2, s_largeMruSize / 2, s_hugeMruSize / 2, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
+            s_whatIfZero = new BucketedPrioritizedStringList(/*gatherStatistics*/ true, 0, 0, 0, s_smallMruThreshold, s_largeMruThreshold, s_hugeMruThreshold, s_ginormousThreshold, s_useSimpleConcurrency);
         }
 
         /// <summary>
@@ -252,7 +243,7 @@ namespace Microsoft.Build
             /// <summary>
             /// The held StringBuilder
             /// </summary>
-            private StringBuilder _target;
+            private readonly StringBuilder _target;
 
             /// <summary>
             /// Pointless comment about constructor.
@@ -265,32 +256,17 @@ namespace Microsoft.Build
             /// <summary>
             /// The length of the target.
             /// </summary>
-            public int Length
-            {
-                get
-                {
-                    return _target.Length;
-                }
-            }
+            public int Length => _target.Length;
 
             /// <summary>
             /// Indexer into the target. Presumed to be fast.
             /// </summary>
-            public char this[int index]
-            {
-                get
-                {
-                    return _target[index];
-                }
-            }
+            public char this[int index] => _target[index];
 
             /// <summary>
             /// Never reference equals to string.
             /// </summary>
-            public bool ReferenceEquals(string other)
-            {
-                return false;
-            }
+            public bool ReferenceEquals(string other) => false;
 
             /// <summary>
             /// Convert target to string. Presumed to be slow (and will be called just once).
@@ -329,10 +305,7 @@ namespace Microsoft.Build
             /// <summary>
             /// Don't use this function. Use ExpensiveConvertToString
             /// </summary>
-            public override string ToString()
-            {
-                throw new InvalidOperationException();
-            }
+            public override string ToString() => throw new InvalidOperationException();
         }
 
         /// <summary>
@@ -343,17 +316,12 @@ namespace Microsoft.Build
             /// <summary>
             /// Start index for the string
             /// </summary>
-            private int _startIndex;
-
-            /// <summary>
-            /// Number of characters.
-            /// </summary>
-            private int _count;
+            private readonly int _startIndex;
 
             /// <summary>
             /// The held array
             /// </summary>
-            private char[] _target;
+            private readonly char[] _target;
 
             /// <summary>
             /// Pointless comment about constructor.
@@ -376,19 +344,13 @@ namespace Microsoft.Build
 #endif
                 _target = target;
                 _startIndex = startIndex;
-                _count = count;
+                Length = count;
             }
 
             /// <summary>
             /// The length of the target.
             /// </summary>
-            public int Length
-            {
-                get
-                {
-                    return _count;
-                }
-            }
+            public int Length { get; }
 
             /// <summary>
             /// Indexer into the target. Presumed to be fast.
@@ -397,7 +359,7 @@ namespace Microsoft.Build
             {
                 get
                 {
-                    if (index > _startIndex + _count - 1 || index < 0)
+                    if (index > _startIndex + Length - 1 || index < 0)
                     {
                         ErrorUtilities.ThrowInternalError("past end");
                     }
@@ -422,7 +384,7 @@ namespace Microsoft.Build
                 // PERF NOTE: This will be an allocation hot-spot because the char[] is finally determined to
                 // not be internable. There is still only one conversion of char[] into string it has just
                 // moved into this single spot.
-                return new String(_target, _startIndex, _count);
+                return new string(_target, _startIndex, Length);
             }
 
             /// <summary>
@@ -431,11 +393,11 @@ namespace Microsoft.Build
             public bool IsOrdinalEqualToStringOfSameLength(string other)
             {
 #if DEBUG
-                ErrorUtilities.VerifyThrow(other.Length == this.Length, "should be same length");
+                ErrorUtilities.VerifyThrow(other.Length == Length, "should be same length");
 #endif
                 // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
                 // For example, C:\project1, C:\project2
-                for (int i = _count - 1; i >= 0; --i)
+                for (int i = Length - 1; i >= 0; --i)
                 {
                     if (_target[i + _startIndex] != other[i])
                     {
@@ -463,7 +425,7 @@ namespace Microsoft.Build
             /// <summary>
             /// Stores the wrapped string.
             /// </summary>
-            private string _target;
+            private readonly string _target;
 
             /// <summary>
             /// Constructor of the class
@@ -471,56 +433,41 @@ namespace Microsoft.Build
             /// <param name="target">The string to wrap</param>
             internal StringInternTarget(string target)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(target, "target");
+                ErrorUtilities.VerifyThrowArgumentLength(target, nameof(target));
                 _target = target;
             }
 
             /// <summary>
             /// Gets the length of the target string.
             /// </summary>
-            public int Length
-            {
-                get { return _target.Length; }
-            }
+            public int Length => _target.Length;
 
             /// <summary>
             /// Gets the n character in the target string.
             /// </summary>
             /// <param name="index">Index of the character to gather.</param>
             /// <returns>The character in the position marked by index.</returns>
-            public char this[int index]
-            {
-                get { return _target[index]; }
-            }
+            public char this[int index] => _target[index];
 
             /// <summary>
             /// Returns the target which is already a string.
             /// </summary>
             /// <returns>The target string.</returns>
-            public string ExpensiveConvertToString()
-            {
-                return _target;
-            }
+            public string ExpensiveConvertToString() => _target;
 
             /// <summary>
             /// Compare if the target string is equal to the given string.
             /// </summary>
             /// <param name="other">The string to compare with the target.</param>
             /// <returns>True if the strings are equal, false otherwise.</returns>
-            public bool IsOrdinalEqualToStringOfSameLength(string other)
-            {
-                return _target.Equals(other, StringComparison.Ordinal);
-            }
+            public bool IsOrdinalEqualToStringOfSameLength(string other) => _target.Equals(other, StringComparison.Ordinal);
 
             /// <summary>
             /// Verifies if the reference of the target string is the same of the given string.
             /// </summary>
             /// <param name="other">The string reference to compare to.</param>
             /// <returns>True if both references are equal, false otherwise.</returns>
-            public bool ReferenceEquals(string other)
-            {
-                return Object.ReferenceEquals(_target, other);
-            }
+            public bool ReferenceEquals(string other) => ReferenceEquals(_target, other);
         }
 
         #endregion
@@ -533,54 +480,54 @@ namespace Microsoft.Build
             /// <summary>
             /// The small string Mru list.
             /// </summary>
-            private PrioritizedStringList _smallMru;
+            private readonly PrioritizedStringList _smallMru;
 
             /// <summary>
             /// The large string Mru list.
             /// </summary>
-            private PrioritizedStringList _largeMru;
+            private readonly PrioritizedStringList _largeMru;
 
             /// <summary>
             /// The huge string Mru list.
             /// </summary>
-            private PrioritizedStringList _hugeMru;
+            private readonly PrioritizedStringList _hugeMru;
 
             /// <summary>
             /// Three most recently used strings over 8K.
             /// </summary>
-            private LinkedList<WeakReference> _ginormous = new LinkedList<WeakReference>();
+            private readonly LinkedList<WeakReference> _ginormous = new LinkedList<WeakReference>();
 
             /// <summary>
             /// The smallest size a string can be to be considered small.
             /// </summary>
-            private int _smallMruThreshhold;
+            private readonly int _smallMruThreshold;
 
             /// <summary>
             /// The smallest size a string can be to be considered large.
             /// </summary>
-            private int _largeMruThreshhold;
+            private readonly int _largeMruThreshold;
 
             /// <summary>
             /// The smallest size a string can be to be considered huge.
             /// </summary>
-            private int _hugeMruThreshhold;
+            private readonly int _hugeMruThreshold;
 
             /// <summary>
             /// The smallest size a string can be to be ginormous.
             /// </summary>
-            private int _ginormousThreshhold;
+            private readonly int _ginormousThreshold;
 
             private readonly bool _useSimpleConcurrency;
 
 #if !CLR2COMPATIBILITY
-            private ConcurrentDictionary<string, string> _internedStrings = new ConcurrentDictionary<string, string>(StringComparer.Ordinal);
+            private readonly ConcurrentDictionary<string, string> _internedStrings = new ConcurrentDictionary<string, string>(StringComparer.Ordinal);
 #endif
 
             #region Statistics
             /// <summary>
             /// Whether or not to gather statistics
             /// </summary>
-            private bool _gatherStatistics = false;
+            private readonly bool _gatherStatistics;
 
             /// <summary>
             /// Number of times interning worked.
@@ -625,36 +572,36 @@ namespace Microsoft.Build
             /// <summary>
             /// Whether or not to track ginormous strings.
             /// </summary>
-            private bool _dontTrack;
+            private readonly bool _dontTrack;
 
             /// <summary>
             /// The time spent interning.
             /// </summary>
-            private Stopwatch _stopwatch;
+            private readonly Stopwatch _stopwatch;
 
             /// <summary>
             /// Strings which did not intern
             /// </summary>
-            private Dictionary<string, int> _missedStrings;
+            private readonly Dictionary<string, int> _missedStrings;
 
             /// <summary>
             /// Strings which we didn't attempt to intern
             /// </summary>
-            private Dictionary<string, int> _rejectedStrings;
+            private readonly Dictionary<string, int> _rejectedStrings;
 
             /// <summary>
             /// Number of ginormous strings to keep
             /// By observation of Auto7, there are about three variations of the huge solution config blob
             /// There aren't really any other strings of this size, but make it 10 to be sure. (There will barely be any misses)
             /// </summary>
-            private int _ginormousSize = 10;
+            private const int GinormousSize = 10;
 
             #endregion
 
             /// <summary>
             /// Construct.
             /// </summary>
-            internal BucketedPrioritizedStringList(bool gatherStatistics, int smallMruSize, int largeMruSize, int hugeMruSize, int smallMruThreshhold, int largeMruThreshhold, int hugeMruThreshhold, int ginormousThreshhold, bool useSimpleConcurrency)
+            internal BucketedPrioritizedStringList(bool gatherStatistics, int smallMruSize, int largeMruSize, int hugeMruSize, int smallMruThreshold, int largeMruThreshold, int hugeMruThreshold, int ginormousThreshold, bool useSimpleConcurrency)
             {
                 if (smallMruSize == 0 && largeMruSize == 0 && hugeMruSize == 0)
                 {
@@ -664,15 +611,15 @@ namespace Microsoft.Build
                 _smallMru = new PrioritizedStringList(smallMruSize);
                 _largeMru = new PrioritizedStringList(largeMruSize);
                 _hugeMru = new PrioritizedStringList(hugeMruSize);
-                _smallMruThreshhold = smallMruThreshhold;
-                _largeMruThreshhold = largeMruThreshhold;
-                _hugeMruThreshhold = hugeMruThreshhold;
-                _ginormousThreshhold = ginormousThreshhold;
+                _smallMruThreshold = smallMruThreshold;
+                _largeMruThreshold = largeMruThreshold;
+                _hugeMruThreshold = hugeMruThreshold;
+                _ginormousThreshold = ginormousThreshold;
                 _useSimpleConcurrency = useSimpleConcurrency;
 
-                for (int i = 0; i < _ginormousSize; i++)
+                for (int i = 0; i < GinormousSize; i++)
                 {
-                    _ginormous.AddFirst(new WeakReference(String.Empty));
+                    _ginormous.AddFirst(new WeakReference(string.Empty));
                 }
 
                 _gatherStatistics = gatherStatistics;
@@ -692,7 +639,7 @@ namespace Microsoft.Build
                 if (candidate.Length == 0)
                 {
                     // As in the case that a property or itemlist has evaluated to empty.
-                    return String.Empty;
+                    return string.Empty;
                 }
 
                 if (_gatherStatistics)
@@ -701,8 +648,7 @@ namespace Microsoft.Build
                 }
                 else
                 {
-                    string result;
-                    TryIntern(candidate, out result);
+                    TryIntern(candidate, out string result);
                     return result;
                 }
             }
@@ -713,10 +659,10 @@ namespace Microsoft.Build
             internal void ReportStatistics(string heading)
             {
                 string title = "Opportunistic Intern (" + heading + ")";
-                Console.WriteLine("\n{0}{1}{0}", new String('=', 41 - (title.Length / 2)), title);
+                Console.WriteLine("\n{0}{1}{0}", new string('=', 41 - (title.Length / 2)), title);
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Hits", _internHits, "hits");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Misses", _internMisses, "misses");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Rejects (as shorter than " + s_smallMruThreshhold + " bytes)", _internRejects, "rejects");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Intern Rejects (as shorter than " + s_smallMruThreshold + " bytes)", _internRejects, "rejects");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Strings*", _internEliminatedStrings, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Chars", _internEliminatedChars, "chars");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Estimated Eliminated Bytes", _internEliminatedChars * 2, "bytes");
@@ -724,47 +670,47 @@ namespace Microsoft.Build
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 KeyValuePair<int, int> held = _smallMru.Statistics();
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings MRU Size", s_smallMruSize, "strings");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings (>=" + _smallMruThreshhold + " chars) Held", held.Key, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Strings (>=" + _smallMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Small Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 held = _largeMru.Statistics();
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings MRU Size", s_largeMruSize, "strings");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings  (>=" + _largeMruThreshhold + " chars) Held", held.Key, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Strings  (>=" + _largeMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Large Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
                 held = _hugeMru.Statistics();
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings MRU Size", s_hugeMruSize, "strings");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings  (>=" + _hugeMruThreshhold + " chars) Held", held.Key, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Strings  (>=" + _hugeMruThreshold + " chars) Held", held.Key, "strings");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Huge Estimated Bytes Held", held.Value * 2, "bytes");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Ginormous Strings MRU Size", _ginormousSize, "strings");
-                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Ginormous (>=" + _ginormousThreshhold + " chars)  Hits", _ginormousHits, "hits");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Ginormous Strings MRU Size", GinormousSize, "strings");
+                Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Ginormous (>=" + _ginormousThreshold + " chars)  Hits", _ginormousHits, "hits");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Ginormous Misses", _ginormousMisses, "misses");
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Ginormous Chars Saved", _ginormousCharsSaved, "chars");
                 Console.WriteLine("|---------------------------------------------------------------------------------|");
 
                 // There's no point in reporting the ginormous string because it will have evaporated by now.
                 Console.WriteLine("||{0,50}|{1,20:N0}|{2,8}|", "Time Spent Interning", _stopwatch.ElapsedMilliseconds, "ms");
-                Console.WriteLine("{0}{0}", new String('=', 41));
+                Console.WriteLine("{0}{0}", new string('=', 41));
 
-                var topMissingString =
+                IEnumerable<string> topMissingString =
                     _missedStrings
                     .OrderByDescending(kv => kv.Value * kv.Key.Length)
                     .Take(15)
                     .Where(kv => kv.Value > 1)
-                    .Select(kv => String.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
+                    .Select(kv => string.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
 
-                Console.WriteLine("##########Top Missed Strings:  \n{0} ", String.Join("\n==============\n", topMissingString.ToArray()));
+                Console.WriteLine("##########Top Missed Strings:  \n{0} ", string.Join("\n==============\n", topMissingString.ToArray()));
                 Console.WriteLine();
 
-                var topRejectedString =
+                IEnumerable<string> topRejectedString =
                     _rejectedStrings
                     .OrderByDescending(kv => kv.Value * kv.Key.Length)
                     .Take(15)
                     .Where(kv => kv.Value > 1)
-                    .Select(kv => String.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
+                    .Select(kv => string.Format(CultureInfo.InvariantCulture, "({1} instances x each {2} chars = {3}KB wasted)\n{0}", kv.Key, kv.Value, kv.Key.Length, (kv.Value - 1) * kv.Key.Length * 2 / 1024));
 
-                Console.WriteLine("##########Top Rejected Strings: \n{0} ", String.Join("\n==============\n", topRejectedString.ToArray()));
+                Console.WriteLine("##########Top Rejected Strings: \n{0} ", string.Join("\n==============\n", topRejectedString.ToArray()));
             }
 
             /// <summary>
@@ -949,7 +895,7 @@ namespace Microsoft.Build
                             }
                         }
                     }
-                    else if (length > _ginormousThreshhold)
+                    else if (length > _ginormousThreshold)
                     {
                         lock (_ginormous)
                         {
@@ -957,8 +903,7 @@ namespace Microsoft.Build
 
                             while (current != null)
                             {
-                                string last = current.Value.Target as string;
-                                if (last != null && last.Length == candidate.Length && candidate.IsOrdinalEqualToStringOfSameLength(last))
+                                if (current.Value.Target is string last && last.Length == candidate.Length && candidate.IsOrdinalEqualToStringOfSameLength(last))
                                 {
                                     interned = last;
                                     _ginormousHits++;
@@ -976,7 +921,7 @@ namespace Microsoft.Build
                             _ginormousMisses++;
                             interned = candidate.ExpensiveConvertToString();
 
-                            var lastNode = _ginormous.Last;
+                            LinkedListNode<WeakReference> lastNode = _ginormous.Last;
                             _ginormous.RemoveLast();
                             _ginormous.AddFirst(lastNode);
                             lastNode.Value.Target = interned;
@@ -992,21 +937,21 @@ namespace Microsoft.Build
                         return true;
                     }
 #endif
-                    else if (length >= _hugeMruThreshhold)
+                    else if (length >= _hugeMruThreshold)
                     {
                         lock (_hugeMru)
                         {
                             return _hugeMru.TryGet(candidate, out interned);
                         }
                     }
-                    else if (length >= _largeMruThreshhold)
+                    else if (length >= _largeMruThreshold)
                     {
                         lock (_largeMru)
                         {
                             return _largeMru.TryGet(candidate, out interned);
                         }
                     }
-                    else if (length >= _smallMruThreshhold)
+                    else if (length >= _smallMruThreshold)
                     {
                         lock (_smallMru)
                         {
@@ -1024,9 +969,8 @@ namespace Microsoft.Build
             /// </summary>
             private string InternWithStatistics(IInternable candidate)
             {
-                string result;
                 _stopwatch.Start();
-                bool? interned = TryIntern(candidate, out result);
+                bool? interned = TryIntern(candidate, out string result);
                 _stopwatch.Stop();
 
                 if (interned.HasValue && !interned.Value)
@@ -1034,8 +978,7 @@ namespace Microsoft.Build
                     // Could not intern.
                     _internMisses++;
 
-                    int priorCount = 0;
-                    _missedStrings.TryGetValue(result, out priorCount);
+                    _missedStrings.TryGetValue(result, out int priorCount);
                     _missedStrings[result] = priorCount + 1;
 
                     return result;
@@ -1045,8 +988,7 @@ namespace Microsoft.Build
                     // Decided not to attempt interning
                     _internRejects++;
 
-                    int priorCount = 0;
-                    _rejectedStrings.TryGetValue(result, out priorCount);
+                    _rejectedStrings.TryGetValue(result, out int priorCount);
                     _rejectedStrings[result] = priorCount + 1;
 
                     return result;
@@ -1158,8 +1100,7 @@ namespace Microsoft.Build
                     {
                         // Not found. Create a new entry and place it at the top.
                         Node old = _mru;
-                        _mru = new Node(candidate.ExpensiveConvertToString());
-                        _mru.Next = old;
+                        _mru = new Node(candidate.ExpensiveConvertToString()) { Next = old };
 
                         // Cache miss. Use this opportunity to discard any element over the max size.
                         if (itemCount >= _size && secondPrior != null)
@@ -1211,7 +1152,7 @@ namespace Microsoft.Build
                     /// <summary>
                     /// The held string.
                     /// </summary>
-                    internal string Value { get; private set; }
+                    internal string Value { get; }
                 }
             }
         }

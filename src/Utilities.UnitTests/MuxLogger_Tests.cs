@@ -1,23 +1,17 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for the MuxLogger.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
 using System.Threading;
 using System.Xml;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.UnitTests;
-
-using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
-using Xunit;
 using Microsoft.Build.Framework;
+using Microsoft.Build.UnitTests;
 using Shouldly;
+using Xunit;
+using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
 
 namespace Microsoft.VisualStudio.Build.UnitTest
 {
@@ -347,7 +341,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             /// <summary>
             /// The event to signal.
             /// </summary>
-            private AutoResetEvent _projectStartedEvent;
+            private readonly AutoResetEvent _projectStartedEvent;
 
             /// <summary>
             /// Constructor.
@@ -357,21 +351,13 @@ namespace Microsoft.VisualStudio.Build.UnitTest
                 _projectStartedEvent = projectStartedEvent;
             }
 
-            #region ILogger Members
-
             /// <summary>
             /// Verbosity accessor.
             /// </summary>
             public LoggerVerbosity Verbosity
             {
-                get
-                {
-                    return LoggerVerbosity.Normal;
-                }
-
-                set
-                {
-                }
+                get => LoggerVerbosity.Normal;
+                set { }
             }
 
             /// <summary>
@@ -379,14 +365,8 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             /// </summary>
             public string Parameters
             {
-                get
-                {
-                    return null;
-                }
-
-                set
-                {
-                }
+                get => null;
+                set { }
             }
 
             /// <summary>
@@ -395,27 +375,19 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             public void Initialize(IEventSource eventSource)
             {
                 _eventSource = eventSource;
-                _eventHandler = new ProjectStartedEventHandler(ProjectStarted);
+                _eventHandler = ProjectStarted;
                 _eventSource.ProjectStarted += _eventHandler;
             }
 
             /// <summary>
             /// Shut down the logger.
             /// </summary>
-            public void Shutdown()
-            {
-                _eventSource.ProjectStarted -= _eventHandler;
-            }
+            public void Shutdown() => _eventSource.ProjectStarted -= _eventHandler;
 
             /// <summary>
             /// Event handler which signals the event.
             /// </summary>
-            private void ProjectStarted(object sender, ProjectStartedEventArgs e)
-            {
-                _projectStartedEvent.Set();
-            }
-
-            #endregion
+            private void ProjectStarted(object sender, ProjectStartedEventArgs e) => _projectStartedEvent.Set();
         }
     }
 }

@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
@@ -22,19 +22,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task logging helper
         /// </summary>
-        private TaskLoggingHelper _logHelper = null;
-
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public CallTarget()
-        {
-        }
+        private TaskLoggingHelper _logHelper;
 
         #region Properties
 
         // outputs of all built targets
-        private readonly ArrayList _targetOutputs = new ArrayList();
+        private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
         /// <summary>
         /// A list of targets to build.  This is a required parameter.  If you want to build the 
@@ -48,13 +41,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <value>Array of output items.</value>
         [Output]
-        public ITaskItem[] TargetOutputs
-        {
-            get
-            {
-                return (ITaskItem[])_targetOutputs.ToArray(typeof(ITaskItem));
-            }
-        }
+        public ITaskItem[] TargetOutputs => _targetOutputs.ToArray();
 
         /// <summary>
         /// When this is true, instead of calling the engine once to build all the targets (for each project),
@@ -74,35 +61,18 @@ namespace Microsoft.Build.BackEnd
 
         #region ITask Members
 
-        public IBuildEngine BuildEngine
-        {
-            get;
-            set;
-        }
+        public IBuildEngine BuildEngine { get; set; }
 
-        public IBuildEngine2 BuildEngine2
-        {
-            get { return (IBuildEngine2)BuildEngine; }
-        }
+        public IBuildEngine2 BuildEngine2 => (IBuildEngine2)BuildEngine;
 
-        public IBuildEngine3 BuildEngine3
-        {
-            get { return (IBuildEngine3)BuildEngine; }
-        }
+        public IBuildEngine3 BuildEngine3 => (IBuildEngine3)BuildEngine;
 
         /// <summary>
         /// The host object, from ITask
         /// </summary>
-        public ITaskHost HostObject
-        {
-            get;
-            set;
-        }
+        public ITaskHost HostObject { get; set; }
 
-        public TaskLoggingHelper Log
-        {
-            get { return _logHelper ?? (_logHelper = new TaskLoggingHelper(this)); }
-        }
+        public TaskLoggingHelper Log => _logHelper ?? (_logHelper = new TaskLoggingHelper(this));
 
         public bool Execute()
         {
@@ -125,9 +95,9 @@ namespace Microsoft.Build.BackEnd
             // string[] represents a set of target names to build.  Depending on the value 
             // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
             // the targets together, or we call the engine separately for each target.
-            ArrayList targetLists = MSBuild.CreateTargetLists(this.Targets, this.RunEachTargetSeparately);
+            List<string[]> targetLists = MSBuild.CreateTargetLists(Targets, RunEachTargetSeparately);
 
-            ITaskItem[] singleProject = new ITaskItem[1];
+            var singleProject = new ITaskItem[1];
             singleProject[0] = null;
 
             // Build the specified targets in the current project.

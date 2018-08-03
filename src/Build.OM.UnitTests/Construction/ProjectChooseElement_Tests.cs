@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for the ProjectChooseElement class (and for ProjectWhenElement and ProjectOtherwiseElement).</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

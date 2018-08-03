@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Enumerable that converts each entry as it is retrieved.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -22,12 +18,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Enumerable behind this one
         /// </summary>
-        private IEnumerable<TFrom> _backingEnumerable;
+        private readonly IEnumerable<TFrom> _backingEnumerable;
 
         /// <summary>
         /// Converter delegate used on each item in the backing enumerable as it is returned
         /// </summary>
-        private Func<TFrom, TTo> _converter;
+        private readonly Func<TFrom, TTo> _converter;
 
         /// <summary>
         /// Constructor
@@ -65,12 +61,12 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// Enumerator behind this one
             /// </summary>
-            private IEnumerator<TFrom2> _backingEnumerator;
+            private readonly IEnumerator<TFrom2> _backingEnumerator;
 
             /// <summary>
             /// Converter delegate used on each item in the backing enumerator as it is returned
             /// </summary>
-            private Func<TFrom2, TTo2> _converter;
+            private readonly Func<TFrom2, TTo2> _converter;
 
             /// <summary>
             /// Constructor
@@ -97,13 +93,7 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// Get the current element, converted
             /// </summary>
-            Object IEnumerator.Current
-            {
-                get
-                {
-                    return Current;
-                }
-            }
+            Object IEnumerator.Current => Current;
 
             /// <summary>
             /// Move to the next element

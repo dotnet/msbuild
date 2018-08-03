@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The object tasks use to interact with the rest of the build system.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

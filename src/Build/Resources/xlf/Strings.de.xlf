@@ -8,6 +8,11 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
+      <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
+        <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
+        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <note>{StrBegin="MSB4249: "}</note>
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: Fehler beim Abrufen der Attribute für Parameter in der {0}-Aufgabe. {1}</target>
@@ -24,6 +29,18 @@
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">Der Vorgang kann nicht abgeschlossen werden, da bereits ein Buildvorgang stattfindet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandItemMetadata">
+        <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
+        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+    %(RootDir) to an item-spec that's not a valid path would result in this error.
+    LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
+      </trans-unit>
+      <trans-unit id="MetaprojectGenerated">
+        <source>Metaproject "{0}" generated.</source>
+        <target state="new">Metaproject "{0}" generated.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -174,7 +191,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Herunterfahren. Diagnoseinformationen finden Sie in den Dateien namens "MSBuild_*.failure.txt" unter "{1}". Dieser Speicherort kann geändert werden, indem Sie die Umgebungsvariable MSBUILDDEBUGPATH auf ein anderes Verzeichnis festlegen.</target>
+        <target state="translated">MSB4166: Der untergeordnete Knoten "{0}" wurde vorzeitig beendet. Vorgang zum Herunterfahren wird durchgeführt. Diagnoseinformationen finden Sie in den Dateien namens "MSBuild_*.failure.txt" unter "{1}". Dieser Speicherort kann geändert werden, indem Sie die Umgebungsvariable MSBUILDDEBUGPATH auf ein anderes Verzeichnis festlegen.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -221,7 +238,7 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: MSBuildToolsPath ist nicht identisch mit MSBuildBinPath für die bei "{1}" definierte ToolsVersion "{0}". Falls beide vorhanden sind, müssen sie den identischen Wert haben.</target>
+        <target state="translated">MSB4142: MSBuildToolsPath ist nicht identisch mit MSBuildBinPath für die bei "{1}" definierte ToolsVersion {0}. Wenn beide Pfade vorhanden sind, müssen sie identische Werte haben.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
@@ -806,7 +823,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: Der Standard-XML-Namespace des Projekts muss entweder der MSBuild-XML-Namespace oder kein Namespace sein. Wenn das Projekt im MSBuild 2003-Format erstellt wurde, fügen Sie dem &lt;Project&gt;-Element xmlns="{0}" hinzu. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
+        <target state="translated">MSB4041: Der Standard-XML-Namespace des Projekts muss entweder der MSBuild-XML-Namespace sein, oder es wird kein Namespace festgelegt. Wenn das Projekt im MSBuild 2003-Format erstellt wurde, fügen Sie dem &lt;Project&gt;-Element xmlns="{0}" hinzu. Wenn das Projekt im alten Format 1.0 oder 1.2 erstellt wurde, konvertieren Sie es in das MSBuild 2003-Format.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1943,12 +1960,12 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: Der Wert "{0}" ist für eine SDK-Spezifikation ungültig. Das Attribut muss eine durch Semikolons getrennte Liste der Paare SDK-Name/Mindestversion (durch Schrägstrich getrennt) sein.</target>
+        <target state="translated">MSB4229: Der Wert "{0}" ist für eine SDK-Spezifikation nicht gültig. Das Attribut muss eine durch Semikolons getrennte Liste der Paare SDK-Name/Mindestversion (durch Schrägstrich getrennt) sein.</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: Die {0}-Aufgabe konnte nicht aus "{1}" instanziiert werden. Diese Version von MSBuild bietet keine Unterstützung für "{2}".</target>
+        <target state="translated">MSB4802: Die Aufgabe "{0}" konnte von "{1}" nicht instanziiert werden. MSBuild unterstützt {2} nicht.</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -1983,7 +2000,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: Ungültige binäre Protokollierungsparameter: {0}. Erwartet: ProjectImports={{None,Embed,ZipFile}} und/oder [LogFile=]filePath.binlog (der Protokolldateiname oder -pfad, muss die Erweiterung ".binlog" aufweisen).</target>
+        <target state="translated">MSB4234: Ungültige binäre Protokollierungsparameter: "{0}". Erwartet: ProjectImports={{None,Embed,ZipFile}} und/oder [LogFile=]filePath.binlog (der Protokolldateiname oder -pfad, muss die Erweiterung ".binlog" aufweisen).</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2068,7 +2085,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: Der NuGet-basierte SDK-Resolver konnte nicht ausgeführt werden, weil NuGet-Assemblys nicht gefunden wurden.  Prüfen Sie Ihre Installation von MSBuild, oder legen Sie die Umgebungsvariable "{0}" auf den Ordner fest, der die erforderlichen NuGet-Assemblys enthält. {1}</target>
+        <target state="translated">MSB4243: Fehler beim NuGet-basierten SDK-Resolver, weil die NuGet-Assemblys nicht gefunden wurden. Überprüfen Sie Ihre Installation von MSBuild, oder legen Sie die Umgebungsvariable "{0}" auf den Ordner fest, der die erforderlichen NuGet-Assemblys enthält. {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2105,7 +2122,7 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: Der SDK-Verweis "{0}", Version "{1}", wurde stattdessen in Version "{2}" aufgelöst.  Möglicherweise verwenden Sie eine andere Version als die erwartete, wenn Sie die referenzierte Version nicht entsprechend aktualisieren.</target>
+        <target state="translated">MSB4241: Der SDK-Verweis "{0}" auf Version "{1}" wurde stattdessen in Version "{2}" aufgelöst. Sie könnten eine andere Version als die erwartete verwenden, wenn Sie die referenzierte Version nicht entsprechend aktualisieren.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2116,6 +2133,21 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
+      </trans-unit>
+      <trans-unit id="SdkResolverManifestInvalid">
+        <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
+        <target state="translated">MSB4245: Die SDK-Resolvermanifestdatei ist ungültig. Dies kann auf eine beschädigte oder ungültige MSBuild-Installation hinweisen. Manifestdateipfad: {0}. Meldung: {1}</target>
+        <note>{StrBegin="MSB4245: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverNoDllOrManifest">
+        <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
+        <target state="translated">MSB4246: Der SDK-Resolverordner ist vorhanden, enthält jedoch keine SDK-Resolver-DLL- oder Manifestdatei. Dies kann auf eine beschädigte oder ungültige MSBuild-Installation hinweisen. SDK-Resolverpfad: {0}</target>
+        <note>{StrBegin="MSB4246: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverDllInManifestMissing">
+        <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
+        <target state="translated">MSB4247: Der SDK-Resolver konnte nicht geladen werden. Eine Manifestdatei ist vorhanden, aber der Pfad zur SDK-Resolver-DLL-Datei wurde nicht gefunden. Manifestdateipfad: {0}. SDK-Resolverpfad: {1}</target>
+        <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>
   </file>

@@ -3,12 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Diagnostics;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -19,8 +13,10 @@ namespace Microsoft.Build.Tasks
     /// an earlier revision of a COM component, its timestamp can go back in time and we still need to regenerate its
     /// wrapper. So in ResolveComReference we compare the stored timestamp with the current component timestamp, and if 
     /// they are different, we regenerate the wrapper.
+    /// 
+    /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    [Serializable()]
+    [Serializable]
     internal sealed class ResolveComReferenceCache : StateFileBase
     {
         /// <summary>
@@ -28,29 +24,25 @@ namespace Microsoft.Build.Tasks
         /// Key: Component path on disk
         /// Value: DateTime struct
         /// </summary>
-        private Hashtable componentTimestamps = null;
-        private string tlbImpLocation = null;
-        private string axImpLocation = null;
+        private Hashtable componentTimestamps;
+        private string tlbImpLocation;
+        private string axImpLocation;
 
         /// <summary>
         /// indicates whether the cache contents have changed since it's been created
         /// </summary>
-        internal bool Dirty
-        {
-            get { return dirty; }
-        }
-
-
+        internal bool Dirty => _dirty;
+        
         [NonSerialized]
-        private bool dirty;
+        private bool _dirty;
 
         /// <summary>
         /// Construct.
         /// </summary>
         internal ResolveComReferenceCache(string tlbImpPath, string axImpPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath, "tlbImpPath");
-            ErrorUtilities.VerifyThrowArgumentNull(axImpPath, "axImpPath");
+            ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath, nameof(tlbImpPath));
+            ErrorUtilities.VerifyThrowArgumentNull(axImpPath, nameof(axImpPath));
 
             tlbImpLocation = tlbImpPath;
             axImpLocation = axImpPath;
@@ -64,7 +56,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if both paths match what is in the cache, false otherwise</returns>
         internal bool ToolPathsMatchCachePaths(string tlbImpPath, string axImpPath)
         {
-            return (String.Equals(tlbImpLocation, tlbImpPath, StringComparison.OrdinalIgnoreCase)) && (String.Equals(axImpLocation, axImpPath, StringComparison.OrdinalIgnoreCase));
+            return String.Equals(tlbImpLocation, tlbImpPath, StringComparison.OrdinalIgnoreCase) &&
+                String.Equals(axImpLocation, axImpPath, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -80,12 +73,10 @@ namespace Microsoft.Build.Tasks
                 {
                     return (DateTime)componentTimestamps[componentPath];
                 }
-                else
-                {
-                    // If the entry is not present in the cache, return the current time. Since no component should be timestamped
-                    // with the current time, this will effectively always regenerate the wrapper.
-                    return DateTime.Now;
-                }
+
+                // If the entry is not present in the cache, return the current time. Since no component should be timestamped
+                // with the current time, this will effectively always regenerate the wrapper.
+                return DateTime.Now;
             }
             set
             {
@@ -93,7 +84,7 @@ namespace Microsoft.Build.Tasks
                 if (DateTime.Compare(this[componentPath], value) != 0)
                 {
                     componentTimestamps[componentPath] = value;
-                    dirty = true;
+                    _dirty = true;
                 }
             }
         }

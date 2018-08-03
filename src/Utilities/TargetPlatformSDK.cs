@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Internal representation of a target platform</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -44,8 +40,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TargetPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier, "targetPlatformIdentifier");
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, "targetPlatformVersion");
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
             TargetPlatformIdentifier = targetPlatformIdentifier;
             TargetPlatformVersion = targetPlatformVersion;
             Path = path;
@@ -60,7 +56,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (_minVSVersion == null && Manifest != null && Manifest.MinVSVersion != null)
+                if (_minVSVersion == null && Manifest?.MinVSVersion != null)
                 {
                     if (!Version.TryParse(Manifest.MinVSVersion, out _minVSVersion))
                     {
@@ -79,7 +75,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (_minOSVersion == null && Manifest != null && Manifest.MinOSVersion != null)
+                if (_minOSVersion == null && Manifest?.MinOSVersion != null)
                 {
                     if (!Version.TryParse(Manifest.MinOSVersion, out _minOSVersion))
                     {
@@ -94,72 +90,36 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Target platform identifier
         /// </summary>
-        public string TargetPlatformIdentifier
-        {
-            get;
-            private set;
-        }
+        public string TargetPlatformIdentifier { get; }
 
         /// <summary>
         /// Target platform version
         /// </summary>
-        public Version TargetPlatformVersion
-        {
-            get;
-            private set;
-        }
+        public Version TargetPlatformVersion { get; }
 
         /// <summary>
         /// Path to target platform sdk if it exists, it may not if there is no target platform is installed
         /// </summary>
         public string Path
         {
-            get
-            {
-                return _path;
-            }
-
-            set
-            {
-                if (value != null)
-                {
-                    _path = FileUtilities.EnsureTrailingSlash(value);
-                }
-                else
-                {
-                    _path = null;
-                }
-            }
+            get => _path;
+            set => _path = value != null ? FileUtilities.EnsureTrailingSlash(value) : null;
         }
 
         /// <summary>
         /// The SDK's display name, or null if one is not defined. 
         /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                return Manifest != null ? Manifest.DisplayName : null;
-            }
-        }
+        public string DisplayName => Manifest?.DisplayName;
 
         /// <summary>
         /// Extension sdks within this platform, 
         /// </summary>
-        internal Dictionary<string, string> ExtensionSDKs
-        {
-            get;
-            private set;
-        }
+        internal Dictionary<string, string> ExtensionSDKs { get; }
 
         /// <summary>
         /// Set of platforms supported by this SDK. 
         /// </summary>
-        internal Dictionary<string, string> Platforms
-        {
-            get;
-            private set;
-        }
+        internal Dictionary<string, string> Platforms { get; }
 
         /// <summary>
         /// Reference to manifest object
@@ -182,23 +142,19 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Override GetHashCode
         /// </summary>
-        public override int GetHashCode()
-        {
-            return TargetPlatformIdentifier.ToLowerInvariant().GetHashCode() ^ TargetPlatformVersion.GetHashCode();
-        }
+        public override int GetHashCode() => TargetPlatformIdentifier.ToLowerInvariant().GetHashCode() ^ TargetPlatformVersion.GetHashCode();
 
         /// <summary>
         /// Override equals
         /// </summary>
         public override bool Equals(object obj)
         {
-            TargetPlatformSDK moniker = obj as TargetPlatformSDK;
-            if (moniker == null)
+            if (!(obj is TargetPlatformSDK moniker))
             {
                 return false;
             }
 
-            if (Object.ReferenceEquals(this, moniker))
+            if (ReferenceEquals(this, moniker))
             {
                 return true;
             }
@@ -231,9 +187,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Given an identifier and version, construct a string to use as a key for that combination. 
         /// </summary>
-        internal static string GetSdkKey(string sdkIdentifier, string sdkVersion)
-        {
-            return String.Format(CultureInfo.InvariantCulture, "{0}, Version={1}", sdkIdentifier, sdkVersion);
-        }
+        internal static string GetSdkKey(string sdkIdentifier, string sdkVersion) => string.Format(CultureInfo.InvariantCulture, "{0}, Version={1}", sdkIdentifier, sdkVersion);
     }
 }

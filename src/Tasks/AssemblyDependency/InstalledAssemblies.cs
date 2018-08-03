@@ -2,16 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Collections;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Reflection;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
 {
@@ -20,12 +13,11 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal class InstalledAssemblies
     {
-        private RedistList _redistList = null;
+        private readonly RedistList _redistList;
 
         /// <summary>
         /// Construct.
         /// </summary>
-        /// <param name="redistList"></param>
         internal InstalledAssemblies(RedistList redistList)
         {
             _redistList = redistList;
@@ -52,7 +44,6 @@ namespace Microsoft.Build.Tasks
             isPrerequisite = false;
             isRedistRoot = null;
             redistName = null;
-
 
             // Short-circuit in cases where there is no redist list.
             if (_redistList == null)
@@ -83,8 +74,6 @@ namespace Microsoft.Build.Tasks
                 isPrerequisite = _redistList.IsPrerequisiteAssembly(highestVersionFromRedistList.FullName);
                 isRedistRoot = _redistList.IsRedistRoot(highestVersionFromRedistList.FullName);
                 redistName = _redistList.RedistName(highestVersionFromRedistList.FullName);
-
-                return;
             }
         }
 
@@ -95,12 +84,7 @@ namespace Microsoft.Build.Tasks
         internal AssemblyNameExtension RemapAssemblyExtension(AssemblyNameExtension assemblyName)
         {
             // Short-circuit in cases where there is no redist list
-            if (_redistList == null)
-            {
-                return null;
-            }
-
-            return _redistList.RemapAssembly(assemblyName);
+            return _redistList?.RemapAssembly(assemblyName);
         }
 
         /// <summary>
@@ -119,9 +103,7 @@ namespace Microsoft.Build.Tasks
 
             // Look up an assembly with the same base name in the installedAssemblyTables.
             // This list should be sorted alphabetically by simple name and then greatest verion
-            AssemblyEntry[] tableCandidates = _redistList.FindAssemblyNameFromSimpleName(assemblyName.Name);
-
-            foreach (AssemblyEntry tableCandidate in tableCandidates)
+            foreach (AssemblyEntry tableCandidate in _redistList.FindAssemblyNameFromSimpleName(assemblyName.Name))
             {
                 // Make an AssemblyNameExtension for comparing.
                 AssemblyNameExtension mostRecentAssemblyNameCandidate = tableCandidate.AssemblyNameExtension;
@@ -153,13 +135,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Find every assembly full name in the redist list that matches the given simple name.
         /// </summary>
-        /// <param name="simpleName"></param>
         /// <returns>The array of assembly names.</returns>
-        internal AssemblyEntry[] FindAssemblyNameFromSimpleName(string simpleName)
+        internal IEnumerable<AssemblyEntry> FindAssemblyNameFromSimpleName(string simpleName)
         {
             if (_redistList == null)
             {
-                return Array.Empty<AssemblyEntry>();
+                return Enumerable.Empty<AssemblyEntry>();
             }
 
             return _redistList.FindAssemblyNameFromSimpleName(simpleName);

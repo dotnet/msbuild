@@ -1,32 +1,19 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A configuration for a build request.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using System.Diagnostics;
 using System.IO;
-using System.Xml;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Utilities;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
 {
-    using Utilities = Microsoft.Build.Internal.Utilities;
-
     /// <summary>
     /// A build request configuration represents all of the data necessary to know which project to build
     /// and the environment in which it should be built.
@@ -82,7 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// same time, causing a race condition.  This class is not made 100% threadsafe by the presence
         /// and current usage of this lock.
         /// </summary>
-        private Object _syncLock = new Object();
+        private readonly Object _syncLock = new Object();
 
         #endregion
 
@@ -171,7 +158,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
         internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(data, "data");
+            ErrorUtilities.VerifyThrowArgumentNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalLength(data.ProjectFullPath, "data.ProjectFullPath");
 
             _configId = configId;
@@ -198,11 +185,11 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                this.IsCacheable = false;
+                IsCacheable = false;
             }
             else
             {
-                this.IsCacheable = true;
+                IsCacheable = true;
             }
         }
 
@@ -214,7 +201,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="instance">The project instance.</param>
         internal BuildRequestConfiguration(int configId, ProjectInstance instance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(instance, "instance");
+            ErrorUtilities.VerifyThrowArgumentNull(instance, nameof(instance));
 
             _configId = configId;
             _projectFullPath = instance.FullPath;
@@ -226,7 +213,7 @@ namespace Microsoft.Build.BackEnd
             _projectInitialTargets = instance.InitialTargets;
             _projectDefaultTargets = instance.DefaultTargets;
             _translateEntireProjectInstanceState = instance.TranslateEntireState;
-            this.IsCacheable = false;
+            IsCacheable = false;
         }
 
         /// <summary>
@@ -235,7 +222,7 @@ namespace Microsoft.Build.BackEnd
         private BuildRequestConfiguration(int configId, BuildRequestConfiguration other)
         {
             ErrorUtilities.VerifyThrow(configId != 0, "Configuration ID must not be zero when using this constructor.");
-            ErrorUtilities.VerifyThrowArgumentNull(other, "other");
+            ErrorUtilities.VerifyThrowArgumentNull(other, nameof(other));
             ErrorUtilities.VerifyThrow(other._transferredState == null, "Unexpected transferred state still set on other configuration.");
 
             _project = other._project;
@@ -247,7 +234,7 @@ namespace Microsoft.Build.BackEnd
             _toolsVersion = other._toolsVersion;
             _explicitToolsVersionSpecified = other._explicitToolsVersionSpecified;
             _globalProperties = other._globalProperties;
-            this.IsCacheable = other.IsCacheable;
+            IsCacheable = other.IsCacheable;
             _configId = configId;
             TargetNames = other.TargetNames;
         }
@@ -264,33 +251,19 @@ namespace Microsoft.Build.BackEnd
         /// Flag indicating whether the configuration is allowed to cache.  This does not mean that the configuration will
         /// actually cache - there are several criteria which must for that.
         /// </summary>
-        public bool IsCacheable
-        {
-            get;
-            set;
-        }
+        public bool IsCacheable { get; set; }
 
         /// <summary>
         /// When reset caches is false we need to only keep around the configurations which are being asked for during the design time build.
         /// Other configurations need to be cleared. If this configuration is marked as ExplicitlyLoadedConfiguration then it should not be cleared when 
         /// Reset Caches is false.
         /// </summary>
-        public bool ExplicitlyLoaded
-        {
-            get;
-            set;
-        }
+        public bool ExplicitlyLoaded { get; set; }
 
         /// <summary>
         /// Flag indicating whether or not the configuration is actually building.
         /// </summary>
-        public bool IsActivelyBuilding
-        {
-            get
-            {
-                return (_activelyBuildingTargets != null) && (_activelyBuildingTargets.Count > 0);
-            }
-        }
+        public bool IsActivelyBuilding => _activelyBuildingTargets?.Count > 0;
 
         /// <summary>
         /// Flag indicating whether or not the configuration has been loaded before.
@@ -300,11 +273,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Flag indicating if the configuration is cached or not.
         /// </summary>
-        public bool IsCached
-        {
-            get;
-            private set;
-        }
+        public bool IsCached { get; private set; }
 
         /// <summary>
         /// Flag indicating if this configuration represents a traversal project.  Traversal projects
@@ -347,12 +316,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.
         /// </summary>
-        public bool WasGeneratedByNode
-        {
-            [DebuggerStepThrough]
-            get
-            { return _configId < 0; }
-        }
+        public bool WasGeneratedByNode => _configId < 0;
 
         /// <summary>
         /// Sets or returns the configuration id
@@ -360,10 +324,7 @@ namespace Microsoft.Build.BackEnd
         public int ConfigurationId
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _configId;
-            }
+            get => _configId;
 
             [DebuggerStepThrough]
             set
@@ -376,12 +337,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the filename of the project to build.
         /// </summary>
-        public string ProjectFullPath
-        {
-            [DebuggerStepThrough]
-            get
-            { return _projectFullPath; }
-        }
+        public string ProjectFullPath => _projectFullPath;
 
         /// <summary>
         /// The tools version specified for the configuration.
@@ -389,22 +345,12 @@ namespace Microsoft.Build.BackEnd
         /// May have originated from a /tv switch, or an MSBuild task,
         /// or a Project tag, or the default.
         /// </summary>
-        public string ToolsVersion
-        {
-            [DebuggerStepThrough]
-            get
-            { return _toolsVersion; }
-        }
+        public string ToolsVersion => _toolsVersion;
 
         /// <summary>
         /// Returns the global properties to use to build this project.
         /// </summary>
-        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties
-        {
-            [DebuggerStepThrough]
-            get
-            { return _globalProperties; }
-        }
+        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties => _globalProperties;
 
         /// <summary>
         /// Sets or returns the project to build.
@@ -495,21 +441,14 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns true if the default and initial targets have been resolved.
         /// </summary>
-        public bool HasTargetsResolved
-        {
-            get { return ProjectInitialTargets != null && ProjectDefaultTargets != null; }
-        }
+        public bool HasTargetsResolved => ProjectInitialTargets != null && ProjectDefaultTargets != null;
 
         /// <summary>
         /// Gets the initial targets for the project
         /// </summary>
         public List<string> ProjectInitialTargets
         {
-            [DebuggerStepThrough]
-            get
-            {
-                return _projectInitialTargets;
-            }
+            get => _projectInitialTargets;
 
             [DebuggerStepThrough]
             set
@@ -525,10 +464,7 @@ namespace Microsoft.Build.BackEnd
         public List<string> ProjectDefaultTargets
         {
             [DebuggerStepThrough]
-            get
-            {
-                return _projectDefaultTargets;
-            }
+            get => _projectDefaultTargets;
 
             [DebuggerStepThrough]
             set
@@ -541,12 +477,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the node packet type
         /// </summary>
-        public NodePacketType Type
-        {
-            [DebuggerStepThrough]
-            get
-            { return NodePacketType.BuildRequestConfiguration; }
-        }
+        public NodePacketType Type => NodePacketType.BuildRequestConfiguration;
 
         /// <summary>
         /// Returns the lookup which collects all items and properties during the run of this project.
@@ -557,9 +488,9 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(!IsCached, "Configuration is cached, we shouldn't be accessing the lookup.");
 
-                if (null == _baseLookup)
+                if (_baseLookup == null)
                 {
-                    _baseLookup = new Lookup(Project.ItemsToBuildWith, Project.PropertiesToBuildWith, Project.InitialGlobalsForDebugging);
+                    _baseLookup = new Lookup(Project.ItemsToBuildWith, Project.PropertiesToBuildWith);
                 }
 
                 return _baseLookup;
@@ -569,33 +500,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the set of targets currently building, mapped to the request id building them.
         /// </summary>
-        public Dictionary<string, int> ActivelyBuildingTargets
-        {
-            get
-            {
-                if (null == _activelyBuildingTargets)
-                {
-                    _activelyBuildingTargets = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                }
-
-                return _activelyBuildingTargets;
-            }
-        }
+        public Dictionary<string, int> ActivelyBuildingTargets => _activelyBuildingTargets ?? (_activelyBuildingTargets =
+                                                                      new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
         public Dictionary<string, string> SavedEnvironmentVariables
         {
-            get
-            {
-                return _savedEnvironmentVariables;
-            }
+            get => _savedEnvironmentVariables;
 
-            set
-            {
-                _savedEnvironmentVariables = value;
-            }
+            set => _savedEnvironmentVariables = value;
         }
 
         /// <summary>
@@ -603,42 +518,25 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string SavedCurrentDirectory
         {
-            get
-            {
-                return _savedCurrentDirectory;
-            }
+            get => _savedCurrentDirectory;
 
-            set
-            {
-                _savedCurrentDirectory = value;
-            }
+            set => _savedCurrentDirectory = value;
         }
 
         /// <summary>
         /// Whether the tools version was set by the /tv switch or passed in through an msbuild callback
         /// directly or indirectly.
         /// </summary>
-        public bool ExplicitToolsVersionSpecified
-        {
-            [DebuggerStepThrough]
-            get
-            { return _explicitToolsVersionSpecified; }
-        }
+        public bool ExplicitToolsVersionSpecified => _explicitToolsVersionSpecified;
 
         /// <summary>
         /// Gets or sets the node on which this configuration's results are stored.
         /// </summary>
         internal int ResultsNodeId
         {
-            get
-            {
-                return _resultsNodeId;
-            }
+            get => _resultsNodeId;
 
-            set
-            {
-                _resultsNodeId = value;
-            }
+            set => _resultsNodeId = value;
         }
 
         /// <summary>
@@ -649,9 +547,9 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects are equivalent, false otherwise.</returns>
         public static bool operator ==(BuildRequestConfiguration left, BuildRequestConfiguration right)
         {
-            if (Object.ReferenceEquals(left, null))
+            if (ReferenceEquals(left, null))
             {
-                if (Object.ReferenceEquals(right, null))
+                if (ReferenceEquals(right, null))
                 {
                     return true;
                 }
@@ -662,7 +560,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                if (Object.ReferenceEquals(right, null))
+                if (ReferenceEquals(right, null))
                 {
                     return false;
                 }
@@ -763,7 +661,7 @@ namespace Microsoft.Build.BackEnd
             List<string> initialTargets = _projectInitialTargets;
             List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
 
-            List<string> allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count);
+            var allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count);
 
             allTargets.AddRange(initialTargets);
             allTargets.AddRange(nonInitialTargets);
@@ -779,17 +677,17 @@ namespace Microsoft.Build.BackEnd
         {
             // We may not have a project available.  In which case, return nothing -- we simply don't have 
             // enough information to figure out what the correct answer is.
-            if (!this.IsCached && this.Project != null)
+            if (!IsCached && Project != null)
             {
-                HashSet<string> afterTargetsFound = new HashSet<string>();
+                var afterTargetsFound = new HashSet<string>();
 
-                Queue<string> targetsToCheckForAfterTargets = new Queue<string>((request.Targets.Count == 0) ? this.ProjectDefaultTargets : request.Targets);
+                var targetsToCheckForAfterTargets = new Queue<string>((request.Targets.Count == 0) ? ProjectDefaultTargets : request.Targets);
 
                 while (targetsToCheckForAfterTargets.Count > 0)
                 {
                     string targetToCheck = targetsToCheckForAfterTargets.Dequeue();
 
-                    IList<TargetSpecification> targetsWhichRunAfter = this.Project.GetTargetsWhichRunAfter(targetToCheck);
+                    IList<TargetSpecification> targetsWhichRunAfter = Project.GetTargetsWhichRunAfter(targetToCheck);
 
                     foreach (TargetSpecification targetWhichRunsAfter in targetsWhichRunAfter)
                     {
@@ -838,12 +736,12 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if they contain the same data, false otherwise</returns>
         public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(obj, null))
+            if (ReferenceEquals(obj, null))
             {
                 return false;
             }
 
-            if (this.GetType() != obj.GetType())
+            if (GetType() != obj.GetType())
             {
                 return false;
             }
@@ -860,7 +758,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if equal, false otherwise.</returns>
         public bool Equals(BuildRequestConfiguration other)
         {
-            if (Object.ReferenceEquals(other, null))
+            if (ReferenceEquals(other, null))
             {
                 return false;
             }
@@ -891,7 +789,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _toolsVersion);
             translator.Translate(ref _explicitToolsVersionSpecified);
-            translator.TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _savedCurrentDirectory);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
 
@@ -907,7 +805,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new BuildRequestConfiguration(translator);
         }
@@ -943,7 +841,7 @@ namespace Microsoft.Build.BackEnd
         internal void ClearCacheFile()
         {
             string cacheFile = GetCacheFile();
-            if (File.Exists(cacheFile))
+            if (FileSystems.Default.FileExists(cacheFile))
             {
                 FileUtilities.DeleteNoThrow(cacheFile);
             }
@@ -964,7 +862,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects contain the same data, false otherwise.</returns>
         private bool InternalEquals(BuildRequestConfiguration other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
@@ -986,7 +884,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Determines what the real tools version is.
         /// </summary>
-        private string ResolveToolsVersion(BuildRequestData data, string defaultToolsVersion)
+        private static string ResolveToolsVersion(BuildRequestData data, string defaultToolsVersion)
         {
             if (data.ExplicitToolsVersionSpecified)
             {

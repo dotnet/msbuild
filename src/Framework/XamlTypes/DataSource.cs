@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary> Represents the data source for a Rule property. </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.ComponentModel;

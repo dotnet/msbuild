@@ -1349,14 +1349,16 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       <trans-unit id="HelpMessage_31_RestoreSwitch">
         <source>  /restore[:True|False]
                      Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
+                     other targets and ensures the build for these
+                     targets uses the latest restored build logic.
+                     This is useful when your project tree requires
+                     packages to be restored before it can be built.
+                     Specifying /restore is the same as specifying
+                     /restore:True. Use the parameter to override
+                     a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="translated">  /restore[:True|False]
+        <target state="needs-review-translation">  /restore[:True|False]
                      Exécute la restauration d'une cible nommée avant la génération
                      des autres cibles. Cela s'avère utile quand votre arborescence du projet
                      nécessite la restauration des packages pour permettre

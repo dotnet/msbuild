@@ -1,10 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
-using System.Text;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
@@ -70,49 +66,29 @@ namespace Microsoft.Build.Tasks
                 aspnet_compiler -v /MyApp -p c:\myapp c:\MyTarget
         */
 
-        private bool _updateable;
-        private bool _force;
-        private bool _debug;
-        private bool _clean;
-        private bool _aptca;
-        private bool _delaySign;
-        private bool _fixedNames;
-
         /// <summary>
         /// If specified, the strong-name assembly will allow partially
         /// trusted callers.
         /// </summary>
-        public bool AllowPartiallyTrustedCallers
-        {
-            get { return _aptca; }
-            set { _aptca = value; }
-        }
+        public bool AllowPartiallyTrustedCallers { get; set; }
 
         /// <summary>
         /// If specified, the assemblly is not fully signed when created. 
         /// </summary>
-        public bool DelaySign
-        {
-            get { return _delaySign; }
-            set { _delaySign = value; }
-        }
+        public bool DelaySign { get; set; }
 
         /// <summary>
         /// If specified, the compiled assemblies will be given fixed names.
         /// </summary>
-        public bool FixedNames
-        {
-            get { return _fixedNames; }
-            set { _fixedNames = value; }
-        }
+        public bool FixedNames { get; set; }
 
         /// <summary>
         /// Specifies a strong name key container.
         /// </summary>
         public string KeyContainer
         {
-            get { return (string)Bag["KeyContainer"]; }
-            set { Bag["KeyContainer"] = value; }
+            get => (string)Bag[nameof(KeyContainer)];
+            set => Bag[nameof(KeyContainer)] = value;
         }
 
         /// <summary>
@@ -120,8 +96,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string KeyFile
         {
-            get { return (string)Bag["KeyFile"]; }
-            set { Bag["KeyFile"] = value; }
+            get => (string)Bag[nameof(KeyFile)];
+            set => Bag[nameof(KeyFile)] = value;
         }
 
         /// <summary>
@@ -130,8 +106,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string MetabasePath
         {
-            get { return (string)Bag["MetabasePath"]; }
-            set { Bag["MetabasePath"] = value; }
+            get => (string)Bag[nameof(MetabasePath)];
+            set => Bag[nameof(MetabasePath)] = value;
         }
 
         /// <summary>
@@ -140,8 +116,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string PhysicalPath
         {
-            get { return (string)Bag["PhysicalPath"]; }
-            set { Bag["PhysicalPath"] = value; }
+            get => (string)Bag[nameof(PhysicalPath)];
+            set => Bag[nameof(PhysicalPath)] = value;
         }
 
         /// <summary>
@@ -150,8 +126,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string TargetPath
         {
-            get { return (string)Bag["TargetPath"]; }
-            set { Bag["TargetPath"] = value; }
+            get => (string)Bag[nameof(TargetPath)];
+            set => Bag[nameof(TargetPath)] = value;
         }
 
         /// <summary>
@@ -162,49 +138,33 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string VirtualPath
         {
-            get { return (string)Bag["VirtualPath"]; }
-            set { Bag["VirtualPath"] = value; }
+            get => (string)Bag[nameof(VirtualPath)];
+            set => Bag[nameof(VirtualPath)] = value;
         }
 
         /// <summary>
         /// If Updateable is true, then the web is compile with -u flag so that it
         /// can be updated after compilation
         /// </summary>
-        public bool Updateable
-        {
-            get { return _updateable; }
-            set { _updateable = value; }
-        }
+        public bool Updateable { get; set; }
 
         /// <summary>
         /// If Force is true, then the web is compile with -f flag overwriting
         /// files in the target location
         /// </summary>
-        public bool Force
-        {
-            get { return _force; }
-            set { _force = value; }
-        }
+        public bool Force { get; set; }
 
         /// <summary>
         /// If Debug is true, then the debug information will be emitted during
         /// compilation.
         /// </summary>
-        public bool Debug
-        {
-            get { return _debug; }
-            set { _debug = value; }
-        }
+        public bool Debug { get; set; }
 
         /// <summary>
         /// If Clean is true, then the application will be built clean. Previously
         /// compiled components will be re-compiled.
         /// </summary>
-        public bool Clean
-        {
-            get { return _clean; }
-            set { _clean = value; }
-        }
+        public bool Clean { get; set; }
 
         /// <summary>
         /// The TargetFrameworkMoniker indicating which .NET Framework version of 
@@ -212,17 +172,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string TargetFrameworkMoniker
         {
-            get { return (string)Bag["TargetFrameworkMoniker"]; }
-            set { Bag["TargetFrameworkMoniker"] = value; }
+            get => (string)Bag[nameof(TargetFrameworkMoniker)];
+            set => Bag[nameof(TargetFrameworkMoniker)] = value;
         }
 
         /// <summary>
         /// The name of the tool to execute
         /// </summary>
-        protected override string ToolName
-        {
-            get { return "aspnet_compiler.exe"; }
-        }
+        protected override string ToolName => "aspnet_compiler.exe";
 
         /// <summary>
         /// Small helper property to get the "project name"
@@ -231,16 +188,11 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if (this.PhysicalPath != null)
+                if (PhysicalPath != null)
                 {
-                    return this.PhysicalPath;
+                    return PhysicalPath;
                 }
-                else if (this.VirtualPath != null)
-                {
-                    return this.VirtualPath;
-                }
-
-                return this.MetabasePath;
+                return VirtualPath ?? MetabasePath;
             }
         }
 
@@ -251,7 +203,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                if (this.Clean)
+                if (Clean)
                 {
                     return "Clean";
                 }
@@ -293,27 +245,41 @@ namespace Microsoft.Build.Tasks
             commandLine.AppendSwitchIfNotNull("-p ", PhysicalPath);
 
             if (Updateable)
+            {
                 commandLine.AppendSwitch("-u");
+            }
 
             if (Force)
+            {
                 commandLine.AppendSwitch("-f");
+            }
 
             if (Clean)
+            {
                 commandLine.AppendSwitch("-c");
+            }
 
             if (Debug)
+            {
                 commandLine.AppendSwitch("-d");
+            }
 
             if (FixedNames)
+            {
                 commandLine.AppendSwitch("-fixednames");
+            }
 
             commandLine.AppendSwitchIfNotNull("", TargetPath);
 
             if (AllowPartiallyTrustedCallers)
+            {
                 commandLine.AppendSwitch("-aptca");
+            }
 
             if (DelaySign)
+            {
                 commandLine.AppendSwitch("-delaysign");
+            }
 
             commandLine.AppendSwitchIfNotNull("-keyfile ", KeyFile);
             commandLine.AppendSwitchIfNotNull("-keycontainer ", KeyContainer);
@@ -325,10 +291,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>path to aspnet_compiler.exe, null if not found</returns>
         protected override string GenerateFullPathToTool()
         {
-            string pathToTool = null;
-
             // If ToolPath wasn't passed in, we want to default to the latest
-            pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolExe, TargetDotNetFrameworkVersion.Latest);
+            string pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolExe, TargetDotNetFrameworkVersion.Latest);
 
             if (pathToTool == null)
             {

@@ -1,11 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The assembly task factory is used to wrap and construct tasks
-// which are from .net assemblies, and can also be used to launch the 
-// MSBuild task host. </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

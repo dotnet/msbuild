@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using Microsoft.Win32;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
@@ -25,19 +22,22 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         public static string AddTrailingChar(string str, char ch)
         {
             if (str.LastIndexOf(ch) == str.Length - 1)
+            {
                 return str;
+            }
             return str + ch;
         }
 
         public static bool IsUncPath(string path)
         {
             if (String.IsNullOrEmpty(path))
+            {
                 return false;
-
+            }
 
             try
             {
-                System.Uri uri = new System.Uri(path);
+                var uri = new Uri(path);
                 return uri.IsUnc;
             }
             catch (UriFormatException)
@@ -45,7 +45,6 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 return false;
             }
         }
-
 
         public static bool IsWebUrl(string path)
         {
@@ -56,7 +55,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             try
             {
-                CultureInfo ci = new System.Globalization.CultureInfo(cultureName);
+                var ci = new CultureInfo(cultureName);
                 return ci;
             }
             catch (ArgumentException)
@@ -66,13 +65,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return null;
         }
 
-        public static CultureInfo DefaultCultureInfo
-        {
-            get
-            {
-                return System.Threading.Thread.CurrentThread.CurrentUICulture;
-            }
-        }
+        public static CultureInfo DefaultCultureInfo => System.Threading.Thread.CurrentThread.CurrentUICulture;
 
         // This is the 4.0 property and will always point to the Dev10 registry key so that we don't break backwards compatibility.
         // Applications relying on 4.5 will need to use the new method that is introduced in 4.5.
@@ -82,13 +75,17 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 if (String.IsNullOrEmpty(s_defaultPath))
                 {
-                    s_defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
+                    s_defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
                     if (!String.IsNullOrEmpty(s_defaultPath))
+                    {
                         return s_defaultPath;
+                    }
 
-                    s_defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, String.Concat(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
+                    s_defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010), REGISTRY_DEFAULTPATH);
                     if (!String.IsNullOrEmpty(s_defaultPath))
+                    {
                         return s_defaultPath;
+                    }
 
                     s_defaultPath = Directory.GetCurrentDirectory();
                 }
@@ -111,39 +108,44 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             // For Dev10, we use 4.0.
             // For Dev15 this will go versionless as there will be singleton MSI setting the registry which will be common for all future VS.
 
-            int majorVersion = 0;
             int dotIndex = visualStudioVersion.IndexOf('.');
             if (dotIndex < 0)
             {
                 dotIndex = visualStudioVersion.Length;
             }
-            if (Int32.TryParse(visualStudioVersion.Substring(0, dotIndex), out majorVersion) && (majorVersion < 11))
+            if (Int32.TryParse(visualStudioVersion.Substring(0, dotIndex), out int majorVersion) && (majorVersion < 11))
             {
                 visualStudioVersion = BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010;
             }
 
-            string defaultPath;
-
-            defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, BOOTSTRAPPER_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
+            string defaultPath = ReadRegistryString(Registry.LocalMachine, BOOTSTRAPPER_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
             if (!String.IsNullOrEmpty(defaultPath))
+            {
                 return defaultPath;
+            }
 
-            defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
+            defaultPath = ReadRegistryString(Registry.LocalMachine, BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, REGISTRY_DEFAULTPATH);
             if (!String.IsNullOrEmpty(defaultPath))
+            {
                 return defaultPath;
+            }
 
-            defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, visualStudioVersion), REGISTRY_DEFAULTPATH);
+            defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_REGISTRY_PATH_BASE, visualStudioVersion), REGISTRY_DEFAULTPATH);
             if (!String.IsNullOrEmpty(defaultPath))
+            {
                 return defaultPath;
+            }
 
-            defaultPath = ReadRegistryString(Win32.Registry.LocalMachine, String.Concat(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, visualStudioVersion), REGISTRY_DEFAULTPATH);
+            defaultPath = ReadRegistryString(Registry.LocalMachine, String.Concat(BOOTSTRAPPER_WOW64_REGISTRY_PATH_BASE, visualStudioVersion), REGISTRY_DEFAULTPATH);
             if (!String.IsNullOrEmpty(defaultPath))
+            {
                 return defaultPath;
+            }
 
             return Directory.GetCurrentDirectory();
         }
 
-        private static string ReadRegistryString(Win32.RegistryKey key, string path, string registryValue)
+        private static string ReadRegistryString(RegistryKey key, string path, string registryValue)
         {
             RegistryKey subKey = key.OpenSubKey(path, false);
 

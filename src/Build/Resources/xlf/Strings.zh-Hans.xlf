@@ -8,6 +8,11 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
+      <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
+        <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
+        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <note>{StrBegin="MSB4249: "}</note>
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: 检索任务“{0}”中参数的特性时失败。{1}</target>
@@ -24,6 +29,18 @@
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">无法完成此操作，因为已经在进行某个生成。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandItemMetadata">
+        <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
+        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+    %(RootDir) to an item-spec that's not a valid path would result in this error.
+    LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
+      </trans-unit>
+      <trans-unit id="MetaprojectGenerated">
+        <source>Metaproject "{0}" generated.</source>
+        <target state="new">Metaproject "{0}" generated.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -1948,7 +1965,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: 未能从“{1}”实例化“{0}”任务。MSBuild 的此版本不支持 {2}。</target>
+        <target state="translated">MSB4802: 无法从“{1}”实例化“{0}”任务。此版本的 MSBuild 不支持 {2}。</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -1983,7 +2000,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: 无效的二进制记录器参数:“{0}”。预期应为: ProjectImports={{None,Embed,ZipFile}} 和/或 [LogFile=]filePath.binlog (日志文件名称或路径必须包含“.binlog” 扩展名)。</target>
+        <target state="translated">MSB4234: 无效的二进制记录器参数: “{0}”。 预期应为: ProjectImports={{None,Embed,ZipFile}} 和/或 [LogFile=]filePath.binlog (日志文件名称或路径必须包含“.binlog” 扩展名)。</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2068,7 +2085,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: 未能运行基于 NuGet 的 SDK 解析程序，因为无法定位 NuGet 程序集。检查 MSBuild 安装或将环境变量“{0}”设为包含所需 NuGet 程序集的文件夹。{1}</target>
+        <target state="translated">MSB4243: 基于 NuGet 的 SDK 解析程序运行失败，因为无法找到 NuGet 程序集。请检查你安装的 MSBuild 或将环境变量“{0}”设置为包含所需 NuGet 程序集的文件夹。{1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2098,7 +2115,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: 无法指定相同 SDK“{0}”的多个版本。将使用以前从位置“{2}”解析的 SDK 版本“{1}”，将忽略版本“{3}”。</target>
+        <target state="translated">MSB4240: 无法指定同一 SDK“{0}”的多个版本。将使用以前从位置“{2}”解析的 SDK 版本“{1}”，并忽略版本“{3}”。</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2116,6 +2133,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
+      </trans-unit>
+      <trans-unit id="SdkResolverManifestInvalid">
+        <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
+        <target state="translated">MSB4245: SDK 解析程序清单文件无效。这可能表示安装的 MSBuild 损坏或无效。清单文件路径“{0}”。消息: {1}</target>
+        <note>{StrBegin="MSB4245: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverNoDllOrManifest">
+        <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
+        <target state="translated">MSB4246: SDK 解析程序文件夹存在，但没有 SDK 解析程序 DLL 或清单文件。这可能表示安装的 MSBuild 损坏或无效。SDK 解析程序路径: {0}</target>
+        <note>{StrBegin="MSB4246: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverDllInManifestMissing">
+        <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
+        <target state="translated">MSB4247: 无法加载 SDK 解析程序。清单文件存在，但无法找到 SDK 解析程序 DLL 文件的路径。清单文件路径“{0}”。 SDK 解析程序路径: {1}</target>
+        <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>
   </file>

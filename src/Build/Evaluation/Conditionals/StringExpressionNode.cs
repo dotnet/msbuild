@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
-using System.Globalization;
-using System.IO;
 using System;
+using System.Diagnostics;
 
 using Microsoft.Build.Shared;
 
@@ -13,6 +11,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Node representing a string
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class StringExpressionNode : OperandExpressionNode
     {
         private string _value;
@@ -141,5 +140,7 @@ namespace Microsoft.Build.Evaluation
         {
             _cachedExpandedValue = null;
         }
+
+        internal override string DebuggerDisplay => $"\"{_value}\"";
     }
 }

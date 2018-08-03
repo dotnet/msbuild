@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace Microsoft.Build.Collections
 {
@@ -15,25 +12,14 @@ namespace Microsoft.Build.Collections
     /// <typeparam name="T"></typeparam>
     internal class HashSetDebugView<T> where T : class, IKeyed
     {
-        private RetrievableEntryHashSet<T> _set;
+        private readonly RetrievableEntryHashSet<T> _set;
 
         public HashSetDebugView(RetrievableEntryHashSet<T> set)
         {
-            if (set == null)
-            {
-                throw new ArgumentNullException("set");
-            }
-
-            _set = set;
+            _set = set ?? throw new ArgumentNullException(nameof(set));
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Items
-        {
-            get
-            {
-                return _set.ToArray();
-            }
-        }
+        public T[] Items => _set.ToArray();
     }
 }

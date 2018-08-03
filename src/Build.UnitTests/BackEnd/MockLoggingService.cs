@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A mock implementation of ILoggingService used for testing.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -190,12 +186,39 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set;
         }
 
-        public void AddWarningsAsMessages(int projectInstanceId, ISet<string> codes)
+        /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        public bool IncludeEvaluationMetaprojects
+        {
+            get => false;
+            set { }
+        }
+
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        public bool IncludeEvaluationProfile
+        {
+            get => false;
+            set { }
+        }
+
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
+        public bool IncludeTaskInputs
+        {
+            get => false;
+            set { }
+        }
+
+        public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
         }
 
-        public void AddWarningsAsErrors(int projectInstanceId, ISet<string> codes)
+        public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
         }

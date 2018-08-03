@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Utility methods for classifying and handling exceptions.</summary>
-//-----------------------------------------------------------------------
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
@@ -18,6 +14,7 @@ using System.Reflection;
 using System.Security;
 using System.Threading;
 using System.Xml;
+using Microsoft.Build.Shared.FileSystem;
 #if FEATURE_VARIOUS_EXCEPTIONS
 using System.Xml.Schema;
 using System.Runtime.Serialization;
@@ -328,7 +325,7 @@ namespace Microsoft.Build.Shared
 
                     // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
                     // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                    if (!Directory.Exists(DebugDumpPath))
+                    if (!FileSystems.Default.DirectoryExists(DebugDumpPath))
                     {
                         // If this throws, no sense catching it, we can't log it now, and we're here
                         // because we're a child node with no console to log to, so die

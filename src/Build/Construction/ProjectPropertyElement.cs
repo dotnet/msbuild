@@ -1,13 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectPropertyElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
@@ -32,7 +25,7 @@ namespace Microsoft.Build.Construction
         internal ProjectPropertyElement(XmlElementWithLocation xmlElement, ProjectPropertyGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -48,8 +41,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Name
         {
-            get { return XmlElement.Name; }
-            set { ChangeName(value); }
+            get => XmlElement.Name;
+            set => ChangeName(value);
         }
 
         /// <summary>
@@ -58,19 +51,16 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Value
         {
-            get
-            {
-                return Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
-            }
+            get => Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "Value");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Value));
 
                 // Visual Studio has a tendency to set properties to their existing value.
                 if (Value != value)
                 {
-                    Microsoft.Build.Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
+                    Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
                     MarkDirty("Set property Value {0}", value);
                 }
             }
@@ -85,7 +75,7 @@ namespace Microsoft.Build.Construction
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
 
-            ErrorUtilities.VerifyThrowInvalidOperation(XMakeElements.IllegalItemPropertyNames[name] == null && !ReservedPropertyNames.IsReservedProperty(name), "OM_CannotCreateReservedProperty", name);
+            ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name) && !ReservedPropertyNames.IsReservedProperty(name), "OM_CannotCreateReservedProperty", name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 
@@ -100,13 +90,13 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeName(string newName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newName, "newName");
+            ErrorUtilities.VerifyThrowArgumentLength(newName, nameof(newName));
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
-            ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[newName] == null, "CannotModifyReservedProperty", newName);
+            ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedProperty", newName);
 
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
-            XmlElementWithLocation newElement = (XmlElementWithLocation)XmlUtilities.RenameXmlElement(XmlElement, newName, XmlElement.NamespaceURI);
+            XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, newName, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
         }
@@ -123,7 +113,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreatePropertyElement(this.Name);
+            return owner.CreatePropertyElement(Name);
         }
     }
 }

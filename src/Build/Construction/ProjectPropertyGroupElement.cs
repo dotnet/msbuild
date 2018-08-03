@@ -1,19 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectPropertyGroupElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -29,7 +22,7 @@ namespace Microsoft.Build.Construction
         internal ProjectPropertyGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -43,30 +36,12 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any contained properties.
         /// </summary>
-        public ICollection<ProjectPropertyElement> Properties
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectPropertyElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectPropertyElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(Children.OfType<ProjectPropertyElement>());
 
         /// <summary>
         /// Get any contained properties.
         /// </summary>
-        public ICollection<ProjectPropertyElement> PropertiesReversed
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectPropertyElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectPropertyElement>(ChildrenReversed)
-                    );
-            }
-        }
+        public ICollection<ProjectPropertyElement> PropertiesReversed => new ReadOnlyCollection<ProjectPropertyElement>(ChildrenReversed.OfType<ProjectPropertyElement>());
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:
@@ -74,8 +49,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyElement AddProperty(string name, string unevaluatedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, "unevaluatedValue");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
 
             ProjectPropertyElement newProperty = ContainingProject.CreatePropertyElement(name);
             newProperty.Value = unevaluatedValue;
@@ -91,8 +66,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyElement SetProperty(string name, string unevaluatedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, "unevaluatedValue");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
 
             foreach (ProjectPropertyElement property in Properties)
             {

@@ -12,6 +12,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Xunit;
 
 
@@ -26,7 +27,7 @@ namespace Microsoft.Build.UnitTests
         public void SimpleEvaluationTests()
         {
             Parser p = new Parser();
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
 
             AssertParseEvaluate(p, "true", expander, true);
             AssertParseEvaluate(p, "on", expander, true);
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         public void EqualityTests()
         {
             Parser p = new Parser();
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
 
             AssertParseEvaluate(p, "true == on", expander, true);
             AssertParseEvaluate(p, "TrUe == On", expander, true);
@@ -67,7 +68,7 @@ namespace Microsoft.Build.UnitTests
         public void RelationalTests()
         {
             Parser p = new Parser();
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
 
             AssertParseEvaluate(p, "1234 < 1235", expander, true);
             AssertParseEvaluate(p, "1234 <= 1235", expander, true);
@@ -86,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         public void AndandOrTests()
         {
             Parser p = new Parser();
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
 
             AssertParseEvaluate(p, "true == on and 1234 < 1235", expander, true);
         }
@@ -98,7 +99,7 @@ namespace Microsoft.Build.UnitTests
         {
             Parser p = new Parser();
             GenericExpressionNode tree;
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), new ItemDictionary<ProjectItemInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), new ItemDictionary<ProjectItemInstance>(), FileSystems.Default);
             expander.Metadata = new StringMetadataTable(null);
             bool value;
 
@@ -115,7 +116,8 @@ namespace Microsoft.Build.UnitTests
                                     ExpanderOptions.ExpandAll,
                                     null,
                                     Directory.GetCurrentDirectory(),
-                                    ElementLocation.EmptyLocation
+                                    ElementLocation.EmptyLocation,
+                                    FileSystems.Default
                                 );
 
             value = tree.Evaluate(state);
@@ -149,7 +151,7 @@ namespace Microsoft.Build.UnitTests
             propertyBag.Set(ProjectPropertyInstance.Create("x86", "x86"));
             propertyBag.Set(ProjectPropertyInstance.Create("no", "no"));
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, new ItemDictionary<ProjectItemInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, new ItemDictionary<ProjectItemInstance>(), FileSystems.Default);
             AssertParseEvaluate(p, "$(foo)", expander, true);
             AssertParseEvaluate(p, "!$(foo)", expander, false);
             // Test properties with strings
@@ -187,7 +189,7 @@ namespace Microsoft.Build.UnitTests
             itemBag.Add(new ProjectItemInstance(parentProject, "Compile", "baz.cs", parentProject.FullPath));
             itemBag.Add(new ProjectItemInstance(parentProject, "Boolean", "true", parentProject.FullPath));
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), itemBag);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), itemBag, FileSystems.Default);
 
             AssertParseEvaluate(p, "@(Compile) == 'foo.cs;bar.cs;baz.cs'", expander, true);
             AssertParseEvaluate(p, "@(Compile,' ') == 'foo.cs bar.cs baz.cs'", expander, true);
@@ -230,7 +232,7 @@ namespace Microsoft.Build.UnitTests
             propertyBag.Set(ProjectPropertyInstance.Create("AnotherTestQuote", "Here's Johnny!"));
             propertyBag.Set(ProjectPropertyInstance.Create("Atsign", "Test the @ replacement"));
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, FileSystems.Default);
 
             AssertParseEvaluate(p, "'simplestring: true foo.cs;bar.cs;baz.cs' == '$(simple): $(foo) @(compile)'", expander, true);
             AssertParseEvaluate(p, "'$(c1) $(c2)' == 'Another (complex) one. Another (complex) one.'", expander, true);
@@ -262,7 +264,7 @@ namespace Microsoft.Build.UnitTests
             propertyBag.Set(ProjectPropertyInstance.Create("c1", "Another (complex) one."));
             propertyBag.Set(ProjectPropertyInstance.Create("c2", "Another (complex) one."));
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, FileSystems.Default);
 
             AssertParseEvaluate(p, "(($(foo) != 'two' and $(bar)) and 5 >= 1) or $(one) == 1", expander, true);
             AssertParseEvaluate(p, "(($(foo) != 'twoo' or !$(bar)) and 5 >= 1) or $(two) == 1", expander, true);
@@ -283,7 +285,7 @@ namespace Microsoft.Build.UnitTests
 
             PropertyDictionary<ProjectPropertyInstance> propertyBag = new PropertyDictionary<ProjectPropertyInstance>();
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, FileSystems.Default);
 
             AssertParseEvaluateThrow(p, "@(Compile) > 0", expander, null);
         }
@@ -312,7 +314,7 @@ namespace Microsoft.Build.UnitTests
             propertyBag.Set(ProjectPropertyInstance.Create("c1", "Another (complex) one."));
             propertyBag.Set(ProjectPropertyInstance.Create("c2", "Another (complex) one."));
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, FileSystems.Default);
 
             AssertParseEvaluate(p, "(($(foo) != 'two' and $(bar)) and 5 >= 1) or $(one) == 1", expander, true);
         }
@@ -329,7 +331,7 @@ namespace Microsoft.Build.UnitTests
             itemBag.Add(new ProjectItemInstance(parentProject, "Compile", "bar.cs", parentProject.FullPath));
             itemBag.Add(new ProjectItemInstance(parentProject, "Compile", "baz.cs", parentProject.FullPath));
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), itemBag);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), itemBag, FileSystems.Default);
             Dictionary<string, List<string>> conditionedProperties = new Dictionary<string, List<string>>();
             ConditionEvaluator.IConditionEvaluationState state =
                                new ConditionEvaluator.ConditionEvaluationState<ProjectPropertyInstance, ProjectItemInstance>
@@ -339,7 +341,8 @@ namespace Microsoft.Build.UnitTests
                                        ExpanderOptions.ExpandAll,
                                        conditionedProperties,
                                        Directory.GetCurrentDirectory(),
-                                       ElementLocation.EmptyLocation
+                                       ElementLocation.EmptyLocation,
+                                       FileSystems.Default
                                    );
 
             List<string> properties = null;
@@ -420,7 +423,7 @@ namespace Microsoft.Build.UnitTests
             propertyBag.Set(ProjectPropertyInstance.Create("foo", "4"));
             propertyBag.Set(ProjectPropertyInstance.Create("bar", "32"));
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, new ItemDictionary<ProjectItemInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, new ItemDictionary<ProjectItemInstance>(), FileSystems.Default);
 
             AssertParseEvaluate(p, "!true", expander, false);
             AssertParseEvaluate(p, "!(true)", expander, false);
@@ -452,7 +455,8 @@ namespace Microsoft.Build.UnitTests
                         ExpanderOptions.ExpandAll,
                         null,
                         Directory.GetCurrentDirectory(),
-                        ElementLocation.EmptyLocation
+                        ElementLocation.EmptyLocation,
+                        FileSystems.Default
                     );
             }
 
@@ -489,7 +493,8 @@ namespace Microsoft.Build.UnitTests
                             ExpanderOptions.ExpandAll,
                             null,
                             Directory.GetCurrentDirectory(),
-                            ElementLocation.EmptyLocation
+                            ElementLocation.EmptyLocation,
+                            FileSystems.Default
                         );
                 }
                 tree.Evaluate(state);
@@ -509,7 +514,7 @@ namespace Microsoft.Build.UnitTests
         public void NegativeTests()
         {
             Parser p = new Parser();
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>());
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
 
             AssertParseEvaluateThrow(p, "foo", expander);
             AssertParseEvaluateThrow(p, "0", expander);

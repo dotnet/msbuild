@@ -112,8 +112,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Initialize the object with type library attributes
         /// </summary>
-        /// <param name="attr"></param>
-        /// <param name="taskItem"></param>
         internal bool InitializeWithTypeLibAttrs(TaskLoggingHelper log, bool silent, TYPELIBATTR tlbAttr, ITaskItem originalTaskItem, string targetProcessorArchitecture)
         {
             TYPELIBATTR remappableTlbAttr = tlbAttr;
@@ -134,8 +132,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Initialize the object with a type library path 
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="taskItem"></param>
         internal bool InitializeWithPath(TaskLoggingHelper log, bool silent, string path, ITaskItem originalTaskItem, string targetProcessorArchitecture)
         {
             ErrorUtilities.VerifyThrowArgumentNull(path, "path");
@@ -150,7 +146,7 @@ namespace Microsoft.Build.Tasks
             // we're using tlbimp.exe, we need to pass the full path w/ type lib number to it, or it won't generate the interop 
             // assembly correctly. 
             this.fullTypeLibPath = path;
-            this.strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, new FileExists(File.Exists));
+            this.strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, File.Exists);
 
             // use the unstripped path to actually load the library
             switch (targetProcessorArchitecture)
@@ -181,7 +177,7 @@ namespace Microsoft.Build.Tasks
                     log,
                     silent,
                     this.typeLibPointer,
-                    this.GetTypeLibId(log),
+                    GetTypeLibId(log),
                     out this.typeLibName))
                 {
                     ReleaseTypeLibPtr();
@@ -216,17 +212,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Get the source item, if available. Null otherwise.
         /// </summary>
-        internal string SourceItemSpec
-        {
-            get
-            {
-                if (taskItem == null)
-                {
-                    return null;
-                }
-                return taskItem.ItemSpec;
-            }
-        }
+        internal string SourceItemSpec => taskItem?.ItemSpec;
 
         /// <summary>
         /// Release the COM ITypeLib pointer for this reference

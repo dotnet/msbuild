@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks
@@ -61,18 +62,13 @@ namespace Microsoft.Build.Tasks
             if (assemblyName != null)
             {
                 // {AssemblyFolders} was passed in.
-                ICollection assemblyFolders = AssemblyFolder.GetAssemblyFolders(assemblyFolderKey);
-
-                if (assemblyFolders != null)
+                foreach (string assemblyFolder in AssemblyFolder.GetAssemblyFolders(assemblyFolderKey))
                 {
-                    foreach (string assemblyFolder in assemblyFolders)
+                    string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder, assembliesConsideredAndRejected);
+                    if (resolvedPath != null)
                     {
-                        string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder, assembliesConsideredAndRejected);
-                        if (resolvedPath != null)
-                        {
-                            foundPath = resolvedPath;
-                            return true;
-                        }
+                        foundPath = resolvedPath;
+                        return true;
                     }
                 }
             }

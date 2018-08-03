@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Build request which has not had its configuration resolved yet.</summary>
-//-----------------------------------------------------------------------
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -31,8 +27,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="flags">Flags specified for the build request.</param>
         public FullyQualifiedBuildRequest(BuildRequestConfiguration config, string[] targets, bool resultsNeeded, BuildRequestDataFlags flags = BuildRequestDataFlags.None)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config, "config");
-            ErrorUtilities.VerifyThrowArgumentNull(targets, "targets");
+            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
+            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
 
             Config = config;
             Targets = targets;

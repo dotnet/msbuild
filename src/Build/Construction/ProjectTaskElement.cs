@@ -1,16 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectTaskElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
@@ -32,7 +28,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Protection for the parameters cache
         /// </summary>
-        private Object _locker = new Object();
+        private readonly Object _locker = new Object();
 
         /// <summary>
         /// Initialize a parented ProjectTaskElement
@@ -117,24 +113,12 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Gets the task name
         /// </summary>
-        public string Name
-        {
-            get { return XmlElement.Name; }
-        }
+        public string Name => XmlElement.Name;
 
         /// <summary>
         /// Gets any output children.
         /// </summary>
-        public ICollection<ProjectOutputElement> Outputs
-        {
-            get
-            {
-                return new Microsoft.Build.Collections.ReadOnlyCollection<ProjectOutputElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectOutputElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectOutputElement> Outputs => new Collections.ReadOnlyCollection<ProjectOutputElement>(Children.OfType<ProjectOutputElement>());
 
         /// <summary>
         /// Enumerable over the unevaluated parameters on the task.
@@ -150,9 +134,9 @@ namespace Microsoft.Build.Construction
                 {
                     EnsureParametersInitialized();
 
-                    Dictionary<string, string> parametersClone = new Dictionary<string, string>(_parameters.Count, StringComparer.OrdinalIgnoreCase);
+                    var parametersClone = new Dictionary<string, string>(_parameters.Count, StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var entry in _parameters)
+                    foreach (KeyValuePair<string, Tuple<string, ElementLocation>> entry in _parameters)
                     {
                         parametersClone[entry.Key] = entry.Value.Item1;
                     }
@@ -178,7 +162,7 @@ namespace Microsoft.Build.Construction
 
                     var parameterLocations = new List<KeyValuePair<string, ElementLocation>>();
 
-                    foreach (var entry in _parameters)
+                    foreach (KeyValuePair<string, Tuple<string, ElementLocation>> entry in _parameters)
                     {
                         parameterLocations.Add(new KeyValuePair<string, ElementLocation>(entry.Key, entry.Value.Item2));
                     }
@@ -192,28 +176,19 @@ namespace Microsoft.Build.Construction
         /// Location of the "ContinueOnError" attribute on this element, if any.
         /// If there is no such attribute, returns null;
         /// </summary>
-        public ElementLocation ContinueOnErrorLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.continueOnError); }
-        }
+        public ElementLocation ContinueOnErrorLocation => XmlElement.GetAttributeLocation(XMakeAttributes.continueOnError);
 
         /// <summary>
         /// Location of the "MSBuildRuntime" attribute on this element, if any.
         /// If there is no such attribute, returns null;
         /// </summary>
-        public ElementLocation MSBuildRuntimeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.msbuildRuntime); }
-        }
+        public ElementLocation MSBuildRuntimeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.msbuildRuntime);
 
         /// <summary>
         /// Location of the "MSBuildArchitecture" attribute on this element, if any.
         /// If there is no such attribute, returns null;
         /// </summary>
-        public ElementLocation MSBuildArchitectureLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.msbuildArchitecture); }
-        }
+        public ElementLocation MSBuildArchitectureLocation => XmlElement.GetAttributeLocation(XMakeAttributes.msbuildArchitecture);
 
         /// <summary>
         /// Retrieves a copy of the parameters as used during evaluation.
@@ -237,8 +212,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputItem(string taskParameter, string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, "taskParameter");
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, "itemType");
+            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, nameof(taskParameter));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
 
             return AddOutputItem(taskParameter, itemType, null);
         }
@@ -267,8 +242,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputProperty(string taskParameter, string propertyName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, "taskParameter");
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName, "propertyName");
+            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, nameof(taskParameter));
+            ErrorUtilities.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
 
             return AddOutputProperty(taskParameter, propertyName, null);
         }
@@ -299,12 +274,11 @@ namespace Microsoft.Build.Construction
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
                 EnsureParametersInitialized();
 
-                Tuple<string, ElementLocation> parameter;
-                if (_parameters.TryGetValue(name, out parameter))
+                if (_parameters.TryGetValue(name, out Tuple<string, ElementLocation> parameter))
                 {
                     return parameter.Item1;
                 }
@@ -320,8 +294,8 @@ namespace Microsoft.Build.Construction
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, "name");
-                ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, "unevaluatedValue");
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
                 ErrorUtilities.VerifyThrowArgument(!XMakeAttributes.IsSpecialTaskAttribute(name), "CannotAccessKnownAttributes", name);
 
                 _parameters = null;
@@ -384,7 +358,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ProjectTaskElement CreateDisconnected(string name, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 
@@ -403,7 +377,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateTaskElement(this.Name);
+            return owner.CreateTaskElement(Name);
         }
 
         /// <summary>

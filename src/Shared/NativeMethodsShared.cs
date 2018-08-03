@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Reflection;
+using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
@@ -44,8 +45,16 @@ namespace Microsoft.Build.Shared
         internal const int FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
         internal const int FILE_ATTRIBUTE_REPARSE_POINT = 0x00000400;
 
+        /// <summary>
+        /// Default buffer size to use when dealing with the Windows API.
+        /// </summary>
+        internal const int MAX_PATH = 260;
+
         private const string kernel32Dll = "kernel32.dll";
         private const string mscoreeDLL = "mscoree.dll";
+
+        private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
+        private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
 #if FEATURE_HANDLEREF
         internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
@@ -167,6 +176,13 @@ namespace Microsoft.Build.Shared
             // Who knows
             Unknown
         }
+
+        internal enum MaxPathLimits
+        {
+            Unknown = 0,
+            LegacyWindows = MAX_PATH,
+            None = int.MaxValue,
+        };
 
         #endregion
 
@@ -452,14 +468,62 @@ namespace Microsoft.Build.Shared
         #region Member data
 
         /// <summary>
-        /// Default buffer size to use when dealing with the Windows API.
+        /// Gets an enum for the max path limit of the current OS.
         /// </summary>
-        /// <remarks>
-        /// This member is intentionally not a constant because we want to allow
-        /// unit tests to change it.
-        /// </remarks>
-        internal static int MAX_PATH = 260;
+        internal static MaxPathLimits OSMaxPathLimit
+        {
+            get
+            {
+#if EXPERIMENTAL_LONGPATHS_ENABLED
+                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                {
+                    SetOSMaxPathLimit();
+                }
+                return osMaxPathLimit;
+#else
+                return MaxPathLimits.LegacyWindows;
+#endif
+            }
+        }
 
+        /// <summary>
+        /// Cached value for OSMaxPathLimit.
+        /// </summary>
+        private static MaxPathLimits osMaxPathLimit = MaxPathLimits.Unknown;
+
+        private static readonly object osMaxPathLimitLock = new object();
+
+        private static void SetOSMaxPathLimit()
+        {
+            lock (osMaxPathLimitLock)
+            {
+                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                {
+                    osMaxPathLimit = IsMaxPathLimitLegacyWindows() ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
+                }
+            }
+        }
+
+        private static bool IsMaxPathLimitLegacyWindows()
+        {
+            try
+            {
+                return IsWindows && !IsLongPathsEnabledRegistry();
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
+        private static bool IsLongPathsEnabledRegistry()
+        {
+            using (RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY))
+            {
+                object longPathsEnabledValue = fileSystemKey?.GetValue(WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME, 0);
+                return fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1;
+            }
+        }
 
         /// <summary>
         /// Cached value for IsUnixLike (this method is called frequently during evaluation).
@@ -542,7 +606,7 @@ namespace Microsoft.Build.Shared
             get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); }
 #endif
         }
-        
+
 #if MONO
         private static bool? _isOSX;
 #endif
@@ -1181,17 +1245,76 @@ namespace Microsoft.Build.Shared
         /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
         /// </summary>
         /// <returns></returns>
-        internal static string GetCurrentDirectory()
+        internal unsafe static string GetCurrentDirectory()
         {
+#if FEATURE_LEGACY_GETCURRENTDIRECTORY
             if (IsWindows)
             {
-                StringBuilder sb = new StringBuilder(MAX_PATH);
-                int pathLength = GetCurrentDirectory(MAX_PATH, sb);
+                int bufferSize = GetCurrentDirectoryWin32(0, null);
+                char* buffer = stackalloc char[bufferSize];
+                int pathLength = GetCurrentDirectoryWin32(bufferSize, buffer);
+                return new string(buffer, startIndex: 0, length: pathLength);
+            }
+#endif
+            return Directory.GetCurrentDirectory();
+        }
 
-                return pathLength > 0 ? sb.ToString() : null;
+        private unsafe static int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
+        {
+            int pathLength = GetCurrentDirectory(nBufferLength, lpBuffer);
+            VerifyThrowWin32Result(pathLength);
+            return pathLength;
+        }
+
+        internal unsafe static string GetFullPath(string path)
+        {
+            int bufferSize = GetFullPathWin32(path, 0, null, IntPtr.Zero);
+            char* buffer = stackalloc char[bufferSize];
+            int fullPathLength = GetFullPathWin32(path, bufferSize, buffer, IntPtr.Zero);
+            // Avoid creating new strings unnecessarily
+            return AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
+        }
+
+        private unsafe static int GetFullPathWin32(string target, int bufferLength, char* buffer, IntPtr mustBeZero)
+        {
+            int pathLength = GetFullPathName(target, bufferLength, buffer, mustBeZero);
+            VerifyThrowWin32Result(pathLength);
+            return pathLength;
+        }
+
+        /// <summary>
+        /// Compare an unsafe char buffer with a <see cref="System.String"/> to see if their contents are identical.
+        /// </summary>
+        /// <param name="buffer">The beginning of the char buffer.</param>
+        /// <param name="len">The length of the buffer.</param>
+        /// <param name="s">The string.</param>
+        /// <returns>True only if the contents of <paramref name="s"/> and the first <paramref name="len"/> characters in <paramref name="buffer"/> are identical.</returns>
+        private unsafe static bool AreStringsEqual(char* buffer, int len, string s)
+        {
+            if (len != s.Length)
+            {
+                return false;
             }
 
-            return Directory.GetCurrentDirectory();
+            foreach (char ch in s)
+            {
+                if (ch != *buffer++)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal static void VerifyThrowWin32Result(int result)
+        {
+            bool isError = result == 0;
+            if (isError)
+            {
+                int code = Marshal.GetLastWin32Error();
+                ThrowExceptionForErrorCode(code);
+            }
         }
 
 #endregion
@@ -1276,7 +1399,7 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern int GetCurrentDirectory(int nBufferLength, [Out] StringBuilder lpBuffer);
+        internal unsafe static extern int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
@@ -1423,12 +1546,51 @@ namespace Microsoft.Build.Shared
 
 #region helper methods
 
-        internal static bool FileExists(string path)
+        internal static bool DirectoryExists(string fullPath)
+        {
+            return NativeMethodsShared.IsWindows
+                ? DirectoryExistsWindows(fullPath)
+                : Directory.Exists(fullPath);
+        }
+
+        internal static bool DirectoryExistsWindows(string fullPath)
+        {
+            NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+            bool success = false;
+
+            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+            return success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) != 0;
+        }
+
+        internal static bool FileExists(string fullPath)
+        {
+            return NativeMethodsShared.IsWindows
+                ? FileExistsWindows(fullPath)
+                : File.Exists(fullPath);
+        }
+
+        internal static bool FileExistsWindows(string fullPath)
+        {
+            NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA data = new NativeMethodsShared.WIN32_FILE_ATTRIBUTE_DATA();
+            bool success = false;
+
+            success = NativeMethodsShared.GetFileAttributesEx(fullPath, 0, ref data);
+            return success && (data.fileAttributes & NativeMethodsShared.FILE_ATTRIBUTE_DIRECTORY) == 0;
+        }
+
+        internal static bool FileOrDirectoryExists(string path)
+        {
+            return IsWindows
+                ? FileOrDirectoryExistsWindows(path)
+                : File.Exists(path) || Directory.Exists(path);
+        }
+
+        internal static bool FileOrDirectoryExistsWindows(string path)
         {
             WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
             return GetFileAttributesEx(path, 0, ref data);
         }
 
-#endregion
+        #endregion
     }
 }

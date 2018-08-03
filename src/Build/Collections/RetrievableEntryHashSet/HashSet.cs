@@ -1233,7 +1233,6 @@ namespace Microsoft.Build.Collections
                     // NOTE: this must add EVEN IF it is already present,
                     // as it may be a different object with the same name,
                     // and we want "last wins" semantics
-                    _slots[i].hashCode = hashCode;
                     _slots[i].value = value;
                     return false;
                 }

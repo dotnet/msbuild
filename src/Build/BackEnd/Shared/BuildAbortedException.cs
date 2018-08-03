@@ -1,13 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The exception which gets thrown if the build is aborted gracefully.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.Serialization;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
@@ -33,12 +27,9 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException()
             : base(ResourceUtilities.GetResourceString("BuildAborted"))
         {
-            string errorCode;
-            string helpKeyword;
+            ResourceUtilities.FormatResourceString(out string errorCode, out _, "BuildAborted");
 
-            ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "BuildAborted");
-
-            this.ErrorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         /// <summary>
@@ -47,12 +38,9 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException(string message)
             : base(ResourceUtilities.FormatResourceString("BuildAbortedWithMessage", message))
         {
-            string errorCode;
-            string helpKeyword;
+            ResourceUtilities.FormatResourceString(out string errorCode, out _, "BuildAbortedWithMessage", message);
 
-            ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "BuildAbortedWithMessage", message);
-
-            this.ErrorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         /// <summary>
@@ -61,12 +49,9 @@ namespace Microsoft.Build.Exceptions
         public BuildAbortedException(string message, Exception innerException)
             : base(ResourceUtilities.FormatResourceString("BuildAbortedWithMessage", message), innerException)
         {
-            string errorCode;
-            string helpKeyword;
+            ResourceUtilities.FormatResourceString(out string errorCode, out _, "BuildAbortedWithMessage", message);
 
-            ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "BuildAbortedWithMessage", message);
-
-            this.ErrorCode = errorCode;
+            ErrorCode = errorCode;
         }
 
         /// <summary>
@@ -76,18 +61,14 @@ namespace Microsoft.Build.Exceptions
         protected BuildAbortedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            this.ErrorCode = info.GetString("ErrorCode");
+            ErrorCode = info.GetString("ErrorCode");
         }
 
         /// <summary>
         /// Gets the error code (if any) associated with the exception message.
         /// </summary>
         /// <value>Error code string, or null.</value>
-        public string ErrorCode
-        {
-            get;
-            private set;
-        }
+        public string ErrorCode { get; }
 
         /// <summary>
         /// ISerializable method which we must override since Exception implements this interface
@@ -96,7 +77,7 @@ namespace Microsoft.Build.Exceptions
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
-        override public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 

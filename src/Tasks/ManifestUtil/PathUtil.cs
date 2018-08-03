@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -46,7 +43,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static bool IsAssembly(string path)
         {
-            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException("path");
+            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
             if (String.Equals(Path.GetExtension(path), ".application", StringComparison.Ordinal)) return true;
             if (String.Equals(Path.GetExtension(path), ".manifest", StringComparison.Ordinal)) return true;
             if (!IsProgramFile(path)) return false; // optimization, don't want to sniff every every kind of file -- just dll's or exe's
@@ -81,14 +78,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static bool IsManagedAssembly(string path)
         {
-            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException("path");
+            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
             using (MetadataReader r = MetadataReader.Create(path))
                 return r != null;
         }
 
         public static bool IsNativeAssembly(string path)
         {
-            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException("path");
+            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
             if (String.Equals(Path.GetExtension(path), ".manifest", StringComparison.Ordinal)) return true;
             return EmbeddedManifestReader.Read(path) != null;
         }
@@ -122,8 +119,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static bool IsUrl(string path)
         {
-            Uri u = null;
-            if (!Uri.TryCreate(path, UriKind.Absolute, out u) || u == null)
+            if (!Uri.TryCreate(path, UriKind.Absolute, out Uri u) || u == null)
                 return false;
             return !u.IsUnc && !String.IsNullOrEmpty(u.Host);
         }
@@ -137,19 +133,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (IsUrl(path)) // if it's a URL then need to check for "localhost"...
             {
                 // Replace "localhost" with the actual machine name...
-                const string LocalHost = "localhost";
-                Uri u = new Uri(path);
-                if (String.Equals(u.Host, LocalHost, StringComparison.OrdinalIgnoreCase))
+                const string localHost = "localhost";
+                var u = new Uri(path);
+                if (String.Equals(u.Host, localHost, StringComparison.OrdinalIgnoreCase))
                 {
                     // Unfortunatly Uri.Host is read-only, so we need to reconstruct it manually...
-                    int i = path.IndexOf(LocalHost, StringComparison.OrdinalIgnoreCase);
-                    return i >= 0 ? path.Substring(0, i) + Environment.MachineName.ToLowerInvariant() + path.Substring(i + LocalHost.Length) : path;
+                    int i = path.IndexOf(localHost, StringComparison.OrdinalIgnoreCase);
+                    return i >= 0 ? path.Substring(0, i) + Environment.MachineName.ToLowerInvariant() + path.Substring(i + localHost.Length) : path;
                 }
-                else
-                    return path;
+                return path;
             }
-            else // if not unc or url then it must be a local disk path...
-                return System.IO.Path.GetFullPath(path); // make sure it's a full path
+
+            // if not unc or url then it must be a local disk path...
+            return Path.GetFullPath(path); // make sure it's a full path
         }
     }
 }

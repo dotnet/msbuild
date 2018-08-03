@@ -1,18 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectUsingTaskBodyElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
-using Utilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -28,7 +20,7 @@ namespace Microsoft.Build.Construction
         internal ProjectUsingTaskBodyElement(XmlElementWithLocation xmlElement, ProjectUsingTaskElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
             VerifyCorrectParent(parent);
         }
 
@@ -46,15 +38,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override string Condition
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
-            }
+            get => null;
+            set => ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
         }
 
         /// <summary>
@@ -63,15 +48,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string TaskBody
         {
-            get
-            {
-                return Microsoft.Build.Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
-            }
+            get => Internal.Utilities.GetXmlNodeInnerContents(XmlElement);
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "TaskBody");
-                Microsoft.Build.Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(TaskBody));
+                Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
                 MarkDirty("Set usingtask body {0}", value);
             }
         }
@@ -118,10 +100,7 @@ namespace Microsoft.Build.Construction
         /// If there is no such attribute, returns the location of the element,
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
-        public ElementLocation EvaluateLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.evaluate) ?? Location; }
-        }
+        public ElementLocation EvaluateLocation => XmlElement.GetAttributeLocation(XMakeAttributes.evaluate) ?? Location;
 
         /// <summary>
         /// Creates an unparented ProjectUsingTaskBodyElement, wrapping an unparented XmlElement.
@@ -131,9 +110,11 @@ namespace Microsoft.Build.Construction
         internal static ProjectUsingTaskBodyElement CreateDisconnected(string evaluate, string body, ProjectRootElement containingProject)
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.usingTaskBody);
-            ProjectUsingTaskBodyElement taskElement = new ProjectUsingTaskBodyElement(element, containingProject);
-            taskElement.Evaluate = evaluate;
-            taskElement.TaskBody = body;
+            var taskElement = new ProjectUsingTaskBodyElement(element, containingProject)
+            {
+                Evaluate = evaluate,
+                TaskBody = body
+            };
             return taskElement;
         }
 
@@ -149,7 +130,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateUsingTaskBodyElement(this.Evaluate, this.TaskBody);
+            return owner.CreateUsingTaskBodyElement(Evaluate, TaskBody);
         }
 
         /// <summary>
@@ -157,7 +138,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void VerifyCorrectParent(ProjectElementContainer parent)
         {
-            ProjectUsingTaskElement parentUsingTask = parent as ProjectUsingTaskElement;
+            var parentUsingTask = parent as ProjectUsingTaskElement;
             ErrorUtilities.VerifyThrowInvalidOperation(parentUsingTask != null, "OM_CannotAcceptParent");
 
             // Since there is not going to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and 

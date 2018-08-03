@@ -1,22 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Methods to create temp files.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
-using System.Security;
-using System.Collections;
-using System.Diagnostics;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.Threading;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -24,7 +12,7 @@ namespace Microsoft.Build.Shared
     /// This class contains utility methods for file IO.
     /// It is in a separate file so that it can be selectively included into an assembly.
     /// </summary>
-    static internal partial class FileUtilities
+    internal static partial class FileUtilities
     {
         /// <summary>
         /// Generates a unique directory name in the temporary folder.  
@@ -88,8 +76,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetTemporaryFile(string directory, string extension, bool createFile = true)
         {
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(directory, "directory");
-            ErrorUtilities.VerifyThrowArgumentLength(extension, "extension");
+            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(directory, nameof(directory));
+            ErrorUtilities.VerifyThrowArgumentLength(extension, nameof(extension));
 
             if (extension[0] != '.')
             {
@@ -102,13 +90,13 @@ namespace Microsoft.Build.Shared
 
                 Directory.CreateDirectory(directory);
 
-                string file = Path.Combine(directory, string.Format("tmp{0}{1}", Guid.NewGuid().ToString("N"), extension));
+                string file = Path.Combine(directory, $"tmp{Guid.NewGuid():N}{extension}");
 
-                ErrorUtilities.VerifyThrow(!File.Exists(file), "Guid should be unique");
+                ErrorUtilities.VerifyThrow(!FileSystems.Default.FileExists(file), "Guid should be unique");
 
                 if (createFile)
                 {
-                    File.WriteAllText(file, String.Empty);
+                    File.WriteAllText(file, string.Empty);
                 }
 
                 return file;
@@ -126,34 +114,31 @@ namespace Microsoft.Build.Shared
             DirectoryInfo sourceInfo = new DirectoryInfo(source);
             foreach (var fileInfo in sourceInfo.GetFiles())
             {
-                string destFile = System.IO.Path.Combine(dest, fileInfo.Name);
+                string destFile = Path.Combine(dest, fileInfo.Name);
                 fileInfo.CopyTo(destFile);
             }
             foreach (var subdirInfo in sourceInfo.GetDirectories())
             {
-                string destDir = System.IO.Path.Combine(dest, subdirInfo.Name);
+                string destDir = Path.Combine(dest, subdirInfo.Name);
                 CopyDirectory(subdirInfo.FullName, destDir);
             }
         }
 
         public class TempWorkingDirectory : IDisposable
         {
-            public string Path { get; private set; }
+            public string Path { get; }
 
             public TempWorkingDirectory(string sourcePath, [CallerMemberName] string name = null)
             {
-                if (name == null)
-                {
-                    Path = FileUtilities.GetTemporaryDirectory();
-                }
-                else
-                {
-                    Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), name);
-                }
-                if (Directory.Exists(Path))
+                Path = name == null
+                    ? GetTemporaryDirectory()
+                    : System.IO.Path.Combine(System.IO.Path.GetTempPath(), name);
+
+                if (FileSystems.Default.DirectoryExists(Path))
                 {
                     Directory.Delete(Path, true);
                 }
+
                 CopyDirectory(sourcePath, Path);
             }
 

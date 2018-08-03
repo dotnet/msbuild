@@ -1,11 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Extension methods for the ConcurrentStack.</summary>
-//-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Concurrent;
 using Microsoft.Build.Shared;
 
@@ -20,10 +15,9 @@ namespace Microsoft.Build.Collections
         /// The peek method.
         /// </summary>
         /// <typeparam name="T">The type contained within the stack.</typeparam>
-        static public T Peek<T>(this ConcurrentStack<T> stack) where T : class
+        public static T Peek<T>(this ConcurrentStack<T> stack) where T : class
         {
-            T result = null;
-            ErrorUtilities.VerifyThrow(stack.TryPeek(out result), "Unable to peek from stack");
+            ErrorUtilities.VerifyThrow(stack.TryPeek(out T result), "Unable to peek from stack");
             return result;
         }
 
@@ -31,10 +25,9 @@ namespace Microsoft.Build.Collections
         /// The pop method.
         /// </summary>
         /// <typeparam name="T">The type contained within the stack.</typeparam>
-        static public T Pop<T>(this ConcurrentStack<T> stack) where T : class
+        public static T Pop<T>(this ConcurrentStack<T> stack) where T : class
         {
-            T result = null;
-            ErrorUtilities.VerifyThrow(stack.TryPop(out result), "Unable to pop from stack");
+            ErrorUtilities.VerifyThrow(stack.TryPop(out T result), "Unable to pop from stack");
             return result;
         }
     }

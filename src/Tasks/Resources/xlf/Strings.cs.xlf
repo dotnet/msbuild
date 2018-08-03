@@ -291,6 +291,36 @@
         <target state="translated">Soubor {0} neexistuje. Bude vynechán.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
+        <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
+        <target state="translated">Soubor se nestáhl z {0} do {1}, protože parametr {2} byl v projektu nastaven na hodnotu {3} a velikosti souborů se shodují.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.Downloading">
+        <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
+        <target state="translated">Probíhá stahování z {0} do {1} ({2:N0} B).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorDownloading">
+        <source>MSB3923: Failed to download file "{0}".  {1}</source>
+        <target state="translated">MSB3923: Soubor {0} se nepodařilo stáhnout. {1}</target>
+        <note>{StrBegin="MSB3923: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorInvalidUrl">
+        <source>MSB3921: The specified URL "{0}" is not valid.</source>
+        <target state="translated">MSB3921: Zadaná adresa URL {0} není platná.</target>
+        <note>{StrBegin="MSB3921: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorUnknownFileName">
+        <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
+        <target state="translated">MSB3922: Z adresy URL {0} se nepodařilo určit název souboru. Zadejte prosím název souboru pomocí parametru {1}.</target>
+        <note>{StrBegin="MSB3922: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.Retrying">
+        <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
+        <target state="translated">MSB3924: Soubor {0} se nepodařilo stáhnout. Za {2} ms bude zahájeno opakování {1}. {3}</target>
+        <note>{StrBegin="MSB3924: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
         <target state="translated">MSB3071: Všechna písmena jednotek od A: po Z: jsou aktuálně použita. Protože pracovní adresář {0} je cesta UNC, potřebuje úloha Exec volné písmeno jednotky pro namapování cesty UNC. Odpojením některých sdílených prostředků uvolněte písmena jednotek. Můžete také zadat místní pracovní adresář. Potom spusťte příkaz znovu.</target>
@@ -325,6 +355,21 @@
         <source>The working directory "{0}" does not exist.</source>
         <target state="translated">Pracovní adresář {0} neexistuje.</target>
         <note>No error code because an error will be prefixed.</note>
+      </trans-unit>
+      <trans-unit id="FileHash.FileNotFound">
+        <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB3954: Nepovedlo se vypočítat hodnotu hash pro soubor {0}, protože neexistuje nebo není dostupný.</target>
+        <note>{StrBegin="MSB3954: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
+        <target state="translated">MSB3953: Nerozpoznaný název algoritmu hash {0}. Povolené algoritmy jsou SHA256, SHA384 a SHA512.</target>
+        <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashEncoding">
+        <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
+        <target state="translated">MSB3951: Nerozpoznané kódování hodnoty hash {0}. Povolená kódování jsou hex a base64.</target>
+        <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
@@ -924,6 +969,11 @@
         <target state="translated">MSB3190: Funkce ClickOnce nepodporuje požadovanou úroveň provedení {0}.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.MOTW">
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
+        <target state="translated">MSB3821: Nešlo zpracovat soubor {0}, protože je v zóně Internet nebo Omezené nebo má na souboru značku webu. Pokud chcete tyto soubory zpracovat, odeberte značku webu.</target>
+        <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
         <target state="translated">MSB3552: Soubor prostředků {0} nebyl nalezen.</target>
@@ -1411,6 +1461,11 @@
         <source>MSB3455: ResGen.exe may not run because the command line is {0} characters long, which exceeds the maximum length of the command. To fix this problem, please either (1) remove unnecessary assembly references, or (2) make the paths to those references shorter.</source>
         <target state="translated">MSB3455: Aplikaci ResGen.exe nelze spustit, protože délka příkazového řádku ({0} znaků) překračuje maximální délku příkazu. Tento problém můžete vyřešit tak, že (1) odeberete nepotřebné odkazy na sestavení nebo (2) zkrátíte cesty k těmto odkazům.</target>
         <note>{StrBegin="MSB3455: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="translated">Soubor sestavení {0} nešel otevřít – image PE neobsahuje spravovaná metadata.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
@@ -2158,7 +2213,7 @@
         <source>Project reference "{0}" has not been resolved.</source>
         <target state="translated">Odkaz na projekt {0} nebyl přeložen.</target>
         <note>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </note>
@@ -2328,6 +2383,46 @@
         <target state="translated">MSB3394: Nelze zrušit registraci knihovny typů {0}, protože není zaregistrována.</target>
         <note>{StrBegin="MSB3394: "}</note>
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
+        <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="translated">Rozzipování ze souboru {0} do souboru {1} neproběhlo, protože parametr {2} byl v projektu nastaven na hodnotu {3} a velikosti souborů a časová razítka se shodují.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
+        <target state="translated">MSB3931: Rozzipování do adresáře {0} se nepodařilo, protože ho nebylo možné vytvořit. {1}</target>
+        <note>{StrBegin="MSB3931: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotExtractFile">
+        <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
+        <target state="translated">MSB3936: Rozzipovaný soubor {0} se nepodařilo otevřít do {1}. {2}</target>
+        <note>{StrBegin="MSB3936: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
+        <target state="translated">MSB3935: Soubor {0} se nepodařilo rozzipovat, protože cílový soubor {1} je jen pro čtení a nebylo možné ho nastavit jako zapisovatelný. {2}</target>
+        <note>{StrBegin="MSB3935: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotOpenFile">
+        <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
+        <target state="translated">MSB3933: Zazipovaný soubor {0} se nepodařilo otevřít. {1}</target>
+        <note>{StrBegin="MSB3933: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="translated">MSB3934: Rozzipovaný soubor {0} se nepodařilo otevřít do {1}, protože se nachází mimo cílový adresář.</target>
+        <note>{StrBegin="MSB3934: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorFileDoesNotExist">
+        <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="translated">MSB3932: Soubor {0} se nepodařilo rozzipovat, protože neexistuje nebo není přístupný.</target>
+        <note>{StrBegin="MSB3932: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.FileComment">
+        <source>Unzipping file "{0}" to "{1}".</source>
+        <target state="translated">Soubor {0} se rozzipovává do {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: {1} je neplatná hodnota parametru {0}.  Platné hodnoty jsou : {2}.</target>
@@ -2342,6 +2437,11 @@
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
         <target state="translated">{1} je neplatná hodnota parametru {0}.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.HashMismatch">
+        <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
+        <target state="translated">MSB3952: Neodpovídající hodnota hash souboru. Očekávalo se, že {0} bude mít hodnotu hash souboru {1} {2}, ale byla {3}.</target>
+        <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
@@ -2639,18 +2739,18 @@
         <note>{StrBegin="MSB3754: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
-        <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors."</source>
+        <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</source>
         <target state="translated">MSB3755: Nelze nalézt odkaz {0}. Pokud kód tento odkaz vyžaduje, při kompilaci může dojít k chybám.</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
-        <source>MSB3756: The xml element "{0}" is not valid under the xml element "{1}".</source>
-        <target state="translated">MSB3756: Element xml {0} není platný pod elementem xml {1}.</target>
+        <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
+        <target state="translated">MSB3756: Element &lt;{0}&gt; není platný podřízený element elementu &lt;{1}&gt;. Platné podřízené elementy jsou &lt;Code&gt;, &lt;Reference&gt; a &lt;Using&gt;.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
-        <source>MSB3757: Multiple Code xml elements have been found, this is not allowed. To fix this issue remove any additional Code xml elements from the task.</source>
-        <target state="translated">MSB3757: Bylo nalezeno více elementů xml kódu. To není povoleno. Chcete-li tento problém vyřešit, odeberte z úlohy všechny další elementy xml kódu.</target>
+        <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
+        <target state="translated">MSB3757: Je možné určit jenom jeden element &lt;Code&gt;.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3007,6 +3107,61 @@
         <source>The file is locked by: "{0}"</source>
         <target state="translated">Soubor uzamkl(a): {0}.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeType">
+        <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
+        <target state="translated">MSB3759: Určený typ kódu {0} není platný. Podporované jsou tyto typy kódu: {1}.</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
+        <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
+        <target state="translated">MSB3759: Určený jazyk kódu {0} není platný. Podporované jsou tyto jazyky kódu: {1}.</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.NoSourceCode">
+        <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
+        <target state="translated">MSB3760: Je nutné zadat zdrojový kód v elementu Code nebo cestu k souboru obsahujícímu zdrojový kód.</target>
+        <note>{StrBegin="MSB3760: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.CompilingAssembly">
+        <source>Compiling task source code</source>
+        <target state="translated">Kompilace zdrojového kódu úlohy</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidTaskXml">
+        <source>MSB3761: The specified task XML is invalid.  {0}</source>
+        <target state="translated">MSB3761: Zadaná úloha XML není platná. {0}</target>
+        <note>{StrBegin="MSB3761: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
+        <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
+        <target state="translated">MSB3756: Atribut {0} není platný pro element &lt;Code&gt;. Platnými atributy jsou Language, Source a Type.</target>
+        <note>{StrBegin="MSB3756: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
+        <target state="translated">MSB3752: Atribut {0} elementu &lt;{1}&gt; je nastavený, ale je prázdný. Pokud je atribut {0} nastavený, nesmí být prázdný.</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.Comment">
+        <source>Zipping directory "{0}" to "{1}".</source>
+        <target state="translated">Adresář {0} se zipuje do {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB3941: Adresář {0} se nepodařilo zazipovat, protože neexistuje nebo není přístupný.</target>
+        <note>{StrBegin="MSB3941: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFailed">
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
+        <target state="translated">MSB3943: Adresář {0} se nepodařilo zazipovat do souboru {1}. {2}</target>
+        <note>{StrBegin="MSB3943: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFileExists">
+        <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="translated">MSB3942: Zazipovaný soubor {0} se nepodařilo vytvořit, protože už existuje. Odstraňte nebo přejmenujte prosím tento soubor a zkuste to znovu.</target>
+        <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>
   </file>

@@ -50,7 +50,7 @@ namespace Microsoft.Build.Internal
         // this method parses the glob and extracts the fixed directory part in order to normalize it and make it absolute
         // without this normalization step, strings pointing outside the globbing cone would still match when they shouldn't
         // for example, we dont want "**/*.cs" to match "../Shared/Foo.cs"
-        // todo: glob rooting partially duplicated with MSBuildGlob.Parse
+        // todo: glob rooting knowledge partially duplicated with MSBuildGlob.Parse and FileMatcher.ComputeFileEnumerationCacheKey
         private static Regex CreateRegex(string unescapedFileSpec, string currentDirectory)
         {
             Regex regex = null;
@@ -58,12 +58,11 @@ namespace Microsoft.Build.Internal
             string wildcardDirectoryPart = null;
             string filenamePart = null;
 
-            FileMatcher.SplitFileSpec(
+            FileMatcher.Default.SplitFileSpec(
                 unescapedFileSpec,
                 out fixedDirPart,
                 out wildcardDirectoryPart,
-                out filenamePart,
-                FileMatcher.s_defaultGetFileSystemEntries);
+                out filenamePart);
 
             if (FileUtilities.PathIsInvalid(fixedDirPart))
             {
@@ -83,12 +82,11 @@ namespace Microsoft.Build.Internal
             bool isRecursive;
             bool isLegal;
 
-            FileMatcher.GetFileSpecInfoWithRegexObject(
+            FileMatcher.Default.GetFileSpecInfoWithRegexObject(
                 recombinedFileSpec,
                 out regex,
                 out isRecursive,
-                out isLegal,
-                FileMatcher.s_defaultGetFileSystemEntries);
+                out isLegal);
 
             return isLegal ? regex : null;
         }

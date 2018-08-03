@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
 
         private static readonly string ProjectFilePath = Path.GetFullPath(
             Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
-                        "..", "..", "Samples", "PortableTask", "netstandard1.3"));
+                        "..", "..", "PortableTask", "netstandard1.3"));
 
         private const string ProjectFileName = "portableTaskTest.proj";
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
             {
                 bool successfulExit;
 
-                var folder = env.CreateFolder().FolderPath;
+                var folder = env.CreateFolder().Path;
                 var projFile = Path.Combine(folder, ProjectFileName);
 
                 foreach (var file in new DirectoryInfo(ProjectFilePath).GetFiles())

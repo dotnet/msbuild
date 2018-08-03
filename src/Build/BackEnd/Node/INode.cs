@@ -1,16 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
-// <summary>Interface for a node.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Build.BackEnd
 {
-    using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
+    using NodeEngineShutdownReason = Execution.NodeEngineShutdownReason;
 
     #region Delegates
     /// <summary>

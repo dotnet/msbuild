@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectInstance class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -24,16 +20,15 @@ using Microsoft.Build.Internal;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
-#if MSBUILD_DEBUGGER
-using Microsoft.Build.Debugging;
-#endif
 using System.Xml;
 using System.IO;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Execution
 {
@@ -130,13 +125,6 @@ namespace Microsoft.Build.Execution
         /// Items organized by evaluatedInclude value
         /// </summary>
         private MultiDictionary<string, ProjectItemInstance> _itemsByEvaluatedInclude;
-
-        /// <summary>
-        /// Items, properties and other project level values to display
-        /// in the debugger, if we are being debugged.
-        /// If not debugging, this is null.
-        /// </summary>
-        private IDictionary<string, object> _initialGlobalsForDebugging;
 
         /// <summary>
         /// The project's root directory, for evaluation of relative paths and
@@ -384,7 +372,7 @@ namespace Microsoft.Build.Execution
         /// Assumes the project path is already normalized.
         /// Used by the RequestBuilder.
         /// </summary>
-        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
+        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId, ProjectLoadSettings? projectLoadSettings)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, "projectFile");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, "toolsVersion");
@@ -392,7 +380,7 @@ namespace Microsoft.Build.Execution
 
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, false /*Not explicitly loaded*/);
 
-            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
+            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId, projectLoadSettings);
         }
 
         /// <summary>
@@ -1116,16 +1104,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Items, properties and other project level values to display
-        /// in the debugger, if we are being debugged.
-        /// If not debugging, this is null.
-        /// </summary>
-        internal IDictionary<string, object> InitialGlobalsForDebugging
-        {
-            get { return _initialGlobalsForDebugging; }
-        }
-
-        /// <summary>
         /// Task classes and locations known to this project. 
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
@@ -1237,7 +1215,8 @@ namespace Microsoft.Build.Execution
         /// Initializes the object for evaluation.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.InitializeForEvaluation(IToolsetProvider toolsetProvider)
+        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.
+            InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
         {
             // All been done in the constructor.  We don't allow re-evaluation of project instances.
         }
@@ -1391,7 +1370,11 @@ namespace Microsoft.Build.Execution
         /// Record an import opened during evaluation.
         /// Does nothing: not needed for project instances.
         /// </summary>
-        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated)
+        void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.RecordImport(
+            ProjectImportElement importElement,
+            ProjectRootElement import,
+            int versionEvaluated,
+            SdkResult sdkResult)
         {
         }
 
@@ -1761,7 +1744,7 @@ namespace Microsoft.Build.Execution
         /// </comment>
         public string ExpandString(string unexpandedValue)
         {
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
 
             string result = expander.ExpandIntoStringAndUnescape(unexpandedValue, ExpanderOptions.ExpandPropertiesAndItems, ProjectFileLocation);
 
@@ -1779,9 +1762,18 @@ namespace Microsoft.Build.Execution
         /// </comment>
         public bool EvaluateCondition(string condition)
         {
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
 
-            bool result = ConditionEvaluator.EvaluateCondition<ProjectPropertyInstance, ProjectItemInstance>(condition, ParserOptions.AllowPropertiesAndItemLists, expander, ExpanderOptions.ExpandPropertiesAndItems, Directory, ProjectFileLocation, null /* no logging service */, BuildEventContext.Invalid);
+            bool result = ConditionEvaluator.EvaluateCondition(
+                condition,
+                ParserOptions.AllowPropertiesAndItemLists,
+                expander,
+                ExpanderOptions.ExpandPropertiesAndItems,
+                Directory,
+                ProjectFileLocation,
+                null /* no logging service */,
+                BuildEventContext.Invalid,
+                FileSystems.Default);
 
             return result;
         }
@@ -1939,8 +1931,6 @@ namespace Microsoft.Build.Execution
             {
                 _globalPropertiesToTreatAsLocal = globalPropertiesToTreatAsLocal;
             }
-
-            // ignore _initialGlobalsForDebugging. Only used for the debugger.
         }
 
         private void TranslateTargets(INodePacketTranslator translator)
@@ -2141,13 +2131,16 @@ namespace Microsoft.Build.Execution
                 // Enables task parameter logging based on whether any of the loggers attached
                 // to the Project have their verbosity set to Diagnostic. If no logger has
                 // been set to log diagnostic then the existing/default value will be persisted.
-                parameters.LogTaskInputs = parameters.LogTaskInputs || loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic);
+                parameters.LogTaskInputs =
+                    parameters.LogTaskInputs ||
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggingService?.IncludeTaskInputs == true;
             }
 
             if (remoteLoggers != null)
             {
-                parameters.ForwardingLoggers = (remoteLoggers is ICollection<ForwardingLoggerRecord>) ?
-                    ((ICollection<ForwardingLoggerRecord>)remoteLoggers) :
+                parameters.ForwardingLoggers = remoteLoggers is ICollection<ForwardingLoggerRecord> records ?
+                    records :
                     new List<ForwardingLoggerRecord>(remoteLoggers);
             }
 
@@ -2404,7 +2397,7 @@ namespace Microsoft.Build.Execution
 
                     if (environmentVariableName != null &&
                         (!XmlUtilities.IsValidElementName(environmentVariableName)
-                        || XMakeElements.IllegalItemPropertyNames[environmentVariableName] != null
+                        || XMakeElements.ReservedItemNames.Contains(environmentVariableName)
                         || ReservedPropertyNames.IsReservedProperty(environmentVariableName))
                        )
                     {
@@ -2496,7 +2489,7 @@ namespace Microsoft.Build.Execution
         /// Tools version may be null.
         /// Does not set mutability.
         /// </summary>
-        private void Initialize(ProjectRootElement xml, IDictionary<string, string> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService = null, int submissionId = BuildEventContext.InvalidSubmissionId)
+        private void Initialize(ProjectRootElement xml, IDictionary<string, string> globalProperties, string explicitToolsVersion, string explicitSubToolsetVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService = null, int submissionId = BuildEventContext.InvalidSubmissionId, ProjectLoadSettings? projectLoadSettings = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, "xml");
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(explicitToolsVersion, "toolsVersion");
@@ -2581,10 +2574,10 @@ namespace Microsoft.Build.Execution
 
             ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
 
-            _initialGlobalsForDebugging = Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
+            Evaluator<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Evaluate(
                 this,
                 xml,
-                buildParameters.ProjectLoadSettings,
+                projectLoadSettings ?? buildParameters.ProjectLoadSettings, /* Use override ProjectLoadSettings if specified */
                 buildParameters.MaxNodeCount,
                 buildParameters.EnvironmentPropertiesInternal,
                 loggingService,
@@ -2592,7 +2585,6 @@ namespace Microsoft.Build.Execution
                 buildParameters.ToolsetProvider,
                 ProjectRootElementCache,
                 buildEventContext,
-                this /* for debugging only */,
                 sdkResolverService ?? SdkResolverService.Instance,
                 submissionId);
 

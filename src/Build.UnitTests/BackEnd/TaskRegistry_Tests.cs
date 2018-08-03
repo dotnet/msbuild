@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Unit tests for the task execution host object.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -20,6 +16,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.BuildTasks;
@@ -2198,7 +2195,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         projectUsingTaskElement,
                         registry,
                         RegistryExpander,
-                        ExpanderOptions.ExpandPropertiesAndItems
+                        ExpanderOptions.ExpandPropertiesAndItems,
+                        FileSystems.Default
                     );
             }
 
@@ -2259,7 +2257,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             secondaryItemsByName.ImportItems(thirdItemGroup);
             secondaryItemsByName.ImportItems(trueItemGroup);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName, FileSystems.Default);
             return expander;
         }
 

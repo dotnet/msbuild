@@ -13,6 +13,9 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Evaluation
@@ -44,20 +47,22 @@ namespace Microsoft.Build.Evaluation
             new Dictionary<string, LazyItemList>() :
             new Dictionary<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
-        /// <summary>
-        /// Cache used for caching IO operation results
-        /// </summary>
-        private readonly ConcurrentDictionary<string, ImmutableArray<string>> _entriesCache = new ConcurrentDictionary<string, ImmutableArray<string>>();
+        protected IFileSystem FileSystem { get; }
 
-        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler)
+        protected EngineFileUtilities EngineFileUtilities { get; }
+
+        public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext.FileSystem);
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext.FileSystem);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
+
+            FileSystem = evaluationContext.FileSystem;
+            EngineFileUtilities = evaluationContext.EngineFileUtilities;
         }
 
         private ImmutableList<I> GetItems(string itemType)
@@ -76,7 +81,14 @@ namespace Microsoft.Build.Evaluation
             return EvaluateCondition(element, expanderOptions, parserOptions, _expander, this);
         }
 
-        private static bool EvaluateCondition(string condition, ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        private static bool EvaluateCondition(
+            string condition,
+            ProjectElement element,
+            ExpanderOptions expanderOptions,
+            ParserOptions parserOptions,
+            Expander<P, I> expander,
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator
+            )
         {
             if (condition?.Length == 0)
             {
@@ -94,14 +106,21 @@ namespace Microsoft.Build.Evaluation
                     GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
                     element.ConditionLocation,
                     lazyEvaluator._loggingContext.LoggingService,
-                    lazyEvaluator._loggingContext.BuildEventContext
+                    lazyEvaluator._loggingContext.BuildEventContext,
+                    lazyEvaluator.FileSystem
                     );
 
                 return result;
             }
         }
 
-        private static bool EvaluateCondition(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions, Expander<P, I> expander, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
+        private static bool EvaluateCondition(
+            ProjectElement element,
+            ExpanderOptions expanderOptions,
+            ParserOptions parserOptions,
+            Expander<P, I> expander,
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator
+            )
         {
             return EvaluateCondition(element.Condition, element, expanderOptions, parserOptions, expander, lazyEvaluator);
         }
@@ -541,14 +560,19 @@ namespace Microsoft.Build.Evaluation
                 // if so we need to add the right item reference.
                 foreach (var metadatumElement in itemElement.Metadata)
                 {
+                    // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
+                    // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
+                    // See: https://github.com/Microsoft/msbuild/issues/3460
+                    const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
+
                     var valueWithPropertiesExpanded = _expander.ExpandIntoStringLeaveEscaped(
                         metadatumElement.Value,
-                        ExpanderOptions.ExpandProperties,
+                        expanderOptions,
                         metadatumElement.Location);
 
                     var conditionWithPropertiesExpanded = _expander.ExpandIntoStringLeaveEscaped(
                         metadatumElement.Condition,
-                        ExpanderOptions.ExpandProperties,
+                        expanderOptions,
                         metadatumElement.ConditionLocation);
 
                     values.Add(valueWithPropertiesExpanded);

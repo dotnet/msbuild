@@ -8,6 +8,11 @@
         <note>{StrBegin="MSB4001: "}UE: This message is shown when a task has more than one .NET property with the same name -- it's unclear which of
     those properties the task wants to use as a parameter in project files.</note>
       </trans-unit>
+      <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
+        <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
+        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <note>{StrBegin="MSB4249: "}</note>
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: не удалось получить атрибуты для параметров в задаче "{0}". {1}</target>
@@ -24,6 +29,18 @@
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">Не удалось завершить операцию, так как уже выполняется сборка.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotExpandItemMetadata">
+        <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
+        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+    %(RootDir) to an item-spec that's not a valid path would result in this error.
+    LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
+      </trans-unit>
+      <trans-unit id="MetaprojectGenerated">
+        <source>Metaproject "{0}" generated.</source>
+        <target state="new">Metaproject "{0}" generated.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -174,7 +191,7 @@
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
         <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: произошел преждевременный выход дочернего узла "{0}". Выполняется завершение работы. Диагностические данные можно найти в файлах с именем MSBuild_*.failure.txt, находящихся в "{1}". Это расположение можно изменить, задав другой каталог в переменной среды MSBUILDDEBUGPATH.</target>
+        <target state="translated">MSB4166: произошло преждевременное завершение работы дочернего узла "{0}". Идет завершение работы. Диагностические данные можно найти в файлах с именем MSBuild_*.failure.txt, находящихся в каталоге "{1}". Этот каталог можно изменить в переменной среды MSBUILDDEBUGPATH.</target>
         <note>{StrBegin="MSB4166: "}</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
@@ -221,7 +238,7 @@
       </trans-unit>
       <trans-unit id="ConflictingValuesOfMSBuildToolsPath">
         <source>MSB4142: MSBuildToolsPath is not the same as MSBuildBinPath for the ToolsVersion "{0}" defined at "{1}". If both are present they must have the same value.</source>
-        <target state="translated">MSB4142: MSBuildToolsPath не соответствует MSBuildBinPath для версии ToolsVersion "{0}", определенной в "{1}". Если заданы оба пути, они должны иметь одинаковое значение.</target>
+        <target state="translated">MSB4142: MSBuildToolsPath не соответствует MSBuildBinPath для ToolsVersion "{0}", определенной в "{1}". Если установлены оба пути, они должны иметь одинаковое значение.</target>
         <note>{StrBegin="MSB4142: "}</note>
       </trans-unit>
       <trans-unit id="DefaultTasksFileFailure">
@@ -806,7 +823,7 @@
       </trans-unit>
       <trans-unit id="ProjectMustBeInMSBuildXmlNamespace">
         <source>MSB4041: The default XML namespace of the project must be the MSBuild XML namespace or no namespace. If the project is authored in the MSBuild 2003 format, please add xmlns="{0}" to the &lt;Project&gt; element. If the project has been authored in the old 1.0 or 1.2 format, please convert it to MSBuild 2003 format.</source>
-        <target state="translated">MSB4041: этот проект должен иметь пространство имен XML по умолчанию MSBuild либо не иметь никакого пространства имен. Если проект создан в формате MSBuild 2003, добавьте xmlns="{0}" в элемент &lt;Project&gt;. Если проект был создан в старом формате 1.0 или 1.2, преобразуйте его в формат MSBuild 2003.</target>
+        <target state="translated">MSB4041: пространством имен XML по умолчанию для этого проекта должно быть пространством имен XML MSBuild (или пространства имен быть не должно). Если проект создан в формате MSBuild 2003, добавьте xmlns="{0}" в элемент &lt;Project&gt;. Если проект был создан в старом формате (1.0 или 1.2), преобразуйте его в формат MSBuild 2003.</target>
         <note>{StrBegin="MSB4041: "}UE: This is a Beta 1 message only.
       LOCALIZATION: &lt;Project&gt;, "MSBuild" and "xmlns" should not be localized.</note>
       </trans-unit>
@@ -1948,7 +1965,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
         <source>MSB4802: The "{0}" task could not be instantiated from "{1}". This version of MSBuild does not support {2}.</source>
-        <target state="translated">MSB4802: не удалось создать экземпляр задачи "{0}" из "{1}". Эта версия MSBuild не поддерживает {2}.</target>
+        <target state="translated">MSB4802: не удалось создать экземпляр задачи "{0}" из "{1}". Установленная версия MSBuild не поддерживает {2}.</target>
         <note>{StrBegin="MSB4802: "}</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
@@ -1983,7 +2000,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: недопустимые параметры средства ведения двоичного журнала: "{0}". Ожидаются: ProjectImports={{None,Embed,ZipFile}} и (или) [LogFile=]filePath.binlog (имя файла журнала или путь к нему должны иметь расширение BINLOG).</target>
+        <target state="translated">MSB4234: недопустимые параметры средства ведения двоичного журнала: "{0}". Ожидаются: ProjectImports={{None,Embed,ZipFile}} и (или) [LogFile=]filePath.binlog (имя файла журнала или путь к нему должны иметь расширение ".binlog").</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
@@ -2043,7 +2060,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="TargetSkippedWhenSkipNonexistentTargets">
         <source>Target "{0}" skipped. The target does not exist in the project and SkipNonexistentTargets is set to true.</source>
-        <target state="translated">Целевой объект "{0}" пропущен. Целевой объект не существует в проекте, а SkipNonexistentTargets имеет значение "true".</target>
+        <target state="translated">Целевой объект "{0}" пропущен. Целевой объект не существует в проекте, а SkipNonexistentTargets имеет значение "Истина".</target>
         <note>LOCALIZATION: Do NOT localize "SkipNonexistentTargets" or "true".</note>
       </trans-unit>
       <trans-unit id="TaskFactoryTaskTypeIsNotSet">
@@ -2068,7 +2085,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
         <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: сбой при запуске сопоставителя SDK на базе NuGet, так как не удалось найти сборки NuGet.  Проверьте свою установку MSBuild или укажите папку, содержащую требуемые сборки NuGet, в переменной среды "{0}". {1}</target>
+        <target state="translated">MSB4243: не удалось запустить сопоставитель SDK на базе NuGet, так как не удалось найти сборки NuGet. Проверьте свою установку MSBuild или укажите папку, содержащую требуемые сборки NuGet, в качестве значения переменной среды "{0}". {1}</target>
         <note>{StrBegin="MSB4243: "}</note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
@@ -2098,14 +2115,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="ReferencingMultipleVersionsOfTheSameSdk">
         <source>MSB4240: Multiple versions of the same SDK "{0}" cannot be specified. The previously resolved SDK version "{1}" from location "{2}" will be used and the version "{3}" will be ignored.</source>
-        <target state="translated">MSB4240: невозможно указать несколько версий одного пакета SDK "{0}". Будет использована ранее разрешенная версия пакета SDK "{1}" из "{2}", а версия "{3}" будет проигнорирована.</target>
+        <target state="translated">MSB4240: невозможно указать несколько версий одного пакета SDK "{0}". Будет использована ранее разрешенная версия SDK "{1}" из расположения "{2}", а версия "{3}" будет пропущена.</target>
         <note>{StrBegin="MSB4240: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>
       <trans-unit id="SdkResultVersionDifferentThanReference">
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
-        <target state="translated">MSB4241: ссылка на пакет SDK "{0}" версии "{1}" была разрешена в версию "{2}".  Возможно, вы используете версию, отличную от ожидаемой, если не обновили версию по ссылке.</target>
+        <target state="translated">MSB4241: ссылка на пакет SDK "{0}" версии "{1}" была сопоставлена версии "{2}". Возможно, вы используете версию, отличную от ожидаемой, если вы не обновили версию по ссылке.</target>
         <note>{StrBegin="MSB4241: "}
       LOCALIZATION:  Do not localize the word SDK.
     </note>
@@ -2116,6 +2133,21 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
+      </trans-unit>
+      <trans-unit id="SdkResolverManifestInvalid">
+        <source>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</source>
+        <target state="translated">MSB4245: файл манифеста сопоставителя SDK недопустим. Это может означать, что установка MSBuild повреждена или недопустима. Путь к файлу манифеста: "{0}". Сообщение: {1}</target>
+        <note>{StrBegin="MSB4245: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverNoDllOrManifest">
+        <source>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</source>
+        <target state="translated">MSB4246: папка сопоставителя SDK существует, но в ней отсутствует библиотека DLL сопоставителя SDK или файл манифеста. Это может означать, что установка MSBuild повреждена или недопустима. Путь к сопоставителю SDK: {0}</target>
+        <note>{StrBegin="MSB4246: "}</note>
+      </trans-unit>
+      <trans-unit id="SdkResolverDllInManifestMissing">
+        <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
+        <target state="translated">MSB4247: не удалось загрузить сопоставитель SDK. Файл манифеста существует, но не удается найти файл библиотеки DLL сопоставителя SDK по указанному пути. Путь к файлу манифеста: "{0}". Путь к сопоставителю SDK: {1}</target>
+        <note>{StrBegin="MSB4247: "}</note>
       </trans-unit>
     </body>
   </file>

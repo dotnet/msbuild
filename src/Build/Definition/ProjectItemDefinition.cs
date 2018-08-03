@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Represents a set of evaluated item definitions all applying to the same item-type.</summary>
-//-----------------------------------------------------------------------
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -142,7 +138,7 @@ namespace Microsoft.Build.Evaluation
         {
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
-            ErrorUtilities.VerifyThrowInvalidOperation(XMakeElements.IllegalItemPropertyNames[name] == null, "CannotModifyReservedItemMetadata", name);
+            ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
 
             ProjectMetadata metadatum;
 

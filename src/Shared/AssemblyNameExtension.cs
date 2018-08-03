@@ -204,8 +204,16 @@ namespace Microsoft.Build.Shared
             using (var stream = File.OpenRead(path))
             using (var peFile = new PEReader(stream))
             {
+                // If the file does not contain PE metadata, throw BadImageFormatException to preserve
+                // behavior from AssemblyName.GetAssemblyName(). RAR will deal with this correctly.
+                if (!peFile.HasMetadata)
+                {
+                    throw new BadImageFormatException(string.Format(CultureInfo.CurrentCulture,
+                        AssemblyResources.GetString("ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata"),
+                        path));
+                }
+
                 var metadataReader = peFile.GetMetadataReader();
-                
                 var entry = metadataReader.GetAssemblyDefinition();
 
                 assemblyName = new AssemblyName();

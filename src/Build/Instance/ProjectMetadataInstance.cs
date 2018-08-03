@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Wraps an evaluated piece of metadata for build purposes.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;
@@ -69,11 +65,11 @@ namespace Microsoft.Build.Execution
 
             if (allowItemSpecModifiers)
             {
-                ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[name] == null, "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
             }
             else
             {
-                ErrorUtilities.VerifyThrowArgument(XMakeElements.IllegalItemPropertyNames[name] == null && !FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "OM_ReservedName", name);
+                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name) && !FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "OM_ReservedName", name);
             }
 
             _name = name;

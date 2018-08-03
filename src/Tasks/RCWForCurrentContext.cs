@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Helpers for COM Interop.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Runtime.InteropServices;
@@ -27,7 +23,7 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         /// <summary>
         /// Indicates if we created the RCW and therefore need to release it's com reference.
         /// </summary>
-        private bool _shouldReleaseRCW;
+        private readonly bool _shouldReleaseRCW;
 
         /// <summary>
         /// Constructor creates the new RCW in the current context.
@@ -39,7 +35,7 @@ namespace Microsoft.Build.Tasks.InteropUtilities
             // the caching behaviour of the marshaled pointer. 
             // See RCW::GetComIPForMethodTableFromCache in ndp\clr\src\VM\RuntimeCallableWrapper.cpp
             IntPtr iunknownPtr = Marshal.GetIUnknownForObject(rcw);
-            Object objInCurrentCtx = null;
+            Object objInCurrentCtx;
 
             try
             {

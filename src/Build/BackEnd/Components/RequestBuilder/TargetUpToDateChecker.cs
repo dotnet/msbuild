@@ -2,12 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -1222,8 +1219,9 @@ namespace Microsoft.Build.BackEnd
         private string _targetInputSpecification;
         // the value of the target's "Outputs" attribute
         private string _targetOutputSpecification;
+
         // Details of the dependency analysis for logging
-        private ArrayList _dependencyAnalysisDetail = new ArrayList();
+        private readonly List<DependencyAnalysisLogDetail> _dependencyAnalysisDetail = new List<DependencyAnalysisLogDetail>();
 
         // Engine logging service which to log message to
         private ILoggingService _loggingService;

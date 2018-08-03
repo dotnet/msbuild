@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The build request builder component.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -45,6 +42,11 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class RequestBuilder : IRequestBuilder, IRequestBuilderCallback, IBuildComponent
     {
+        /// <summary>
+        /// The dedicated scheduler object.
+        /// </summary>
+        private static readonly TaskScheduler s_dedicatedScheduler = new DedicatedThreadsTaskScheduler();
+
         /// <summary>
         /// The event used to signal that this request should immediately terminate.
         /// </summary>
@@ -629,8 +631,8 @@ namespace Microsoft.Build.BackEnd
                             return this.RequestThreadProc(setThreadParameters: true);
                         },
                         _cancellationTokenSource.Token,
-                        TaskCreationOptions.LongRunning,
-                        TaskScheduler.Default).Unwrap();
+                        TaskCreationOptions.None,
+                        s_dedicatedScheduler).Unwrap();
                 }
             }
         }
@@ -658,8 +660,10 @@ namespace Microsoft.Build.BackEnd
                 threadName = "RequestBuilder STA thread";
             }
 #endif
-
-            Thread.CurrentThread.Name = threadName;
+            if (string.IsNullOrEmpty(Thread.CurrentThread.Name))
+            {
+                Thread.CurrentThread.Name = threadName;
+            }
         }
 
         /// <summary>
@@ -1155,6 +1159,14 @@ namespace Microsoft.Build.BackEnd
             // Get the hosted ISdkResolverService.  This returns either the MainNodeSdkResolverService or the OutOfProcNodeSdkResolverService depending on who created the current RequestBuilder
             ISdkResolverService sdkResolverService = _componentHost.GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
 
+            // Use different project load settings if the build request indicates to do so
+            ProjectLoadSettings projectLoadSettings = _componentHost.BuildParameters.ProjectLoadSettings;
+
+            if (_requestEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
+            {
+                projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
+            }
+
             return new ProjectInstance(
                 _requestEntry.RequestConfiguration.ProjectFullPath,
                 globalProperties,
@@ -1169,8 +1181,9 @@ namespace Microsoft.Build.BackEnd
                     BuildEventContext.InvalidProjectContextId,
                     BuildEventContext.InvalidTargetId,
                     BuildEventContext.InvalidTaskId),
-                    sdkResolverService,
-                    _requestEntry.Request.SubmissionId);
+                sdkResolverService,
+                _requestEntry.Request.SubmissionId,
+                projectLoadSettings);
         }
 
         /// <summary>
@@ -1287,7 +1300,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     //
-                    loggingService.AddWarningsAsErrors(buildEventContext.ProjectInstanceId, new HashSet<string>());
+                    loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
                 {
@@ -1295,7 +1308,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (warningsAsErrors?.Count > 0)
                     {
-                        loggingService.AddWarningsAsErrors(buildEventContext.ProjectInstanceId, warningsAsErrors);
+                        loggingService.AddWarningsAsErrors(buildEventContext, warningsAsErrors);
                     }
                 }
 
@@ -1303,7 +1316,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (warningsAsMessages?.Count > 0)
                 {
-                    loggingService.AddWarningsAsMessages(buildEventContext.ProjectInstanceId, warningsAsMessages);
+                    loggingService.AddWarningsAsMessages(buildEventContext, warningsAsMessages);
                 }
             }
         }
@@ -1316,6 +1329,58 @@ namespace Microsoft.Build.BackEnd
             }
             
             return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+        }
+
+        private sealed class DedicatedThreadsTaskScheduler : TaskScheduler
+        {
+            private readonly BlockingCollection<Task> _tasks = new BlockingCollection<Task>();
+            private int _availableThreads = 0;
+
+            protected override void QueueTask(Task task)
+            {
+                RequestThread();
+                _tasks.Add(task);
+            }
+
+            protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) => false;
+
+            protected override IEnumerable<Task> GetScheduledTasks() => _tasks;
+
+            private void RequestThread()
+            {
+                // Decrement available thread count; don't drop below zero
+                // Prior value is stored in count
+                var count = Volatile.Read(ref _availableThreads);
+                while (count > 0)
+                {
+                    var prev = Interlocked.CompareExchange(ref _availableThreads, count - 1, count);
+                    if (prev == count)
+                    {
+                        break;
+                    }
+                    count = prev;
+                }
+
+                if (count == 0)
+                {
+                    // No threads were available for request
+                    InjectThread();
+                }
+            }
+
+            private void InjectThread()
+            {
+                var thread = new Thread(() =>
+                {
+                    foreach (Task t in _tasks.GetConsumingEnumerable())
+                    {
+                        TryExecuteTask(t);
+                        Interlocked.Increment(ref _availableThreads);
+                    }
+                });
+                thread.IsBackground = true;
+                thread.Start();
+            }
         }
     }
 }

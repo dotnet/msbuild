@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Shared;
@@ -16,12 +15,10 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal sealed class FunctionCallExpressionNode : OperatorExpressionNode
     {
-        private ArrayList _arguments;
-        private string _functionName;
+        private readonly List<GenericExpressionNode> _arguments;
+        private readonly string _functionName;
 
-        private FunctionCallExpressionNode() { }
-
-        internal FunctionCallExpressionNode(string functionName, ArrayList arguments)
+        internal FunctionCallExpressionNode(string functionName, List<GenericExpressionNode> arguments)
         {
             _functionName = functionName;
             _arguments = arguments;
@@ -42,7 +39,7 @@ namespace Microsoft.Build.Evaluation
                     // Expand the items and use DefaultIfEmpty in case there is nothing returned
                     // Then check if everything is not null (because the list was empty), not
                     // already loaded into the cache, and exists
-                    var list = ExpandArgumentAsFileList((GenericExpressionNode) _arguments[0], state);
+                    List<string> list = ExpandArgumentAsFileList(_arguments[0], state);
                     if (list == null)
                     {
                         return false;
@@ -50,7 +47,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (var item in list)
                     {
-                        if (item == null || !(state.LoadedProjectsCache?.TryGet(item) != null || FileUtilities.FileOrDirectoryExistsNoThrow(item)))
+                        if (item == null || !(state.LoadedProjectsCache?.TryGet(item) != null || FileUtilities.FileOrDirectoryExistsNoThrow(item, state.FileSystem)))
                         {
                             return false;
                         }
@@ -76,7 +73,7 @@ namespace Microsoft.Build.Evaluation
                 VerifyArgumentCount(1, state);
 
                 // Expand properties and items, and verify the result is an appropriate scalar
-                string expandedValue = ExpandArgumentForScalarParameter("HasTrailingSlash", (GenericExpressionNode)_arguments[0], state);
+                string expandedValue = ExpandArgumentForScalarParameter("HasTrailingSlash", _arguments[0], state);
 
                 // Is the last character a backslash?
                 if (expandedValue.Length != 0)
@@ -113,7 +110,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="state"></param>
         /// <param name="isFilePath">True if this is afile name and the path should be normalized</param>
         /// <returns>Scalar result</returns>
-        private string ExpandArgumentForScalarParameter(string function, GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state,
+        private static string ExpandArgumentForScalarParameter(string function, GenericExpressionNode argumentNode, ConditionEvaluator.IConditionEvaluationState state,
             bool isFilePath = true)
         {
             string argument = argumentNode.GetUnexpandedValue(state);

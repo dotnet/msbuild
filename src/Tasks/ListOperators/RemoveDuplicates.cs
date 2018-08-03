@@ -17,19 +17,19 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The left-hand set of items to be RemoveDuplicatesed from.
         /// </summary>
-        public ITaskItem[] Inputs { get; set; } = Array.Empty<TaskItem>();
+        public ITaskItem[] Inputs { get; set; } = Array.Empty<ITaskItem>();
 
         /// <summary>
         /// List of unique items.
         /// </summary>
         [Output]
-        public ITaskItem[] Filtered { get; set; } = null;
+        public ITaskItem[] Filtered { get; set; }
 
         /// <summary>
         /// True if any duplicate items were found. False otherwise.
         /// </summary>
         [Output]
-        public bool HadAnyDuplicates { get; set; } = false;
+        public bool HadAnyDuplicates { get; set; }
 
         /// <summary>
         /// Execute the task.

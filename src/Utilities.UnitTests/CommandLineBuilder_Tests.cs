@@ -7,13 +7,12 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.Text.RegularExpressions;
 using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CommandLineBuilderTest
+    public sealed class CommandLineBuilderTest
     {
         /*
         * Method:   AppendSwitchSimple
@@ -62,7 +61,7 @@ namespace Microsoft.Build.UnitTests
         public void AppendSwitchWithSpacesInParameterTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendSwitchIfNotNull("/animal:", (ITaskItem)new TaskItem("dog and pony"));
+            c.AppendSwitchIfNotNull("/animal:", new TaskItem("dog and pony"));
             c.ShouldBe("/animal:\"dog and pony\"");
         }
 
@@ -88,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         public void AppendTwoStringsEnsureNoSpace()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new string[] { "Form1.resx", FileUtilities.FixFilePath("built\\Form1.resources") }, ",");
+            c.AppendFileNamesIfNotNull(new[] { "Form1.resx", FileUtilities.FixFilePath("built\\Form1.resources") }, ",");
 
             // There shouldn't be a space before or after the comma
             // Tools like resgen require comma-delimited lists to be bumped up next to each other.
@@ -104,7 +103,7 @@ namespace Microsoft.Build.UnitTests
         public void AppendSourcesArray()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new string[] { "Mercury.cs", "Venus.cs", "Earth.cs" }, " ");
+            c.AppendFileNamesIfNotNull(new[] { "Mercury.cs", "Venus.cs", "Earth.cs" }, " ");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe(@"Mercury.cs Venus.cs Earth.cs");
@@ -119,7 +118,7 @@ namespace Microsoft.Build.UnitTests
         public void AppendSourcesArrayWithDashes()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new string[] { "-Mercury.cs", "-Venus.cs", "-Earth.cs" }, " ");
+            c.AppendFileNamesIfNotNull(new[] { "-Mercury.cs", "-Venus.cs", "-Earth.cs" }, " ");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe($".{Path.DirectorySeparatorChar}-Mercury.cs .{Path.DirectorySeparatorChar}-Venus.cs .{Path.DirectorySeparatorChar}-Earth.cs");
@@ -132,7 +131,7 @@ namespace Microsoft.Build.UnitTests
         public void AppendSourcesArrayWithDashesTaskItem()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new TaskItem[] { new TaskItem("-Mercury.cs"), null, new TaskItem("Venus.cs"), new TaskItem("-Earth.cs") }, " ");
+            c.AppendFileNamesIfNotNull(new[] { new TaskItem("-Mercury.cs"), null, new TaskItem("Venus.cs"), new TaskItem("-Earth.cs") }, " ");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe($".{Path.DirectorySeparatorChar}-Mercury.cs  Venus.cs .{Path.DirectorySeparatorChar}-Earth.cs");
@@ -147,7 +146,7 @@ namespace Microsoft.Build.UnitTests
         public void JoinAppendEmpty()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new string[] { "" }, " ");
+            c.AppendFileNamesIfNotNull(new[] { "" }, " ");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe("");
@@ -176,7 +175,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitch("/something");
-            c.AppendSwitchIfNotNull("/switch:", new string[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
+            c.AppendSwitchIfNotNull("/switch:", new[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe("/something /switch:\"Mer cury.cs\",\"Ve nus.cs\",\"Ear th.cs\"");
@@ -190,7 +189,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitch("/something");
-            c.AppendSwitchIfNotNull("/switch:", new TaskItem[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
+            c.AppendSwitchIfNotNull("/switch:", new[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe("/something /switch:\"Mer cury.cs\",,\"Ve nus.cs\",\"Ear th.cs\"");
@@ -204,7 +203,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitch("/something");
-            c.AppendSwitchUnquotedIfNotNull("/switch:", new string[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
+            c.AppendSwitchUnquotedIfNotNull("/switch:", new[] { "Mer cury.cs", "Ve nus.cs", "Ear th.cs" }, ",");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe("/something /switch:Mer cury.cs,Ve nus.cs,Ear th.cs");
@@ -218,7 +217,7 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitch("/something");
-            c.AppendSwitchUnquotedIfNotNull("/switch:", new TaskItem[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
+            c.AppendSwitchUnquotedIfNotNull("/switch:", new[] { new TaskItem("Mer cury.cs"), null, new TaskItem("Ve nus.cs"), new TaskItem("Ear th.cs") }, ",");
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe("/something /switch:Mer cury.cs,,Ve nus.cs,Ear th.cs");
@@ -248,9 +247,9 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineBuilder c = new CommandLineBuilder();
             c.AppendSwitch("/something");
-            c.AppendFileNameIfNotNull((ITaskItem)new TaskItem("-Mercury.cs"));
-            c.AppendFileNameIfNotNull((ITaskItem)new TaskItem("Mercury.cs"));
-            c.AppendFileNameIfNotNull((ITaskItem)new TaskItem("Mer cury.cs"));
+            c.AppendFileNameIfNotNull(new TaskItem("-Mercury.cs"));
+            c.AppendFileNameIfNotNull(new TaskItem("Mercury.cs"));
+            c.AppendFileNameIfNotNull(new TaskItem("Mer cury.cs"));
 
             // Managed compilers use this function to append sources files.
             c.ShouldBe($"/something .{Path.DirectorySeparatorChar}-Mercury.cs Mercury.cs \"Mer cury.cs\"");

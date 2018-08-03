@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Unit tests for the TargetBuilder with a mock task builder.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Xml;
@@ -1174,11 +1170,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
       ";
             StringReader reader = new StringReader(projectContents);
-#if FEATURE_XMLTEXTREADER
             Project project = new Project(new XmlTextReader(reader), null, null);
-#else
-            Project project = new Project(XmlReader.Create(reader), null, null);
-#endif
             bool success = project.Build(_mockLogger);
             Assert.False(success);
         }
@@ -1356,7 +1348,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>The lookup</returns>
         private Lookup CreateStandardLookup(ProjectInstance project)
         {
-            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties), null);
+            Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
             return lookup;
         }
 

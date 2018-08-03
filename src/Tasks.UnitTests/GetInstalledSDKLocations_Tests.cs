@@ -2,10 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Test that we can retrieve the list of SDKs and output them to the project file.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

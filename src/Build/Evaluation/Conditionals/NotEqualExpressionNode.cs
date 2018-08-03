@@ -1,18 +1,15 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections;
-using System.Globalization;
-using System.IO;
 using System;
-
-using Microsoft.Build.Shared;
+using System.Diagnostics;
 
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// Compares for inequality
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class NotEqualExpressionNode : MultipleComparisonNode
     {
         /// <summary>
@@ -38,5 +35,7 @@ namespace Microsoft.Build.Evaluation
         {
             return !String.Equals(left, right, StringComparison.OrdinalIgnoreCase);
         }
+
+        internal override string DebuggerDisplay => $"(!= {LeftChild.DebuggerDisplay} {RightChild.DebuggerDisplay})";
     }
 }

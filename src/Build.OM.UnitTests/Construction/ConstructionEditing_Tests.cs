@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for editing through the construction model.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -3210,7 +3206,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             using (var env = TestEnvironment.Create())
             {
-                var testSdkRoot = env.CreateFolder().FolderPath;
+                var testSdkRoot = env.CreateFolder().Path;
                 var testSdkDirectory = Path.Combine(testSdkRoot, "MSBuildUnitTestSdk", "Sdk");
                 Directory.CreateDirectory(testSdkDirectory);
 

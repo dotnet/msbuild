@@ -1,19 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectItemDefinitionGroupElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
-
-using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -29,7 +22,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemDefinitionGroupElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -43,16 +36,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get a list of child item definitions.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectItemDefinitionElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectItemDefinitionElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(Children.OfType<ProjectItemDefinitionElement>());
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:

@@ -1,16 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An interner used for serialization.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {
@@ -39,7 +32,7 @@ namespace Microsoft.Build.Collections
         /// The map used to intern strings for serialization.  This map doesn't exist when the strings
         /// are deserialized (it is not needed.)
         /// </summary>
-        private Dictionary<string, int> _stringToIdsMap;
+        private readonly Dictionary<string, int> _stringToIdsMap;
 
         /// <summary>
         /// The list of strings by ID.
@@ -64,7 +57,7 @@ namespace Microsoft.Build.Collections
         /// </remarks>
         public LookasideStringInterner(INodePacketTranslator translator)
         {
-            this.Translate(translator);
+            Translate(translator);
         }
 
         /// <summary>
@@ -84,12 +77,10 @@ namespace Microsoft.Build.Collections
             }
             else
             {
-                int index = -1;
-
                 // If stringToIdsMap is null here, it means we probably tried to intern a string to an interner which came from
                 // deserialization (and thus doesn't support further interning for efficiency reasons.)  No VerifyThrow here
                 // because this function is called a lot.
-                if (!_stringToIdsMap.TryGetValue(str, out index))
+                if (!_stringToIdsMap.TryGetValue(str, out int index))
                 {
                     index = _strings.Count; // This will be the index of the string we are about to add.
                     _stringToIdsMap.Add(str, index);

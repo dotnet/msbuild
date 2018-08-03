@@ -146,6 +146,12 @@
     %(RootDir) to an item-spec that's not a valid path, would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
   </data>
+  <data name="CannotExpandItemMetadata" UESanitized="false" Visibility="Public">
+    <value>MSB4248: Cannot expand metadata in expression "{0}". {1}</value>
+    <comment>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
+    %(RootDir) to an item-spec that's not a valid path would result in this error.
+    LOCALIZATION: "{1}" is a localized message explaining the problem.</comment>
+  </data>
   <data name="CouldNotFindMSBuildExe">
     <value>MSB4193: MSBuild.exe could not be launched as a child node as it could not be found at the location "{0}". If necessary, specify the correct location in the BuildParameters, or with the MSBUILD_EXE_PATH environment variable.</value>
     <comment>{StrBegin="MSB4193: "}</comment>
@@ -801,6 +807,10 @@
     <value>MSB4205: The website project in this solution is targeting the v2.0 runtime, but it is not installed.</value>
     <comment>{StrBegin="MSB4205: "}</comment>
   </data>
+  <data name="AspNetCompiler.UnsupportedMSBuildVersion">
+    <value>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</value>
+    <comment>{StrBegin="MSB4249: "}</comment>
+  </data>
   <data name="AspNetCompiler.InvalidTargetFrameworkMonikerFromException">
     <value>MSB4204: {0}: Invalid TargetFrameworkMoniker {1}. {2}.</value>
     <comment>{StrBegin="MSB4204: "}</comment>
@@ -1215,6 +1225,18 @@
     <value>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
     <comment>{StrBegin="MSB4243: "}</comment>
   </data>
+  <data name="SdkResolverManifestInvalid" UESanitized="false" Visibility="Public">
+    <value>MSB4245: SDK Resolver manifest file is invalid. This may indicate a corrupt or invalid installation of MSBuild. Manifest file path '{0}'. Message: {1}</value>
+    <comment>{StrBegin="MSB4245: "}</comment>
+  </data>
+  <data name="SdkResolverNoDllOrManifest" UESanitized="false" Visibility="Public">
+    <value>MSB4246: SDK Resolver folder exists but without an SDK Resolver DLL or manifest file. This may indicate a corrupt or invalid installation of MSBuild. SDK resolver path: {0}</value>
+    <comment>{StrBegin="MSB4246: "}</comment>
+  </data>
+  <data name="SdkResolverDllInManifestMissing" UESanitized="false" Visibility="Public">
+    <value>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</value>
+    <comment>{StrBegin="MSB4247: "}</comment>
+  </data>
   <data name="InvalidSdkElementName" UESanitized="false" Visibility="Public">
     <value>MSB4238: The name "{0}" is not a valid SDK name.</value>
     <comment>{StrBegin="MSB4238: "}</comment>
@@ -1624,6 +1646,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>{StrBegin="MSB4231: "}</comment>
   </data>
 
+  <data name="MetaprojectGenerated">
+    <value>Metaproject &quot;{0}&quot; generated.</value>
+  </data>
+
   <data name="ProjectImportSkippedFalseCondition">
     <value>Project &quot;{0}&quot; was not imported by &quot;{1}&quot; at ({2},{3}), due to false condition; ({4}) was evaluated as ({5}).</value>
   </data>
@@ -1680,7 +1706,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4245.
+        Next message code should be MSB4250.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

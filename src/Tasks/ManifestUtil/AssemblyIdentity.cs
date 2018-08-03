@@ -5,16 +5,15 @@ using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Build.Shared.FileSystem;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -22,6 +21,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     /// <summary>
     /// Describes the identity of an assembly.
     /// </summary>
+    /// <remarks>This is a serialization format, do not remove or change the private fields.</remarks>
     [ComVisible(false)]
     [XmlRoot("AssemblyIdentity")]
     public sealed class AssemblyIdentity
@@ -50,12 +50,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             All = 0x0003
         }
 
-        private string _name = null;
-        private string _version = null;
-        private string _publicKeyToken = null;
-        private string _culture = null;
-        private string _processorArchitecture = null;
-        private string _type = null;
+        private string _name;
+        private string _version;
+        private string _publicKeyToken;
+        private string _culture;
+        private string _processorArchitecture;
+        private string _type;
 
         /// <summary>
         /// Initializes a new instance of the AssemblyIdentity class.
@@ -180,15 +180,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromManifest(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
+            {
                 return null;
+            }
 
-            XmlDocument document = new XmlDocument();
+            var document = new XmlDocument();
             try
             {
-                XmlReaderSettings readerSettings = new XmlReaderSettings();
-                readerSettings.DtdProcessing = DtdProcessing.Ignore;
-
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader xmlReader = XmlReader.Create(path, readerSettings))
                 {
                     document.Load(xmlReader);
@@ -204,9 +204,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static AssemblyIdentity FromManifest(Stream s)
         {
-            XmlDocument document = new XmlDocument();
-            XmlReaderSettings xrSettings = new XmlReaderSettings();
-            xrSettings.DtdProcessing = DtdProcessing.Ignore;
+            var document = new XmlDocument();
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
             try
             {
                 using (XmlReader xr = XmlReader.Create(s, xrSettings))
@@ -224,22 +223,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static AssemblyIdentity FromManifest(XmlDocument document)
         {
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
-            XmlElement element = (XmlElement)document.SelectSingleNode(XPaths.assemblyIdentityPath, nsmgr);
+            var element = (XmlElement)document.SelectSingleNode(XPaths.assemblyIdentityPath, nsmgr);
             if (element == null)
+            {
                 return null;
+            }
 
             XmlNode node = element.Attributes.GetNamedItem("name");
-            string name = node != null ? node.Value : null;
+            string name = node?.Value;
             node = element.Attributes.GetNamedItem("version");
-            string version = node != null ? node.Value : null;
+            string version = node?.Value;
             node = element.Attributes.GetNamedItem("publicKeyToken");
-            string publicKeyToken = node != null ? node.Value : null;
+            string publicKeyToken = node?.Value;
             node = element.Attributes.GetNamedItem("language");
-            string culture = node != null ? node.Value : null;
+            string culture = node?.Value;
             node = element.Attributes.GetNamedItem("processorArchitecture");
-            string processorArchitecture = node != null ? node.Value : null;
+            string processorArchitecture = node?.Value;
             node = element.Attributes.GetNamedItem("type");
-            string type = node != null ? node.Value : null;
+            string type = node?.Value;
             return new AssemblyIdentity(name, version, publicKeyToken, culture, processorArchitecture, type);
         }
 
@@ -252,8 +253,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromManagedAssembly(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
+            {
                 return null;
+            }
 
             // NOTE: We're not using System.Reflection.AssemblyName class here because we need ProcessorArchitecture
             using (MetadataReader r = MetadataReader.Create(path))
@@ -288,18 +291,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromNativeAssembly(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
+            {
                 return null;
+            }
 
             if (PathUtil.IsPEFile(path))
             {
                 Stream m = EmbeddedManifestReader.Read(path);
                 if (m == null)
+                {
                     return null;
+                }
                 return FromManifest(m);
             }
-            else
-                return FromManifest(path);
+            return FromManifest(path);
         }
 
         /// <summary>
@@ -311,14 +317,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>The assembly identity of the specified file.</returns>
         public static AssemblyIdentity FromFile(string path)
         {
-            if (!File.Exists(path))
+            if (!FileSystems.Default.FileExists(path))
+            {
                 return null;
+            }
 
-            AssemblyIdentity id = null;
-            id = FromNativeAssembly(path); // if there's an xml manifest use that first
-            if (id == null)
-                id = FromManagedAssembly(path); // otherwise fallback to the complib manifest if it's there
-            return id;
+            return FromNativeAssembly(path) ?? FromManagedAssembly(path);
         }
 
         internal static bool IsEqual(AssemblyIdentity a1, AssemblyIdentity a2)
@@ -329,29 +333,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static bool IsEqual(AssemblyIdentity a1, AssemblyIdentity a2, bool specificVersion)
         {
             if (a1 == null || a2 == null)
+            {
                 return false;
+            }
             if (specificVersion)
+            {
                 return String.Equals(a1._name, a2._name, StringComparison.OrdinalIgnoreCase)
                     && String.Equals(a1._publicKeyToken, a2._publicKeyToken, StringComparison.OrdinalIgnoreCase)
                     && String.Equals(a1._version, a2._version, StringComparison.OrdinalIgnoreCase)
                     && String.Equals(a1._culture, a2._culture, StringComparison.OrdinalIgnoreCase)
                     && String.Equals(a1._processorArchitecture, a2._processorArchitecture, StringComparison.OrdinalIgnoreCase);
-            else
-                return String.Equals(a1._name, a2._name, StringComparison.OrdinalIgnoreCase);
+            }
+            return String.Equals(a1._name, a2._name, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
         /// Returns true if this assembly is part of the .NET Framework.
         /// </summary>
         [XmlIgnore]
-        public bool IsFrameworkAssembly
-        {
-            get
-            {
-                return IsInFramework(null, null);
-            }
-        }
-
+        public bool IsFrameworkAssembly => IsInFramework(null, null);
 
         /// <summary>
         /// Returns true if this assembly is part of the given framework.
@@ -378,10 +378,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             if (string.IsNullOrEmpty(frameworkIdentifier) && version != null)
             {
-                throw new ArgumentNullException("frameworkIdentifier");
+                throw new ArgumentNullException(nameof(frameworkIdentifier));
             }
 
-            Dictionary<string, RedistList> redistDictionary = new Dictionary<string, RedistList>();
+            var redistDictionary = new Dictionary<string, RedistList>();
 
             foreach (string moniker in ToolLocationHelper.GetSupportedTargetFrameworks())
             {
@@ -401,11 +401,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
             }
 
-            string fullName = GetFullName(AssemblyIdentity.FullNameFlags.Default);
+            string fullName = GetFullName(FullNameFlags.Default);
             foreach (RedistList list in redistDictionary.Values)
             {
                 if (list != null && list.IsFrameworkAssembly(fullName))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -417,8 +419,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Culture
         {
-            get { return _culture; }
-            set { _culture = value; }
+            get => _culture;
+            set => _culture = value;
         }
 
         /// <summary>
@@ -428,18 +430,27 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <returns>A string representation of the full name.</returns>
         public string GetFullName(FullNameFlags flags)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(_name);
+            var sb = new StringBuilder(_name);
             if (!String.IsNullOrEmpty(_version))
+            {
                 sb.Append(String.Format(CultureInfo.InvariantCulture, ", Version={0}", _version));
+            }
             if (!String.IsNullOrEmpty(_culture))
+            {
                 sb.Append(String.Format(CultureInfo.InvariantCulture, ", Culture={0}", _culture));
+            }
             if (!String.IsNullOrEmpty(_publicKeyToken))
+            {
                 sb.Append(String.Format(CultureInfo.InvariantCulture, ", PublicKeyToken={0}", _publicKeyToken));
+            }
             if (!String.IsNullOrEmpty(_processorArchitecture) && (flags & FullNameFlags.ProcessorArchitecture) != 0)
+            {
                 sb.Append(String.Format(CultureInfo.InvariantCulture, ", ProcessorArchitecture={0}", _processorArchitecture));
+            }
             if (!String.IsNullOrEmpty(_type) && (flags & FullNameFlags.Type) != 0)
+            {
                 sb.Append(String.Format(CultureInfo.InvariantCulture, ", Type={0}", _type));
+            }
             return sb.ToString();
         }
 
@@ -447,24 +458,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Specifies whether the assembly identity represents a neutral platform assembly.
         /// </summary>
         [XmlIgnore]
-        public bool IsNeutralPlatform
-        {
-            get { return String.IsNullOrEmpty(_processorArchitecture) || String.Equals(_processorArchitecture, "msil", StringComparison.OrdinalIgnoreCase); }
-        }
+        public bool IsNeutralPlatform => String.IsNullOrEmpty(_processorArchitecture) || String.Equals(_processorArchitecture, "msil", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Specifies whether the assembly identity is a strong name.
         /// </summary>
         [XmlIgnore]
-        public bool IsStrongName
-        {
-            get
-            {
-                return !String.IsNullOrEmpty(_name)
-                    && !String.IsNullOrEmpty(_version)
-                    && !String.IsNullOrEmpty(_publicKeyToken);
-            }
-        }
+        public bool IsStrongName => !String.IsNullOrEmpty(_name)
+                                    && !String.IsNullOrEmpty(_version)
+                                    && !String.IsNullOrEmpty(_publicKeyToken);
 
         /// <summary>
         /// Specifies the simple name of the assembly.
@@ -472,8 +474,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Name
         {
-            get { return _name; }
-            set { _name = value; }
+            get => _name;
+            set => _name = value;
         }
 
         /// <summary>
@@ -482,8 +484,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string ProcessorArchitecture
         {
-            get { return _processorArchitecture; }
-            set { _processorArchitecture = value; }
+            get => _processorArchitecture;
+            set => _processorArchitecture = value;
         }
 
         /// <summary>
@@ -492,8 +494,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string PublicKeyToken
         {
-            get { return _publicKeyToken; }
-            set { _publicKeyToken = value; }
+            get => _publicKeyToken;
+            set => _publicKeyToken = value;
         }
 
         internal string Resolve(string[] searchPaths)
@@ -504,19 +506,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal string Resolve(string[] searchPaths, bool specificVersion)
         {
             if (searchPaths == null)
-                searchPaths = new string[] { ".\\" };
+            {
+                searchPaths = new[] { ".\\" };
+            }
 
             foreach (string searchPath in searchPaths)
             {
                 string file = String.Format(CultureInfo.InvariantCulture, "{0}.dll", _name);
                 string path = Path.Combine(searchPath, file);
-                if (File.Exists(path) && AssemblyIdentity.IsEqual(this, AssemblyIdentity.FromFile(path), specificVersion))
+                if (FileSystems.Default.FileExists(path) && IsEqual(this, FromFile(path), specificVersion))
+                {
                     return path;
+                }
 
                 file = String.Format(CultureInfo.InvariantCulture, "{0}.manifest", _name);
                 path = Path.Combine(searchPath, file);
-                if (File.Exists(path) && AssemblyIdentity.IsEqual(this, AssemblyIdentity.FromManifest(path), specificVersion))
+                if (FileSystems.Default.FileExists(path) && IsEqual(this, FromManifest(path), specificVersion))
+                {
                     return path;
+                }
             }
 
             return null;
@@ -533,8 +541,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Type
         {
-            get { return _type; }
-            set { _type = value; }
+            get => _type;
+            set => _type = value;
         }
 
         /// <summary>
@@ -543,8 +551,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlIgnore]
         public string Version
         {
-            get { return _version; }
-            set { _version = value; }
+            get => _version;
+            set => _version = value;
         }
 
         #region " XmlSerializer "
@@ -554,8 +562,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Name")]
         public string XmlName
         {
-            get { return _name; }
-            set { _name = value; }
+            get => _name;
+            set => _name = value;
         }
 
         [Browsable(false)]
@@ -563,8 +571,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Version")]
         public string XmlVersion
         {
-            get { return _version; }
-            set { _version = value; }
+            get => _version;
+            set => _version = value;
         }
 
         [Browsable(false)]
@@ -572,8 +580,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("PublicKeyToken")]
         public string XmlPublicKeyToken
         {
-            get { return _publicKeyToken; }
-            set { _publicKeyToken = value; }
+            get => _publicKeyToken;
+            set => _publicKeyToken = value;
         }
 
         [Browsable(false)]
@@ -581,8 +589,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Culture")]
         public string XmlCulture
         {
-            get { return _culture; }
-            set { _culture = value; }
+            get => _culture;
+            set => _culture = value;
         }
 
         [Browsable(false)]
@@ -590,8 +598,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("ProcessorArchitecture")]
         public string XmlProcessorArchitecture
         {
-            get { return _processorArchitecture; }
-            set { _processorArchitecture = value; }
+            get => _processorArchitecture;
+            set => _processorArchitecture = value;
         }
 
         [Browsable(false)]
@@ -599,8 +607,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [XmlAttribute("Type")]
         public string XmlType
         {
-            get { return _type; }
-            set { _type = value; }
+            get => _type;
+            set => _type = value;
         }
 
         #endregion

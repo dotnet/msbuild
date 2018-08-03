@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Implementation of the ItemGroup intrinsic task.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Concurrent;
@@ -17,7 +13,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
-
+using Microsoft.Build.Shared.FileSystem;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
@@ -35,6 +31,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ProjectItemGroupTaskInstance _taskInstance;
 
+        private EngineFileUtilities _engineFileUtilities;
+
         /// <summary>
         /// Instantiates an ItemGroup task
         /// </summary>
@@ -46,6 +44,7 @@ namespace Microsoft.Build.BackEnd
             : base(loggingContext, projectInstance, logTaskInputs)
         {
             _taskInstance = taskInstance;
+            _engineFileUtilities = EngineFileUtilities.Default;
         }
 
         /// <summary>
@@ -76,8 +75,8 @@ namespace Microsoft.Build.BackEnd
                             Project.Directory,
                             child.ConditionLocation,
                             LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext
-                            );
+                            LoggingContext.BuildEventContext,
+                            FileSystems.Default);
 
                         if (condition)
                         {
@@ -169,8 +168,8 @@ namespace Microsoft.Build.BackEnd
                     Project.Directory,
                     metadataInstance.Location,
                     LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext
-                    );
+                    LoggingContext.BuildEventContext,
+                    FileSystems.Default);
 
                 if (condition)
                 {
@@ -198,8 +197,8 @@ namespace Microsoft.Build.BackEnd
                 Project.Directory,
                 child.KeepDuplicatesLocation,
                 LoggingContext.LoggingService,
-                LoggingContext.BuildEventContext
-                );
+                LoggingContext.BuildEventContext,
+                FileSystems.Default);
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd != null && itemsToAdd.Count > 0)
             {
@@ -287,8 +286,8 @@ namespace Microsoft.Build.BackEnd
                     Project.Directory,
                     metadataInstance.ConditionLocation,
                     LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext
-                    );
+                    LoggingContext.BuildEventContext,
+                    FileSystems.Default);
 
                 if (condition)
                 {
@@ -401,12 +400,10 @@ namespace Microsoft.Build.BackEnd
                     // The expression is not of the form "@(X)". Treat as string
 
                     // Pass the non wildcard expanded excludes here to fix https://github.com/Microsoft/msbuild/issues/2621
-                    string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
+                    string[] includeSplitFiles = _engineFileUtilities.GetFileListEscaped(
                         Project.Directory,
                         includeSplit,
-                        excludes,
-                        false,
-                        new ConcurrentDictionary<string, ImmutableArray<string>>());
+                        excludes);
 
                     foreach (string includeSplitFile in includeSplitFiles)
                     {
@@ -427,7 +424,7 @@ namespace Microsoft.Build.BackEnd
 
             foreach (string excludeSplit in excludes)
             {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
+                string[] excludeSplitFiles = _engineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
 
                 foreach (string excludeSplitFile in excludeSplitFiles)
                 {
@@ -512,7 +509,7 @@ namespace Microsoft.Build.BackEnd
                 // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
                 // as literals. Everything else is safe to unescape at this point, since we're only matching
                 // against the file system.
-                string[] fileList = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
+                string[] fileList = _engineFileUtilities.GetFileListEscaped(Project.Directory, piece);
 
                 foreach (string file in fileList)
                 {

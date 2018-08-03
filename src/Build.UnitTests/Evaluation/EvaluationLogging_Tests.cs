@@ -1,14 +1,11 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for evaluation logging</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -172,6 +169,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         }
                     }
                 });
+        }
+
+        [Fact]
+        public void TurnOnProfileEvaluationFromLogger()
+        {
+            AssertLoggingEvents(
+                (project, logger) =>
+                {
+                    foreach (var e in logger.AllBuildEvents.OfType<ProjectEvaluationFinishedEventArgs>())
+                    {
+                        e.ProfilerResult.ShouldNotBeNull();
+                    }
+                },
+                new MockLogger(null, true));
         }
     }
 }

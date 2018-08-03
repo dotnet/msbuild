@@ -1,12 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Implementation of the Build Manager.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -116,7 +111,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Flag indicating if we are currently shutting down.  When set, we stop processing packets other than NodeShutdown.
         /// </summary>
-        private bool _shuttingDown = false;
+        private bool _shuttingDown;
 
         /// <summary>
         /// The current state of the BuildManager.
@@ -211,7 +206,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Flag indicating we have disposed.
         /// </summary>
-        private bool _disposed = false;
+        private bool _disposed;
 
 #if DEBUG
         /// <summary>
@@ -237,7 +232,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public BuildManager(string hostName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(hostName, "hostName");
+            ErrorUtilities.VerifyThrowArgumentNull(hostName, nameof(hostName));
             _hostName = hostName;
             _buildManagerState = BuildManagerState.Idle;
             _buildSubmissions = new Dictionary<int, BuildSubmission>();
@@ -530,12 +525,12 @@ namespace Microsoft.Build.Execution
         {
             lock (_syncLock)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(requestData, "requestData");
+                ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
                 VerifyStateInternal(BuildManagerState.Building);
 
-                BuildSubmission newSubmission = new BuildSubmission(this, GetNextSubmissionId(), requestData, _buildParameters.LegacyThreadingSemantics);
+                var newSubmission = new BuildSubmission(this, GetNextSubmissionId(), requestData, _buildParameters.LegacyThreadingSemantics);
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
                 _noActiveSubmissionsEvent.Reset();
                 return newSubmission;
@@ -572,7 +567,7 @@ namespace Microsoft.Build.Execution
                 VerifyStateInternal(BuildManagerState.Building);
 
                 // If there are any submissions which never started, remove them now.
-                List<BuildSubmission> submissionsToCheck = new List<BuildSubmission>(_buildSubmissions.Values);
+                var submissionsToCheck = new List<BuildSubmission>(_buildSubmissions.Values);
                 foreach (BuildSubmission submission in submissionsToCheck)
                 {
                     CheckSubmissionCompletenessAndRemove(submission);
@@ -613,7 +608,7 @@ namespace Microsoft.Build.Execution
                 {
                     bool allMismatchedProjectStartedEventsDueToLoggerErrors = true;
 
-                    foreach (var projectStartedEvent in _projectStartedEvents)
+                    foreach (KeyValuePair<int, BuildEventArgs> projectStartedEvent in _projectStartedEvents)
                     {
                         BuildResult result = _resultsCache.GetResultsForConfiguration(projectStartedEvent.Value.BuildEventContext.ProjectInstanceId);
 
@@ -641,7 +636,7 @@ namespace Microsoft.Build.Execution
                 }
                 finally
                 {
-                    if (_buildParameters.LegacyThreadingSemantics == true)
+                    if (_buildParameters.LegacyThreadingSemantics)
                     {
                         _legacyThreadingData.MainThreadSubmissionId = -1;
                     }
@@ -720,7 +715,7 @@ namespace Microsoft.Build.Execution
         /// <param name="packet">The packet.</param>
         void INodePacketHandler.PacketReceived(int node, INodePacket packet)
         {
-            _workQueue.Post(() => this.ProcessPacket(node, packet));
+            _workQueue.Post(() => ProcessPacket(node, packet));
         }
 
         #endregion
@@ -761,7 +756,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Complex class might need refactoring to separate scheduling elements from submission elements.")]
         internal void ExecuteSubmission(BuildSubmission submission, bool allowMainThreadBuild)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(submission, "submission");
+            ErrorUtilities.VerifyThrowArgumentNull(submission, nameof(submission));
             ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
 
             lock (_syncLock)
@@ -799,12 +794,10 @@ namespace Microsoft.Build.Execution
                         ErrorUtilities.VerifyThrow(submission.BuildRequestData.ProjectInstance != null,
                             "Unexpected null path for a submission with no ProjectInstance.");
 
-                        string tempName;
-
                         // If we have already named this instance when it was submitted previously during this build, use the same
                         // name so that we get the same configuration (and thus don't cause it to rebuild.)
                         if (!_unnamedProjectInstanceToNames.TryGetValue(submission.BuildRequestData.ProjectInstance,
-                            out tempName))
+                            out string tempName))
                         {
                             tempName = "Unnamed_" + _nextUnnamedProjectId++;
                             _unnamedProjectInstanceToNames[submission.BuildRequestData.ProjectInstance] = tempName;
@@ -831,7 +824,7 @@ namespace Microsoft.Build.Execution
                     // Now create the build request
                     submission.BuildRequest = new BuildRequest(
                         submission.SubmissionId,
-                        Microsoft.Build.BackEnd.BuildRequest.InvalidNodeRequestId,
+                        BackEnd.BuildRequest.InvalidNodeRequestId,
                         newConfiguration.ConfigurationId,
                         submission.BuildRequestData.TargetNames,
                         submission.BuildRequestData.HostServices,
@@ -852,7 +845,7 @@ namespace Microsoft.Build.Execution
 
                     // Submit the build request.
                     BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(),
-                        new BuildRequest[] {submission.BuildRequest});
+                        new[] {submission.BuildRequest});
                     _workQueue.Post(() =>
                     {
                         try
@@ -862,7 +855,7 @@ namespace Microsoft.Build.Execution
                         catch (BuildAbortedException bae)
                         {
                             // We were canceled before we got issued by the work queue.
-                            BuildResult result = new BuildResult(submission.BuildRequest, bae);
+                            var result = new BuildResult(submission.BuildRequest, bae);
                             submission.CompleteResults(result);
                             submission.CompleteLogging(true);
                             CheckSubmissionCompletenessAndRemove(submission);
@@ -914,8 +907,9 @@ namespace Microsoft.Build.Execution
                 // Create new configurations for each of these if they don't already exist.  That could happen if there are multiple
                 // solutions in this build which refer to the same project, in which case we want them to refer to the same
                 // metaproject as well.
-                BuildRequestConfiguration newConfig = new BuildRequestConfiguration(GetNewConfigurationId(), instances[i]);
-                newConfig.ExplicitlyLoaded = config.ExplicitlyLoaded;
+                var newConfig = new BuildRequestConfiguration(
+                    GetNewConfigurationId(),
+                    instances[i]) { ExplicitlyLoaded = config.ExplicitlyLoaded };
                 if (_configCache.GetMatchingConfiguration(newConfig) == null)
                 {
                     _configCache.AddConfiguration(newConfig);
@@ -979,7 +973,7 @@ namespace Microsoft.Build.Execution
                 {
                     // These need to go to the main thread exception handler.  We can't rethrow here because that will just silently stop the
                     // action block.  Instead, send them over to the main handler for the BuildManager.
-                    this.OnThreadException(ex);
+                    OnThreadException(ex);
                 }
                 finally
                 {
@@ -1064,7 +1058,7 @@ namespace Microsoft.Build.Execution
             // BuildRequest may be null if the submission fails early on.
             if (submission.BuildRequest != null)
             {
-                BuildResult result = new BuildResult(submission.BuildRequest, ex);
+                var result = new BuildResult(submission.BuildRequest, ex);
                 submission.CompleteResults(result);
                 submission.CompleteLogging(true);
             }
@@ -1273,7 +1267,7 @@ namespace Microsoft.Build.Execution
             {
                 ReplaceExistingProjectInstance(unresolvedConfiguration, resolvedConfiguration);
             }
-            else if (unresolvedConfiguration.Project != null && resolvedConfiguration.Project != null && !Object.ReferenceEquals(unresolvedConfiguration.Project, resolvedConfiguration.Project))
+            else if (unresolvedConfiguration.Project != null && resolvedConfiguration.Project != null && !ReferenceEquals(unresolvedConfiguration.Project, resolvedConfiguration.Project))
             {
                 // The user passed in a different instance than the one we already had. Throw away any corresponding results.
                 ReplaceExistingProjectInstance(unresolvedConfiguration, resolvedConfiguration);
@@ -1357,9 +1351,9 @@ namespace Microsoft.Build.Execution
         {
             BuildRequestConfiguration resolvedConfiguration = ResolveConfiguration(unresolvedConfiguration, null, false);
 
-            BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(unresolvedConfiguration.ConfigurationId, resolvedConfiguration.ConfigurationId, resolvedConfiguration.ResultsNodeId);
+            var response = new BuildRequestConfigurationResponse(unresolvedConfiguration.ConfigurationId, resolvedConfiguration.ConfigurationId, resolvedConfiguration.ResultsNodeId);
 
-            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out var configurationsOnNode))
+            if (!_nodeIdToKnownConfigurations.TryGetValue(node, out HashSet<NGen<int>> configurationsOnNode))
             {
                 configurationsOnNode = new HashSet<NGen<int>>();
                 _nodeIdToKnownConfigurations[node] = configurationsOnNode;
@@ -1459,7 +1453,7 @@ namespace Microsoft.Build.Execution
         {
             if (_activeNodes.Count == 0)
             {
-                List<BuildSubmission> submissions = new List<BuildSubmission>(_buildSubmissions.Values);
+                var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
                 foreach (BuildSubmission submission in submissions)
                 {
                     // The submission has not started do not add it to the results cache
@@ -1516,7 +1510,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
-                        List<NodeInfo> newNodes = new List<NodeInfo>();
+                        var newNodes = new List<NodeInfo>();
 
                         for (int i = 0; i < response.NumberOfNodesToCreate; i++)
                         {
@@ -1551,7 +1545,7 @@ namespace Microsoft.Build.Execution
                             // of which nodes have had configurations specifically assigned to them for building.  However, a node may
                             // have created a configuration based on a build request it needs to wait on.  In this
                             // case we need not send the configuration since it will already have been mapped earlier.
-                            if (!_nodeIdToKnownConfigurations.TryGetValue(response.NodeId, out var configurationsOnNode) ||
+                            if (!_nodeIdToKnownConfigurations.TryGetValue(response.NodeId, out HashSet<NGen<int>> configurationsOnNode) ||
                                !configurationsOnNode.Contains(response.BuildRequest.ConfigurationId))
                             {
                                 IConfigCache configCache = _componentFactories.GetComponent(BuildComponentType.ConfigCache) as IConfigCache;
@@ -1581,18 +1575,22 @@ namespace Microsoft.Build.Execution
                 {
                     BuildSubmission submission = _buildSubmissions[result.SubmissionId];
 
-                    submission.CompleteResults(result);
-
-                    // If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
-                    // this submission, therefore set the logging as complete. IntrnalLoggerExceptions are unhandled exceptions from the logger. If the logger author does
-                    // not handle an exception the eventsource wraps all exceptions (except a logging exception) into an internal logging exception.
-                    // These exceptions will have their stack logged on the commandline as an unexpected failure. If a logger author wants the logger
-                    // to fail gracefully then can catch an exception and log a LoggerException. This has the same effect of stopping the build but it logs only
-                    // the exception error message rather than the whole stack trace.
-                    if (result.Exception is InternalLoggerException || result.Exception is LoggerException || result.Exception is InvalidOperationException)
+                    /* If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
+                     * this submission, therefore set the logging as complete. InternalLoggerExceptions are unhandled exceptions from the logger. If the logger author does
+                     * not handle an exception the eventsource wraps all exceptions (except a logging exception) into an internal logging exception.
+                     * These exceptions will have their stack logged on the commandline as an unexpected failure. If a logger author wants the logger
+                     * to fail gracefully then can catch an exception and log a LoggerException. This has the same effect of stopping the build but it logs only
+                     * the exception error message rather than the whole stack trace.
+                     * 
+                     * If any other exception happened and logging is not completed, then go ahead and complete it now since this is the last place to do it.
+                     * Otherwise the submission would remain uncompleted, potentially causing hangs (EndBuild waiting on all BuildSubmissions, users waiting on BuildSubmission, or expecting a callback, etc)
+                    */
+                    if (!submission.LoggingCompleted && result.Exception != null)
                     {
-                        submission.CompleteLogging(false /* waitForLoggingThread */);
+                        submission.CompleteLogging(waitForLoggingThread: false);
                     }
+
+                    submission.CompleteResults(result);
 
                     _overallBuildSuccess = _overallBuildSuccess && (_buildSubmissions[result.SubmissionId].BuildResult.OverallResult == BuildResultCode.Success);
 
@@ -1648,7 +1646,7 @@ namespace Microsoft.Build.Execution
             {
                 // Get the remote loggers
                 ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent(BuildComponentType.LoggingService) as ILoggingService;
-                List<LoggerDescription> remoteLoggers = new List<LoggerDescription>(loggingService.LoggerDescriptions);
+                var remoteLoggers = new List<LoggerDescription>(loggingService.LoggerDescriptions);
 
                 _nodeConfiguration = new NodeConfiguration
                 (
@@ -1658,6 +1656,7 @@ namespace Microsoft.Build.Execution
 #if FEATURE_APPDOMAIN
                 , AppDomain.CurrentDomain.SetupInformation
 #endif
+                , new LoggingNodeConfiguration(loggingService.IncludeEvaluationMetaprojects, loggingService.IncludeEvaluationProfile, loggingService.IncludeTaskInputs)
                 );
             }
 
@@ -1676,7 +1675,7 @@ namespace Microsoft.Build.Execution
                 if (_threadException == null)
                 {
                     _threadException = e;
-                    List<BuildSubmission> submissions = new List<BuildSubmission>(_buildSubmissions.Values);
+                    var submissions = new List<BuildSubmission>(_buildSubmissions.Values);
                     foreach (BuildSubmission submission in submissions)
                     {
                         // Submission has not started
@@ -1825,7 +1824,7 @@ namespace Microsoft.Build.Execution
         /// Ensures that the packet type matches the expected type
         /// </summary>
         /// <typeparam name="I">The instance-type of packet being expected</typeparam>
-        private I ExpectPacketType<I>(INodePacket packet, NodePacketType expectedType) where I : class, INodePacket
+        private static I ExpectPacketType<I>(INodePacket packet, NodePacketType expectedType) where I : class, INodePacket
         {
             I castPacket = packet as I;
 

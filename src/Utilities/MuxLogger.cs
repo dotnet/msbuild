@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Implementation of the Multiplexing logger.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -57,42 +53,42 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// The mapping of submission IDs to the submission record.
         /// </summary>
-        private Dictionary<int, SubmissionRecord> _submissionRecords = new Dictionary<int, SubmissionRecord>();
+        private readonly Dictionary<int, SubmissionRecord> _submissionRecords = new Dictionary<int, SubmissionRecord>();
 
         /// <summary>
         ///  Keep the build started event if it has been seen, we need the message off it.
         /// </summary>
-        private BuildStartedEventArgs _buildStartedEvent = null;
+        private BuildStartedEventArgs _buildStartedEvent;
 
         /// <summary>
         /// Event source which events from the build manager will be raised on.
         /// </summary>
-        private IEventSource _eventSourceForBuild = null;
+        private IEventSource _eventSourceForBuild;
 
         /// <summary>
         /// The handler for the build started event
         /// </summary>
-        private BuildStartedEventHandler _buildStartedEventHandler = null;
+        private readonly BuildStartedEventHandler _buildStartedEventHandler;
 
         /// <summary>
         /// The handler for the build finished event.
         /// </summary>
-        private BuildFinishedEventHandler _buildFinishedEventHandler = null;
+        private readonly BuildFinishedEventHandler _buildFinishedEventHandler;
 
         /// <summary>
         /// The handler for the project started event.
         /// </summary>
-        private ProjectStartedEventHandler _projectStartedEventHandler = null;
+        private readonly ProjectStartedEventHandler _projectStartedEventHandler;
 
         /// <summary>
         /// The handler for the project finished event.
         /// </summary>
-        private ProjectFinishedEventHandler _projectFinishedEventHandler = null;
+        private readonly ProjectFinishedEventHandler _projectFinishedEventHandler;
 
         /// <summary>
         /// Dictionary mapping submission id to projects in progress.
         /// </summary>
-        private Dictionary<int, int> _submissionProjectsInProgress = new Dictionary<int, int>();
+        private readonly Dictionary<int, int> _submissionProjectsInProgress = new Dictionary<int, int>();
 
         /// <summary>
         /// The maximum node count as specified in the call to Initialize()
@@ -104,37 +100,41 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public MuxLogger()
         {
-            _buildStartedEventHandler = new BuildStartedEventHandler(BuildStarted);
-            _buildFinishedEventHandler = new BuildFinishedEventHandler(BuildFinished);
-            _projectStartedEventHandler = new ProjectStartedEventHandler(ProjectStarted);
-            _projectFinishedEventHandler = new ProjectFinishedEventHandler(ProjectFinished);
+            _buildStartedEventHandler = BuildStarted;
+            _buildFinishedEventHandler = BuildFinished;
+            _projectStartedEventHandler = ProjectStarted;
+            _projectFinishedEventHandler = ProjectFinished;
         }
 
         /// <summary>
         /// Required for ILogger interface
         /// </summary>
-        public LoggerVerbosity Verbosity
-        {
-            get;
-            set;
-        }
+        public LoggerVerbosity Verbosity { get; set; }
 
         /// <summary>
         /// Required for the ILoggerInterface
         /// </summary>
-        public string Parameters
-        {
-            get;
-            set;
-        }
+        public string Parameters { get; set; }
+
+        /// <summary>
+        /// Should evaluation events include generated metaprojects?
+        /// </summary>
+        public bool IncludeEvaluationMetaprojects { get; set; }
+
+        /// <summary>
+        /// Should evaluation events include profiling information?
+        /// </summary>
+        public bool IncludeEvaluationProfiles { get; set; }
+
+        /// <summary>
+        /// Should task events include task inputs?
+        /// </summary>
+        public bool IncludeTaskInputs { get; set; }
 
         /// <summary>
         /// Initialize the logger.
         /// </summary>
-        public void Initialize(IEventSource eventSource)
-        {
-            Initialize(eventSource, 1);
-        }
+        public void Initialize(IEventSource eventSource) => Initialize(eventSource, 1);
 
         /// <summary>
         /// Initialize the logger.
@@ -153,6 +153,23 @@ namespace Microsoft.Build.Utilities
             _eventSourceForBuild.BuildFinished += _buildFinishedEventHandler;
             _eventSourceForBuild.ProjectStarted += _projectStartedEventHandler;
             _eventSourceForBuild.ProjectFinished += _projectFinishedEventHandler;
+
+            if (_eventSourceForBuild is IEventSource3 eventSource3)
+            {
+                if (IncludeEvaluationMetaprojects)
+                {
+                    eventSource3.IncludeEvaluationMetaprojects();
+                }
+                if (IncludeEvaluationProfiles)
+                {
+                    eventSource3.IncludeEvaluationProfiles();
+                }
+
+                if (IncludeTaskInputs)
+                {
+                    eventSource3.IncludeTaskInputs();
+                }
+            }
         }
 
         /// <summary>
@@ -195,7 +212,7 @@ namespace Microsoft.Build.Utilities
         {
             if (logger == null)
             {
-                throw new ArgumentNullException("logger");
+                throw new ArgumentNullException(nameof(logger));
             }
 
             if (_eventSourceForBuild == null)
@@ -209,7 +226,7 @@ namespace Microsoft.Build.Utilities
             }
 
             // See if another logger has been registered already with the same submission ID
-            SubmissionRecord record = null;
+            SubmissionRecord record;
             lock (_submissionRecords)
             {
                 if (!_submissionRecords.TryGetValue(submissionId, out record))
@@ -243,24 +260,6 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Initialize the logger
-        /// </summary>
-        internal void InitializeLogger(List<ILogger> loggerList, ILogger logger, IEventSource sourceForLogger)
-        {
-            // Node loggers are central /l loggers which can understand how many CPU's the build is running with, they are only different in that
-            // they can take a number of CPU
-            INodeLogger nodeLogger = logger as INodeLogger;
-            if (null != nodeLogger)
-            {
-                nodeLogger.Initialize(sourceForLogger, 1);
-            }
-            else
-            {
-                logger.Initialize(sourceForLogger);
-            }
-        }
-
-        /// <summary>
         /// Receives the build started event for the whole build.
         /// </summary>
         private void BuildStarted(object sender, BuildStartedEventArgs e)
@@ -288,8 +287,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private void ProjectStarted(object sender, ProjectStartedEventArgs e)
         {
-            int value = 0;
-            _submissionProjectsInProgress.TryGetValue(e.BuildEventContext.SubmissionId, out value);
+            _submissionProjectsInProgress.TryGetValue(e.BuildEventContext.SubmissionId, out int value);
             _submissionProjectsInProgress[e.BuildEventContext.SubmissionId] = value + 1;
         }
 
@@ -303,10 +301,9 @@ namespace Microsoft.Build.Utilities
             if (value == 1)
             {
                 _submissionProjectsInProgress.Remove(e.BuildEventContext.SubmissionId);
-                SubmissionRecord record = null;
                 lock (_submissionRecords)
                 {
-                    if (_submissionRecords.TryGetValue(e.BuildEventContext.SubmissionId, out record))
+                    if (_submissionRecords.ContainsKey(e.BuildEventContext.SubmissionId))
                     {
                         _submissionRecords.Remove(e.BuildEventContext.SubmissionId);
                     }
@@ -331,42 +328,42 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// Object used to synchronize access to internals.
             /// </summary>
-            private Object _syncLock = new Object();
+            private readonly object _syncLock = new object();
 
             /// <summary>
             /// List of loggers
             /// </summary>
-            private List<ILogger> _loggers = null;
+            private readonly List<ILogger> _loggers;
 
             /// <summary>
             /// The maximum node count
             /// </summary>
-            private int _maxNodeCount;
+            private readonly int _maxNodeCount;
 
             /// <summary>
             /// The event source which will have events raised from the buld manager.
             /// </summary>
-            private IEventSource _eventSourceForBuild = null;
+            private readonly IEventSource _eventSourceForBuild;
 
             /// <summary>
             /// The buildStartedEvent to use when synthesizing the build started event.
             /// </summary>
-            private BuildStartedEventArgs _buildStartedEvent = null;
+            private BuildStartedEventArgs _buildStartedEvent;
 
             /// <summary>
             /// The project build event coontext for the first project started event seen, this is the root of the submission.
             /// </summary>
-            private BuildEventContext _firstProjectStartedEventContext = null;
+            private BuildEventContext _firstProjectStartedEventContext;
 
             /// <summary>
             /// SubmissionId for this submission record
             /// </summary>
-            private int _submissionId = 0;
+            private readonly int _submissionId;
 
             /// <summary>
             /// Has the record been shutdown yet.
             /// </summary>
-            private bool _shutdown = false;
+            private bool _shutdown;
             #endregion
 
             // Keep instance of event handlers so they can be unregistered at the end of the submissionID. 
@@ -376,72 +373,72 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// Even hander for "anyEvent" this is a handler which will be called from each of the other event handlers
             /// </summary>
-            private AnyEventHandler _anyEventHandler = null;
+            private AnyEventHandler _anyEventHandler;
 
             /// <summary>
             /// Handle the Build Finished event
             /// </summary>
-            private BuildFinishedEventHandler _buildFinishedEventHandler = null;
+            private BuildFinishedEventHandler _buildFinishedEventHandler;
 
             /// <summary>
             /// Handle the Build started event
             /// </summary>
-            private BuildStartedEventHandler _buildStartedEventHandler = null;
+            private BuildStartedEventHandler _buildStartedEventHandler;
 
             /// <summary>
             /// Handle custom build events
             /// </summary>
-            private CustomBuildEventHandler _customBuildEventHandler = null;
+            private CustomBuildEventHandler _customBuildEventHandler;
 
             /// <summary>
             /// Handle error events
             /// </summary>
-            private BuildErrorEventHandler _buildErrorEventHandler = null;
+            private BuildErrorEventHandler _buildErrorEventHandler;
 
             /// <summary>
             /// Handle message events
             /// </summary>
-            private BuildMessageEventHandler _buildMessageEventHandler = null;
+            private BuildMessageEventHandler _buildMessageEventHandler;
 
             /// <summary>
             /// Handle project finished events
             /// </summary>
-            private ProjectFinishedEventHandler _projectFinishedEventHandler = null;
+            private ProjectFinishedEventHandler _projectFinishedEventHandler;
 
             /// <summary>
             /// Handle project started events
             /// </summary>
-            private ProjectStartedEventHandler _projectStartedEventHandler = null;
+            private ProjectStartedEventHandler _projectStartedEventHandler;
 
             /// <summary>
             /// Handle build sttus events
             /// </summary>
-            private BuildStatusEventHandler _buildStatusEventHandler = null;
+            private BuildStatusEventHandler _buildStatusEventHandler;
 
             /// <summary>
             /// Handle target finished events
             /// </summary>
-            private TargetFinishedEventHandler _targetFinishedEventHandler = null;
+            private TargetFinishedEventHandler _targetFinishedEventHandler;
 
             /// <summary>
             /// Handle target started events
             /// </summary>
-            private TargetStartedEventHandler _targetStartedEventHandler = null;
+            private TargetStartedEventHandler _targetStartedEventHandler;
 
             /// <summary>
             /// Handle task finished
             /// </summary>
-            private TaskFinishedEventHandler _taskFinishedEventHandler = null;
+            private TaskFinishedEventHandler _taskFinishedEventHandler;
 
             /// <summary>
             /// Handle task started
             /// </summary>
-            private TaskStartedEventHandler _taskStartedEventHandler = null;
+            private TaskStartedEventHandler _taskStartedEventHandler;
 
             /// <summary>
             /// Handle warning events
             /// </summary>
-            private BuildWarningEventHandler _buildWarningEventHandler = null;
+            private BuildWarningEventHandler _buildWarningEventHandler;
 
             /// <summary>
             /// Handle telemetry events.
@@ -455,11 +452,6 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             internal SubmissionRecord(int submissionId, IEventSource buildEventSource, BuildStartedEventArgs buildStartedEvent, int maxNodeCount)
             {
-                if (buildEventSource == null)
-                {
-                    throw new InvalidOperationException("eventSourceForBuild cannot be null");
-                }
-
                 _maxNodeCount = maxNodeCount;
                 _submissionId = submissionId;
                 _buildStartedEvent = buildStartedEvent;
@@ -563,8 +555,7 @@ namespace Microsoft.Build.Utilities
 
                     // Node loggers are central /l loggers which can understand how many CPU's the build is running with, they are only different in that
                     // they can take a number of CPU
-                    INodeLogger nodeLogger = logger as INodeLogger;
-                    if (null != nodeLogger)
+                    if (logger is INodeLogger nodeLogger)
                     {
                         nodeLogger.Initialize(this, _maxNodeCount);
                     }
@@ -620,7 +611,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">BuildMessageEventArgs</param>
-            internal void RaiseMessageEvent(object sender, BuildMessageEventArgs buildEvent)
+            private void RaiseMessageEvent(object sender, BuildMessageEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -641,14 +632,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -661,7 +652,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">BuildErrorEventArgs</param>
-            internal void RaiseErrorEvent(object sender, BuildErrorEventArgs buildEvent)
+            private void RaiseErrorEvent(object sender, BuildErrorEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -687,14 +678,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                         }
                     }
                 }
@@ -705,7 +696,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">BuildWarningEventArgs</param>
-            internal void RaiseWarningEvent(object sender, BuildWarningEventArgs buildEvent)
+            private void RaiseWarningEvent(object sender, BuildWarningEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -731,14 +722,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                         }
                     }
                 }
@@ -749,7 +740,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">BuildStartedEventArgs</param>
-            internal void RaiseBuildStartedEvent(object sender, BuildStartedEventArgs buildEvent)
+            private void RaiseBuildStartedEvent(object sender, BuildStartedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -770,14 +761,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -792,7 +783,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">BuildFinishedEventArgs</param>
-            internal void RaiseBuildFinishedEvent(object sender, BuildFinishedEventArgs buildEvent)
+            private void RaiseBuildFinishedEvent(object sender, BuildFinishedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -814,14 +805,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -836,7 +827,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">ProjectStartedEventArgs</param>
-            internal void RaiseProjectStartedEvent(object sender, ProjectStartedEventArgs buildEvent)
+            private void RaiseProjectStartedEvent(object sender, ProjectStartedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -868,14 +859,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -888,7 +879,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">ProjectFinishedEventArgs</param>
-            internal void RaiseProjectFinishedEvent(object sender, ProjectFinishedEventArgs buildEvent)
+            private void RaiseProjectFinishedEvent(object sender, ProjectFinishedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -909,14 +900,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -929,7 +920,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">TargetStartedEventArgs</param>
-            internal void RaiseTargetStartedEvent(object sender, TargetStartedEventArgs buildEvent)
+            private void RaiseTargetStartedEvent(object sender, TargetStartedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -950,14 +941,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -970,7 +961,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">TargetFinishedEventArgs</param>
-            internal void RaiseTargetFinishedEvent(object sender, TargetFinishedEventArgs buildEvent)
+            private void RaiseTargetFinishedEvent(object sender, TargetFinishedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -991,14 +982,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -1011,7 +1002,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">TaskStartedEventArgs</param>
-            internal void RaiseTaskStartedEvent(object sender, TaskStartedEventArgs buildEvent)
+            private void RaiseTaskStartedEvent(object sender, TaskStartedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -1032,14 +1023,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -1052,7 +1043,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">TaskFinishedEventArgs</param>
-            internal void RaiseTaskFinishedEvent(object sender, TaskFinishedEventArgs buildEvent)
+            private void RaiseTaskFinishedEvent(object sender, TaskFinishedEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -1073,14 +1064,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -1093,7 +1084,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">CustomBuildEventArgs</param>
-            internal void RaiseCustomEvent(object sender, CustomBuildEventArgs buildEvent)
+            private void RaiseCustomEvent(object sender, CustomBuildEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -1114,14 +1105,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -1134,15 +1125,12 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">BuildStatusEventArgs</param>
-            internal void RaiseStatusEvent(object sender, BuildStatusEventArgs buildEvent)
-            {
-                RaiseStatusEvent(sender, buildEvent, false);
-            }
+            private void RaiseStatusEvent(object sender, BuildStatusEventArgs buildEvent) => RaiseStatusEvent(sender, buildEvent, false);
 
             /// <summary>
             /// Raises a status event, optionally cascading to an any event.
             /// </summary>
-            internal void RaiseStatusEvent(object sender, BuildStatusEventArgs buildEvent, bool cascade)
+            private void RaiseStatusEvent(object sender, BuildStatusEventArgs buildEvent, bool cascade)
             {
                 lock (_syncLock)
                 {
@@ -1163,14 +1151,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -1188,7 +1176,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="sender">sender of the event</param>
             /// <param name="buildEvent">Build EventArgs</param>
-            internal void RaiseAnyEvent(object sender, BuildEventArgs buildEvent)
+            private void RaiseAnyEvent(object sender, BuildEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -1224,14 +1212,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
 
                             throw;
                         }
@@ -1254,7 +1242,7 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// Raises a telemetry event to all registered loggers.
             /// </summary>
-            internal void RaiseTelemetryEvent(object sender, TelemetryEventArgs buildEvent)
+            private void RaiseTelemetryEvent(object sender, TelemetryEventArgs buildEvent)
             {
                 lock (_syncLock)
                 {
@@ -1269,14 +1257,14 @@ namespace Microsoft.Build.Utilities
                             // if a logger has failed politely, abort immediately
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                             throw;
                         }
                         catch (Exception)
                         {
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
-                            this.UnregisterAllEventHandlers();
+                            UnregisterAllEventHandlers();
                         }
                     }
                 }
@@ -1289,21 +1277,21 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             private void InitializeInternalEventSource()
             {
-                _anyEventHandler = new AnyEventHandler(RaiseAnyEvent);
-                _buildFinishedEventHandler = new BuildFinishedEventHandler(RaiseBuildFinishedEvent);
-                _buildStartedEventHandler = new BuildStartedEventHandler(RaiseBuildStartedEvent);
-                _customBuildEventHandler = new CustomBuildEventHandler(RaiseCustomEvent);
-                _buildErrorEventHandler = new BuildErrorEventHandler(RaiseErrorEvent);
-                _buildMessageEventHandler = new BuildMessageEventHandler(RaiseMessageEvent);
-                _projectFinishedEventHandler = new ProjectFinishedEventHandler(RaiseProjectFinishedEvent);
-                _projectStartedEventHandler = new ProjectStartedEventHandler(RaiseProjectStartedEvent);
-                _buildStatusEventHandler = new BuildStatusEventHandler(RaiseStatusEvent);
-                _targetFinishedEventHandler = new TargetFinishedEventHandler(RaiseTargetFinishedEvent);
-                _targetStartedEventHandler = new TargetStartedEventHandler(RaiseTargetStartedEvent);
-                _taskFinishedEventHandler = new TaskFinishedEventHandler(RaiseTaskFinishedEvent);
-                _taskStartedEventHandler = new TaskStartedEventHandler(RaiseTaskStartedEvent);
-                _buildWarningEventHandler = new BuildWarningEventHandler(RaiseWarningEvent);
-                _telemetryEventHandler = new TelemetryEventHandler(RaiseTelemetryEvent);
+                _anyEventHandler = RaiseAnyEvent;
+                _buildFinishedEventHandler = RaiseBuildFinishedEvent;
+                _buildStartedEventHandler = RaiseBuildStartedEvent;
+                _customBuildEventHandler = RaiseCustomEvent;
+                _buildErrorEventHandler = RaiseErrorEvent;
+                _buildMessageEventHandler = RaiseMessageEvent;
+                _projectFinishedEventHandler = RaiseProjectFinishedEvent;
+                _projectStartedEventHandler = RaiseProjectStartedEvent;
+                _buildStatusEventHandler = RaiseStatusEvent;
+                _targetFinishedEventHandler = RaiseTargetFinishedEvent;
+                _targetStartedEventHandler = RaiseTargetStartedEvent;
+                _taskFinishedEventHandler = RaiseTaskFinishedEvent;
+                _taskStartedEventHandler = RaiseTaskStartedEvent;
+                _buildWarningEventHandler = RaiseWarningEvent;
+                _telemetryEventHandler = RaiseTelemetryEvent;
 
                 _eventSourceForBuild.AnyEventRaised += _anyEventHandler;
                 _eventSourceForBuild.BuildFinished += _buildFinishedEventHandler;
@@ -1320,8 +1308,7 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskStarted += _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised += _buildWarningEventHandler;
 
-                IEventSource2 eventSource2 = _eventSourceForBuild as IEventSource2;
-                if (eventSource2 != null)
+                if (_eventSourceForBuild is IEventSource2 eventSource2)
                 {
                     eventSource2.TelemetryLogged += _telemetryEventHandler;
                 }
@@ -1347,8 +1334,7 @@ namespace Microsoft.Build.Utilities
                 _eventSourceForBuild.TaskStarted -= _taskStartedEventHandler;
                 _eventSourceForBuild.WarningRaised -= _buildWarningEventHandler;
 
-                IEventSource2 eventSource2 = _eventSourceForBuild as IEventSource2;
-                if (eventSource2 != null)
+                if (_eventSourceForBuild is IEventSource2 eventSource2)
                 {
                     eventSource2.TelemetryLogged -= _telemetryEventHandler;
                 }

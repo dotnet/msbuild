@@ -1,15 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectOtherwiseElement class.</summary>
-//-----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
@@ -27,7 +21,7 @@ namespace Microsoft.Build.Construction
         internal ProjectOtherwiseElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -44,59 +38,26 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override string Condition
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
-            }
+            get => null;
+            set => ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
         }
 
         #region ChildEnumerators
         /// <summary>
         /// Get an enumerator over any child item groups
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectItemGroupElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectItemGroupElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
 
         /// <summary>
         /// Get an enumerator over any child property groups
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectPropertyGroupElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectPropertyGroupElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
 
         /// <summary>
         /// Get an enumerator over any child chooses
         /// </summary>
-        public ICollection<ProjectChooseElement> ChooseElements
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectChooseElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectChooseElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
+
         #endregion
 
         /// <summary>

@@ -1,8 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="RoslynTools.RepoToolset">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
 
+    <!-- Don't warn on incompatability MSIL vs x86 since this isn't an actual working DLL -->
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+    
     <!-- For mono builds we only use TF=net461, so using this project with TF=netcoreapp2.1
          will cause build failures because the projects are compatible. So, instead we use
          TF=net461 here and let this set up the `bootstrap/` folder. And to avoid the
@@ -20,9 +23,6 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">
-    <!-- Include SDKs from the Stage 0 .NET Core SDK -->
-    <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
-
     <!-- This file is needed so the dotnet CLI knows how to map preview SDK versions to tfms (because tfms do not have preview information on them) -->
     <!-- This is because according to semver, 2.1.0-preview is not >= 2.1.0 -->
     <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props" CopyToOutputDirectory="PreserveNewest" />
@@ -37,23 +37,19 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">
-    <!-- Include SDKs from the Stage 0 .NET Core SDK -->
-    <Content Include="$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\sdk\$(DotNetCliVersion)\Sdks\**\*" LinkBase="Sdks" CopyToOutputDirectory="PreserveNewest" />
-
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
-    <!-- Include NuGet.targets from NuGet.Build.Tasks package.  Ideally, this should probably be in contentFiles in the package so we don't have to do this. -->
-    <Content Include="$(NuGetPackageRoot)nuget.build.tasks\$(NuGetBuildTasksVersion)\runtimes\any\native\NuGet.targets" CopyToOutputDirectory="PreserveNewest" />
-    
+    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
+
     <!-- Include DependencyModel libraries. -->
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
-  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true'">
+  <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'netstandard2.0'">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" />
   </Target>
-  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(MonoBuild)' != 'true'">
+  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
   </Target>
 

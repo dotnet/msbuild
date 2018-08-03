@@ -1,14 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A dictionary that can hold more than one distinct value with the same key.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Collections.ObjectModel;
 using System.Collections;
 using Microsoft.Build.Shared;
 using System.Diagnostics;
@@ -69,32 +63,23 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal MultiDictionary(IEqualityComparer<K> keyComparer)
         {
-            _backing = new Dictionary<K, MultiDictionary<K, V>.SmallList<V>>(keyComparer);
+            _backing = new Dictionary<K, SmallList<V>>(keyComparer);
         }
 
         /// <summary>
         /// Number of keys
         /// </summary>
-        internal int KeyCount
-        {
-            get { return _backing.Count; }
-        }
+        internal int KeyCount => _backing.Count;
 
         /// <summary>
         /// Number of values over all keys
         /// </summary>
-        internal int ValueCount
-        {
-            get { return _valueCount; }
-        }
+        internal int ValueCount => _valueCount;
 
         /// <summary>
         /// return keys in the dictionary
         /// </summary>
-        internal IEnumerable<K> Keys
-        {
-            get { return _backing.Keys; }
-        }
+        internal IEnumerable<K> Keys => _backing.Keys;
 
         /// <summary>
         /// Enumerator over values that have the specified key.
@@ -103,8 +88,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                SmallList<V> entry;
-                if (!_backing.TryGetValue(key, out entry))
+                if (!_backing.TryGetValue(key, out SmallList<V> entry))
                 {
                     yield break;
                 }
@@ -124,10 +108,9 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrow(value != null, "Null value not allowed");
 
-            SmallList<V> entry;
-            if (!_backing.TryGetValue(key, out entry))
+            if (!_backing.TryGetValue(key, out SmallList<V> entry))
             {
-                _backing.Add(key, new MultiDictionary<K, V>.SmallList<V>(value));
+                _backing.Add(key, new SmallList<V>(value));
             }
             else
             {
@@ -145,8 +128,7 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrow(value != null, "Null value not allowed");
 
-            SmallList<V> entry;
-            if (!_backing.TryGetValue(key, out entry))
+            if (!_backing.TryGetValue(key, out SmallList<V> entry))
             {
                 return false;
             }
@@ -171,7 +153,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Clear()
         {
-            _backing = new Dictionary<K, MultiDictionary<K, V>.SmallList<V>>();
+            _backing = new Dictionary<K, SmallList<V>>();
             _valueCount = 0;
         }
 
@@ -208,9 +190,7 @@ namespace Microsoft.Build.Collections
                         return 0;
                     }
 
-                    List<TT> list = _entry as List<TT>;
-
-                    if (list == null)
+                    if (!(_entry is List<TT> list))
                     {
                         return 1;
                     }
@@ -234,7 +214,7 @@ namespace Microsoft.Build.Collections
                 }
                 else
                 {
-                    List<TT> list = _entry as List<TT>;
+                    var list = _entry as List<TT>;
 
                     foreach (TT item in list)
                     {
@@ -263,14 +243,12 @@ namespace Microsoft.Build.Collections
                 }
                 else if (_entry is TT)
                 {
-                    List<TT> list = new List<TT>();
-                    list.Add((TT)_entry);
-                    list.Add(value);
+                    var list = new List<TT> { (TT) _entry, value };
                     _entry = list;
                 }
                 else
                 {
-                    List<TT> list = _entry as List<TT>;
+                    var list = _entry as List<TT>;
                     list.Add(value);
                 }
             }
@@ -287,7 +265,7 @@ namespace Microsoft.Build.Collections
                 }
                 else if (_entry is TT)
                 {
-                    if (Object.ReferenceEquals((TT)_entry, value))
+                    if (ReferenceEquals((TT)_entry, value))
                     {
                         _entry = null;
                         return true;
@@ -296,11 +274,11 @@ namespace Microsoft.Build.Collections
                     return false;
                 }
 
-                List<TT> list = _entry as List<TT>;
+                var list = _entry as List<TT>;
 
                 for (int i = 0; i < list.Count; i++)
                 {
-                    if (Object.ReferenceEquals(value, list[i]))
+                    if (ReferenceEquals(value, list[i]))
                     {
                         if (list.Count == 2)
                         {

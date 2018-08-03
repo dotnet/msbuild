@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class which maintains the plan used by the Scheduler to efficiently distribute work to multiple nodes.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -148,7 +145,7 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            if (!File.Exists(planName))
+            if (!FileSystems.Default.FileExists(planName))
             {
                 return;
             }

@@ -1,0 +1,141 @@
+queue:
+  name: VSEng-MicroBuildVS2017
+  timeoutInMinutes: 360
+trigger: none
+variables:
+  BuildConfiguration: 'Release'
+  TeamName: MSBuild
+steps:
+- task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
+  displayName: Install Signing Plugin
+  inputs:
+    signType: '$(SignType)'
+
+- task: ms-vseng.MicroBuildTasks.a9799c06-320f-4175-8756-31cd731bd5f3.MicroBuildIBCMergePlugin@0
+  displayName: Install IBCMerge Plugin
+
+- task: CmdLine@1
+  displayName: save build number
+  inputs:
+    filename: echo
+    arguments: '##vso[task.setvariable variable=BUILD_BUILDNUMBER_SAVED]%BUILD_BUILDNUMBER%'
+  condition: always()
+
+- task: CmdLine@1
+  displayName: Print Vars
+  inputs:
+    filename: set
+  condition: always()
+
+- task: CmdLine@1
+  displayName: Bogus build to have nerdbank.GitVersioning set the version for the swix plugin
+  inputs:
+    filename: '$(comspec)'
+    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & msbuild /restore $(Build.Repository.LocalPath)\build\SetMicrobuildVersion\SetMicrobuildVersion.csproj"'
+
+- task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+  displayName: Install Swix Plugin
+  inputs:
+    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
+
+- task: CmdLine@1
+  displayName: restore build number
+  inputs:
+    filename: echo
+    arguments: '##vso[build.updatebuildnumber]%BUILD_BUILDNUMBER_SAVED%'
+  condition: always()
+
+- task: CmdLine@1
+  displayName: Print Vars
+  inputs:
+    filename: set
+  condition: always()
+
+- task: CmdLine@1
+  displayName: Run build.cmd
+  inputs:
+    filename: '$(comspec)'
+    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & $(Build.Repository.LocalPath)\build.cmd -pack -sign -configuration Release -properties /p:SignType=$(SignType)"'
+
+- task: CmdLine@1
+  displayName: Print bin contents
+  inputs:
+    filename: dir
+    arguments: '/s /b artifacts\>artifacts\$(BuildConfiguration)\log\BinFileListing.log'
+  condition: always()
+
+- task: CmdLine@1
+  displayName: Set build version to meaningful one again
+  inputs:
+    filename: '$(comspec)'
+    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & msbuild /restore $(Build.Repository.LocalPath)\build\SetMicrobuildVersion\SetMicrobuildVersion.csproj"'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: logs'
+  inputs:
+    PathtoPublish: 'artifacts\$(BuildConfiguration)\log'
+    ArtifactName: logs
+  condition: succeededOrFailed()
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: packages'
+  inputs:
+    PathtoPublish: 'artifacts\$(BuildConfiguration)\packages'
+    ArtifactName: packages
+  condition: succeededOrFailed()
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: vsix'
+  inputs:
+    PathtoPublish: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+    ArtifactName: vsix
+  condition: succeededOrFailed()
+
+- task: CopyFiles@2
+  displayName: Collect Symbols
+  inputs:
+    Contents: 'artifacts\$(BuildConfiguration)\bin\**\*.pdb'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/symbols'
+    CleanTargetFolder: true
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: symbols'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/symbols'
+    ArtifactName: symbols
+  condition: succeededOrFailed()
+
+- task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+  displayName: Reinstall Swix Plugin (to pick up new build number)
+  inputs:
+    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
+  enabled: false
+
+- task: ms-vseng.MicroBuildTasks.4305a8de-ba66-4d8b-b2d1-0dc4ecbbf5e8.MicroBuildUploadVstsDropFolder@1
+  displayName: Upload VSTS Drop
+  inputs:
+    DropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+
+- task: PublishSymbols@1
+  displayName: Index Sources
+  inputs:
+    SearchPattern: '**/*.pdb'
+    SymbolsFolder: '$(Build.ArtifactStagingDirectory)\symbols'
+
+- task: ms-vscs-artifact.build-tasks.artifactSymbolTask-1.artifactSymbolTask@0
+  displayName: Publish Symbols to Artifact Services
+  inputs:
+    symbolServiceURI: 'https://microsoft.artifacts.visualstudio.com/DefaultCollection'
+    sourcePath: '$(Build.ArtifactStagingDirectory)\symbols'
+    usePat: false
+
+- task: PowerShell@1
+  displayName: Microbuild health checks
+  inputs:
+    scriptName: 'build/MicrobuildTest.ps1'
+  enabled: false
+  continueOnError: true
+
+- task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+  displayName: Execute cleanup tasks
+

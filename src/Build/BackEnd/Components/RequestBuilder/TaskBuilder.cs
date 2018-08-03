@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The object which executes tasks.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -20,6 +16,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -385,8 +382,8 @@ namespace Microsoft.Build.BackEnd
                 _buildRequestEntry.ProjectRootDirectory,
                 _targetChildInstance.ConditionLocation,
                 _targetLoggingContext.LoggingService,
-                _targetLoggingContext.BuildEventContext
-                );
+                _targetLoggingContext.BuildEventContext,
+                FileSystems.Default);
 
             if (!condition)
             {
@@ -990,8 +987,8 @@ namespace Microsoft.Build.BackEnd
                     _buildRequestEntry.ProjectRootDirectory,
                     taskOutputSpecification.ConditionLocation,
                     _targetLoggingContext.LoggingService,
-                    _targetLoggingContext.BuildEventContext
-                    );
+                    _targetLoggingContext.BuildEventContext,
+                    FileSystems.Default);
 
                 if (condition)
                 {

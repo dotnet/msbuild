@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class holding the parameters and settings which are global to the build.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -18,11 +14,12 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
 namespace Microsoft.Build.Execution
 {
-    using Utilities = Microsoft.Build.Internal.Utilities;
+    using Utilities = Internal.Utilities;
 
     /// <summary>
     /// This class represents all of the settings which must be specified to start a build.
@@ -102,7 +99,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The build id
         /// </summary>
-        private int _buildId = 0;
+        private int _buildId;
 
         /// <summary>
         /// The culture
@@ -113,11 +110,6 @@ namespace Microsoft.Build.Execution
         /// The default tools version.
         /// </summary>
         private string _defaultToolsVersion = "2.0";
-
-        /// <summary>
-        /// When true, causes the build to emit a summary of project build information
-        /// </summary>
-        private bool _detailedSummary;
 
         /// <summary>
         /// Flag indicating whether node reuse should be enabled.
@@ -150,11 +142,6 @@ namespace Microsoft.Build.Execution
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
 
         /// <summary>
-        /// The host services object.
-        /// </summary>
-        private HostServices _hostServices;
-
-        /// <summary>
         /// The loggers.
         /// </summary>
         private IEnumerable<ILogger> _loggers;
@@ -167,7 +154,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The maximum amount of memory to use.
         /// </summary>
-        private int _memoryUseLimit = 0; // Unlimited
+        private int _memoryUseLimit; // Default 0 = unlimited
 
         /// <summary>
         /// The location of the node exe.  This is the full path including the exe file itself.
@@ -177,22 +164,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Flag indicating if we should only log critical events.
         /// </summary>
-        private bool _onlyLogCriticalEvents = false;
-
-        /// <summary>
-        /// A list of warnings to treat as errors.
-        /// </summary>
-        private ISet<string> _warningsAsErrors;
-
-        /// <summary>
-        /// A list of warnings to treat as low importance messages.
-        /// </summary>
-        private ISet<string> _warningsAsMessages;
-
-        /// <summary>
-        /// The location of the toolset definitions.
-        /// </summary>
-        private ToolsetDefinitionLocations _toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
+        private bool _onlyLogCriticalEvents;
 
         /// <summary>
         /// The UI culture.
@@ -205,36 +177,30 @@ namespace Microsoft.Build.Execution
         private ToolsetProvider _toolsetProvider;
 
         /// <summary>
-        /// Should the operating environment such as the current directory and environment be saved and restored between project builds and task invocations
-        /// This should be defaulted to true as we should normally do this. This should be set to false for GlobalDTAR which could run at the same time in a different build manager.
-        /// </summary>
-        private bool _saveOperatingEnvironment = true;
-
-        /// <summary>
         /// Should the logging service be done Synchronously when the number of cps's is 1
         /// </summary>
-        private bool _useSynchronousLogging = false;
+        private bool _useSynchronousLogging;
 
         /// <summary>
         /// Should the inprocess node be shutdown when the build finishes. By default this is false
         /// since visual studio needs to keep the inprocess node around after the build has finished.
         /// </summary>
-        private bool _shutdownInProcNodeOnBuildFinish = false;
+        private bool _shutdownInProcNodeOnBuildFinish;
 
         /// <summary>
         /// When true, the in-proc node will not be available.
         /// </summary>
-        private bool _disableInProcNode = false;
+        private bool _disableInProcNode;
 
         /// <summary>
         /// When true, the build should log task inputs to the loggers.
         /// </summary>
-        private bool _logTaskInputs = false;
+        private bool _logTaskInputs;
 
         /// <summary>
         /// When true, the build should log the input parameters.  Note - logging these is very expensive!
         /// </summary>
-        private bool _logInitialPropertiesAndItems = false;
+        private bool _logInitialPropertiesAndItems;
 
         /// <summary>
         /// The settings used to load the project under build
@@ -255,13 +221,13 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">The ProjectCollection from which the BuildParameters should populate itself.</param>
         public BuildParameters(ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, "projectCollection");
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             Initialize(new PropertyDictionary<ProjectPropertyInstance>(projectCollection.EnvironmentProperties), projectCollection.ProjectRootElementCache, new ToolsetProvider(projectCollection.Toolsets));
 
             _maxNodeCount = projectCollection.MaxNodeCount;
             _onlyLogCriticalEvents = projectCollection.OnlyLogCriticalEvents;
-            _toolsetDefinitionLocations = projectCollection.ToolsetLocations;
+            ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
             _defaultToolsVersion = projectCollection.DefaultToolsVersion;
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
@@ -280,7 +246,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildParameters(BuildParameters other)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other, "other");
+            ErrorUtilities.VerifyThrowInternalNull(other, nameof(other));
 
             _buildId = other._buildId;
             _culture = other._culture;
@@ -290,7 +256,7 @@ namespace Microsoft.Build.Execution
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
             _globalProperties = other._globalProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._globalProperties) : null;
-            _hostServices = other._hostServices;
+            HostServices = other.HostServices;
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
             _memoryUseLimit = other._memoryUseLimit;
@@ -301,21 +267,21 @@ namespace Microsoft.Build.Execution
             BuildThreadPriority = other.BuildThreadPriority;
 #endif
             _toolsetProvider = other._toolsetProvider;
-            _toolsetDefinitionLocations = other._toolsetDefinitionLocations;
+            ToolsetDefinitionLocations = other.ToolsetDefinitionLocations;
             _toolsetProvider = other._toolsetProvider;
             _uiCulture = other._uiCulture;
-            _detailedSummary = other._detailedSummary;
+            DetailedSummary = other.DetailedSummary;
             _shutdownInProcNodeOnBuildFinish = other._shutdownInProcNodeOnBuildFinish;
             ProjectRootElementCache = other.ProjectRootElementCache;
             ResetCaches = other.ResetCaches;
             LegacyThreadingSemantics = other.LegacyThreadingSemantics;
-            _saveOperatingEnvironment = other._saveOperatingEnvironment;
+            SaveOperatingEnvironment = other.SaveOperatingEnvironment;
             _useSynchronousLogging = other._useSynchronousLogging;
             _disableInProcNode = other._disableInProcNode;
             _logTaskInputs = other._logTaskInputs;
             _logInitialPropertiesAndItems = other._logInitialPropertiesAndItems;
-            _warningsAsErrors = other._warningsAsErrors == null ? null : new HashSet<string>(other._warningsAsErrors, StringComparer.OrdinalIgnoreCase);
-            _warningsAsMessages = other._warningsAsMessages == null ? null : new HashSet<string>(other._warningsAsMessages, StringComparer.OrdinalIgnoreCase);
+            WarningsAsErrors = other.WarningsAsErrors == null ? null : new HashSet<string>(other.WarningsAsErrors, StringComparer.OrdinalIgnoreCase);
+            WarningsAsMessages = other.WarningsAsMessages == null ? null : new HashSet<string>(other.WarningsAsMessages, StringComparer.OrdinalIgnoreCase);
             _projectLoadSettings = other._projectLoadSettings;
         }
 
@@ -364,11 +330,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// When true, indicates that the build should emit a detailed summary at the end of the log.
         /// </summary>
-        public bool DetailedSummary
-        {
-            get => _detailedSummary;
-            set => _detailedSummary = value;
-        }
+        public bool DetailedSummary { get; set; }
 
         /// <summary>
         /// When true, indicates the in-proc node should not be used.
@@ -444,7 +406,7 @@ namespace Microsoft.Build.Execution
                 {
                     foreach (ForwardingLoggerRecord logger in value)
                     {
-                        ErrorUtilities.VerifyThrowArgumentNull(logger, "ForwardingLoggers", "NullLoggerNotAllowed");
+                        ErrorUtilities.VerifyThrowArgumentNull(logger, nameof(ForwardingLoggers), "NullLoggerNotAllowed");
                     }
                 }
 
@@ -478,11 +440,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Interface allowing the host to provide additional control over the build process.
         /// </summary>
-        public HostServices HostServices
-        {
-            get => _hostServices;
-            set => _hostServices = value;
-        }
+        public HostServices HostServices { get; set; }
 
         /// <summary>
         /// Enables or disables legacy threading semantics
@@ -493,11 +451,7 @@ namespace Microsoft.Build.Execution
         /// requests will be built on the thread which invoked the build rather than a 
         /// thread owned by the BuildManager.
         /// </remarks>
-        public bool LegacyThreadingSemantics
-        {
-            get;
-            set;
-        }
+        public bool LegacyThreadingSemantics { get; set; }
 
         /// <summary>
         /// The collection of loggers to use during the build.
@@ -564,29 +518,17 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// A list of warnings to treat as errors.  To treat all warnings as errors, set this to an empty <see cref="HashSet{String}"/>.  
         /// </summary>
-        public ISet<string> WarningsAsErrors
-        {
-            get => _warningsAsErrors;
-            set => _warningsAsErrors = value;
-        }
+        public ISet<string> WarningsAsErrors { get; set; }
 
         /// <summary>
         /// A list of warnings to treat as low importance messages.
         /// </summary>
-        public ISet<string> WarningsAsMessages
-        {
-            get => _warningsAsMessages;
-            set => _warningsAsMessages = value;
-        }
+        public ISet<string> WarningsAsMessages { get; set; }
 
         /// <summary>
         /// Locations to search for toolsets.
         /// </summary>
-        public ToolsetDefinitionLocations ToolsetDefinitionLocations
-        {
-            get => _toolsetDefinitionLocations;
-            set => _toolsetDefinitionLocations = value;
-        }
+        public ToolsetDefinitionLocations ToolsetDefinitionLocations { get; set; } = ToolsetDefinitionLocations.Default;
 
         /// <summary>
         /// Returns all of the toolsets.
@@ -609,11 +551,7 @@ namespace Microsoft.Build.Execution
         /// Flag indicating if the operating environment such as the current directory and environment be saved and restored between project builds and task invocations.
         /// This should be set to false for any other build managers running in the system so that we do not have two build managers trampling on each others environment.
         /// </summary>
-        public bool SaveOperatingEnvironment
-        {
-            get => _saveOperatingEnvironment;
-            set => _saveOperatingEnvironment = value;
-        }
+        public bool SaveOperatingEnvironment { get; set; } = true;
 
         /// <summary>
         /// Shutdown the inprocess node when the build finishes. By default this is false 
@@ -737,7 +675,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets the node id.
         /// </summary>
-        internal int NodeId { get; set; } = 0;
+        internal int NodeId { get; set; }
 
         /// <summary>
         /// Gets the toolset provider.
@@ -754,31 +692,19 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The one and only project root element cache to be used for the build.
         /// </summary>
-        internal ProjectRootElementCache ProjectRootElementCache
-        {
-            get;
-            set;
-        }
+        internal ProjectRootElementCache ProjectRootElementCache { get; set; }
 
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Information for configuring child AppDomains.
         /// </summary>
-        internal AppDomainSetup AppDomainSetup
-        {
-            get;
-            set;
-        }
+        internal AppDomainSetup AppDomainSetup { get; set; }
 #endif
 
         /// <summary>
         ///  (for diagnostic use) Whether or not this is out of proc
         /// </summary>
-        internal bool IsOutOfProc
-        {
-            get;
-            set;
-        }
+        internal bool IsOutOfProc { get; set; }
 
         /// <nodoc/>
         public ProjectLoadSettings ProjectLoadSettings
@@ -830,7 +756,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _onlyLogCriticalEvents);
             translator.Translate(ref s_startupDirectory);
             translator.TranslateCulture(ref _uiCulture);
-            translator.Translate(ref _toolsetProvider, Microsoft.Build.Evaluation.ToolsetProvider.FactoryForDeserialization);
+            translator.Translate(ref _toolsetProvider, Evaluation.ToolsetProvider.FactoryForDeserialization);
             translator.Translate(ref _useSynchronousLogging);
             translator.Translate(ref _shutdownInProcNodeOnBuildFinish);
             translator.Translate(ref _logTaskInputs);
@@ -906,7 +832,7 @@ namespace Microsoft.Build.Execution
 
             if (Environment.GetEnvironmentVariable("MSBUILDDETAILEDSUMMARY") == "1") // For example to get detailed summary within Visual Studio
             {
-                _detailedSummary = true;
+                DetailedSummary = true;
             }
 
             _nodeExeLocation = FindMSBuildExe();
@@ -948,7 +874,7 @@ namespace Microsoft.Build.Execution
         /// This File.Exists otherwise can show up in profiles when there's a lot of 
         /// design time builds going on.
         /// </summary>
-        private bool CheckMSBuildExeExistsAt(string path)
+        private static bool CheckMSBuildExeExistsAt(string path)
         {
             if (s_msbuildExeKnownToExistAt != null && string.Equals(path, s_msbuildExeKnownToExistAt, StringComparison.OrdinalIgnoreCase))
             {
@@ -956,7 +882,7 @@ namespace Microsoft.Build.Execution
                 return true;
             }
 
-            if (File.Exists(path))
+            if (FileSystems.Default.FileExists(path))
             {
                 s_msbuildExeKnownToExistAt = path;
                 return true;

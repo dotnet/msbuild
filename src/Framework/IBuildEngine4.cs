@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface for tasks to communicate with the MSBuild engine.</summary>
-//-----------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
 

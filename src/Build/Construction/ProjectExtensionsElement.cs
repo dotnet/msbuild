@@ -1,19 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Represents the ProjectExtensions element in the MSBuild project.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Xml;
-using System.Reflection;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using Utilities = Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.Construction
 {
@@ -31,7 +22,7 @@ namespace Microsoft.Build.Construction
         internal ProjectExtensionsElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -48,15 +39,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override string Condition
         {
-            get
-            {
-                return null;
-            }
-
-            set
-            {
-                ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
-            }
+            get => null;
+            set => ErrorUtilities.ThrowInvalidOperation("OM_CannotGetSetCondition");
         }
 
         /// <summary>
@@ -72,7 +56,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "Content");
+                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Content));
                 XmlElement.InnerXml = value;
                 MarkDirty("Set ProjectExtensions raw {0}", value);
             }
@@ -98,17 +82,12 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, "name");
+                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
 
                 XmlElement idElement = XmlElement[name];
 
-                if (idElement == null)
-                {
-                    return String.Empty;
-                }
-
                 // remove the xmlns attribute, because the IDE's not expecting that
-                return Microsoft.Build.Internal.Utilities.RemoveXmlNamespace(idElement.InnerXml);
+                return idElement == null ? String.Empty : Internal.Utilities.RemoveXmlNamespace(idElement.InnerXml);
             }
 
             set
@@ -148,20 +127,20 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc/>
         public override void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, "element");
-            ErrorUtilities.VerifyThrowArgument(this.GetType().IsEquivalentTo(element.GetType()), "element");
+            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
+            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
 
             if (this == element)
             {
                 return;
             }
 
-            this.Label = element.Label;
+            Label = element.Label;
 
             var other = (ProjectExtensionsElement)element;
-            this.Content = other.Content;
+            Content = other.Content;
 
-            this.MarkDirty("CopyFrom", null);
+            MarkDirty("CopyFrom", null);
         }
 
         /// <summary>

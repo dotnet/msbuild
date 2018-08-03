@@ -4,9 +4,9 @@
 
 using System;
 using System.IO;
-using System.Collections;
-
+using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 
 namespace Microsoft.Build.Tasks
@@ -20,12 +20,12 @@ namespace Microsoft.Build.Tasks
         /// Key -- Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project
         /// Value -- Directory
         /// </summary>
-        private static Hashtable s_assemblyFolders;
+        private static Dictionary<string, string> s_assemblyFolders;
 
         /// <summary>
         /// Synchronize the creation of assemblyFolders
         /// </summary>
-        private static Object s_syncLock = new Object();
+        private static readonly Object s_syncLock = new Object();
 
         /// <summary>
         /// Given a registry key, find all of the registered assembly folders and add them to the list.
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks
         (
             RegistryKey hive,
             string key,
-            Hashtable directories
+            Dictionary<string, string> directories
         )
         {
             using (RegistryKey baseKey = hive.OpenSubKey(key))
@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                             if (product.ValueCount > 0)
                             {
                                 string folder = (string)product.GetValue("");
-                                if (Directory.Exists(folder))
+                                if (FileSystems.Default.DirectoryExists(folder))
                                 {
                                     string regkeyAlias = aliasKey + "\\" + productName;
                                     directories[regkeyAlias] = folder;
@@ -81,12 +81,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// For the given key name, look for registered assembly folders in HKCU then HKLM.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="directories"></param>
-        private static void AddFoldersFromRegistryKey
-        (
+        private static void AddFoldersFromRegistryKey(
             string key,
-            Hashtable directories
+            Dictionary<string, string> directories
         )
         {
             // First add the current user.
@@ -111,7 +108,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void CreateAssemblyFolders()
         {
-            s_assemblyFolders = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            s_assemblyFolders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             if (NativeMethodsShared.IsWindows)
             {
@@ -134,8 +131,7 @@ namespace Microsoft.Build.Tasks
         /// Returns the list of assembly folders that we're interested in.
         /// </summary>
         /// <param name="regKeyAlias">Like "hklm\Vendor RegKey" as provided to a reference by the &lt;AssemblyFolderKey&gt; on the reference in the project.</param>
-        /// <returns>Collection of assembly folders.</returns>
-        static internal ICollection GetAssemblyFolders(string regKeyAlias)
+        internal static IEnumerable<string> GetAssemblyFolders(string regKeyAlias)
         {
             lock (s_syncLock)
             {
@@ -146,19 +142,22 @@ namespace Microsoft.Build.Tasks
             }
 
             // If no specific alias was requested then return the complete list.
-            if (regKeyAlias == null || regKeyAlias.Length == 0)
+            if (string.IsNullOrEmpty(regKeyAlias))
             {
-                return s_assemblyFolders.Values;
+                foreach (string folder in s_assemblyFolders.Values)
+                {
+                    yield return folder;
+                }
             }
 
             // If a specific alias was requested then return only that alias.
-            ArrayList specificKey = new ArrayList();
-            string directory = (string)s_assemblyFolders[regKeyAlias];
-            if (directory != null && directory.Length > 0)
+            if (s_assemblyFolders.TryGetValue(regKeyAlias, out string directory))
             {
-                specificKey.Add(directory);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    yield return directory;
+                }
             }
-            return specificKey;
         }
     }
 }

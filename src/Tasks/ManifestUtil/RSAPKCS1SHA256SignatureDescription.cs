@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 
@@ -22,7 +21,9 @@ namespace System.Deployment.Internal.CodeSigning
         public override AsymmetricSignatureDeformatter CreateDeformatter(AsymmetricAlgorithm key)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
             RSAPKCS1SignatureDeformatter deformatter = new RSAPKCS1SignatureDeformatter(key);
             deformatter.SetHashAlgorithm("SHA256");
@@ -32,7 +33,9 @@ namespace System.Deployment.Internal.CodeSigning
         public override AsymmetricSignatureFormatter CreateFormatter(AsymmetricAlgorithm key)
         {
             if (key == null)
-                throw new ArgumentNullException("key");
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
             RSAPKCS1SignatureFormatter formatter = new RSAPKCS1SignatureFormatter(key);
             formatter.SetHashAlgorithm("SHA256");

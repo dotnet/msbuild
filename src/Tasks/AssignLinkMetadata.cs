@@ -1,16 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Task to assign a reasonable "Link" metadata to the provided items.</summary>
-//-----------------------------------------------------------------------
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Microsoft.Build.Tasks
 {
@@ -22,21 +17,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The set of items to assign metadata to
         /// </summary>
-        public ITaskItem[] Items
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] Items { get; set; }
 
         /// <summary>
         /// The set of items to which the Link metadata has been set
         /// </summary>
         [Output]
-        public ITaskItem[] OutputItems
-        {
-            get;
-            set;
-        }
+        public ITaskItem[] OutputItems { get; set; }
 
         /// <summary>
         /// Sets "Link" metadata on any item where the project file in which they 
@@ -47,11 +34,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
-            List<ITaskItem> outputItems = new List<ITaskItem>();
+            var outputItems = new List<ITaskItem>();
 
-            if (this.Items != null)
+            if (Items != null)
             {
-                foreach (var item in this.Items)
+                foreach (ITaskItem item in Items)
                 {
                     try
                     {
@@ -80,7 +67,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            this.OutputItems = outputItems.ToArray();
+            OutputItems = outputItems.ToArray();
             return !Log.HasLoggedErrors;
         }
     }

@@ -19,31 +19,6 @@ namespace Microsoft.Build.Tasks.Xaml
     public abstract class XamlDataDrivenToolTask : ToolTask
     {
         /// <summary>
-        /// The list of switches in the order they should appear, if set.
-        /// </summary>
-        private IEnumerable<String> _switchOrderList;
-
-        /// <summary>
-        /// The dictionary that holds all set switches
-        /// The string is the name of the property, and the CommandLineToolSwitch holds all of the relevant information
-        /// i.e., switch, boolean value, type, etc.
-        /// </summary>
-        private Dictionary<string, CommandLineToolSwitch> _activeToolSwitches = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// The dictionary holds all of the legal values that are associated with a certain switch.
-        /// For example, the key Optimization would hold another dictionary as the value, that had the string pairs
-        /// "Disabled", "/Od"; "MaxSpeed", "/O1"; "MinSpace", "/O2"; "Full", "/Ox" in it.
-        /// </summary>
-        private Dictionary<string, Dictionary<string, string>> _values = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// Any additional options (as a literal string) that may have been specified in the project file
-        /// We eventually want to get rid of this
-        /// </summary>
-        private string _additionalOptions = String.Empty;
-
-        /// <summary>
         /// True if we returned our commands directly from the command line generation and do not need to use the
         /// response file (because the command-line is short enough)
         /// </summary>
@@ -55,19 +30,9 @@ namespace Microsoft.Build.Tasks.Xaml
         private TaskLoggingHelper _logPrivate;
 
         /// <summary>
-        /// The set of active tool switch values.
-        /// </summary>
-        private Dictionary<string, CommandLineToolSwitch> _activeToolSwitchesValues = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
-        /// An array of non-zero codes which don't cause an error.
-        /// </summary>
-        private string[] _acceptableNonZeroExitCodes = null;
-
-        /// <summary>
         /// The command line for this task. 
         /// </summary>
-        private string _commandLine = null;
+        private string _commandLine;
 
         /// <summary>
         /// Constructor called by the generated task.
@@ -75,124 +40,61 @@ namespace Microsoft.Build.Tasks.Xaml
         protected XamlDataDrivenToolTask(string[] switchOrderList, ResourceManager taskResources)
             : base(taskResources)
         {
-            this.InitializeLogger(taskResources);
-            _switchOrderList = switchOrderList;
+            InitializeLogger(taskResources);
+            SwitchOrderList = switchOrderList;
 
-            _logPrivate = new TaskLoggingHelper(this);
-            _logPrivate.TaskResources = AssemblyResources.PrimaryResources;
-            _logPrivate.HelpKeywordPrefix = "MSBuild.";
+            _logPrivate = new TaskLoggingHelper(this)
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
         }
 
         /// <summary>
         /// The command-line template to use, if any.
         /// </summary>
-        public string CommandLineTemplate
-        {
-            get;
-            set;
-        }
+        public string CommandLineTemplate { get; set; }
 
         /// <summary>
         /// The additional options that have been set. These are raw switches that
         /// go last on the command line.
         /// </summary>
-        public string AdditionalOptions
-        {
-            get
-            {
-                return _additionalOptions;
-            }
-
-            set
-            {
-                _additionalOptions = value;
-            }
-        }
+        public string AdditionalOptions { get; set; } = String.Empty;
 
         /// <summary>
         /// Retrieves the list of acceptable non-zero exit codes.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "NonZero", Justification = "Already shipped as public API")]
-        public virtual string[] AcceptableNonZeroExitCodes
-        {
-            get
-            {
-                return _acceptableNonZeroExitCodes;
-            }
-            set
-            {
-                _acceptableNonZeroExitCodes = value;
-            }
-        }
+        public virtual string[] AcceptableNonZeroExitCodes { get; set; }
 
         /// <summary>
         /// Gets or set the dictionary of active tool switch values.
         /// </summary>
-        public Dictionary<string, CommandLineToolSwitch> ActiveToolSwitchesValues
-        {
-            get
-            {
-                return _activeToolSwitchesValues;
-            }
-
-            set
-            {
-                _activeToolSwitchesValues = value;
-            }
-        }
+        public Dictionary<string, CommandLineToolSwitch> ActiveToolSwitchesValues { get; set; } = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Ordered list of switches
         /// </summary>
-        /// <returns>ArrayList of switches in declaration order</returns>
-        internal virtual IEnumerable<string> SwitchOrderList
-        {
-            get
-            {
-                return _switchOrderList;
-            }
-        }
+        /// <returns>Switches in declaration order</returns>
+        internal virtual IEnumerable<string> SwitchOrderList { get; }
 
         /// <summary>
         /// The list of all the switches that have been set
         /// </summary>
-        protected internal Dictionary<string, CommandLineToolSwitch> ActiveToolSwitches
-        {
-            get
-            {
-                return _activeToolSwitches;
-            }
-        }
+        protected internal Dictionary<string, CommandLineToolSwitch> ActiveToolSwitches { get; } = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Overridden to use UTF16, which works better than UTF8 for older versions of CL, LIB, etc. 
         /// </summary>
-        protected override Encoding ResponseFileEncoding
-        {
-            get
-            {
-                return Encoding.Unicode;
-            }
-        }
+        protected override Encoding ResponseFileEncoding { get; } = Encoding.Unicode;
 
         /// <summary>
         /// Made a property to abstract out the "if null, call GenerateCommands()" logic. 
         /// </summary>
         private string CommandLine
         {
-            get
-            {
-                if (_commandLine == null)
-                {
-                    _commandLine = GenerateCommands();
-                }
-
-                return _commandLine;
-            }
-            set
-            {
-                _commandLine = value;
-            }
+            get => _commandLine ?? (_commandLine = GenerateCommands());
+            set => _commandLine = value;
         }
 
         /// <summary>
@@ -202,12 +104,10 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             if (!String.IsNullOrEmpty(propertyName))
             {
-                return _activeToolSwitches.ContainsKey(propertyName);
+                return ActiveToolSwitches.ContainsKey(propertyName);
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         /// <summary>
@@ -215,7 +115,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public void ReplaceToolSwitch(CommandLineToolSwitch switchToAdd)
         {
-            _activeToolSwitches[switchToAdd.Name] = switchToAdd;
+            ActiveToolSwitches[switchToAdd.Name] = switchToAdd;
         }
 
         /// <summary>
@@ -223,17 +123,16 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public void AddActiveSwitchToolValue(CommandLineToolSwitch switchToAdd)
         {
-            if (((switchToAdd.Type != CommandLineToolSwitchType.Boolean)
-                            || (switchToAdd.BooleanValue == true)))
+            if (switchToAdd.Type != CommandLineToolSwitchType.Boolean || switchToAdd.BooleanValue)
             {
-                if ((switchToAdd.SwitchValue != String.Empty))
+                if (switchToAdd.SwitchValue != String.Empty)
                 {
                     ActiveToolSwitchesValues.Add(switchToAdd.SwitchValue, switchToAdd);
                 }
             }
             else
             {
-                if ((switchToAdd.ReverseSwitchValue != String.Empty))
+                if (switchToAdd.ReverseSwitchValue != String.Empty)
                 {
                     ActiveToolSwitchesValues.Add(switchToAdd.ReverseSwitchValue, switchToAdd);
                 }
@@ -245,7 +144,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public override bool Execute()
         {
-            if (!String.IsNullOrEmpty(this.CommandLineTemplate))
+            if (!String.IsNullOrEmpty(CommandLineTemplate))
             {
                 UseCommandProcessor = true;
             }
@@ -279,7 +178,7 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             if (IsPropertySet(propertyName))
             {
-                return !String.IsNullOrEmpty(_activeToolSwitches[propertyName].Name);
+                return !String.IsNullOrEmpty(ActiveToolSwitches[propertyName].Name);
             }
             else
             {
@@ -357,7 +256,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 }
             }
 
-            //Remove the overrided switches
+            // Remove the overridden switches
             foreach (string overridenSwitch in overriddenSwitches)
             {
                 ActiveToolSwitches.Remove(overridenSwitch);
@@ -398,11 +297,11 @@ namespace Microsoft.Build.Tasks.Xaml
             // We don't want to use ToolTask's implementation because it doesn't report the command line that failed. 
             if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
-                _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailedAccessDenied", this.CommandLine, ExitCode);
+                _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailedAccessDenied", CommandLine, ExitCode);
             }
             else
             {
-                _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailed", this.CommandLine, ExitCode);
+                _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailed", CommandLine, ExitCode);
             }
             return false;
         }
@@ -414,9 +313,12 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             PostProcessSwitchList();
 
-            CommandLineGenerator generator = new CommandLineGenerator(_activeToolSwitches, SwitchOrderList);
-            generator.CommandLineTemplate = this.CommandLineTemplate;
-            generator.AdditionalOptions = _additionalOptions;
+            var generator =
+                new CommandLineGenerator(ActiveToolSwitches, SwitchOrderList)
+                {
+                    CommandLineTemplate = CommandLineTemplate,
+                    AdditionalOptions = AdditionalOptions
+                };
 
             CommandLine = generator.GenerateCommandLine();
             return CommandLine;
@@ -447,11 +349,11 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             if (switchMap != null)
             {
-                for (int i = 0; i < switchMap.Length; ++i)
+                foreach (string[] switches in switchMap)
                 {
-                    if (String.Equals(switchMap[i][0], value, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(switches[0], value, StringComparison.OrdinalIgnoreCase))
                     {
-                        return switchMap[i][1];
+                        return switches[1];
                     }
                 }
 
@@ -460,7 +362,6 @@ namespace Microsoft.Build.Tasks.Xaml
 
             return String.Empty;
         }
-
 
         /// <summary>
         /// A method for the enumerated values a property can have
@@ -490,7 +391,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public string CreateSwitchValue(string propertyName, string baseSwitch, string separator, Tuple<string, bool>[] arguments)
         {
-            StringBuilder switchValue = new StringBuilder(baseSwitch);
+            var switchValue = new StringBuilder(baseSwitch);
             foreach (Tuple<string, bool> argument in arguments)
             {
                 string argName = argument.Item1;
@@ -521,9 +422,11 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal void InitializeLogger(ResourceManager taskResources)
         {
-            _logPrivate = new TaskLoggingHelper(this);
-            _logPrivate.TaskResources = AssemblyResources.PrimaryResources;
-            _logPrivate.HelpKeywordPrefix = "MSBuild.";
+            _logPrivate = new TaskLoggingHelper(this)
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
         }
 
         #region ToolTask Members

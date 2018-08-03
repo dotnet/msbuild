@@ -1,12 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//-----------------------------------------------------------------------
-// <copyright file="IntrinsicFunctions.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// <summary>Definition of functions which can be accessed from MSBuild files.</summary>
-//-----------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
 using System.Text;

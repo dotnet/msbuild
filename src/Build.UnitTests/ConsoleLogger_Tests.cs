@@ -19,6 +19,7 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Evaluation;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -129,7 +130,9 @@ namespace Microsoft.Build.UnitTests
 
         private class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
 
-        public ConsoleLoggerTest()
+        private readonly ITestOutputHelper _output;
+
+        public ConsoleLoggerTest(ITestOutputHelper output)
         {
             _environment = new Dictionary<string, string>();
 
@@ -137,6 +140,8 @@ namespace Microsoft.Build.UnitTests
             {
                 _environment.Add((string)entry.Key, (string)entry.Value);
             }
+
+            _output = output;
         }
 
 
@@ -670,9 +675,9 @@ namespace Microsoft.Build.UnitTests
                 bfea.BuildEventContext = buildEventContext;
                 es.Consume(bfea);
 
-                Console.WriteLine("==");
-                Console.WriteLine(sc.ToString());
-                Console.WriteLine("==");
+                _output.WriteLine("==");
+                _output.WriteLine(sc.ToString());
+                _output.WriteLine("==");
 
                 if (i == 1)
                 {
@@ -747,9 +752,9 @@ namespace Microsoft.Build.UnitTests
                 bfea.BuildEventContext = buildEventContext;
                 es.Consume(bfea);
 
-                Console.WriteLine("==");
-                Console.WriteLine(sc.ToString());
-                Console.WriteLine("==");
+                _output.WriteLine("==");
+                _output.WriteLine(sc.ToString());
+                _output.WriteLine("==");
 
                 if (i == 1)
                 {
@@ -879,9 +884,9 @@ namespace Microsoft.Build.UnitTests
                 bfea.BuildEventContext = buildEventContext;
                 es.Consume(bfea);
 
-                Console.WriteLine("==");
-                Console.WriteLine(sc.ToString());
-                Console.WriteLine("==");
+                _output.WriteLine("==");
+                _output.WriteLine(sc.ToString());
+                _output.WriteLine("==");
 
                 if (i == 1)
                 {
@@ -955,9 +960,9 @@ namespace Microsoft.Build.UnitTests
                 bfea.BuildEventContext = buildEventContext;
                 es.Consume(bfea);
 
-                Console.WriteLine("==");
-                Console.WriteLine(sc.ToString());
-                Console.WriteLine("==");
+                _output.WriteLine("==");
+                _output.WriteLine(sc.ToString());
+                _output.WriteLine("==");
 
                 if (i == 1)
                 {
@@ -1031,9 +1036,9 @@ namespace Microsoft.Build.UnitTests
                 bfea.BuildEventContext = buildEventContext;
                 L.BuildFinishedHandler(null, bfea);
 
-                Console.WriteLine("==");
-                Console.WriteLine(sc.ToString());
-                Console.WriteLine("==");
+                _output.WriteLine("==");
+                _output.WriteLine(sc.ToString());
+                _output.WriteLine("==");
 
                 if (i == 1)
                 {
@@ -1305,7 +1310,7 @@ namespace Microsoft.Build.UnitTests
             }
             string log = sc.ToString();
 
-            Console.WriteLine("[" + log + "]");
+            _output.WriteLine("[" + log + "]");
 
             // Being careful not to make locale assumptions here, eg about sorting
             if (expectToSeeLogging)
@@ -1479,7 +1484,7 @@ namespace Microsoft.Build.UnitTests
         {
             cl.WriteEnvironment(_environment);
             string log = sc.ToString();
-            Console.WriteLine("[" + log + "]");
+            _output.WriteLine("[" + log + "]");
 
             // Being careful not to make locale assumptions here, eg about sorting
             foreach (KeyValuePair<string, string> kvp in _environment)
@@ -1493,6 +1498,8 @@ namespace Microsoft.Build.UnitTests
                 {
                     message = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", kvp.Key, kvp.Value);
                 }
+
+                message = message.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
 
                 if (expectToSeeLogging)
                 {
@@ -1556,7 +1563,7 @@ namespace Microsoft.Build.UnitTests
 
             string log = sc.ToString();
 
-            Console.WriteLine("[" + log + "]");
+            _output.WriteLine("[" + log + "]");
 
 
 
@@ -1629,7 +1636,7 @@ namespace Microsoft.Build.UnitTests
 
                 // There should be nothing in the log
                 log.Length.ShouldBe(0);
-                Console.WriteLine("Iteration of i: " + i + "[" + log + "]");
+                _output.WriteLine("Iteration of i: " + i + "[" + log + "]");
             }
         }
 
@@ -1663,7 +1670,7 @@ namespace Microsoft.Build.UnitTests
 
                 // There should be nothing in the log
                 log.Length.ShouldBe(0);
-                Console.WriteLine("Iteration of i: " + i + "[" + log + "]");
+                _output.WriteLine("Iteration of i: " + i + "[" + log + "]");
             }
         }
 
@@ -1821,9 +1828,9 @@ namespace Microsoft.Build.UnitTests
             // Log so far
             string actualLog = sc.ToString();
 
-            Console.WriteLine("==");
-            Console.WriteLine(sc.ToString());
-            Console.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
             // Verify that the log has correct error and warning string
             actualLog.ShouldContain(errorString);
@@ -1843,9 +1850,9 @@ namespace Microsoft.Build.UnitTests
             // Log so far
             actualLog = sc.ToString();
 
-            Console.WriteLine("==");
-            Console.WriteLine(sc.ToString());
-            Console.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
             // Verify that the error and warning from the previous build is not
             // reported in the subsequent build
@@ -1911,9 +1918,9 @@ namespace Microsoft.Build.UnitTests
             // Log so far
             string actualLog = sc.ToString();
 
-            Console.WriteLine("==");
-            Console.WriteLine(sc.ToString());
-            Console.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
             // Verify that the log has correct error and warning string
             actualLog.ShouldContain("<red>");
@@ -1934,9 +1941,9 @@ namespace Microsoft.Build.UnitTests
             // Log so far
             actualLog = sc.ToString();
 
-            Console.WriteLine("==");
-            Console.WriteLine(sc.ToString());
-            Console.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
             // Verify that the error and warning from the previous build is not
             // reported in the subsequent build
@@ -2048,9 +2055,9 @@ namespace Microsoft.Build.UnitTests
                 // Log so far
                 string actualLog = sc.ToString();
 
-                Console.WriteLine("==");
-                Console.WriteLine(sc.ToString());
-                Console.WriteLine("==");
+                _output.WriteLine("==");
+                _output.WriteLine(sc.ToString());
+                _output.WriteLine("==");
 
                 // Verify that the log has perf summary
                 // Project perf summary
@@ -2071,9 +2078,9 @@ namespace Microsoft.Build.UnitTests
                 // Log so far
                 actualLog = sc.ToString();
 
-                Console.WriteLine("==");
-                Console.WriteLine(sc.ToString());
-                Console.WriteLine("==");
+                _output.WriteLine("==");
+                _output.WriteLine(sc.ToString());
+                _output.WriteLine("==");
 
                 // Verify that the log doesn't have perf summary
                 actualLog.ShouldNotContain(prjPerfString);
@@ -2228,7 +2235,7 @@ namespace Microsoft.Build.UnitTests
             bool runningWithCharDevice = NativeMethodsShared.IsWindows ? IsRunningWithCharacterFileType() : false;
             for (int i = 0; i < 3; i++)
             {
-                Console.Out.WriteLine("Iteration of I is {" + i + "}");
+                _output.WriteLine("Iteration of I is {" + i + "}");
 
 
                 EventSourceSink es = new EventSourceSink();

@@ -1,18 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Collection of instance or definition items</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Collections
 {
@@ -86,10 +80,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Number of items in total, for debugging purposes.
         /// </summary>
-        internal int Count
-        {
-            get { return _nodes.Count; }
-        }
+        internal int Count => _nodes.Count;
 
         /// <summary>
         /// Get the item types that have at least one item in this collection
@@ -165,7 +156,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            return new ItemDictionary<T>.Enumerator(_itemLists.Values);
+            return new Enumerator(_itemLists.Values);
         }
 
         /// <summary>
@@ -213,8 +204,7 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                LinkedList<T> list;
-                if (!_itemLists.TryGetValue(projectItem.Key, out list))
+                if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
                 {
                     list = new LinkedList<T>();
                     _itemLists[projectItem.Key] = list;
@@ -237,8 +227,7 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                LinkedListNode<T> node;
-                if (!_nodes.TryGetValue(projectItem, out node))
+                if (!_nodes.TryGetValue(projectItem, out LinkedListNode<T> node))
                 {
                     return false;
                 }
@@ -269,8 +258,7 @@ namespace Microsoft.Build.Collections
             ErrorUtilities.VerifyThrow(existingItem.Key == newItem.Key, "Cannot replace an item {0} with an item {1} with a different name.", existingItem.Key, newItem.Key);
             lock (_itemLists)
             {
-                LinkedListNode<T> node;
-                if (_nodes.TryGetValue(existingItem, out node))
+                if (_nodes.TryGetValue(existingItem, out LinkedListNode<T> node))
                 {
                     node.Value = newItem;
                     _nodes.Remove(existingItem);
@@ -301,8 +289,7 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                LinkedList<T> list;
-                if (!_itemLists.TryGetValue(itemType, out list))
+                if (!_itemLists.TryGetValue(itemType, out LinkedList<T> list))
                 {
                     list = new LinkedList<T>();
                     _itemLists[itemType] = list;
@@ -357,9 +344,7 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                LinkedList<T> list;
-
-                if (_itemLists.TryGetValue(itemType, out list) && list.Count == 0)
+                if (_itemLists.TryGetValue(itemType, out LinkedList<T> list) && list.Count == 0)
                 {
                     return true;
                 }
@@ -374,7 +359,7 @@ namespace Microsoft.Build.Collections
         /// All items of a type are returned consecutively in their correct order.
         /// However the order in which item types are returned is not defined.
         /// </summary>
-        private class Enumerator : IEnumerator<T>, IDisposable
+        private sealed class Enumerator : IEnumerator<T>, IDisposable
         {
             /// <summary>
             /// Enumerator over lists
@@ -407,32 +392,15 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// Get the current item
             /// </summary>
-            public T Current
-            {
-                get
-                {
-                    // Undefined if enumerator is before or after collection: we return null
-                    return _itemEnumerator != null ? _itemEnumerator.Current : null;
-                }
-            }
+            /// <remarks>Undefined if enumerator is before or after collection: we return null.</remarks>
+            public T Current => _itemEnumerator?.Current;
 
             /// <summary>
             /// Implementation of IEnumerator.Current, which unlike IEnumerator&gt;T&lt;.Current throws
             /// if there is no current object
             /// </summary>
-            object IEnumerator.Current
-            {
-                get
-                {
-                    if (_itemEnumerator != null)
-                    {
-                        return _itemEnumerator.Current;
-                    }
-
-                    // will throw InvalidOperationException, per IEnumerator contract
-                    return ((IEnumerator)_listEnumerator).Current;
-                }
-            }
+            // will throw InvalidOperationException, per IEnumerator contract
+            object IEnumerator.Current => _itemEnumerator != null ? _itemEnumerator.Current : ((IEnumerator)_listEnumerator).Current;
 
             /// <summary>
             /// Move to the next object if any,
@@ -463,11 +431,7 @@ namespace Microsoft.Build.Collections
             /// </summary>
             public void Reset()
             {
-                if (_itemEnumerator != null)
-                {
-                    _itemEnumerator.Reset();
-                }
-
+                _itemEnumerator?.Reset();
                 _listEnumerator.Reset();
             }
 
@@ -483,7 +447,7 @@ namespace Microsoft.Build.Collections
             /// <summary>
             /// The real disposer.
             /// </summary>
-            protected virtual void Dispose(bool disposing)
+            private void Dispose(bool disposing)
             {
                 if (disposing)
                 {

@@ -28,7 +28,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ToolLocationHelper_Tests
+    public sealed class ToolLocationHelper_Tests
     {
         private readonly ITestOutputHelper _output;
 
@@ -47,14 +47,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetApiContractReferencesHandlesEmptyContracts()
         {
-            string[] returnValue = ToolLocationHelper.GetApiContractReferences(Enumerable.Empty<ApiContract>(), String.Empty);
+            string[] returnValue = ToolLocationHelper.GetApiContractReferences(Enumerable.Empty<ApiContract>(), string.Empty);
             returnValue.Length.ShouldBe(0);
         }
 
         [Fact]
         public void GetApiContractReferencesHandlesNullContracts()
         {
-            string[] returnValue = ToolLocationHelper.GetApiContractReferences(null, String.Empty);
+            string[] returnValue = ToolLocationHelper.GetApiContractReferences(null, string.Empty);
             returnValue.Length.ShouldBe(0);
         }
 
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
         public void GetApiContractReferencesHandlesNonExistingLocation()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            string[] returnValue = ToolLocationHelper.GetApiContractReferences(new ApiContract[] { new ApiContract { Name = "Foo", Version = "Bar" } }, tempDirectory);
+            string[] returnValue = ToolLocationHelper.GetApiContractReferences(new[] { new ApiContract { Name = "Foo", Version = "Bar" } }, tempDirectory);
             returnValue.Length.ShouldBe(0);
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(Path.Combine(referenceDirectory, "One.winmd"), "First");
                 File.WriteAllText(Path.Combine(referenceDirectory, "Two.winmd"), "Second");
                 File.WriteAllText(Path.Combine(referenceDirectory, "Three.winmd"), "Third");
-                string[] returnValue = ToolLocationHelper.GetApiContractReferences(new ApiContract[] { new ApiContract { Name = "Foo", Version = "Bar" } }, tempDirectory);
+                string[] returnValue = ToolLocationHelper.GetApiContractReferences(new[] { new ApiContract { Name = "Foo", Version = "Bar" } }, tempDirectory);
                 returnValue.Length.ShouldBe(3);
             }
             finally
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(referenceDirectory);
                 File.WriteAllText(Path.Combine(referenceDirectory, "One.winmd"), "First");
-                string[] returnValue = ToolLocationHelper.GetApiContractReferences(new ApiContract[] { new ApiContract { Name = "Foo", Version = "Bar" } }, tempDirectory, tempVersion);
+                string[] returnValue = ToolLocationHelper.GetApiContractReferences(new[] { new ApiContract { Name = "Foo", Version = "Bar" } }, tempDirectory, tempVersion);
                 returnValue.Length.ShouldBe(1);
             }
             finally
@@ -238,7 +238,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(sdkDirectory);
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), string.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 sdk.ExtensionSDKs.Count.ShouldBe(0);
             }
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.CreateDirectory(sdkDirectory);
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), string.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 sdk.ExtensionSDKs.Count.ShouldBe(0);
             }
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(sdkDirectory);
                 File.WriteAllText(Path.Combine(sdkDirectory, "SDKManifest.xml"), "");
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), string.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 sdk.ExtensionSDKs.Count.ShouldBe(1);
             }
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(sdkDirectory);
                 File.WriteAllText(Path.Combine(sdkDirectory, "SDKManifest.xml"), "Garbaggggge");
                 DirectoryInfo info = new DirectoryInfo(tempDirectory);
-                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), String.Empty);
+                TargetPlatformSDK sdk = new TargetPlatformSDK("Foo", new Version(0, 0), string.Empty);
                 ToolLocationHelper.GatherExtensionSDKs(info, sdk);
                 sdk.ExtensionSDKs.Count.ShouldBe(1);
             }
@@ -517,8 +517,8 @@ namespace Microsoft.Build.UnitTests
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
                 Path.GetDirectoryName(typeof(object).GetTypeInfo().Module.FullyQualifiedName),
                 ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version40),
-                new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
-                new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
+                DirectoryExists,
+                GetDirectories,
                 SharedDotNetFrameworkArchitecture.Current
             );
 
@@ -542,8 +542,8 @@ namespace Microsoft.Build.UnitTests
                 (
                     @"{runtime-base}\v1.2.x86dbg",    // Simulate "Whidbey" as the current runtime.
                     "v1.2",
-                    new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
-                    new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
+                    DirectoryExists,
+                    GetDirectories,
                     SharedDotNetFrameworkArchitecture.Current
                 );
             path.ShouldBe(Path.Combine("{runtime-base}", "v1.2.x86dbg"));
@@ -562,8 +562,8 @@ namespace Microsoft.Build.UnitTests
                 (
                     Path.Combine("{runtime-base}", "v1.3.x86dbg"),        // Simulate "Orcas" as the current runtime.}
                     "v1.2",                                              // But we're looking for "Whidbey"
-                    new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
-                    new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
+                    DirectoryExists,
+                    GetDirectories,
                     SharedDotNetFrameworkArchitecture.Current
                 );
             path.ShouldBe(Path.Combine("{runtime-base}", "v1.2.x86fre"));
@@ -582,8 +582,8 @@ namespace Microsoft.Build.UnitTests
                 (
                     Path.Combine("{runtime-base}", "v1.1.x86dbg"),       // Simulate "Everett" as the current runtime.
                     "v1.2",                                              // But we're looking for "Whidbey"
-                    new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
-                    new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
+                    DirectoryExists,
+                    GetDirectories,
                     SharedDotNetFrameworkArchitecture.Current
                 );
 
@@ -602,8 +602,8 @@ namespace Microsoft.Build.UnitTests
                 (
                     Path.Combine(@"{runtime-base}", "v1.1"),             // Simulate "everett" as the current runtime
                     "v1.3",                                              // And we're trying to find "orchas" runtime which isn't installed.
-                    new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
-                    new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
+                    DirectoryExists,
+                    GetDirectories,
                     SharedDotNetFrameworkArchitecture.Current
                 );
 
@@ -627,8 +627,8 @@ namespace Microsoft.Build.UnitTests
                 (
                     fakeWhidbeyPath,  // Simulate "whidbey" as the current runtime
                     "v1.1",                 // We're looking for "everett"
-                    new DirectoryExists(ToolLocationHelper_Tests.DirectoryExists),
-                    new GetDirectories(ToolLocationHelper_Tests.GetDirectories),
+                    DirectoryExists,
+                    GetDirectories,
                     SharedDotNetFrameworkArchitecture.Current
                 );
 
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests
                     FrameworkLocationHelper.GetPathToDotNetFrameworkV40(SharedDotNetFrameworkArchitecture.Bitness32)
                 );
 
-            if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProgramFiles(x86)")))
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ProgramFiles(x86)")))
             {
                 // 64-bit machine, so we should test the 64-bit overloads as well
                 ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version11, UtilitiesDotNetFrameworkArchitecture.Bitness64).ShouldBe(
@@ -746,18 +746,10 @@ namespace Microsoft.Build.UnitTests
         public void TestGetPathToBuildToolsFile_32Bit()
         {
             string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version20, UtilitiesDotNetFrameworkArchitecture.Bitness32);
-
-            if (net20Path != null)
-            {
-                net20Path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "2.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
-            }
+            net20Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "2.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
 
             string net35Path = ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version35, UtilitiesDotNetFrameworkArchitecture.Bitness32);
-
-            if (net35Path != null)
-            {
-                net35Path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "3.5", UtilitiesDotNetFrameworkArchitecture.Bitness32));
-            }
+            net35Path?.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "3.5", UtilitiesDotNetFrameworkArchitecture.Bitness32));
 
             ToolLocationHelper.GetPathToDotNetFrameworkFile("msbuild.exe", TargetDotNetFrameworkVersion.Version40, UtilitiesDotNetFrameworkArchitecture.Bitness32).ShouldBe(
                     ToolLocationHelper.GetPathToBuildToolsFile("msbuild.exe", "4.0", UtilitiesDotNetFrameworkArchitecture.Bitness32));
@@ -809,6 +801,7 @@ namespace Microsoft.Build.UnitTests
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK462 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.6.2\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK47 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.7\WinSDK-NetFx40Tools-x86";
             string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK471 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.7.1\WinSDK-NetFx40Tools-x86";
+            string fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK472 = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.7.2\WinSDK-NetFx40Tools-x86";
 
             // v4.0
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version40, VisualStudioVersion.Version100).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK70A);
@@ -865,8 +858,14 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version471, VisualStudioVersion.Version120));
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version471, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK471);
 
-            // Latest (v4.7.1)
-            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK471);
+            // v4.7.2
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version472, VisualStudioVersion.Version100));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version472, VisualStudioVersion.Version110));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version472, VisualStudioVersion.Version120));
+            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version472, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK472);
+
+            // Latest
+            ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.Version150).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK472);
         }
 
         [Fact]
@@ -1040,7 +1039,7 @@ namespace Microsoft.Build.UnitTests
 #pragma warning restore 618
 
 #if FEATURE_CODETASKFACTORY
-        private static string s_verifyToolsetAndToolLocationHelperProjectCommonContent = @"
+        private static readonly string s_verifyToolsetAndToolLocationHelperProjectCommonContent = @"
                                     string currentInstallFolderLocation = null;
 
                                     using (RegistryKey baseKey = Registry.LocalMachine.OpenSubKey(""SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows""))
@@ -1302,7 +1301,7 @@ namespace Microsoft.Build.UnitTests
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
 
             string expectedPath = Path.Combine(targetFrameworkRootPath, targetFrameworkIdentifier);
-            expectedPath = Path.Combine(expectedPath, "v" + targetFrameworkVersion.ToString());
+            expectedPath = Path.Combine(expectedPath, "v" + targetFrameworkVersion);
             expectedPath = Path.Combine(expectedPath, "Profile");
             expectedPath = Path.Combine(expectedPath, targetFrameworkProfile);
 
@@ -1318,9 +1317,9 @@ namespace Microsoft.Build.UnitTests
                                                  : "/usr/lib";
             string targetFrameworkIdentifier = "Compact Framework";
             Version targetFrameworkVersion = new Version("1.0");
-            FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, String.Empty);
+            FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, string.Empty);
             string expectedPath = Path.Combine(targetFrameworkRootPath, targetFrameworkIdentifier);
-            expectedPath = Path.Combine(expectedPath, "v" + targetFrameworkVersion.ToString());
+            expectedPath = Path.Combine(expectedPath, "v" + targetFrameworkVersion);
 
             string path = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
             path.ShouldBe(expectedPath, StringCompareShould.IgnoreCase);
@@ -1340,7 +1339,7 @@ namespace Microsoft.Build.UnitTests
                                                      : "/usr/lib";
                 string targetFrameworkIdentifier = "Compact Framework";
                 Version targetFrameworkVersion = new Version("1.0");
-                string targetFrameworkProfile = "PocketPC" + new String(Path.GetInvalidFileNameChars());
+                string targetFrameworkProfile = "PocketPC" + new string(Path.GetInvalidFileNameChars());
 
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
 
@@ -1360,7 +1359,7 @@ namespace Microsoft.Build.UnitTests
                 string targetFrameworkRootPath = NativeMethodsShared.IsWindows
                                                      ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
                                                      : "/usr/lib";
-                string targetFrameworkIdentifier = "Compact Framework" + new String(Path.GetInvalidFileNameChars());
+                string targetFrameworkIdentifier = "Compact Framework" + new string(Path.GetInvalidFileNameChars());
                 Version targetFrameworkVersion = new Version("1.0");
                 string targetFrameworkProfile = "PocketPC";
 
@@ -1381,7 +1380,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InvalidOperationException>(() =>
             {
-                string pathTooLong = new String('a', 500);
+                string pathTooLong = new string('a', 500);
 
                 string targetFrameworkRootPath = NativeMethodsShared.IsWindows
                                                      ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
@@ -1478,7 +1477,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(redist41Directory);
                 File.WriteAllText(redist41, redistString41);
                 string path = ToolLocationHelper.ChainReferenceAssemblyPath(Path.Combine(tempDirectory, "v4.1"));
-                path.ShouldBe(String.Empty); // "Expected the path to be empty"
+                path.ShouldBe(string.Empty); // "Expected the path to be empty"
             }
             finally
             {
@@ -1508,7 +1507,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(redist41Directory);
                 File.WriteAllText(redist41, redistString41);
                 string path = ToolLocationHelper.ChainReferenceAssemblyPath(Path.Combine(tempDirectory, "v4.1"));
-                path.ShouldBe(String.Empty); // "Expected the path to be empty"
+                path.ShouldBe(string.Empty); // "Expected the path to be empty"
             }
             finally
             {
@@ -1538,7 +1537,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(redist41Directory);
                 File.WriteAllText(redist41, redistString41);
                 string path = ToolLocationHelper.ChainReferenceAssemblyPath(Path.Combine(tempDirectory, "v4.1"));
-                path.ShouldBe(String.Empty); // "Expected the path to be empty"
+                path.ShouldBe(string.Empty); // "Expected the path to be empty"
             }
             finally
             {
@@ -1658,7 +1657,7 @@ namespace Microsoft.Build.UnitTests
         {
             Should.Throw<InvalidOperationException>(() =>
             {
-                string tooLong = new String('a', 500);
+                string tooLong = new string('a', 500);
                 string redistString41 = "<FileList Redist='Random' IncludeFramework='" + tooLong + "'>" +
                                                   "<File AssemblyName='System' Version='4.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='false' />" +
                                                "</FileList>";
@@ -1782,7 +1781,7 @@ namespace Microsoft.Build.UnitTests
             string framework40RedistList = Path.Combine(framework40redistDirectory, "FrameworkList.xml");
 
             string framework39Directory =
-                Path.Combine(new[] { tempDirectory, "MyFramework", "v3.9", "Profile", "Client" });
+                Path.Combine(tempDirectory, "MyFramework", "v3.9", "Profile", "Client");
             string framework39redistDirectory = Path.Combine(framework39Directory, "RedistList");
             string framework39RedistList = Path.Combine(framework39redistDirectory, "FrameworkList.xml");
 
@@ -1922,7 +1921,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentException>(() =>
             {
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Ident", new Version("2.0"));
-                ToolLocationHelper.GetPathToReferenceAssemblies(String.Empty, frameworkName);
+                ToolLocationHelper.GetPathToReferenceAssemblies(string.Empty, frameworkName);
             }
            );
         }
@@ -1936,7 +1935,7 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<ArgumentException>(() =>
             {
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Ident", new Version("2.0"));
-                ToolLocationHelper.GetPathToReferenceAssemblies(String.Empty, frameworkName);
+                ToolLocationHelper.GetPathToReferenceAssemblies(string.Empty, frameworkName);
             }
            );
         }
@@ -1987,48 +1986,30 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPathToReferenceAssembliesDefaultLocation99()
         {
-#if FEATURE_SPECIAL_FOLDERS
-            string targetFrameworkRootPath = Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
-#else
-            string targetFrameworkRootPath = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
-#endif
+            string targetFrameworkRootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
             string targetFrameworkIdentifier = ".Net Framework";
             Version targetFrameworkVersion = new Version("99.99");
 
-            FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, String.Empty);
+            FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, string.Empty);
 
             IList<string> directories = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName);
             directories.Count.ShouldBe(0); // "Expected the method to return no paths."
         }
 
-#if FEATURE_SPECIAL_FOLDERS
         /// <summary>
-        /// Make sure we choose the correct path for program files based on the environment variables
+        /// Make sure we choose the correct path for program files based on the operating system
         /// </summary>
         [Fact]
-#else
-        [Fact(Skip = "Special folders not supported")]
-#endif
         [PlatformSpecific(TestPlatforms.Windows)]
         public void TestGenerateProgramFiles32()
         {
-            string programFilesX86Original = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
-            string programFiles = Environment.GetEnvironmentVariable("ProgramFiles");
-            try
-            {
-                Environment.SetEnvironmentVariable("ProgramFiles(x86)", null);
-                string result = FrameworkLocationHelper.GenerateProgramFiles32();
-                result.ShouldBe(programFiles, StringCompareShould.IgnoreCase); // "Expected to use program files but used program files x86"
+            Environment.SpecialFolder folder = Environment.Is64BitOperatingSystem ? Environment.SpecialFolder.ProgramFilesX86 : Environment.SpecialFolder.ProgramFiles;
+            string programFilesX86 = Environment.GetFolderPath(folder);
+            string result = FrameworkLocationHelper.GenerateProgramFiles32();
 
-                Environment.SetEnvironmentVariable("ProgramFiles(x86)", String.Empty);
-
-                result = FrameworkLocationHelper.GenerateProgramFiles32();
-                result.ShouldBe(programFiles, StringCompareShould.IgnoreCase); // "Expected to use program files but used program files x86"
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("ProgramFiles(x86)", programFilesX86Original);
-            }
+            // 32-bit OS: "Expected to use program files"
+            // 64-bit OS: "Expected to use program files x86"
+            result.ShouldBe(programFilesX86, StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -2222,29 +2203,29 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
-            if (String.IsNullOrEmpty(frameworkDirectory2032bit) || String.IsNullOrEmpty(frameworkDirectory2064bit) || String.IsNullOrEmpty(frameworkDirectory20Current))
+            if (string.IsNullOrEmpty(frameworkDirectory2032bit) || string.IsNullOrEmpty(frameworkDirectory2064bit) || string.IsNullOrEmpty(frameworkDirectory20Current))
             {
                 // ".Net 2.0 not installed: checked current {0} :: 64 bit :: {1} :: 32 bit {2}", frameworkDirectory20Current, frameworkDirectory2064bit, frameworkDirectory2032bit
                 return;
             }
 
-            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "x86");
+            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "x86");
             pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "x64");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "x64");
             pathToFramework.ShouldBe(frameworkDirectory2064bit, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "itanium");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "itanium");
             pathToFramework.ShouldBe(frameworkDirectory2064bit, StringCompareShould.IgnoreCase);
 
             if (!EnvironmentUtilities.Is64BitProcess)
             {
-                pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "RandomPlatform");
+                pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "RandomPlatform");
                 pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
             }
             else
             {
-                pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "RandomPlatform");
+                pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "RandomPlatform");
                 pathToFramework.ShouldBe(frameworkDirectory2064bit, StringCompareShould.IgnoreCase);
             }
         }
@@ -2275,17 +2256,17 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
-            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "x86");
+            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x86");
             string dotNet40Path = FileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "x64");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x64");
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "itanium");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "itanium");
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "RandomPlatform");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "RandomPlatform");
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
         }
 
@@ -2314,22 +2295,22 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
-            if (String.IsNullOrEmpty(frameworkDirectory2032bit) || String.IsNullOrEmpty(frameworkDirectory20Current))
+            if (string.IsNullOrEmpty(frameworkDirectory2032bit) || string.IsNullOrEmpty(frameworkDirectory20Current))
             {
                 // ".Net 2.0 not installed: checked current {0} :: 32 bit {2}", frameworkDirectory20Current, frameworkDirectory2032bit
                 return;
             }
 
-            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "x86");
+            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "x86");
             pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "x64");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "x64");
             pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "itanium");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "itanium");
             pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", String.Empty, "RandomPlatform");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "RandomPlatform");
             pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
         }
 
@@ -2358,17 +2339,17 @@ namespace Microsoft.Build.UnitTests
                 return;
             }
 
-            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "x86");
+            string pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x86");
             string dotNet40Path = FileUtilities.EnsureNoTrailingSlash(referencePaths[0]);
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "x64");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "x64");
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "itanium");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "itanium");
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
 
-            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", String.Empty, "RandomPlatform");
+            pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v4.0", string.Empty, "RandomPlatform");
             pathToFramework.ShouldBe(dotNet40Path, StringCompareShould.IgnoreCase);
         }
 
@@ -2536,7 +2517,7 @@ namespace Microsoft.Build.UnitTests
         public void GetAssemblyFoldersExInfoTest()
         {
             SetupAssemblyFoldersExTestConditionRegistryKey();
-            IList<AssemblyFoldersExInfo> directories = null;
+            IList<AssemblyFoldersExInfo> directories;
             try
             {
                 directories = ToolLocationHelper.GetAssemblyFoldersExInfo(@"SOFTWARE\Microsoft\.UnitTest", "v3.0", "AssemblyFoldersEx", null, null, System.Reflection.ProcessorArchitecture.MSIL);
@@ -2551,7 +2532,7 @@ namespace Microsoft.Build.UnitTests
             directories[1].DirectoryPath.ShouldBe(@"C:\V1Control", StringCompareShould.IgnoreCase);
         }
 
-        private void SetupAssemblyFoldersExTestConditionRegistryKey()
+        private static void SetupAssemblyFoldersExTestConditionRegistryKey()
         {
             RegistryKey baseKey = Registry.CurrentUser;
             baseKey.DeleteSubKeyTree(@"SOFTWARE\Microsoft\.UnitTest", false);
@@ -2562,7 +2543,7 @@ namespace Microsoft.Build.UnitTests
             servicePackKey.SetValue("", @"C:\V1Control2");
         }
 
-        private void RemoveAssemblyFoldersExTestConditionRegistryKey()
+        private static void RemoveAssemblyFoldersExTestConditionRegistryKey()
         {
             RegistryKey baseKey = Registry.CurrentUser;
             try
@@ -2583,11 +2564,11 @@ namespace Microsoft.Build.UnitTests
             {
                 string frameworkName = "Foo Framework";
                 string frameworkVersion = "v0.1";
-                string rootDir = Path.Combine(env.DefaultTestDirectory.FolderPath, "framework-root");
+                string rootDir = Path.Combine(env.DefaultTestDirectory.Path, "framework-root");
 
                 string asmPath = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersion, rootDir);
 
-                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, rootDir);
+                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, string.Empty, null, rootDir);
                 stdLibPath.ShouldBe(asmPath);
             }
         }
@@ -2598,9 +2579,9 @@ namespace Microsoft.Build.UnitTests
             string frameworkName = ".NETFramework";
             string frameworkVersion = "v4.5";
 
-            string v45Path = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty);
+            string v45Path = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, string.Empty);
             // This look up should fall back the default path with the .NET frameworks
-            string v45PathWithNullRoot = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null);
+            string v45PathWithNullRoot = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, string.Empty, null);
 
             v45PathWithNullRoot.ShouldBe(v45Path);
         }
@@ -2612,12 +2593,12 @@ namespace Microsoft.Build.UnitTests
             {
                 string frameworkName = "Foo Framework";
                 string frameworkVersion = "v0.1";
-                string customFrameworkRootPath = Path.Combine(env.DefaultTestDirectory.FolderPath, "framework-root");
+                string customFrameworkRootPath = Path.Combine(env.DefaultTestDirectory.Path, "framework-root");
 
                 string asmPath = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersion, customFrameworkRootPath);
                 string fallbackSearchPaths = $"/foo/bar;{customFrameworkRootPath};/a/b";
 
-                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, null, fallbackSearchPaths);
+                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, string.Empty, null, null, fallbackSearchPaths);
                 stdLibPath.ShouldBe(asmPath);
             }
         }
@@ -2635,14 +2616,14 @@ namespace Microsoft.Build.UnitTests
             {
                 string frameworkName = "Foo Framework";
                 string frameworkVersion = "v0.1";
-                string rootDir = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
-                string fallbackPath = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
+                string rootDir = Path.Combine(env.CreateFolder().Path, "framework-root");
+                string fallbackPath = Path.Combine(env.CreateFolder().Path, "framework-root");
 
                 string asmPathForRoot = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersion, rootDir);
-                string asmPathForFallback = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersion, fallbackPath);
+                CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersion, fallbackPath);
                 string fallbackSearchPaths = $"/foo/bar;{fallbackPath};/a/b";
 
-                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, rootDir, fallbackPath);
+                string stdLibPath = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, string.Empty, null, rootDir, fallbackSearchPaths);
                 // the path should be for the framework in the root path
                 stdLibPath.ShouldBe(asmPathForRoot);
             }
@@ -2654,9 +2635,9 @@ namespace Microsoft.Build.UnitTests
             string frameworkName = ".NETFramework";
             string frameworkVersion = "v4.5";
 
-            string v45Path = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty);
+            string v45Path = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, string.Empty);
             // This look up should fall back the default path with the .NET frameworks
-            string v45PathWithNullRoot = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, String.Empty, null, null);
+            string v45PathWithNullRoot = ToolLocationHelper.GetPathToStandardLibraries(frameworkName, frameworkVersion, string.Empty, null, null);
 
             v45PathWithNullRoot.ShouldBe(v45Path);
         }
@@ -2666,11 +2647,11 @@ namespace Microsoft.Build.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                string customFrameworkDir = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
+                string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
 
-                CheckGetPathToReferenceAssemblies(env, customFrameworkDir, null,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
-                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, "v" + frameworkVersion, frameworkProfile, _customFrameworkDir));
+                CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, null,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
+                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, "v" + frameworkVersion, frameworkProfile, customFrameworkDir));
             }
         }
 
@@ -2679,15 +2660,15 @@ namespace Microsoft.Build.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                string customFrameworkDir = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
-                string searchPaths = $"/foo/bar;{customFrameworkDir}";
-                string rootDir = env.CreateFolder().FolderPath;
+                string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
+                string searchPaths = $"/foo/bar;{customFrameworkDirToUse}";
+                string rootDir = env.CreateFolder().Path;
 
-                CheckGetPathToReferenceAssemblies(env, customFrameworkDir, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                                 frameworkName, "v" + frameworkVersion, frameworkProfile,
-                                                                                rootDir, _fallbackSearchPaths));
+                                                                                rootDir, fallbackSearchPaths));
             }
         }
 
@@ -2696,14 +2677,14 @@ namespace Microsoft.Build.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                string customFrameworkDir = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
-                string searchPaths = $"/foo/bar;{customFrameworkDir}";
+                string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
+                string searchPaths = $"/foo/bar;{customFrameworkDirToUse}";
 
-                CheckGetPathToReferenceAssemblies(env, customFrameworkDir, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                             frameworkName, "v" + frameworkVersion, frameworkProfile,
-                                                                            targetFrameworkRootPath:null, targetFrameworkFallbackSearchPaths:_fallbackSearchPaths));
+                                                                            targetFrameworkRootPath:null, targetFrameworkFallbackSearchPaths:fallbackSearchPaths));
             }
         }
 
@@ -2713,11 +2694,11 @@ namespace Microsoft.Build.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                string customFrameworkDir = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
-                CheckGetPathToReferenceAssemblies(env, customFrameworkDir, null,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
+                CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, null,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
                                                          => ToolLocationHelper.GetPathToReferenceAssemblies(
-                                                                            _customFrameworkDir, _fallbackSearchPaths,
+                                                                            customFrameworkDir, fallbackSearchPaths,
                                                                             new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
             }
         }
@@ -2728,14 +2709,14 @@ namespace Microsoft.Build.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                string customFrameworkDir = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
-                string searchPaths = $"{customFrameworkDir};/a/b";
-                string rootDir = env.CreateFolder().FolderPath;
+                string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
+                string searchPaths = $"{customFrameworkDirToUse};/a/b";
+                string rootDir = env.CreateFolder().Path;
 
-                CheckGetPathToReferenceAssemblies(env,customFrameworkDir, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
                                                          => ToolLocationHelper.GetPathToReferenceAssemblies(
-                                                                            rootDir, _fallbackSearchPaths,
+                                                                            rootDir, fallbackSearchPaths,
                                                                             new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
             }
         }
@@ -2745,12 +2726,12 @@ namespace Microsoft.Build.UnitTests
         {
             using (var env = TestEnvironment.Create())
             {
-                string customFrameworkDir = Path.Combine(env.CreateFolder().FolderPath, "framework-root");
-                string searchPaths = $"{customFrameworkDir};/a/b";
-                CheckGetPathToReferenceAssemblies(env,customFrameworkDir, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string _customFrameworkDir, string _fallbackSearchPaths)
+                string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
+                string searchPaths = $"{customFrameworkDirToUse};/a/b";
+                CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
+                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
                                                          => ToolLocationHelper.GetPathToReferenceAssemblies(
-                                                                            null, _fallbackSearchPaths,
+                                                                            null, fallbackSearchPaths,
                                                                             new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
             }
         }
@@ -2760,7 +2741,7 @@ namespace Microsoft.Build.UnitTests
             string frameworkName = "Foo Framework";
             string frameworkVersion = "0.1";
             string frameworkVersionWithV = "v" + frameworkVersion;
-            string frameworkProfile = String.Empty;
+            string frameworkProfile = string.Empty;
 
             string asmPath = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersionWithV, customFrameworkDir);
 
@@ -2768,13 +2749,13 @@ namespace Microsoft.Build.UnitTests
             if (NativeMethodsShared.IsMono)
             {
                 stdLibPaths.Count.ShouldBe(2);
-                stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar.ToString(), stdLibPaths[0]);
+                stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar, stdLibPaths[0]);
                 stdLibPaths[1].ShouldBe(asmPath + Path.DirectorySeparatorChar);
             }
             else
             {
                 stdLibPaths.Count.ShouldBe(1);
-                stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar.ToString(), stdLibPaths[0]);
+                stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar, stdLibPaths[0]);
              }
          }
 
@@ -2784,10 +2765,10 @@ namespace Microsoft.Build.UnitTests
             string frameworkName = ".NETFramework";
             string frameworkVersion = "v4.5";
 
-            var v45Paths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty);
+            var v45Paths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, string.Empty);
 
             // This look up should fall back the default path with the .NET frameworks
-            var v45PathsWithNullRoot = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, null);
+            var v45PathsWithNullRoot = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, string.Empty, null);
 
             v45PathsWithNullRoot.ShouldBe(v45Paths);
         }
@@ -2798,15 +2779,15 @@ namespace Microsoft.Build.UnitTests
             string frameworkName = ".NETFramework";
             string frameworkVersion = "v4.5";
 
-            var v45Paths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty);
+            var v45Paths = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, string.Empty);
 
             // This look up should fall back the default path with the .NET frameworks
-            var v45PathsWithNullRoot = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, String.Empty, null, null);
+            var v45PathsWithNullRoot = ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, frameworkVersion, string.Empty, null, null);
 
             v45PathsWithNullRoot.ShouldBe(v45Paths);
         }
 
-        string CreateNewFrameworkAndGetAssembliesPath(TestEnvironment env, string frameworkName, string frameworkVersion, string rootDir)
+        private static string CreateNewFrameworkAndGetAssembliesPath(TestEnvironment env, string frameworkName, string frameworkVersion, string rootDir)
         {
             string frameworkListXml = null;
             if (NativeMethodsShared.IsMono)
@@ -2823,13 +2804,13 @@ namespace Microsoft.Build.UnitTests
             }
 
             string redistPath = Path.Combine(rootDir, frameworkName, frameworkVersion, "RedistList");
-            string asmPath = Path.Combine(rootDir, frameworkName, frameworkVersion, NativeMethodsShared.IsMono ? "assemblies" : String.Empty);
+            string asmPath = Path.Combine(rootDir, frameworkName, frameworkVersion, NativeMethodsShared.IsMono ? "assemblies" : string.Empty);
 
             env.CreateFolder(redistPath);
             env.CreateFolder(asmPath);
 
-            File.WriteAllText(Path.Combine(redistPath, "FrameworkList.xml"), String.Format(frameworkListXml, frameworkName));
-            File.WriteAllText(Path.Combine(asmPath, "mscorlib.dll"), String.Empty);
+            File.WriteAllText(Path.Combine(redistPath, "FrameworkList.xml"), string.Format(frameworkListXml, frameworkName));
+            File.WriteAllText(Path.Combine(asmPath, "mscorlib.dll"), string.Empty);
 
             return asmPath;
         }
@@ -2843,19 +2824,9 @@ namespace Microsoft.Build.UnitTests
         {
             if (path == "{runtime-base}" && pattern == "v1.2*")
             {
-                return new string[] { @"{runtime-base}\v1.2.30617", @"{runtime-base}\v1.2.x86dbg", @"{runtime-base}\v1.2.x86fre" };
+                return new[] { @"{runtime-base}\v1.2.30617", @"{runtime-base}\v1.2.x86dbg", @"{runtime-base}\v1.2.x86fre" };
             }
             return new string[0];
-        }
-
-        /*
-        * Method:   GetDirectories35
-        *
-        * Delegate method simulates a file system for testing location methods.
-        */
-        private static string[] GetDirectories35(string path, string pattern)
-        {
-            return new string[] { @"{runtime-base}\v3.5.12333", @"{runtime-base}\v3.5", @"{runtime-base}\v3.5.23455" };
         }
 
         /// <summary>
@@ -2918,188 +2889,104 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Should the delegate respond with a path or null when asked for Version20 on the delegate which gets the DotNetFrameworkPath
             /// </summary>
-            internal bool DotNet20Installed
-            {
-                get;
-                set;
-            }
+            internal bool DotNet20Installed { get; set; }
 
             /// <summary>
             /// Should the delegate respond with a path or null when asked for Version30 on the delegate which gets the DotNetFrameworkPath
             /// </summary>
-            internal bool DotNet30Installed
-            {
-                get;
-                set;
-            }
+            internal bool DotNet30Installed { get; set; }
 
             /// <summary>
             /// Should the delegate respond with a path or null when asked for Version35 on the delegate which gets the DotNetFrameworkPath
             /// </summary>
-            internal bool DotNet35Installed
-            {
-                get;
-                set;
-            }
+            internal bool DotNet35Installed { get; set; }
 
             /// <summary>
             /// Should the delegate respond with a path or null when asked for Version40 on the delegate which gets the DotNetFrameworkPath
             /// </summary>
-            internal bool DotNet40Installed
-            {
-                get;
-                set;
-            }
+            internal bool DotNet40Installed { get; set; }
 
             /// <summary>
             /// Should the delegate respond with a path or null when asked for Version40 on the delegate which gets the DotNetReferenceAssembliesPath is called
             /// </summary>
-            internal bool DotNetReferenceAssemblies40Installed
-            {
-                get;
-                set;
-            }
+            internal bool DotNetReferenceAssemblies40Installed { get; set; }
 
             /// <summary>
             /// Should the delegate respond with a path or null when asked for Version35 on the delegate which gets the DotNetReferenceAssembliesPath is called
             /// </summary>
-            internal bool DotNetReferenceAssemblies35Installed
-            {
-                get;
-                set;
-            }
+            internal bool DotNetReferenceAssemblies35Installed { get; set; }
 
             /// <summary>
             /// Should the delegate respond with a path or null when asked for Version30 on the delegate which gets the DotNetReferenceAssembliesPath is called
             /// </summary>
-            internal bool DotNetReferenceAssemblies30Installed
-            {
-                get;
-                set;
-            }
+            internal bool DotNetReferenceAssemblies30Installed { get; set; }
 
             /// <summary>
             /// Return a delegate which will return a path or null depending on whether or not frameworks and their reference assembly paths are being simulated as being installed
             /// </summary>
-            internal ToolLocationHelper.VersionToPath GetDotNetVersionToPathDelegate
-            {
-                get
-                {
-                    return new ToolLocationHelper.VersionToPath(GetDotNetFramework);
-                }
-            }
+            internal ToolLocationHelper.VersionToPath GetDotNetVersionToPathDelegate => GetDotNetFramework;
 
             /// <summary>
             /// Return a delegate which will return a path or null depending on whether or not frameworks and their reference assembly paths are being simulated as being installed
             /// </summary>
-            internal ToolLocationHelper.VersionToPath GetDotNetReferenceAssemblyDelegate
-            {
-                get
-                {
-                    return new ToolLocationHelper.VersionToPath(GetDotNetFrameworkReferenceAssemblies);
-                }
-            }
+            internal ToolLocationHelper.VersionToPath GetDotNetReferenceAssemblyDelegate => GetDotNetFrameworkReferenceAssemblies;
 
             /// <summary>
             /// Return a path to the .net framework reference assemblies if the boolean property said we should return one.
             /// Return null if we should not fake the fact that the framework reference assemblies are installed
             /// </summary>
-            internal string GetDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion version)
+            private string GetDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion version)
             {
-                if (version == TargetDotNetFrameworkVersion.Version40)
+                switch (version)
                 {
-                    if (DotNetReferenceAssemblies40Installed)
+                    case TargetDotNetFrameworkVersion.Version40:
                     {
-                        return DotNet40ReferenceAssemblyPath;
+                        return DotNetReferenceAssemblies40Installed ? DotNet40ReferenceAssemblyPath : null;
                     }
-                    else
+                    case TargetDotNetFrameworkVersion.Version35:
+                    {
+                        return DotNetReferenceAssemblies35Installed ? DotNet35ReferenceAssemblyPath : null;
+                    }
+                    case TargetDotNetFrameworkVersion.Version30:
+                    {
+                        return DotNetReferenceAssemblies30Installed ? DotNet30ReferenceAssemblyPath : null;
+                    }
+                    default:
                     {
                         return null;
                     }
                 }
-
-                if (version == TargetDotNetFrameworkVersion.Version35)
-                {
-                    if (DotNetReferenceAssemblies35Installed)
-                    {
-                        return DotNet35ReferenceAssemblyPath;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-
-                if (version == TargetDotNetFrameworkVersion.Version30)
-                {
-                    if (DotNetReferenceAssemblies30Installed)
-                    {
-                        return DotNet30ReferenceAssemblyPath;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-
-                return null;
             }
 
             /// <summary>
             /// Return a path to the .net framework if the boolean property said we should return one.
             /// Return null if we should not fake the fact that the framework is installed
             /// </summary>
-            internal string GetDotNetFramework(TargetDotNetFrameworkVersion version)
+            private string GetDotNetFramework(TargetDotNetFrameworkVersion version)
             {
-                if (version == TargetDotNetFrameworkVersion.Version20)
+                switch (version)
                 {
-                    if (DotNet20Installed)
+                    case TargetDotNetFrameworkVersion.Version20:
                     {
-                        return DotNet20FrameworkPath;
+                        return DotNet20Installed ? DotNet20FrameworkPath : null;
                     }
-                    else
+                    case TargetDotNetFrameworkVersion.Version30:
+                    {
+                        return DotNet30Installed ? DotNet30FrameworkPath : null;
+                    }
+                    case TargetDotNetFrameworkVersion.Version35:
+                    {
+                        return DotNet35Installed ? DotNet35FrameworkPath : null;
+                    }
+                    case TargetDotNetFrameworkVersion.Version40:
+                    {
+                        return DotNet40Installed ? DotNet40FrameworkPath : null;
+                    }
+                    default:
                     {
                         return null;
                     }
                 }
-
-                if (version == TargetDotNetFrameworkVersion.Version30)
-                {
-                    if (DotNet30Installed)
-                    {
-                        return DotNet30FrameworkPath;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-
-                if (version == TargetDotNetFrameworkVersion.Version35)
-                {
-                    if (DotNet35Installed)
-                    {
-                        return DotNet35FrameworkPath;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-
-                if (version == TargetDotNetFrameworkVersion.Version40)
-                {
-                    if (DotNet40Installed)
-                    {
-                        return DotNet40FrameworkPath;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-
-                return null;
             }
         }
     }
@@ -3111,20 +2998,20 @@ namespace Microsoft.Build.UnitTests
     {
 #if FEATURE_WIN32_REGISTRY
         // Create delegates to mock the registry for the registry portion of the test.
-        private Microsoft.Build.Shared.OpenBaseKey _openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
-        internal Microsoft.Build.Shared.GetRegistrySubKeyNames getRegistrySubKeyNames = new Microsoft.Build.Shared.GetRegistrySubKeyNames(GetRegistrySubKeyNames);
-        internal Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue;
+        private readonly OpenBaseKey _openBaseKey = GetBaseKey;
+        private readonly GetRegistrySubKeyNames getRegistrySubKeyNames = GetRegistrySubKeyNames;
+        private readonly GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue;
 #endif
 
         // Path to the fake SDk directory structure created under the temp directory.
-        private string _fakeStructureRoot = null;
-        private string _fakeStructureRoot2 = null;
-        private ITestOutputHelper _output;
+        private readonly string _fakeStructureRoot;
+        private readonly string _fakeStructureRoot2;
+        private readonly ITestOutputHelper _output;
 
         public GetPlatformExtensionSDKLocationsTestFixture(ITestOutputHelper output)
         {
 #if FEATURE_WIN32_REGISTRY
-            getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
+            getRegistrySubKeyDefaultValue = GetRegistrySubKeyDefaultValue;
 #endif
 
             _output = output;
@@ -3160,7 +3047,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void PassEmptyAndNullTPM()
         {
-            VerifyExceptionOnEmptyOrNullPlatformAttributes(String.Empty, new Version("1.0"));
+            VerifyExceptionOnEmptyOrNullPlatformAttributes(string.Empty, new Version("1.0"));
             VerifyExceptionOnEmptyOrNullPlatformAttributes(null, new Version("1.0"));
             VerifyExceptionOnEmptyOrNullPlatformAttributes(null, null);
             VerifyExceptionOnEmptyOrNullPlatformAttributes("Windows", null);
@@ -3171,12 +3058,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static void VerifyExceptionOnEmptyOrNullPlatformAttributes(string identifier, Version version)
         {
-
-            Should.Throw<ArgumentException>(
-                () => ToolLocationHelper.GetPlatformExtensionSDKLocations(identifier, version));
-
-            Should.Throw<ArgumentException>(
-                () => ToolLocationHelper.GetPlatformSDKLocation(identifier, version));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPlatformExtensionSDKLocations(identifier, version));
+            Should.Throw<ArgumentException>(() => ToolLocationHelper.GetPlatformSDKLocation(identifier, version));
         }
 
         /// <summary>
@@ -3190,16 +3073,16 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "true");
 
                 // Identifier does not exist
-                IDictionary<string, string> sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { _fakeStructureRoot }, null, "FOO", new Version(1, 0));
+                IDictionary<string, string> sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new[] { _fakeStructureRoot }, null, "FOO", new Version(1, 0));
                 sdks.Count.ShouldBe(0);
 
                 // Identifier exists
-                sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { _fakeStructureRoot }, null, "MyPlatform", new Version(3, 0));
+                sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new[] { _fakeStructureRoot }, null, "MyPlatform", new Version(3, 0));
                 sdks.ShouldContainKey("MyAssembly, Version=1.0");
                 sdks.Count.ShouldBe(1);
 
                 // Targeting version higher than exists, however since we are using a russian doll model for extension sdks we will return ones in lower versions of the targeted platform.
-                sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { _fakeStructureRoot }, null, "MyPlatform", new Version(4, 0));
+                sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new[] { _fakeStructureRoot }, null, "MyPlatform", new Version(4, 0));
                 sdks.ShouldContainKey("MyAssembly, Version=1.0");
                 sdks["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
                 sdks.ShouldContainKey("AnotherAssembly, Version=1.0");
@@ -3207,7 +3090,7 @@ namespace Microsoft.Build.UnitTests
                 sdks.Count.ShouldBe(2);
 
                 // Identifier exists but no extensions are in sdks this version or lower
-                sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { _fakeStructureRoot }, null, "MyPlatform", new Version(1, 0));
+                sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new[] { _fakeStructureRoot }, null, "MyPlatform", new Version(1, 0));
                 sdks.Count.ShouldBe(0);
             }
             finally
@@ -3227,11 +3110,11 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "true");
 
                 // Identifier does not exist
-                IDictionary<string, string> sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { _fakeStructureRoot }, null, "FOO", new Version(1, 0));
+                IDictionary<string, string> sdks = ToolLocationHelper.GetPlatformExtensionSDKLocations(new[] { _fakeStructureRoot }, null, "FOO", new Version(1, 0));
                 sdks.Count.ShouldBe(0);
 
                 string targetPath =
-                    Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" })
+                    Path.Combine(_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0")
                     + Path.DirectorySeparatorChar;
 
                 // Identifier exists
@@ -3239,7 +3122,7 @@ namespace Microsoft.Build.UnitTests
                     "MyAssembly, Version=1.0",
                     "MyPlatform",
                     new Version(3, 0),
-                    new string[] { _fakeStructureRoot },
+                    new[] { _fakeStructureRoot },
                     null);
                 path.ShouldBe(targetPath, StringCompareShould.IgnoreCase);
 
@@ -3248,12 +3131,12 @@ namespace Microsoft.Build.UnitTests
                     "MyAssembly, Version=1.0",
                     "MyPlatform",
                     new Version(4, 0),
-                    new string[] { _fakeStructureRoot },
+                    new[] { _fakeStructureRoot },
                     null);
                 path.ShouldBe(targetPath, StringCompareShould.IgnoreCase);
 
                 // Identifier does not exist
-                path = ToolLocationHelper.GetPlatformExtensionSDKLocation("Something, Version=1.0", "MyPlatform", new Version(4, 0), new string[] { _fakeStructureRoot }, null);
+                path = ToolLocationHelper.GetPlatformExtensionSDKLocation("Something, Version=1.0", "MyPlatform", new Version(4, 0), new[] { _fakeStructureRoot }, null);
                 path.Length.ShouldBe(0);
             }
             finally
@@ -3278,8 +3161,8 @@ namespace Microsoft.Build.UnitTests
                                      ? ("C:\\" + new string('g', 1800))
                                      : ("/" + new string('g', 10000));
 
-                List<string> paths = new List<string>() { tooLongPath };
-                Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+                var paths = new List<string> { tooLongPath };
+                var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
                 ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform);
             }
@@ -3294,14 +3177,12 @@ namespace Microsoft.Build.UnitTests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void ResolveFromDirectoryInvalidChar()
         {
-            Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform =
-                new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+            var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
             // Try a path with invalid chars which does not exist
             string directoryWithInvalidChars = "c:\\<>?";
-            List<string> paths = new List<string>() {directoryWithInvalidChars};
-            Should.Throw<ArgumentException>(
-                () => { ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform); });
+            var paths = new List<string> {directoryWithInvalidChars};
+            Should.Throw<ArgumentException>(() => { ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform); });
         }
 
         /// <summary>
@@ -3311,11 +3192,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResolveFromDirectoryNotExist()
         {
-            Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+            var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
             // Try a regular path which does not exist.
             string normalDirectory = NativeMethodsShared.IsWindows ? "c:\\SDKPath" : "/SDKPath";
-            List<string> paths = new List<string>() { normalDirectory };
+            var paths = new List<string> { normalDirectory };
             ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform);
             targetPlatform.Count.ShouldBe(0);
         }
@@ -3323,11 +3204,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VerifySDKManifestWithNullOrEmptyParameter()
         {
-            Should.Throw<ArgumentNullException>(() =>
-                new SDKManifest(null));
-
-            Should.Throw<ArgumentException>(() =>
-                new SDKManifest(""));
+            Should.Throw<ArgumentNullException>(() => new SDKManifest(null));
+            Should.Throw<ArgumentException>(() => new SDKManifest(""));
         }
 
         /// <summary>
@@ -3667,7 +3545,8 @@ namespace Microsoft.Build.UnitTests
                 </FileList>";
 
                 File.WriteAllText(manifestFile, manifestExtensionSDK);
-                ExtensionSDK extensionSDK = new ExtensionSDK(string.Format("CppUnitTestFramework, Version={0}", ObjectModelHelpers.MSBuildDefaultToolsVersion), manifestPath);
+                ExtensionSDK extensionSDK = new ExtensionSDK(
+                    $"CppUnitTestFramework, Version={ObjectModelHelpers.MSBuildDefaultToolsVersion}", manifestPath);
 
                 extensionSDK.Identifier.ShouldBe("CppUnitTestFramework");
                 extensionSDK.MaxPlatformVersion.ShouldBe(new Version("8.0"));
@@ -3690,7 +3569,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "True");
 
-                IList<TargetPlatformSDK> sdkList = ToolLocationHelper.GetTargetPlatformSdks(new string[] { _fakeStructureRoot }, null);
+                IList<TargetPlatformSDK> sdkList = ToolLocationHelper.GetTargetPlatformSdks(new[] { _fakeStructureRoot }, null);
                 IList<TargetPlatformSDK> filteredSdkList = ToolLocationHelper.FilterTargetPlatformSdks(sdkList, new Version(6, 2, 5), new Version(12, 0));
                 IList<TargetPlatformSDK> filteredSdkList1 = ToolLocationHelper.FilterTargetPlatformSdks(sdkList, new Version(6, 2, 1), new Version(10, 0));
                 IList<TargetPlatformSDK> filteredSdkList2 = ToolLocationHelper.FilterTargetPlatformSdks(sdkList, new Version(6, 2, 3), new Version(10, 0));
@@ -3734,7 +3613,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "True");
 
-                IDictionary<string, string> extensionSDKs = ToolLocationHelper.GetPlatformExtensionSDKLocations(new string[] { _fakeStructureRoot }, null, "MyPlatform", new Version(4, 0));
+                IDictionary<string, string> extensionSDKs = ToolLocationHelper.GetPlatformExtensionSDKLocations(new[] { _fakeStructureRoot }, null, "MyPlatform", new Version(4, 0));
                 IDictionary<string, string> filteredExtensionSDKs1 = ToolLocationHelper.FilterPlatformExtensionSDKs(new Version(8, 0), extensionSDKs);
                 IDictionary<string, string> filteredExtensionSDKs2 = ToolLocationHelper.FilterPlatformExtensionSDKs(new Version(9, 0), extensionSDKs);
                 IDictionary<string, string> filteredExtensionSDKs3 = ToolLocationHelper.FilterPlatformExtensionSDKs(new Version(10, 0), extensionSDKs);
@@ -3792,8 +3671,6 @@ namespace Microsoft.Build.UnitTests
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
-
-                MockLogger logger = new MockLogger(_output);
 
                 ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
@@ -3866,8 +3743,6 @@ namespace Microsoft.Build.UnitTests
                 string testProjectFile = Path.Combine(testDirectoryRoot, "testproject.csproj");
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
-
-                MockLogger logger = new MockLogger(_output);
 
                 ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
@@ -3963,8 +3838,6 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                MockLogger logger = new MockLogger(_output);
-
                 ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
                 string propertyValue1 = project.GetPropertyValue("SDKLocation1");
@@ -4005,9 +3878,8 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void ResolveSDKFromDirectory()
         {
-            Dictionary<string, string> extensionSDKs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            List<string> paths = new List<string> { _fakeStructureRoot, _fakeStructureRoot2 };
-            Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+            var paths = new List<string> { _fakeStructureRoot, _fakeStructureRoot2 };
+            var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
             ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatforms);
 
@@ -4041,13 +3913,13 @@ namespace Microsoft.Build.UnitTests
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(1);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "3.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.ShouldContainKey("MyAssembly, Version=1.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             key = new TargetPlatformSDK("MyPlatform", new Version("2.0"), null);
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(1);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "2.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.ShouldContainKey("MyAssembly, Version=1.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             key = new TargetPlatformSDK("MyPlatform", new Version("1.0"), null);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
@@ -4058,7 +3930,7 @@ namespace Microsoft.Build.UnitTests
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(0);
             targetPlatforms[key].Platforms.Count.ShouldBe(3);
             targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3").ShouldBeTrue();
-            targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ContainsPlatform("PlatformAssembly", "1.2.3.0").ShouldBeTrue();
             targetPlatforms[key].ContainsPlatform("Sparkle", "3.3.3.3").ShouldBeTrue();
 
@@ -4067,7 +3939,7 @@ namespace Microsoft.Build.UnitTests
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(0);
             targetPlatforms[key].Platforms.Count.ShouldBe(1);
             targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3").ShouldBeTrue();
-            targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
         }
 
 #if FEATURE_REGISTRY_SDKS
@@ -4083,24 +3955,24 @@ namespace Microsoft.Build.UnitTests
                 return; // "No registry unless under Windows"
             }
 
-            Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+            var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
-            ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, new FileExists(File.Exists));
-            ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, new FileExists(File.Exists));
+            ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, File.Exists);
+            ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, File.Exists);
 
             TargetPlatformSDK key = new TargetPlatformSDK("Windows", new Version("1.0"), null);
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(2);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.ShouldContainKey("MyAssembly, Version=1.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.ShouldContainKey("MyAssembly, Version=2.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             key = new TargetPlatformSDK("Windows", new Version("2.0"), null);
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(1);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "2.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.ShouldContainKey("MyAssembly, Version=3.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             key = new TargetPlatformSDK("MyPlatform", new Version("5.0"), null);
             targetPlatforms.ShouldContainKey(key);
@@ -4121,7 +3993,7 @@ namespace Microsoft.Build.UnitTests
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(0);
             targetPlatforms[key].Platforms.Count.ShouldBe(1);
             targetPlatforms[key].ContainsPlatform("PlatformAssembly", "0.1.2.3").ShouldBeTrue();
-            targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].Platforms["PlatformAssembly, Version=0.1.2.3"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -4133,31 +4005,31 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "mono-osx-failing")]
         public void ResolveSDKFromRegistryAndDisk()
         {
-            Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+            var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
 
-            List<string> paths = new List<string>() { _fakeStructureRoot };
+            var paths = new List<string> { _fakeStructureRoot };
 
             ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatforms);
 
             if (NativeMethodsShared.IsWindows)
             {
-                ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, new FileExists(File.Exists));
-                ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, new FileExists(File.Exists));
+                ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.CurrentUser, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, File.Exists);
+                ToolLocationHelper.GatherSDKsFromRegistryImpl(targetPlatforms, "Software\\Microsoft\\MicrosoftSDks", RegistryView.Registry32, RegistryHive.LocalMachine, getRegistrySubKeyNames, getRegistrySubKeyDefaultValue, _openBaseKey, File.Exists);
             }
 
             TargetPlatformSDK key = new TargetPlatformSDK("Windows", new Version("1.0"), null);
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(2);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.Keys.ShouldContain("MyAssembly, Version=1.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.Keys.ShouldContain("MyAssembly, Version=2.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=2.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             key = new TargetPlatformSDK("Windows", new Version("2.0"), null);
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(1);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "2.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
             targetPlatforms[key].ExtensionSDKs.Keys.ShouldContain("MyAssembly, Version=3.0");
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=3.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             // This is present in the registry but not on disk.
             key = new TargetPlatformSDK("MyPlatform", new Version("6.0"), null);
@@ -4181,13 +4053,13 @@ namespace Microsoft.Build.UnitTests
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(1);
             targetPlatforms[key].ExtensionSDKs.Keys.ShouldContain("MyAssembly, Version=1.0");
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "3.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             key = new TargetPlatformSDK("MyPlatform", new Version("2.0"), null);
             targetPlatforms[key].ExtensionSDKs.Count.ShouldBe(1);
             targetPlatforms[key].ExtensionSDKs.Keys.ShouldContain("MyAssembly, Version=1.0");
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "2.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
-            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(new[] { _fakeStructureRoot, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0" }) + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
+            targetPlatforms[key].ExtensionSDKs["MyAssembly, Version=1.0"].ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
 
             key = new TargetPlatformSDK("MyPlatform", new Version("1.0"), null);
             targetPlatforms[key].Path.ShouldBe(Path.Combine(_fakeStructureRoot, "MyPlatform", "1.0") + Path.DirectorySeparatorChar, StringCompareShould.IgnoreCase);
@@ -4202,12 +4074,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKNullSDKIdentifier()
         {
-            Should.Throw<ArgumentNullException>(() =>
-            {
-                ToolLocationHelper.GetPlatformsForSDK(null, new Version("1.0"));
-            }
-           );
+            Should.Throw<ArgumentNullException>(() => ToolLocationHelper.GetPlatformsForSDK(null, new Version("1.0")));
         }
+
         /// <summary>
         /// Make sure if the sdk version is null we get an ArgumentNullException because without specifying the
         /// sdk version we can't get any platforms back.
@@ -4215,12 +4084,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKNullSDKVersion()
         {
-            Should.Throw<ArgumentNullException>(() =>
-            {
-                ToolLocationHelper.GetPlatformsForSDK("AnySDK", null);
-            }
-           );
+            Should.Throw<ArgumentNullException>(() => ToolLocationHelper.GetPlatformsForSDK("AnySDK", null));
         }
+
         /// <summary>
         /// Verify that when there are no sdks with target platforms installed, our list of platforms is empty
         /// to make sure we are not getting platforms from somewhere else.
@@ -4228,8 +4094,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKWithNoInstalledTargetPlatforms()
         {
-            IEnumerable<string> platforms = ToolLocationHelper.GetPlatformsForSDK("AnySDK", new Version("1.0"), new string[0], "");
-            platforms.Any<string>().ShouldBeFalse();
+            ToolLocationHelper.GetPlatformsForSDK("AnySDK", new Version("1.0"), new string[0], "").Any().ShouldBeFalse();
         }
 
         /// <summary>
@@ -4240,11 +4105,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKWithMatchingInstalledTargetPlatforms()
         {
-            IEnumerable<string> myPlatforms = ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("8.0"), new string[] { _fakeStructureRoot }, null);
+            IEnumerable<string> myPlatforms = ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("8.0"), new[] { _fakeStructureRoot }, null);
             myPlatforms.ShouldContain("Sparkle, Version=3.3.3.3");
             myPlatforms.ShouldContain("PlatformAssembly, Version=0.1.2.3");
             myPlatforms.ShouldContain("PlatformAssembly, Version=1.2.3.0");
-            myPlatforms.Count<string>().ShouldBe(3);
+            myPlatforms.Count().ShouldBe(3);
         }
 
         /// <summary>
@@ -4253,8 +4118,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKWithInstalledTargetPlatformsNoMatch()
         {
-            IEnumerable<string> platforms = ToolLocationHelper.GetPlatformsForSDK("DoesNotExistPlatform", new Version("0.0.0.0"), new string[] { _fakeStructureRoot }, null);
-            platforms.Any<string>().ShouldBeFalse();
+            ToolLocationHelper.GetPlatformsForSDK("DoesNotExistPlatform", new Version("0.0.0.0"), new[] { _fakeStructureRoot }, null).Any().ShouldBeFalse();
         }
 
         /// <summary>
@@ -4264,8 +4128,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKWithMatchingPlatformNotMatchingVersion()
         {
-            IEnumerable<string> platforms = ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("0.0.0.0"), new string[] { _fakeStructureRoot }, null);
-            platforms.Any<string>().ShouldBeFalse();
+            ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("0.0.0.0"), new[] {_fakeStructureRoot}, null).Any().ShouldBeFalse();
         }
 
         /// <summary>
@@ -4275,8 +4138,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPlatformsForSDKForLegacyPlatformSDK()
         {
-            IEnumerable<string> platforms = ToolLocationHelper.GetPlatformsForSDK("Windows", new Version("8.0"), new string[] { _fakeStructureRoot }, null);
-            platforms.Any<string>().ShouldBeFalse();
+            ToolLocationHelper.GetPlatformsForSDK("Windows", new Version("8.0"), new[] {_fakeStructureRoot}, null).Any().ShouldBeFalse();
         }
 
         /// <summary>
@@ -4290,9 +4152,9 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "true");
-                var sdks = ToolLocationHelper.GetTargetPlatformSdks(new[] { _fakeStructureRoot }, null);
+                IList<TargetPlatformSDK> sdks = ToolLocationHelper.GetTargetPlatformSdks(new[] { _fakeStructureRoot }, null);
 
-                Dictionary<TargetPlatformSDK, TargetPlatformSDK> targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+                var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                 foreach (TargetPlatformSDK sdk in sdks)
                 {
                     targetPlatforms.Add(sdk, sdk);
@@ -4410,8 +4272,7 @@ namespace Microsoft.Build.UnitTests
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetOneCoreSDKPropsLocation");
             string platformDirectory = Path.Combine(testDirectoryRoot, "OneCoreSDK", "1.0") + Path.DirectorySeparatorChar;
             string propsDirectory =
-                Path.Combine(
-                    new[] { platformDirectory, "DesignTime", "CommonConfiguration", "Neutral", "MyPlatform", "0.8.0.0" });
+                Path.Combine(platformDirectory, "DesignTime", "CommonConfiguration", "Neutral", "MyPlatform", "0.8.0.0");
             string platformDirectory2 = Path.Combine(platformDirectory, "Platforms", "MyPlatform", "0.8.0.0");
 
             string tempProjectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -4623,78 +4484,60 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(
                     Path.Combine(tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" }));
+                    Path.Combine(tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(
-                        new[]
-                            {
-                                tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs",
-                                "MyAssembly", "1.0"
-                            }));
+                    Path.Combine(tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs", "MyAssembly", "1.0"));
                 Directory.CreateDirectory(Path.Combine(tempPath, "WindowsKits", "6.0"));
                 Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "5.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0" }));
+                    Path.Combine(tempPath, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0" }));
+                    Path.Combine(tempPath, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0" }));
+                    Path.Combine(tempPath, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0"));
                 Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "1.0"));
                 Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "8.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3" }));
+                    Path.Combine(tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "1.2.3.0" }));
+                    Path.Combine(tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "1.2.3.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "8.0", "Platforms", "Sparkle", "3.3.3.3" }));
+                    Path.Combine(tempPath, "MyPlatform", "8.0", "Platforms", "Sparkle", "3.3.3.3"));
                 Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "9.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3" }));
-                Directory.CreateDirectory(Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "PlatformAssembly", "Sparkle" }));
+                    Path.Combine(tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3"));
+                Directory.CreateDirectory(Path.Combine(tempPath, "MyPlatform", "9.0", "PlatformAssembly", "Sparkle"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "Sparkle" }));
+                    Path.Combine(tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "Sparkle"));
 
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0", "SDKManifest.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0", "SDKManifest.xml"),
                     "Hello");
 
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "SDKManifest.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(
-                        new[]
-                            {
-                                tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs",
-                                "MyAssembly", "1.0", "SDKManifest.xml"
-                            }),
+                    Path.Combine(tempPath, "SomeOtherPlace", "MyPlatformOtherLocation", "4.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml"),
                     "Hello");
                 File.WriteAllText(Path.Combine(tempPath, "Windows", "1.0", "SDKManifest.xml"), manifestPlatformSDK1);
                 File.WriteAllText(Path.Combine(tempPath, "Windows", "2.0", "SDKManifest.xml"), manifestPlatformSDK2);
                 File.WriteAllText(
-                    Path.Combine(
-                        new[]
-                            { tempPath, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "4.0", "ExtensionSDKs", "AnotherAssembly", "1.0", "SDKManifest.xml"),
                     manifestExtensionSDK2);
                 File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "3.0", "SDKManifest.xml"), manifestPlatformSDK3);
                 File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "2.0", "SDKManifest.xml"), manifestPlatformSDK4);
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "3.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml"),
                     manifestExtensionSDK1);
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "2.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml"),
                     "Hello");
                 File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "1.0", "SDKManifest.xml"), manifestPlatformSDK5);
 
@@ -4703,37 +4546,32 @@ namespace Microsoft.Build.UnitTests
                     Path.Combine(tempPath, "MyPlatform", "8.0", "SDKManifest.xml"),
                     manifestPlatformSDK6);
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3", "Platform.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "0.1.2.3", "Platform.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "1.2.3.0", "Platform.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "8.0", "Platforms", "PlatformAssembly", "1.2.3.0", "Platform.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "MyPlatform", "8.0", "Platforms", "Sparkle", "3.3.3.3", "Platform.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "8.0", "Platforms", "Sparkle", "3.3.3.3", "Platform.xml"),
                     "Hello");
 
                 // Contains invalid sub-platforms as well as valid ones
                 File.WriteAllText(Path.Combine(tempPath, "MyPlatform", "9.0", "SDKManifest.xml"), manifestPlatformSDK7);
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3", "Platform.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "0.1.2.3", "Platform.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "PlatformAssembly", "Sparkle", "Platform.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "9.0", "PlatformAssembly", "Sparkle", "Platform.xml"),
                     "Hello"); // not under the Platforms directory
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "Sparkle", "Platform.xml" }),
+                    Path.Combine(tempPath, "MyPlatform", "9.0", "Platforms", "PlatformAssembly", "Sparkle", "Platform.xml"),
                     "Hello"); // bad version
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "MyPlatform", "9.0", "Platforms", "Sparkle", "3.3.3.3" })); // no platform.xml
+                    Path.Combine(tempPath, "MyPlatform", "9.0", "Platforms", "Sparkle", "3.3.3.3")); // no platform.xml
 
                 //Bad because of v in the sdk version
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "AnotherAssembly", "v1.1" }));
+                    Path.Combine(tempPath, "Windows", "v1.0", "ExtensionSDKs", "AnotherAssembly", "v1.1"));
 
                 //Bad because no extensionsdks directory under the platform version
                 Directory.CreateDirectory(Path.Combine(tempPath, "Windows", "v3.0") + Path.DirectorySeparatorChar);
@@ -4744,8 +4582,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Bad because the directory under the identifier is not a version
                 Directory.CreateDirectory(
-                    Path.Combine(
-                        new[] { tempPath, "Windows", "NotAVersion", "ExtensionSDKs", "Assembly", "1.0" }));
+                    Path.Combine(tempPath, "Windows", "NotAVersion", "ExtensionSDKs", "Assembly", "1.0"));
             }
             catch (Exception)
             {
@@ -4766,23 +4603,20 @@ namespace Microsoft.Build.UnitTests
             {
                 // Good
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" }));
+                    Path.Combine(tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" }));
+                    Path.Combine(tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0"));
                 Directory.CreateDirectory(
-                    Path.Combine(new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "4.0" }));
+                    Path.Combine(tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "4.0"));
 
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0", "SDKManifest.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0", "SDKManifest.xml"),
                     "Hello");
                 File.WriteAllText(
-                    Path.Combine(
-                        new[] { tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "4.0", "SDKManifest.xml" }),
+                    Path.Combine(tempPath, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "4.0", "SDKManifest.xml"),
                     "Hello");
             }
             catch (Exception)
@@ -4821,12 +4655,12 @@ namespace Microsoft.Build.UnitTests
 
                 if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "MyAssembly" };
+                    return new[] { "MyAssembly" };
                 }
 
                 if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\1.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "MyAssembly" };
+                    return new[] { "MyAssembly" };
                 }
 
                 if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\Windows\v1.0\ExtensionSDKs\MyAssembly", StringComparison.OrdinalIgnoreCase) == 0)
@@ -4846,7 +4680,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\4.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    return new string[] { "MyAssembly" };
+                    return new[] { "MyAssembly" };
                 }
 
                 if (string.Compare(subKey, @"Software\Microsoft\MicrosoftSDKs\MyPlatform\5.0\ExtensionSDKs", StringComparison.OrdinalIgnoreCase) == 0)
@@ -4971,16 +4805,21 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static RegistryKey GetBaseKey(RegistryHive hive, RegistryView view)
         {
-            if (hive == RegistryHive.CurrentUser)
+            switch (hive)
             {
-                return Registry.CurrentUser;
+                case RegistryHive.CurrentUser:
+                {
+                    return Registry.CurrentUser;
+                }
+                case RegistryHive.LocalMachine:
+                {
+                    return Registry.LocalMachine;
+                }
+                default:
+                {
+                    return null;
+                }
             }
-            else if (hive == RegistryHive.LocalMachine)
-            {
-                return Registry.LocalMachine;
-            }
-
-            return null;
         }
 #endif
         #endregion

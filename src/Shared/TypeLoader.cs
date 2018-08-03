@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Determines if a type is in a given assembly and loads that type.</summary>
-//-----------------------------------------------------------------------
 
 
 using System;
@@ -13,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -172,7 +169,7 @@ namespace Microsoft.Build.Shared
                     var assemblyNameInExecutableDirectory = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
                         Path.GetFileName(assemblyLoadInfo.AssemblyFile));
 
-                    if (File.Exists(assemblyNameInExecutableDirectory))
+                    if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
                     {
                         var simpleName = Path.GetFileNameWithoutExtension(assemblyLoadInfo.AssemblyFile);
                         loadedAssembly = Assembly.Load(new AssemblyName(simpleName));

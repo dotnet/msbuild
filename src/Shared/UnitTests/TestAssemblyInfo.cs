@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Xunit;
 
@@ -49,7 +50,7 @@ public class MSBuildTestAssemblyFixture : IDisposable
         string newTempPath = Path.Combine(Path.GetTempPath(), subdirectory);
         var assemblyTempFolder = _testEnvironment.CreateFolder(newTempPath);
 
-        _testEnvironment.SetTempPath(assemblyTempFolder.FolderPath);
+        _testEnvironment.SetTempPath(assemblyTempFolder.Path);
 
         _testEnvironment.CreateFile(
             transientTestFolder: assemblyTempFolder,
@@ -79,12 +80,12 @@ public class MSBuildTestAssemblyFixture : IDisposable
     /// <param name="testEnvironment"></param>
     private static void SetDotnetHostPath(TestEnvironment testEnvironment)
     {
-        var currentFolder = System.AppContext.BaseDirectory;
+        var currentFolder = AppContext.BaseDirectory;
 
         while (currentFolder != null)
         {
             string potentialVersionsPropsPath = Path.Combine(currentFolder, "build", "Versions.props");
-            if (File.Exists(potentialVersionsPropsPath))
+            if (FileSystems.Default.FileExists(potentialVersionsPropsPath))
             {
                 var doc = XDocument.Load(potentialVersionsPropsPath);
                 var ns = doc.Root.Name.Namespace;

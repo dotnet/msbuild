@@ -3,7 +3,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {

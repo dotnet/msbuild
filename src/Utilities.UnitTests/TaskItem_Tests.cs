@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
             // manipulate the item-spec a bit
             to.GetMetadata(FileUtilities.ItemSpecModifiers.Filename).ShouldBe("Monkey");
             to.GetMetadata(FileUtilities.ItemSpecModifiers.Extension).ShouldBe(".txt");
-            to.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).ShouldBe(String.Empty);
+            to.GetMetadata(FileUtilities.ItemSpecModifiers.RelativeDir).ShouldBe(string.Empty);
         }
 
         // Make sure metadata can be cloned from an existing ITaskItem
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests
             metadata.Add("m", null);
 
             TaskItem item = new TaskItem("bar", (IDictionary)metadata);
-            item.GetMetadata("m").ShouldBe(String.Empty);
+            item.GetMetadata("m").ShouldBe(string.Empty);
         }
 
         /// <summary>
@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests
         {
             TaskItem item = new TaskItem("bar");
             item.SetMetadata("m", null);
-            item.GetMetadata("m").ShouldBe(String.Empty);
+            item.GetMetadata("m").ShouldBe(string.Empty);
         }
 
 #if FEATURE_APPDOMAIN
@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests
                 metadata.Add("c", "C");
                 metadata.Add("d", "D");
 
-                creator.Run(new string[] { "a", "b" }, metadata);
+                creator.Run(new[] { "a", "b" }, metadata);
 
                 ITaskItem[] itemsInThisAppDomain = new ITaskItem[creator.CreatedTaskItems.Length];
 
@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests
 
                     foreach (string metadatum in creator.CreatedTaskItems[i].MetadataNames)
                     {
-                        if (!String.Equals("OriginalItemSpec", metadatum))
+                        if (!string.Equals("OriginalItemSpec", metadatum))
                         {
                             itemsInThisAppDomain[i].GetMetadata(metadatum).ShouldBe(creator.CreatedTaskItems[i].GetMetadata(metadatum));
                         }

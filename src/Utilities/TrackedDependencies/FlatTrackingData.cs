@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -11,6 +10,7 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 #if FEATURE_FILE_TRACKER
 
@@ -27,83 +27,60 @@ namespace Microsoft.Build.Utilities
         #endregion
 
         #region Member Data
-        // The output dependency table
-        private IDictionary<string, DateTime> _dependencyTable = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
         // The .write. trackg log files
-        private ITaskItem[] _tlogFiles;
 
         // The tlog marker is used if the tracking data is empty
         // even if the tracked execution was successful
-        private string _tlogMarker = String.Empty;
+        private string _tlogMarker = string.Empty;
 
         // The TaskLoggingHelper that we log progress to
         private TaskLoggingHelper _log;
-        // Are the tracking logs that we were constructed with actually available
-        private bool _tlogsAvailable;
 
         // The oldest file that we have seen
-        private string _oldestFileName = String.Empty;
         private DateTime _oldestFileTimeUtc = DateTime.MaxValue;
 
         // The newest file what we have seen
-        private string _newestFileName = String.Empty;
         private DateTime _newestFileTimeUtc = DateTime.MinValue;
 
         // Should rooting markers be treated as tracking entries
-        private bool _treatRootMarkersAsEntries = false;
+        private bool _treatRootMarkersAsEntries;
 
-        // If files are missing when reading the Tlog, skip them
-        private bool _skipMissingFiles = false;
         // If we are not skipping missing files, what DateTime should they be given?
         private DateTime _missingFileTimeUtc = DateTime.MinValue;
-        // Missing files that have been detected in the TLog
-        private List<string> _missingFiles = new List<string>();
 
         // The newest Tlog that we have seen
         private DateTime _newestTLogTimeUtc = DateTime.MinValue;
-        private string _newestTLogFileName = String.Empty;
 
         // Cache of last write times
-        private IDictionary<string, DateTime> _lastWriteTimeUtcCache = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+        private readonly IDictionary<string, DateTime> _lastWriteTimeUtcCache = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
         // The set of paths that contain files that are to be ignored during up to date check - these directories or their subdirectories
-        private List<string> _excludedInputPaths = new List<string>();
+        private readonly List<string> _excludedInputPaths = new List<string>();
         #endregion
 
         #region Properties
 
-        // Provide external access to the dependencyTable
-        internal IDictionary<string, DateTime> DependencyTable
-        {
-            get { return _dependencyTable; }
-        }
+        // The output dependency table
+        internal Dictionary<string, DateTime> DependencyTable { get; private set; } = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Missing files have been detected in the TLog
         /// </summary>
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Has shipped as public API, so we can't easily change it now. ")]
-        public List<string> MissingFiles
-        {
-            get { return _missingFiles; }
-            set { _missingFiles = value; }
-        }
+        public List<string> MissingFiles { get; set; } = new List<string>();
 
         /// <summary>
         /// The path for the oldest file we have seen
         /// </summary>
-        public string OldestFileName
-        {
-            get { return _oldestFileName; }
-            set { _oldestFileName = value; }
-        }
+        public string OldestFileName { get; set; } = string.Empty;
 
         /// <summary>
         /// The time for the oldest file we have seen
         /// </summary>
         public DateTime OldestFileTime
         {
-            get { return _oldestFileTimeUtc.ToLocalTime(); }
-            set { _oldestFileTimeUtc = value.ToUniversalTime(); }
+            get => _oldestFileTimeUtc.ToLocalTime();
+            set => _oldestFileTimeUtc = value.ToUniversalTime();
         }
 
         /// <summary>
@@ -111,26 +88,22 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public DateTime OldestFileTimeUtc
         {
-            get { return _oldestFileTimeUtc; }
-            set { _oldestFileTimeUtc = value.ToUniversalTime(); }
+            get => _oldestFileTimeUtc;
+            set => _oldestFileTimeUtc = value.ToUniversalTime();
         }
 
         /// <summary>
         /// The path for the newest file we have seen
         /// </summary>
-        public string NewestFileName
-        {
-            get { return _newestFileName; }
-            set { _newestFileName = value; }
-        }
+        public string NewestFileName { get; set; } = string.Empty;
 
         /// <summary>
         /// The time for the newest file we have seen
         /// </summary>
         public DateTime NewestFileTime
         {
-            get { return _newestFileTimeUtc.ToLocalTime(); }
-            set { _newestFileTimeUtc = value.ToUniversalTime(); }
+            get => _newestFileTimeUtc.ToLocalTime();
+            set => _newestFileTimeUtc = value.ToUniversalTime();
         }
 
         /// <summary>
@@ -138,8 +111,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public DateTime NewestFileTimeUtc
         {
-            get { return _newestFileTimeUtc; }
-            set { _newestFileTimeUtc = value.ToUniversalTime(); }
+            get => _newestFileTimeUtc;
+            set => _newestFileTimeUtc = value.ToUniversalTime();
         }
 
         /// <summary>
@@ -147,28 +120,20 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public bool TreatRootMarkersAsEntries
         {
-            get { return _treatRootMarkersAsEntries; }
-            set { _treatRootMarkersAsEntries = value; }
+            get => _treatRootMarkersAsEntries;
+            set => _treatRootMarkersAsEntries = value;
         }
 
         /// <summary>
         /// Should files in the TLog but no longer exist be skipped or recorded?
         /// </summary>
-        public bool SkipMissingFiles
-        {
-            get { return _skipMissingFiles; }
-            set { _skipMissingFiles = value; }
-        }
+        public bool SkipMissingFiles { get; set; }
 
         /// <summary>
         /// The TLog files that back this structure
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Has shipped as public API, so we can't easily change it now. ")]
-        public ITaskItem[] TlogFiles
-        {
-            get { return _tlogFiles; }
-            set { _tlogFiles = value; }
-        }
+        public ITaskItem[] TlogFiles { get; set; }
 
         /// <summary>
         /// The time of the newest Tlog
@@ -176,8 +141,8 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public DateTime NewestTLogTime
         {
-            get { return _newestTLogTimeUtc.ToLocalTime(); }
-            set { _newestTLogTimeUtc = value.ToUniversalTime(); }
+            get => _newestTLogTimeUtc.ToLocalTime();
+            set => _newestTLogTimeUtc = value.ToUniversalTime();
         }
 
         /// <summary>
@@ -186,28 +151,20 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public DateTime NewestTLogTimeUtc
         {
-            get { return _newestTLogTimeUtc; }
-            set { _newestTLogTimeUtc = value.ToUniversalTime(); }
+            get => _newestTLogTimeUtc;
+            set => _newestTLogTimeUtc = value.ToUniversalTime();
         }
 
         /// <summary>
         /// The path of the newest TLog file
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
-        public string NewestTLogFileName
-        {
-            get { return _newestTLogFileName; }
-            set { _newestTLogFileName = value; }
-        }
+        public string NewestTLogFileName { get; set; } = string.Empty;
 
         /// <summary>
         /// Are all the TLogs that were passed to us actually available on disk?
         /// </summary>
-        public bool TlogsAvailable
-        {
-            get { return _tlogsAvailable; }
-            set { _tlogsAvailable = value; }
-        }
+        public bool TlogsAvailable { get; set; }
 
         #endregion
 
@@ -217,10 +174,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="tlogFiles">The .write. tlog files to interpret</param>
         /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
-        public FlatTrackingData(ITaskItem[] tlogFiles, DateTime missingFileTimeUtc)
-        {
-            InternalConstruct(null, tlogFiles, null, false, missingFileTimeUtc, null);
-        }
+        public FlatTrackingData(ITaskItem[] tlogFiles, DateTime missingFileTimeUtc) => InternalConstruct(null, tlogFiles, null, false, missingFileTimeUtc, null);
 
         /// <summary>
         /// Constructor
@@ -228,10 +182,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="tlogFiles">The .write. tlog files to interpret</param>
         /// <param name="tlogFilesToIgnore">The .tlog files to ignore</param>
         /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
-        public FlatTrackingData(ITaskItem[] tlogFiles, ITaskItem[] tlogFilesToIgnore, DateTime missingFileTimeUtc)
-        {
-            InternalConstruct(null, tlogFiles, tlogFilesToIgnore, false, missingFileTimeUtc, null);
-        }
+        public FlatTrackingData(ITaskItem[] tlogFiles, ITaskItem[] tlogFilesToIgnore, DateTime missingFileTimeUtc) => InternalConstruct(null, tlogFiles, tlogFilesToIgnore, false, missingFileTimeUtc, null);
 
         /// <summary>
         /// Constructor
@@ -280,20 +231,14 @@ namespace Microsoft.Build.Utilities
         /// <param name="ownerTask">The task that is using file tracker</param>
         /// <param name="tlogFiles">The tlog files to interpret</param>
         /// <param name="missingFileTimeUtc">The DateTime that should be recorded for missing file.</param>
-        public FlatTrackingData(ITask ownerTask, ITaskItem[] tlogFiles, DateTime missingFileTimeUtc)
-        {
-            InternalConstruct(ownerTask, tlogFiles, null, false, missingFileTimeUtc, null);
-        }
+        public FlatTrackingData(ITask ownerTask, ITaskItem[] tlogFiles, DateTime missingFileTimeUtc) => InternalConstruct(ownerTask, tlogFiles, null, false, missingFileTimeUtc, null);
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="tlogFiles">The .write. tlog files to interpret</param>
         /// <param name="skipMissingFiles">Ignore files that do not exist on disk</param>
-        public FlatTrackingData(ITaskItem[] tlogFiles, bool skipMissingFiles)
-        {
-            InternalConstruct(null, tlogFiles, null, skipMissingFiles, DateTime.MinValue, null);
-        }
+        public FlatTrackingData(ITaskItem[] tlogFiles, bool skipMissingFiles) => InternalConstruct(null, tlogFiles, null, skipMissingFiles, DateTime.MinValue, null);
 
         /// <summary>
         /// Constructor
@@ -301,10 +246,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="ownerTask">The task that is using file tracker</param>
         /// <param name="tlogFiles">The tlog files to interpret</param>
         /// <param name="skipMissingFiles">Ignore files that do not exist on disk</param>
-        public FlatTrackingData(ITask ownerTask, ITaskItem[] tlogFiles, bool skipMissingFiles)
-        {
-            InternalConstruct(ownerTask, tlogFiles, null, skipMissingFiles, DateTime.MinValue, null);
-        }
+        public FlatTrackingData(ITask ownerTask, ITaskItem[] tlogFiles, bool skipMissingFiles) => InternalConstruct(ownerTask, tlogFiles, null, skipMissingFiles, DateTime.MinValue, null);
 
         /// <summary>
         /// Internal constructor
@@ -319,9 +261,11 @@ namespace Microsoft.Build.Utilities
         {
             if (ownerTask != null)
             {
-                _log = new TaskLoggingHelper(ownerTask);
-                _log.TaskResources = AssemblyResources.PrimaryResources;
-                _log.HelpKeywordPrefix = "MSBuild.";
+                _log = new TaskLoggingHelper(ownerTask)
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
             }
 
             ITaskItem[] expandedTlogFiles = TrackedDependencies.ExpandWildcards(tlogFilesLocal);
@@ -332,8 +276,8 @@ namespace Microsoft.Build.Utilities
 
                 if (expandedTlogFilesToIgnore.Length > 0)
                 {
-                    HashSet<string> ignore = new HashSet<string>();
-                    List<ITaskItem> remainingTlogFiles = new List<ITaskItem>();
+                    var ignore = new HashSet<string>();
+                    var remainingTlogFiles = new List<ITaskItem>();
 
                     foreach (ITaskItem tlogFileToIgnore in expandedTlogFilesToIgnore)
                     {
@@ -348,16 +292,16 @@ namespace Microsoft.Build.Utilities
                         }
                     }
 
-                    _tlogFiles = remainingTlogFiles.ToArray();
+                    TlogFiles = remainingTlogFiles.ToArray();
                 }
                 else
                 {
-                    _tlogFiles = expandedTlogFiles;
+                    TlogFiles = expandedTlogFiles;
                 }
             }
             else
             {
-                _tlogFiles = expandedTlogFiles;
+                TlogFiles = expandedTlogFiles;
             }
 
             // We have no TLog files on disk, create a TLog marker from the
@@ -365,10 +309,11 @@ namespace Microsoft.Build.Utilities
             // This becomes our "first" tlog, since on the very first run, no tlogs
             // will exist, and if a compaction has been run (as part of the initial up-to-date check) then this
             // marker tlog will be created as empty.
-            if (_tlogFiles == null || _tlogFiles.Length == 0)
+            if (TlogFiles == null || TlogFiles.Length == 0)
             {
-                _tlogMarker = tlogFilesLocal[0].ItemSpec.Replace("*", "1");
-                _tlogMarker = _tlogMarker.Replace("?", "2");
+                _tlogMarker = tlogFilesLocal[0].ItemSpec
+                    .Replace("*", "1")
+                    .Replace("?", "2");
             }
 
             if (excludedInputPaths != null)
@@ -382,10 +327,10 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            _tlogsAvailable = TrackedDependencies.ItemsExist(_tlogFiles);
-            _skipMissingFiles = skipMissingFiles;
+            TlogsAvailable = TrackedDependencies.ItemsExist(TlogFiles);
+            SkipMissingFiles = skipMissingFiles;
             _missingFileTimeUtc = missingFileTimeUtc.ToUniversalTime();
-            if (_tlogFiles != null)
+            if (TlogFiles != null)
             {
                 // Read the TLogs into our internal structures
                 ConstructFileTable();
@@ -399,18 +344,18 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         private void ConstructFileTable()
         {
-            string tLogRootingMarker = null;
+            string tLogRootingMarker;
             try
             {
                 // construct a rooting marker from the tlog files
-                tLogRootingMarker = DependencyTableCache.FormatNormalizedTlogRootingMarker(_tlogFiles);
+                tLogRootingMarker = DependencyTableCache.FormatNormalizedTlogRootingMarker(TlogFiles);
             }
             catch (ArgumentException e)
             {
                 FileTracker.LogWarningWithCodeFromResources(_log, "Tracking_RebuildingDueToInvalidTLog", e.Message);
                 return;
             }
-            if (!_tlogsAvailable)
+            if (!TlogsAvailable)
             {
                 lock (DependencyTableCache.DependencyTable)
                 {
@@ -424,7 +369,7 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            DependencyTableCacheEntry cachedEntry = null;
+            DependencyTableCacheEntry cachedEntry;
 
             lock (DependencyTableCache.DependencyTable)
             {
@@ -435,12 +380,12 @@ namespace Microsoft.Build.Utilities
             // We have an up to date cached entry
             if (cachedEntry != null)
             {
-                _dependencyTable = (IDictionary<string, DateTime>)cachedEntry.DependencyTable;
+                DependencyTable = (Dictionary<string, DateTime>)cachedEntry.DependencyTable;
 
                 // We may have stored the dependency table in the cache, but all the other information
                 // (newest file time, number of missing files, etc.) has been reset to default.  Refresh
                 // the data.  
-                this.UpdateFileEntryDetails();
+                UpdateFileEntryDetails();
 
                 // Log information about what we're using
                 FileTracker.LogMessageFromResources(_log, MessageImportance.Low, "Tracking_TrackingCached");
@@ -456,9 +401,8 @@ namespace Microsoft.Build.Utilities
             // If there are any errors in the tlogs, we want to warn, stop parsing tlogs, and empty 
             // out the dependency table, essentially forcing a rebuild.  
             bool encounteredInvalidTLogContents = false;
-            bool exceptionCaught = false;
             string invalidTLogName = null;
-            foreach (ITaskItem tlogFileName in _tlogFiles)
+            foreach (ITaskItem tlogFileName in TlogFiles)
             {
                 try
                 {
@@ -468,7 +412,7 @@ namespace Microsoft.Build.Utilities
                     if (tlogLastWriteTimeUtc > _newestTLogTimeUtc)
                     {
                         _newestTLogTimeUtc = tlogLastWriteTimeUtc;
-                        _newestTLogFileName = tlogFileName.ItemSpec;
+                        NewestTLogFileName = tlogFileName.ItemSpec;
                     }
 
                     using (StreamReader tlog = File.OpenText(tlogFileName.ItemSpec))
@@ -507,7 +451,7 @@ namespace Microsoft.Build.Utilities
                             }
 
                             // If we haven't seen this file before, then record it
-                            if (!_dependencyTable.ContainsKey(tlogEntry))
+                            if (!DependencyTable.ContainsKey(tlogEntry))
                             {
                                 // It may be that this is one of the locations that we should ignore
                                 if (!FileTracker.FileIsExcludedFromDependencies(tlogEntry))
@@ -536,19 +480,19 @@ namespace Microsoft.Build.Utilities
             {
                 // There were problems with the tracking logs -- we've already warned or errored; now we want to make 
                 // sure that we essentially force a rebuild of this particular root. 
-                if (encounteredInvalidTLogContents || exceptionCaught)
+                if (encounteredInvalidTLogContents)
                 {
                     if (DependencyTableCache.DependencyTable.ContainsKey(tLogRootingMarker))
                     {
                         DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
                     }
 
-                    _dependencyTable = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+                    DependencyTable = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
                 }
                 else
                 {
                     // Record the newly built dependency table in the cache
-                    DependencyTableCache.DependencyTable[tLogRootingMarker] = new DependencyTableCacheEntry(_tlogFiles, (IDictionary)_dependencyTable);
+                    DependencyTableCache.DependencyTable[tLogRootingMarker] = new DependencyTableCacheEntry(TlogFiles, DependencyTable);
                 }
             }
         }
@@ -558,30 +502,30 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public void UpdateFileEntryDetails()
         {
-            _oldestFileName = String.Empty;
+            OldestFileName = string.Empty;
             _oldestFileTimeUtc = DateTime.MaxValue;
 
-            _newestFileName = String.Empty;
+            NewestFileName = string.Empty;
             _newestFileTimeUtc = DateTime.MinValue;
 
-            _newestTLogFileName = String.Empty;
+            NewestTLogFileName = string.Empty;
             _newestTLogTimeUtc = DateTime.MinValue;
 
-            this.MissingFiles.Clear();
+            MissingFiles.Clear();
 
             // First update the details of our Tlogs
-            foreach (ITaskItem tlogFileName in _tlogFiles)
+            foreach (ITaskItem tlogFileName in TlogFiles)
             {
                 DateTime tlogLastWriteTimeUtc = NativeMethodsShared.GetLastWriteFileUtcTime(tlogFileName.ItemSpec);
                 if (tlogLastWriteTimeUtc > _newestTLogTimeUtc)
                 {
                     _newestTLogTimeUtc = tlogLastWriteTimeUtc;
-                    _newestTLogFileName = tlogFileName.ItemSpec;
+                    NewestTLogFileName = tlogFileName.ItemSpec;
                 }
             }
 
             // Now for each entry in the table
-            foreach (string entry in this.DependencyTable.Keys)
+            foreach (string entry in DependencyTable.Keys)
             {
                 RecordEntryDetails(entry, false);
             }
@@ -621,7 +565,7 @@ namespace Microsoft.Build.Utilities
             }
 
             DateTime fileModifiedTimeUtc = GetLastWriteTimeUtc(tlogEntry);
-            if (_skipMissingFiles && fileModifiedTimeUtc == DateTime.MinValue) // the file is missing
+            if (SkipMissingFiles && fileModifiedTimeUtc == DateTime.MinValue) // the file is missing
             {
                 return;
             }
@@ -631,15 +575,15 @@ namespace Microsoft.Build.Utilities
                 // use the missingFileTimeUtc as indicated.
                 if (populateTable)
                 {
-                    _dependencyTable[tlogEntry] = _missingFileTimeUtc.ToUniversalTime();
+                    DependencyTable[tlogEntry] = _missingFileTimeUtc.ToUniversalTime();
                 }
-                _missingFiles.Add(tlogEntry);
+                MissingFiles.Add(tlogEntry);
             }
             else
             {
                 if (populateTable)
                 {
-                    _dependencyTable[tlogEntry] = fileModifiedTimeUtc;
+                    DependencyTable[tlogEntry] = fileModifiedTimeUtc;
                 }
             }
 
@@ -647,24 +591,21 @@ namespace Microsoft.Build.Utilities
             if (fileModifiedTimeUtc > _newestFileTimeUtc)
             {
                 _newestFileTimeUtc = fileModifiedTimeUtc;
-                _newestFileName = tlogEntry;
+                NewestFileName = tlogEntry;
             }
 
             // Record this file if it is older than our current oldest
             if (fileModifiedTimeUtc < _oldestFileTimeUtc)
             {
                 _oldestFileTimeUtc = fileModifiedTimeUtc;
-                _oldestFileName = tlogEntry;
+                OldestFileName = tlogEntry;
             }
         }
 
         /// <summary>
         /// This method will re-write the tlogs from the output table
         /// </summary>
-        public void SaveTlog()
-        {
-            SaveTlog(null);
-        }
+        public void SaveTlog() => SaveTlog(null);
 
         /// <summary>
         /// This method will re-write the tlogs from the current table
@@ -672,9 +613,9 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public void SaveTlog(DependencyFilter includeInTLog)
         {
-            if (_tlogFiles != null && (_tlogFiles.Length > 0))
+            if (TlogFiles != null && TlogFiles.Length > 0)
             {
-                string tLogRootingMarker = DependencyTableCache.FormatNormalizedTlogRootingMarker(_tlogFiles);
+                string tLogRootingMarker = DependencyTableCache.FormatNormalizedTlogRootingMarker(TlogFiles);
 
                 lock (DependencyTableCache.DependencyTable)
                 {
@@ -686,10 +627,10 @@ namespace Microsoft.Build.Utilities
                     }
                 }
 
-                string firstTlog = _tlogFiles[0].ItemSpec;
+                string firstTlog = TlogFiles[0].ItemSpec;
 
                 // empty all tlogs
-                foreach (ITaskItem tlogFile in _tlogFiles)
+                foreach (ITaskItem tlogFile in TlogFiles)
                 {
                     File.WriteAllText(tlogFile.ItemSpec, "", Encoding.Unicode);
                 }
@@ -697,7 +638,7 @@ namespace Microsoft.Build.Utilities
                 // Write out the dependency information as a new tlog
                 using (StreamWriter newTlog = FileUtilities.OpenWrite(firstTlog, false, Encoding.Unicode))
                 {
-                    foreach (string fileEntry in _dependencyTable.Keys)
+                    foreach (string fileEntry in DependencyTable.Keys)
                     {
                         // Give the task a chance to filter dependencies out of the written TLog
                         if (includeInTLog == null || includeInTLog(fileEntry))
@@ -708,10 +649,10 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
-            else if (_tlogMarker != String.Empty)
+            else if (_tlogMarker != string.Empty)
             {
                 string markerDirectory = Path.GetDirectoryName(_tlogMarker);
-                if (!Directory.Exists(markerDirectory))
+                if (!FileSystems.Default.DirectoryExists(markerDirectory))
                 {
                     Directory.CreateDirectory(markerDirectory);
                 }
@@ -728,8 +669,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public DateTime GetLastWriteTimeUtc(string file)
         {
-            DateTime fileModifiedTimeUtc = DateTime.MinValue;
-            if (!_lastWriteTimeUtcCache.TryGetValue(file, out fileModifiedTimeUtc))
+            if (!_lastWriteTimeUtcCache.TryGetValue(file, out DateTime fileModifiedTimeUtc))
             {
                 fileModifiedTimeUtc = NativeMethodsShared.GetLastWriteFileUtcTime(file);
                 _lastWriteTimeUtcCache[file] = fileModifiedTimeUtc;
@@ -756,7 +696,6 @@ namespace Microsoft.Build.Utilities
         [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "TLog", Justification = "Has now shipped as public API; plus it's unclear whether 'Tlog' or 'TLog' is the preferred casing")]
         public static bool IsUpToDate(Task hostTask, UpToDateCheckType upToDateCheckType, ITaskItem[] readTLogNames, ITaskItem[] writeTLogNames)
         {
-            bool isUpToDate;
             // Read the input graph (missing inputs are infinitely new - i.e. outputs are out of date)
             FlatTrackingData inputs = new FlatTrackingData(hostTask, readTLogNames, DateTime.MaxValue);
 
@@ -764,7 +703,7 @@ namespace Microsoft.Build.Utilities
             FlatTrackingData outputs = new FlatTrackingData(hostTask, writeTLogNames, DateTime.MinValue);
 
             // Find out if we are up to date
-            isUpToDate = IsUpToDate(hostTask.Log, upToDateCheckType, inputs, outputs);
+            bool isUpToDate = IsUpToDate(hostTask.Log, upToDateCheckType, inputs, outputs);
 
             // We're going to execute, so clear out the tlogs so
             // the new execution will correctly populate the tlogs a-new
@@ -852,31 +791,31 @@ namespace Microsoft.Build.Utilities
                 }
             }
             else if (upToDateCheckType == UpToDateCheckType.InputOrOutputNewerThanTracking &&
-                    (inputs.NewestFileTimeUtc > inputs.NewestTLogTimeUtc))
+                    inputs.NewestFileTimeUtc > inputs.NewestTLogTimeUtc)
             {
                 // One of the inputs is newer than the input tlog
                 Log.LogMessageFromResources(MessageImportance.Low, "Tracking_DependencyWasModifiedAt", inputs.NewestFileName, inputs.NewestFileTimeUtc, inputs.NewestTLogFileName, inputs.NewestTLogTimeUtc);
             }
             else if (upToDateCheckType == UpToDateCheckType.InputOrOutputNewerThanTracking &&
-                    (outputs.NewestFileTimeUtc > outputs.NewestTLogTimeUtc))
+                    outputs.NewestFileTimeUtc > outputs.NewestTLogTimeUtc)
             {
                 // one of the outputs is newer than the output tlog
                 Log.LogMessageFromResources(MessageImportance.Low, "Tracking_DependencyWasModifiedAt", outputs.NewestFileName, outputs.NewestFileTimeUtc, outputs.NewestTLogFileName, outputs.NewestTLogTimeUtc);
             }
             else if (upToDateCheckType == UpToDateCheckType.InputNewerThanOutput &&
-                    (inputs.NewestFileTimeUtc > outputs.NewestFileTimeUtc))
+                    inputs.NewestFileTimeUtc > outputs.NewestFileTimeUtc)
             {
                 // One of the inputs is newer than the outputs
                 Log.LogMessageFromResources(MessageImportance.Low, "Tracking_DependencyWasModifiedAt", inputs.NewestFileName, inputs.NewestFileTimeUtc, outputs.NewestFileName, outputs.NewestFileTimeUtc);
             }
             else if (upToDateCheckType == UpToDateCheckType.InputNewerThanTracking &&
-                    (inputs.NewestFileTimeUtc > inputs.NewestTLogTimeUtc))
+                    inputs.NewestFileTimeUtc > inputs.NewestTLogTimeUtc)
             {
                 // One of the inputs is newer than the one of the TLogs
                 Log.LogMessageFromResources(MessageImportance.Low, "Tracking_DependencyWasModifiedAt", inputs.NewestFileName, inputs.NewestFileTimeUtc, inputs.NewestTLogFileName, inputs.NewestTLogTimeUtc);
             }
             else if (upToDateCheckType == UpToDateCheckType.InputNewerThanTracking &&
-                    (inputs.NewestFileTimeUtc > outputs.NewestTLogTimeUtc))
+                    inputs.NewestFileTimeUtc > outputs.NewestTLogTimeUtc)
             {
                 // One of the inputs is newer than the one of the TLogs
                 Log.LogMessageFromResources(MessageImportance.Low, "Tracking_DependencyWasModifiedAt", inputs.NewestFileName, inputs.NewestFileTimeUtc, outputs.NewestTLogFileName, outputs.NewestTLogTimeUtc);
@@ -943,21 +882,10 @@ namespace Microsoft.Build.Utilities
                     }
 
                     // UNDONE: If necessary we could have two independent sets of "ignore" files, one for inputs and one for outputs
-                    // Use an anonymous method to encapsulate the contains check for the output tlogs
-                    outputs.SaveTlog(delegate (string fullTrackedPath)
-                                     {
-                                         // We need to answer the question "should fullTrackedPath be included in the TLog?"
-                                         return (!trackedFilesToRemove.ContainsKey(fullTrackedPath));
-                                     }
-                    );
-
-                    // Use an anonymous method to encapsulate the contains check for the input tlogs
-                    inputs.SaveTlog(delegate (string fullTrackedPath)
-                                     {
-                                         // We need to answer the question "should fullTrackedPath be included in the TLog?"
-                                         return (!trackedFilesToRemove.ContainsKey(fullTrackedPath));
-                                     }
-                    );
+                    // Use an anonymous methods to encapsulate the contains check for the input and output tlogs
+                    // We need to answer the question "should fullTrackedPath be included in the TLog?"
+                    outputs.SaveTlog(fullTrackedPath => !trackedFilesToRemove.ContainsKey(fullTrackedPath));
+                    inputs.SaveTlog(fullTrackedPath => !trackedFilesToRemove.ContainsKey(fullTrackedPath));
                 }
                 else
                 {

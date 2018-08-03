@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -13,12 +14,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class AssemblyReferenceCollection : IEnumerable
     {
-        private ArrayList _list = new ArrayList();
+        private readonly List<AssemblyReference> _list = new List<AssemblyReference>();
 
         internal AssemblyReferenceCollection(AssemblyReference[] array)
         {
             if (array == null)
+            {
                 return;
+            }
             _list.AddRange(array);
         }
 
@@ -27,10 +30,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <param name="index">The zero-based index of the entry to get.</param>
         /// <returns>The assembly reference instance.</returns>
-        public AssemblyReference this[int index]
-        {
-            get { return (AssemblyReference)_list[index]; }
-        }
+        public AssemblyReference this[int index] => _list[index];
 
         /// <summary>
         /// Adds the specified assembly reference to the collection.
@@ -64,10 +64,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <summary>
         /// Gets the number of objects contained in the collection.
         /// </summary>
-        public int Count
-        {
-            get { return _list.Count; }
-        }
+        public int Count => _list.Count;
 
         /// <summary>
         /// Finds an assembly reference in the collection by simple name.
@@ -77,10 +74,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public AssemblyReference Find(string name)
         {
             if (String.IsNullOrEmpty(name))
+            {
                 return null;
+            }
             foreach (AssemblyReference a in _list)
-                if (a.AssemblyIdentity != null && String.Compare(name, a.AssemblyIdentity.Name, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                if (a.AssemblyIdentity != null && String.Compare(
+                        name,
+                        a.AssemblyIdentity.Name,
+                        StringComparison.OrdinalIgnoreCase) == 0)
+                {
                     return a;
+                }
+            }
             return null;
         }
 
@@ -92,7 +98,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public AssemblyReference Find(AssemblyIdentity identity)
         {
             if (identity == null)
+            {
                 return null;
+            }
 
             foreach (AssemblyReference a in _list)
             {
@@ -143,10 +151,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public AssemblyReference FindTargetPath(string targetPath)
         {
             if (String.IsNullOrEmpty(targetPath))
+            {
                 return null;
+            }
             foreach (AssemblyReference a in _list)
+            {
                 if (String.Compare(targetPath, a.TargetPath, StringComparison.OrdinalIgnoreCase) == 0)
+                {
                     return a;
+                }
+            }
             return null;
         }
 
@@ -170,7 +184,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         internal AssemblyReference[] ToArray()
         {
-            return (AssemblyReference[])_list.ToArray(typeof(AssemblyReference));
+            return _list.ToArray();
         }
     }
 }

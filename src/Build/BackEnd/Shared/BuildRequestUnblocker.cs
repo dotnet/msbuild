@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class used to unblock a blocked build request.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -57,7 +53,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal BuildRequestUnblocker(BuildResult buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildResult, "buildResult");
+            ErrorUtilities.VerifyThrowArgumentNull(buildResult, nameof(buildResult));
             _buildResult = buildResult;
             _blockedGlobalRequestId = buildResult.ParentGlobalRequestId;
         }
@@ -68,7 +64,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestUnblocker(BuildRequest parentRequest, BuildResult buildResult)
             : this(buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parentRequest, "parentRequest");
+            ErrorUtilities.VerifyThrowArgumentNull(parentRequest, nameof(parentRequest));
             _blockedGlobalRequestId = parentRequest.GlobalRequestId;
         }
 
@@ -122,7 +118,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        static internal INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
         {
             return new BuildRequestUnblocker(translator);
         }

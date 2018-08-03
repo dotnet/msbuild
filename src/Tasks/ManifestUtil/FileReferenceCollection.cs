@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
@@ -13,12 +14,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public sealed class FileReferenceCollection : IEnumerable
     {
-        private ArrayList _list = new ArrayList();
+        private readonly List<FileReference> _list = new List<FileReference>();
 
         internal FileReferenceCollection(FileReference[] array)
         {
             if (array == null)
+            {
                 return;
+            }
             _list.AddRange(array);
         }
 
@@ -27,10 +30,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <param name="index">The zero-based index of the entry to get.</param>
         /// <returns>The file reference instance.</returns>
-        public FileReference this[int index]
-        {
-            get { return (FileReference)_list[index]; }
-        }
+        public FileReference this[int index] => _list[index];
 
         /// <summary>
         /// Adds the specified assembly reference to the collection.
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <summary>
         /// Adds the specified assembly reference to the collection.
         /// </summary>
-        /// <param name="path">The specified file reference to add.</param>
+        /// <param name="file">The specified file reference to add.</param>
         /// <returns>The added file reference instance.</returns>
         public FileReference Add(FileReference file)
         {
@@ -64,10 +64,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <summary>
         /// Gets the number of objects contained in the collection.
         /// </summary>
-        public int Count
-        {
-            get { return _list.Count; }
-        }
+        public int Count => _list.Count;
 
         /// <summary>
         /// Finds a file reference in the collection by the specified target path.
@@ -77,10 +74,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public FileReference FindTargetPath(string targetPath)
         {
             if (String.IsNullOrEmpty(targetPath))
+            {
                 return null;
+            }
             foreach (FileReference f in _list)
+            {
                 if (String.Compare(targetPath, f.TargetPath, StringComparison.OrdinalIgnoreCase) == 0)
+                {
                     return f;
+                }
+            }
             return null;
         }
 
@@ -96,7 +99,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <summary>
         /// Removes the specified file reference from the collection.
         /// </summary>
-        /// <param name="assemblyReference">The specified file reference to remove.</param>
+        /// <param name="file">The specified file reference to remove.</param>
         public void Remove(FileReference file)
         {
             _list.Remove(file);
@@ -104,7 +107,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         internal FileReference[] ToArray()
         {
-            return (FileReference[])_list.ToArray(typeof(FileReference));
+            return _list.ToArray();
         }
     }
 }

@@ -1,16 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>The PropertyGroup intrinsic task.</summary>
-//-----------------------------------------------------------------------
 
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using Microsoft.Build.Shared.FileSystem;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 
@@ -68,8 +64,8 @@ namespace Microsoft.Build.BackEnd
                             Project.Directory,
                             property.ConditionLocation,
                             LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext
-                            );
+                            LoggingContext.BuildEventContext,
+                            FileSystems.Default);
 
                         if (condition)
                         {

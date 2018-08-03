@@ -291,6 +291,36 @@
         <target state="translated">Le fichier "{0}" n'existe pas. Opération ignorée.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DownloadFile.DidNotDownloadBecauseOfFileMatch">
+        <source>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</source>
+        <target state="translated">Impossible de télécharger le fichier de "{0}" vers "{1}", car le paramètre "{2}" a la valeur "{3}" dans le projet et les tailles des fichiers correspondent.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.Downloading">
+        <source>Downloading from "{0}" to "{1}" ({2:N0} bytes).</source>
+        <target state="translated">Téléchargement de "{0}" vers "{1}" ({2:N0} octets).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorDownloading">
+        <source>MSB3923: Failed to download file "{0}".  {1}</source>
+        <target state="translated">MSB3923: Échec de téléchargement du fichier "{0}". {1}</target>
+        <note>{StrBegin="MSB3923: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorInvalidUrl">
+        <source>MSB3921: The specified URL "{0}" is not valid.</source>
+        <target state="translated">MSB3921: L'URL spécifiée ("{0}") n'est pas valide.</target>
+        <note>{StrBegin="MSB3921: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.ErrorUnknownFileName">
+        <source>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</source>
+        <target state="translated">MSB3922: Échec de détermination d'un nom de fichier à partir de l'URL "{0}". Spécifiez un nom de fichier avec le paramètre "{1}".</target>
+        <note>{StrBegin="MSB3922: "}</note>
+      </trans-unit>
+      <trans-unit id="DownloadFile.Retrying">
+        <source>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</source>
+        <target state="translated">MSB3924: Échec de téléchargement du fichier "{0}". Nouvelle tentative de {1} dans {2} ms. {3}</target>
+        <note>{StrBegin="MSB3924: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
         <target state="translated">MSB3071: Toutes les lettres de lecteur de A: à Z: sont actuellement utilisées. Le répertoire de travail "{0}" étant un chemin UNC, la tâche "Exec" nécessite une lettre de lecteur disponible à laquelle le chemin UNC sera mappé. Déconnectez-vous d'une ou de plusieurs ressources partagées pour libérer des lettres de lecteur ou spécifiez un répertoire de travail local avant de réexécuter cette commande.</target>
@@ -325,6 +355,21 @@
         <source>The working directory "{0}" does not exist.</source>
         <target state="translated">Le répertoire de travail "{0}" n'existe pas.</target>
         <note>No error code because an error will be prefixed.</note>
+      </trans-unit>
+      <trans-unit id="FileHash.FileNotFound">
+        <source>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB3954: Échec du calcul du hachage pour le fichier '{0}' car il n'existe pas ou est inaccessible.</target>
+        <note>{StrBegin="MSB3954: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashAlgorithm">
+        <source>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</source>
+        <target state="translated">MSB3953: Le nom d'algorithme de hachage '{0}' n'est pas reconnu. Les algorithmes autorisés sont 'SHA256', 'SHA384' et 'SHA512'.</target>
+        <note>{StrBegin="MSB3953: "}</note>
+      </trans-unit>
+      <trans-unit id="FileHash.UnrecognizedHashEncoding">
+        <source>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</source>
+        <target state="translated">MSB3951: L'encodage de hachage '{0}' n'est pas reconnu. Les encodages autorisés sont 'hex' et 'base64'.</target>
+        <note>{StrBegin="MSB3951: "}</note>
       </trans-unit>
       <trans-unit id="FindInList.Found">
         <source>Found "{0}".</source>
@@ -924,6 +969,11 @@
         <target state="translated">MSB3190: ClickOnce ne prend pas en charge le niveau d'exécution de la requête '{0}'.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.MOTW">
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
+        <target state="translated">MSB3821: Impossible de traiter le fichier {0} car il se trouve dans la zone Internet ou Restreinte ou il contient Mark of the Web. Pour traiter ces fichiers, supprimez Mark of the Web.</target>
+        <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.ResourceNotFound">
         <source>MSB3552: Resource file "{0}" cannot be found.</source>
         <target state="translated">MSB3552: Impossible de trouver le fichier de ressources "{0}".</target>
@@ -1411,6 +1461,11 @@
         <source>MSB3455: ResGen.exe may not run because the command line is {0} characters long, which exceeds the maximum length of the command. To fix this problem, please either (1) remove unnecessary assembly references, or (2) make the paths to those references shorter.</source>
         <target state="translated">MSB3455: ResGen.exe peut ne pas s'exécuter, car la ligne de commande contient {0} caractères, ce qui dépasse la longueur maximale de la commande. Essayez de résoudre le problème de l'une des manières suivantes : (1) Supprimez les références d'assembly inutiles. (2) Raccourcissez les chemins à ces références.</target>
         <note>{StrBegin="MSB3455: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+        <source>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</source>
+        <target state="translated">Impossible d'ouvrir le fichier d'assembly '{0}'. L'image PE ne contient pas de métadonnées gérées.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
         <source>AssemblyFoldersEx location: "{0}"</source>
@@ -2158,7 +2213,7 @@
         <source>Project reference "{0}" has not been resolved.</source>
         <target state="translated">La référence de projet "{0}" n'a pas été résolue.</target>
         <note>
-      UE and LOCALIZATION: 
+      UE and LOCALIZATION:
       This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
       processing in the .targets file.
     </note>
@@ -2328,9 +2383,49 @@
         <target state="translated">MSB3394: La bibliothèque de types "{0}" n'est pas inscrite, impossible d'annuler l'inscription.</target>
         <note>{StrBegin="MSB3394: "}</note>
       </trans-unit>
+      <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
+        <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="translated">Impossible de décompresser le fichier "{0}" vers le fichier "{1}", car le paramètre "{2}" a la valeur "{3}" dans le projet, et les tailles et horodatages des fichiers correspondent.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</source>
+        <target state="translated">MSB3931: Échec de la décompression dans le répertoire "{0}", car il n'a pas pu être créé. {1}</target>
+        <note>{StrBegin="MSB3931: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotExtractFile">
+        <source>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</source>
+        <target state="translated">MSB3936: Échec de l'ouverture du fichier décompressé "{0}" dans "{1}". {2}</target>
+        <note>{StrBegin="MSB3936: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
+        <target state="translated">MSB3935: Échec de la décompression du fichier "{0}", car le fichier de destination "{1}" est en lecture seule et n'a pas pu être rendu accessible en écriture. {2}</target>
+        <note>{StrBegin="MSB3935: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorCouldNotOpenFile">
+        <source>MSB3933: Failed to open zip file "{0}".  {1}</source>
+        <target state="translated">MSB3933: Échec de l'ouverture du fichier zip "{0}". {1}</target>
+        <note>{StrBegin="MSB3933: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="translated">MSB3934: Échec de l'ouverture du fichier décompressé "{0}" dans "{1}", car il se trouve en dehors du répertoire de destination.</target>
+        <note>{StrBegin="MSB3934: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.ErrorFileDoesNotExist">
+        <source>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="translated">MSB3932: Échec de la décompression du fichier "{0}", car le fichier n'existe pas ou est inaccessible.</target>
+        <note>{StrBegin="MSB3932: "}</note>
+      </trans-unit>
+      <trans-unit id="Unzip.FileComment">
+        <source>Unzipping file "{0}" to "{1}".</source>
+        <target state="translated">Décompression du fichier "{0}" dans "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
-        <target state="translated">MSB3401: "{1}" n'est pas une valeur valide pour le paramètre "{0}".  Valeurs valides : {2}</target>
+        <target state="translated">MSB3401: "{1}" n'est pas une valeur valide pour le paramètre "{0}". Les valeurs valides sont : {2}</target>
         <note>{StrBegin="MSB3401: "}</note>
       </trans-unit>
       <trans-unit id="VBC.RenamePDB">
@@ -2342,6 +2437,11 @@
         <source>"{1}" is an invalid value for the "{0}" parameter.</source>
         <target state="translated">"{1}" n'est pas une valeur valide pour le paramètre "{0}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="VerifyFileHash.HashMismatch">
+        <source>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</source>
+        <target state="translated">MSB3952: Incompatibilité au niveau du hachage de fichier. {0} devait avoir un hachage de fichier {1} de {2}, mais {3} a été utilisé.</target>
+        <note>{StrBegin="MSB3952: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1}</source>
@@ -2639,18 +2739,18 @@
         <note>{StrBegin="MSB3754: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CouldNotFindReferenceAssembly">
-        <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors."</source>
-        <target state="translated">MSB3755: Impossible de trouver la référence "{0}". Si cette référence est exigée par votre code, cela peut entraîner des erreurs de compilation."</target>
+        <source>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</source>
+        <target state="translated">MSB3755: Impossible de trouver la référence "{0}". Si cette référence est exigée par votre code, cela peut entraîner des erreurs de compilation.</target>
         <note>{StrBegin="MSB3755: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidElementLocation">
-        <source>MSB3756: The xml element "{0}" is not valid under the xml element "{1}".</source>
-        <target state="translated">MSB3756: l'élément xml "{0}" n'est pas valide sous l'élément xml "{1}".</target>
+        <source>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</source>
+        <target state="translated">MSB3756: L'élément &lt;{0}&gt; n'est pas un enfant valide de l'élément &lt;{1}&gt;. Les éléments enfants valides sont &lt;Code&gt;, &lt;Reference&gt; et &lt;Using&gt;.</target>
         <note>{StrBegin="MSB3756: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.MultipleCodeNodes">
-        <source>MSB3757: Multiple Code xml elements have been found, this is not allowed. To fix this issue remove any additional Code xml elements from the task.</source>
-        <target state="translated">MSB3757: Plusieurs éléments xml de code ont été trouvés, ce qui n'est pas autorisé. Pour corriger ce problème, supprimez les éléments xml de code supplémentaires de la tâche.</target>
+        <source>MSB3757: Only one &lt;Code&gt; element can be specified.</source>
+        <target state="translated">MSB3757: Un seul élément &lt;Code&gt; peut être spécifié.</target>
         <note>{StrBegin="MSB3757: "}</note>
       </trans-unit>
       <trans-unit id="CodeTaskFactory.CompilerError">
@@ -3007,6 +3107,61 @@
         <source>The file is locked by: "{0}"</source>
         <target state="translated">Le fichier est verrouillé par : "{0}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeType">
+        <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
+        <target state="translated">MSB3759: Le type de code spécifié ("{0}") n'est pas valide. Les types de code pris en charge sont "{1}".</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeLanguage">
+        <source>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</source>
+        <target state="translated">MSB3759: Le langage de code spécifié ("{0}") n'est pas valide. Les langages de code pris en charge sont "{1}".</target>
+        <note>{StrBegin="MSB3759: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.NoSourceCode">
+        <source>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</source>
+        <target state="translated">MSB3760: Vous devez spécifier le code source dans l'élément Code ou un chemin à un fichier contenant le code source.</target>
+        <note>{StrBegin="MSB3760: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.CompilingAssembly">
+        <source>Compiling task source code</source>
+        <target state="translated">Compilation du code source de la tâche</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidTaskXml">
+        <source>MSB3761: The specified task XML is invalid.  {0}</source>
+        <target state="translated">MSB3761: La tâche XML spécifiée n'est pas valide. {0}</target>
+        <note>{StrBegin="MSB3761: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.InvalidCodeElementAttribute">
+        <source>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</source>
+        <target state="translated">MSB3756: L'attribut "{0}" n'est pas valide pour l'élément &lt;Code&gt;. Les attributs valides sont "Language", "Source" et "Type".</target>
+        <note>{StrBegin="MSB3756: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</source>
+        <target state="translated">MSB3752: L'attribut "{0}" de l'élément &lt;{1}&gt; a été défini, mais il est vide. Si l'attribut "{0}" est défini, il ne doit pas être vide.</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.Comment">
+        <source>Zipping directory "{0}" to "{1}".</source>
+        <target state="translated">Compression du répertoire "{0}" dans "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB3941: Échec de la compression du répertoire "{0}", car il n'existe pas ou est inaccessible.</target>
+        <note>{StrBegin="MSB3941: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFailed">
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
+        <target state="translated">MSB3943: Échec de la compression du répertoire "{0}" dans le fichier "{1}". {2}</target>
+        <note>{StrBegin="MSB3943: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorFileExists">
+        <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="translated">MSB3942: Échec de la compression du fichier zip "{0}", car il existe déjà. Supprimez ou renommez le fichier, puis réessayez.</target>
+        <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
     </body>
   </file>

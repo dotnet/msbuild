@@ -2115,7 +2115,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using (var env = TestEnvironment.Create())
             {
                 var projectDirectory = env.CreateFolder();
-                env.SetCurrentDirectory(projectDirectory.FolderPath);
+                env.SetCurrentDirectory(projectDirectory.Path);
 
                 var file1 = env.CreateFile(projectDirectory).Path;
                 var file2 = env.CreateFile(projectDirectory).Path;
@@ -2125,7 +2125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 <Target Name='t'>
                     <ItemGroup>
                         <i1 Include='" + file1 + ";" + file2 + @";other'/>
-                        <i1 Remove='" + projectDirectory.FolderPath + Path.DirectorySeparatorChar + @"*.tmp'/>
+                        <i1 Remove='" + projectDirectory.Path + Path.DirectorySeparatorChar + @"*.tmp'/>
                     </ItemGroup>
                 </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
@@ -3599,7 +3599,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         projectInstance,
                         false);
 
-                    var lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), null);
+                    var lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>());
                     task.ExecuteTask(lookup);
 
                     return lookup.GetItems(itemType).Select(i => (ObjectModelHelpers.TestItem)new ObjectModelHelpers.ProjectItemInstanceTestItemAdapter(i)).ToList();

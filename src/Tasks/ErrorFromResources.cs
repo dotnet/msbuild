@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Task that logs an error given the appropriate resource string.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Framework;
@@ -20,112 +16,30 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Resource from which error message is extracted
         /// </summary>
-        private string _resource;
-
-        /// <summary>
-        /// Error code
-        /// </summary>
-        private string _code;
-
-        /// <summary>
-        /// Relevant file if any.
-        /// If none is provided, the file containing the Error 
-        /// task will be used.
-        /// </summary>
-        private string _file;
-
-        /// <summary>
-        /// Error help keyword
-        /// </summary>
-        private string _helpKeyword;
-
-        /// <summary>
-        /// Optional arguments to use when formatting the error message
-        /// </summary>
-        private string[] _arguments;
-
-        /// <summary>
-        /// Resource from which error message is extracted
-        /// </summary>
         [Required]
-        public string Resource
-        {
-            get
-            {
-                return _resource;
-            }
-
-            set
-            {
-                _resource = value;
-            }
-        }
+        public string Resource { get; set; }
 
         /// <summary>
         /// Optional arguments to use when formatting the error message
         /// </summary>
-        public string[] Arguments
-        {
-            get
-            {
-                return _arguments;
-            }
-
-            set
-            {
-                _arguments = value;
-            }
-        }
+        public string[] Arguments { get; set; }
 
         /// <summary>
         /// Error code
         /// </summary>
-        public string Code
-        {
-            get
-            {
-                return _code;
-            }
-
-            set
-            {
-                _code = value;
-            }
-        }
+        public string Code { get; set; }
 
         /// <summary>
         /// Relevant file if any.
         /// If none is provided, the file containing the Error 
         /// task will be used.
         /// </summary>
-        public string File
-        {
-            get
-            {
-                return _file;
-            }
-
-            set
-            {
-                _file = value;
-            }
-        }
+        public string File { get; set; }
 
         /// <summary>
         /// Error help keyword
         /// </summary>
-        public string HelpKeyword
-        {
-            get
-            {
-                return _helpKeyword;
-            }
-
-            set
-            {
-                _helpKeyword = value;
-            }
-        }
+        public string HelpKeyword { get; set; }
 
         /// <summary>
         /// Log the requested error message.
@@ -134,8 +48,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                string errorCode;
-                string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, Log.FormatResourceString(Resource, Arguments), out errorCode);
+                string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, Log.FormatResourceString(Resource, Arguments), out string errorCode);
 
                 // If the user specifies a code, that should override. 
                 Code = Code ?? errorCode;

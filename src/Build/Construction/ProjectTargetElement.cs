@@ -1,15 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectTargetElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
+using System.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -35,7 +30,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTargetElement(XmlElementWithLocation xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -50,58 +45,23 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get an enumerator over any child item groups
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectItemGroupElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectItemGroupElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
 
         /// <summary>
         /// Get an enumerator over any child property groups
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectPropertyGroupElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectPropertyGroupElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
 
         /// <summary>
         /// Get an enumerator over any child tasks
         /// </summary>
-        public ICollection<ProjectTaskElement> Tasks
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectTaskElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectTaskElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectTaskElement> Tasks => new ReadOnlyCollection<ProjectTaskElement>(Children.OfType<ProjectTaskElement>());
 
         /// <summary>
         /// Get an enumerator over any child onerrors
         /// </summary>
-        public ICollection<ProjectOnErrorElement> OnErrors
-        {
-            get
-            {
-                return new ReadOnlyCollection<ProjectOnErrorElement>
-                    (
-                        new FilteringEnumerable<ProjectElement, ProjectOnErrorElement>(Children)
-                    );
-            }
-        }
+        public ICollection<ProjectOnErrorElement> OnErrors => new ReadOnlyCollection<ProjectOnErrorElement>(Children.OfType<ProjectOnErrorElement>());
+
         #endregion
 
         /// <summary>
@@ -113,21 +73,17 @@ namespace Microsoft.Build.Construction
             get
             {
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                if (_name == null)
-                {
-                    _name = EscapingUtilities.UnescapeAll(ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.name));
-                }
-
-                return _name;
+                return _name ?? (_name = EscapingUtilities.UnescapeAll(
+                           ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.name)));
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, "value");
+                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
 
                 string unescapedValue = EscapingUtilities.UnescapeAll(value);
 
-                int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.illegalTargetNameCharacters);
+                int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
                 if (indexOfSpecialCharacter >= 0)
                 {
                     ErrorUtilities.ThrowArgument("OM_NameInvalid", unescapedValue, unescapedValue[indexOfSpecialCharacter]);
@@ -319,26 +275,17 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the Name attribute
         /// </summary>
-        public ElementLocation NameLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.name); }
-        }
+        public ElementLocation NameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.name);
 
         /// <summary>
         /// Location of the Inputs attribute
         /// </summary>
-        public ElementLocation InputsLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.inputs); }
-        }
+        public ElementLocation InputsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.inputs);
 
         /// <summary>
         /// Location of the Outputs attribute
         /// </summary>
-        public ElementLocation OutputsLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.outputs); }
-        }
+        public ElementLocation OutputsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.outputs);
 
         /// <summary>
         /// Location of the TrimDuplicateOutputs attribute
@@ -362,43 +309,27 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the DependsOnTargets attribute
         /// </summary>
-        public ElementLocation DependsOnTargetsLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.dependsOnTargets); }
-        }
+        public ElementLocation DependsOnTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.dependsOnTargets);
 
         /// <summary>
         /// Location of the BeforeTargets attribute
         /// </summary>
-        public ElementLocation BeforeTargetsLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.beforeTargets); }
-        }
+        public ElementLocation BeforeTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.beforeTargets);
 
         /// <summary>
         /// Location of the Returns attribute
         /// </summary>
-        public ElementLocation ReturnsLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.returns); }
-        }
+        public ElementLocation ReturnsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.returns);
 
         /// <summary>
         /// Location of the AfterTargets attribute
         /// </summary>
-        public ElementLocation AfterTargetsLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.afterTargets); }
-        }
+        public ElementLocation AfterTargetsLocation => XmlElement.GetAttributeLocation(XMakeAttributes.afterTargets);
 
         /// <summary>
         /// A cache of the last instance which was created from this target.
         /// </summary>
-        internal ProjectTargetInstance TargetInstance
-        {
-            get;
-            set;
-        }
+        internal ProjectTargetInstance TargetInstance { get; set; }
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:
@@ -432,7 +363,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectTaskElement AddTask(string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, "taskName");
+            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
 
             ProjectTaskElement task = ContainingProject.CreateTaskElement(taskName);
 
@@ -459,11 +390,7 @@ namespace Microsoft.Build.Construction
         {
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.target);
 
-            ProjectTargetElement target = new ProjectTargetElement(element, containingProject);
-
-            target.Name = name;
-
-            return target;
+            return new ProjectTargetElement(element, containingProject) { Name = name };
         }
 
         /// <summary>
@@ -487,7 +414,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateTargetElement(this.Name);
+            return owner.CreateTargetElement(Name);
         }
     }
 }

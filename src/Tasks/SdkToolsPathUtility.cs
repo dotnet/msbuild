@@ -1,13 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Provide a helper class for tasks to find their tools if they are in the SDK</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
@@ -35,7 +29,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (s_fileInfoExists == null)
                 {
-                    s_fileInfoExists = new FileExists(FileExists);
+                    s_fileInfoExists = FileExists;
                 }
 
                 return s_fileInfoExists;
@@ -57,7 +51,7 @@ namespace Microsoft.Build.Tasks
             string pathToTool = null;
             if (!String.IsNullOrEmpty(sdkToolsPath))
             {
-                string processorSpecificToolDirectory = String.Empty;
+                string processorSpecificToolDirectory;
                 try
                 {
                     switch (currentArchitecture)
@@ -155,7 +149,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Provide a method which can be used with a delegate to provide a specific FileExists behavior.
         ///
-        /// Use FileInfo instead of File.Exists(...) because the latter fails silently (by design) if CAS
+        /// Use FileInfo instead of FileSystems.Default.FileExists(...) because the latter fails silently (by design) if CAS
         /// doesn't grant access. We want the security exception if there is going to be one.
         /// </summary>
         /// <returns>True if the file exists. False if it does not</returns>

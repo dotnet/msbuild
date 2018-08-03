@@ -97,14 +97,12 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         string[] includeSplitFilesEscaped;
-                        using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob,
-                            excludePatternsForGlobs))
+                        using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                         {
                             includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                 _rootDirectory,
                                 glob,
-                                excludePatternsForGlobs,
-                                entriesCache: EntriesCache
+                                excludePatternsForGlobs
                             );
                         }
 

@@ -4,35 +4,29 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
-using System.Collections;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
+using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ToolTask_Tests
+    public sealed class ToolTask_Tests
     {
-        internal class MyTool : ToolTask, IDisposable
+        private class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
-            private string _responseFileCommands = String.Empty;
-            private string _commandLineCommands = String.Empty;
+            private string _responseFileCommands = string.Empty;
+            private string _commandLineCommands = string.Empty;
             private string _pathToToolUsed;
 
             public MyTool()
                 : base()
             {
                 _fullToolName = Path.Combine(
-#if FEATURE_SPECIAL_FOLDERS
-                    Environment.GetFolderPath(Environment.SpecialFolder.System),
-#else
-                    FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System),
-#endif
+                    NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System),
                     NativeMethodsShared.IsUnixLike ? "sh" : "cmd.exe");
             }
 
@@ -40,92 +34,51 @@ namespace Microsoft.Build.UnitTests
             {
             }
 
-            public string PathToToolUsed
-            {
-                get { return _pathToToolUsed; }
-            }
+            public string PathToToolUsed => _pathToToolUsed;
 
             public string MockResponseFileCommands
             {
-                set { _responseFileCommands = value; }
+                set => _responseFileCommands = value;
             }
 
             public string MockCommandLineCommands
             {
-                set { _commandLineCommands = value; }
+                set => _commandLineCommands = value;
             }
 
             public string FullToolName
             {
-                set { _fullToolName = value; }
+                set => _fullToolName = value;
             }
 
             /// <summary>
             /// Intercepted start info
             /// </summary>
-            internal ProcessStartInfo StartInfo
-            {
-                get;
-                private set;
-            }
+            internal ProcessStartInfo StartInfo { get; private set; }
 
             /// <summary>
             /// Whether execute was called
             /// </summary>
-            internal bool ExecuteCalled
+            internal bool ExecuteCalled { get; private set; }
+
+            internal Action<ProcessStartInfo> DoProcessStartInfoMutation { get; set; }
+
+            protected override string ToolName => Path.GetFileName(_fullToolName);
+
+            protected override string GenerateFullPathToTool() => _fullToolName;
+
+            protected override string GenerateResponseFileCommands() => _responseFileCommands;
+
+            protected override string GenerateCommandLineCommands() => _commandLineCommands;
+
+            protected override ProcessStartInfo GetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
             {
-                get;
-                private set;
-            }
-
-            internal Action<ProcessStartInfo> DoProcessStartInfoMutation {get; set;}
-
-            protected override string ToolName
-            {
-                get { return Path.GetFileName(_fullToolName); }
-            }
-
-            protected override string GenerateFullPathToTool()
-            {
-                return _fullToolName;
-            }
-
-            override protected string GenerateResponseFileCommands()
-            {
-                return _responseFileCommands;
-            }
-
-            override protected string GenerateCommandLineCommands()
-            {
-                // Default is nothing. This is useful for tools where all the parameters can go into a response file.
-                return _commandLineCommands;
-            }
-
-            override protected ProcessStartInfo GetProcessStartInfo
-            (
-                string pathToTool,
-                string commandLineCommands,
-                string responseFileSwitch
-            )
-            {
-                var basePSI = base.GetProcessStartInfo(
-                    pathToTool, 
-                    commandLineCommands, 
-                    responseFileSwitch);
-                
-                if (DoProcessStartInfoMutation != null)
-                {
-                    DoProcessStartInfoMutation(basePSI);
-                }
-
+                var basePSI = base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+                DoProcessStartInfoMutation?.Invoke(basePSI);
                 return basePSI;
             }
 
-            override protected void LogEventsFromTextOutput
-                (
-                string singleLine,
-                MessageImportance messageImportance
-                )
+            protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
             {
                 if (singleLine.Contains("BADTHINGHAPPENED"))
                 {
@@ -139,7 +92,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            override protected int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
+            protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
             {
                 Console.WriteLine("executetool");
                 _pathToToolUsed = pathToTool;
@@ -149,11 +102,9 @@ namespace Microsoft.Build.UnitTests
                     // Unix makes sh interactive and it won't exit if there is nothing on the command line
                     commandLineCommands = " -c \"echo\"";
                 }
+
                 int result = base.ExecuteTool(pathToTool, responseFileCommands, commandLineCommands);
-                StartInfo = GetProcessStartInfo(
-                    GenerateFullPathToTool(),
-                    NativeMethodsShared.IsWindows ? "/x" : string.Empty,
-                    null);
+                StartInfo = GetProcessStartInfo(GenerateFullPathToTool(), NativeMethodsShared.IsWindows ? "/x" : string.Empty, null);
                 return result;
             }
         };
@@ -200,13 +151,10 @@ namespace Microsoft.Build.UnitTests
 
                 // "cmd.exe" croaks big-time when given a very long command-line.  It pops up a message box on
                 // Windows XP.  We can't have that!  So use "attrib.exe" for this exercise instead.
-#if FEATURE_SPECIAL_FOLDERS
-                t.FullToolName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), NativeMethodsShared.IsWindows ? "attrib.exe" : "ps");
-#else
-                t.FullToolName = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), NativeMethodsShared.IsWindows ? "attrib.exe" : "ps");
-#endif
+                string systemPath = NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System);
+                t.FullToolName = Path.Combine(systemPath, NativeMethodsShared.IsWindows ? "attrib.exe" : "ps");
 
-                t.MockCommandLineCommands = new String('x', 32001);
+                t.MockCommandLineCommands = new string('x', 32001);
 
                 // It's only a warning, we still succeed
                 t.Execute().ShouldBeTrue();
@@ -392,17 +340,13 @@ namespace Microsoft.Build.UnitTests
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
                 t.FullToolName = shellName;
-#if FEATURE_SPECIAL_FOLDERS
-                string systemPath = Environment.GetFolderPath(Environment.SpecialFolder.System);
-#else
-                string systemPath = FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System);
-#endif
+                string systemPath = NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System);
                 t.ToolPath = systemPath;
 
                 t.Execute();
                 t.PathToToolUsed.ShouldBe(Path.Combine(systemPath, shellName));
                 engine.AssertLogContains(shellName);
-                engine.Log = String.Empty;
+                engine.Log = string.Empty;
 
                 t.ToolExe = copyName;
                 t.Execute();
@@ -450,12 +394,9 @@ namespace Microsoft.Build.UnitTests
                 t.ExitCode.ShouldBe(0);
                 engine.Errors.ShouldBe(0);
 
+                string systemPath = NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System);
                 engine.AssertLogContains(
-#if FEATURE_SPECIAL_FOLDERS
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), toolName));
-#else
-                    Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), toolName));
-#endif
+                Path.Combine(systemPath, toolName));
             }
         }
 
@@ -565,7 +506,7 @@ namespace Microsoft.Build.UnitTests
             MyTool task = new MyTool();
             task.BuildEngine = new MockEngine();
             string userVarName = NativeMethodsShared.IsWindows ? "username" : "user";
-            task.EnvironmentVariables = new string[] { "a=b", "c=d", userVarName + "=x" /* built-in */, "path=" /* blank value */};
+            task.EnvironmentVariables = new[] { "a=b", "c=d", userVarName + "=x" /* built-in */, "path=" /* blank value */};
             bool result = task.Execute();
 
             result.ShouldBe(true);
@@ -582,17 +523,13 @@ namespace Microsoft.Build.UnitTests
             startInfo.EnvironmentVariables["a"].ShouldBe("b");
             startInfo.EnvironmentVariables["c"].ShouldBe("d");
             startInfo.EnvironmentVariables[userVarName].ShouldBe("x");
-            startInfo.EnvironmentVariables["path"].ShouldBe(String.Empty);
+            startInfo.EnvironmentVariables["path"].ShouldBe(string.Empty);
 #endif
 
             if (NativeMethodsShared.IsWindows)
             {
                 Assert.Equal(
-#if FEATURE_SPECIAL_FOLDERS
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-#else
-                        FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.ProgramFiles),
-#endif
 #if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
                         startInfo.Environment["programfiles"],
 #else
@@ -611,7 +548,7 @@ namespace Microsoft.Build.UnitTests
         {
             MyTool task = new MyTool();
             task.BuildEngine = new MockEngine();
-            task.EnvironmentVariables = new string[] { "a=b=c" };
+            task.EnvironmentVariables = new[] { "a=b=c" };
             bool result = task.Execute();
 
             result.ShouldBe(true);
@@ -630,7 +567,7 @@ namespace Microsoft.Build.UnitTests
         {
             MyTool task = new MyTool();
             task.BuildEngine = new MockEngine();
-            task.EnvironmentVariables = new string[] { "x" };
+            task.EnvironmentVariables = new[] { "x" };
             bool result = task.Execute();
 
             result.ShouldBe(false);
@@ -645,7 +582,7 @@ namespace Microsoft.Build.UnitTests
         {
             MyTool task = new MyTool();
             task.BuildEngine = new MockEngine();
-            task.EnvironmentVariables = new string[] { "" };
+            task.EnvironmentVariables = new[] { "" };
             bool result = task.Execute();
 
             result.ShouldBe(false);
@@ -660,7 +597,7 @@ namespace Microsoft.Build.UnitTests
         {
             MyTool task = new MyTool();
             task.BuildEngine = new MockEngine();
-            task.EnvironmentVariables = new string[] { "=a;b=c" };
+            task.EnvironmentVariables = new[] { "=a;b=c" };
             bool result = task.Execute();
 
             result.ShouldBe(false);
@@ -704,7 +641,7 @@ namespace Microsoft.Build.UnitTests
             {
                 using (var env = TestEnvironment.Create())
                 {
-                    string tempDirectory = env.CreateFolder().FolderPath;
+                    string tempDirectory = env.CreateFolder().Path;
                     env.SetCurrentDirectory(tempDirectory);
                     env.SetEnvironmentVariable("PATH", $"{tempDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}");
                     Directory.SetCurrentDirectory(tempDirectory);
@@ -739,11 +676,7 @@ namespace Microsoft.Build.UnitTests
             string shellName;
             if (NativeMethodsShared.IsWindows)
             {
-#if FEATURE_SPECIAL_FOLDERS
                 expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
-#else
-                expectedCmdPath = Path.Combine(FileUtilities.GetFolderPath(FileUtilities.SpecialFolder.System), "cmd.exe");
-#endif
                 shellName = "cmd.exe";
             }
             else
@@ -771,7 +704,7 @@ namespace Microsoft.Build.UnitTests
 #endif
             
             task.BuildEngine = new MockEngine();
-            task.EnvironmentVariables = new string[] { "a=b" };
+            task.EnvironmentVariables = new[] { "a=b" };
             bool result = task.Execute();
 
             result.ShouldBe(true);
@@ -833,17 +766,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A simple implementation of <see cref="ToolTask"/> that allows tests to verify the command-line that was generated.
         /// </summary>
-        internal sealed class ToolTaskThatGetsCommandLine : ToolTask
+        private sealed class ToolTaskThatGetsCommandLine : ToolTask
         {
-            protected override string ToolName
-            {
-                get { return "cmd.exe"; }
-            }
+            protected override string ToolName => "cmd.exe";
 
-            protected override string GenerateFullPathToTool()
-            {
-                return null;
-            }
+            protected override string GenerateFullPathToTool() => null;
 
             protected override int ExecuteTool(string pathToTool, string responseFileCommands, string commandLineCommands)
             {

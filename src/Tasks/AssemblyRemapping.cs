@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
-// <summary>Describes a remapping entry pair</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Build.Shared;
@@ -15,53 +12,30 @@ namespace Microsoft.Build.Tasks
     internal class AssemblyRemapping : IEquatable<AssemblyRemapping>
     {
         /// <summary>
-        /// The assemblyName we mapped from
-        /// </summary>
-        private readonly AssemblyNameExtension _from;
-
-        /// <summary>
-        /// The assemblyName we mapped to
-        /// </summary>
-        private readonly AssemblyNameExtension _to;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         public AssemblyRemapping(AssemblyNameExtension from, AssemblyNameExtension to)
         {
-            _from = from;
-            _to = to;
+            From = from;
+            To = to;
         }
 
         /// <summary>
         /// The assemblyName we mapped from
         /// </summary>
-        public AssemblyNameExtension From
-        {
-            get
-            {
-                return _from;
-            }
-        }
+        public AssemblyNameExtension From { get; }
 
         /// <summary>
         /// The assemblyName we mapped to
         /// </summary>
-        public AssemblyNameExtension To
-        {
-            get
-            {
-                return _to;
-            }
-        }
+        public AssemblyNameExtension To { get; }
 
         /// <summary>
         /// Compare two Assembly remapping objects
         /// </summary>
         public override bool Equals(object obj)
         {
-            AssemblyNameExtension name = obj as AssemblyNameExtension;
-            if (name == null)
+            if (!(obj is AssemblyNameExtension name))
             {
                 return false;
             }
@@ -74,7 +48,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override int GetHashCode()
         {
-            return _from.GetHashCode();
+            return From.GetHashCode();
         }
 
         /// <summary>
@@ -82,7 +56,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool Equals(AssemblyRemapping other)
         {
-            return _from.Equals(other._from);
+            return From.Equals(other.From);
         }
     }
 }

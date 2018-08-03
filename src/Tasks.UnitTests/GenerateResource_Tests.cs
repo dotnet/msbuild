@@ -306,40 +306,33 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         public void ForceOutOfDate()
         {
             var folder = _env.CreateFolder();
-            string resxFile = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
+            string resxFileInput = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
 
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(_env.GetTempFile(".cache").Path);
-            t.Sources = new ITaskItem[] {new TaskItem(resxFile)};
+            t.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
 
             Utilities.ExecuteTask(t);
 
-            string resourcesFile = t.OutputResources[0].ItemSpec;
-            Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
-            resourcesFile = t.FilesWritten[0].ItemSpec;
-            Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+            t.OutputResources.Length.ShouldBe(1);
+            var resourceOutput = t.OutputResources[0].ItemSpec;
+            Path.GetExtension(resourceOutput).ShouldBe(".resources");
+            Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
 
 #if FEATURE_RESGENCACHE
-                Utilities.AssertStateFileWasWritten(t);
+            Utilities.AssertStateFileWasWritten(t);
 #endif
+
             GenerateResource t2 = Utilities.CreateTask(_output);
             t2.StateFile = new TaskItem(t.StateFile);
-            t2.Sources = new ITaskItem[] {new TaskItem(resxFile)};
+            t2.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
 
-            DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-
-            System.Threading.Thread.Sleep(200);
-            if (NativeMethodsShared.IsOSX)
-            {
-                // Must be > 1 sec for HFS+ timestamp granularity
-                System.Threading.Thread.Sleep(1100);
-            }
-
-            File.SetLastWriteTime(resxFile, DateTime.Now);
-
+            // Execute the task again when the input (5m ago) is newer than the previous outputs (10m ago)
+            File.SetLastWriteTime(resxFileInput, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)));
+            File.SetLastWriteTime(resourceOutput, DateTime.Now.Subtract(TimeSpan.FromMinutes(10)));
             Utilities.ExecuteTask(t2);
 
-            Assert.True(DateTime.Compare(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec), time) > 0);
+            File.GetLastAccessTime(t2.OutputResources[0].ItemSpec).ShouldBe(DateTime.Now, TimeSpan.FromSeconds(5));
         }
 
         /// <summary>
@@ -3211,6 +3204,54 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 }
             }
         }
+
+        [Fact]
+        public void ShouldNotRegenResourcesWhenRebuildingInPresenceOfFileRefWithWindowsPath()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetCurrentDirectory(env.DefaultTestDirectory.Path);
+
+                string fileRef = "<data name=\"TextFile1\" type=\"System.Resources.ResXFileRef, System.Windows.Forms\">" +
+                                $"<value>.\\tmp_dir\\test_file.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value></data>";
+
+                env.CreateFile(
+                        env.CreateFolder(Path.Combine(env.DefaultTestDirectory.Path, "tmp_dir")),
+                        "test_file.txt", "xyz");
+
+                string resxFile = env.CreateFile("test.resx").Path;
+                Utilities.WriteTestResX(false, null, fileRef, false, resxFile);
+
+                GenerateResource ExecuteTask()
+                {
+                    GenerateResource task = Utilities.CreateTask(_output);
+                    task.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+
+                    Utilities.ExecuteTask(task);
+
+                    string outputResourceFile = task.OutputResources[0].ItemSpec;
+                    task.OutputResources[0].ItemSpec.ShouldBe(task.FilesWritten[0].ItemSpec);
+                    Path.GetExtension(outputResourceFile).ShouldBe(".resources");
+
+                    return task;
+                }
+
+                GenerateResource t = ExecuteTask();
+                string resourcesFile = t.OutputResources[0].ItemSpec;
+                DateTime initialWriteTime = File.GetLastWriteTime(resourcesFile);
+
+                // fs granularity on HFS is 1 sec!
+                System.Threading.Thread.Sleep(NativeMethodsShared.IsOSX ? 1000 : 100);
+
+                // Rebuild, it shouldn't regen .resources file since the sources
+                // haven't changed
+                t = ExecuteTask();
+                resourcesFile = t.OutputResources[0].ItemSpec;
+
+                Utilities.FileUpdated(resourcesFile, initialWriteTime).ShouldBeFalse();
+            }
+        }
+
     }
 }
 

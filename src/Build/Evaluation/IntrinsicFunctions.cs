@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of functions which can be accessed from MSBuild files.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +11,7 @@ using System.Text.RegularExpressions;
 
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 
 // Needed for DoesTaskHostExistForParameters
@@ -35,6 +32,10 @@ namespace Microsoft.Build.Evaluation
                 .Select(pi => pi.Name)
                 .Aggregate("", (a, b) => string.IsNullOrEmpty(a) ? b : $"{a}, {b}"),
             true);
+
+        private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
+
+        private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
 
         /// <summary>
         /// Add two doubles
@@ -181,29 +182,36 @@ namespace Microsoft.Build.Evaluation
             return Registry.GetValue(keyName, valueName, defaultValue);
         }
 
+        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
+        {
+            if (views == null || views.Length == 0)
+            {
+                views = DefaultRegistryViews;
+            }
+
+            return GetRegistryValueFromView(keyName, valueName, defaultValue, new ArraySegment<object>(views));
+        }
+
+
         /// <summary>
         /// Get the value of the registry key from one of the RegistryView's specified
         /// </summary>
-        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
+        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, ArraySegment<object> views)
         {
-            string subKeyName;
-
             // We will take on handing of default value
             // A we need to act on the null return from the GetValue call below
             // so we can keep searching other registry views
             object result = defaultValue;
 
             // If we haven't been passed any views, then we'll just use the default view
-            if (views == null || views.Length == 0)
+            if (views.Count == 0)
             {
-                views = new object[] { RegistryView.Default };
+                views = new ArraySegment<object>(DefaultRegistryViews);
             }
 
             foreach (object viewObject in views)
             {
-                string viewAsString = viewObject as string;
-
-                if (viewAsString != null)
+                if (viewObject is string viewAsString)
                 {
                     string typeLeafName = typeof(RegistryView).Name + ".";
                     string typeFullName = typeof(RegistryView).FullName + ".";
@@ -219,11 +227,9 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Fake common requests to HKLM that we can resolve
 
-
                         // See if this asks for a specific SDK
-                        var m = Regex.Match(keyName,
-                            @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$",
-                            RegexOptions.IgnoreCase);
+                        var m = RegistrySdkRegex.Value.Match(keyName);
+                        
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
                             return Path.Combine(NativeMethodsShared.FrameworkBasePath, m.Groups[0].Value) + Path.DirectorySeparatorChar;
@@ -232,7 +238,7 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
-                    using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
+                    using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                     {
                         if (key != null)
                         {
@@ -312,9 +318,9 @@ namespace Microsoft.Build.Evaluation
         /// <param name="startingDirectory">The directory to start the search in.</param>
         /// <param name="fileName">The name of the file to search for.</param>
         /// <returns>The full path of the directory containing the file if it is found, otherwise an empty string. </returns>
-        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName)
+        internal static string GetDirectoryNameOfFileAbove(string startingDirectory, string fileName, IFileSystem fileSystem)
         {
-            return FileUtilities.GetDirectoryNameOfFileAbove(startingDirectory, fileName);
+            return FileUtilities.GetDirectoryNameOfFileAbove(startingDirectory, fileName, fileSystem);
         }
 
         /// <summary>
@@ -324,9 +330,9 @@ namespace Microsoft.Build.Evaluation
         /// <param name="startingDirectory">An optional directory to start the search in.  The default location is the directory
         /// of the file containing the property function.</param>
         /// <returns>The full path of the file if it is found, otherwise an empty string.</returns>
-        internal static string GetPathOfFileAbove(string file, string startingDirectory)
+        internal static string GetPathOfFileAbove(string file, string startingDirectory, IFileSystem fileSystem)
         {
-            return FileUtilities.GetPathOfFileAbove(file, startingDirectory);
+            return FileUtilities.GetPathOfFileAbove(file, startingDirectory, fileSystem);
         }
 
         /// <summary>

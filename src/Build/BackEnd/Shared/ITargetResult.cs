@@ -1,14 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>An interface for target results.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Execution
@@ -43,27 +37,22 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The exception generated when the target ran, if any.
         /// </summary>
-        Exception Exception
-        {
-            get;
-        }
+        Exception Exception { get; }
 
         /// <summary>
         /// The set of build items output by the target.
         /// These are ITaskItem's, so they have no item-type.
         /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "This isn't worth fixing. The current code depends too on the fact that TaskItem[] can implicitly cast to ITaskItem[] but the same is not true for List<TaskItem> and List<ITaskItem>. Also a public interface (IBuildEngine) would have to be changed, or the items copied into an array")]
-        ITaskItem[] Items
-        {
-            get;
-        }
+        [SuppressMessage(
+            "Microsoft.Performance",
+            "CA1819:PropertiesShouldNotReturnArrays",
+            Justification =
+                "This isn't worth fixing. The current code depends too on the fact that TaskItem[] can implicitly cast to ITaskItem[] but the same is not true for List<TaskItem> and List<ITaskItem>. Also a public interface (IBuildEngine) would have to be changed, or the items copied into an array")]
+        ITaskItem[] Items { get; }
 
         /// <summary>
         /// The result code for the target run.
         /// </summary>
-        TargetResultCode ResultCode
-        {
-            get;
-        }
+        TargetResultCode ResultCode { get; }
     }
 }

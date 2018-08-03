@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface used by the test task to communicate what the TaskExecutionHost did to it.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;

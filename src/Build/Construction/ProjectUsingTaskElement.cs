@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Definition of ProjectUsingTaskElement class.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;
@@ -26,7 +22,7 @@ namespace Microsoft.Build.Construction
         internal ProjectUsingTaskElement(XmlElementWithLocation xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, "parent");
+            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
         }
 
         /// <summary>
@@ -43,12 +39,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string AssemblyFile
         {
-            get
-            {
-                return
-                    FileUtilities.FixFilePath(
-                        ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyFile));
-            }
+            get => FileUtilities.FixFilePath(
+                ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyFile));
 
             set
             {
@@ -66,10 +58,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string AssemblyName
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyName);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.assemblyName);
 
             set
             {
@@ -85,10 +74,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string TaskName
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskName);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskName);
 
             set
             {
@@ -103,10 +89,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string TaskFactory
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskFactory);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.taskFactory);
 
             set
             {
@@ -120,10 +103,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Runtime
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.runtime);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.runtime);
 
             set
             {
@@ -137,10 +117,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Architecture
         {
-            get
-            {
-                return ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.architecture);
-            }
+            get => ProjectXmlUtilities.GetAttributeValue(XmlElement, XMakeAttributes.architecture);
 
             set
             {
@@ -156,7 +133,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ProjectUsingTaskBodyElement body = (LastChild == null) ? null : LastChild as ProjectUsingTaskBodyElement;
+                ProjectUsingTaskBodyElement body = LastChild as ProjectUsingTaskBodyElement;
                 return body;
             }
         }
@@ -168,7 +145,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                UsingTaskParameterGroupElement parameterGroup = (FirstChild == null) ? null : FirstChild as UsingTaskParameterGroupElement;
+                UsingTaskParameterGroupElement parameterGroup = FirstChild as UsingTaskParameterGroupElement;
                 return parameterGroup;
             }
         }
@@ -176,50 +153,32 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Location of the task name attribute
         /// </summary>
-        public ElementLocation TaskNameLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.taskName); }
-        }
+        public ElementLocation TaskNameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.taskName);
 
         /// <summary>
         /// Location of the assembly file attribute, if any
         /// </summary>
-        public ElementLocation AssemblyFileLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.assemblyFile); }
-        }
+        public ElementLocation AssemblyFileLocation => XmlElement.GetAttributeLocation(XMakeAttributes.assemblyFile);
 
         /// <summary>
         /// Location of the assembly name attribute, if any
         /// </summary>
-        public ElementLocation AssemblyNameLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.assemblyName); }
-        }
+        public ElementLocation AssemblyNameLocation => XmlElement.GetAttributeLocation(XMakeAttributes.assemblyName);
 
         /// <summary>
         /// Location of the Runtime attribute, if any
         /// </summary>
-        public ElementLocation RuntimeLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.runtime); }
-        }
+        public ElementLocation RuntimeLocation => XmlElement.GetAttributeLocation(XMakeAttributes.runtime);
 
         /// <summary>
         /// Location of the Architecture attribute, if any
         /// </summary>
-        public ElementLocation ArchitectureLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.architecture); }
-        }
+        public ElementLocation ArchitectureLocation => XmlElement.GetAttributeLocation(XMakeAttributes.architecture);
 
         /// <summary>
         /// Location of the TaskFactory attribute, if any
         /// </summary>
-        public ElementLocation TaskFactoryLocation
-        {
-            get { return XmlElement.GetAttributeLocation(XMakeAttributes.taskFactory); }
-        }
+        public ElementLocation TaskFactoryLocation => XmlElement.GetAttributeLocation(XMakeAttributes.taskFactory);
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:
@@ -251,22 +210,21 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectUsingTaskElement CreateDisconnected(string taskName, string assemblyFile, string assemblyName, string runtime, string architecture, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgument
-            (
-            (String.IsNullOrEmpty(assemblyFile) ^ String.IsNullOrEmpty(assemblyName)),
-            "OM_EitherAttributeButNotBoth",
-            XMakeElements.usingTask,
-            XMakeAttributes.assemblyFile,
-            XMakeAttributes.assemblyName
-            );
+            ErrorUtilities.VerifyThrowArgument(
+                (String.IsNullOrEmpty(assemblyFile) ^ String.IsNullOrEmpty(assemblyName)),
+                "OM_EitherAttributeButNotBoth",
+                XMakeElements.usingTask,
+                XMakeAttributes.assemblyFile,
+                XMakeAttributes.assemblyName);
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.usingTask);
 
-            ProjectUsingTaskElement usingTask = new ProjectUsingTaskElement(element, containingProject);
-
-            usingTask.TaskName = taskName;
-            usingTask.Runtime = runtime;
-            usingTask.Architecture = architecture;
+            var usingTask = new ProjectUsingTaskElement(element, containingProject)
+            {
+                TaskName = taskName,
+                Runtime = runtime,
+                Architecture = architecture
+            };
 
             if (!String.IsNullOrEmpty(assemblyFile))
             {
@@ -292,7 +250,7 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc />
         protected override ProjectElement CreateNewInstance(ProjectRootElement owner)
         {
-            return owner.CreateUsingTaskElement(this.TaskName, this.AssemblyFile, this.AssemblyName, this.Runtime, this.Architecture);
+            return owner.CreateUsingTaskElement(TaskName, AssemblyFile, AssemblyName, Runtime, Architecture);
         }
     }
 }

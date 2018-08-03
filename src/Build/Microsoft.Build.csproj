@@ -1,4 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="RoslynTools.RepoToolset">
+
+  <Import Project="..\Shared\FileSystemSources.proj" />
+
   <PropertyGroup>
     <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
          in .NETStandard. -->
@@ -11,8 +14,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);BUILD_ENGINE</DefineConstants>
 
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <EnableDefaultItems>false</EnableDefaultItems>
 
     <!-- Generate API only for the more limited .NET Core/Standard flavor. -->
     <GenerateReferenceAssemblySources Condition="'$(TargetFramework)' != 'netcoreapp2.1'">true</GenerateReferenceAssemblySources>
@@ -28,11 +30,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
 
-    <PackageReference Include="System.Collections.Immutable" Version="1.3.1" />
+    <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
 
-    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" Condition="'$(MonoBuild)' == 'true'" />
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -44,13 +46,14 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.0.0" />
-    <PackageReference Include="System.IO.Pipes.AccessControl" Version="4.3.0" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
-    <PackageReference Include="System.Reflection.Metadata" Version="1.3.0" />
+    <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.1.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.0.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.0.1" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.6.0" />
+    <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
+    <PackageReference Include="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryVersion)" />
   </ItemGroup>
 
   <!-- This item group is for classes that exist in .NET Framework but not in .NET Core.
@@ -94,9 +97,6 @@
     </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.GetFolderPath.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-      <Link>SharedUtilities\FileUtilities.GetFolderPath.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
@@ -241,12 +241,14 @@
     <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverContext.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverLoader.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverManifest.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverRequest.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\MainNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\HostedSdkResolverServiceBase.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResult.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResultFactory.cs" />
+    <Compile Include="BackEnd\Node\LoggingNodeConfiguration.cs" />
     <Compile Include="BackEnd\Shared\ConfigurationMetadata.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
@@ -378,7 +380,6 @@
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\IDeepCloneable.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
-    <Compile Include="Collections\FilteringEnumerable.cs" />
     <Compile Include="Collections\HashTableUtility.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -389,9 +390,7 @@
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
-    <Compile Include="Collections\Triple.cs" />
     <!-- ######################## -->
-    <Compile Include="Collections\WeakReference.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />

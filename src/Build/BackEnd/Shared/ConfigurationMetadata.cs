@@ -1,13 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class used for efficiently indexing BuildRequestConfigurations in the cache.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -26,7 +21,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ConfigurationMetadata(BuildRequestConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configuration, "configuration");
+            ErrorUtilities.VerifyThrowArgumentNull(configuration, nameof(configuration));
             GlobalProperties = new PropertyDictionary<ProjectPropertyInstance>(configuration.GlobalProperties);
             ProjectFullPath = FileUtilities.NormalizePath(configuration.ProjectFullPath);
             ToolsVersion = configuration.ToolsVersion;
@@ -37,11 +32,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ConfigurationMetadata(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, "project");
+            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
             GlobalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
             foreach (KeyValuePair<string, string> entry in project.GlobalProperties)
             {
-                this.GlobalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
+                GlobalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
             }
 
             ToolsVersion = project.ToolsVersion;
@@ -51,11 +46,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The full path to the project to build.
         /// </summary>
-        public string ProjectFullPath
-        {
-            get;
-            private set;
-        }
+        public string ProjectFullPath { get; }
 
         /// <summary>
         /// The tools version specified for the configuration.
@@ -63,20 +54,12 @@ namespace Microsoft.Build.BackEnd
         /// May have originated from a /tv switch, or an MSBuild task,
         /// or a Project tag, or the default.
         /// </summary>
-        public string ToolsVersion
-        {
-            get;
-            private set;
-        }
+        public string ToolsVersion { get; }
 
         /// <summary>
         /// The set of global properties which should be used when building this project.
         /// </summary>
-        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties
-        {
-            get;
-            private set;
-        }
+        public PropertyDictionary<ProjectPropertyInstance> GlobalProperties { get; }
 
         /// <summary>
         /// This override is used to provide a hash code for storage in dictionaries and the like.
@@ -99,12 +82,12 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if they contain the same data, false otherwise</returns>
         public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(obj, null))
+            if (ReferenceEquals(obj, null))
             {
                 return false;
             }
 
-            if (this.GetType() != obj.GetType())
+            if (GetType() != obj.GetType())
             {
                 return false;
             }
@@ -121,7 +104,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if equal, false otherwise.</returns>
         public bool Equals(ConfigurationMetadata other)
         {
-            if (Object.ReferenceEquals(other, null))
+            if (ReferenceEquals(other, null))
             {
                 return false;
             }
@@ -138,7 +121,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the objects contain the same data, false otherwise.</returns>
         private bool InternalEquals(ConfigurationMetadata other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }

@@ -1,6 +1,7 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Build.BuildEngine
 {
-    [System.Diagnostics.DebuggerDisplayAttribute("BuildItem (Name = { Name }, Include = { Include }, FinalItemSpec = { FinalItemSpec }, Condition = { Condition } )")]
     public partial class BuildItem
     {
         public BuildItem(string itemName, Microsoft.Build.Framework.ITaskItem taskItem) { }
@@ -24,7 +25,6 @@ namespace Microsoft.Build.BuildEngine
         public void SetMetadata(string metadataName, string metadataValue) { }
         public void SetMetadata(string metadataName, string metadataValue, bool treatMetadataValueAsLiteral) { }
     }
-    [System.Diagnostics.DebuggerDisplayAttribute("BuildItemGroup (Count = { Count }, Condition = { Condition })")]
     public partial class BuildItemGroup : System.Collections.IEnumerable
     {
         public BuildItemGroup() { }
@@ -50,7 +50,6 @@ namespace Microsoft.Build.BuildEngine
         public void CopyTo(System.Array array, int index) { }
         public System.Collections.IEnumerator GetEnumerator() { throw null; }
     }
-    [System.Diagnostics.DebuggerDisplayAttribute("BuildProperty (Name = { Name }, Value = { Value }, FinalValue = { FinalValue }, Condition = { Condition })")]
     public partial class BuildProperty
     {
         public BuildProperty(string propertyName, string propertyValue) { }
@@ -63,7 +62,6 @@ namespace Microsoft.Build.BuildEngine
         public static explicit operator string (Microsoft.Build.BuildEngine.BuildProperty propertyToCast) { throw null; }
         public override string ToString() { throw null; }
     }
-    [System.Diagnostics.DebuggerDisplayAttribute("BuildPropertyGroup (Count = { Count }, Condition = { Condition })")]
     public partial class BuildPropertyGroup : System.Collections.IEnumerable
     {
         public BuildPropertyGroup() { }
@@ -387,7 +385,6 @@ namespace Microsoft.Build.BuildEngine
     {
         public static string Generate(string solutionPath, string toolsVersionOverride, Microsoft.Build.Framework.BuildEventContext projectBuildEventContext) { throw null; }
     }
-    [System.Diagnostics.DebuggerDisplayAttribute("Target (Name = { Name }, Condition = { Condition })")]
     public partial class Target : System.Collections.IEnumerable
     {
         internal Target() { }

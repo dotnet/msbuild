@@ -1,10 +1,15 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -42,8 +47,6 @@ namespace Microsoft.Build.UnitTests
             {
                 env.WithInvariant(new BuildFailureLogInvariant());
             }
-
-            env.SetEnvironmentVariable("MSBUILDRELOADTRAITSONEACHACCESS", "1");
 
             return env;
         }
@@ -160,7 +163,7 @@ namespace Microsoft.Build.UnitTests
         public TransientTempPath CreateNewTempPath()
         {
             var folder = CreateFolder();
-            return SetTempPath(folder.FolderPath, true);
+            return SetTempPath(folder.Path, true);
         }
 
         /// <summary>
@@ -194,10 +197,7 @@ namespace Microsoft.Build.UnitTests
 
         public TransientTestFile CreateFile(TransientTestFolder transientTestFolder, string fileName, string contents = "")
         {
-            var file = WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, Path.GetFileNameWithoutExtension(fileName), Path.GetExtension(fileName)));
-            File.WriteAllText(file.Path, contents);
-
-            return file;
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, fileName, contents));
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension,
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension,
                 createFile: true, expectedAsOutput: false));
         }
 
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         public TransientTestFile GetTempFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension,
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension,
                 createFile: false, expectedAsOutput: false));
         }
 
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.FolderPath, extension, createFile: false, expectedAsOutput: true));
+            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension, createFile: false, expectedAsOutput: true));
         }
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests
         {
             var folder = WithTransientTestState(new TransientTestFolder(folderPath, createFolder));
 
-            Assert.True(!(createFolder ^ Directory.Exists(folder.FolderPath)));
+            Assert.True(!(createFolder ^ FileSystems.Default.DirectoryExists(folder.Path)));
 
             return folder;
         }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests
 
     public class EnvironmentInvariant : TestInvariant
     {
-        private IDictionary _initialEnvironment;
+        private readonly IDictionary _initialEnvironment;
 
         public EnvironmentInvariant()
         {
@@ -393,7 +393,7 @@ namespace Microsoft.Build.UnitTests
             int newFilesCount = newFiles.Length;
             if (newFilesCount > _originalFiles.Length)
             {
-                foreach (var file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
+                foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
                 {
                     string contents = File.ReadAllText(file.FullName);
 
@@ -517,11 +517,11 @@ namespace Microsoft.Build.UnitTests
             Path = FileUtilities.GetTemporaryFile(rootPath, extension, createFile);
         }
 
-        public TransientTestFile(string rootPath, string fileNameWithoutExtension, string extension)
+        public TransientTestFile(string rootPath, string fileName, string contents = null)
         {
-            Path = System.IO.Path.Combine(rootPath, fileNameWithoutExtension + extension);
+            Path = System.IO.Path.Combine(rootPath, fileName);
 
-            File.WriteAllText(Path, string.Empty);
+            File.WriteAllText(Path, contents ?? string.Empty);
         }
 
         public string Path { get; }
@@ -532,7 +532,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (_expectedAsOutput)
                 {
-                    Assert.True(File.Exists(Path), $"A file expected as an output does not exist: {Path}");
+                    Assert.True(FileSystems.Default.FileExists(Path), $"A file expected as an output does not exist: {Path}");
                 }
             }
             finally
@@ -540,34 +540,49 @@ namespace Microsoft.Build.UnitTests
                 FileUtilities.DeleteNoThrow(Path);
             }
         }
+
+        public void Delete()
+        {
+            File.Delete(Path);
+        }
     }
 
     public class TransientTestFolder : TransientTestState
     {
         public TransientTestFolder(string folderPath = null, bool createFolder = true)
         {
-            FolderPath = folderPath ?? FileUtilities.GetTemporaryDirectory(createFolder);
+            Path = folderPath ?? FileUtilities.GetTemporaryDirectory(createFolder);
 
             if (createFolder)
             {
-                Directory.CreateDirectory(FolderPath);
+                Directory.CreateDirectory(Path);
             }
         }
 
-        public string FolderPath { get; }
+        public TransientTestFolder CreateDirectory(string directoryName)
+        {
+            return new TransientTestFolder(System.IO.Path.Combine(Path, directoryName));
+        }
+
+        public TransientTestFile CreateFile(string fileName, string contents = null)
+        {
+            return new TransientTestFile(Path, fileName, contents);
+        }
+
+        public string Path { get; }
 
         public override void Revert()
         {
             // Basic checks to make sure we're not deleting something very obviously wrong (e.g.
             // the entire temp drive).
-            Assert.NotNull(FolderPath);
-            Assert.NotEqual(string.Empty, FolderPath);
-            Assert.NotEqual(@"\", FolderPath);
-            Assert.NotEqual(@"/", FolderPath);
-            Assert.NotEqual(Path.GetFullPath(Path.GetTempPath()), Path.GetFullPath(FolderPath));
-            Assert.True(Path.IsPathRooted(FolderPath));
+            Assert.NotNull(Path);
+            Assert.NotEqual(string.Empty, Path);
+            Assert.NotEqual(@"\", Path);
+            Assert.NotEqual(@"/", Path);
+            Assert.NotEqual(System.IO.Path.GetFullPath(System.IO.Path.GetTempPath()), System.IO.Path.GetFullPath(Path));
+            Assert.True(System.IO.Path.IsPathRooted(Path));
 
-            FileUtilities.DeleteDirectoryNoThrow(FolderPath, true);
+            FileUtilities.DeleteDirectoryNoThrow(Path, true);
         }
     }
 
@@ -603,6 +618,34 @@ namespace Microsoft.Build.UnitTests
         public override void Revert()
         {
             Directory.SetCurrentDirectory(_originalValue);
+        }
+    }
+
+    public class TransientZipArchive : TransientTestState
+    {
+        private TransientZipArchive()
+        {
+        }
+
+        public string Path { get; set; }
+
+        public static TransientZipArchive Create(TransientTestFolder source, TransientTestFolder destination, string filename = "test.zip")
+        {
+            Directory.CreateDirectory(destination.Path);
+
+            string path = System.IO.Path.Combine(destination.Path, filename);
+
+            ZipFile.CreateFromDirectory(source.Path, path);
+
+            return new TransientZipArchive
+            {
+                Path = path
+            };
+        }
+
+        public override void Revert()
+        {
+            FileUtilities.DeleteNoThrow(Path);
         }
     }
 }

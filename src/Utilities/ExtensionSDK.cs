@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Internal representation of the extension SDK</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -18,12 +14,12 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Path to the platform sdk may be null if not a platform sdk.
         /// </summary>
-        private string _path;
+        private readonly string _path;
 
         /// <summary>
         /// Extension SDK moniker
         /// </summary>
-        private string _sdkMoniker;
+        private readonly string _sdkMoniker;
 
         /// <summary>
         /// SDK version
@@ -38,17 +34,17 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Object containing the properties in the SDK manifest
         /// </summary>
-        private SDKManifest _manifest = null;
+        private SDKManifest _manifest;
 
         /// <summary>
         /// Caches minimum Visual Studio version from the manifest
         /// </summary>
-        private Version _minVSVersion = null;
+        private Version _minVSVersion;
 
         /// <summary>
         /// Caches max platform version from the manifest
         /// </summary>
-        private Version _maxPlatformVersion = null;
+        private Version _maxPlatformVersion;
 
         /// <summary>
         /// Constructor
@@ -94,13 +90,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// The type of the SDK.
         /// </summary>
-        public SDKType SDKType
-        {
-            get
-            {
-                return Manifest.SDKType;
-            }
-        }
+        public SDKType SDKType => Manifest.SDKType;
 
         /// <summary>
         /// Minimum Visual Studio version from SDKManifest.xml
@@ -143,36 +133,19 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Api contracts from the SDKManifest, if any
         /// </summary>
-        public ICollection<ApiContract> ApiContracts
-        {
-            get
-            {
-                return Manifest.ApiContracts;
-            }
-        }
+        public ICollection<ApiContract> ApiContracts => Manifest.ApiContracts;
 
         /// <summary>
         /// Reference to the manifest object
         /// Makes sure manifest is instantiated only once
         /// </summary>
-        private SDKManifest Manifest
-        {
-            get
-            {
-                if (_manifest == null)
-                {
-                    // Load manifest from disk the first time it is needed
-                    _manifest = new SDKManifest(_path);
-                }
-
-                return _manifest;
-            }
-        }
+        /// <remarks>Load manifest from disk the first time it is needed</remarks>
+        private SDKManifest Manifest => _manifest ?? (_manifest = new SDKManifest(_path));
 
         /// <summary>
         /// Parse SDK moniker
         /// </summary>
-        internal void ParseMoniker(string moniker)
+        private void ParseMoniker(string moniker)
         {
             string[] properties = moniker.Split(',');
 
@@ -182,8 +155,7 @@ namespace Microsoft.Build.Utilities
 
                 if (words[0].Trim().StartsWith("Version", StringComparison.OrdinalIgnoreCase))
                 {
-                    Version ver = null;
-                    if (words.Length > 1 && System.Version.TryParse(words[1], out ver))
+                    if (words.Length > 1 && Version.TryParse(words[1], out Version ver))
                     {
                         _sdkVersion = ver;
                     }

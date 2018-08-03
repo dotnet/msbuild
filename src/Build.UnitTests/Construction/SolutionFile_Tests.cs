@@ -708,11 +708,11 @@ namespace Microsoft.Build.UnitTests.Construction
             using (var env = TestEnvironment.Create())
             {
                 var solutionFolder = env.CreateFolder(Path.Combine(FileUtilities.GetTemporaryDirectory(), "sln"));
-                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.FolderPath, "RelativePath"));
+                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
 
                 SolutionFile p = new SolutionFile();
-                p.FullPath = Path.Combine(solutionFolder.FolderPath, "RelativePath", "project file");
-                p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.FolderPath);
+                p.FullPath = Path.Combine(solutionFolder.Path, "RelativePath", "project file");
+                p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.Path);
                 ProjectInSolution proj = new ProjectInSolution(p);
 
                 p.ParseFirstProjectLine
@@ -1466,7 +1466,7 @@ EndGlobal
             Assert.Equal("", releaseAspNetCompilerParameters.aspNetAPTCA);
             Assert.Equal("", releaseAspNetCompilerParameters.aspNetFixedNames);
 
-            ArrayList aspNetProjectReferences = solution.ProjectsInOrder[0].ProjectReferences;
+            List<string> aspNetProjectReferences = solution.ProjectsInOrder[0].ProjectReferences;
             Assert.Equal(2, aspNetProjectReferences.Count);
             Assert.Equal("{FD705688-88D1-4C22-9BFF-86235D89C2FC}", aspNetProjectReferences[0]);
             Assert.Equal("{F0726D09-042B-4A7A-8A01-6BED2422BD5D}", aspNetProjectReferences[1]);

@@ -1,15 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//-----------------------------------------------------------------------
-// <copyright file="AddNewImport_Tests.cs" company="Microsoft">
-//     Copyright (c) Microsoft Corporation.  All rights reserved.
-// </copyright>
-// <summary>
-//  Baseline Regression Tests for v9 OM Public Interface Compatibility: 
-//  Common Tests for Project.AddNewImport and ImportCollection.AddNewImport
-// </summary>
-//-----------------------------------------------------------------------
 using System;
 using System.Collections.Generic;
 using System.Text;

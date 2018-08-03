@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Represents a project configuration (e.g. "Debug|x86")</summary>
-//-----------------------------------------------------------------------
 
 using System;
 
@@ -14,68 +10,37 @@ namespace Microsoft.Build.Construction
     /// </summary>
     public sealed class ProjectConfigurationInSolution
     {
-        /// <summary>
-        /// The configuration part of this configuration - e.g. "Debug", "Release"
-        /// </summary>
-        private string _configurationName;
-
-        /// <summary>
-        /// The platform part of this configuration - e.g. "Any CPU", "Win32"
-        /// </summary>
-        private string _platformName;
-
-        /// <summary>
-        /// The full name of this configuration - e.g. "Debug|Any CPU"
-        /// </summary>
-        private string _fullName;
-
-        /// <summary>
-        /// True if this project configuration should be built as part of its parent solution configuration
-        /// </summary>
-        private bool _includeInBuild;
 
         /// <summary>
         /// Constructor
         /// </summary>
         internal ProjectConfigurationInSolution(string configurationName, string platformName, bool includeInBuild)
         {
-            _configurationName = configurationName;
-            _platformName = RemoveSpaceFromAnyCpuPlatform(platformName);
-            _includeInBuild = includeInBuild;
-            _fullName = SolutionConfigurationInSolution.ComputeFullName(_configurationName, _platformName);
+            ConfigurationName = configurationName;
+            PlatformName = RemoveSpaceFromAnyCpuPlatform(platformName);
+            IncludeInBuild = includeInBuild;
+            FullName = SolutionConfigurationInSolution.ComputeFullName(ConfigurationName, PlatformName);
         }
 
         /// <summary>
         /// The configuration part of this configuration - e.g. "Debug", "Release"
         /// </summary>
-        public string ConfigurationName
-        {
-            get { return _configurationName; }
-        }
+        public string ConfigurationName { get; }
 
         /// <summary>
         /// The platform part of this configuration - e.g. "Any CPU", "Win32"
         /// </summary>
-        public string PlatformName
-        {
-            get { return _platformName; }
-        }
+        public string PlatformName { get; }
 
         /// <summary>
         /// The full name of this configuration - e.g. "Debug|Any CPU"
         /// </summary>
-        public string FullName
-        {
-            get { return _fullName; }
-        }
+        public string FullName { get; }
 
         /// <summary>
         /// True if this project configuration should be built as part of its parent solution configuration
         /// </summary>
-        public bool IncludeInBuild
-        {
-            get { return _includeInBuild; }
-        }
+        public bool IncludeInBuild { get; }
 
         /// <summary>
         /// This is a hacky method to remove the space in the "Any CPU" platform in project configurations.
@@ -85,7 +50,7 @@ namespace Microsoft.Build.Construction
         /// they have no clue what we're talking about. We need to remove the space in project platforms so that
         /// the platform name matches the one used in projects.
         /// </summary>
-        static private string RemoveSpaceFromAnyCpuPlatform(string platformName)
+        private static string RemoveSpaceFromAnyCpuPlatform(string platformName)
         {
             if (string.Compare(platformName, "Any CPU", StringComparison.OrdinalIgnoreCase) == 0)
             {
