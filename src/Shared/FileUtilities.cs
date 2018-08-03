@@ -371,13 +371,16 @@ namespace Microsoft.Build.Shared
             }
 
             // For Unix-like systems, we may want to convert backslashes to slashes
+#if FEATURE_SPAN
+            Span<char> newValue = ConvertToUnixSlashes(value.ToCharArray());
+#else
             string newValue = ConvertToUnixSlashes(value);
+#endif
 
             // Find the part of the name we want to check, that is remove quotes, if present
             bool shouldAdjust = newValue.IndexOf('/') != -1 && LooksLikeUnixFilePath(RemoveQuotes(newValue), baseDirectory);
-            return shouldAdjust ? newValue : value;
+            return shouldAdjust ? newValue.ToString() : value;
         }
-
 
         private static string ConvertToUnixSlashes(string path)
         {
@@ -390,7 +393,7 @@ namespace Microsoft.Build.Shared
             return StringBuilderCache.GetStringAndRelease(unixPath);
         }
 
-#if !CLR2COMPATIBILITY
+#if !CLR2COMPATIBILITY && !FEATURE_SPAN
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         private static void CopyAndCollapseSlashes(string str, StringBuilder copy)
@@ -420,6 +423,47 @@ namespace Microsoft.Build.Shared
 
             return hasQuotes ? path.Substring(1, endId - 1) : path;
         }
+
+#if FEATURE_SPAN
+        private static Span<char> ConvertToUnixSlashes(Span<char> path)
+        {
+            return path.IndexOf('\\') == -1 ? path : CollapseSlashes(path);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Span<char> CollapseSlashes(Span<char> str)
+        {
+            int sliceLength = 0;
+
+            // Performs Regex.Replace(str, @"[\\/]+", "/")
+            for (int i = 0; i < str.Length; i++)
+            {
+                bool isCurSlash = IsAnySlash(str[i]);
+                bool isPrevSlash = i > 0 && IsAnySlash(str[i - 1]);
+
+                if (!isCurSlash || !isPrevSlash)
+                {
+                    str[sliceLength] = str[i] == '\\' ? '/' : str[i];
+                    sliceLength++;
+                }
+            }
+
+            return str.Slice(0, sliceLength);
+        }
+
+        private static Span<char> RemoveQuotes(Span<char> path)
+        {
+            int endId = path.Length - 1;
+            char singleQuote = '\'';
+            char doubleQuote = '\"';
+
+            bool hasQuotes = path.Length > 2
+                && (path[0] == singleQuote && path[endId] == singleQuote
+                || path[0] == doubleQuote && path[endId] == doubleQuote);
+
+            return hasQuotes ? path.Slice(1, endId - 1) : path;
+        }
+#endif
 
 #if !CLR2COMPATIBILITY
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -451,6 +495,27 @@ namespace Microsoft.Build.Shared
             return shouldCheckDirectory && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, value.Substring(0, directoryLength)))
                 || shouldCheckFileOrDirectory && DefaultFileSystem.DirectoryEntryExists(value);
         }
+
+#if FEATURE_SPAN
+        internal static bool LooksLikeUnixFilePath(ReadOnlySpan<char> value, string baseDirectory = "")
+        {
+            if (Path.DirectorySeparatorChar == '\\')
+            {
+                return false;
+            }
+
+            // The first slash will either be at the beginning of the string or after the first directory name
+            int directoryLength = value.Slice(1).IndexOf('/') + 1;
+            bool shouldCheckDirectory = directoryLength != 0;
+
+            // Check for actual files or directories under / that get missed by the above logic
+            bool shouldCheckFileOrDirectory = !shouldCheckDirectory && value.Length > 0 && value[0] == '/';
+            ReadOnlySpan<char> directory = value.Slice(0, directoryLength);
+
+            return shouldCheckDirectory && DefaultFileSystem.DirectoryExists(Path.Combine(baseDirectory, directory.ToString()))
+                || shouldCheckFileOrDirectory && DefaultFileSystem.DirectoryEntryExists(value.ToString());
+        }
+#endif
 
         /// <summary>
         /// Extracts the directory from the given file-spec.
