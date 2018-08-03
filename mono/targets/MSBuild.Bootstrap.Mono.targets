@@ -47,6 +47,7 @@
 
 		<!-- Copy to the MSBuildExtensionsPath for bootstrap -->
 		<Copy
+			Condition="'$(CreateBootstrap)' == 'true'"
 			SourceFiles="$(OutDir)\Mono.Build.Tasks.dll"
 			DestinationFolder="$(BootstrapDestination)" />
 	</Target>
