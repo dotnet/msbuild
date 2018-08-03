@@ -131,12 +131,10 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                     TimeSpan.Zero))
                 {
                     package = toolPackageInstaller.InstallPackage(
+                        new PackageLocation(nugetConfig: configFile, additionalFeeds: _source),
                         packageId: _packageId,
                         versionRange: versionRange,
-                        targetFramework: _framework,
-                        nugetConfig: configFile,
-                        additionalFeeds: _source,
-                        verbosity: _verbosity);
+                        targetFramework: _framework, verbosity: _verbosity);
 
                     foreach (var command in package.Commands)
                     {

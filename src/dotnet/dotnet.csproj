@@ -74,14 +74,11 @@
     <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
     <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
   </ItemGroup>
-
   <ItemGroup>
     <Folder Include="commands\dotnet-migrate\xlf" />
     <Folder Include="dotnet-complete\commands\" />
   </ItemGroup>
-
 </Project>

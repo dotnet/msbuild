@@ -27,16 +27,16 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         }
 
         public void Restore(FilePath project,
-            FilePath? nugetConfig = null,
+            PackageLocation packageLocation,
             string verbosity = null)
         {
             var argsToPassToRestore = new List<string>();
 
             argsToPassToRestore.Add(project.Value);
-            if (nugetConfig != null)
+            if (packageLocation.NugetConfig != null)
             {
                 argsToPassToRestore.Add("--configfile");
-                argsToPassToRestore.Add(nugetConfig.Value.Value);
+                argsToPassToRestore.Add(packageLocation.NugetConfig.Value.Value);
             }
 
             argsToPassToRestore.AddRange(new List<string>
