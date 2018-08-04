@@ -363,7 +363,7 @@ namespace Microsoft.Build.Shared
 
             // Don't bother with arrays or properties or network paths, or those that
             // have no slashes.
-            if (Path.DirectorySeparatorChar == '\\' || string.IsNullOrEmpty(value)
+            if (NativeMethodsShared.IsWindows || string.IsNullOrEmpty(value)
                 || value.StartsWith("$(", comparisonType) || value.StartsWith("@(", comparisonType)
                 || value.StartsWith("\\\\", comparisonType))
             {
@@ -480,7 +480,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool LooksLikeUnixFilePath(string value, string baseDirectory = "")
         {
-            if (Path.DirectorySeparatorChar == '\\')
+            if (NativeMethodsShared.IsWindows)
             {
                 return false;
             }
@@ -499,7 +499,7 @@ namespace Microsoft.Build.Shared
 #if FEATURE_SPAN
         internal static bool LooksLikeUnixFilePath(ReadOnlySpan<char> value, string baseDirectory = "")
         {
-            if (Path.DirectorySeparatorChar == '\\')
+            if (NativeMethodsShared.IsWindows)
             {
                 return false;
             }

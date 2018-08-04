@@ -597,6 +597,10 @@ namespace Microsoft.Build.Shared
             }
         }
 
+#if !CLR2COMPATIBILITY
+        private static bool? _isWindows = false;
+#endif
+
         /// <summary>
         /// Gets a flag indicating if we are running under some version of Windows
         /// </summary>
@@ -605,7 +609,13 @@ namespace Microsoft.Build.Shared
 #if CLR2COMPATIBILITY
             get { return true; }
 #else
-            get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); }
+            get {
+                if (_isWindows == null)
+                {
+                    _isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+                }
+                return _isWindows.Value;
+            }
 #endif
         }
 
@@ -1598,6 +1608,6 @@ namespace Microsoft.Build.Shared
             return GetFileAttributesEx(path, 0, ref data);
         }
 
-        #endregion
+#endregion
     }
 }
