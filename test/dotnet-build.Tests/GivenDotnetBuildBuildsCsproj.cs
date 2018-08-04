@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             string dir = "pkgs";
             string args = $"--packages {dir}";
 
-            string newArgs = $"console -f netcoreapp2.1 -o \"{rootPath}\" --debug:ephemeral-hive --no-restore";
+            string newArgs = $"console -f netcoreapp2.2 -o \"{rootPath}\" --debug:ephemeral-hive --no-restore";
             new NewCommandShim()
                 .WithWorkingDirectory(rootPath)
                 .Execute(newArgs)
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputDll = Directory.EnumerateFiles(
-                Path.Combine(rootPath, "bin", configuration, "netcoreapp2.1"), "*.dll", 
+                Path.Combine(rootPath, "bin", configuration, "netcoreapp2.2"), "*.dll", 
                 SearchOption.TopDirectoryOnly)
                 .Single();
 
