@@ -3,10 +3,10 @@
   <!-- Generate MSI/Bundle Properties -->
   <PropertyGroup>
     <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
-    <SdkMSBuildExtensionsNuspecFile>$(RepoRoot)/packaging/windows/msbuildextensions/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.nuspec</SdkMSBuildExtensionsNuspecFile>
-    <SdkMSBuildExtensionsNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(FullNugetVersion).nupkg</SdkMSBuildExtensionsNupkgFile>
-    <SdkMSBuildExtensionsSwrFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.swr</SdkMSBuildExtensionsSwrFile>
-    <SdkGenerateNupkgPowershellScript>$(RepoRoot)/packaging/windows/msbuildextensions/generatenupkg.ps1</SdkGenerateNupkgPowershellScript>
+    <SdkMSBuildExtensionsNuspecFile>$([MSBuild]::NormalizePath($(RepoRoot)/packaging/windows/msbuildextensions/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.nuspec))</SdkMSBuildExtensionsNuspecFile>
+    <SdkMSBuildExtensionsNupkgFile>$([MSBuild]::NormalizePath($(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(FullNugetVersion).nupkg))</SdkMSBuildExtensionsNupkgFile>
+    <SdkMSBuildExtensionsSwrFile>$([MSBuild]::NormalizePath($(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.swr))</SdkMSBuildExtensionsSwrFile>
+    <SdkGenerateNupkgPowershellScript>$([MSBuild]::NormalizePath($(RepoRoot)/packaging/windows/msbuildextensions/generatenupkg.ps1))</SdkGenerateNupkgPowershellScript>
   </PropertyGroup>
 
   <Target Name="GenerateSdkMSBuildExtensionsNupkg"
@@ -16,11 +16,11 @@
                     $(SdkGenerateNupkgPowershellScript)"
           Outputs="$(SdkMSBuildExtensionsNupkgFile);$(SdkMSBuildExtensionsSwrFile)">
 
-    <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
-                      '$(MSBuildExtensionsLayoutDirectory)'
-                      '$(FullNugetVersion)'
-                      '$(SdkMSBuildExtensionsNuspecFile)'
-                      '$(SdkMSBuildExtensionsNupkgFile)'" />
+    <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
+                      &quot;$(MSBuildExtensionsLayoutDirectory)&quot; ^
+                      &quot;$(FullNugetVersion)&quot; ^
+                      &quot;$(SdkMSBuildExtensionsNuspecFile)&quot; ^
+                      &quot;$(SdkMSBuildExtensionsNupkgFile)&quot;" />
 
     <GenerateMSBuildExtensionsSWR MSBuildExtensionsLayoutDirectory="$(MSBuildExtensionsLayoutDirectory)"
                                     OutputFile="$(SdkMSBuildExtensionsSwrFile)"/>
