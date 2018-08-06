@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
         public void ItCreatesTwoCoverageFilesForMultiTargetedProject()
         {
             // Copy XunitMulti project in output directory of project dotnet-test.Tests

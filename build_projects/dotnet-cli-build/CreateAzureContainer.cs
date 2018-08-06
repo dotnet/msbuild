@@ -105,11 +105,11 @@ namespace Microsoft.DotNet.Build.CloudTestTasks
                             "PUT",
                             dt,
                             req));
-                    byte[] bytestoWrite = new byte[0];
+                    byte[] bytesToWrite = new byte[0];
                     int bytesToWriteLength = 0;
 
                     Stream postStream = new MemoryStream();
-                    postStream.Write(bytestoWrite, 0, bytesToWriteLength);
+                    postStream.Write(bytesToWrite, 0, bytesToWriteLength);
                     req.Content = new StreamContent(postStream);
 
                     return req;

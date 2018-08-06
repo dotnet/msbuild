@@ -10,6 +10,7 @@
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
+    <PackageId>Microsoft.DotNet.Cli</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
@@ -76,7 +77,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
-    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(AspNetCoreVersion)" />
   </ItemGroup>
 
   <ItemGroup>
