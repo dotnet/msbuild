@@ -155,7 +155,7 @@
       </trans-unit>
       <trans-unit id="Save">
         <source>Save</source>
-        <target state="translated">[保存]</target>
+        <target state="translated">保存</target>
         <note />
       </trans-unit>
       <trans-unit id="Find">
@@ -375,7 +375,7 @@
       </trans-unit>
       <trans-unit id="FoundMoreThanOneSolutionIn">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">{0} に複数のソリューションが見つかりました。使用するプロジェクトを指定してください。</target>
+        <target state="translated">{0} に複数のソリューションが見つかりました。どれを使用するか指定してください。</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundInvalidSolution">
@@ -555,7 +555,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">プロジェクト {1} 内に {0} 参照がありません。;; {0} は要求中のアイテムの種類であり (プロジェクト、パッケージ、p2p)、{1} は (プロジェクト ファイルまたはソリューション ファイル) で操作されるオブジェクトです。 </target>
+        <target state="translated">プロジェクト {1} 内に {0} 参照がありません。;; {0} は要求中のアイテムの種類であり (プロジェクト、パッケージ、p2p)、{1} は操作されるオブジェクト (プロジェクト ファイルまたはソリューション ファイル) です。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">

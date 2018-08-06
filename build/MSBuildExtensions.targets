@@ -137,7 +137,7 @@
         So that we don't need to manually update the version selection logic between when we ship a final release and when we ship the first patch
       -->
     <GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion
-      BundledNETCoreAppPackageVersion="$(BundledNETCoreAppPackageVersion)">
+      BundledNETCoreAppPackageVersion="$(_NETCoreAppPackageVersion)">
       <Output TaskParameter="UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion"
               PropertyName="_UseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion" />
     </GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion>
@@ -196,6 +196,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <LatestPatchVersionForNetCore1_0 Condition="'%24(LatestPatchVersionForNetCore1_0)' == ''">1.0.12</LatestPatchVersionForNetCore1_0>
     <LatestPatchVersionForNetCore1_1 Condition="'%24(LatestPatchVersionForNetCore1_1)' == ''">1.1.9</LatestPatchVersionForNetCore1_1>
     <LatestPatchVersionForNetCore2_0 Condition="'%24(LatestPatchVersionForNetCore2_0)' == ''">2.0.9</LatestPatchVersionForNetCore2_0>
+    <LatestPatchVersionForNetCore2_1 Condition="'%24(LatestPatchVersionForNetCore2_1)' == ''">2.1.2</LatestPatchVersionForNetCore2_1>
   </PropertyGroup>
 </Project>
 ]]>
