@@ -1495,31 +1495,15 @@ namespace Microsoft.Build.Utilities
             {
                 if (!_terminatedTool)
                 {
-                    LogPrivate.LogErrorWithCodeFromResources("General.InvalidToolSwitch", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
+                    LogPrivate.LogErrorWithCodeFromResources("General.InvalidToolSwitch", ToolExe, e.ToString());
                 }
                 return false;
             }
-            catch (Win32Exception e)
+            catch (Exception e) when (e is Win32Exception || e is IOException || e is UnauthorizedAccessException)
             {
                 if (!_terminatedTool)
                 {
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
-                }
-                return false;
-            }
-            catch (IOException e)
-            {
-                if (!_terminatedTool)
-                {
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
-                }
-                return false;
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                if (!_terminatedTool)
-                {
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, GetErrorMessageWithDiagnosticsCheck(e));
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.CouldNotStartToolExecutable", ToolExe, e.ToString());
                 }
                 return false;
             }
@@ -1571,27 +1555,6 @@ namespace Microsoft.Build.Utilities
             }
 
             return sb.ToString();
-        }
-
-        /// <summary>
-        /// This method takes in an exception and if MSBuildDiagnostics is set then it will display the stack trace
-        /// if it is not set only the message will be displayed, this is to fix the problem where the user was getting
-        /// stack trace when a shorter message was better
-        /// </summary>
-        /// <returns>exception message</returns>
-        private static string GetErrorMessageWithDiagnosticsCheck(Exception e)
-        {
-            // If MSBuildDiagnostics is set show stack trace information
-            if (Environment.GetEnvironmentVariable("MSBuildDiagnostics") != null)
-            {
-                // Includes stack trace
-                return e.ToString();
-            }
-            else
-            {
-                // does not include stack trace
-                return e.Message;
-            }
         }
 
         /// <summary>
