@@ -172,7 +172,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("5");
             string configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
             string expectedError = Path.Combine(testProjectDirectory, "bin",
-                                   configuration, "netcoreapp2.2", "VSTestCore.dll");
+                                   configuration, "netcoreapp3.0", "VSTestCore.dll");
             expectedError = "The test source file " + "\"" + expectedError + "\"" + " provided was not found.";
 
             // Call test
@@ -353,7 +353,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        [WindowsOnlyFact]
         public void ItCreatesCoverageFileWhenCodeCoverageEnabledByRunsettings()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("11");
@@ -389,7 +389,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        [WindowsOnlyFact]
         public void ItCreatesCoverageFileInResultsDirectory()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("12");
@@ -423,7 +423,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [UnixOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        [UnixOnlyFact]
         public void ItShouldShowWarningMessageOnCollectCodeCoverage()
         {
             var testProjectDirectory = this.CopyAndRestoreVSTestDotNetCoreTestApp("13");

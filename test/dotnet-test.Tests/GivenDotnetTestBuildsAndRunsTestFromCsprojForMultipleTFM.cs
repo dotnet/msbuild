@@ -84,7 +84,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/cli/issues/9773")]
+        [WindowsOnlyFact]
         public void ItCreatesTwoCoverageFilesForMultiTargetedProject()
         {
             // Copy XunitMulti project in output directory of project dotnet-test.Tests
@@ -127,7 +127,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand()
                .WithWorkingDirectory(projectDirectory)
-               .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --framework netcoreapp2.2")
+               .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --framework netcoreapp3.0")
                .Should().Pass();
         }
     }

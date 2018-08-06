@@ -69,6 +69,6 @@ if(!(Test-Path $NupkgFile))
     throw "$NupkgFile not generated"
 }
 
-Write-Output -ForegroundColor Green "Successfully created installer nupkg - $NupkgFile"
+Write-Output "Successfully created installer nupkg - $NupkgFile"
 
 exit $LastExitCode

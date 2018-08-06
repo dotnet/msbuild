@@ -30,12 +30,11 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <CLIBuildDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/$(RelativeCLIBuildDllName)</CLIBuildDll>
     <BuildTasksFeedDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
 
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
 
-    <CliTargetFramework>netcoreapp2.2</CliTargetFramework>
-    <!-- We only need this until we get a stage0 with a 2.2 SDK. -->
-    <NETCoreAppMaximumVersion>2.2</NETCoreAppMaximumVersion>
+    <CliTargetFramework>netcoreapp3.0</CliTargetFramework>
+    <!-- We only need this until we get a dotnet/sdk in stage0 with a 3.0 support. -->
+    <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
   </PropertyGroup>
 
   <Import Project="build/BranchInfo.props" />
