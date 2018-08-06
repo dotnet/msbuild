@@ -13,5 +13,8 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities
 
         public static readonly NuGetFramework NetCoreApp22
                 = new NuGetFramework(FrameworkConstants.FrameworkIdentifiers.NetCoreApp, new Version(2, 2, 0, 0));
+
+        public static readonly NuGetFramework NetCoreApp30
+                = new NuGetFramework(FrameworkConstants.FrameworkIdentifiers.NetCoreApp, new Version(3, 0, 0, 0));
     }
 }

@@ -6,25 +6,25 @@
       <!-- BaseOutputDirectory is the root output path for this stage and RID
            BaseOutputPath is the project-specific output folder that each project builds into.
            This is not confusing at all. -->
-      <BaseOutputDirectory>$(RepoRoot)/bin/$(CliBuildStage)</BaseOutputDirectory>
-      <BaseOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/bin/$(MSBuildProjectName)'))</BaseOutputPath>
+      <BaseOutputDirectory>$([MSBuild]::NormalizePath($(RepoRoot)/bin/$(CliBuildStage)))</BaseOutputDirectory>
+      <BaseOutputPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/bin/$(MSBuildProjectName)))</BaseOutputPath>
 
-      <BaseIntermediateOutputPath>$([System.IO.Path]::GetFullPath('$(BaseOutputDirectory)/obj/$(MSBuildProjectName)'))</BaseIntermediateOutputPath>
-      <OutputDirectory>$(BaseOutputDirectory)/Cli</OutputDirectory>
-      <CliOutputDirectory>$(OutputDirectory)/sdk/$(SdkVersion)</CliOutputDirectory>
-      <SdkOutputDirectory>$(BaseOutputDirectory)/dotnet</SdkOutputDirectory>
-      <SymbolsDirectory>$(BaseOutputDirectory)/symbols</SymbolsDirectory>
-      <CompilationDirectory>$(BaseOutputDirectory)/compilation</CompilationDirectory>
-      <IntermediateDirectory>$(BaseOutputDirectory)/int</IntermediateDirectory>
-      <PackagesDirectory>$(BaseOutputDirectory)/packages</PackagesDirectory>
-      <SharedFrameworkPublishDirectory>$(IntermediateDirectory)/sharedFrameworkPublish</SharedFrameworkPublishDirectory>
-      <AspNetCoreSharedFxPublishDirectory>$(IntermediateDirectory)/aspnetSharedFxPublish</AspNetCoreSharedFxPublishDirectory>
-      <TestOutputDir>$(BaseOutputDirectory)/test/</TestOutputDir>
-      <DotnetInOutputDirectory>$(BaseOutputDirectory)/dotnet/dotnet$(ExeExtension)</DotnetInOutputDirectory>
-      <GeneratedMSBuildExtensionsDirectory>$(IntermediateDirectory)/GeneratedMSBuildExtensions</GeneratedMSBuildExtensionsDirectory>
-      <MSBuildExtensionsLayoutDirectory>$(IntermediateDirectory)/MSBuildExtensionsLayout</MSBuildExtensionsLayoutDirectory>
-      <SdkResolverOutputDirectory>$(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver</SdkResolverOutputDirectory>
-      <DotNetCoreSdkLKGPublishDirectory>$(IntermediateDirectory)/SdkLKG</DotNetCoreSdkLKGPublishDirectory>
-      <NextStagePropsPath>$(BaseOutputDirectory)/PreviousStage.props</NextStagePropsPath>
+      <BaseIntermediateOutputPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/obj/$(MSBuildProjectName)))</BaseIntermediateOutputPath>
+      <OutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/cli))</OutputDirectory>
+      <CliOutputDirectory>$([MSBuild]::NormalizePath($(OutputDirectory)/sdk/$(SdkVersion)))</CliOutputDirectory>
+      <SdkOutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/dotnet))</SdkOutputDirectory>
+      <SymbolsDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/symbols))</SymbolsDirectory>
+      <CompilationDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/compilation))</CompilationDirectory>
+      <IntermediateDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/int))</IntermediateDirectory>
+      <PackagesDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/packages))</PackagesDirectory>
+      <SharedFrameworkPublishDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/sharedFrameworkPublish))</SharedFrameworkPublishDirectory>
+      <AspNetCoreSharedFxPublishDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/aspnetSharedFxPublish))</AspNetCoreSharedFxPublishDirectory>
+      <TestOutputDir>$([MSBuild]::NormalizeDirectory($(BaseOutputDirectory)/test))</TestOutputDir>
+      <DotnetInOutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/dotnet/dotnet$(ExeExtension)))</DotnetInOutputDirectory>
+      <GeneratedMSBuildExtensionsDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/GeneratedMSBuildExtension))</GeneratedMSBuildExtensionsDirectory>
+      <MSBuildExtensionsLayoutDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/MSBuildExtensionsLayout))</MSBuildExtensionsLayoutDirectory>
+      <SdkResolverOutputDirectory>$([MSBuild]::NormalizePath($(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver))</SdkResolverOutputDirectory>
+      <DotNetCoreSdkLKGPublishDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/SdkLKG))</DotNetCoreSdkLKGPublishDirectory>
+      <NextStagePropsPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/PreviousStage.props))</NextStagePropsPath>
   </PropertyGroup>
 </Project>
