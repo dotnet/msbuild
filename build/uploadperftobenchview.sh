@@ -88,7 +88,7 @@ python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/machinedat
 
 echo Creating: "$perfWorkingDirectory/measurement.json"
 find "$perfWorkingDirectory" -maxdepth 1 -type f -name "*.xml" -exec echo Processing: "{}" \;
-find "$perfWorkingDirectory" -maxdepth 1 -type f -name "*.xml" -exec python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/measurement.py" xunitscenario "{}" --better desc --append \
+find "$perfWorkingDirectory" -maxdepth 1 -type f -name "*.xml" -exec python3.5 "$perfWorkingDirectory/Microsoft.BenchView.JSONFormat/tools/measurement.py" xunitscenario "{}" --better desc --drop-first-value --append \
                        -o "$perfWorkingDirectory/measurement.json" \; || { echo Failed to create: "$perfWorkingDirectory/measurement.json" && exit 1 ; }
 
 echo Creating: "$perfWorkingDirectory/submission.json"
