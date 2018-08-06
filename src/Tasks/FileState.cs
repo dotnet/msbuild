@@ -158,6 +158,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 // Use DirectoryInfo to get the last write date
                                 Exists = true;
+                                IsDirectory = true;
                                 IsReadOnly = false;
                                 LastWriteTimeUtc = directoryInfo.LastWriteTimeUtc;
                             }

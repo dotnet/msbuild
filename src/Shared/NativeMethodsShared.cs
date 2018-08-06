@@ -598,7 +598,7 @@ namespace Microsoft.Build.Shared
         }
 
 #if !CLR2COMPATIBILITY
-        private static bool? _isWindows = false;
+        private static bool? _isWindows;
 #endif
 
         /// <summary>
@@ -981,7 +981,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 DateTime lastWriteTime = File.GetLastWriteTimeUtc(fullPath);
-                bool fileExists = fileModifiedTime != minFileDate;
+                bool fileExists = lastWriteTime != minFileDate;
 
                 fileModifiedTime = fileExists ? lastWriteTime : DateTime.MinValue;
             }
