@@ -45,7 +45,7 @@ namespace Microsoft.DotNet.Migration.Tests
 
             new DotnetCommand()
                 .WithWorkingDirectory(projectDirectory)
-                .Execute($"build \"{solutionRelPath}\"")
+                .Execute($"build \"{solutionRelPath}\" -p:GenerateAssemblyInfo=false") // https://github.com/dotnet/sdk/issues/2278"
                 .Should().Pass();
 
             SlnFile slnFile = SlnFile.Read(Path.Combine(projectDirectory.FullName, solutionRelPath));

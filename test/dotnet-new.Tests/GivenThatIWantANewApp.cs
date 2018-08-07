@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.New.Tests
         // Remove the expectedVersion parameter once we have templates targetting netcoreapp2.2.
         [Theory]
         [InlineData("console", "microsoft.netcore.app", "2.1.0")]
-        [InlineData("classlib", "netstandard.library", null)]
+        [InlineData("classlib", "netstandard.library", "2.0.3")] // FIXME: This is pinned to 2.0.3 due to https://github.com/dotnet/sdk/issues/2410
         public void NewProjectRestoresCorrectPackageVersion(string type, string packageName, string expectedVersion)
         {
             var rootPath = TestAssets.CreateTestDirectory(identifier: $"_{type}").FullName;

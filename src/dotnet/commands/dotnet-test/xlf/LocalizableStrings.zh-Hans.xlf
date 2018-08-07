@@ -160,6 +160,11 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
         <target state="translated">用于运行测试的配置。大多数项目的默认值是 "Debug"。</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

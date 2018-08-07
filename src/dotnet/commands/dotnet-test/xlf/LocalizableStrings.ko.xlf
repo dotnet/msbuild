@@ -160,6 +160,11 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
         <target state="translated">테스트 실행에 사용할 구성입니다. 대부분의 프로젝트에서 기본값은 'Debug'입니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

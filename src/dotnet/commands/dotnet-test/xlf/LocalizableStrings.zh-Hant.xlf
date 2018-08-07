@@ -160,6 +160,11 @@ Outputs a 'Sequence.xml' file in the current directory that captures the order o
         <target state="translated">要用於執行測試的組態。大部分的專案預設為「偵錯」。</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

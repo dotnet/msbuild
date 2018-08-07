@@ -160,6 +160,11 @@ Výstupem je soubor Sequence.xml v aktuálním adresáři, do kterého se zaznam
         <target state="translated">Konfigurace, která se má použít pro spuštění testů. Výchozí možností pro většinu projektů je Debug.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

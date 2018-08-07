@@ -1012,6 +1012,72 @@ EndGlobal
                 .Should().BeVisuallyEquivalentTo(ExpectedSlnFileAfterAddingProjectWithAdditionalConfigs);
         }
 
+        [Fact]
+        public void ItAddsACSharpProjectThatIsMultitargeted()
+        {
+            var solutionDirectory = TestAssets
+                .Get("TestAppsWithSlnAndMultitargetedProjects")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var slnFullPath = Path.Combine(solutionDirectory, "App.sln");
+            var projectToAdd = Path.Combine("MultitargetedCS", "MultitargetedCS.csproj");
+
+            new DotnetCommand()
+                .WithWorkingDirectory(solutionDirectory)
+                .ExecuteWithCapturedOutput($"sln add {projectToAdd}")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, projectToAdd));
+        }
+
+        [Fact]
+        public void ItAddsAVisualBasicProjectThatIsMultitargeted()
+        {
+            var solutionDirectory = TestAssets
+                .Get("TestAppsWithSlnAndMultitargetedProjects")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var slnFullPath = Path.Combine(solutionDirectory, "App.sln");
+            var projectToAdd = Path.Combine("MultitargetedVB", "MultitargetedVB.vbproj");
+
+            new DotnetCommand()
+                .WithWorkingDirectory(solutionDirectory)
+                .ExecuteWithCapturedOutput($"sln add {projectToAdd}")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, projectToAdd));
+        }
+
+        [Fact]
+        public void ItAddsAnFSharpProjectThatIsMultitargeted()
+        {
+            var solutionDirectory = TestAssets
+                .Get("TestAppsWithSlnAndMultitargetedProjects")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var slnFullPath = Path.Combine(solutionDirectory, "App.sln");
+            var projectToAdd = Path.Combine("MultitargetedFS", "MultitargetedFS.fsproj");
+
+            new DotnetCommand()
+                .WithWorkingDirectory(solutionDirectory)
+                .ExecuteWithCapturedOutput($"sln add {projectToAdd}")
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining(string.Format(CommonLocalizableStrings.ProjectAddedToTheSolution, projectToAdd));
+        }
+
         private string GetExpectedSlnContents(
             string slnPath,
             string slnTemplate,

@@ -160,6 +160,11 @@ Crea un archivo de salida en el directorio actual como "Sequence.xml" que captur
         <target state="translated">La configuración que se usará para ejecutar pruebas. El valor predeterminado para la mayoría de los proyectos es "Debug".</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to test for.</source>
+        <target state="new">The target runtime to test for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
