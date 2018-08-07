@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp2.1", "publish", $"{rootDir.Name}.dll")
+                .GetDirectory("bin", configuration, "netcoreapp2.2", "publish", $"{rootDir.Name}.dll")
                 .FullName;
 
             new TestCommand(outputProgram)
@@ -270,7 +270,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputProgram = rootDir
-                .GetDirectory("bin", configuration, "netcoreapp2.1", rid, "publish", $"{rootDir.Name}.dll")
+                .GetDirectory("bin", configuration, "netcoreapp2.2", rid, "publish", $"{rootDir.Name}.dll")
                 .FullName;
 
             new TestCommand(outputProgram)
