@@ -20,7 +20,7 @@ namespace Microsoft.Build.Logging
         /// <param name="sourceFilePath">The full file path of the binary log file</param>
         public void Replay(string sourceFilePath)
         {
-            Replay(sourceFilePath, new CancellationToken(canceled: false));
+            Replay(sourceFilePath, CancellationToken.None);
         }
 
         /// <summary>
