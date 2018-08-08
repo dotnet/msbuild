@@ -200,6 +200,11 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
+        /// Keeps track of the project that is newest between the project and all imports.
+        /// </summary>
+        private ProjectRootElement _newestProject;
+
+        /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
         private Evaluator(
@@ -245,6 +250,13 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+
+            // Only track the newest project for on disk projects.  There's no way to guarantee the MSBuildNewestProject property
+            // is accurate for in-memory projects
+            if (projectRootElement.FullPath != null)
+            {
+                _newestProject = projectRootElement;
+            }
         }
 
         /// <summary>
@@ -715,6 +727,11 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
+                }
+
+                if (_newestProject != null)
+                {
+                    _data.SetProperty(ReservedPropertyNames.newestProject, _newestProject.FullPath, isGlobalProperty: false, mayBeReserved: true);
                 }
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
@@ -2351,6 +2368,11 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             imports.Add(importedProjectElement);
+
+                            if (_newestProject != null && importedProjectElement.LastWriteTimeWhenRead > _newestProject.LastWriteTimeWhenRead)
+                            {
+                                _newestProject = importedProjectElement;
+                            }
 
                             if (_logProjectImportedEvents)
                             {

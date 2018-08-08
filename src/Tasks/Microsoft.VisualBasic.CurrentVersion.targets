@@ -177,7 +177,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 -->
     <Target
         Name="XamlPreCompile"
-        Inputs="$(MSBuildAllProjects);
+        Inputs="$(MSBuildNewestProject);$(MSBuildAllProjects);
                 @(Compile);
                 @(_CoreCompileResourceInputs);
                 $(ApplicationIcon);

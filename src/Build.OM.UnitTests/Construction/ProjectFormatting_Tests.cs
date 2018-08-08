@@ -328,7 +328,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 <Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
   <Target
     Name=""XamlPreCompile""
-    Inputs=""$(MSBuildAllProjects);
+    Inputs=""$(MSBuildNewestProject);$(MSBuildAllProjects);
            @(Compile);
            @(_CoreCompileResourceInputs);""
   />
