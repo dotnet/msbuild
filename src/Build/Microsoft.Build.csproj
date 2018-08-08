@@ -32,7 +32,6 @@
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.IO.Compression" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
