@@ -24,7 +24,6 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.IO.Compression.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Runtime.InteropServices.RuntimeInformation.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
@@ -160,7 +159,6 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.IO.Compression.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Runtime.InteropServices.RuntimeInformation.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
