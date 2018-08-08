@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 using Microsoft.Build.Collections;
@@ -351,8 +352,31 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogUniqueInputsAndOutputs()
         {
-            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateInputs", string.Join(";", _uniqueTargetInputs.Keys));
-            _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateOutputs", string.Join(";", _uniqueTargetOutputs.Keys));
+            var targetInputKeys = _uniqueTargetInputs.Keys;
+            var targetOutputKeys = _uniqueTargetOutputs.Keys;
+
+            var maxContentLength = Math.Max(LengthSum(targetInputKeys), LengthSum(targetOutputKeys));
+            var maxSeparatorLength = Math.Max(targetInputKeys.Count, targetOutputKeys.Count);
+
+            using (var sb = new ReuseableStringBuilder(maxContentLength + maxSeparatorLength))
+            {
+                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateInputs", sb.AppendSeparated(';', targetInputKeys).ToString());
+
+                sb.Clear();
+
+                _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "SkipTargetUpToDateOutputs", sb.AppendSeparated(';', targetOutputKeys).ToString());
+            }
+
+            int LengthSum(ICollection<string> collection)
+            {
+                var sum = 0;
+                foreach (var targetInput in collection)
+                {
+                    sum += targetInput.Length;
+                }
+
+                return sum;
+            }
         }
 
         /// <summary>
