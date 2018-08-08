@@ -4,22 +4,22 @@
             "certificate": "Microsoft",
             "strongName": "StrongName",
             "values": [
-                "bin/MSBuild/net46/MSBuild.exe",
-                "bin/MSBuild/net46/Microsoft.Build.dll",
-                "bin/MSBuild/net46/Microsoft.Build.Framework.dll",
-                "bin/MSBuild/net46/Microsoft.Build.Tasks.Core.dll",
-                "bin/MSBuild/net46/Microsoft.Build.Utilities.Core.dll",
+                "bin/MSBuild/net472/MSBuild.exe",
+                "bin/MSBuild/net472/Microsoft.Build.dll",
+                "bin/MSBuild/net472/Microsoft.Build.Framework.dll",
+                "bin/MSBuild/net472/Microsoft.Build.Tasks.Core.dll",
+                "bin/MSBuild/net472/Microsoft.Build.Utilities.Core.dll",
 
-                "bin/MSBuild/net46/*/*.resources.dll",
+                "bin/MSBuild/net472/*/*.resources.dll",
 
                 "bin/MSBuildTaskHost/net35/MSBuildTaskHost.exe",
                 "bin/MSBuildTaskHost/net35/*/MSBuildTaskHost.resources.dll",
 
-                "bin/MSBuild/x64/net46/MSBuild.exe",
+                "bin/MSBuild/x64/net472/MSBuild.exe",
 
                 "bin/MSBuildTaskHost/x64/net35/MSBuildTaskHost.exe",
-                "bin/Microsoft.Build.Conversion/net46/Microsoft.Build.Engine.dll",
-                "bin/Microsoft.Build.Conversion/net46/Microsoft.Build.Conversion.Core.dll",
+                "bin/Microsoft.Build.Conversion/net472/Microsoft.Build.Engine.dll",
+                "bin/Microsoft.Build.Conversion/net472/Microsoft.Build.Conversion.Core.dll",
 
                 "bin/MSBuild/netcoreapp2.1/MSBuild.dll",
                 "bin/MSBuild/netcoreapp2.1/Microsoft.Build.dll",

@@ -249,14 +249,14 @@
   <Target Name="GetCustomPackageFiles" BeforeTargets="_GetPackageFiles" DependsOnTargets="RemoveSatelliteDllsFromBuildOutputInPackage">
 
     <ItemGroup>
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Data.Entity.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.ServiceModel.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WinFx.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WorkflowBuildExtensions.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Xaml.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.VisualBasic.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Data.Entity.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.ServiceModel.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WinFx.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WorkflowBuildExtensions.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Xaml.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.VisualBasic.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == '$(FullFrameworkTFM)' " />
     </ItemGroup>
 
     <ItemGroup>

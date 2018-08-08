@@ -10,7 +10,7 @@
    <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
 
    <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <RestoreSources>$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
   </PropertyGroup>
 
