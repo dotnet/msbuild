@@ -397,4 +397,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1069: This project uses a library that targets .NET Standard 1.5 or higher, and the project targets a version of .NET Framework that doesn't have built-in support for that version of .NET Standard. Visit https://aka.ms/net-standard-known-issues for a set of known issues. Consider retargeting to .NET Framework 4.7.2.</value>
     <comment>{StrBegin="NETSDK1069: "}</comment>
   </data>
+  <data name="AppConfigRequiresRootConfiguration" xml:space="preserve">
+    <value>NETSDK1070: The application configuration file must have root configuration element.</value>
+    <comment>{StrBegin="NETSDK1070: "}</comment>
+  </data>
 </root>
