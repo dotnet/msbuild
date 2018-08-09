@@ -1997,7 +1997,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // the whole list.
                 // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
                 // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
-                foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
+                foreach (ProjectProperty property in project.AllEvaluatedProperties.Where(property => property.Xml == null))
                 {
                     allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
                 }
@@ -2024,7 +2024,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
 
                 // These are the properties which are defined in some file.
-                IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.SkipWhile(property => property.Xml == null);
+                IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.Where(property => property.Xml != null);
 
                 Assert.Equal(3, restOfAllEvaluatedProperties.Count());
                 Assert.Equal("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
