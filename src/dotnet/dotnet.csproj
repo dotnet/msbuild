@@ -10,6 +10,7 @@
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
+    <PackageId>Microsoft.DotNet.Cli</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
@@ -55,7 +56,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.0.0" />
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.TextWriterTraceListener" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -75,7 +75,7 @@
     <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
-    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(AspNetCoreVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="commands\dotnet-migrate\xlf" />

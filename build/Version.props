@@ -1,21 +1,23 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <VersionMajor>2</VersionMajor>
-    <VersionMinor>2</VersionMinor>
+    <VersionMajor>3</VersionMajor>
+    <VersionMinor>0</VersionMinor>
     <VersionPatch>100</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview1</ReleaseSuffix>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">alpha1</ReleaseSuffix>
 
-    <MajorMinorVersion>$(VersionMajor).$(VersionMinor)</MajorMinorVersion>
-    <CliVersionNoSuffix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>
-    <CliVersionPrefix>$(CliVersionNoSuffix)-$(ReleaseSuffix)</CliVersionPrefix>
-    <CliBrandingVersion Condition=" '$(DropSuffix)' != 'true' ">$(CliVersionNoSuffix) - $(ReleaseSuffix)</CliBrandingVersion>
-    <CliBrandingVersion Condition=" '$(DropSuffix)' == 'true' ">$(CliVersionNoSuffix)</CliBrandingVersion>
-    <SimpleVersion Condition=" '$(DropSuffix)' != 'true' ">$(CliVersionNoSuffix).$(CommitCount)</SimpleVersion>
-    <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(CliVersionNoSuffix)</SimpleVersion>
+    <!-- When running on VSO (for official builds) use a real number. -->
+    <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">00000001-01</BuildNumber>
 
-    <VersionSuffix Condition=" '$(DropSuffix)' != 'true' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
+    <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
+    <CliVersionNoSuffix Condition="'$(CliVersionNoSuffix)' == ''">$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>
 
-    <FullNugetVersion>$(CliVersionNoSuffix)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion>
+    <SimpleVersion Condition=" '$(DropSuffix)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch).$(BuildNumber)</SimpleVersion> 
+    <SimpleVersion Condition=" '$(SimpleVersion)' == '' ">$(VersionMajor).$(VersionMinor).$(VersionPatch)</SimpleVersion> 
+
+    <VersionSuffix Condition=" '$(DropSuffix)' == '' ">$(ReleaseSuffix)-$(BuildNumber)</VersionSuffix> 
+
+    <FullNugetVersion>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)-$(BuildNumber)</FullNugetVersion> 
 
     <NugetVersion Condition=" '$(DropSuffix)' != 'true' ">$(FullNugetVersion)</NugetVersion>
     <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(CliVersionNoSuffix)</NugetVersion>

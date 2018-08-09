@@ -2,10 +2,12 @@
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
   </PropertyGroup>
-  <Import Project="build/InitRepo.props" />
   <Import Project="build/DependencyVersions.props" />
   <PropertyGroup>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+
+    <!-- Needed while dotnet/sdk version used does not support 3.0 yet -->
+    <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
   </PropertyGroup>
 </Project>

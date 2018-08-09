@@ -3,16 +3,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net451;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>net451;netcoreapp3.0</TargetFrameworks>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="dotnet-desktop-and-portable" Version="1.0.0-*" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.2' ">
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

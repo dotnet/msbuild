@@ -34,11 +34,16 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 # Install a stage 0
 echo "Installing .NET Core CLI Stage 0"
-$REPO_ROOT/scripts/obtain/dotnet-install.sh -Version 2.1.302 -Architecture x64
 
-if [ $? -ne 0 ]; then
-    echo "Failed to install stage 0"
-    exit 1
+if [ -z "$DOTNET_TOOL_DIR" ]; then
+    $REPO_ROOT/scripts/obtain/dotnet-install.sh -Channel master -Architecture x64
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to install stage 0"
+        exit 1
+    fi
+else
+    cp -r $DOTNET_TOOL_DIR/* $DOTNET_INSTALL_DIR/
 fi
 
 # Put the stage 0 on the path
