@@ -49,7 +49,6 @@
         "mscorlib.dll",
         "netstandard.dll",
         "System.Collections.Immutable.dll",
-        "System.IO.Compression.dll",
         "System.Threading.Tasks.Dataflow.dll"
       ]
 }
