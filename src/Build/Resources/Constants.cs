@@ -46,7 +46,7 @@ namespace Microsoft.Build.Internal
         internal const string startupDirectory = "MSBuildStartupDirectory";
         internal const string buildNodeCount = "MSBuildNodeCount";
         internal const string lastTaskResult = "MSBuildLastTaskResult";
-        internal const string newestProject = "MSBuildNewestProject";
+        internal const string lastModifiedProject = "MSBuildLastModifiedProject";
         internal const string extensionsPathSuffix = "MSBuild";
         internal const string userExtensionsPathSuffix = "Microsoft\\MSBuild";
         internal const string programFiles32 = "MSBuildProgramFiles32";
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Internal
             programFiles32,
             assemblyVersion,
             version,
-            newestProject
+            lastModifiedProject
         };
 
         /// <summary>

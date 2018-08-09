@@ -200,9 +200,9 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
-        /// Keeps track of the project that is newest between the project and all imports.
+        /// Keeps track of the project that is last modified of the project and all imports.
         /// </summary>
-        private ProjectRootElement _newestProject;
+        private ProjectRootElement _lastModifiedProject;
 
         /// <summary>
         /// Private constructor called by the static Evaluate method.
@@ -251,11 +251,10 @@ namespace Microsoft.Build.Evaluation
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
 
-            // Only track the newest project for on disk projects.  There's no way to guarantee the MSBuildNewestProject property
-            // is accurate for in-memory projects
+            // The last modified project is the project itself unless its an in-memory project
             if (projectRootElement.FullPath != null)
             {
-                _newestProject = projectRootElement;
+                _lastModifiedProject = projectRootElement;
             }
         }
 
@@ -729,9 +728,9 @@ namespace Microsoft.Build.Evaluation
                     PerformDepthFirstPass(_projectRootElement);
                 }
 
-                if (_newestProject != null)
+                if (_lastModifiedProject != null)
                 {
-                    _data.SetProperty(ReservedPropertyNames.newestProject, _newestProject.FullPath, isGlobalProperty: false, mayBeReserved: true);
+                    _data.SetProperty(ReservedPropertyNames.lastModifiedProject, _lastModifiedProject.FullPath, isGlobalProperty: false, mayBeReserved: true);
                 }
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
@@ -2369,9 +2368,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             imports.Add(importedProjectElement);
 
-                            if (_newestProject != null && importedProjectElement.LastWriteTimeWhenRead > _newestProject.LastWriteTimeWhenRead)
+                            if (_lastModifiedProject == null || importedProjectElement.LastWriteTimeWhenRead > _lastModifiedProject.LastWriteTimeWhenRead)
                             {
-                                _newestProject = importedProjectElement;
+                                _lastModifiedProject = importedProjectElement;
                             }
 
                             if (_logProjectImportedEvents)
