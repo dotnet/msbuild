@@ -199,6 +199,19 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Formats the resource string with the given arguments.
+        /// Ignores error codes and keywords
+        /// </summary>
+        /// <param name="resourceName"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params object[] args)
+        {
+            // NOTE: the AssemblyResources.GetString() method is thread-safe
+            return FormatString(GetResourceString(resourceName), args);
+        }
+
+        /// <summary>
         /// Formats the given string using the variable arguments passed in.
         /// 
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for

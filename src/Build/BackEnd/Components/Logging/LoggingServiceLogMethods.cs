@@ -576,11 +576,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // default targets.
                 if (!String.IsNullOrEmpty(targetNames))
                 {
-                    message = ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithTargetNames", projectFilePath, targetNames);
+                    message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithTargetNames", projectFilePath, targetNames);
                 }
                 else
                 {
-                    message = ResourceUtilities.FormatResourceString("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", projectFilePath);
+                    message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", projectFilePath);
                 }
 
                 ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectInstanceId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
@@ -619,7 +619,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 ErrorUtilities.VerifyThrow(projectBuildEventContext != null, "projectBuildEventContext");
 
-                string message = ResourceUtilities.FormatResourceString((success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure"), Path.GetFileName(projectFile));
+                string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword((success ? "ProjectFinishedSuccess" : "ProjectFinishedFailure"), Path.GetFileName(projectFile));
 
                 ProjectFinishedEventArgs buildEvent = new ProjectFinishedEventArgs
                     (
@@ -674,22 +674,22 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         if (!String.IsNullOrEmpty(parentTargetName))
                         {
-                            message = ResourceUtilities.FormatResourceString("TargetStartedProjectDepends", targetName, projectFile, parentTargetName);
+                            message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectDepends", targetName, projectFile, parentTargetName);
                         }
                         else
                         {
-                            message = ResourceUtilities.FormatResourceString("TargetStartedProjectEntry", targetName, projectFile);
+                            message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectEntry", targetName, projectFile);
                         }
                     }
                     else
                     {
                         if (!String.IsNullOrEmpty(parentTargetName))
                         {
-                            message = ResourceUtilities.FormatResourceString("TargetStartedFileProjectDepends", targetName, projectFileOfTargetElement, projectFile, parentTargetName);
+                            message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectDepends", targetName, projectFileOfTargetElement, projectFile, parentTargetName);
                         }
                         else
                         {
-                            message = ResourceUtilities.FormatResourceString("TargetStartedFileProjectEntry", targetName, projectFileOfTargetElement, projectFile);
+                            message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectEntry", targetName, projectFileOfTargetElement, projectFile);
                         }
                     }
 
@@ -730,7 +730,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     ErrorUtilities.VerifyThrow(targetBuildEventContext != null, "targetBuildEventContext is null");
 
-                    string message = ResourceUtilities.FormatResourceString((success ? "TargetFinishedSuccess" : "TargetFinishedFailure"), targetName, Path.GetFileName(projectFile));
+                    string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword((success ? "TargetFinishedSuccess" : "TargetFinishedFailure"), targetName, Path.GetFileName(projectFile));
 
                     TargetFinishedEventArgs buildEvent = new TargetFinishedEventArgs
                         (
@@ -766,7 +766,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     TaskStartedEventArgs buildEvent = new TaskStartedEventArgs
                         (
-                            ResourceUtilities.FormatResourceString("TaskStarted", taskName),
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskStarted", taskName),
                             null, // no help keyword
                             projectFile,
                             projectFileOfTaskNode,
@@ -806,7 +806,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     TaskStartedEventArgs buildEvent = new TaskStartedEventArgs
                         (
-                            ResourceUtilities.FormatResourceString("TaskStarted", taskName),
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskStarted", taskName),
                             null, // no help keyword
                             projectFile,
                             projectFileOfTaskNode,
@@ -836,7 +836,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (!OnlyLogCriticalEvents)
                 {
                     ErrorUtilities.VerifyThrow(taskBuildEventContext != null, "taskBuildEventContext is null");
-                    string message = ResourceUtilities.FormatResourceString((success ? "TaskFinishedSuccess" : "TaskFinishedFailure"), taskName);
+                    string message = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword((success ? "TaskFinishedSuccess" : "TaskFinishedFailure"), taskName);
 
                     TaskFinishedEventArgs buildEvent = new TaskFinishedEventArgs
                         (
