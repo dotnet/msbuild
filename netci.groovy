@@ -107,7 +107,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
                     }
 
                     // this agent has VS 15.7 on it, which is a min requirement for our repo now.
-                    machineAffinityOverride = 'Windows.10.Amd64.ClientRS3.DevEx.Open'
+                    machineAffinityOverride = 'windows.10.amd64.clientrs4.devex.15.8.open'
 
                     break;
                 case 'OSX10.13':
