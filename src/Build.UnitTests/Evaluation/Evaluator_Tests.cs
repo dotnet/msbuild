@@ -18,6 +18,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -4422,6 +4423,56 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 bool result = project.Build(logger);
 
                 Assert.True(result);
+            }
+        }
+
+        [Fact]
+        public void VerifyMSBuildLastModifiedProjectForImport()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                var project1 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+                var project2 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+
+                var primaryProject = testEnvironment.CreateTestProjectWithFiles($@"<Project>
+<Import Project=""{project1.ProjectFile}"" />
+<Import Project=""{project2.ProjectFile}"" />
+</Project>");
+
+                // Project1 and primary project last modified an hour ago, project2 is the newest
+                File.SetLastWriteTime(project1.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(project2.ProjectFile, DateTime.Now);
+                File.SetLastWriteTime(primaryProject.ProjectFile, DateTime.Now.AddHours(-1));
+
+
+                Project project = new Project(primaryProject.ProjectFile, null, null);
+
+                project.GetPropertyValue(ReservedPropertyNames.lastModifiedProject).ShouldBe(project2.ProjectFile);
+            }
+        }
+
+        [Fact]
+        public void VerifyMSBuildLastModifiedProjectIsProject()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                var project1 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+                var project2 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+
+                var primaryProject = testEnvironment.CreateTestProjectWithFiles($@"<Project>
+<Import Project=""{project1.ProjectFile}"" />
+<Import Project=""{project2.ProjectFile}"" />
+</Project>");
+
+                // Project1 and project2 last modified an hour ago, primaryProject is the newest
+                File.SetLastWriteTime(project1.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(project2.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(primaryProject.ProjectFile, DateTime.Now);
+
+
+                Project project = new Project(primaryProject.ProjectFile, null, null);
+
+                project.GetPropertyValue(ReservedPropertyNames.lastModifiedProject).ShouldBe(primaryProject.ProjectFile);
             }
         }
 
