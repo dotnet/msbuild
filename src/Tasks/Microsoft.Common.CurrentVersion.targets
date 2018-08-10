@@ -2217,7 +2217,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ====================================================================================================
   -->
   <Target Name="GenerateBindingRedirects"
-    Inputs="$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(IntermediateOutputPath);@(SuggestedBindingRedirects)"
+    Inputs="$(MSBuildNewestProject);$(MSBuildAllProjects);@(AppConfigFile);$(ResolveAssemblyReferencesStateFile);$(IntermediateOutputPath);@(SuggestedBindingRedirects)"
     Outputs="$(_GenerateBindingRedirectsIntermediateAppConfig)"
     Condition="'$(AutoGenerateBindingRedirects)' == 'true' and '$(GenerateBindingRedirectsOutputType)' == 'true'">
 
@@ -2518,7 +2518,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Target Name="ExportWindowsMDFile"
           DependsOnTargets="Compile"
           Condition="'$(ExportWinMDFile)' == 'true'"
-          Inputs="@(IntermediateAssembly);@(DocFileItem);@(_DebugSymbolsIntermediatePath);@(ReferencePathWithRefAssemblies);$(MSBuildAllProjects)"
+          Inputs="@(IntermediateAssembly);@(DocFileItem);@(_DebugSymbolsIntermediatePath);@(ReferencePathWithRefAssemblies);$(MSBuildNewestProject);$(MSBuildAllProjects)"
           Outputs="$(_IntermediateWindowsMetadataPath);$(WinMDExpOutputPdb);$(WinMDOutputDocumentationFile)"
   >
 
@@ -3050,7 +3050,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Sources="@(EmbeddedResource)"
         UseSourcePath="$(UseSourcePath)"
         References="@(ReferencePathWithRefAssemblies)"
-        AdditionalInputs="$(MSBuildAllProjects)"
+        AdditionalInputs="$(MSBuildNewestProject);$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
         StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.cache"
         StronglyTypedClassName="%(EmbeddedResource.StronglyTypedClassName)"
@@ -3080,7 +3080,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         Sources="@(EmbeddedResource)"
         UseSourcePath="$(UseSourcePath)"
         References="@(ReferencePath)"
-        AdditionalInputs="$(MSBuildAllProjects)"
+        AdditionalInputs="$(MSBuildNewestProject);$(MSBuildAllProjects)"
         NeverLockTypeAssemblies="$(GenerateResourceNeverLockTypeAssemblies)"
         StateFile="$(IntermediateOutputPath)$(MSBuildProjectFile).GenerateResource.cache"
         StronglyTypedClassName="%(EmbeddedResource.StronglyTypedClassName)"
@@ -3149,7 +3149,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="CompileLicxFiles"
       Condition="'@(_LicxFile)'!=''"
       DependsOnTargets="$(CompileLicxFilesDependsOn)"
-      Inputs="$(MSBuildAllProjects);@(_LicxFile);@(ReferencePathWithRefAssemblies);@(ReferenceDependencyPaths)"
+      Inputs="$(MSBuildNewestProject);$(MSBuildAllProjects);@(_LicxFile);@(ReferencePathWithRefAssemblies);@(ReferenceDependencyPaths)"
       Outputs="$(IntermediateOutputPath)$(TargetFileName).licenses">
 
     <PropertyGroup>
@@ -3356,7 +3356,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GenerateAdditionalSources"
           BeforeTargets="BeforeCompile"
           DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths"
-          Inputs="$(MSBuildAllProjects)"
+          Inputs="$(MSBuildNewestProject);$(MSBuildAllProjects)"
           Outputs="$(AssemblyAttributesPath)"
           Condition="'@(AssemblyAttributes)' != '' and '$(GenerateAdditionalSources)' == 'true'">
     <WriteCodeFragment
@@ -3523,7 +3523,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="GenerateSerializationAssemblies"
       Condition="'$(_SGenGenerateSerializationAssembliesConfig)' == 'On' or ('@(WebReferenceUrl)'!='' and '$(_SGenGenerateSerializationAssembliesConfig)' == 'Auto')"
       DependsOnTargets="AssignTargetPaths;Compile;ResolveKeySource"
-      Inputs="$(MSBuildAllProjects);@(IntermediateAssembly)"
+      Inputs="$(MSBuildNewestProject);@(IntermediateAssembly);$(MSBuildAllProjects)"
       Outputs="$(IntermediateOutputPath)$(_SGenDllName)">
 
     <PropertyGroup>
@@ -3618,7 +3618,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="GenerateSatelliteAssemblies"
-          Inputs="$(MSBuildAllProjects);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt)"
+          Inputs="$(MSBuildNewestProject);@(_SatelliteAssemblyResourceInputs);$(IntermediateOutputPath)$(TargetName)$(TargetExt);$(MSBuildAllProjects)"
           Outputs="$(IntermediateOutputPath)%(Culture)\$(TargetName).resources.dll"
           Condition="'@(_SatelliteAssemblyResourceInputs)' != '' and '$(GenerateSatelliteAssembliesForCore)' != 'true'">
 

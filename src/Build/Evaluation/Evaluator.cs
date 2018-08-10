@@ -200,6 +200,11 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
+        /// Keeps track of the project that is last modified of the project and all imports.
+        /// </summary>
+        private ProjectRootElement _lastModifiedProject;
+
+        /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
         private Evaluator(
@@ -245,6 +250,12 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+
+            // The last modified project is the project itself unless its an in-memory project
+            if (projectRootElement.FullPath != null)
+            {
+                _lastModifiedProject = projectRootElement;
+            }
         }
 
         /// <summary>
@@ -715,6 +726,11 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
+                }
+
+                if (_lastModifiedProject != null)
+                {
+                    _data.SetProperty(ReservedPropertyNames.lastModifiedProject, _lastModifiedProject.FullPath, isGlobalProperty: false, mayBeReserved: true);
                 }
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
@@ -2351,6 +2367,11 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             imports.Add(importedProjectElement);
+
+                            if (_lastModifiedProject == null || importedProjectElement.LastWriteTimeWhenRead > _lastModifiedProject.LastWriteTimeWhenRead)
+                            {
+                                _lastModifiedProject = importedProjectElement;
+                            }
 
                             if (_logProjectImportedEvents)
                             {
