@@ -62,6 +62,7 @@
       <Link>Constants.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
