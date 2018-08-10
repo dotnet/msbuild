@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>NuGet Package Id of the tool to update.</source>
+        <target state="translated">업데이트할 도구의 NuGet 패키지 ID입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Please specify one tool Package Id to update.</source>
+        <target state="translated">업데이트할 도구 패키지 ID를 하나 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>Version of the tool package in NuGet.</source>
+        <target state="translated">NuGet의 도구 패키지 버전입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Updates a tool to the latest stable version for use.</source>
+        <target state="translated">도구를 사용할 안정적인 최신 버전으로 업데이트합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">사용할 NuGet 구성 파일입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to update the tool for.</source>
+        <target state="translated">도구를 업데이트할 대상 프레임워크입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">NuGet 구성 파일 '{0}'이(가) 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceeded">
+        <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="translated">'{0}' 도구가 '{1}' 버전에서 '{2}' 버전으로 업데이트되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Update user wide.</source>
+        <target state="translated">사용자 수준에서 업데이트하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFullCommandNameLocalized">
+        <source>.NET update Command</source>
+        <target state="translated">.NET 업데이트 명령</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="translated">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tool will be installed.</source>
+        <target state="translated">도구가 설치될 위치입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolHasMultipleVersionsInstalled">
+        <source>Tool '{0}' has multiple versions installed and cannot be updated.</source>
+        <target state="translated">'{0}' 도구는 여러 버전이 설치되어 있으며 업데이트할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolNotInstalled">
+        <source>Tool '{0}' is not currently installed.</source>
+        <target state="translated">도구 '{0}'이(가) 현재 설치되어 있지 않습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">'{0}' 도구가 안정적인 최신 버전('{1}' 버전)으로 다시 설치되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolFailed">
+        <source>Tool '{0}' failed to update due to the following:</source>
+        <target state="translated">다음으로 인해 '{0}' 도구를 업데이트하지 못했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during update.</source>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>ADD_SOURCE</source>
+        <target state="new">ADD_SOURCE</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

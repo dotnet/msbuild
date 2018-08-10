@@ -3,21 +3,29 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.DotNet.ShellShim;
 using Microsoft.DotNet.Tools.Help;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
 using Command = Microsoft.DotNet.Cli.Utils.Command;
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
+using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 
 namespace Microsoft.DotNet.Cli
 {
     public class Program
     {
+        private static readonly string ToolPathSentinelFileName = $"{Product.Version}.toolpath.sentinel";
+
         public static int Main(string[] args)
         {
             DebugHelper.HandleDebugSwitch(ref args);
@@ -77,22 +85,30 @@ namespace Microsoft.DotNet.Cli
         {
             // CommandLineApplication is a bit restrictive, so we parse things ourselves here. Individual apps should use CLA.
 
-            bool? verbose = null;
             var success = true;
             var command = string.Empty;
             var lastArg = 0;
-            var cliFallbackFolderPathCalculator = new CliFallbackFolderPathCalculator();
+            var cliFallbackFolderPathCalculator = new CliFolderPathCalculator();
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
+
             using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel(cliFallbackFolderPathCalculator))
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(cliFallbackFolderPathCalculator))
             {
                 IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel = disposableFirstTimeUseNoticeSentinel;
+                IAspNetCertificateSentinel aspNetCertificateSentinel = new AspNetCertificateSentinel(cliFallbackFolderPathCalculator);
+                IFileSentinel toolPathSentinel = new FileSentinel(
+                    new FilePath(
+                        Path.Combine(
+                            CliFolderPathCalculator.DotnetUserProfileFolderPath,
+                            ToolPathSentinelFileName)));
+
                 for (; lastArg < args.Length; lastArg++)
                 {
                     if (IsArg(args[lastArg], "d", "diagnostics"))
                     {
-                        verbose = true;
+                        Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, bool.TrueString);
+                        CommandContext.SetVerbose(true);
                     }
                     else if (IsArg(args[lastArg], "version"))
                     {
@@ -111,7 +127,7 @@ namespace Microsoft.DotNet.Cli
                         HelpCommand.PrintHelp();
                         return 0;
                     }
-                    else if (args[lastArg].StartsWith("-"))
+                    else if (args[lastArg].StartsWith("-", StringComparison.OrdinalIgnoreCase))
                     {
                         Reporter.Error.WriteLine($"Unknown option: {args[lastArg]}");
                         success = false;
@@ -120,22 +136,28 @@ namespace Microsoft.DotNet.Cli
                     {
                         // It's the command, and we're done!
                         command = args[lastArg];
-
                         if (string.IsNullOrEmpty(command))
                         {
                             command = "help";
                         }
 
-                        topLevelCommandParserResult = new TopLevelCommandParserResult(args[lastArg]);
+                        topLevelCommandParserResult = new TopLevelCommandParserResult(command);
+                        var hasSuperUserAccess = false;
                         if (IsDotnetBeingInvokedFromNativeInstaller(topLevelCommandParserResult))
                         {
+                            aspNetCertificateSentinel = new NoOpAspNetCertificateSentinel();
                             firstTimeUseNoticeSentinel = new NoOpFirstTimeUseNoticeSentinel();
+                            toolPathSentinel = new NoOpFileSentinel(exists: false);
+                            hasSuperUserAccess = true;
                         }
 
                         ConfigureDotNetForFirstTimeUse(
                             nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
-                            cliFallbackFolderPathCalculator);
+                            aspNetCertificateSentinel,
+                            toolPathSentinel,
+                            cliFallbackFolderPathCalculator,
+                            hasSuperUserAccess);
 
                         break;
                     }
@@ -159,9 +181,8 @@ namespace Microsoft.DotNet.Cli
                 ? Enumerable.Empty<string>()
                 : args.Skip(lastArg + 1).ToArray();
 
-            if (verbose.HasValue)
+            if (CommandContext.IsVerbose())
             {
-                Environment.SetEnvironmentVariable(CommandContext.Variables.Verbose, verbose.ToString());
                 Console.WriteLine($"Telemetry is: {(telemetryClient.Enabled ? "Enabled" : "Disabled")}");
             }
 
@@ -170,7 +191,12 @@ namespace Microsoft.DotNet.Cli
             int exitCode;
             if (BuiltInCommandsCatalog.Commands.TryGetValue(topLevelCommandParserResult.Command, out var builtIn))
             {
-                TelemetryEventEntry.SendFiltered(Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray()));
+                var parseResult = Parser.Instance.ParseFrom($"dotnet {topLevelCommandParserResult.Command}", appArgs.ToArray());
+                if (!parseResult.Errors.Any())
+                {
+                    TelemetryEventEntry.SendFiltered(parseResult);
+                }
+
                 exitCode = builtIn.Command(appArgs.ToArray());
             }
             else
@@ -193,24 +219,35 @@ namespace Microsoft.DotNet.Cli
         private static void ConfigureDotNetForFirstTimeUse(
             INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
-            CliFallbackFolderPathCalculator cliFallbackFolderPathCalculator)
+            IAspNetCertificateSentinel aspNetCertificateSentinel,
+            IFileSentinel toolPathSentinel,
+            CliFolderPathCalculator cliFolderPathCalculator,
+            bool hasSuperUserAccess)
         {
+            var environmentProvider = new EnvironmentProvider();
+
             using (PerfTrace.Current.CaptureTiming())
             {
                 var nugetPackagesArchiver = new NuGetPackagesArchiver();
-                var environmentProvider = new EnvironmentProvider();
+                var environmentPath =
+                    EnvironmentPathFactory.CreateEnvironmentPath(cliFolderPathCalculator, hasSuperUserAccess, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
                 var nugetCachePrimer = new NuGetCachePrimer(
                     nugetPackagesArchiver,
                     nugetCacheSentinel,
-                    cliFallbackFolderPathCalculator);
+                    cliFolderPathCalculator);
+                var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
                     nugetCachePrimer,
                     nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
+                    aspNetCertificateSentinel,
+                    aspnetCertificateGenerator,
+                    toolPathSentinel,
                     environmentProvider,
                     Reporter.Output,
-                    cliFallbackFolderPathCalculator.CliFallbackFolderPath);
+                    cliFolderPathCalculator.CliFallbackFolderPath,
+                    environmentPath);
 
                 dotnetConfigurer.Configure();
             }
@@ -237,16 +274,13 @@ namespace Microsoft.DotNet.Cli
 
         private static void PrintInfo()
         {
-            HelpCommand.PrintVersionHeader();
-
             DotnetVersionFile versionFile = DotnetFiles.VersionFileObject;
             var commitSha = versionFile.CommitSha ?? "N/A";
+            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetSdkInfoLabel}");
+            Reporter.Output.WriteLine($" Version:   {Product.Version}");
+            Reporter.Output.WriteLine($" Commit:    {commitSha}");
             Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine("Product Information:");
-            Reporter.Output.WriteLine($" Version:            {Product.Version}");
-            Reporter.Output.WriteLine($" Commit SHA-1 hash:  {commitSha}");
-            Reporter.Output.WriteLine();
-            Reporter.Output.WriteLine("Runtime Environment:");
+            Reporter.Output.WriteLine($"{LocalizableStrings.DotNetRuntimeInfoLabel}");
             Reporter.Output.WriteLine($" OS Name:     {RuntimeEnvironment.OperatingSystem}");
             Reporter.Output.WriteLine($" OS Version:  {RuntimeEnvironment.OperatingSystemVersion}");
             Reporter.Output.WriteLine($" OS Platform: {RuntimeEnvironment.OperatingSystemPlatform}");
@@ -261,7 +295,8 @@ namespace Microsoft.DotNet.Cli
 
         private static bool IsArg(string candidate, string shortName, string longName)
         {
-            return (shortName != null && candidate.Equals("-" + shortName)) || (longName != null && candidate.Equals("--" + longName));
+            return (shortName != null && candidate.Equals("-" + shortName, StringComparison.OrdinalIgnoreCase)) ||
+                   (longName != null && candidate.Equals("--" + longName, StringComparison.OrdinalIgnoreCase));
         }
 
         private static string GetDisplayRid(DotnetVersionFile versionFile)

@@ -7,6 +7,7 @@ using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Collections.Generic;
+using System;
 using Xunit;
 
 namespace Microsoft.DotNet.Tests
@@ -24,6 +25,22 @@ namespace Microsoft.DotNet.Tests
             _fakeTelemetry = new FakeRecordEventNameTelemetry();
             TelemetryEventEntry.Subscribe(_fakeTelemetry.TrackEvent);
             TelemetryEventEntry.TelemetryFilter = new TelemetryFilter(Sha256Hasher.HashWithNormalizedCasing);
+        }
+
+        [Fact]
+        public void NoTelemetryIfCommandIsInvalid()
+        {
+            string[] args = { "publish", "-r"};
+            Action a = () => { Cli.Program.ProcessArgs(args); };
+            a.ShouldNotThrow<ArgumentOutOfRangeException>();
+        }
+
+        [Fact]
+        public void NoTelemetryIfCommandIsInvalid2()
+        {
+            string[] args = { "restore", "-v" };
+            Action a = () => { Cli.Program.ProcessArgs(args); };
+            a.ShouldNotThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -145,7 +162,9 @@ namespace Microsoft.DotNet.Tests
         public void DotnetNugetCommandFirstArgumentShouldBeSentToTelemetry()
         {
             const string argumentToSend = "push";
-            string[] args = { "nuget", argumentToSend, "aRoot" };
+
+            string[] args = { "nuget", argumentToSend };
+
             Cli.Program.ProcessArgs(args);
             _fakeTelemetry
                 .LogEntries.Should()

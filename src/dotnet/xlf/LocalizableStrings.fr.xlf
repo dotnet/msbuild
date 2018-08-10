@@ -375,7 +375,7 @@
       </trans-unit>
       <trans-unit id="FoundMoreThanOneSolutionIn">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">Plusieurs fichiers solution trouvés dans {0}. Spécifiez celui à utiliser.</target>
+        <target state="translated">Plusieurs fichiers solution trouvés dans {0}. Spécifiez celui qui doit être utilisé.</target>
         <note />
       </trans-unit>
       <trans-unit id="FoundInvalidSolution">

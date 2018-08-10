@@ -4,13 +4,21 @@
   <Import Project="prepare/CheckPrereqs.targets" />
 
   <Target Name="Prepare"
-          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages" />
+          DependsOnTargets="Init;DownloadHostAndSharedFxArtifacts;RestoreSrcPackages;RestoreToolsPackages;IsolateArtifactsFromDirectoryBuildFiles;CreatePropsForNextStage" />
 
   <Target Name="Init"
           DependsOnTargets="PrintBuildInfo;
                             SetTelemetryProfile;
                             BuildDotnetCliBuildFramework;
                             CheckPrereqs;">
+  </Target>
+
+  <Target Name="SandBoxPrepare"
+          DependsOnTargets="PrintBuildInfo;
+                            CheckPrereqs;
+                            DownloadHostAndSharedFxArtifacts;
+                            IsolateArtifactsFromDirectoryBuildFiles;
+                            CreatePropsForNextStage">
   </Target>
 
   <Target Name="PrintBuildInfo">
@@ -31,7 +39,7 @@
       <OverwriteExtractionDestination>%(_DownloadAndExtractItem.OverwriteDestination)</OverwriteExtractionDestination>
       <OverwriteExtractionDestination Condition="'$(OverwriteExtractionDestination)' == ''">True</OverwriteExtractionDestination>
     </PropertyGroup>
-    
+
     <DownloadFile Condition=" '@(_DownloadAndExtractItem)' != '' "
                   Uri="%(_DownloadAndExtractItem.Url)"
                   DestinationPath="%(_DownloadAndExtractItem.DownloadFileName)" />
@@ -54,7 +62,7 @@
 
     <CallTarget Targets="CleanSrcLockFiles" />
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="&quot;%(RestoreSrcPackagesInput.FullPath)&quot;" />
 
   </Target>
@@ -79,7 +87,7 @@
 
     <CallTarget Targets="CleanToolsLockFiles" />
 
-    <DotNetRestore ToolPath="$(Stage0Directory)"
+    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
                    ProjectPath="&quot;%(RestoreToolsPackagesInput.FullPath)&quot;"
                    AdditionalParameters="/p:UsePortableLinuxSharedFramework=$(UsePortableLinuxSharedFramework)" />
 
@@ -98,4 +106,39 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="IsolateArtifactsFromDirectoryBuildFiles">
+    <Copy SourceFiles="$(RepoRoot)TestAssets\Directory.Build.props"
+          DestinationFolder ="$(RepoRoot)bin"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CreatePropsForNextStage">
+    <PropertyGroup>
+     
+      <NextStagePropsContent>
+&lt;Project&gt;
+    &lt;PropertyGroup&gt;
+        &lt;PreviousStageDirectory&gt;$(OutputDirectory)&lt;/PreviousStageDirectory&gt;
+        &lt;PreviousStageDotnet&gt;$(DotnetInOutputDirectory)&lt;/PreviousStageDotnet&gt;
+        &lt;CliOuterBuildStage&gt;$(CliBuildStage)&lt;/CliOuterBuildStage&gt;
+    &lt;/PropertyGroup&gt;
+&lt;/Project&gt;
+      </NextStagePropsContent>
+
+      <ExistingNextStagePropsContent Condition=" Exists('$(NextStagePropsPath)') ">
+        $([System.IO.File]::ReadAllText($(NextStagePropsPath)))
+      </ExistingNextStagePropsContent>
+
+      <ShouldOverwriteNextStagePropsFile>false</ShouldOverwriteNextStagePropsFile>
+      <ShouldOverwriteNextStagePropsFile
+        Condition=" '$(ExistingNextStagePropsContent.Trim())' != '$(NextStagePropsContent.Trim())' ">true</ShouldOverwriteNextStagePropsFile>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(NextStagePropsPath)"
+                  Lines="$(NextStagePropsContent)"
+                  Condition=" '$(ShouldOverwriteNextStagePropsFile)' == 'true' "
+                  Overwrite="true"  />
+  </Target>
+
 </Project>
+

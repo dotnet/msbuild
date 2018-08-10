@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="InstallationSucceeded">
+        <source>You can invoke the tool using the following command: {0}
+Tool '{1}' (version '{2}') was successfully installed.</source>
+        <target state="translated">Sie können das Tool über den folgenden Befehl aufrufen: {0}
+Das Tool "{1}" (Version {2}) wurde erfolgreich installiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>NuGet Package Id of the tool to install.</source>
+        <target state="translated">NuGet-Paket-ID des zu installierenden Tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Installs a tool for use on the command line.</source>
+        <target state="translated">Installiert ein Tool zur Verwendung über die Befehlszeile.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">Die zu verwendende NuGet-Konfigurationsdatei.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to install the tool for.</source>
+        <target state="translated">Das Zielframework, für das das Tool installiert wird.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>Version of the tool package in NuGet.</source>
+        <target state="translated">Die Version des Toolpakets in NuGet.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Please specify one tool Package Id to install.</source>
+        <target state="translated">Geben Sie eine Toolpaket-ID für die Installation an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Install user wide.</source>
+        <target state="translated">Benutzerweite Installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET Install Command</source>
+        <target state="translated">.NET-Installationsbefehl</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolConfiguration">
+        <source>The settings file in the tool's NuGet package is invalid: {0}</source>
+        <target state="translated">Die Einstellungsdatei im NuGet-Paket des Tools ist ungültig: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedContactAuthor">
+        <source>Tool '{0}' failed to install. Please contact the tool author for assistance.</source>
+        <target state="translated">Fehler bei der Installation des Tools "{0}". Wenden Sie sich an den Verfasser des Tools, um Unterstützung zu erhalten.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolAlreadyInstalled">
+        <source>Tool '{0}' is already installed.</source>
+        <target state="translated">Das Tool "{0}" ist bereits installiert.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateToolShim">
+        <source>Failed to create shell shim for tool '{0}': {1}</source>
+        <target state="translated">Fehler beim Erstellen des Shell-Shims für das Tool "{0}": {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">Die NuGet-Konfigurationsdatei "{0}" ist nicht vorhanden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationRestoreFailed">
+        <source>The tool package could not be restored.</source>
+        <target state="translated">Das Toolpaket konnte nicht wiederhergestellt werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidNuGetVersionRange">
+        <source>Specified version '{0}' is not a valid NuGet version range.</source>
+        <target state="translated">Die angegebene Version "{0}" ist kein gültiger NuGet-Versionsbereich.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">Geben Sie entweder die globale Option (--global) oder die Toolpfadoption (--tool-path) an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="translated">(--global) verursacht einen Konflikt mit der Toolpfadoption (--tool-path). Geben Sie nur eine der beiden Optionen an.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tool will be installed.</source>
+        <target state="translated">Speicherort für die Installation des Tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailed">
+        <source>Tool '{0}' failed to install.</source>
+        <target state="translated">Fehler bei der Installation des Tools "{0}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolInstallationFailedWithRestoreGuidance">
+        <source>Tool '{0}' failed to install. This failure may have been caused by:
+
+* You are attempting to install a preview release and did not use the --version option to specify the version.
+* A package by this name was found, but it was not a .NET Core tool.
+* The required NuGet feed cannot be accessed, perhaps because of an Internet connection problem.
+* You mistyped the name of the tool.</source>
+        <target state="translated">Fehler bei der Installation des Tools "{0}". Dieser Fehler kann folgende Ursachen haben:
+
+* Sie versuchen, eine Vorschauversion zu installieren und haben nicht die Option "--version" verwendet, um die Version anzugeben.
+* Ein Paket mit diesem Namen wurde gefunden, aber es handelt sich nicht um ein .NET Core-Tool.
+* Auf den erforderlichen NuGet-Feed kann nicht zugegriffen werden, möglicherweise aufgrund eines Problems mit der Internetverbindung.
+* Sie haben den Namen des Tools falsch eingegeben.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during installation.</source>
+        <target state="new">Adds an additional NuGet package source to use during installation.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>SOURCE</source>
+        <target state="new">SOURCE</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

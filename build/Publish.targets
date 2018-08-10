@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(NuGetPackagesDir)/microsoft.dotnet.build.tasks.feed/$(BuildTasksFeedToolVersion)/build/Microsoft.DotNet.Build.Tasks.Feed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/FinishBuild.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishContent.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)/publish/PublishDebian.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/PublishNupkgToBlobFeed.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Badge.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/Checksum.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/publish/RuntimeCoherence.targets" />
-  
+
   <!-- PUBLISH_TO_AZURE_BLOB env variable set by CI -->
   <Target Name="Publish"
           Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
           DependsOnTargets="Init;
+                            SetBadgeProps;
                             Package;
+                            EvaluateRuntimeCoherence;
+                            PublishArtifacts;
+                            FinishBuild" />
+
+  <Target Name="PublishWithoutPackage"
+          Condition=" '$(PUBLISH_TO_AZURE_BLOB)' == 'true' "
+          DependsOnTargets="Init;
+                            SetBadgeProps;
                             EvaluateRuntimeCoherence;
                             PublishArtifacts;
                             FinishBuild" />
@@ -26,54 +35,66 @@
                              UploadArtifactsToAzure;
                              UploadChecksumsToAzure;
                              PublishNupkgToBlobFeed;
-                             PublishDebFilesToDebianRepo;
                              PublishCliVersionBadge" />
 
   <Target Name="GatherItemsForPattern">
     <ItemGroup>
       <ForPublishing Include="@(GeneratedInstallers)"
-                     Condition=" '$(IslinuxPortable)' != 'true' "/>
+                     Condition=" '$(PublishNativeInstallers)' == 'true' "/>
       <ForPublishing Include="%(GenerateArchivesInputsOutputs.Outputs)"
-                     Condition=" '$(IsLinuxDistroSpecific)' != 'true' "/>
-      <ForPublishing Include="@(NupkgsForPublishing)"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(PublishArchives)' == 'true' "/>
+      <ForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.Cli.Utils.*.nupkg"
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " />
+      <ForPublishing Include="$(PackagesDirectory)/Microsoft.DotNet.MSBuildSdkResolver.*.nupkg"
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " />
+      <ForPublishing Include="$(PackagesDirectory)/runtime.*.Microsoft.DotNet.SDK.*.symbols.nupkg" />
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' "/>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.*.nupkg"
-                     Condition=" '$(PUBLISH_NUPKG_TO_AZURE_BLOB)' == 'true' AND '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+      <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.swr"
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+      <ForPublishing Include="$(PackagesDirectory)/nuGetPackagesArchive.lzma"
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
     </ItemGroup>
 
     <ItemGroup>
       <ForPublishing>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </ForPublishing>
     </ItemGroup>
   </Target>
 
   <Target Name="PublishCliVersionBadge">
+    <Error Condition="'$(ArtifactCloudDropAccessToken)' == ''" Text="Missing property ArtifactCloudDropAccessToken." />
+    <Error Condition="'$(ArtifactCloudDropURL)' == ''" Text="Missing property ArtifactCloudDropURL." />
+    
     <ItemGroup>
       <CliVersionBadgeToUpload Include="$(VersionBadge)" />
       <CliVersionBadgeToUpload Include="$(CoherentBadge)"
-              Condition=" '$(Coherent)' == 'true' " />
+              Condition=" '$(Coherent)' == 'true' And !$(Architecture.StartsWith('arm')) " />
     </ItemGroup>
 
     <ItemGroup>
       <CliVersionBadgeToUpload>
-        <RelativeBlobPath>$(Product)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <RelativeBlobPath>$(BlobStoragePartialRelativePath)/$(FullNugetVersion)/$([System.String]::Copy('%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+        <ManifestArtifactData>ShipInstaller=dotnetcli</ManifestArtifactData>
       </CliVersionBadgeToUpload>
     </ItemGroup>
 
-    <UploadToAzure
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(CliVersionBadgeToUpload)"
-      Overwrite="$(OverwriteOnPublish)" />
-
-    <SetBlobPropertiesBasedOnFileType
-      AccountKey="$(ArtifactCloudDropAccessToken)"
-      AccountName="$(ArtifactCloudDropAccountName)"
-      ContainerName="$(ArtifactContainerName)"
-      Items="@(CliVersionBadgeToUpload)" />
+    <Message Text="Publish badges to blob feed started: $(ArtifactCloudDropURL)" />
+    <PushToBlobFeed ExpectedFeedUrl="$(ArtifactCloudDropURL)"
+                    AccountKey="$(ArtifactCloudDropAccessToken)"
+                    ItemsToPush="@(CliVersionBadgeToUpload)"
+                    ManifestBranch="$(BranchName)"
+                    ManifestBuildId="$(FullNugetVersion)"
+                    ManifestCommit="$(CommitHash)"
+                    ManifestName="$(BuildName)"
+                    ManifestBuildData="ProductVersion=$(FullNugetVersion)"
+                    Overwrite="false" 
+                    PublishFlatContainer="true" 
+                    SkipCreateManifest="$(IsNotOrchestratedPublish)" />
   </Target>
+
 </Project>

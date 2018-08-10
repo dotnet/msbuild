@@ -73,11 +73,15 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results.
-                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
+                                        Examples:
+                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
-        <target state="translated">指定测试结果的记录器。
-                                        示例: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
-                                        有关记录器参数的详细信息，请访问 support:https://aka.ms/vstest-report</target>
+        <target state="translated">为测试结果指定一个记录器。
+                                        示例:
+                                        使用唯一文件名按 trx 格式进行记录: --logger trx
+                                        使用指定的文件名按 trx 格式进行记录: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        有关记录器参数支持的详细信息，请访问: https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfiguration">
@@ -123,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
-        <source>Do not build project before testing.</source>
-        <target state="translated">测试之前不要生成项目。</target>
+        <source>Do not build the project before testing. Implies --no-restore.</source>
+        <target state="translated">测试之前不要生成项目。Implies --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
@@ -171,6 +175,11 @@ RunSettings 参数:
                                         More info here : https://aka.ms/vstest-collect</source>
         <target state="translated">为测试运行启用数据收集器。
                                         有关详细信息，请访问: https://aka.ms/vstest-collect</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
+        <target state="translated">在追责模式下运行测试。此选项有助于隔离有问题的测试，以免导致测试主机崩溃。它会在当前目录中创建一个输出文件 "Sequence.xml"，用于在崩溃之前捕获测试的执行顺序。</target>
         <note />
       </trans-unit>
     </body>

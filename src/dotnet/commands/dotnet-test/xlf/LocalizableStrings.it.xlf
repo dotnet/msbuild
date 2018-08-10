@@ -73,10 +73,14 @@
       </trans-unit>
       <trans-unit id="CmdLoggerDescription">
         <source>Specify a logger for test results.
-                                        Example: --logger "trx[;LogFileName=&lt;Defaults to unique file name&gt;]"
+                                        Examples:
+                                        Log in trx format using a unqiue file name: --logger trx
+                                        Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         More info on logger arguments support:https://aka.ms/vstest-report</source>
         <target state="translated">Consente di specificare un logger per i risultati dei test.
-                                        Esempio: --logger "trx[;LogFileName=&lt;l'impostazione predefinita è un nome file univoco&gt;]"
+                                        Esempi:
+                                        Log in formato trx con nome file univoco: --logger trx
+                                        Log in formato trx con il nome file specificato: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         Per altre informazioni sul supporto degli argomenti del logger, vedere: https://aka.ms/vstest-report</target>
         <note />
       </trans-unit>
@@ -123,8 +127,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildDescription">
-        <source>Do not build project before testing.</source>
-        <target state="translated">Il progetto non viene compilato prima del test.</target>
+        <source>Do not build the project before testing. Implies --no-restore.</source>
+        <target state="translated">Non compila il progetto prima del test. Implica --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdTestAdapterPath">
@@ -171,6 +175,11 @@ Argomenti di RunSettings:
                                         More info here : https://aka.ms/vstest-collect</source>
         <target state="translated">Abilita l'agente di raccolta dati per l'esecuzione dei test.
                                         Per altre informazioni, vedere: https://aka.ms/vstest-collect</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdBlameDescription">
+        <source>Runs the test in blame mode. This option is helpful in isolating the problematic test causing test host crash. It creates an output file in the current directory as "Sequence.xml", that captures the order of execution of test before the crash.</source>
+        <target state="translated">Esegue il test in modalità di segnalazione errore. Questa opzione è utile per isolare il test problematico che causa l'arresto anomalo dell'host dei test. Crea nella directory corrente un file di output denominato "Sequence.xml", in cui viene acquisito l'ordine di esecuzione del test prima dell'arresto anomalo.</target>
         <note />
       </trans-unit>
     </body>

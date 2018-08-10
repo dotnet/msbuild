@@ -40,11 +40,16 @@ namespace Microsoft.DotNet.Tools.Sln.Remove
         {
             SlnFile slnFile = SlnFileFactory.CreateFromFileOrDirectory(_fileOrDirectory);
 
-            var relativeProjectPaths = _appliedCommand.Arguments.Select(p =>
-                                                                            PathUtility.GetRelativePath(
-                                                                                PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory),
-                                                                                Path.GetFullPath(p)))
-                                                      .ToList();
+            var baseDirectory = PathUtility.EnsureTrailingSlash(slnFile.BaseDirectory);
+            var relativeProjectPaths = _appliedCommand.Arguments.Select(p => {
+                var fullPath = Path.GetFullPath(p);
+                return Path.GetRelativePath(
+                    baseDirectory,
+                    Directory.Exists(fullPath) ?
+                        MsbuildProject.GetProjectFileFromDirectory(fullPath).FullName :
+                        fullPath
+                );
+            });
 
             bool slnChanged = false;
             foreach (var path in relativeProjectPaths)

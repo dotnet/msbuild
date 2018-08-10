@@ -5,22 +5,24 @@
       <trans-unit id="FirstTimeWelcomeMessage">
         <source>Welcome to .NET Core!
 ---------------------
-Learn more about .NET Core @ https://aka.ms/dotnet-docs. Use dotnet --help to see available commands or go to https://aka.ms/dotnet-cli-docs.
+Learn more about .NET Core: https://aka.ms/dotnet-docs
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
 
 Telemetry
---------------
-The .NET Core tools collect usage data in order to improve your experience. The data is anonymous and does not include command-line arguments. The data is collected by Microsoft and shared with the community.
-You can opt out of telemetry by setting a DOTNET_CLI_TELEMETRY_OPTOUT environment variable to 1 using your favorite shell.
-You can read more about .NET Core tools telemetry @ https://aka.ms/dotnet-cli-telemetry.</source>
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
         <target state="translated">Vítá vás .NET Core!
 ---------------------
-Další informace o .NET Core najdete na https://aka.ms/dotnet-docs. Dostupné příkazy si zobrazíte pomocí dotnet --help, případně přejděte na https://aka.ms/dotnet-cli-docs.
+Další informace o .NET Core: https://aka.ms/dotnet-docs
+Dostupné příkazy si zobrazíte pomocí dotnet --help, případně navštivte: https://aka.ms/dotnet-cli-docs.
 
 Telemetrie
---------------
-Nástroje .NET Core shromažďují data o využití s cílem vylepšit vaše prostředí. Data jsou anonymní a nezahrnují argumenty příkazového řádku. Data shromažďuje Microsoft, který je sdílí s komunitou.
-S telemetrií můžete vyjádřit výslovný nesouhlas, a to nastavením proměnné prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1 prostřednictvím svého oblíbeného rozhraní.
-Další informace o telemetrii nástrojů .NET Core si můžete přečíst na webu https://aka.ms/dotnet-cli-telemetry.</target>
+---------
+Nástroje .NET Core shromažďují data o využití s cílem usnadnit nám vylepšování vašeho prostředí. Data jsou anonymní a nezahrnují argumenty příkazového řádku. Data shromažďuje Microsoft, který je sdílí s komunitou. S telemetrií můžete vyjádřit výslovný nesouhlas, a to nastavením proměnné prostředí DOTNET_CLI_TELEMETRY_OPTOUT na 1 (neboli Pravda) prostřednictvím svého oblíbeného rozhraní.
+
+Další informace o telemetrii nástrojů .NET Core CLI: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedToPrimeCacheError">
@@ -30,18 +32,18 @@ Další informace o telemetrii nástrojů .NET Core si můžete přečíst na we
       </trans-unit>
       <trans-unit id="NugetCachePrimeMessage">
         <source>Configuring...
--------------------
-A command is running to initially populate your local package cache, to improve restore speed and enable offline access. This command will take up to a minute to complete and will only happen once.</source>
+--------------
+A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
         <target state="translated">Probíhá konfigurace...
--------------------
-Běží příkaz pro počáteční naplnění vaší místní mezipaměti balíčků, aby se vylepšila rychlost obnovování a umožnil se offline přístup. Provádění tohoto příkazu může trvat až minutu a proběhne jen jednou.</target>
+--------------
+Běží příkaz pro naplnění vaší místní mezipaměti balíčků, aby se vylepšila rychlost obnovování a umožnil se offline přístup. Provádění tohoto příkazu trvá až minutu a proběhne jen jednou.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
----------------------
+----------------------------------------
 1. Re-run this command with elevated access.
 2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
@@ -49,11 +51,24 @@ Here are some options to fix this error:
         <target state="translated">Oprávnění ke změně složky {0} bylo zamítnuto.
 
 Tuto chybu můžete opravit pomocí některé z těchto možností:
----------------------
+----------------------------------------
 1. Znovu spusťte tento příkaz pomocí přístupu se zvýšenou úrovní oprávnění.
 2. Zakažte software spouštěný při prvním zapnutí počítače tak, že nastavíte proměnnou prostředí DOTNET_SKIP_FIRST_TIME_EXPERIENCE na hodnotu Pravda.
 3. Zkopírujte sadu .NET Core SDK do nechráněného umístění a použijte ji z tohoto umístění.
     </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AspNetCertificateInstalled">
+        <source>ASP.NET Core
+------------
+Successfully installed the ASP.NET Core HTTPS Development Certificate.
+To trust the certificate run 'dotnet dev-certs https --trust' (Windows and macOS only). For establishing trust on other platforms refer to the platform specific documentation.
+For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?linkid=848054.</source>
+        <target state="needs-review-translation">ASP.NET Core
+------------
+Úspěšně se podařilo nainstalovat certifikát pro vývoj ASP.NET Core HTTPS Development Certificate.
+Pokud chcete certifikátu důvěřovat (platí jenom pro Windows a macOS), nainstalujte nejprve nástroj dev-certs. To uděláte tak, že spustíte dotnet tool install dotnet-dev-certs -g --version 2.1.0-preview1-final a potom dotnet-dev-certs https --trust.
+Další informace o konfiguraci protokolu HTTPS najdete na webu https://go.microsoft.com/fwlink/?linkid=848054.</target>
         <note />
       </trans-unit>
     </body>

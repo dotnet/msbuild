@@ -102,7 +102,8 @@ namespace Microsoft.DotNet.Tools.Help
         {
             if (BuiltInCommandsCatalog.Commands.TryGetValue(
                 _appliedOption.Arguments.Single(),
-                out BuiltInCommandMetadata builtIn))
+                out BuiltInCommandMetadata builtIn) &&
+                !string.IsNullOrEmpty(builtIn.DocLink))
             {
                 var process = ConfigureProcess(builtIn.DocLink);
                 process.Start();

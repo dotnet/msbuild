@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="NetListCommand">
-        <source>.NET List Command</source>
-        <target state="translated">Polecenie list platformy .NET</target>
+        <source>List references of a .NET project.</source>
+        <target state="needs-review-translation">Polecenie list platformy .NET</target>
         <note />
       </trans-unit>
     </body>

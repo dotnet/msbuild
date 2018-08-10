@@ -10,7 +10,7 @@
 
     <PropertyGroup>
       <HostInfoPropsContent>
-&lt;Project ToolsVersion=&quot;15.0&quot;&gt;
+&lt;Project ToolsVersion=&quot;15.0&quot; xmlns=&quot;http://schemas.microsoft.com/developer/msbuild/2003&quot;&gt;
     &lt;PropertyGroup&gt;
         &lt;HostRid&gt;$(HostRid)&lt;/HostRid&gt;
         &lt;HostOSName&gt;$(HostOSName)&lt;/HostOSName&gt;

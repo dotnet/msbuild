@@ -16,6 +16,7 @@ fi
 dotnet_pkg_name_suffix="com.microsoft.dotnet"
 dotnet_install_root="/usr/local/share/dotnet"
 dotnet_path_file="/etc/paths.d/dotnet"
+dotnet_tool_path_file="/etc/paths.d/dotnet-cli-tools"
 
 remove_dotnet_pkgs(){
     installed_pkgs=($(pkgutil --pkgs | grep $dotnet_pkg_name_suffix))
@@ -33,6 +34,7 @@ remove_dotnet_pkgs
 echo "Deleting install root - $dotnet_install_root" >&2
 rm -rf "$dotnet_install_root"
 rm -f "$dotnet_path_file"
+rm -f "$dotnet_tool_path_file"
 
 echo "dotnet packages removal succeeded." >&2
 exit 0

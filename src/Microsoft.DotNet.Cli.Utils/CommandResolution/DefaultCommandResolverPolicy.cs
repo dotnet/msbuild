@@ -44,6 +44,7 @@ namespace Microsoft.DotNet.Cli.Utils
             var compositeCommandResolver = new CompositeCommandResolver();
 
             compositeCommandResolver.AddCommandResolver(new MuxerCommandResolver());
+            compositeCommandResolver.AddCommandResolver(new DotnetToolsCommandResolver());
             compositeCommandResolver.AddCommandResolver(new RootedCommandResolver());
             compositeCommandResolver.AddCommandResolver(
                 new ProjectToolsCommandResolver(packagedCommandSpecFactory, environment));

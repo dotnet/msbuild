@@ -86,8 +86,12 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             result.StdOut.Should().Contain(MSBuildHelpText);
         }
 
-        [Fact]
-        public void WhenRestoreSourcesStartsWithUnixPathThenHttpsSourceIsParsedCorrectly()
+        [Theory]
+        [InlineData("/p")]
+        [InlineData("/property")]
+        [InlineData("-p")]
+        [InlineData("-property")]
+        public void WhenRestoreSourcesStartsWithUnixPathThenHttpsSourceIsParsedCorrectly(string propertyFormat)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -104,7 +108,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
             var result = new DotnetCommand()
                 .WithWorkingDirectory(root)
-                .Execute($"msbuild /p:RestoreSources={somePathThatExists};https://api.nuget.org/v3/index.json /t:restore LibraryWithUnresolvablePackageReference.csproj");
+                .Execute($"msbuild {propertyFormat}:RestoreSources={somePathThatExists};https://api.nuget.org/v3/index.json /t:restore LibraryWithUnresolvablePackageReference.csproj");
 
             _output.WriteLine($"[STDOUT]\n{result.StdOut}\n[STDERR]\n{result.StdErr}");
 
@@ -138,7 +142,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                 allArgs.Should().NotBeNull();
 
                 allArgs.Should().Contain(
-                    value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
+                    value => value.IndexOf("-distributedlogger", StringComparison.OrdinalIgnoreCase) >= 0,
                     "The MSBuild logger argument should be specified when telemetry is enabled.");
             }
         }
@@ -151,7 +155,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             allArgs.Should().NotBeNull();
 
             allArgs.Should().NotContain(
-                value => value.IndexOf("/Logger", StringComparison.OrdinalIgnoreCase) >= 0,
+                value => value.IndexOf("-logger", StringComparison.OrdinalIgnoreCase) >= 0,
                 $"The MSBuild logger argument should not be specified when telemetry is disabled.");
         }
 

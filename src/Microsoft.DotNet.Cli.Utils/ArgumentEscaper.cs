@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.DotNet.Cli.Utils
 {
@@ -22,7 +21,12 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns></returns>
         public static string EscapeAndConcatenateArgArrayForProcessStart(IEnumerable<string> args)
         { 
-            return string.Join(" ", EscapeArgArray(args));
+            var escaped = EscapeArgArray(args);
+#if NET35
+            return string.Join(" ", escaped.ToArray());
+#else
+            return string.Join(" ", escaped);
+#endif
         }
 
         /// <summary>
@@ -36,7 +40,12 @@ namespace Microsoft.DotNet.Cli.Utils
         /// <returns></returns>
         public static string EscapeAndConcatenateArgArrayForCmdProcessStart(IEnumerable<string> args)
         {
-            return string.Join(" ", EscapeArgArrayForCmd(args));
+            var escaped = EscapeArgArrayForCmd(args);
+#if NET35
+            return string.Join(" ", escaped.ToArray());
+#else
+            return string.Join(" ", escaped);
+#endif
         }
 
         /// <summary>
@@ -176,12 +185,6 @@ namespace Microsoft.DotNet.Cli.Utils
 
         internal static bool ShouldSurroundWithQuotes(string argument)
         {
-            // Don't quote already quoted strings
-            if (IsSurroundedWithQuotes(argument))
-            {
-                return false;
-            }
-
             // Only quote if whitespace exists in the string
             return ArgumentContainsWhitespace(argument);
         }

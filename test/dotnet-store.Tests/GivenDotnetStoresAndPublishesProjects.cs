@@ -13,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
 {
     public class GivenDotnetStoresAndPublishesProjects : TestBase
     {
-        private static string _tfm = "netcoreapp2.0";
+        private static string _tfm = "netcoreapp2.1";
         private static string _frameworkVersion = TestAssetInstance.CurrentRuntimeFrameworkVersion;
         private static string _arch = RuntimeEnvironment.RuntimeArchitecture.ToLowerInvariant();
 
@@ -108,7 +108,8 @@ namespace Microsoft.DotNet.Cli.Publish.Tests
                     "    path: 'lib/netstandard1.3/NuGet.Configuration.dll'");
         }
 
-        [Fact]
+        //  Windows only for now due to https://github.com/dotnet/cli/issues/7501
+        [WindowsOnlyFact]
         public void ItPublishesAnAppWithMultipleProfiles()
         {
             var testAppName = "MultiDependentProject";

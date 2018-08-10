@@ -1,8 +1,8 @@
-<Project>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <RuntimeNETCoreAppPackageName>runtime.$(SharedFrameworkRid).microsoft.netcore.app</RuntimeNETCoreAppPackageName>
     <CrossgenPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(MicrosoftNETCoreAppPackageVersion)/tools/crossgen$(ExeExtension)</CrossgenPath>
     <LibCLRJitPath>$(NuGetPackagesDir)/$(RuntimeNETCoreAppPackageName)/$(MicrosoftNETCoreAppPackageVersion)/runtimes/$(SharedFrameworkRid)/native/$(DynamicLibPrefix)clrjit$(DynamicLibExtension)</LibCLRJitPath>
-    <SharedFrameworkNameVersionPath>$(OutputDirectory)/shared/$(SharedFrameworkName)/$(SharedFrameworkVersion)</SharedFrameworkNameVersionPath>
+    <SharedFrameworkNameVersionPath>$(OutputDirectory)/shared/$(SharedFrameworkName)/$(MicrosoftNETCoreAppPackageVersion)</SharedFrameworkNameVersionPath>
   </PropertyGroup>
 </Project>

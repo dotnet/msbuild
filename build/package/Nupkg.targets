@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Layout" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PackagingBuildBasePath>$(CompilationDirectory)/forPackaging</PackagingBuildBasePath>
   </PropertyGroup>
@@ -10,10 +10,12 @@
       <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.Cli.Utils" >
         <ProjectName>Microsoft.DotNet.Cli.Utils</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
+        <IncludeSymbols>False</IncludeSymbols>
       </ProjectsToPack>
       <ProjectsToPack Include="$(SrcDirectory)/Microsoft.DotNet.MSBuildSdkResolver" >
         <ProjectName>Microsoft.DotNet.MSBuildSdkResolver</ProjectName>
         <Version>$(SdkNugetVersion)</Version>
+        <IncludeSymbols>True</IncludeSymbols>
       </ProjectsToPack>
     </ItemGroup>
   </Target>
@@ -22,9 +24,10 @@
           DependsOnTargets="Init; SetupProjectsToPack">
 
     <DotNetPack NoBuild="True"
+                IncludeSymbols="%(ProjectsToPack.IncludeSymbols)"
                 Output="$(PackagesDirectory)"
                 ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj"
-                ToolPath="$(Stage0Directory)"
+                ToolPath="$(PreviousStageDirectory)"
                 VersionSuffix="$(VersionSuffix)"
                 Configuration="$(Configuration)" />
   </Target>
@@ -34,7 +37,7 @@
 
     <MakeDir Directories="$(PackagingBuildBasePath)" />
 
-    <DotNetBuild ToolPath="$(Stage0Directory)"
+    <DotNetBuild ToolPath="$(PreviousStageDirectory)"
                  Configuration="$(Configuration)"
                  ProjectPath="%(ProjectsToPack.Identity)/%(ProjectsToPack.ProjectName).csproj" />
   </Target>

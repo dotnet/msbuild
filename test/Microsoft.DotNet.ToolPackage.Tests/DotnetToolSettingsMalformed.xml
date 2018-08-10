@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DotNetCliTool>
+  <Commands Malformed=""
+    <Command Name="sayhello" EntryPoint="console.dll" Runner="dotnet" />
+  </Commands>
+</DotNetCliTool>

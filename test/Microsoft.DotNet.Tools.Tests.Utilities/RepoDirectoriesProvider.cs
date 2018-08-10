@@ -15,11 +15,13 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private static string s_buildRid;
 
         private string _artifacts;
+        private string _dotnetRoot;
         private string _builtDotnet;
         private string _nugetPackages;
         private string _stage2Sdk;
         private string _stage2WithBackwardsCompatibleRuntimesDirectory;
         private string _testPackages;
+        private string _testWorkingFolder;
 
         public static string RepoRoot
         {
@@ -36,9 +38,14 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 string directory = AppContext.BaseDirectory;
 #endif
 
-                while (!Directory.Exists(Path.Combine(directory, ".git")) && directory != null)
+                while (directory != null)
                 {
-                    directory = Directory.GetParent(directory).FullName;
+                    var gitDirOrFile = Path.Combine(directory, ".git");
+                    if (Directory.Exists(gitDirOrFile) || File.Exists(gitDirOrFile))
+                    {
+                        break;
+                    }
+                    directory = Directory.GetParent(directory)?.FullName;
                 }
 
                 if (directory == null)
@@ -57,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 if (string.IsNullOrEmpty(s_buildRid))
                 {
-                    var buildInfoPath = Path.Combine(RepoRoot, "artifacts", "obj", "BuildInfo.props");
+                    var buildInfoPath = Path.Combine(RepoRoot, "bin", "obj", "BuildInfo.props");
                     var root = XDocument.Load(buildInfoPath).Root;
                     var ns = root.Name.Namespace;
 
@@ -79,10 +86,12 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         public string Artifacts => _artifacts;
         public string BuiltDotnet => _builtDotnet;
+        public string DotnetRoot => _dotnetRoot;
         public string NugetPackages => _nugetPackages;
         public string Stage2Sdk => _stage2Sdk;
         public string Stage2WithBackwardsCompatibleRuntimesDirectory => _stage2WithBackwardsCompatibleRuntimesDirectory;
         public string TestPackages => _testPackages;
+        public string TestWorkingFolder => _testWorkingFolder;
 
         public RepoDirectoriesProvider(
             string artifacts = null,
@@ -91,24 +100,35 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             string corehostPackages = null,
             string corehostDummyPackages = null)
         {
-            _artifacts = artifacts ?? Path.Combine(RepoRoot, "artifacts", BuildRid);
+            //  Ideally this wouldn't be hardcoded, so that you could use stage n to build stage n + 1, and then use stage n + 1 to run tests
+            int previousStage = 2;
+
+            _artifacts = artifacts ?? Path.Combine(RepoRoot,
+                                                   "bin",
+                                                   previousStage.ToString(),
+                                                   BuildRid);
             _builtDotnet = builtDotnet ?? Path.Combine(_artifacts, "intermediate", "sharedFrameworkPublish");
+            _dotnetRoot = Path.Combine(_artifacts, "dotnet");
             _nugetPackages = nugetPackages ?? Path.Combine(RepoRoot, ".nuget", "packages");
             _stage2Sdk = Directory
-                .EnumerateDirectories(Path.Combine(_artifacts, "stage2", "sdk"))
+                .EnumerateDirectories(Path.Combine(_artifacts, "dotnet", "sdk"))
                 .First(d => !d.Contains("NuGetFallbackFolder"));
 
             _stage2WithBackwardsCompatibleRuntimesDirectory =
-                Path.Combine(_artifacts, "stage2WithBackwardsCompatibleRuntimes");
-            _testPackages = Path.Combine(RepoRoot, "artifacts", "testpackages", "packages");
-        }
+                Path.Combine(_artifacts, "dotnetWithBackwardsCompatibleRuntimes");
 
-        private string GetPjDotnetPath()
-        {
-            return new DirectoryInfo(Path.Combine(RepoRoot, ".dotnet_stage0PJ"))
-                .GetDirectories().First()
-                .GetFiles("dotnet*").First()
-                .FullName;
+            _testPackages = Environment.GetEnvironmentVariable("TEST_PACKAGES");
+            if (string.IsNullOrEmpty(_testPackages))
+            {
+                _testPackages = Path.Combine(_artifacts, "test", "packages");
+            }
+
+            _testWorkingFolder = Path.Combine(RepoRoot,
+                                              "bin",
+                                              (previousStage + 1).ToString(),
+                                              BuildRid,
+                                              "test");
+            
         }
     }
 }

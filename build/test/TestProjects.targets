@@ -15,8 +15,10 @@
       <PreTestProjectsToExclude Condition=" 'Non-test projects in test directory' != 'consider moving elsewhere' "
                              Include="test/ArgumentsReflector/ArgumentsReflector.csproj;
                                       test/Microsoft.DotNet.Tools.Tests.Utilities/Microsoft.DotNet.Tools.Tests.Utilities.csproj;
+                                      test/Microsoft.DotNet.Tools.Tests.ComponentMocks/Microsoft.DotNet.Tools.Tests.ComponentMocks.csproj;
                                       test/Msbuild.Tests.Utilities/Msbuild.Tests.Utilities.csproj;
-                                      test/Performance/Performance.csproj" />
+                                      test/Performance/Performance.csproj;
+                                      test/Microsoft.DotNet.TestFramework/Microsoft.DotNet.TestFramework.csproj" />
 
       <PreTestProjectsToExclude Condition=" 'Executed after primary test phase.' != ' Consider moving.' "
                              Include="test/Installer/Microsoft.DotNet.Cli.Msi.Tests/Microsoft.DotNet.Cli.Msi.Tests.csproj;" />

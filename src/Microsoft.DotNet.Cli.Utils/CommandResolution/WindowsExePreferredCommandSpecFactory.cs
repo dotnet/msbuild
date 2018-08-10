@@ -63,7 +63,8 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var cmdEscapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForCmdProcessStart(args);
 
-            if (ArgumentEscaper.ShouldSurroundWithQuotes(command))
+            if (!ArgumentEscaper.IsSurroundedWithQuotes(command) // Don't quote already quoted strings
+                && ArgumentEscaper.ShouldSurroundWithQuotes(command))
             {
                 command = $"\"{command}\"";
             }

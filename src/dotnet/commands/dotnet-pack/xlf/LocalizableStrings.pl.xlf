@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdNoBuildOptionDescription">
-        <source>Skip building the project prior to packing. By default, the project will be built.</source>
-        <target state="translated">Pomiń kompilację projektu przed pakowaniem. Domyślnie projekt zostanie skompilowany.</target>
+        <source>Do not build the project before packing. Implies --no-restore.</source>
+        <target state="translated">Nie kompiluj tego projektu przed pakowaniem. Powoduje przyjęcie, że podano parametr --no-restore.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdIncludeSymbolsDescription">

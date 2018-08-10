@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.DotNet.Cli;
@@ -42,10 +43,22 @@ namespace Microsoft.DotNet.Tools.Remove.ProjectToProjectReference
         public override int Execute()
         {
             var msbuildProj = MsbuildProject.FromFileOrDirectory(new ProjectCollection(), _fileOrDirectory);
+            var references = _appliedCommand.Arguments.Select(p => {
+                var fullPath = Path.GetFullPath(p);
+                if (!Directory.Exists(fullPath))
+                {
+                    return p;
+                }
+
+                return Path.GetRelativePath(
+                    msbuildProj.ProjectRootElement.FullPath,
+                    MsbuildProject.GetProjectFileFromDirectory(fullPath).FullName
+                );
+            });
 
             int numberOfRemovedReferences = msbuildProj.RemoveProjectToProjectReferences(
                 _appliedCommand.ValueOrDefault<string>("framework"),
-                _appliedCommand.Arguments);
+                references);
 
             if (numberOfRemovedReferences != 0)
             {

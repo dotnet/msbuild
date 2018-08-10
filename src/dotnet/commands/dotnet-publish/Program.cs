@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Publish
 
             result.ShowHelpOrErrorIfAppropriate();
 
-            msbuildArgs.Add("/t:Publish");
+            msbuildArgs.Add("-target:Publish");
 
             var appliedPublishOption = result["dotnet"]["publish"];
 
@@ -43,7 +43,8 @@ namespace Microsoft.DotNet.Tools.Publish
 
             msbuildArgs.AddRange(appliedPublishOption.Arguments);
 
-            bool noRestore = appliedPublishOption.HasOption("--no-restore");
+            bool noRestore = appliedPublishOption.HasOption("--no-restore")
+                          || appliedPublishOption.HasOption("--no-build");
 
             return new PublishCommand(
                 msbuildArgs,

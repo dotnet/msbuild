@@ -12,12 +12,10 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{base.Args} {GetProjectPath()} {GetConfigFile()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()} {GetAdditionalParameters()}"; }
+            get { return $"{base.Args} {GetProjectPath()} {GetConfigFile()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()} {AdditionalParameters}"; }
         }
 
         public string ConfigFile { get; set; }
-
-        public string AdditionalParameters { get; set; }
 
         public string ProjectPath { get; set; }
 
@@ -73,7 +71,7 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (SkipInvalidConfigurations)
             {
-                return "/p:SkipInvalidConfigurations=true";
+                return "-property:SkipInvalidConfigurations=true";
             }
 
             return null;
@@ -83,15 +81,10 @@ namespace Microsoft.DotNet.Cli.Build
         {
             if (!string.IsNullOrEmpty(Runtime))
             {
-                return $"/p:RuntimeIdentifier={Runtime}";
+                return $"-property:RuntimeIdentifier={Runtime}";
             }
 
             return null;
-        }
-
-        private string GetAdditionalParameters()
-        {
-            return AdditionalParameters;
         }
     }
 }

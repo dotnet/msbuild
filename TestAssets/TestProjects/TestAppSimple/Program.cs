@@ -10,6 +10,14 @@ namespace ConsoleApplication
         public static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+
+            if (args.Length > 0)
+            {
+                for (int i = 0; i < args.Length; i++)
+                {
+                    Console.WriteLine($"{i} = {args[i]}");
+                }
+            }
         }
     }
 }

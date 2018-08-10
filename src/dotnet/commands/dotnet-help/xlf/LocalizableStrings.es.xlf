@@ -153,8 +153,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List reference in the project.</source>
-        <target state="translated">Muestra referencias en el proyecto.</target>
+        <source>List references of a .NET project.</source>
+        <target state="needs-review-translation">Enumere las referencias de proyecto o las herramientas instaladas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
@@ -188,13 +188,23 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
-        <source>Display .NET Core SDK version.</source>
-        <target state="translated">Muestra la versión del SDK de .NET Core.</target>
+        <source>Display .NET Core SDK version in use.</source>
+        <target state="translated">Muestra la versión del SDK de .NET Core en uso.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET Core information.</source>
         <target state="translated">Muestra la información de .NET Core.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="translated">Muestra los SDK instalados.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="translated">Muestra los runtimes instalados.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
@@ -233,8 +243,53 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
+        <source>Path to additional deps.json file.</source>
         <target state="translated">Ruta de acceso al archivo deps.json adicional.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Stores the specified assemblies in the runtime store.</source>
+        <target state="translated">Almacena los ensamblados especificados en el almacén del tiempo de ejecución.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolDefinition">
+        <source>Install or work with tools that extend the .NET experience.</source>
+        <target state="translated">Instale o trabaje con herramientas que mejoran la experiencia de uso de .NET.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildServerDefinition">
+        <source>Interact with servers started by a build.</source>
+        <target state="translated">Interactúe con los servidores que inicia una compilación.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevCertsDefinition">
+        <source>Create and manage development certificates.</source>
+        <target state="new">Create and manage development certificates.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EfDefinition">
+        <source>Entity Framework Core command-line tools.</source>
+        <target state="new">Entity Framework Core command-line tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="new">SQL Server cache command-line tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserSecretsDefinition">
+        <source>Manage development user secrets.</source>
+        <target state="new">Manage development user secrets.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WatchDefinition">
+        <source>Start a file watcher that runs a command when files change.</source>
+        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalTools">
+        <source>Additional tools ('dotnet [tool-name] --help' for more information):</source>
+        <target state="new">Additional tools ('dotnet [tool-name] --help' for more information):</target>
         <note />
       </trans-unit>
     </body>

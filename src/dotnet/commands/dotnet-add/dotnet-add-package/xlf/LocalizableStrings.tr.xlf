@@ -77,6 +77,11 @@
         <target state="translated">PACKAGE_NAME</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdDGFileIOException">
+        <source>Unable to generate a temporary file for project '{0}'. Cannot add package reference. Please clear the temp directory and try again.</source>
+        <target state="translated">'{0}' projesi için bir geçici dosya oluşturulamıyor. Paket başvurusu eklenemiyor. Lütfen geçici dizini temizleyin ve yeniden deneyin.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

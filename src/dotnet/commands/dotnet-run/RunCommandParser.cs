@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Cli
                         project: o.SingleArgumentOrDefault("--project"),
                         launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
                         noLaunchProfile: o.HasOption("--no-launch-profile"),
-                        noRestore: o.HasOption("--no-restore"),
+                        noRestore: o.HasOption("--no-restore") || o.HasOption("--no-build"),
                         restoreArgs: o.OptionValuesToBeForwarded(),
                         args: o.Arguments
                     )),
@@ -51,7 +51,8 @@ namespace Microsoft.DotNet.Cli
                         "--no-build",
                         LocalizableStrings.CommandOptionNoBuildDescription,
                         Accept.NoArguments()),
-                    CommonOptions.NoRestoreOption()
+                    CommonOptions.NoRestoreOption(),
+                    CommonOptions.VerbosityOption()
                 });
     }
 }

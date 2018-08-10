@@ -12,24 +12,21 @@
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
   </PropertyGroup>
 
-  <ItemGroup>
-    <TestTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <RunTestEnvironmentVariables>@(TestTaskEnvironmentVariables)</RunTestEnvironmentVariables>
-  </PropertyGroup>
-
   <Target Name="Test"
-          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' "
-          DependsOnTargets="BuildTests;">
+          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' And !$(Architecture.StartsWith('arm')) "
+          DependsOnTargets="TestsForBuildItself;BuildTests;">
 
+    <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->
+    <MakeDir Directories="$(TestPackagesDir)" />
+    
     <ItemGroup>
       <ProjectsToTest Include="build/test/RunTest.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           Configuration=$(Configuration);
-          EnvironmentVariables=$(RunTestEnvironmentVariables);
+          TestArtifactsDir=$(TestArtifactsDir);
+          TestPackagesDir=$(TestPackagesDir);
+          PreviousStageProps=$(NextStagePropsPath);
           TestProject=%(TestProjects.Identity);
           TestResultXmlDir=$(TestResultXmlDir);
           ToolPath=$(OutputDirectory);
@@ -37,35 +34,6 @@
         </Properties>
       </ProjectsToTest>
     </ItemGroup>
-
-    <!-- Begin Workaround lack of a stable package version for depedencies; copy into simulated stable version folders -->
- 
-    <PropertyGroup>
-        <StableSharedFrameworkDirectory>$(OutputDirectory)/shared/Microsoft.NETCore.App/$(SharedFrameworkStableVersion)</StableSharedFrameworkDirectory>
-        <StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes>$(Stage2WithBackwardsCompatibleRuntimesOutputDirectory)/shared/Microsoft.NETCore.App/$(SharedFrameworkStableVersion)</StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes>
-    </PropertyGroup>
-
-    <ItemGroup>  
-        <Stabilize_SourceFiles_2_0 Include="$(OutputDirectory)/shared/Microsoft.NETCore.App/$(MicrosoftNETCoreAppPackageVersion)/*.*"/>
-        <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-                                          Include="$(StableSharedFrameworkDirectory)" />
-        <SimulatedStableSharedFrameworkDirectories Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-                                          Include="$(StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes)" />
-    </ItemGroup>
-
-    <Copy
-        Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-        SourceFiles="@(Stabilize_SourceFiles_2_0)"
-        DestinationFiles="@(Stabilize_SourceFiles_2_0->'$(StableSharedFrameworkDirectory)/%(RecursiveDir)%(Filename)%(Extension)')"
-    />
-
-    <Copy
-        Condition=" '$(IsSharedFrameworkPreReleaseVersion)' == 'True' "
-        SourceFiles="@(Stabilize_SourceFiles_2_0)"
-        DestinationFiles="@(Stabilize_SourceFiles_2_0->'$(StableSharedFrameworkDirectoryWithBackwardsCompatibleRuntimes)/%(RecursiveDir)%(Filename)%(Extension)')"
-    />
- 
-    <!-- End Workaround lack of a stable package version for depedencies; copy into simulated stable versions -->
 
     <Message Text="Starting test execution" Importance="High" />
   
@@ -77,12 +45,6 @@
     <Exec Command="$(DotnetInOutputDirectory) exec $(RoslynDirectory)/bincore/VBCSCompiler.dll -shutdown" />
 
     <Message Text="Finished test execution" Importance="High" />
-
-    <!-- Begin Workaround lack of a stable package version for depedencies; remove simulated stable version folder. -->
-
-    <RemoveDir Directories="@(SimulatedStableSharedFrameworkDirectories)" />
- 
-    <!-- End Workaround lack of a stable package version for depedencies; remove simulated stable version folder. -->
   </Target>
 
   <Target Name="PrepareTests"
@@ -95,13 +57,15 @@
           DependsOnTargets="PrepareTests;
                             CreateTestAssetPackageNuPkgs;">
     <DotNetRestore ToolPath="$(OutputDirectory)"
-                   ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;" />
+                   ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
+                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)" />
   </Target>
 
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
     <DotNetBuild ToolPath="$(OutputDirectory)"
                  ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
+                 AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
                  MaxCpuCount="1" />
   </Target>
 
@@ -111,19 +75,26 @@
 
     <DotNetRestore ToolPath="$(OutputDirectory)"
                    WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
-                   ProjectPath="%(TestPackageProject.ProjectPath)" />
+                   ProjectPath="%(TestPackageProject.ProjectPath)"
+                   AdditionalParameters="/p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)"
+                   />
  
     <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion)" />
+                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
 
+  </Target>
+
+  <Target Name="TestsForBuildItself">
+    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/test/MsBuildScript.Tests/runtests.target /p:PB_AssetRootUrl=$(PB_AssetRootUrl)"
+                   ToolPath="$(PreviousStageDirectory)" />
   </Target>
 
   <Target Name="EnsureStageSeparation">
     <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:OutputDirectory=&quot;$(OutputDirectory)&quot;"
-                   ToolPath="$(Stage0Directory)" />
+                   ToolPath="$(PreviousStageDirectory)" />
   </Target>
 </Project>

@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Lists installed tools in the current development environment.</source>
+        <target state="translated">Vypíše nástroje nainstalované v aktuálním vývojovém prostředí.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>List user wide tools.</source>
+        <target state="translated">Vypsat nástroje všech uživatelů</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">Verze</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">Příkazy</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">ID balíčku</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackageWarning">
+        <source>Warning: tool package '{0}' is invalid: {1}</source>
+        <target state="translated">Upozornění: Balíček nástroje {0} je neplatný: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tools are installed.</source>
+        <target state="translated">Umístění, do kterého se nástroje nainstalují</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">Zadejte prosím globální parametr (--global) nebo parametr cesty nástroje (--tool-path).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalAndToolPathConflict">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="translated">(--global) je v konfliktu s parametrem cesty nástroje (--tool-path). Zadejte prosím pouze jeden z parametrů.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="translated">Cesta k nástroji {0} neexistuje.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

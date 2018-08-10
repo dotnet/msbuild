@@ -238,6 +238,9 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 psi.Environment[item.Key] = item.Value;
 #endif
             }
+
+            //  Flow the TEST_PACKAGES environment variable to the child process
+            psi.Environment["TEST_PACKAGES"] = System.Environment.GetEnvironmentVariable("TEST_PACKAGES");
         }
 
         private void AddWorkingDirectoryTo(ProcessStartInfo psi)

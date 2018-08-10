@@ -42,6 +42,11 @@
         <target state="translated">Opublikuj środowisko uruchomieniowe programu .NET Core z aplikacją, aby nie trzeba było go instalować na maszynie docelowej. Domyślnie jest ustawiona wartość „true” w przypadku określenia identyfikatora środowiska uruchomieniowego.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NoBuildOptionDescription">
+        <source>Do not build the project before publishing. Implies --no-restore.</source>
+        <target state="translated">Nie kompiluj tego projektu przed opublikowaniem. Powoduje przyjęcie, że podano parametr --no-restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

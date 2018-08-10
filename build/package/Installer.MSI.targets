@@ -21,8 +21,6 @@
 
       <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
       <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>
-      <SdkInstallerNuspecFile2xx>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).2.1.2xx.nuspec</SdkInstallerNuspecFile2xx>
-      <SdkInstallerNupkgFile2xx>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).2.1.2xx.$(FullNugetVersion).nupkg</SdkInstallerNupkgFile2xx>
 
       <SdkMSBuildExtensionsNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.nuspec</SdkMSBuildExtensionsNuspecFile>
       <SdkMSBuildExtensionsNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(FullNugetVersion).nupkg</SdkMSBuildExtensionsNupkgFile>
@@ -145,7 +143,7 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateBundlePowershellScript)
                       '$(SdkInstallerFile)'
-                      '$(AspNetCoreRuntimeInstallerWixLibFile)'
+                      '$(DownloadedAspNetCoreSharedFxInstallerFile)'
                       '$(DownloadedSharedFrameworkInstallerFile)'
                       '$(DownloadedHostFxrInstallerFile)'
                       '$(DownloadedSharedHostInstallerFile)'
@@ -156,7 +154,9 @@
                       '$(SimpleVersion)'
                       '$(NugetVersion)'
                       '$(CombinedFrameworkSDKHostInstallerUpgradeCode)'
-                      '$(Architecture)'" />
+                      '$(Architecture)'
+                      '$(MicrosoftNETCoreAppPackageVersion)'
+                      '$(AspNetCoreVersion)'" />
     </Target>
 
     <Target Name="GenerateSdkNupkg"
@@ -164,26 +164,19 @@
             Condition=" '$(OS)' == 'Windows_NT'"
             Inputs="$(CombinedFrameworkSdkHostInstallerFile);
                     $(SdkInstallerNuspecFile);
-                    $(SdkInstallerNuspecFile2xx);
                     $(SdkGenerateNupkgPowershellScript)"
-            Outputs="$(SdkInstallerNupkgFile);$(SdkInstallerNupkgFile2xx)">
+            Outputs="$(SdkInstallerNupkgFile)">
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
                       '$(CombinedFrameworkSdkHostInstallerFile)'
                       '$(FullNugetVersion)'
                       '$(SdkInstallerNuspecFile)'
                       '$(SdkInstallerNupkgFile)'" />
-
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
-                      '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(FullNugetVersion)'
-                      '$(SdkInstallerNuspecFile2xx)'
-                      '$(SdkInstallerNupkgFile2xx)'" />
     </Target>
 
     <Target Name="GenerateSdkMSBuildExtensionsNupkg"
             DependsOnTargets="Init;Layout;MsiTargetsSetupInputOutputs;GenerateSdkBundle"
-            Condition=" '$(OS)' == 'Windows_NT'"
+            Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "
             Inputs="$(MSBuildExtensionsLayoutDirectory)/**/*;
                     $(SdkInstallerNuspecFile);
                     $(SdkGenerateNupkgPowershellScript)"
@@ -197,7 +190,7 @@
       
       <GenerateMSBuildExtensionsSWR MSBuildExtensionsLayoutDirectory="$(MSBuildExtensionsLayoutDirectory)"
                                     OutputFile="$(SdkMSBuildExtensionsSwrFile)"/>
-      
+
     </Target>
 
     <Target Name="TestSdkMsi"
@@ -208,7 +201,8 @@
 
       <Exec Command ="powershell -NoProfile -NoLogo $(SdkTestMsiPowershellScript)
                       -InputMsi '$(SdkInstallerFile)'
-                      -DotnetDir '$(Stage0Directory)'" />
+                      -DotnetDir '$(PreviousStageDirectory)'
+                      -TestDir '$(TestOutputDir)'" />
 
       <WriteLinesToFile
           File="$(SdkMsiTestedSentinel)"

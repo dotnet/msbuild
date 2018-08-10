@@ -42,19 +42,26 @@ namespace Microsoft.DotNet.Cli
             }
             catch (KeyNotFoundException)
             {
-                return ReportError(CommonLocalizableStrings.RequiredCommandNotPassed);
+                Reporter.Error.WriteLine(CommonLocalizableStrings.RequiredCommandNotPassed.Red());
+                ParseResult.ShowHelp();
+                return 1;
             }
             catch (GracefulException e)
             {
-                return ReportError(e.Message);
-            }
-        }
+                if (Reporter.IsVerbose)
+                {
+                    Reporter.Error.WriteLine(e.VerboseMessage.Red());
+                }
+                
+                Reporter.Error.WriteLine(e.Message.Red());
+                
+                if (e.IsUserError)
+                {
+                    ParseResult.ShowHelp();
+                }
 
-        private int ReportError(string errorMessage)
-        {
-            Reporter.Error.WriteLine(errorMessage.Red());
-            ParseResult.ShowHelp();
-            return 1;
+                return 1;
+            }
         }
     }
 }

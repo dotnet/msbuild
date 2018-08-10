@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.Tools.Common
             {
                 compare = StringComparison.OrdinalIgnoreCase;
                 // check if paths are on the same volume
-                if (!string.Equals(Path.GetPathRoot(path1), Path.GetPathRoot(path2)))
+                if (!string.Equals(Path.GetPathRoot(path1), Path.GetPathRoot(path2), compare))
                 {
                     // on different volumes, "relative" path is just path2
                     return path2;
@@ -273,7 +273,22 @@ namespace Microsoft.DotNet.Tools.Common
 
             foreach (var component in components)
             {
-                if (!string.IsNullOrEmpty(component))
+                if (string.IsNullOrEmpty(component))
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(result))
+                {
+                    result = component;
+
+                    // On Windows, manually append a separator for drive references because Path.Combine won't do so
+                    if (result.EndsWith(":") && RuntimeEnvironment.OperatingSystemPlatform == Platform.Windows)
+                    {
+                        result += Path.DirectorySeparatorChar;
+                    }
+                }
+                else
                 {
                     result = Path.Combine(result, component);
                 }
@@ -315,13 +330,14 @@ namespace Microsoft.DotNet.Tools.Common
 
         public static void EnsureAllPathsExist(
             IReadOnlyCollection<string> paths,
-            string pathDoesNotExistLocalizedFormatString)
+            string pathDoesNotExistLocalizedFormatString,
+            bool allowDirectories = false)
         {
             var notExisting = new List<string>();
 
             foreach (var p in paths)
             {
-                if (!File.Exists(p))
+                if (!File.Exists(p) && (!allowDirectories || !Directory.Exists(p)))
                 {
                     notExisting.Add(p);
                 }

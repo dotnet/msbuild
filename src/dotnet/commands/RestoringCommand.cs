@@ -36,10 +36,10 @@ namespace Microsoft.DotNet.Tools
 
             if (HasArgumentToExcludeFromRestore(parsedArguments))
             {
-                return Prepend("/nologo", msbuildArgs);
+                return Prepend("-nologo", msbuildArgs);
             }
 
-            return Prepend("/restore", msbuildArgs);
+            return Prepend("-restore", msbuildArgs);
         }
 
         private static RestoreCommand GetSeparateRestoreCommand(
@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Tools
             => arguments.Any(a => IsExcludedFromRestore(a));
 
         private static bool IsExcludedFromRestore(string argument) 
-            => argument.StartsWith("/p:TargetFramework=", StringComparison.Ordinal);
+            => argument.StartsWith("-property:TargetFramework=", StringComparison.Ordinal);
 
         public override int Execute()
         {

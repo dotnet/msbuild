@@ -24,14 +24,15 @@
 
         <Text X="155" Y="80" Width="-11" Height="-70" TabStop="no" FontId="2" HexStyle="0x800000" DisablePrefix="yes" />
         <Text Name="WelcomeHeaderMessage" X="160" Y="81" Width="300" Height="30" TabStop="yes" FontId="2">#(loc.WelcomeHeaderMessage)</Text>
-        <Text Name="WelcomeDescription" X="160" Y="125" Width="460" Height="65" TabStop="yes" FontId="3">#(loc.WelcomeDescription)</Text>
-        <Text Name="LearnMoreTitle" X="160" Y="179" Width="460" Height="30" TabStop="yes" FontId="2">#(loc.LearnMoreTitle)</Text>
-        <Hypertext Name="CoreDocumentationLink" X="185" Y="223" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.CoreDocumentationLink)</Hypertext>
-        <Hypertext Name="SDKDocumentation" X="185" Y="243" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SDKDocumentation)</Hypertext>
-        <Hypertext Name="PrivacyStatementLink" X="185" Y="263" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.PrivacyStatementLink)</Hypertext>
-        <Hypertext Name="MITLicenseLink" X="185" Y="283" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.MITLicenseLink)</Hypertext>
-        <Text Name="InstallationNoteTitle" X="160" Y="308" Width="460" Height="30" TabStop="yes" FontId="2">#(loc.InstallationNoteTitle)</Text>
-        <Text Name="InstallationNote" X="160" Y="352" Width="460" Height="30" TabStop="yes" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.InstallationNote)</Text>
+        <Text Name="WelcomeDescription" X="160" Y="115" Width="460" Height="65" TabStop="yes" FontId="3">#(loc.WelcomeDescription)</Text>
+        <Text Name="LearnMoreTitle" X="160" Y="164" Width="460" Height="30" TabStop="yes" FontId="2">#(loc.LearnMoreTitle)</Text>
+        <Hypertext Name="CoreDocumentationLink" X="185" Y="198" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.CoreDocumentationLink)</Hypertext>
+        <Hypertext Name="SDKDocumentation" X="185" Y="218" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.SDKDocumentation)</Hypertext>
+        <Hypertext Name="PrivacyStatementLink" X="185" Y="238" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.PrivacyStatementLink)</Hypertext>
+        <Hypertext Name="MITLicenseLink" X="185" Y="258" Width="400" Height="22" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.MITLicenseLink)</Hypertext>
+        <Text Name="InstallationNoteTitle" X="160" Y="278" Width="460" Height="30" TabStop="yes" FontId="2">#(loc.InstallationNoteTitle)</Text>
+        <Text Name="InstallationNote" X="160" Y="312" Width="460" Height="30" TabStop="yes" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.InstallationNote)</Text>
+        <Hypertext Name="VisualStudioWarning" X="160" Y="350" Width="460" Height="30" TabStop="yes" FontId="3" HideWhenDisabled="yes" DisablePrefix="yes">#(loc.VisualStudioWarning)</Hypertext>
         <Button Name="InstallButton" X="-91" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.InstallInstallButton)</Button>
         <Button Name="WelcomeCancelButton" X="-11" Y="-11" Width="75" Height="23" TabStop="yes" FontId="0">#(loc.InstallCloseButton)</Button>
     </Page>

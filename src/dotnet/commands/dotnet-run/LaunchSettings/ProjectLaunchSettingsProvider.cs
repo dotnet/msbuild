@@ -15,6 +15,11 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
         {
             var config = model.ToObject<ProjectLaunchSettingsModel>();
 
+            if (!string.IsNullOrEmpty(config.ApplicationUrl))
+            {
+                command.EnvironmentVariable("ASPNETCORE_URLS", config.ApplicationUrl);
+            }
+
             //For now, ignore everything but the environment variables section
 
             foreach (var entry in config.EnvironmentVariables)
@@ -22,11 +27,6 @@ namespace Microsoft.DotNet.Tools.Run.LaunchSettings
                 string value = Environment.ExpandEnvironmentVariables(entry.Value);
                 //NOTE: MSBuild variables are not expanded like they are in VS
                 command.EnvironmentVariable(entry.Key, value);
-            }
-
-            if (!string.IsNullOrEmpty(config.ApplicationUrl))
-            {
-                command.EnvironmentVariable("ASPNETCORE_URLS", config.ApplicationUrl);
             }
 
             return new LaunchSettingsApplyResult(true, null, config.LaunchUrl);

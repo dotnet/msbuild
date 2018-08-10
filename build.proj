@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="BuildTheWholeCli" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="Directory.Build.props" />
 
   <ItemGroup>
     <DotnetCliBuildFrameworkInputs Include="build_projects/**/*.cs" Exclude="build_projects/**/obj/**/*.cs" />
@@ -20,7 +20,7 @@
           DependsOnTargets="MSBuildWorkaroundTarget;
                             RestoreDotnetCliBuildFramework">
 
-    <Exec Command="$(DotnetStage0) publish --no-restore -o $(DotnetCliBuildDirectory)/bin --framework netcoreapp2.0 /p:GeneratePropsFile=$(GeneratePropsFile)" 
+    <Exec Command="$(PreviousStageDotnet) publish --no-restore -o $(DotnetCliBuildDirectory)/bin --framework $(CliTargetFramework) /p:GeneratePropsFile=$(GeneratePropsFile)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
   
@@ -40,7 +40,7 @@
       <ExtraRestoreArgs Condition="'$(OS)' != 'Windows_NT'">$(ExtraRestoreArgs) --disable-parallel</ExtraRestoreArgs>
     </PropertyGroup>
 
-    <Exec Command="$(DotnetStage0) restore $(ExtraRestoreArgs)" 
+    <Exec Command="$(PreviousStageDotnet) restore $(ExtraRestoreArgs)" 
           WorkingDirectory="$(DotnetCliBuildDirectory)"/>
   </Target>
 
@@ -53,6 +53,7 @@
   <Import Project="build/DownloadPackageVersions.targets" />
   <Import Project="build/Prepare.targets" />
   <Import Project="build/Compile.targets" />
+  <Import Project="build/BuildAndPublishAllLinuxDistrosNativeInstallers.targets" />
   <Import Project="build/Package.targets" />
   <Import Project="build/Test.targets" />
   <Import Project="build/Publish.targets" />

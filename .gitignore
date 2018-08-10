@@ -99,6 +99,7 @@ dlldata.c
 # DNX
 project.lock.json
 artifacts/
+bin/
 
 *_i.c
 *_p.c
@@ -125,6 +126,9 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+
+# BinLog artifacts
+msbuild.*.ProjectImports.zip
 
 # Chutzpah Test files
 _Chutzpah*

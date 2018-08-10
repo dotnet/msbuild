@@ -14,6 +14,9 @@ namespace Microsoft.DotNet.Cli.Utils
         // command loaded from project tools nuget package
         ProjectToolsPackage,
 
+        // command loaded from bundled DotnetTools nuget package
+        DotnetToolsPackage,
+
         // command loaded from the same directory as the executing assembly
         BaseDirectory,
 

@@ -97,11 +97,6 @@
         <target state="translated">Aplikacja</target>
         <note />
       </trans-unit>
-      <trans-unit id="ReferenceDoesNotExist">
-        <source>Reference {0} does not exist.</source>
-        <target state="translated">Odwołanie {0} nie istnieje.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
         <target state="translated">Do projektu zostało dodane odwołanie „{0}”.</target>
@@ -605,8 +600,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="translated">Nieobsługiwany typ projektu. Skontaktuj się z dostawcą zestawu SDK.</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <target state="translated">Projekt „{0}” ma nieznany typ projektu i nie można go dodać do pliku rozwiązania. Skontaktuj się z dostawcą zestawu SDK w celu uzyskania pomocy technicznej.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -672,6 +667,230 @@
       <trans-unit id="NoRestoreDescription">
         <source>Does not do an implicit restore when executing the command.</source>
         <target state="translated">Nie wykonuje niejawnego przywracania podczas wykonywania polecenia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="translated">Projekt „{0}” został skasowany z rozwiązania.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="translated">Nieprawidłowy kod XML: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxNeedLogout">
+        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="translated">Właśnie zainstalowano zestaw .NET Core SDK, dlatego należy wylogować się lub uruchomić ponownie sesję przed uruchomieniem zainstalowanego narzędzia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="translated">Właśnie zainstalowano zestaw .NET Core SDK, dlatego należy ponownie otworzyć terminal przed uruchomieniem zainstalowanego narzędzia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="translated">Właśnie zainstalowano zestaw .NET Core SDK, dlatego należy ponownie otworzyć okno wiersza polecenia przed uruchomieniem zainstalowanego narzędzia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="translated">Narzędzie definiuje polecenie z brakującym ustawieniem nazwy.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="translated">W poleceniu „{0}” brakuje ustawienia punktu wejścia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="translated">Polecenie „{0}” zawiera co najmniej jeden nieprawidłowy znak: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="translated">Dla narzędzia zdefiniowano więcej niż jedno polecenie.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="translated">Polecenie „{0}” używa nieobsługiwanego modułu uruchamiającego „{1}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' (version '{1}') is already installed.</source>
+        <target state="translated">Narzędzie „{0}” (wersja: „{1}”) jest już zainstalowane.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShellShimConflict">
+        <source>Command '{0}' conflicts with an existing command from another tool.</source>
+        <target state="translated">Wystąpił konflikt między poleceniem „{0}” i istniejącym poleceniem z innego narzędzia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyExecutablePath">
+        <source>Cannot create shell shim for an empty executable path.</source>
+        <target state="translated">Nie można utworzyć podkładki powłoki dla pustej ścieżki pliku wykonywalnego.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyCommand">
+        <source>Cannot create shell shim for an empty command.</source>
+        <target state="translated">Nie można utworzyć podkładki powłoki dla pustego polecenia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRetrieveToolConfiguration">
+        <source>Failed to retrieve tool configuration: {0}</source>
+        <target state="translated">Nie można pobrać konfiguracji narzędzia: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Katalogu narzędzi „{0}” nie ma obecnie w zmiennej środowiskowej PATH.
+Jeśli używasz powłoki bash, możesz dodać go do profilu przez uruchomienie następującego polecenia:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Możesz dodać go do bieżącej sesji przez uruchomienie następującego polecenia:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Katalogu narzędzi „{0}” nie ma obecnie w zmiennej środowiskowej PATH.
+Jeśli używasz powłoki bash, możesz dodać go do profilu przez uruchomienie następującego polecenia:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+Możesz dodać go do bieżącej sesji przez uruchomienie następującego polecenia:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</source>
+        <target state="translated">Katalogu narzędzi „{0}” nie ma obecnie w zmiennej środowiskowej PATH.
+
+Możesz dodać katalog do zmiennej PATH przez uruchomienie następującego polecenia:
+
+setx PATH "%PATH%;{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="translated">Nie można utworzyć podkładki narzędzia dla polecenia „{0}”: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="translated">Nie można usunąć podkładki narzędzia dla polecenia „{0}”: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="translated">Nie można ustawić uprawnień pliku wykonywalnego użytkownika dla podkładki powłoki: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="translated">Nie można zainstalować pakietu narzędzia „{0}”: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="translated">Nie można odinstalować pakietu narzędzia „{0}”: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="translated">Maksymalna szerokość kolumny musi być większa niż zero.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="translated">Nie znaleziono pliku punktu wejścia „{0}” polecenia „{1}” w pakiecie.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="translated">Nie znaleziono pliku ustawień „DotnetToolSettings.xml” w pakiecie.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="translated">Nie można odnaleźć etapowego pakietu narzędzia „{0}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="translated">Nazwa polecenia „{0}” nie może zaczynać się od kropki (.).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
+        <target state="translated">Wersja formatu jest nowsza niż obsługiwana. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Zaktualizuj zestaw SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="translated">Wersja formatu jest nieprawidłowo sformułowana. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Skontaktuj się z autorem narzędzia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="translated">Brak wersji formatu. To narzędzie może nie być obsługiwane w tej wersji zestawu SDK. Skontaktuj się z autorem narzędzia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
+        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">Nie można dodać katalogu „{0}” do zmiennej środowiskowej PATH. Dodaj ten katalog do zmiennej PATH, aby używać narzędzi zainstalowanych za pomocą polecenia „dotnet tool install”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="translated">Dostępna jest więcej niż jedna spakowana podkładka: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="translated">Nie można odczytać pliku blokady NuGet dla pakietu narzędzia „{0}”: {1}</target>
         <note />
       </trans-unit>
     </body>

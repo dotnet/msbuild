@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="SetupDebProps"
-          DependsOnTargets="Init">
-    <PropertyGroup>
-      <SdkDebianPackageName>dotnet-sdk-$(SdkVersion)</SdkDebianPackageName>
-    </PropertyGroup>
-
+          DependsOnTargets="Init;
+                            CalculateLinuxNativeInstallerDependencyVersions">
     <!-- dotnet deb-tool -->
     <PropertyGroup>
-      <DotnetDebToolConsumerProjectName>dotnet-deb-tool-consumer.csproj</DotnetDebToolConsumerProjectName>
-      <DotnetDebToolDir>$(IntermediateDirectory)/$(DotnetDebToolConsumerProjectName)</DotnetDebToolDir>
+      <DotnetDebToolDir>$(MSBuildThisFileDirectory)/dotnet-deb-tool-consumer</DotnetDebToolDir>
       <PackageTool>$(NuGetPackagesDir)/dotnet-deb-tool/$(DotnetDebToolVersion)/lib/netcoreapp2.0/tool/package_tool</PackageTool>
     </PropertyGroup>
 
@@ -26,16 +22,24 @@
 
     <!-- Package Identities -->
     <PropertyGroup>
-      <SdkDebianPackageVersion>$(SdkVersion)</SdkDebianPackageVersion>
+      <RuntimeDepsPackageVersion>$(MicrosoftNETCoreAppMajorMinorVersion)</RuntimeDepsPackageVersion>
+      <RuntimeDepsPackageName>dotnet-runtime-deps-$(RuntimeDepsPackageVersion)</RuntimeDepsPackageName>
+      <SdkDebianPackageVersion>$(MajorMinorVersion)</SdkDebianPackageVersion>
       <SdkDebianPackageName>dotnet-sdk-$(SdkDebianPackageVersion)</SdkDebianPackageName>
-      <SharedFxDebianPackageVersion>$(SharedFrameworkVersion)</SharedFxDebianPackageVersion>
+      <SharedFxDebianPackageFileVersion>$(MicrosoftNETCoreAppPackageVersion)</SharedFxDebianPackageFileVersion>
+      <SharedFxDebianPackageVersion>$(MicrosoftNETCoreAppMajorMinorVersion)</SharedFxDebianPackageVersion>
+      <SharedFxDebianPackageFileName>dotnet-runtime-$(SharedFxDebianPackageFileVersion)</SharedFxDebianPackageFileName>
+      <SharedFxDebianPackageFileName>$(SharedFxDebianPackageFileName.ToLower())</SharedFxDebianPackageFileName>
       <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
-      <HostFxrDebianPackageVersion>$(HostFxrVersion)</HostFxrDebianPackageVersion>
+      <HostFxrDebianPackageVersion>$(HostFxrMajorMinorVersion)</HostFxrDebianPackageVersion>
       <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
-      <AspNetCoreRuntimeDebPackageName>$(AspNetCoreRuntimePackageBrandName)-$(CurrentAspNetCoreRuntimeVersion)</AspNetCoreRuntimeDebPackageName>
+      <AspNetCoreSharedFxDebianPackageFileName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxDebianPackageFileName>
+      <AspNetCoreSharedFxDebianPackageFileName>$(AspNetCoreSharedFxDebianPackageFileName.ToLower())</AspNetCoreSharedFxDebianPackageFileName>
+      <AspNetCoreSharedFxDebianPackageName>aspnetcore-runtime-$(AspNetCoreMajorMinorVersion)</AspNetCoreSharedFxDebianPackageName>
+      <AspNetCoreSharedFxDebianPackageName>$(AspNetCoreSharedFxDebianPackageName.ToLower())</AspNetCoreSharedFxDebianPackageName>
     </PropertyGroup>
 
     <!-- Inputs -->
@@ -84,8 +88,8 @@
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_NAME%">
         <ReplacementString>$(SharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
-      <DebianConfigTokenValues Include="%ASPNETCOREPACKAGESTORE_DEBIAN_PACKAGE_NAME%">
-        <ReplacementString>$(AspNetCoreRuntimeDebPackageName)</ReplacementString>
+      <DebianConfigTokenValues Include="%ASPNETCORE_SHAREDFX_DEBIAN_PACKAGE_NAME%">
+        <ReplacementString>$(AspNetCoreSharedFxDebianPackageName)</ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_ADDITIONAL_DEPENDENCY%"
                                Condition="'$(IncludeAdditionalSharedFrameworks)' == 'true'">
@@ -97,10 +101,16 @@
         <ReplacementString></ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%SDK_NUGET_VERSION%">
-        <ReplacementString>$(SdkVersion)</ReplacementString>
+        <ReplacementString>$(MajorMinorVersion)</ReplacementString>
       </DebianConfigTokenValues>
       <DebianConfigTokenValues Include="%CLI_SDK_BRAND_NAME%">
         <ReplacementString>$(SdkBrandName)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%SHARED_FRAMEWORK_DEBIAN_PACKAGE_VERSIONS%">
+        <ReplacementString>$(MicrosoftNETCoreAppPackageVersionWithTilda)</ReplacementString>
+      </DebianConfigTokenValues>
+      <DebianConfigTokenValues Include="%ASPNETCORE_SHAREDFX_DEBIAN_PACKAGE_VERSION%">
+        <ReplacementString>$(AspNetCoreVersionWithTilda)</ReplacementString>
       </DebianConfigTokenValues>
 
       <DebianPostInstTokenValues Include="%SDK_VERSION%">
@@ -110,24 +120,12 @@
 
     <ItemGroup>
       <TestSdkDebTaskEnvironmentVariables Include="PATH=$(DebianInstalledDirectory)$(PathListSeparator)$(PATH)" />
-      <TestSdkDebTaskEnvironmentVariables Include="SDK_INSTALLER_FILE=$(SdkInstallerFile)" />
+      <TestSdkDebTaskEnvironmentVariables Include="TEST_ARTIFACTS=$(TestArtifactsDir)" />
+      <TestSdkDebTaskEnvironmentVariables Include="TEST_PACKAGES=$(TestPackagesDir)" />
+      <TestSdkDebTaskEnvironmentVariables Include="PreviousStageProps=$(NextStagePropsPath)" />
 
       <!-- Consumed By Publish -->
       <GeneratedInstallers Include="$(SdkInstallerFile)" />
     </ItemGroup>
-  </Target>
-
-  <Target Name="DownloadAspNetCoreRuntimeDebInstaller"
-        DependsOnTargets="SetupDebProps">
-
-    <ItemGroup>
-      <AspNetCoreDebInstallerFile Include="$(PackagesDirectory)/$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)-$(HostRid).deb">
-        <Source>$(AspNetCoreRuntimeInstallerBlobRootUrl)/$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)-$(HostRid).deb$(CoreSetupBlobAccessTokenParam)</Source>
-        <PackageName>$(AspNetCoreRuntimePackageBrandName)-%(AspNetCoreRuntimeStoreVersion.Identity)</PackageName>
-      </AspNetCoreDebInstallerFile>
-    </ItemGroup>
-
-    <DownloadFile Uri="%(AspNetCoreDebInstallerFile.Source)"
-                  DestinationPath="%(AspNetCoreDebInstallerFile.Identity)"/>
   </Target>
 </Project>

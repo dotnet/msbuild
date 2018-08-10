@@ -50,9 +50,9 @@
   <String Id="FirstTimeWelcomeMessage">The installation was successful
 
 The following were installed at [DOTNETHOME]
-    • .NET Core SDK 2.1.203
-    • .NET Core Runtime 2.0.9
-    • Runtime Package Store
+    • .NET Core SDK [DOTNETSDKVERSION]
+    • .NET Core Runtime [DOTNETRUNTIMEVERSION]
+    • ASP.NET Core Runtime [ASPNETCOREVERSION]
 
 This product collects usage data
     • More information and opt-out https://aka.ms/dotnet-cli-telemetry
@@ -73,5 +73,7 @@ Resources
   <String Id="MITLicenseLink">&lt;A HREF=&quot;https://aka.ms/dotnet-license&quot;&gt;MIT License&lt;/A&gt;</String>
   <String Id="InstallationNoteTitle">Installation note</String>
   <String Id="InstallationNote">A command will be run during the install process that will improve project restore speed and enable offline access. It will take up to a minute to complete.
+  </String>
+  <String Id="VisualStudioWarning">If you plan to use .NET Core 2.1 with Visual Studio, Visual Studio 2017 15.7 or newer is recommended. &lt;A HREF=&quot;https://go.microsoft.com/fwlink/?linkid=866799&quot;&gt;Learn More&lt;/A&gt;.
   </String>
 </WixLocalization>

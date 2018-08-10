@@ -140,8 +140,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
-        <source>unable to generate deps.json, it may have been already generated: {0}</source>
-        <target state="translated">nie można wygenerować pliku deps.json, być może został już wygenerowany: {0}</target>
+        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
+        <target state="translated">Nie można wygenerować pliku deps.json. Być może został już wygenerowany. Podaj opcję „-d” przed nazwą narzędzia, aby uzyskać diagnostyczne dane wyjściowe (na przykład „dotnet -d &lt;nazwa_narzędzia&gt;”: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -232,6 +232,40 @@
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
         <target state="translated">Nie znaleziono pliku wykonywalnego polecenia dla elementu „{0}”. Projekt mógł nie zostać przywrócony lub przywracanie zakończyło się niepowodzeniem — uruchom polecenie „dotnet restore”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="translated">Zestaw .NET Core SDK (odzwierciedlenie dowolnego pliku global.json):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="translated">Środowisko uruchomieniowe:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildArgs">
+        <source>MSBuild arguments: {0}</source>
+        <target state="translated">Argumenty programu MSBuild: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">Nie można użyć elementu „{0}” jako pliku wykonywalnego hosta aplikacji, ponieważ nie zawiera on oczekiwanej sekwencji bajtów symbolu zastępczego „{1}”, która wskazuje lokalizację zapisu nazwy aplikacji.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">Podana nazwa pliku „{0}” jest dłuższa niż 1024 bajty</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">Nie można znaleźć polecenia „dotnet {0}”; uruchom następujące polecenie, aby zainstalować
+
+dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
     </body>

@@ -8,6 +8,7 @@ using Microsoft.DotNet.Tools.Test.Utilities;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.Sln.Remove.Tests
@@ -167,6 +168,42 @@ Global
 		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x64.Build.0 = Release|x64
 		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.ActiveCfg = Release|x86
 		{7072A694-548F-4CAE-A58F-12D257D5F486}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+EndGlobal
+";
+
+        private const string ExpectedSlnContentsAfterRemoveProjectWithDependencies = @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27110.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""App"", ""App\App.csproj"", ""{BB02B949-F6BD-4872-95CB-96A05B1FE026}""
+	ProjectSection(ProjectDependencies) = postProject
+		{D53E177A-8ECF-43D5-A01E-98B884D53CA6} = {D53E177A-8ECF-43D5-A01E-98B884D53CA6}
+	EndProjectSection
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""First"", ""First\First.csproj"", ""{D53E177A-8ECF-43D5-A01E-98B884D53CA6}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB02B949-F6BD-4872-95CB-96A05B1FE026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB02B949-F6BD-4872-95CB-96A05B1FE026}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB02B949-F6BD-4872-95CB-96A05B1FE026}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB02B949-F6BD-4872-95CB-96A05B1FE026}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D53E177A-8ECF-43D5-A01E-98B884D53CA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D53E177A-8ECF-43D5-A01E-98B884D53CA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D53E177A-8ECF-43D5-A01E-98B884D53CA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D53E177A-8ECF-43D5-A01E-98B884D53CA6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6D9A973-1CFD-41C9-84F2-1471C0FE67DF}
 	EndGlobalSection
 EndGlobal
 ";
@@ -331,7 +368,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput("sln remove referenceDoesNotExistInSln.csproj");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, "referenceDoesNotExistInSln.csproj"));
+            cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectNotFoundInTheSolution, "referenceDoesNotExistInSln.csproj"));
             File.ReadAllText(solutionPath)
                 .Should().BeVisuallyEquivalentTo(contentBefore);
         }
@@ -355,7 +392,7 @@ EndGlobal
                 .WithWorkingDirectory(projectDirectory)
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Pass();
-            cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, projectToRemove));
+            cmd.StdOut.Should().Be(string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, projectToRemove));
 
             slnFile = SlnFile.Read(solutionPath);
             slnFile.Projects.Count.Should().Be(1);
@@ -382,7 +419,7 @@ EndGlobal
                 .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
             cmd.Should().Pass();
 
-            string outputText = string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, projectToRemove);
+            string outputText = string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, projectToRemove);
             outputText += Environment.NewLine + outputText;
             cmd.StdOut.Should().BeVisuallyEquivalentTo(outputText);
 
@@ -411,9 +448,9 @@ EndGlobal
                 .ExecuteWithCapturedOutput($"sln remove idontexist.csproj {projectToRemove} idontexisteither.csproj");
             cmd.Should().Pass();
 
-            string outputText = $@"{string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, "idontexist.csproj")}
-{string.Format(CommonLocalizableStrings.ProjectReferenceRemoved, projectToRemove)}
-{string.Format(CommonLocalizableStrings.ProjectReferenceCouldNotBeFound, "idontexisteither.csproj")}";
+            string outputText = $@"{string.Format(CommonLocalizableStrings.ProjectNotFoundInTheSolution, "idontexist.csproj")}
+{string.Format(CommonLocalizableStrings.ProjectRemovedFromTheSolution, projectToRemove)}
+{string.Format(CommonLocalizableStrings.ProjectNotFoundInTheSolution, "idontexisteither.csproj")}";
 
             cmd.StdOut.Should().BeVisuallyEquivalentTo(outputText);
 
@@ -444,6 +481,73 @@ EndGlobal
 
             File.ReadAllText(solutionPath)
                 .Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemove);
+        }
+
+        [Fact]
+        public void WhenDirectoryContainingProjectIsGivenProjectIsRemoved()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojToRemove")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var solutionPath = Path.Combine(projectDirectory, "App.sln");
+            SlnFile slnFile = SlnFile.Read(solutionPath);
+            slnFile.Projects.Count.Should().Be(2);
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput("sln remove Lib");
+            cmd.Should().Pass();
+
+            File.ReadAllText(solutionPath)
+                .Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemove);
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsNoProjectsItCancelsWholeOperation()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojToRemove")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+            var directoryToRemove = "Empty";
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln remove {directoryToRemove}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be(
+                string.Format(
+                    CommonLocalizableStrings.CouldNotFindAnyProjectInDirectory,
+                    Path.Combine(projectDirectory, directoryToRemove)));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
+        }
+
+        [Fact]
+        public void WhenDirectoryContainsMultipleProjectsItCancelsWholeOperation()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojToRemove")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+            var directoryToRemove = "Multiple";
+
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln remove {directoryToRemove}");
+            cmd.Should().Fail();
+            cmd.StdErr.Should().Be(
+                string.Format(
+                    CommonLocalizableStrings.MoreThanOneProjectInDirectory,
+                    Path.Combine(projectDirectory, directoryToRemove)));
+            cmd.StdOut.Should().BeVisuallyEquivalentToIfNotLocalized(HelpText);
         }
 
         [Fact]
@@ -485,6 +589,32 @@ EndGlobal
             releaseDirectory.Count().Should().Be(1, $"App {reasonString}");
             Directory.EnumerateFiles(releaseDirectory.Single(), "App.dll", SearchOption.AllDirectories)
                 .Count().Should().Be(1, $"App {reasonString}");
+        }
+
+        [Fact]
+        public void WhenProjectIsRemovedSolutionHasUTF8BOM()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnAndCsprojToRemove")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var projectToRemove = Path.Combine("Lib", "Lib.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln App.sln remove {projectToRemove}");
+            cmd.Should().Pass();
+
+            var preamble = Encoding.UTF8.GetPreamble();
+            preamble.Length.Should().Be(3);
+            using (var stream = new FileStream(Path.Combine(projectDirectory, "App.sln"), FileMode.Open))
+            {
+                var bytes = new byte[preamble.Length];
+                stream.Read(bytes, 0, bytes.Length);
+                bytes.Should().BeEquivalentTo(preamble);
+            }
         }
 
         [Fact]
@@ -555,6 +685,28 @@ EndGlobal
 
             File.ReadAllText(solutionPath)
                 .Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemoveLastNestedProj);
+        }
+
+        [Fact]
+        public void WhenProjectIsRemovedThenDependenciesOnProjectAreAlsoRemoved()
+        {
+            var projectDirectory = TestAssets
+                .Get("TestAppWithSlnProjectDependencyToRemove")
+                .CreateInstance()
+                .WithSourceFiles()
+                .Root
+                .FullName;
+
+            var solutionPath = Path.Combine(projectDirectory, "App.sln");
+
+            var projectToRemove = Path.Combine("Second", "Second.csproj");
+            var cmd = new DotnetCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput($"sln remove {projectToRemove}");
+            cmd.Should().Pass();
+
+            File.ReadAllText(solutionPath)
+                .Should().BeVisuallyEquivalentTo(ExpectedSlnContentsAfterRemoveProjectWithDependencies);
         }
     }
 }

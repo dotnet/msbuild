@@ -97,11 +97,6 @@
         <target state="translated">Aplikace</target>
         <note />
       </trans-unit>
-      <trans-unit id="ReferenceDoesNotExist">
-        <source>Reference {0} does not exist.</source>
-        <target state="translated">Odkaz na {0} neexistuje.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ReferenceAddedToTheProject">
         <source>Reference `{0}` added to the project.</source>
         <target state="translated">Odkaz na {0} byl přidán do projektu.</target>
@@ -605,8 +600,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedProjectType">
-        <source>Unsupported project type. Please check with your sdk provider.</source>
-        <target state="translated">Nepodporovaný typ projektu. Ověřte to prosím u poskytovatele sady SDK.</target>
+        <source>Project '{0}' has an unknown project type and cannot be added to the solution file. Please contact your SDK provider for support.</source>
+        <target state="translated">Projekt {0} má neznámý typ projektu a nelze ho přidat do souboru řešení. K získání podpory prosím kontaktujte poskytovatele sady SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidSolutionFormatString">
@@ -672,6 +667,230 @@
       <trans-unit id="NoRestoreDescription">
         <source>Does not do an implicit restore when executing the command.</source>
         <target state="translated">Při spuštění příkazu neprovede implicitní obnovení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectRemovedFromTheSolution">
+        <source>Project `{0}` removed from the solution.</source>
+        <target state="translated">Projekt {0} byl z řešení odebrán.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidXml">
+        <source>Invalid XML: {0}</source>
+        <target state="translated">Neplatné XML: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxNeedLogout">
+        <source>Since you just installed the .NET Core SDK, you will need to logout or restart your session before running the tool you installed.</source>
+        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje se odhlásit nebo restartovat relaci.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen terminal before running the tool you installed.</source>
+        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít terminál.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsNeedReopen">
+        <source>Since you just installed the .NET Core SDK, you will need to reopen the Command Prompt window before running the tool you installed.</source>
+        <target state="translated">Právě jste nainstalovali sadu .NET Core SDK, bude proto nutné před spuštěním nainstalovaného nástroje znovu otevřít okno příkazového řádku.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingCommandName">
+        <source>Tool defines a command with a missing name setting.</source>
+        <target state="translated">Nástroj definuje příkaz s chybějícím nastavením názvu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMissingEntryPoint">
+        <source>Command '{0}' is missing an entry point setting.</source>
+        <target state="translated">V příkazu {0} chybí nastavení vstupního bodu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidCommandName">
+        <source>Command '{0}' contains one or more of the following invalid characters: {1}.</source>
+        <target state="translated">Příkaz {0} obsahuje minimálně jeden neplatný znak: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsMoreThanOneCommand">
+        <source>More than one command is defined for the tool.</source>
+        <target state="translated">Pro nástroj je definovaných více příkazů.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsUnsupportedRunner">
+        <source>Command '{0}' uses unsupported runner '{1}'."</source>
+        <target state="translated">Příkaz {0} používá nepodporovaný spouštěč {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPackageConflictPackageId">
+        <source>Tool '{0}' (version '{1}') is already installed.</source>
+        <target state="translated">Nástroj {0} (verze {1}) je už nainstalovaný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShellShimConflict">
+        <source>Command '{0}' conflicts with an existing command from another tool.</source>
+        <target state="translated">Příkaz {0} koliduje s existujícím příkazem jiného nástroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyExecutablePath">
+        <source>Cannot create shell shim for an empty executable path.</source>
+        <target state="translated">Pro prázdnou cestu ke spustitelnému souboru nelze vytvořit překrytí prostředí.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotCreateShimForEmptyCommand">
+        <source>Cannot create shell shim for an empty command.</source>
+        <target state="translated">Pro prázdný příkaz nelze vytvořit překrytí prostředí.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRetrieveToolConfiguration">
+        <source>Failed to retrieve tool configuration: {0}</source>
+        <target state="translated">Nepodařilo se načíst konfiguraci nástroje: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathLinuxManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
+Pokud používáte bash, přidáte ho do svého profilu spuštěním následujícího příkazu:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Přidání nástrojů sady .NET Core SDK
+export PATH="$PATH:{0}"
+EOF
+
+Do aktuální relace ho přidáte spuštěním následujícího příkazu:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathOSXManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+If you are using bash, you can add it to your profile by running the following command:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Add .NET Core SDK tools
+export PATH="$PATH:{0}"
+EOF
+
+You can add it to the current session by running the following command:
+
+export PATH="$PATH:{0}"
+</source>
+        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
+Pokud používáte bash, přidáte ho do svého profilu spuštěním následujícího příkazu:
+
+cat &lt;&lt; \EOF &gt;&gt; ~/.bash_profile
+# Přidání nástrojů sady .NET Core SDK
+export PATH="$PATH:{0}"
+EOF
+
+Do aktuální relace ho přidáte spuštěním následujícího příkazu:
+
+export PATH="$PATH:{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentPathWindowsManualInstructions">
+        <source>Tools directory '{0}' is not currently on the PATH environment variable.
+
+You can add the directory to the PATH by running the following command:
+
+setx PATH "%PATH%;{0}"
+</source>
+        <target state="translated">Adresář nástrojů {0} není momentálně v proměnné prostředí PATH.
+
+Tento adresář přidáte do proměnné PATH spuštěním následujícího příkazu:
+
+setx PATH "%PATH%;{0}"
+</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToCreateShellShim">
+        <source>Failed to create tool shim for command '{0}': {1}</source>
+        <target state="translated">Pro příkaz {0} se nepodařilo vytvořit překrytí nástroje: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToRemoveShellShim">
+        <source>Failed to remove tool shim for command '{0}': {1}</source>
+        <target state="translated">Pro příkaz {0} se nepodařilo odebrat překrytí nástroje: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedSettingShimPermissions">
+        <source>Failed to set user executable permissions for shell shim: {0}</source>
+        <target state="translated">Pro překrytí prostředí se nepodařilo nastavit oprávnění uživatele ke spouštění: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToInstallToolPackage">
+        <source>Failed to install tool package '{0}': {1}</source>
+        <target state="translated">Nepodařilo se nainstalovat balíček nástroje {0}: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToUninstallToolPackage">
+        <source>Failed to uninstall tool package '{0}': {1}</source>
+        <target state="translated">Nepodařilo se odinstalovat balíček nástroje {0}: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ColumnMaxWidthMustBeGreaterThanZero">
+        <source>Column maximum width must be greater than zero.</source>
+        <target state="translated">Maximální šířka sloupce musí být větší než nula.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolEntryPointFile">
+        <source>Entry point file '{0}' for command '{1}' was not found in the package.</source>
+        <target state="translated">Soubor vstupního bodu {0} pro příkaz {1} nebyl v balíčku nalezen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MissingToolSettingsFile">
+        <source>Settings file 'DotnetToolSettings.xml' was not found in the package.</source>
+        <target state="translated">Soubor s nastavením DotnetToolSettings.xml nebyl v balíčku nalezen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToFindStagedToolPackage">
+        <source>Failed to find staged tool package '{0}'.</source>
+        <target state="translated">Nepodařilo se najít připravený balíček nástroje {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolSettingsInvalidLeadingDotCommandName">
+        <source>The command name '{0}' cannot begin with a leading dot (.).</source>
+        <target state="translated">Název příkazu {0} nemůže začínat úvodní tečkou (.).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsHigher">
+        <source>Format version is higher than supported. This tool may not be supported in this SDK version. Please update your SDK.</source>
+        <target state="translated">Verze formátu je vyšší, než se podporuje. Tento nástroj možná není v této verzi SDK podporovaný. Aktualizujte sadu SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMalformed">
+        <source>Format version is malformed. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="translated">Verze formátu je chybně vytvořená. Tento nástroj možná není v této verzi SDK podporovaný. Kontaktujte prosím autora nástroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FormatVersionIsMissing">
+        <source>Format version is missing. This tool may not be supported in this SDK version. Please contact the author of the tool.</source>
+        <target state="translated">Verze formátu chybí. Tento nástroj možná není v této verzi SDK podporovaný. Kontaktujte prosím autora nástroje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToSetToolsPathEnvironmentVariable">
+        <source>Failed to add '{0}' to the PATH environment variable. Please add this directory to your PATH to use tools installed with 'dotnet tool install'.</source>
+        <target state="translated">Nepovedlo se přidat adresář {0} do proměnné prostředí PATH. Přidejte prosím tento adresář do proměnné PATH, abyste mohli používat nástroje nainstalované pomocí dotnet tool install.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MoreThanOnePackagedShimAvailable">
+        <source>More than one packaged shim is available: {0}.</source>
+        <target state="translated">Je k dispozici více než jedno zabalené překrytí: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedToReadNuGetLockFile">
+        <source>Failed to read NuGet LockFile for tool package '{0}': {1}</source>
+        <target state="translated">Nepovedlo se přečíst soubor LockFile NuGet pro balíček nástroje {0}: {1}</target>
         <note />
       </trans-unit>
     </body>

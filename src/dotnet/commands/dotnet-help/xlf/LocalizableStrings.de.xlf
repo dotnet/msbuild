@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="PublishDefinition">
         <source>Publishes a .NET project for deployment (including the runtime).</source>
-        <target state="translated">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Laufzeit).</target>
+        <target state="translated">Veröffentlicht ein .NET-Projekt für die Bereitstellung (einschließlich Runtime).</target>
         <note />
       </trans-unit>
       <trans-unit id="RunDefinition">
@@ -129,7 +129,8 @@
       </trans-unit>
       <trans-unit id="MsBuildDefinition">
         <source>Runs Microsoft Build Engine (MSBuild).</source>
-        <target state="translated">Führt Microsoft-Buildmodul (MSBuild) aus.</target>
+        <target state="translated">Führt die Microsoft-Build-Engine (MSBuild) aus.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="VsTestDefinition">
@@ -153,8 +154,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ListDefinition">
-        <source>List reference in the project.</source>
-        <target state="translated">Verweis im Projekt auflisten.</target>
+        <source>List references of a .NET project.</source>
+        <target state="needs-review-translation">Hiermit werden Projektverweise oder installierte Tools aufgelistet.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDoesNotExist">
@@ -188,13 +189,23 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKVersionCommandDefinition">
-        <source>Display .NET Core SDK version.</source>
-        <target state="translated">.NET Core SDK-Version anzeigen.</target>
+        <source>Display .NET Core SDK version in use.</source>
+        <target state="translated">Die verwendete .NET Core SDK-Version anzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKInfoCommandDefinition">
         <source>Display .NET Core information.</source>
         <target state="translated">.NET Core-Informationen anzeigen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListSdksCommandDefinition">
+        <source>Display the installed SDKs.</source>
+        <target state="translated">Die installierten SDKs anzeigen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKListRuntimesCommandDefinition">
+        <source>Display the installed runtimes.</source>
+        <target state="translated">Die installierten Runtimes anzeigen.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKDiagnosticsCommandDefinition">
@@ -233,8 +244,53 @@
         <note />
       </trans-unit>
       <trans-unit id="AdditionalDeps">
-        <source>Path to additonal deps.json file.</source>
-        <target state="translated">Pfad zur zusätzlichen "deps.json"-Datei.</target>
+        <source>Path to additional deps.json file.</source>
+        <target state="translated">Pfad zur zusätzlichen Datei "deps.json".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StoreDefinition">
+        <source>Stores the specified assemblies in the runtime store.</source>
+        <target state="translated">Speichert die angegebenen Assemblys im Runtimespeicher.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolDefinition">
+        <source>Install or work with tools that extend the .NET experience.</source>
+        <target state="translated">Installation oder Arbeit mit Tools zum Erweitern der .NET-Benutzeroberfläche.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildServerDefinition">
+        <source>Interact with servers started by a build.</source>
+        <target state="translated">Interaktion mit Servern, die durch einen Build gestartet werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevCertsDefinition">
+        <source>Create and manage development certificates.</source>
+        <target state="new">Create and manage development certificates.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EfDefinition">
+        <source>Entity Framework Core command-line tools.</source>
+        <target state="new">Entity Framework Core command-line tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SqlCacheDefinition">
+        <source>SQL Server cache command-line tools.</source>
+        <target state="new">SQL Server cache command-line tools.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UserSecretsDefinition">
+        <source>Manage development user secrets.</source>
+        <target state="new">Manage development user secrets.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WatchDefinition">
+        <source>Start a file watcher that runs a command when files change.</source>
+        <target state="new">Start a file watcher that runs a command when files change.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AdditionalTools">
+        <source>Additional tools ('dotnet [tool-name] --help' for more information):</source>
+        <target state="new">Additional tools ('dotnet [tool-name] --help' for more information):</target>
         <note />
       </trans-unit>
     </body>

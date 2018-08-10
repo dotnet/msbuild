@@ -27,6 +27,10 @@ path-to-application:
   nuget            {LocalizableStrings.NugetDefinition}
   msbuild          {LocalizableStrings.MsBuildDefinition}
   vstest           {LocalizableStrings.VsTestDefinition}
+  store            {LocalizableStrings.StoreDefinition}
+  tool             {LocalizableStrings.ToolDefinition}
+  build-server     {LocalizableStrings.BuildServerDefinition}
+  help             {LocalizableStrings.HelpDefinition}
 
 {LocalizableStrings.CommonOptions}:
   -v|--verbosity        {CommonLocalizableStrings.VerbosityOptionDescription}
@@ -37,6 +41,8 @@ path-to-application:
 sdk-options:
   --version        {LocalizableStrings.SDKVersionCommandDefinition}
   --info           {LocalizableStrings.SDKInfoCommandDefinition}
+  --list-sdks      {LocalizableStrings.SDKListSdksCommandDefinition}
+  --list-runtimes  {LocalizableStrings.SDKListRuntimesCommandDefinition}
   -d|--diagnostics {LocalizableStrings.SDKDiagnosticsCommandDefinition}
 
 runtime-options:
@@ -44,5 +50,12 @@ runtime-options:
   --fx-version <version>            {LocalizableStrings.FxVersionDefinition}
   --roll-forward-on-no-candidate-fx {LocalizableStrings.RollForwardOnNoCandidateFxDefinition}
   --additional-deps <path>          {LocalizableStrings.AdditionalDeps}
+
+{LocalizableStrings.AdditionalTools}
+  dev-certs      {LocalizableStrings.DevCertsDefinition}
+  ef             {LocalizableStrings.EfDefinition}
+  sql-cache      {LocalizableStrings.SqlCacheDefinition}
+  user-secrets   {LocalizableStrings.UserSecretsDefinition}
+  watch          {LocalizableStrings.WatchDefinition}
 ";
 }

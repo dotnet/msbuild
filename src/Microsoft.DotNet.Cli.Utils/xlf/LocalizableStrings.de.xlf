@@ -140,8 +140,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UnableToGenerateDepsJson">
-        <source>unable to generate deps.json, it may have been already generated: {0}</source>
-        <target state="translated">"deps.json" kann nicht erzeugt werden; sie wurde vielleicht bereits erzeugt: {0}</target>
+        <source>Unable to generate deps.json, it may have been already generated.  You can specify the "-d" option before the tool name for diagnostic output (for example, "dotnet -d &lt;toolname&gt;": {0}</source>
+        <target state="translated">Die Datei "deps.json" kann nicht generiert werden, möglicherweise wurde sie bereits generiert. Sie können zur Diagnoseausgabe die Option "-d" vor dem Toolnamen angeben (Beispiel: "dotnet -d &lt;toolname&gt;": {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="UnableToDeleteTemporaryDepsJson">
@@ -161,7 +161,7 @@
       </trans-unit>
       <trans-unit id="ProjectNotRestoredOrRestoreFailed">
         <source>The project may not have been restored or restore failed - run `dotnet restore`</source>
-        <target state="translated">Das Projekt wurde möglicherweise nicht wiederhergestellt, oder bei der Wiederherstellung ist ein Fehler aufgetreten. führen Sie "dotnet restore" aus.</target>
+        <target state="translated">Das Projekt wurde möglicherweise nicht wiederhergestellt, oder bei der Wiederherstellung ist ein Fehler aufgetreten. Führen Sie "dotnet restore" aus.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
@@ -216,7 +216,7 @@
       </trans-unit>
       <trans-unit id="IgnoringPreferCLIRuntimeFile">
         <source>{0}: Ignoring prefercliruntime file as the tool target framework ({1}) has a different major version than the current CLI runtime ({2})</source>
-        <target state="translated">{0}: Die Datei "prefercliruntime" wird ignoriert, da das Tool-Ziellaufwerk ({1}) eine andere Hauptversion aufweist als die aktuelle CLI-Laufzeit ({2}).</target>
+        <target state="translated">{0}: Die Datei "prefercliruntime" wird ignoriert, da das Tool-Ziellaufwerk ({1}) eine andere Hauptversion aufweist als die aktuelle CLI-Runtime ({2}).</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotFindToolRuntimeConfigFile">
@@ -232,6 +232,40 @@
       <trans-unit id="CommandAssembliesNotFound">
         <source>The command executable for "{0}" was not found. The project may not have been restored or restore failed - run `dotnet restore`</source>
         <target state="translated">Der für "{0}" auszuführende Befehl wurde nicht gefunden. Das Projekt wurde möglicherweise nicht wiederhergestellt, oder bei der Wiederherstellung ist ein Fehler aufgetreten. Führen Sie "dotnet restore" aus.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfoLabel">
+        <source>.NET Core SDK (reflecting any global.json):</source>
+        <target state="translated">.NET Core SDK (gemäß "global.json"):</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetRuntimeInfoLabel">
+        <source>Runtime Environment:</source>
+        <target state="translated">Laufzeitumgebung:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildArgs">
+        <source>MSBuild arguments: {0}</source>
+        <target state="translated">MSBuild-Argumente: {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostAppHostHasBeenModified">
+        <source>Unable to use '{0}' as application host executable as it does not contain the expected placeholder byte sequence '{1}' that would mark where the application name would be written.</source>
+        <target state="translated">"{0}" kann nicht als ausführbare Anwendungshostdatei verwendet werden, da die erwartete Platzhalter-Bytesequenz "{1}" nicht vorhanden ist, die markiert, wo der Anwendungsname geschrieben wird.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmbedAppNameInHostFileNameIsTooLong">
+        <source>Given file name '{0}' is longer than 1024 bytes</source>
+        <target state="translated">Der angegebene Dateiname "{0}" ist länger als 1024 Byte.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindCommandAvailableAsTool">
+        <source>Cannot find command 'dotnet {0}', please run the following command to install
+
+dotnet tool install --global {1}</source>
+        <target state="translated">Der Befehl "dotnet {0}" wurde nicht gefunden, führen Sie zur Installation den folgenden Befehl aus:
+
+dotnet tool install --global {1}</target>
         <note />
       </trans-unit>
     </body>

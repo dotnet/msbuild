@@ -1,9 +1,10 @@
 <Project>
+
   <Target Name="GenerateMSBuildExtensions"
-          DependsOnTargets="GenerateBundledVersionsProps;RestoreMSBuildExtensionsPackages">
+          DependsOnTargets="GenerateBundledVersionsProps;GenerateBundledCliToolsProps;RestoreMSBuildExtensionsPackages">
 
     <ItemGroup>
-      
+
       <!-- The MSBuildExtensionsContent item is for the files that will be laid out in the CLI install -->
       <MSBuildExtensionsContent Include="$(GeneratedMSBuildExtensionsDirectory)/**/*" />
 
@@ -11,19 +12,19 @@
            from that package under the net461, net462, etc folders.  That is because they come from the NETStandard.Library.NETFramework
            package, and we want to insert them directly into the CLI from CoreFx instead of having to do a two-hop insertion (CoreFX -> SDK -> CLI)
            if we need to update them.
-           
+
            https://github.com/dotnet/sdk/issues/1324 has been filed to exclude these from the Microsoft.NET.Build.Extensions package when
            we generate it.
            -->
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\**\*.*"
                                 Exclude="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\net*\**" />
-      
+
       <!-- Don't include .NET Framework MS.NET.Build.Extensions tasks in CLI layout -->
       <MSBuildExtensionsContent Remove="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions\Microsoft\Microsoft.NET.Build.Extensions\tools\net46\**" />
 
       <MSBuildExtensionsContent Include="$(MSBuildExtensionsNuPkgPath)\msbuildExtensions-ver\**\*.*"
                                 DeploymentSubpath="$(MSBuildExtensionsVersionSubfolder)/" />
-      
+
       <MSBuildExtensionsContent Include="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.*"
                                 Exclude="$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.props;$(NETStandardLibraryNETFrameworkNuPkgPath)\build\**\*.targets"
                                 DeploymentSubpath="Microsoft/Microsoft.NET.Build.Extensions/" />
@@ -68,14 +69,14 @@
     <ItemGroup>
       <ExtensionPackageToRestore Include="$(MSBuildExtensionsPackageName)" Version="$(MicrosoftNETBuildExtensionsPackageVersion)"/>
       <ExtensionPackageToRestore Include="$(NETStandardLibraryNETFrameworkPackageName)" Version="$(CLI_NETStandardLibraryNETFrameworkVersion)"/>
-      
+
       <ExtensionRestore Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
           CLIBuildDll=$(CLIBuildDll);
           NuGetPackagesDir=$(NuGetPackagesDir);
           DependencyPackageName=%(ExtensionPackageToRestore.Identity);
           DependencyPackageVersion=%(ExtensionPackageToRestore.Version);
-          Stage0Directory=$(Stage0Directory)
+          PreviousStageDirectory=$(PreviousStageDirectory)
         </Properties>
       </ExtensionRestore>
     </ItemGroup>
@@ -86,32 +87,72 @@
     </MSBuild>
   </Target>
 
-  <Target Name="GenerateBundledVersionsProps">
+  <Target Name="GenerateBundledVersionsProps" DependsOnTargets="RunResolvePackageDependencies">
     <PropertyGroup>
       <BundledVersionsPropsFileName>Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPropsFileName>
     </PropertyGroup>
 
-    <!-- 
+    <!--
       The bundled version of Microsoft.NETCore.App is determined statically from DependencyVersions.props whereas the bundled version
       of NETStandard.Library is defined by what Microsoft.NETCore.App pulls in. This digs in to the package resolution items of
       of our build against Microsoft.NETCore.App to find the correct NETStandard.Library version
     -->
     <ItemGroup>
-      <_NETStandardLibraryVersions Include="@(PackageDefinitions->'%(Version)')"
+      <_NETStandardLibraryPackageVersions Include="@(PackageDefinitions->'%(Version)')"
                                    Condition="%(PackageDefinitions.Name) == 'NetStandard.Library'" />
+      <_NETCorePlatformsPackageVersions Include="@(PackageDefinitions->'%(Version)')"
+                                   Condition="%(PackageDefinitions.Name) == 'Microsoft.NETCore.Platforms'" />
     </ItemGroup>
 
-    <Error Condition="@(_NETStandardLibraryVersions->Distinct()->Count()) != 1"
+    <Error Condition="@(_NETStandardLibraryPackageVersions->Distinct()->Count()) != 1"
            Text="Failed to determine the NETStandard.Library version pulled in Microsoft.NETCore.App" />
+    <Error Condition="@(_NETCorePlatformsPackageVersions->Distinct()->Count()) != 1"
+           Text="Failed to determine the Microsoft.NETCore.Platforms version pulled in Microsoft.NETCore.App" />
 
     <PropertyGroup>
       <_NETCoreAppPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</_NETCoreAppPackageVersion>
-      <_NETStandardPackageVersion>@(_NETStandardLibraryVersions->Distinct())</_NETStandardPackageVersion>
+      <_NETStandardLibraryPackageVersion>@(_NETStandardLibraryPackageVersions->Distinct())</_NETStandardLibraryPackageVersion>
+      <_NETCorePlatformsPackageVersion>@(_NETCorePlatformsPackageVersions->Distinct())</_NETCorePlatformsPackageVersion>
+      <_AspNetCoreAllPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</_AspNetCoreAllPackageVersion>
+      <_AspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAppPackageVersion)</_AspNetCoreAppPackageVersion>
+
+      <!-- Default aspnetcore patch versions, specified as a stabilized version -->
+      <_DefaultPatchVersionForAspNetCoreAll2_1>2.1.1</_DefaultPatchVersionForAspNetCoreAll2_1>
+      <_DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreAll2_1)</_DefaultPatchVersionForAspNetCoreApp2_1>
+      <!-- If we are currently building a prerelease of the version that we intend to lock to, set the default version to the ingested version instead of the stabilized version. -->
+      <_DefaultPatchVersionForAspNetCoreAll2_1 Condition="$(_AspNetCoreAllPackageVersion.StartsWith('$(_DefaultPatchVersionForAspNetCoreAll2_1)-'))">$(_AspNetCoreAllPackageVersion)</_DefaultPatchVersionForAspNetCoreAll2_1>
+      <_DefaultPatchVersionForAspNetCoreApp2_1 Condition="$(_AspNetCoreAppPackageVersion.StartsWith('$(_DefaultPatchVersionForAspNetCoreApp2_1)-'))">$(_AspNetCoreAppPackageVersion)</_DefaultPatchVersionForAspNetCoreApp2_1>
 
       <!-- Use only major and minor in target framework version -->
       <_NETCoreAppTargetFrameworkVersion>$(_NETCoreAppPackageVersion.Split('.')[0]).$(_NETCoreAppPackageVersion.Split('.')[1])</_NETCoreAppTargetFrameworkVersion>
-      <_NETStandardTargetFrameworkVersion>$(_NETStandardPackageVersion.Split('.')[0]).$(_NETStandardPackageVersion.Split('.')[1])</_NETStandardTargetFrameworkVersion>
+      <_NETStandardTargetFrameworkVersion>$(_NETStandardLibraryPackageVersion.Split('.')[0]).$(_NETStandardLibraryPackageVersion.Split('.')[1])</_NETStandardTargetFrameworkVersion>
+      <_AspNetCoreAllTargetFrameworkVersion>$(_NETCoreAppTargetFrameworkVersion)</_AspNetCoreAllTargetFrameworkVersion>
+      <_AspNetCoreAppTargetFrameworkVersion>$(_AspNetCoreAllTargetFrameworkVersion)</_AspNetCoreAppTargetFrameworkVersion>
 
+      <_NETCoreSdkIsPreview Condition=" '$(DropSuffix)' != 'true' ">true</_NETCoreSdkIsPreview>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <BundledVersionsVariable Include="BundledAspNetCoreAllTargetFrameworkVersion" Value="$(_AspNetCoreAllTargetFrameworkVersion)" />
+      <BundledVersionsVariable Include="BundledAspNetCoreAllPackageVersion" Value="$(_AspNetCoreAllPackageVersion)" />
+      <BundledVersionsVariable Include="BundledAspNetCoreAppTargetFrameworkVersion" Value="$(_AspNetCoreAppTargetFrameworkVersion)" />
+      <BundledVersionsVariable Include="BundledAspNetCoreAppPackageVersion" Value="$(_AspNetCoreAppPackageVersion)" />
+    </ItemGroup>
+
+    <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' == 'false' ">
+      <!--
+        These properties indicate that the ASP.NET Core shared runtime is not bundled on this platform, so the SDK should not
+        treat these packages as the 'platform' base.
+
+        The bundled aspnet packages versions should still be set, however, so the default, version-less PackageReference
+        still works.
+        See also https://github.com/aspnet/Universe/pull/1130.
+      -->
+      <BundledVersionsVariable Include="_AspNetCoreAppSharedFxIsEnabled" Value="false" />
+      <BundledVersionsVariable Include="_AspNetCoreAllSharedFxIsEnabled" Value="false" />
+    </ItemGroup>
+
+    <PropertyGroup>
       <BundledVersionsPropsContent>
 <![CDATA[
 <!--
@@ -130,7 +171,20 @@ Copyright (c) .NET Foundation. All rights reserved.
     <BundledNETCoreAppTargetFrameworkVersion>$(_NETCoreAppTargetFrameworkVersion)</BundledNETCoreAppTargetFrameworkVersion>
     <BundledNETCoreAppPackageVersion>$(_NETCoreAppPackageVersion)</BundledNETCoreAppPackageVersion>
     <BundledNETStandardTargetFrameworkVersion>$(_NETStandardTargetFrameworkVersion)</BundledNETStandardTargetFrameworkVersion>
-    <BundledNETStandardPackageVersion>$(_NETStandardPackageVersion)</BundledNETStandardPackageVersion>
+    <BundledNETStandardPackageVersion>$(_NETStandardLibraryPackageVersion)</BundledNETStandardPackageVersion>
+    <BundledNETCorePlatformsPackageVersion>$(_NETCorePlatformsPackageVersion)</BundledNETCorePlatformsPackageVersion>
+    @(BundledVersionsVariable->'<%(Identity)>%(Value)</%(Identity)>', '%0A    ')
+    <NETCoreSdkVersion>$(SdkVersion)</NETCoreSdkVersion>
+    <_NETCoreSdkIsPreview>$(_NETCoreSdkIsPreview)</_NETCoreSdkIsPreview>
+
+    <!-- Default patch versions for each minor version of ASP.NET Core -->
+    <DefaultPatchVersionForAspNetCoreAll2_1>$(_DefaultPatchVersionForAspNetCoreAll2_1)</DefaultPatchVersionForAspNetCoreAll2_1>
+    <DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreApp2_1)</DefaultPatchVersionForAspNetCoreApp2_1>
+
+    <!-- Latest patch versions for each minor version of .NET Core -->
+    <LatestPatchVersionForNetCore1_0 Condition="'$(LatestPatchVersionForNetCore1_0)' == ''">1.0.11</LatestPatchVersionForNetCore1_0>
+    <LatestPatchVersionForNetCore1_1 Condition="'$(LatestPatchVersionForNetCore1_1)' == ''">1.1.8</LatestPatchVersionForNetCore1_1>
+    <LatestPatchVersionForNetCore2_0 Condition="'$(LatestPatchVersionForNetCore2_0)' == ''">2.0.7</LatestPatchVersionForNetCore2_0>
   </PropertyGroup>
 </Project>
 ]]>
@@ -140,6 +194,40 @@ Copyright (c) .NET Foundation. All rights reserved.
     <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)" />
     <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledVersionsPropsFileName)"
                       Lines="$(BundledVersionsPropsContent)"
+                      Overwrite="true" />
+  </Target>
+
+  <Target Name="GenerateBundledCliToolsProps">
+    <PropertyGroup>
+      <BundledBundledCliToolsPropsFileName>Microsoft.NETCoreSdk.BundledCliTools.props</BundledBundledCliToolsPropsFileName>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <BundledBundledCliToolsPropsContent>
+<![CDATA[
+<!--
+***********************************************************************************************
+$(BundledBundledCliToolsPropsFileName)
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (c) .NET Foundation. All rights reserved.
+***********************************************************************************************
+-->
+<Project>
+  <ItemGroup>
+@(BundledDotnetTools->HasMetadata('ObsoletesCliTool')->'    %3CBundledDotNetCliToolReference Include="%(ObsoletesCliTool)" /%3E','%0A')
+  </ItemGroup>
+</Project>
+]]>
+    </BundledBundledCliToolsPropsContent>
+  </PropertyGroup>
+
+    <MakeDir Directories="$(GeneratedMSBuildExtensionsDirectory)" />
+    <WriteLinesToFile File="$(GeneratedMSBuildExtensionsDirectory)/$(BundledBundledCliToolsPropsFileName)"
+                      Lines="$(BundledBundledCliToolsPropsContent)"
                       Overwrite="true" />
   </Target>
 </Project>

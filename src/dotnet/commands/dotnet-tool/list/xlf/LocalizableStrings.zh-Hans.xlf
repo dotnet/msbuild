@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="CommandDescription">
+        <source>Lists installed tools in the current development environment.</source>
+        <target state="translated">列出当前开发环境中的已安装工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>List user wide tools.</source>
+        <target state="translated">列出用户范围工具。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionColumn">
+        <source>Version</source>
+        <target state="translated">版本</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandsColumn">
+        <source>Commands</source>
+        <target state="translated">命令</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdColumn">
+        <source>Package Id</source>
+        <target state="translated">包 ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidPackageWarning">
+        <source>Warning: tool package '{0}' is invalid: {1}</source>
+        <target state="translated">警告: 工具包“{0}”无效: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tools are installed.</source>
+        <target state="translated">安装工具的位置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">请指定全局选项(--global)或工具路径选项(--tool-path)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalAndToolPathConflict">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="translated">(--global)与工具路径选项(--tool-path)冲突。请仅指定其中一种选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidToolPathOption">
+        <source>Tool path '{0}' does not exist.</source>
+        <target state="translated">工具路径“{0}”不存在。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

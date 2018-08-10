@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>NuGet Package Id of the tool to update.</source>
+        <target state="translated">更新するツールの NuGet パッケージ ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Please specify one tool Package Id to update.</source>
+        <target state="translated">更新するツール パッケージ ID を 1 つ指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>Version of the tool package in NuGet.</source>
+        <target state="translated">NuGet のツール パッケージのバージョン。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Updates a tool to the latest stable version for use.</source>
+        <target state="translated">ツールを、安定した最新バージョンに更新して使用します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">使用する NuGet 構成ファイル。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to update the tool for.</source>
+        <target state="translated">ツールを更新するターゲット フレームワーク。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">NuGet 構成ファイル '{0}' は存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceeded">
+        <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="translated">ツール '{0}' がバージョン '{1}' からバージョン '{2}' に正常に更新されました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Update user wide.</source>
+        <target state="translated">ユーザー全体で更新します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFullCommandNameLocalized">
+        <source>.NET update Command</source>
+        <target state="translated">.NET update コマンド</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">グローバル オプション (--global) またはツール パス オプション (--tool-path) のいずれかを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="translated">(--global) とツール パス オプション (--tool-path) は競合します。どちらか片方のオプションのみを指定してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tool will be installed.</source>
+        <target state="translated">ツールがインストールされる場所。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolHasMultipleVersionsInstalled">
+        <source>Tool '{0}' has multiple versions installed and cannot be updated.</source>
+        <target state="translated">ツール '{0}' の複数のバージョンがインストールされており、更新できません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolNotInstalled">
+        <source>Tool '{0}' is not currently installed.</source>
+        <target state="translated">ツール '{0}' は現在、インストールされていません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">ツール '{0}' が安定した最新バージョン (バージョン '{1}') で再インストールされました。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolFailed">
+        <source>Tool '{0}' failed to update due to the following:</source>
+        <target state="translated">ツール '{0}' を更新できませんでした。原因:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during update.</source>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>ADD_SOURCE</source>
+        <target state="new">ADD_SOURCE</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="InstallFullCommandNameLocalized">
+        <source>.NET Install Command</source>
+        <target state="translated">.NET 설치 명령</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Install or work with tools that extend the .NET experience.</source>
+        <target state="translated">.NET 환경을 확장하는 도구를 설치하거나 도구로 작업합니다.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

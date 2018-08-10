@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="PackageIdArgumentName">
+        <source>PACKAGE_ID</source>
+        <target state="translated">PACKAGE_ID</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackageIdArgumentDescription">
+        <source>NuGet Package Id of the tool to update.</source>
+        <target state="translated">要更新的工具的 NuGet 包 ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SpecifyExactlyOnePackageId">
+        <source>Please specify one tool Package Id to update.</source>
+        <target state="translated">请指定一个要更新的工具包 ID。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="VersionOptionDescription">
+        <source>Version of the tool package in NuGet.</source>
+        <target state="translated">NuGet 中工具包的版本。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommandDescription">
+        <source>Updates a tool to the latest stable version for use.</source>
+        <target state="translated">将工具更新为最新稳定版本以供使用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ConfigFileOptionDescription">
+        <source>The NuGet configuration file to use.</source>
+        <target state="translated">要使用的 NuGet 配置文件。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FrameworkOptionDescription">
+        <source>The target framework to update the tool for.</source>
+        <target state="translated">要更新工具的目标框架。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NuGetConfigurationFileDoesNotExist">
+        <source>NuGet configuration file '{0}' does not exist.</source>
+        <target state="translated">NuGet 配置文件“{0}”不存在。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceeded">
+        <source>Tool '{0}' was successfully updated from version '{1}' to version '{2}'.</source>
+        <target state="translated">工具“{0}”已成功从版本“{1}”更新到版本“{2}”。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobalOptionDescription">
+        <source>Update user wide.</source>
+        <target state="translated">更新用户范围。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateFullCommandNameLocalized">
+        <source>.NET update Command</source>
+        <target state="translated">.NET 更新命令</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandNeedGlobalOrToolPath">
+        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
+        <target state="translated">请指定全局选项(--global)或工具路径选项(--tool-path)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolCommandInvalidGlobalAndToolPath">
+        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
+        <target state="translated">(--global)与工具路径选项(--tool-path)冲突。请仅指定其中一种选项。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolPathDescription">
+        <source>Location where the tool will be installed.</source>
+        <target state="translated">将安装工具的位置。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolHasMultipleVersionsInstalled">
+        <source>Tool '{0}' has multiple versions installed and cannot be updated.</source>
+        <target state="translated">工具“{0}”已安装多个版本，无法更新。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolNotInstalled">
+        <source>Tool '{0}' is not currently installed.</source>
+        <target state="translated">工具“{0}”目前尚未安装。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateSucceededVersionNoChange">
+        <source>Tool '{0}' was reinstalled with the latest stable version (version '{1}').</source>
+        <target state="translated">工具“{0}”已重新安装最新稳定版本(版本“{1}”)。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UpdateToolFailed">
+        <source>Tool '{0}' failed to update due to the following:</source>
+        <target state="translated">工具“{0}”因以下原因而未能更新:</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionDescription">
+        <source>Adds an additional NuGet package source to use during update.</source>
+        <target state="new">Adds an additional NuGet package source to use during update.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddSourceOptionName">
+        <source>ADD_SOURCE</source>
+        <target state="new">ADD_SOURCE</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

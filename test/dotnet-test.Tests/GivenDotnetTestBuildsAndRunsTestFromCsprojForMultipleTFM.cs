@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand()
                .WithWorkingDirectory(projectDirectory)
-               .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --framework netcoreapp2.0")
+               .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --framework netcoreapp2.1")
                .Should().Pass();
         }
     }
