@@ -90,24 +90,34 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
 
         public override bool Execute()
         {
+            return RunXmlTrasform();
+        }
+
+        public bool RunXmlTrasform(bool isLoggingEnabled = true)
+        {
             bool succeeded = true;
-            IXmlTransformationLogger logger = new TaskTransformationLogger(Log, StackTrace);
+            IXmlTransformationLogger logger = null;
+            if (isLoggingEnabled)
+            {
+                logger = new TaskTransformationLogger(Log, StackTrace);
+            }
+
             XmlTransformation transformation = null;
             XmlTransformableDocument document = null;
 
             try
             {
-                logger.StartSection(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.BUILDTASK_TransformXml_TransformationStart, Source));
+                logger?.StartSection(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.BUILDTASK_TransformXml_TransformationStart, Source));
                 document = OpenSourceFile(Source);
 
-                logger.LogMessage(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.BUILDTASK_TransformXml_TransformationApply, Transform));
+                logger?.LogMessage(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.BUILDTASK_TransformXml_TransformationApply, Transform));
                 transformation = OpenTransformFile(Transform, logger);
 
                 succeeded = transformation.Apply(document);
 
                 if (succeeded)
                 {
-                    logger.LogMessage(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.BUILDTASK_TransformXml_TransformOutput, Destination));
+                    logger?.LogMessage(string.Format(System.Globalization.CultureInfo.CurrentCulture, Resources.BUILDTASK_TransformXml_TransformOutput, Destination));
 
                     SaveTransformedFile(document, Destination);
                 }
@@ -121,17 +131,17 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Xdt
                     localPath = sourceUri.LocalPath;
                 }
 
-                logger.LogError(localPath, ex.LineNumber, ex.LinePosition, ex.Message);
+                logger?.LogError(localPath, ex.LineNumber, ex.LinePosition, ex.Message);
                 succeeded = false;
             }
             catch (Exception ex)
             {
-                logger.LogErrorFromException(ex);
+                logger?.LogErrorFromException(ex);
                 succeeded = false;
             }
             finally
             {
-                logger.EndSection(string.Format(System.Globalization.CultureInfo.CurrentCulture, succeeded ?
+                logger?.EndSection(string.Format(System.Globalization.CultureInfo.CurrentCulture, succeeded ?
                     Resources.BUILDTASK_TransformXml_TransformationSucceeded :
                     Resources.BUILDTASK_TransformXml_TransformationFailed));
                 if (transformation != null)
