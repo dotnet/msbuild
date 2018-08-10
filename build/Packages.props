@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-      <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-preview1.5185</NuGetPackageVersion>
+      <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-rtm.5362</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
