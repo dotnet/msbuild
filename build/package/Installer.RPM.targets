@@ -196,7 +196,8 @@
   <Target Name="TestFPMTool">
 
     <!-- run FPM  -->
-    <Exec Command="fpm --help > /dev/null" ContinueOnError="True">
+    <!-- NB: IgnoreExitCode prevents Exec from failing, but does not prevent us from retrieving the exit code. -->
+    <Exec Command="fpm --help > /dev/null 2>&amp;1" IgnoreExitCode="True">
       <Output TaskParameter="ExitCode" PropertyName="FPMExitCode"/>
     </Exec>
 
