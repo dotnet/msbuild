@@ -84,7 +84,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishProfileName>$([System.IO.Path]::GetFileNameWithoutExtension($(WebPublishProfileFile)))</PublishProfileName>
   </PropertyGroup>
     
-    <!-- Run the transform at the config level e.g: web.Release.config-->
+    <!-- Run the transform at the config level e.g: web.Release.config if the configuration is Release-->
     <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(Configuration).config')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
@@ -95,7 +95,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                   SourceRootPath="$(PublishIntermediateOutputPath)"
                   TransformRootPath="$(MSBuildProjectDirectory)"/>
   
-      <!-- Run the transform at the profile level e.g: web.FolderProfile.config -->
+      <!-- Run the transform at the profile level e.g: web.FolderProfile.config if the profile name is FolderProfile -->
     <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(PublishProfileName).config')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
@@ -106,7 +106,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                   SourceRootPath="$(PublishIntermediateOutputPath)"
                   TransformRootPath="$(MSBuildProjectDirectory)"/>
   
-    <!-- Run the transform at the environment level e.g: web.staging.config -->
+    <!-- Run the transform at the environment level e.g: web.staging.config if the $(EnvironmentName) passed to msbuild is staging-->
     <TransformXml Condition="Exists('$(MSBuildProjectDirectory)\web.$(EnvironmentName).config')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
@@ -118,7 +118,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                   TransformRootPath="$(MSBuildProjectDirectory)"/>
 
 
-    <!-- Run the custom transform file e.g: MyCustomTransformFile.xml -->
+    <!-- Run the custom transform file e.g: MyTransformFile.xml if the $(CustomTransformFileName) passed to msbuild is MyTransformFile.xml-->
     <TransformXml Condition=" $(CustomTransformFileName) != '' And Exists('$(MSBuildProjectDirectory)\$(CustomTransformFileName)')
                   And Exists('$(PublishIntermediateOutputPath)web.config')
                   And '$(RunXdt)' == 'true'"
