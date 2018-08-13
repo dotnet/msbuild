@@ -33,7 +33,7 @@ then
     [ -d "$DOTNET_INSTALL_DIR" ] || mkdir -p $DOTNET_INSTALL_DIR
 
     DOTNET_INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.sh"
-    curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.1.300
+    curl -sSL "$DOTNET_INSTALL_SCRIPT_URL" | bash /dev/stdin --verbose --version 2.1.302
 
     curl --retry 10 -s -SL -f --create-dirs -o $DOTNET_INSTALL_DIR/buildtools.tar.gz https://aspnetcore.blob.core.windows.net/buildtools/netfx/4.6.1/netfx.4.6.1.tar.gz
     [ -d "$DOTNET_INSTALL_DIR/buildtools/net461" ] || mkdir -p $DOTNET_INSTALL_DIR/buildtools/net461
