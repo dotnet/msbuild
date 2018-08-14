@@ -1,9 +1,9 @@
 <Project>
 
   <PropertyGroup>
-      <!-- Prodcon-overrideable, using repo-toolset naming convention
+      <!-- Prodcon-overrideable, using repo-toolset naming convention -->
       <MicrosoftNetCompilersVersion Condition="'$(MicrosoftNetCompilersVersion)' == ''">2.8.2</MicrosoftNetCompilersVersion>
-      <MicrosoftNETCoreCompilersVersion Condition="'$(MicrosoftNETCoreCompilersVersion)' == ''">2.8.0</MicrosoftNETCoreCompilersVersion>-->
+      <MicrosoftNETCoreCompilersVersion Condition="'$(MicrosoftNETCoreCompilersVersion)' == ''">2.8.0</MicrosoftNETCoreCompilersVersion>
 
       <!--<NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-preview1.5185</NuGetPackageVersion>
           <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
