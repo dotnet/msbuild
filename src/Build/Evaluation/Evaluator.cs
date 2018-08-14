@@ -2754,7 +2754,9 @@ namespace Microsoft.Build.Evaluation
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null
                         ? _lastModifiedProject.FullPath
-                        : String.Format(CultureInfo.CurrentCulture, "{0};{1}", _lastModifiedProject.FullPath, oldValue.EvaluatedValue), isGlobalProperty: false, mayBeReserved: false);
+                        : $"{_lastModifiedProject.FullPath};{oldValue.EvaluatedValue}",
+                    isGlobalProperty: false,
+                    mayBeReserved: false);
 
                 if (oldValue != null)
                 {
