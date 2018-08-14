@@ -119,7 +119,7 @@ namespace Microsoft.Build.BackEnd
             }
             catch (IOException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("CantWriteBuildPlan", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CantWriteBuildPlan", planName));
             }
         }
 
@@ -165,15 +165,15 @@ namespace Microsoft.Build.BackEnd
             }
             catch (IOException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("CantReadBuildPlan", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CantReadBuildPlan", planName));
             }
             catch (InvalidDataException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("BuildPlanCorrupt", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildPlanCorrupt", planName));
             }
             catch (FormatException)
             {
-                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceString("BuildPlanCorrupt", planName));
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildPlanCorrupt", planName));
             }
         }
 

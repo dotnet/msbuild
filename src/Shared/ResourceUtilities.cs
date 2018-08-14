@@ -164,7 +164,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceString(out string code, out string helpKeyword, string resourceName, params object[] args)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, string resourceName, params object[] args)
         {
             helpKeyword = GetHelpKeyword(resourceName);
 
@@ -190,12 +190,12 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceString(string resourceName, params object[] args)
+        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object[] args)
         {
             string code;
             string helpKeyword;
 
-            return FormatResourceString(out code, out helpKeyword, resourceName, args);
+            return FormatResourceStringStripCodeAndKeyword(out code, out helpKeyword, resourceName, args);
         }
 
         /// <summary>

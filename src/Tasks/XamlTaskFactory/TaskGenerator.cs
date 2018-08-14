@@ -375,7 +375,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 {
                     // add comments to the class
                     taskClass.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                    string commentContent = ResourceUtilities.FormatResourceString("ClassDescription", _taskParser.GeneratedTaskName);
+                    string commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ClassDescription", _taskParser.GeneratedTaskName);
                     taskClass.Comments.Add(new CodeCommentStatement(commentContent, true));
                     taskClass.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
                 }
@@ -705,11 +705,11 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 // comments
                 propertyName.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                string commentContent = ResourceUtilities.FormatResourceString("PropertyNameDescription", property.Name);
+                string commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyNameDescription", property.Name);
                 propertyName.Comments.Add(new CodeCommentStatement(commentContent, true));
-                commentContent = ResourceUtilities.FormatResourceString("PropertyTypeDescription", type);
+                commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyTypeDescription", type);
                 propertyName.Comments.Add(new CodeCommentStatement(commentContent, true));
-                commentContent = ResourceUtilities.FormatResourceString("PropertySwitchDescription", property.SwitchName);
+                commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertySwitchDescription", property.SwitchName);
                 propertyName.Comments.Add(new CodeCommentStatement(commentContent, true));
                 propertyName.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
             }
@@ -1215,7 +1215,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void LogError(string messageResourceName, params object[] messageArgs)
         {
-            ErrorLog.AddLast(ResourceUtilities.FormatResourceString(messageResourceName, messageArgs));
+            ErrorLog.AddLast(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(messageResourceName, messageArgs));
             ErrorCount++;
         }
 

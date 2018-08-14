@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.False(succeeded);
             Assert.Equal(1, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            string message = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.InvalidParameter", "TargetFrameworkMoniker", t.TargetFrameworkMoniker, String.Empty);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.InvalidParameter", "TargetFrameworkMoniker", t.TargetFrameworkMoniker, String.Empty);
             engine.AssertLogContains(message);
         }
 
@@ -1370,7 +1370,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(0, t.ResolvedFiles.Length);
-            string message = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", @"C:\Regress714052\X86\A.dll", "X86", "AMD64");
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch", @"C:\Regress714052\X86\A.dll", "X86", "AMD64");
             mockEngine.AssertLogContains(message);
         }
 
@@ -6012,7 +6012,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.Equal(0, blackList.Count); // "Expected to have no assembly in the black list"
                 Assert.Equal(1, whiteListErrors.Count); // "Expected there to be one error in the whiteListErrors"
                 Assert.Equal(1, whiteListErrorFileNames.Count); // "Expected there to be one error in the whiteListErrorFileNames"
-                string message = ResourceUtilities.FormatResourceString("ResolveAssemblyReference.NoSubSetRedistListName", subsetFile);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", subsetFile);
                 Assert.True(((Exception)whiteListErrors[0]).Message.Contains(message)); // "Expected assertion to contain correct error code"
             }
             finally

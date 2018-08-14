@@ -2905,7 +2905,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove($(FileWithPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             });
 
-            Assert.Contains(ResourceUtilities.FormatResourceString("InvalidGetPathOfFileAboveParameter", fileWithPath), exception.Message);
+            Assert.Contains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidGetPathOfFileAboveParameter", fileWithPath), exception.Message);
         }
 
         /// <summary>

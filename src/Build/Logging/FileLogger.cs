@@ -107,7 +107,7 @@ namespace Microsoft.Build.Logging
             {
                 string errorCode;
                 string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, e.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, e.Message);
                 _fileWriter?.Dispose();
 
                 throw new LoggerException(message, e.InnerException, errorCode, helpKeyword);
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Logging
             {
                 string errorCode;
                 string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, ex.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidFileLoggerFile", _logFileName, ex.Message);
                 _fileWriter?.Dispose();
 
                 throw new LoggerException(message, ex.InnerException, errorCode, helpKeyword);

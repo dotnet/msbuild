@@ -636,7 +636,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
                 string errCode, ignoredKeyword;
-                ResourceUtilities.FormatResourceString(out errCode, out ignoredKeyword, "Shared.InvalidProjectFile",
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out ignoredKeyword, "Shared.InvalidProjectFile",
                    "someproj.etp", String.Empty);
                 foreach (string warningString in solution.SolutionParserWarnings)
                 {
@@ -671,7 +671,7 @@ namespace Microsoft.Build.UnitTests.Construction
             File.Delete(proj1Path);
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             string errCode, ignoredKeyword;
-            ResourceUtilities.FormatResourceString(out errCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
+            ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out ignoredKeyword, "Shared.ProjectFileCouldNotBeLoaded",
                   "someproj.etp", String.Empty);
             Assert.True(solution.SolutionParserErrorCodes[0].ToString().Contains(errCode));
         }
@@ -799,7 +799,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             Assert.Equal(1, solution.SolutionParserComments.Count); // "Expected the solution parser to contain one comment"
-            Assert.True(String.Equals((string)solution.SolutionParserComments[0], ResourceUtilities.FormatResourceString("UnrecognizedSolutionComment", "999"), StringComparison.OrdinalIgnoreCase));
+            Assert.True(String.Equals((string)solution.SolutionParserComments[0], ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedSolutionComment", "999"), StringComparison.OrdinalIgnoreCase));
         }
 
         [Fact]
