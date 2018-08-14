@@ -184,11 +184,6 @@
         <target state="translated">Impossible d'accéder au fichier de composants.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DotNetCommandLineTools">
-        <source>.NET Command Line Tools</source>
-        <target state="translated">Outils en ligne de commande .NET</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLineForwarderSetPreviously">
         <source>WriteLine forwarder set previously</source>
         <target state="translated">Redirecteur WriteLine déjà défini</target>
@@ -271,6 +266,11 @@ dotnet tool install --global {1}</target>
       <trans-unit id="DotnetCliHomeUsed">
         <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
         <target state="translated">Utilisation du répertoire de base '{0}' défini par la variable d’environnement '{1}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="new">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

@@ -184,11 +184,6 @@
         <target state="translated">無法存取資產檔案。</target>
         <note />
       </trans-unit>
-      <trans-unit id="DotNetCommandLineTools">
-        <source>.NET Command Line Tools</source>
-        <target state="translated">.NET 命令列工具</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLineForwarderSetPreviously">
         <source>WriteLine forwarder set previously</source>
         <target state="translated">先前已設定 WriteLine 轉寄站</target>
@@ -271,6 +266,11 @@ dotnet tool install --global {1}</target>
       <trans-unit id="DotnetCliHomeUsed">
         <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
         <target state="translated">使用依 '{1}' 環境變數設定的主目錄 '{0}'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="new">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

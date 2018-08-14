@@ -2,22 +2,13 @@
   <Target Name="OverlaySdkOnLKG">
     <ItemGroup>
       <OverlaySDK Include="$(DotNetCoreSdkLKGPublishDirectory)/**/*" />
-      <OverlayCLI Include="$(OutputDirectory)/**/*" />
+      <OverlayCLI Include="$(CliOutputDirectory)/**/*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(OverlaySDK)"
           DestinationFiles="@(OverlaySDK->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <ItemGroup>
-      <OldSdk Include="$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/**/*" />
-    </ItemGroup>
-
-    <Move SourceFiles="@(OldSdk)"
-          DestinationFiles="@(OldSdk->'$(SdkOutputDirectory)\sdk\$(SdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <RemoveDir Directories="$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)" />
-
     <Copy SourceFiles="@(OverlayCLI)"
-          DestinationFiles="@(OverlayCLI->'$(SdkOutputDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(OverlayCLI->'$(SdkOutputDirectory)\sdk\$(DotNetCoreSdkLKGVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

@@ -184,11 +184,6 @@
         <target state="translated">无法访问资产文件。</target>
         <note />
       </trans-unit>
-      <trans-unit id="DotNetCommandLineTools">
-        <source>.NET Command Line Tools</source>
-        <target state="translated">.NET 命令行工具</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLineForwarderSetPreviously">
         <source>WriteLine forwarder set previously</source>
         <target state="translated">以前设置的 WriteLine 转发器</target>
@@ -271,6 +266,11 @@ dotnet 工具安装 -- 全局 {1}</target>
       <trans-unit id="DotnetCliHomeUsed">
         <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
         <target state="translated">使用由“{1}”环境变量设置的“{0}”主目录。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="new">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

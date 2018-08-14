@@ -184,11 +184,6 @@
         <target state="translated">Nie można uzyskać dostępu do pliku zasobów.</target>
         <note />
       </trans-unit>
-      <trans-unit id="DotNetCommandLineTools">
-        <source>.NET Command Line Tools</source>
-        <target state="translated">Narzędzia wiersza polecenia programu .NET</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WriteLineForwarderSetPreviously">
         <source>WriteLine forwarder set previously</source>
         <target state="translated">Ustawiona wcześniej usługa przesyłania dalej WriteLine</target>
@@ -271,6 +266,11 @@ dotnet tool install --global {1}</target>
       <trans-unit id="DotnetCliHomeUsed">
         <source>Using home directory '{0}' set by the '{1}' environment variable.</source>
         <target state="translated">Używany jest katalog główny „{0}” ustawiony za pomocą zmiennej środowiskowej „{1}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DotNetSdkInfo">
+        <source>.NET Core SDK</source>
+        <target state="new">.NET Core SDK</target>
         <note />
       </trans-unit>
     </body>

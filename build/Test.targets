@@ -11,7 +11,7 @@
     <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
-    <RoslynDirectory>$(SdkOutputDirectory)/sdk/$(SdkVersion)/Roslyn</RoslynDirectory>
+    <RoslynDirectory>$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/Roslyn</RoslynDirectory>
   </PropertyGroup>
 
   <Target Name="Test"

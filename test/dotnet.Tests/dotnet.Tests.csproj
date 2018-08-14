@@ -30,7 +30,7 @@
     <PropertyGroup>
       <ExpectedVersionFileInIntermediateFolder>$(IntermediateOutputPath)ExpectedSdkVersion.txt</ExpectedVersionFileInIntermediateFolder>
       
-      <VersionFileContent>$(SdkVersion)</VersionFileContent>
+      <VersionFileContent>$(DotNetCoreSdkLKGVersion)</VersionFileContent>
       <ExistingVersionFileContent Condition=" Exists('$(ExpectedVersionFileInIntermediateFolder)') ">
         $([System.IO.File]::ReadAllText($(ExpectedVersionFileInIntermediateFolder)))
       </ExistingVersionFileContent>
