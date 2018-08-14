@@ -4444,10 +4444,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.SetLastWriteTime(project2.ProjectFile, DateTime.Now);
                 File.SetLastWriteTime(primaryProject.ProjectFile, DateTime.Now.AddHours(-1));
 
-
                 Project project = new Project(primaryProject.ProjectFile, null, null);
 
-                project.GetPropertyValue(Constants.MSBuildAllProjectsPropertyName).ShouldStartWith(project2.ProjectFile);
+                string propertyValue = project.GetPropertyValue(Constants.MSBuildAllProjectsPropertyName);
+
+                propertyValue.ShouldStartWith(project2.ProjectFile);
+
+                propertyValue.ShouldNotContain(primaryProject.ProjectFile, Case.Insensitive);
+                propertyValue.ShouldNotContain(project1.ProjectFile, Case.Insensitive);
             }
         }
 
