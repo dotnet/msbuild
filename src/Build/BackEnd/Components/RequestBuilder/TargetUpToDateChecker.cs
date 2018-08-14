@@ -5,7 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-
+#if FEATURE_ENUMERATION
+using System.IO.Enumeration;
+#endif
+using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -960,6 +963,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if any "input" is newer than any "output", or if any input or output does not exist.</returns>
         internal static bool IsAnyOutOfDate<T>(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, string projectDirectory, IList<T> inputs, IList<T> outputs)
         {
+#if FEATURE_ENUMERATION
+            if (NativeMethodsShared.IsWindows)
+            {
+                return IsAnyOutOfDateWip(out dependencyAnalysisDetailEntry, projectDirectory, inputs, outputs);
+            }
+#endif
+
             ErrorUtilities.VerifyThrow((inputs.Count > 0) && (outputs.Count > 0), "Need to specify inputs and outputs.");
             if (inputs.Count > 0)
             {
@@ -1075,6 +1085,175 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
+#if FEATURE_ENUMERATION
+        internal static bool IsAnyOutOfDateWip<T>(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, string projectDirectory, IList<T> inputs, IList<T> outputs)
+        {
+            ErrorUtilities.VerifyThrow((inputs.Count > 0) && (outputs.Count > 0), "Need to specify inputs and outputs.");
+            ValidateTargetItemsType(inputs);
+            ValidateTargetItemsType(outputs);
+
+            // Algorithm: walk through all the outputs to find the oldest output
+            //            walk through the inputs as far as we need to until we find one that's newer (if any)
+
+            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely): 
+            //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
+            //         in the cases I've seen, and adding this optimization would make the code hard to read.
+            (string fileName, DateTime fileTime) oldestOutput = GetOldestFile(projectDirectory, outputs);
+            (string fileName, DateTime fileTime) newerInput = GetNewerFile(projectDirectory, inputs, oldestOutput.fileTime);
+            dependencyAnalysisDetailEntry = CompareInputAndOutput(newerInput, oldestOutput);
+            return dependencyAnalysisDetailEntry != null;
+        }
+
+        private static void ValidateTargetItemsType<T>(IList<T> items)
+        {
+            if (items.Count > 0)
+            {
+                ErrorUtilities.VerifyThrow(items[0] is string || items[0] is ProjectItemInstance, "Must be either string or ProjectItemInstance");
+            }
+        }
+
+        private static DependencyAnalysisLogDetail CompareInputAndOutput((string fileName, DateTime fileTime) newerInput, (string fileName, DateTime fileTime) oldestOutput)
+        {
+            bool isMissingOutput = IsInvalidFileTime(oldestOutput.fileTime);
+            bool isMissingInput = IsInvalidFileTime(newerInput.fileTime);
+            bool isTargetUpToDate = !isMissingOutput && !isMissingInput && newerInput.fileTime <= oldestOutput.fileTime;
+
+            // All exist and no inputs are newer than any outputs; up to date
+            if (isTargetUpToDate)
+            {
+                return null;
+            }
+
+            OutofdateReason reason = isMissingOutput ? OutofdateReason.MissingOutput
+                : isMissingInput ? OutofdateReason.MissingInput : OutofdateReason.NewerInput;
+            return new DependencyAnalysisLogDetail(newerInput.fileName, oldestOutput.fileName, null, null, reason);
+        }
+
+        private static bool IsInvalidFileTime(DateTime lastWriteTimeUtc)
+        {
+            return lastWriteTimeUtc == DateTime.MinValue;
+        }
+
+        private static (string fileName, DateTime fileTime) GetOldestFile<T>(string projectDirectory, IList<T> escapedFilePaths)
+        {
+            string oldestFilePath = String.Empty;
+            DateTime oldestFileTime = DateTime.MaxValue;
+            IDictionary<string, ISet<string>> directoryToFileNames = MapDirectoryToFileNames(escapedFilePaths);
+
+            foreach (string directoryName in directoryToFileNames.Keys)
+            {
+                ISet<string> fileNamesToFind = directoryToFileNames[directoryName];
+                IEnumerable<(string fileName, DateTime fileTime)> files = GetFilesInDirectory(projectDirectory, directoryName);
+
+                foreach ((string fileName, DateTime fileTime) in files)
+                {
+                    bool isOlderFile = fileNamesToFind.Remove(fileName) && fileTime < oldestFileTime;
+
+                    if (isOlderFile)
+                    {
+                        oldestFilePath = Path.Combine(directoryName, fileName);
+                        oldestFileTime = fileTime;
+                    }
+                    if (fileNamesToFind.Count == 0)
+                    {
+                        break;
+                    }
+                }
+
+                bool isMissingFile = fileNamesToFind.Count > 0;
+
+                if (isMissingFile)
+                {
+                    string missingFileName = fileNamesToFind.ElementAt(0);
+                    return (Path.Combine(directoryName, missingFileName), DateTime.MinValue);
+                }
+            }
+
+            return (oldestFilePath, oldestFileTime);
+        }
+
+        private static (string fileName, DateTime fileTime) GetNewerFile<T>(string projectDirectory, IList<T> escapedFilePaths, DateTime oldestFileTime)
+        {
+            if (IsInvalidFileTime(oldestFileTime))
+            {
+                return (UnescapeFilePath(escapedFilePaths[0]), oldestFileTime);
+            }
+
+            IDictionary<string, ISet<string>> directoryToFileNames = MapDirectoryToFileNames(escapedFilePaths);
+
+            foreach (string directoryName in directoryToFileNames.Keys)
+            {
+                ISet<string> fileNamesToFind = directoryToFileNames[directoryName];
+                IEnumerable<(string fileName, DateTime fileTime)> files = GetFilesInDirectory(projectDirectory, directoryName);
+
+                foreach ((string fileName, DateTime fileTime) in files)
+                {
+                    bool isNewerFile = fileNamesToFind.Remove(fileName) && fileTime > oldestFileTime;
+
+                    if (isNewerFile)
+                    {
+                        return (Path.Combine(directoryName, fileName), fileTime);
+                    }
+                    if (fileNamesToFind.Count == 0)
+                    {
+                        break;
+                    }
+                }
+
+                bool isMissingFile = fileNamesToFind.Count > 0;
+
+                if (isMissingFile)
+                {
+                    string missingFileName = fileNamesToFind.ElementAt(0);
+                    return (Path.Combine(directoryName, missingFileName), DateTime.MinValue);
+                }
+            }
+
+            return (String.Empty, oldestFileTime);
+        }
+
+        private static string UnescapeFilePath<T>(T escapedFilePath)
+        {
+            string filePath = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(escapedFilePath.ToString()));
+            ErrorUtilities.ThrowIfTypeDoesNotImplementToString(escapedFilePath);
+            return filePath;
+        }
+
+        private static IDictionary<string, ISet<string>> MapDirectoryToFileNames<T>(IList<T> escapedFilePaths)
+        {
+            var directoryToFileNames = new Dictionary<string, ISet<string>>(StringComparer.Ordinal);
+
+            foreach (T escapedFilePath in escapedFilePaths)
+            {
+                SplitAndMapFilePath(UnescapeFilePath(escapedFilePath), directoryToFileNames);
+            }
+            return directoryToFileNames;
+        }
+
+        private static void SplitAndMapFilePath(string filePath, IDictionary<string, ISet<string>> directoryToFileNames)
+        {
+            string directoryName = Path.GetDirectoryName(filePath);
+
+            if (!directoryToFileNames.ContainsKey(directoryName))
+            {
+                directoryToFileNames[directoryName] = new HashSet<string>(StringComparer.Ordinal);
+            }
+            string fileName = Path.GetFileName(filePath);
+            directoryToFileNames[directoryName].Add(fileName);
+        }
+
+        private static IEnumerable<(string fileName, DateTime fileTime)> GetFilesInDirectory(string projectDirectory, string directoryName)
+        {
+            string directoryPath = Path.Combine(projectDirectory, directoryName);
+            return new FileSystemEnumerable<(string fileName, DateTime fileTime)>(
+                directoryPath,
+                (ref FileSystemEntry entry) => (entry.FileName.ToString(), entry.LastWriteTimeUtc.DateTime)
+            )
+            {
+                ShouldIncludePredicate = (ref FileSystemEntry entry) => !entry.IsDirectory
+            };
+        }
+#endif
 
         /// <summary>
         /// Record the unique input and output files so that the "up to date" message
