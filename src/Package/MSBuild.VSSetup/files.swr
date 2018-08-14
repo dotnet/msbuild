@@ -23,8 +23,6 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe.config
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.IO.Compression.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Runtime.InteropServices.RuntimeInformation.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
@@ -52,10 +50,6 @@ folder InstallDir:\MSBuild\15.0\Bin
 folder InstallDir:\MSBuild\15.0\Bin\MSBuild
   file source=$(X86BinPath)Microsoft.Build.Core.xsd
   file source=$(X86BinPath)Microsoft.Build.CommonTypes.xsd
-
-folder InstallDir:\MSBuild\15.0\Bin\ref
-  file source=$(X86BinPath)ref\mscorlib.dll
-  file source=$(X86BinPath)ref\netstandard.dll
 
 folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver
   file source=$(SourceDir)MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml
@@ -159,8 +153,6 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.IO.Compression.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Runtime.InteropServices.RuntimeInformation.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks

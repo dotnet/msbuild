@@ -35,7 +35,7 @@
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.300</DotNetCliVersion>
+    <DotNetCliVersion>2.1.401-preview-009229</DotNetCliVersion>
     <!-- We are pretty much always on a preview SDK. No need to warn about it. -->
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <VSWhereVersion>2.2.7</VSWhereVersion>
@@ -51,7 +51,7 @@
     <VisualStudioSetupInteropVersion>1.16.30</VisualStudioSetupInteropVersion>
 
     <!-- MSBuild custom overall switch -->
-    <NuGetPackageVersion>4.8.0-preview1.5185</NuGetPackageVersion>
+    <NuGetPackageVersion>4.8.0-rtm.5362</NuGetPackageVersion>
 
     <!-- Prodcon-overrideable, using repo-toolset naming convention -->
     <NuGetBuildTasksVersion>$(NuGetPackageVersion)</NuGetBuildTasksVersion>

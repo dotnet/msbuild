@@ -9,7 +9,7 @@
    <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.props" />
 
    <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
 
     <!-- The IBCMerge process tries to treat this project as
          the real Microsoft.Build.dll, producing thousands
