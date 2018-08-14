@@ -363,42 +363,25 @@ namespace Microsoft.Build.Tasks
                 {
                     var metadataReader = peFile.GetMetadataReader();
 
-                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>();
+                    var assemblyReferences = metadataReader.AssemblyReferences;
 
-                    foreach (var handle in metadataReader.AssemblyReferences)
+                    List<AssemblyNameExtension> ret = new List<AssemblyNameExtension>(assemblyReferences.Count);
+
+                    foreach (var handle in assemblyReferences)
                     {
-                        var entry = metadataReader.GetAssemblyReference(handle);
-
-                        var assemblyName = new AssemblyName
-                        {
-                            Name = metadataReader.GetString(entry.Name),
-                            Version = entry.Version,
-                            CultureName = metadataReader.GetString(entry.Culture)
-                        };
-                        var publicKeyOrToken = metadataReader.GetBlobBytes(entry.PublicKeyOrToken);
-                        if (publicKeyOrToken != null)
-                        {
-                            if (publicKeyOrToken.Length <= 8)
-                            {
-                                assemblyName.SetPublicKeyToken(publicKeyOrToken);
-                            }
-                            else
-                            {
-                                assemblyName.SetPublicKey(publicKeyOrToken);
-                            }
-                        }
-                        assemblyName.Flags = (AssemblyNameFlags)(int)entry.Flags;
-
-                        ret.Add(new AssemblyNameExtension(assemblyName));
+                        ret.Add(
+                            new AssemblyNameExtension(
+                                metadataReader
+                                .GetAssemblyReference(handle)
+                                .GetAssemblyName()));
                     }
 
                     _assemblyDependencies = ret.ToArray();
 
-                    var attrs = metadataReader.GetAssemblyDefinition().GetCustomAttributes()
-                        .Select(ah => metadataReader.GetCustomAttribute(ah));
-
-                    foreach (var attr in attrs)
+                    foreach (var attrHandle in metadataReader.GetAssemblyDefinition().GetCustomAttributes())
                     {
+                        var attr = metadataReader.GetCustomAttribute(attrHandle);
+
                         var ctorHandle = attr.Constructor;
                         if (ctorHandle.Kind != HandleKind.MemberReference)
                         {
@@ -418,6 +401,17 @@ namespace Microsoft.Build.Tasks
                             _frameworkName = new FrameworkName(arguments[0]);
                         }
                     }
+
+                    var assemblyFilesCollection = metadataReader.AssemblyFiles;
+
+                    List<string> assemblyFiles = new List<string>(assemblyFilesCollection.Count);
+
+                    foreach (var fileHandle in assemblyFilesCollection)
+                    {
+                        assemblyFiles.Add(metadataReader.GetString(metadataReader.GetAssemblyFile(fileHandle).Name));
+                    }
+
+                    _assemblyFiles = assemblyFiles.ToArray();
                 }
 
                 _metadataRead = true;
@@ -656,11 +650,6 @@ namespace Microsoft.Build.Tasks
         /// <returns>The extra files of assembly dependencies.</returns>
         private string[] ImportFiles()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return Array.Empty<string>();
-            }
-
 #if FEATURE_ASSEMBLY_LOADFROM
             var files = new List<string>();
             IntPtr fileEnum = IntPtr.Zero;
@@ -699,7 +688,8 @@ namespace Microsoft.Build.Tasks
 
             return files.ToArray();
 #else
-            return Array.Empty<string>();
+            CorePopulateMetadata();
+            return _assemblyFiles;
 #endif
         }
 
