@@ -26,7 +26,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PublishNupkgToBlobFeed" DependsOnTargets="GatherNupkgsForPublishing">
+  <Target Name="PublishNupkgToBlobFeed" Condition=" '$(PUBLISH_NUPKG_TO_BLOB_FEED)' == 'true'" DependsOnTargets="GatherNupkgsForPublishing">
     <Error Condition="'$(BlobFeedCloudDropAccessToken)' == ''" Text="Missing property BlobFeedCloudDropAccessToken." />
     <Error Condition="'$(BlobFeedExpectedURL)' == ''" Text="Missing property BlobFeedExpectedURL." />
 
