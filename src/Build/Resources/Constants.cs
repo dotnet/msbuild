@@ -182,6 +182,8 @@ namespace Microsoft.Build.Internal
 
         // Name of the environment variable that always points to 32-bit program files.
         internal const string programFilesx86 = "ProgramFiles(x86)";
+
+        internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
     }
 
     /// <summary>

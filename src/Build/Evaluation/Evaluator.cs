@@ -200,6 +200,11 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationProfiler _evaluationProfiler;
 
         /// <summary>
+        /// Keeps track of the project that is last modified of the project and all imports.
+        /// </summary>
+        private ProjectRootElement _lastModifiedProject;
+
+        /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
         private Evaluator(
@@ -245,6 +250,12 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+
+            // The last modified project is the project itself unless its an in-memory project
+            if (projectRootElement.FullPath != null)
+            {
+                _lastModifiedProject = projectRootElement;
+            }
         }
 
         /// <summary>
@@ -716,6 +727,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     PerformDepthFirstPass(_projectRootElement);
                 }
+
+                SetAllProjectsProperty();
 
                 List<string> initialTargets = new List<string>(_initialTargetsList.Count);
                 foreach (var initialTarget in _initialTargetsList)
@@ -2352,6 +2365,11 @@ namespace Microsoft.Build.Evaluation
                         {
                             imports.Add(importedProjectElement);
 
+                            if (_lastModifiedProject == null || importedProjectElement.LastWriteTimeWhenRead > _lastModifiedProject.LastWriteTimeWhenRead)
+                            {
+                                _lastModifiedProject = importedProjectElement;
+                            }
+
                             if (_logProjectImportedEvents)
                             {
                                 ProjectImportedEventArgs eventArgs = new ProjectImportedEventArgs(
@@ -2724,6 +2742,25 @@ namespace Microsoft.Build.Evaluation
             sb.Append($"\"{strings[strings.Count - 1]}\"");
 
             return sb.ToString();
+        }
+
+        private void SetAllProjectsProperty()
+        {
+            if (_lastModifiedProject != null)
+            {
+                P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
+
+                P newValue = _data.SetProperty(
+                    Constants.MSBuildAllProjectsPropertyName,
+                    oldValue == null
+                        ? _lastModifiedProject.FullPath
+                        : String.Format(CultureInfo.CurrentCulture, "{0};{1}", _lastModifiedProject.FullPath, oldValue.EvaluatedValue), isGlobalProperty: false, mayBeReserved: false);
+
+                if (oldValue != null)
+                {
+                    LogPropertyReassignment(oldValue, newValue, String.Empty);
+                }
+            }
         }
     }
 
