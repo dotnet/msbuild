@@ -86,7 +86,7 @@ namespace Microsoft.Build.Internal
                 {
                     DtdProcessing = DtdProcessing.Ignore,
                     IgnoreComments = true,
-                    IgnoreWhitespace = true
+                    IgnoreWhitespace = true,
                 };
                 reader = XmlReader.Create(input, xrs, uri);
             }
