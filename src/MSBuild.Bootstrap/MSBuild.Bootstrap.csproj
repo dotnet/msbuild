@@ -31,11 +31,11 @@
 
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">
     <!-- Include NuGet build tasks -->
-    <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
-    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
+    <PackageReference Include="NuGet.Build.Tasks" />
+    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" />
 
     <!-- Include DependencyModel libraries. -->
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="$(MicrosoftExtensionsDependencyModelVersion)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
