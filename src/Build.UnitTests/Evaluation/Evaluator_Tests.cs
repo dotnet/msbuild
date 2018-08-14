@@ -1831,11 +1831,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             IDictionary<string, ProjectProperty> allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates = new Dictionary<string, ProjectProperty>(StringComparer.OrdinalIgnoreCase);
 
-            // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. As project.AllEvaluatedProperties
-            // is an ordered collection and since such properties necessarily should occur before other properties, we don't need to scan
-            // the whole list.
-            // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
-            // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
+            // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. We have to dump it into a dictionary
+            // because AllEvaluatedProperties contains duplicates, but we're preparing to Properties, which doesn't, so we need to make sure
+            // that the final value in AllEvaluatedProperties is the one that matches.
             foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
             {
                 allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
