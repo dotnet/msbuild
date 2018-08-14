@@ -51,10 +51,6 @@ folder InstallDir:\MSBuild\15.0\Bin\MSBuild
   file source=$(X86BinPath)Microsoft.Build.Core.xsd
   file source=$(X86BinPath)Microsoft.Build.CommonTypes.xsd
 
-folder InstallDir:\MSBuild\15.0\Bin\ref
-  file source=$(X86BinPath)ref\mscorlib.dll
-  file source=$(X86BinPath)ref\netstandard.dll
-
 folder InstallDir:\MSBuild\15.0\Bin\SdkResolvers\Microsoft.Build.NuGetSdkResolver
   file source=$(SourceDir)MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml
 
