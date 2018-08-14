@@ -41,7 +41,7 @@ namespace Microsoft.Build.Logging
                 // that we don't know how to read
                 if (fileFormatVersion > BinaryLogger.FileFormatVersion)
                 {
-                    var text = ResourceUtilities.FormatResourceString("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
+                    var text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnsupportedLogFileFormat", fileFormatVersion, BinaryLogger.FileFormatVersion);
                     throw new NotSupportedException(text);
                 }
 

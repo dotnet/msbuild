@@ -560,7 +560,7 @@ namespace Microsoft.Build.Tasks
                         if (whiteListErrors.Count == errorsBeforeReadCall)
                         {
                             // The whiteList errors passes back problems reading the redist file through the use of an array containing exceptions
-                            whiteListErrors.Add(new Exception(ResourceUtilities.FormatResourceString("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
+                            whiteListErrors.Add(new Exception(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", info.Path)));
                             whiteListErrorFileNames.Add(info.Path);
                         }
                     }

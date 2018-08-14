@@ -48,16 +48,16 @@ namespace Microsoft.Build.UnitTests
             bool succeeded = t.Execute();
             Assert.True(succeeded);
 
-            string warning1 = ResourceUtilities.FormatResourceString("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj1.proj", "Windows, Version=7.0");
+            string warning1 = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj1.proj", "Windows, Version=7.0");
             engine.AssertLogDoesntContain(warning1);
 
-            string warning2 = ResourceUtilities.FormatResourceString("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj2.proj", "Windows, Version=8.0");
+            string warning2 = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj2.proj", "Windows, Version=8.0");
             engine.AssertLogDoesntContain(warning2);
 
-            string warning3 = ResourceUtilities.FormatResourceString("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj3.proj", "Windows, Version=8.1");
+            string warning3 = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj3.proj", "Windows, Version=8.1");
             engine.AssertLogContains(warning3);
 
-            string warning4 = ResourceUtilities.FormatResourceString("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj4.proj", "Windows, Version=8.2");
+            string warning4 = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj4.proj", "Windows, Version=8.2");
             engine.AssertLogContains(warning4);
 
             Assert.Equal(t.InvalidReferences.Length, 2);

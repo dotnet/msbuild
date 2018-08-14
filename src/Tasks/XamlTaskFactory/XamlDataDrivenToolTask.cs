@@ -404,7 +404,7 @@ namespace Microsoft.Build.Tasks.Xaml
                         if (isRequired)
                         {
                             _logPrivate.LogErrorWithCodeFromResources("Xaml.MissingRequiredArgument", propertyName, argName);
-                            throw new ArgumentException(ResourceUtilities.FormatResourceString("Xaml.MissingRequiredArgument", propertyName, argName));
+                            throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.MissingRequiredArgument", propertyName, argName));
                         }
                     }
                     else

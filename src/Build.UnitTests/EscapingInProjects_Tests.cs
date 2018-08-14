@@ -760,7 +760,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             catch (InvalidProjectFileException ex)
             {
-                string expectedErrorMessage = ResourceUtilities.FormatResourceString("NameInvalid", "$", "$");
+                string expectedErrorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("NameInvalid", "$", "$");
                 Assert.True(String.Equals(ex.Message, expectedErrorMessage, StringComparison.OrdinalIgnoreCase)); // "Wrong error message"
                 exceptionCaught = true;
             }

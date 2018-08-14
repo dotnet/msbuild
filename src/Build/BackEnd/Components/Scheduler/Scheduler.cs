@@ -1625,7 +1625,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (affinityMismatch)
                         {
-                            BuildResult result = new BuildResult(request, new InvalidOperationException(ResourceUtilities.FormatResourceString("AffinityConflict", requestAffinity, existingRequestAffinity)));
+                            BuildResult result = new BuildResult(request, new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AffinityConflict", requestAffinity, existingRequestAffinity)));
                             response = GetResponseForResult(nodeForResults, request, result);
                             responses.Add(response);
                             continue;

@@ -154,7 +154,7 @@ namespace Microsoft.Build.Exceptions
 #endif
             string errorCode;
             string helpKeyword;
-            string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, resourceName, (object[])args);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, (object[])args);
 
             throw new InvalidToolsetDefinitionException(message, errorCode, innerException);
         }

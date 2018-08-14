@@ -548,7 +548,7 @@ namespace Microsoft.Build.BackEnd
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
                               out Dictionary<string, string> preProjectPropertiesTable)
                            )
                         {
@@ -590,7 +590,7 @@ namespace Microsoft.Build.BackEnd
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceString("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
+                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries),
                               out Dictionary<string, string> additionalProjectPropertiesTable)
                            )
                         {

@@ -257,7 +257,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
 
-                    string message = ResourceUtilities.FormatResourceString("MultipleDefinitionsForSameExtensionsPathOS", os, locationString);
+                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MultipleDefinitionsForSameExtensionsPathOS", os, locationString);
 
                     throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
                 }
@@ -427,7 +427,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (_previouslySeenPropertyNames.ContainsKey(propertyName))
                 {
-                    string message = ResourceUtilities.FormatResourceString("MultipleDefinitionsForSameProperty", propertyName);
+                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MultipleDefinitionsForSameProperty", propertyName);
 
                     throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
                 }
@@ -598,7 +598,7 @@ namespace Microsoft.Build.Evaluation
 
             if (_previouslySeenToolsVersions.ContainsKey(toolsVersion))
             {
-                string message = ResourceUtilities.FormatResourceString("MultipleDefinitionsForSameToolset", toolsVersion);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MultipleDefinitionsForSameToolset", toolsVersion);
 
                 throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
             }
