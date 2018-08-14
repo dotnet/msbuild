@@ -1098,8 +1098,8 @@ namespace Microsoft.Build.BackEnd
             // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely): 
             //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
             //         in the cases I've seen, and adding this optimization would make the code hard to read.
-            (string fileName, DateTime fileTime) oldestOutput = GetOldestFile(projectDirectory, outputs);
-            (string fileName, DateTime fileTime) newerInput = GetNewerFile(projectDirectory, inputs, oldestOutput.fileTime);
+            (string filePath, DateTime fileTime) oldestOutput = GetOldestFile(projectDirectory, outputs);
+            (string filePath, DateTime fileTime) newerInput = GetNewerFile(projectDirectory, inputs, oldestOutput.fileTime);
             dependencyAnalysisDetailEntry = CompareInputAndOutput(newerInput, oldestOutput);
             return dependencyAnalysisDetailEntry != null;
         }
@@ -1112,7 +1112,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static DependencyAnalysisLogDetail CompareInputAndOutput((string fileName, DateTime fileTime) newerInput, (string fileName, DateTime fileTime) oldestOutput)
+        private static DependencyAnalysisLogDetail CompareInputAndOutput((string filePath, DateTime fileTime) newerInput, (string filePath, DateTime fileTime) oldestOutput)
         {
             bool isMissingOutput = IsInvalidFileTime(oldestOutput.fileTime);
             bool isMissingInput = IsInvalidFileTime(newerInput.fileTime);
@@ -1126,7 +1126,7 @@ namespace Microsoft.Build.BackEnd
 
             OutofdateReason reason = isMissingOutput ? OutofdateReason.MissingOutput
                 : isMissingInput ? OutofdateReason.MissingInput : OutofdateReason.NewerInput;
-            return new DependencyAnalysisLogDetail(newerInput.fileName, oldestOutput.fileName, null, null, reason);
+            return new DependencyAnalysisLogDetail(newerInput.filePath, oldestOutput.filePath, null, null, reason);
         }
 
         private static bool IsInvalidFileTime(DateTime lastWriteTimeUtc)
@@ -1134,7 +1134,7 @@ namespace Microsoft.Build.BackEnd
             return lastWriteTimeUtc == DateTime.MinValue;
         }
 
-        private static (string fileName, DateTime fileTime) GetOldestFile<T>(string projectDirectory, IList<T> escapedFilePaths)
+        private static (string filePath, DateTime fileTime) GetOldestFile<T>(string projectDirectory, IList<T> escapedFilePaths)
         {
             string oldestFilePath = String.Empty;
             DateTime oldestFileTime = DateTime.MaxValue;
@@ -1172,7 +1172,7 @@ namespace Microsoft.Build.BackEnd
             return (oldestFilePath, oldestFileTime);
         }
 
-        private static (string fileName, DateTime fileTime) GetNewerFile<T>(string projectDirectory, IList<T> escapedFilePaths, DateTime oldestFileTime)
+        private static (string filePath, DateTime fileTime) GetNewerFile<T>(string projectDirectory, IList<T> escapedFilePaths, DateTime oldestFileTime)
         {
             if (IsInvalidFileTime(oldestFileTime))
             {
