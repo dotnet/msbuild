@@ -27,11 +27,18 @@ steps:
     filename: set
   condition: always()
 
-- task: CmdLine@1
-  displayName: Bogus build to have nerdbank.GitVersioning set the version for the swix plugin
+- task: DotNetCoreCLI@2
+  displayName: Install nbgv
   inputs:
-    filename: '$(comspec)'
-    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & msbuild /restore $(Build.Repository.LocalPath)\build\SetMicrobuildVersion\SetMicrobuildVersion.csproj"'
+    command: custom
+    custom: tool
+    arguments: 'install --tool-path artifacts nbgv'
+
+- task: CmdLine@1
+  displayName: Set version with nbgv
+  inputs:
+    filename: 'artifacts\nbgv.exe'
+    arguments: 'cloud'
 
 - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
   displayName: Install Swix Plugin
@@ -67,8 +74,8 @@ steps:
 - task: CmdLine@1
   displayName: Set build version to meaningful one again
   inputs:
-    filename: '$(comspec)'
-    arguments: '/c "call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" & msbuild /restore $(Build.Repository.LocalPath)\build\SetMicrobuildVersion\SetMicrobuildVersion.csproj"'
+    filename: 'artifacts\nbgv.exe'
+    arguments: 'cloud'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: logs'
