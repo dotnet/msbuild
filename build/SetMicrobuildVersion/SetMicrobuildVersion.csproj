@@ -1,22 +1,20 @@
-<Project DefaultTargets="GetBuildVersion">
+<Project Sdk="RoslynTools.RepoToolset" DefaultTargets="GetBuildVersion">
 
-  <Import Project="..\Versions.props" />
+  <ItemGroup>
+    <!-- Add IsImplicitlyDefined to any packages that were 'magically' referenced (RepoTools!). This
+         should be removed if RepoTools adds the metadata for their package references. -->
+    <PackageReference Update="@(PackageReference)" IsImplicitlyDefined="true" />
+  </ItemGroup>
 
   <PropertyGroup>
-    <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
-    <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
-  </PropertyGroup>
-
-   <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
-
-   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <RestoreSources>$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
   </PropertyGroup>
 
-   <ItemGroup>
-      <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
-   </ItemGroup>
+  <!-- this will get us GitVersioning without having to duplicate the verison string. -->
+  <PropertyGroup>
+    <CentralPackagesFile>$(MSBuildThisFileDirectory)../Packages.props</CentralPackagesFile>
+  </PropertyGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.Build.CentralPackageVersions" />
 
-   <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
 </Project>
