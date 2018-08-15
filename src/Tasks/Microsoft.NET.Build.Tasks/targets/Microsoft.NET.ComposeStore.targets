@@ -430,7 +430,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                            RuntimeIdentifier="$(RuntimeIdentifier)"
                            IsSelfContained="$(SelfContained)" >
       <Output TaskParameter="AssembliesToPublish" ItemName="ResolvedFileToPublish" />
-      <Output TaskParameter="PublishedPackges" ItemName="PackagesThatWereResolved" />
+      <Output TaskParameter="PublishedPackages" ItemName="PackagesThatWereResolved" />
     </FilterResolvedFiles>
 
     <ItemGroup>

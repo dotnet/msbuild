@@ -175,7 +175,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         /// <summary>
-        /// Adds assemblies, analyzers and framework assemblies from FileDefinitons to dependencies world dictionary.
+        /// Adds assemblies, analyzers and framework assemblies from FileDefinitions to dependencies world dictionary.
         /// </summary>
         private void PopulateAssemblies()
         {

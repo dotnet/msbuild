@@ -489,7 +489,7 @@ public static class Program
             var testProject = new TestProject()
             {
                 Name = "OutputPathCasing",
-                TargetFrameworks = "igored",
+                TargetFrameworks = "ignored",
                 IsSdkProject = true,
                 IsExe = true
             };

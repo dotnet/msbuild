@@ -14,9 +14,9 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GiventThatWeManifestSupportedFrameworks : SdkTest
+    public class GivenThatWeManifestSupportedFrameworks : SdkTest
     {
-        public GiventThatWeManifestSupportedFrameworks(ITestOutputHelper log) : base(log)
+        public GivenThatWeManifestSupportedFrameworks(ITestOutputHelper log) : base(log)
         {
         }
 

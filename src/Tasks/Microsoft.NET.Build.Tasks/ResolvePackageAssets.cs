@@ -849,10 +849,10 @@ namespace Microsoft.NET.Build.Tasks
                 if (_task.VerifyMatchingImplicitPackageVersion &&
                     _task.ExpectedPlatformPackages != null)
                 {
-                    foreach (var implicitPackge in _task.ExpectedPlatformPackages)
+                    foreach (var implicitPackage in _task.ExpectedPlatformPackages)
                     {
-                        var packageName = implicitPackge.ItemSpec;
-                        var expectedVersion = implicitPackge.GetMetadata(MetadataKeys.ExpectedVersion);
+                        var packageName = implicitPackage.ItemSpec;
+                        var expectedVersion = implicitPackage.GetMetadata(MetadataKeys.ExpectedVersion);
 
                         if (string.IsNullOrEmpty(packageName) ||
                             string.IsNullOrEmpty(expectedVersion) ||

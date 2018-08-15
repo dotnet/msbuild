@@ -572,7 +572,7 @@ namespace Microsoft.NET.Build.Tests
             else
             {
                 // Intentionally not checking the error message on restore here as we can't put ourselves in front of
-                // restore and customize the  message forinvalid target frameworks as that would break restoring packages
+                // restore and customize the message for invalid target frameworks as that would break restoring packages
                 // like MSBuild.Sdk.Extras that add support for extra TFMs.
                 restore.Should().Fail();
             }

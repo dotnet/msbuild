@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks
             get; private set;
         }
         [Output]
-        public ITaskItem[] PublishedPackges
+        public ITaskItem[] PublishedPackages
         {
             get; private set;
         }
@@ -63,9 +63,9 @@ namespace Microsoft.NET.Build.Tasks
 
             var packageClosure =  new HashSet<PackageIdentity>();
 
-            foreach ( var pakageItem in PackagesToPrune)
+            foreach ( var packageItem in PackagesToPrune)
             {
-                var pkgName = pakageItem.ItemSpec;
+                var pkgName = packageItem.ItemSpec;
                 if (!string.IsNullOrEmpty(pkgName))
                 {
                     packageClosure.UnionWith(projectContext.GetTransitiveList(pkgName));
@@ -92,7 +92,7 @@ namespace Microsoft.NET.Build.Tasks
                 item.SetMetadata("Version", resolvedPkg.Version.ToString());
                 _packagesResolved.Add(item);
             }
-            PublishedPackges = _packagesResolved.ToArray();
+            PublishedPackages = _packagesResolved.ToArray();
         }
     }
 }

@@ -75,21 +75,21 @@ namespace Microsoft.NET.Publish.Tests
                 .CopyTestAsset(TestProjectName)
                 .WithSource();
 
-            var msbuidArgs = new string[] { "/p:SelfContained=true",
+            var msbuildArgs = new string[] { "/p:SelfContained=true",
                     $"/p:TargetFramework={TargetFramework}",
                     $"/p:RuntimeIdentifier={runtimeIdentifier}"};
 
             var restoreCommand = new RestoreCommand(Log, testAsset.TestRoot);
 
-            restoreCommand.Execute(msbuidArgs);
+            restoreCommand.Execute(msbuildArgs);
 
             var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
             publishCommand
-                .Execute(msbuidArgs)
+                .Execute(msbuildArgs)
                 .Should().Pass();
 
             publishCommand
-                .Execute(msbuidArgs)
+                .Execute(msbuildArgs)
                 .Should().Pass().And.NotHaveStdOutContaining("HelloWorld.exe' already exists");
         }
     }

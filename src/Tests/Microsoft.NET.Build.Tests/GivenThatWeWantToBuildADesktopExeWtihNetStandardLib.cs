@@ -343,7 +343,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
-        public void It_does_not_include_netstandard_when_libary_targets_netstandard14(bool isSdk)
+        public void It_does_not_include_netstandard_when_library_targets_netstandard14(bool isSdk)
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())
@@ -383,7 +383,7 @@ namespace Microsoft.NET.Build.Tests
         [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
-        public void It_includes_netstandard_when_libary_targets_netstandard15(bool isSdk)
+        public void It_includes_netstandard_when_library_targets_netstandard15(bool isSdk)
         {
             var testAsset = _testAssetsManager
                 .CopyTestAsset(GetTemplateName(isSdk), identifier: isSdk.ToString())
