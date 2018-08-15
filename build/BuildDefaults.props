@@ -33,6 +33,7 @@
     <NoWarn>NU1701;NU5104</NoWarn>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <!-- https://github.com/dotnet/cli/issues/9834 - re-enable the flag below once warnings are cleared up -->
+    <!-- <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors> -->
   </PropertyGroup>
 </Project>
