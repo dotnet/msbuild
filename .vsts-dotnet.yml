@@ -27,6 +27,11 @@ steps:
     filename: set
   condition: always()
 
+- task: DotNetCoreInstaller@0
+  displayName: Use .NET Core sdk 2.1.300
+  inputs:
+    version: 2.1.300
+
 - task: DotNetCoreCLI@2
   displayName: Install nbgv
   inputs:
