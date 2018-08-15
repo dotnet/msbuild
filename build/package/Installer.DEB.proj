@@ -94,7 +94,6 @@
         UseHardlinksIfPossible="False" />
 
       <!-- Remove Shared Framework and Debian Packages -->
-      <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" IgnoreStandardErrorWarningFormat="true"  />
       <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
       <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
@@ -129,6 +128,9 @@
                   ToolPath="$(DebianInstalledDirectory)" />
 
       <!-- Clean up Packages -->
+      <!-- The following line is needed. So it won't warning dotnet folder is not empty after uninstall -->
+      <Exec Command="sudo rm -rf /usr/share/dotnet/sdk/NuGetFallbackFolder" />
+
       <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
       <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
       <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true"  />
