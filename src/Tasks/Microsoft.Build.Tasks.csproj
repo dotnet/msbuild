@@ -955,20 +955,11 @@
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Repotools will add a PackageReference for the compilers package based on the current runtime.
-         To bootstrap, we will need the compilers for both runtimes to copy the output. -->
-    <PackageReference
-      Condition="'$(MSBuildRuntimeType)' == 'Core' and '$(TargetFrameworkIdentifier)' == '.NETFramework'"
-      Include="Microsoft.Net.Compilers" ExcludeAssets="all" />
-    <PackageReference
-      Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(TargetFrameworkIdentifier)' != '.NETFramework'"
-      Include="Microsoft.NETCore.Compilers" ExcludeAssets="all" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
+
+    <PackageReference Include="Microsoft.Net.Compilers" ExcludeAssets="all" />
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
@@ -985,6 +976,7 @@
     <PackageReference Include="Microsoft.Win32.Registry" />
 
     <!-- Reference compilers package without using assets, so we can copy them to the output directory under the Roslyn folder -->
+    <PackageReference Include="Microsoft.NETCore.Compilers" ExcludeAssets="all" />
     <Content Include="$(NuGetPackageRoot)microsoft.netcore.compilers\$(MicrosoftNetCoreCompilersVersion)\tools\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
