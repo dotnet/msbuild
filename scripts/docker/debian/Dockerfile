@@ -7,7 +7,8 @@
 FROM microsoft/dotnet-buildtools-prereqs:debian-8.2-debpkg-d770b8b-20180628122423
 
 # Misc Dependencies for build
-RUN apt-get update && \
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get update && \
     apt-get -qqy install \
         sudo && \
     apt-get clean && \
