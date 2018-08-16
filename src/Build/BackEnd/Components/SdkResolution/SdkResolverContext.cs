@@ -12,12 +12,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     internal sealed class SdkResolverContext : SdkResolverContextBase
     {
-        public SdkResolverContext(Framework.SdkLogger logger, string projectFilePath, string solutionPath, Version msBuildVersion)
+        public SdkResolverContext(Framework.SdkLogger logger, string projectFilePath, string solutionPath, Version msBuildVersion, bool interactive)
         {
             Logger = logger;
             ProjectFilePath = projectFilePath;
             SolutionFilePath = solutionPath;
             MSBuildVersion = msBuildVersion;
+            Interactive = interactive;
         }
     }
 }
