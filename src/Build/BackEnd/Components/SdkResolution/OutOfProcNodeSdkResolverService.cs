@@ -8,6 +8,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
@@ -61,14 +62,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, IDictionary<string, string> globalProperties)
         {
             // Get a cached response if possible, otherwise send the request
             var sdkResult = _responseCache.GetOrAdd(
                 sdk.Name,
                 key =>
                 {
-                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath);
+                    var result = RequestSdkPathFromMainNode(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, globalProperties);
                     return new SdkResult(null, result.Path, result.Version, null);
                 });
 
@@ -103,13 +104,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _responseReceivedEvent.Set();
         }
 
-        private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        private SdkResult RequestSdkPathFromMainNode(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, IDictionary<string, string> globalProperties)
         {
             // Clear out the last response for good measure
             _lastResponse = null;
 
             // Create the SdkResolverRequest packet to send
-            INodePacket packet = SdkResolverRequest.Create(submissionId, sdk, loggingContext.BuildEventContext, sdkReferenceLocation, solutionPath, projectPath);
+            INodePacket packet = SdkResolverRequest.Create(submissionId, sdk, loggingContext.BuildEventContext, sdkReferenceLocation, solutionPath, projectPath, globalProperties);
 
             SendPacket(packet);
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
 {
@@ -10,6 +11,8 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public abstract class SdkResolverContext
     {
+        public virtual IReadOnlyDictionary<string, string> GlobalProperties { get; protected set; }
+
         /// <summary>
         ///     Logger to log real-time messages back to MSBuild.
         /// </summary>

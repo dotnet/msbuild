@@ -4,6 +4,7 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
         }
 
-        public Build.BackEnd.SdkResolution.SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath)
+        public Build.BackEnd.SdkResolution.SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, IDictionary<string, string> globalProperties)
         {
             return null;
         }
