@@ -2132,7 +2132,7 @@ namespace Microsoft.Build.Evaluation
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _data.GlobalPropertiesDictionary.ToDictionary());
 
                 if (!sdkResult.Success)
                 {

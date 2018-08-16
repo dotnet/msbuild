@@ -453,6 +453,7 @@ namespace Microsoft.Build.Framework
     public abstract partial class SdkResolverContext
     {
         protected SdkResolverContext() { }
+        public virtual System.Collections.Generic.IReadOnlyDictionary<string, string> GlobalProperties { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
         public virtual Microsoft.Build.Framework.SdkLogger Logger { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
         public virtual System.Version MSBuildVersion { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }
         public virtual string ProjectFilePath { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]protected set { } }

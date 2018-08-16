@@ -36,11 +36,19 @@ namespace Microsoft.Build.Unittest
         {
             private readonly Dictionary<string, SdkResult> _resultMap;
 
+            private readonly Func<SdkReference, SdkResolverContext, SdkResultFactory, Framework.SdkResult> _resolveFunc;
+
+
             public ConcurrentDictionary<string, int> ResolvedCalls { get; } = new ConcurrentDictionary<string, int>();
 
             public ConfigurableMockSdkResolver(SdkResult result)
             {
                 _resultMap = new Dictionary<string, SdkResult> { [result.SdkReference.Name] = result };
+            }
+
+            public ConfigurableMockSdkResolver(Func<SdkReference, SdkResolverContext, SdkResultFactory, Framework.SdkResult> resolveFunc)
+            {
+                _resolveFunc = resolveFunc;
             }
 
             public ConfigurableMockSdkResolver(Dictionary<string, SdkResult> resultMap)
@@ -54,10 +62,15 @@ namespace Microsoft.Build.Unittest
 
             public override Framework.SdkResult Resolve(SdkReference sdkReference, SdkResolverContext resolverContext, SdkResultFactory factory)
             {
+                if (_resolveFunc != null)
+                {
+                    return _resolveFunc(sdkReference, resolverContext, factory);
+                }
+
                 ResolvedCalls.AddOrUpdate(sdkReference.Name, k => 1, (k, c) => c + 1);
 
-                return _resultMap.TryGetValue(sdkReference.Name, out var result)
-                    ? new SdkResult(sdkReference, result.Path, result.Version, null)
+                return _resultMap.TryGetValue(sdkReference.Name, out var result1)
+                    ? new SdkResult(sdkReference, result1.Path, result1.Version, null)
                     : null;
             }
         }

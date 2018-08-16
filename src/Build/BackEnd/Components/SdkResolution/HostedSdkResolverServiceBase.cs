@@ -5,6 +5,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
@@ -47,7 +48,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public abstract void PacketReceived(int node, INodePacket packet);
 
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
-        public abstract SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath);
+        public abstract SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, IDictionary<string, string> globalProperties);
 
         /// <inheritdoc cref="IBuildComponent.ShutdownComponent"/>
         public virtual void ShutdownComponent()
