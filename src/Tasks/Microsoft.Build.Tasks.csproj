@@ -1,4 +1,4 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+<Project Sdk="RoslynTools.RepoToolset">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
 
