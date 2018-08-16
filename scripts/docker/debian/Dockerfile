@@ -4,46 +4,15 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM debian:jessie
+FROM microsoft/dotnet-buildtools-prereqs:debian-8.2-debpkg-d770b8b-20180628122423
 
 # Misc Dependencies for build
-RUN apt-get update && \
+RUN rm -rf /var/lib/apt/lists/* && \
+    apt-get update && \
     apt-get -qqy install \
-        curl \
-        unzip \
-        gettext \
         sudo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# This could become a "microsoft/coreclr" image, since it just installs the dependencies for CoreCLR (and stdlib)
-RUN apt-get update &&\
-    apt-get -qqy install \
-        libunwind8 \
-        libkrb5-3 \
-        libicu52 \
-        liblttng-ust0 \
-        libssl1.0.0 \
-        zlib1g \
-        libuuid1 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Build Prereqs
-RUN apt-get update && \
-    apt-get -qqy install \
-        debhelper \
-        build-essential \
-        devscripts \
-        git \
-        cmake \
-        clang-3.5 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Use clang as c++ compiler
-RUN update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.5 100
-RUN update-alternatives --set c++ /usr/bin/clang++-3.5
 
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
