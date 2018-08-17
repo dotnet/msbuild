@@ -1036,7 +1036,8 @@ namespace Microsoft.Build.BackEnd
                 return new FileDateInfo(arbitraryPath, DateTime.MaxValue);
             }
 #if FEATURE_ENUMERATION
-            if (NativeMethodsShared.IsWindows) {
+            if (NativeMethodsShared.IsWindows)
+            {
                 return GetFileWithTimeConditionByDirectory(projectDirectory, escapedFilePaths, conditionFileTime, condition);
             }
 #endif
@@ -1162,13 +1163,20 @@ namespace Microsoft.Build.BackEnd
         {
             string directoryPath = Path.Combine(projectDirectory, directoryName);
 
-            return new FileSystemEnumerable<FileDateInfo>(
-                directoryPath,
-                (ref FileSystemEntry entry) => new FileDateInfo(entry.FileName.ToString(), entry.LastWriteTimeUtc.DateTime)
-            )
+            try
             {
-                ShouldIncludePredicate = (ref FileSystemEntry entry) => !entry.IsDirectory
-            };
+                return new FileSystemEnumerable<FileDateInfo>(
+                    directoryPath,
+                    (ref FileSystemEntry entry) => new FileDateInfo(entry.FileName.ToString(), entry.LastWriteTimeUtc.DateTime)
+                )
+                {
+                    ShouldIncludePredicate = (ref FileSystemEntry entry) => !entry.IsDirectory
+                };
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return Enumerable.Empty<FileDateInfo>();
+            }
         }
 #endif
 
