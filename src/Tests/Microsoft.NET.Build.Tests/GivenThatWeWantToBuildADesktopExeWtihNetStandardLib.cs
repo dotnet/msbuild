@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GivenThatWeWantToBuildADesktopExeWtihNetStandardLib : SdkTest
+    public class GivenThatWeWantToBuildADesktopExeWithNetStandardLib : SdkTest
     {
         private const string AppName = "TestApp";
         private const string LibraryName = "TestLibrary";
@@ -26,7 +26,7 @@ namespace Microsoft.NET.Build.Tests
         private const string TemplateNamePackagesConfig = "DesktopAppWithLibrary-PackagesConfig";
         private const string TemplateNameNonSdk = "DesktopAppWithLibrary-NonSDK";
 
-        public GivenThatWeWantToBuildADesktopExeWtihNetStandardLib(ITestOutputHelper log) : base(log)
+        public GivenThatWeWantToBuildADesktopExeWithNetStandardLib(ITestOutputHelper log) : base(log)
         {
         }
 
