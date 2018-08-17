@@ -7,7 +7,7 @@
 
   <Bundle Name="$(var.ProductName)" Manufacturer="$(var.Manufacturer)"
           Version="$(var.DisplayVersion)" UpgradeCode="$(var.UpgradeCode)"
-          AboutUrl="http://dotnet.github.io/"
+          AboutUrl="https://dotnet.github.io/"
           Compressed="yes">
 
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.Foundation">
