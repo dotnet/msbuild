@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-      <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-preview1.5185</NuGetPackageVersion>
+      <NuGetPackageVersion Condition="'$(NuGetPackageVersion)' == ''">4.8.0-rtm.5362</NuGetPackageVersion>
       <NuGetBuildTasksVersion Condition="'$(NuGetBuildTasksVersion)' == ''">$(NuGetPackageVersion)</NuGetBuildTasksVersion>
       <NuGetCommandsVersion Condition="'$(NuGetCommandsVersion)' == ''">$(NuGetPackageVersion)</NuGetCommandsVersion>
       <NuGetProtocolVersion Condition="'$(NuGetProtocolVersion)' == ''">$(NuGetPackageVersion)</NuGetProtocolVersion>
@@ -51,7 +51,7 @@
 
   <ItemGroup>
     <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="2.1.23" Condition="'$(DisableNerdbankVersioning)' != 'true'" PrivateAssets="All" />
-    <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-003" PrivateAssets="All"/>
+    <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0-alpha-004" PrivateAssets="All"/>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

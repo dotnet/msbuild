@@ -1,7 +1,7 @@
 ﻿<Project Sdk="RoslynTools.RepoToolset">
   <PropertyGroup>
     <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>

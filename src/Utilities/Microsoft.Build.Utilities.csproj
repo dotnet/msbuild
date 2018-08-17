@@ -19,7 +19,6 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">

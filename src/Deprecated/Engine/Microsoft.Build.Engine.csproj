@@ -1,6 +1,6 @@
 ﻿<Project Sdk="RoslynTools.RepoToolset">
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <NoWarn>$(NoWarn);618</NoWarn>
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <EnableDefaultItems>false</EnableDefaultItems>
