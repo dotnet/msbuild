@@ -226,6 +226,36 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Expand an item vector function ContainsItem
+        /// </summary>
+        [Fact]
+        public void ExpandItemVectorFunctionsContainsItem()
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            var expander = CreateItemFunctionExpander();
+
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(project, "i");
+
+            var items = expander.ExpandIntoItemsLeaveEscaped("@(i->ContainsItem('i0'))", itemFactory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
+
+            items.Count.ShouldBe(1);
+            items[0].ItemType.ShouldBe("i");
+            items[0].EvaluatedInclude.ShouldBe("true");
+
+            items = expander.ExpandIntoItemsLeaveEscaped("@(i->ContainsItem('I0'))", itemFactory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
+
+            items.Count.ShouldBe(1);
+            items[0].ItemType.ShouldBe("i");
+            items[0].EvaluatedInclude.ShouldBe("true");
+
+            items = expander.ExpandIntoItemsLeaveEscaped("@(i->ContainsItem('i20'))", itemFactory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
+
+            items.Count.ShouldBe(1);
+            items[0].ItemType.ShouldBe("i");
+            items[0].EvaluatedInclude.ShouldBe("false");
+        }
+
+        /// <summary>
         /// Expand an item vector function Metadata()->DirectoryName()->Distinct()
         /// </summary>
         [Fact]
