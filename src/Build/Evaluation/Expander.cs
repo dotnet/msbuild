@@ -2554,6 +2554,30 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
+                /// Intrinsic function that returns a boolean to indicate if any of the items have the given value
+                /// Using a case insensitive comparison
+                /// </summary>
+                internal static IEnumerable<Pair<string, S>> ContainsItem(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments != null && arguments.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, (arguments == null ? 0 : arguments.Length));
+
+                    var hasItem = false;
+
+                    var searchedItem = arguments[0];
+
+                    foreach (var item in itemsOfType)
+                    {
+                        if (item.Key.Equals(searchedItem, StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasItem = true;
+                            break;
+                        }
+                    }
+
+                    yield return new Pair<string, S>(hasItem ? "true" : "false", null /* no base item */);
+                }
+
+                /// <summary>
                 /// Intrinsic function that returns a boolean to indicate if any of the items have the given metadata value
                 /// Using a case insensitive comparison
                 /// </summary>
