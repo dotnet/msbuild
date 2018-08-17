@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -963,131 +963,6 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if any "input" is newer than any "output", or if any input or output does not exist.</returns>
         internal static bool IsAnyOutOfDate<T>(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, string projectDirectory, IList<T> inputs, IList<T> outputs)
         {
-#if FEATURE_ENUMERATION
-            if (NativeMethodsShared.IsWindows)
-            {
-                return IsAnyOutOfDateWip(out dependencyAnalysisDetailEntry, projectDirectory, inputs, outputs);
-            }
-#endif
-
-            ErrorUtilities.VerifyThrow((inputs.Count > 0) && (outputs.Count > 0), "Need to specify inputs and outputs.");
-            if (inputs.Count > 0)
-            {
-                ErrorUtilities.VerifyThrow(inputs[0] is string || inputs[0] is ProjectItemInstance, "Must be either string or ProjectItemInstance");
-            }
-
-            if (outputs.Count > 0)
-            {
-                ErrorUtilities.VerifyThrow(outputs[0] is string || outputs[0] is ProjectItemInstance, "Must be either string or ProjectItemInstance");
-            }
-
-            // Algorithm: walk through all the outputs to find the oldest output
-            //            walk through the inputs as far as we need to until we find one that's newer (if any)
-
-            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely): 
-            //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
-            //         in the cases I've seen, and adding this optimization would make the code hard to read.
-
-            string oldestOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[0].ToString()));
-            ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[0]);
-
-            DateTime oldestOutputFileTime = DateTime.MinValue;
-            try
-            {
-                string oldestOutputFullPath = Path.Combine(projectDirectory, oldestOutput);
-                oldestOutputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(oldestOutputFullPath);
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                // Output does not exist
-                oldestOutputFileTime = DateTime.MinValue;
-            }
-
-            if (oldestOutputFileTime == DateTime.MinValue)
-            {
-                // First output is missing: we must build the target
-                string arbitraryInput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(inputs[0].ToString()));
-                ErrorUtilities.ThrowIfTypeDoesNotImplementToString(inputs[0]);
-                dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(arbitraryInput, oldestOutput, null, null, OutofdateReason.MissingOutput);
-                return true;
-            }
-
-            for (int i = 1; i < outputs.Count; i++)
-            {
-                string candidateOutput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(outputs[i].ToString()));
-                ErrorUtilities.ThrowIfTypeDoesNotImplementToString(outputs[i]);
-                DateTime candidateOutputFileTime = DateTime.MinValue;
-                try
-                {
-                    string candidateOutputFullPath = Path.Combine(projectDirectory, candidateOutput);
-                    candidateOutputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(candidateOutputFullPath);
-                }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                {
-                    // Output does not exist
-                    candidateOutputFileTime = DateTime.MinValue;
-                }
-
-                if (candidateOutputFileTime == DateTime.MinValue)
-                {
-                    // An output is missing: we must build the target
-                    string arbitraryInput =
-                        EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(inputs[0].ToString()));
-                    ErrorUtilities.ThrowIfTypeDoesNotImplementToString(inputs[0]);
-                    dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(arbitraryInput, candidateOutput, null, null, OutofdateReason.MissingOutput);
-                    return true;
-                }
-
-                if (oldestOutputFileTime > candidateOutputFileTime)
-                {
-                    // This output is older than the previous record holder
-                    oldestOutputFileTime = candidateOutputFileTime;
-                    oldestOutput = candidateOutput;
-                }
-            }
-
-            // Now compare the oldest output with each input and break out if we find one newer.
-            foreach (T input in inputs)
-            {
-                string unescapedInput = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input.ToString()));
-                ErrorUtilities.ThrowIfTypeDoesNotImplementToString(input);
-                DateTime inputFileTime = DateTime.MaxValue;
-                try
-                {
-                    string unescapedInputFullPath = Path.Combine(projectDirectory, unescapedInput);
-                    inputFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(unescapedInputFullPath);
-                }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                {
-                    // Output does not exist
-                    inputFileTime = DateTime.MinValue;
-                }
-
-                if (inputFileTime == DateTime.MinValue)
-                {
-                    // An input is missing: we must build the target
-                    dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(unescapedInput, oldestOutput, null, null, OutofdateReason.MissingInput);
-                    return true;
-                }
-                else
-                {
-                    if (inputFileTime > oldestOutputFileTime)
-                    {
-                        // This input is newer than the oldest output: we must build the target
-                        dependencyAnalysisDetailEntry = new DependencyAnalysisLogDetail(unescapedInput, oldestOutput, null, null, OutofdateReason.NewerInput);
-                        return true;
-                    }
-                }
-            }
-
-            // All exist and no inputs are newer than any outputs; up to date
-            dependencyAnalysisDetailEntry = null;
-            return false;
-        }
-
-#if FEATURE_ENUMERATION
-        internal static bool IsAnyOutOfDateWip<T>(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, string projectDirectory, IList<T> inputs, IList<T> outputs)
-        {
             ErrorUtilities.VerifyThrow((inputs.Count > 0) && (outputs.Count > 0), "Need to specify inputs and outputs.");
             ValidateTargetItemsType(inputs);
             ValidateTargetItemsType(outputs);
@@ -1160,6 +1035,56 @@ namespace Microsoft.Build.BackEnd
                 string arbitraryPath = Path.Combine(projectDirectory, UnescapeFilePath(escapedFilePaths[0]));
                 return new FileDateInfo(arbitraryPath, DateTime.MaxValue);
             }
+#if FEATURE_ENUMERATION
+            if (NativeMethodsShared.IsWindows) {
+                return GetFileWithTimeConditionByDirectory(projectDirectory, escapedFilePaths, conditionFileTime, condition);
+            }
+#endif
+
+            return GetFileWithTimeConditionByFile(projectDirectory, escapedFilePaths, conditionFileTime, condition);
+        }
+
+        private static string UnescapeFilePath<T>(T escapedFilePath)
+        {
+            string filePath = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(escapedFilePath.ToString()));
+            ErrorUtilities.ThrowIfTypeDoesNotImplementToString(escapedFilePath);
+            return filePath;
+        }
+
+        private static FileDateInfo GetFileWithTimeConditionByFile<T>(string projectDirectory, IList<T> escapedFilePaths, DateTime conditionFileTime, FileTimeCondition condition)
+        {
+
+            bool findOlder = condition == FileTimeCondition.FindOlder;
+            bool findNewer = condition == FileTimeCondition.FindNewer;
+            string candidateFilePath = String.Empty;
+            DateTime candidateFileTime = findOlder ? DateTime.MaxValue : DateTime.MinValue;
+
+            foreach (T escapedFilePath in escapedFilePaths)
+            {
+                string filePath = UnescapeFilePath(escapedFilePath);
+                DateTime fileTime = NativeMethodsShared.GetLastWriteFileUtcTime(Path.Combine(projectDirectory, filePath));
+
+                bool isMissingFile = IsInvalidFileTime(fileTime);
+                bool hasMetCondition = findOlder && fileTime < conditionFileTime || findNewer && fileTime > conditionFileTime;
+                bool isCloserToCondition = findOlder && fileTime < candidateFileTime || findNewer && fileTime > candidateFileTime;
+
+                if (isMissingFile || hasMetCondition)
+                {
+                    return new FileDateInfo(filePath, fileTime);
+                }
+                if (isCloserToCondition)
+                {
+                    candidateFilePath = filePath;
+                    candidateFileTime = fileTime;
+                }
+            }
+
+            return new FileDateInfo(candidateFilePath, candidateFileTime);
+        }
+
+#if FEATURE_ENUMERATION
+        private static FileDateInfo GetFileWithTimeConditionByDirectory<T>(string projectDirectory, IList<T> escapedFilePaths, DateTime conditionFileTime, FileTimeCondition condition)
+        {
 
             bool findOlder = condition == FileTimeCondition.FindOlder;
             bool findNewer = condition == FileTimeCondition.FindNewer;
@@ -1209,12 +1134,6 @@ namespace Microsoft.Build.BackEnd
             return new FileDateInfo(Path.Combine(candidateDirectory, candidateFileName), candidateFileTime);
         }
 
-        private static string UnescapeFilePath<T>(T escapedFilePath)
-        {
-            string filePath = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(escapedFilePath.ToString()));
-            ErrorUtilities.ThrowIfTypeDoesNotImplementToString(escapedFilePath);
-            return filePath;
-        }
 
         private static IDictionary<string, ISet<string>> MapDirectoryToFileNames<T>(IList<T> escapedFilePaths)
         {
