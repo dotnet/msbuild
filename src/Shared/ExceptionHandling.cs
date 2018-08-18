@@ -5,6 +5,7 @@
 namespace Microsoft.Build.AppxPackage.Shared
 #else
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -333,6 +334,7 @@ namespace Microsoft.Build.Shared
                     }
 
                     var pid = Process.GetCurrentProcess().Id;
+                    // This naming pattern is assumed in ReadAnyExceptionFromFile
                     s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
 
                     using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
@@ -350,6 +352,28 @@ namespace Microsoft.Build.Shared
                     writer.WriteLine("===================");
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the content of any exception dump files modified
+        /// since the provided time, otherwise returns an empty string.
+        /// </summary>
+        internal static string ReadAnyExceptionFromFile(DateTime fromTimeUtc)
+        {
+            string result = "";
+            IEnumerable<string> files = FileSystems.Default.EnumerateFiles(DebugDumpPath, "MSBuild*failure.txt");
+
+            foreach (string file in files)
+            {
+                if (File.GetLastWriteTimeUtc(file) >= fromTimeUtc)
+                {
+                    result += Environment.NewLine;
+                    result += file + ":" + Environment.NewLine;
+                    result += File.ReadAllText(file) + Environment.NewLine;
+                }
+            }
+
+            return result;
         }
 #endif
 
