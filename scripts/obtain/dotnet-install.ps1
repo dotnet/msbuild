@@ -581,7 +581,7 @@ catch {
 }
 
 if ($DownloadFailed) {
-    throw "Could not find/download: `"$assetName`" with version = $SpecificVersion`nRefer to: https://github.com/dotnet/core/blob/master/os-lifecycle-policy.md for information on .NET Core support"
+    throw "Could not find/download: `"$assetName`" with version = $SpecificVersion`nRefer to: https://aka.ms/dotnet-os-lifecycle for information on .NET Core support"
 }
 
 Say "Extracting zip from $DownloadLink"

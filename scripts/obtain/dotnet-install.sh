@@ -803,7 +803,7 @@ install_dotnet() {
 
     if [ "$download_failed" = true ]; then
         say_err "Could not find/download: \`$asset_name\` with version = $specific_version"
-        say_err "Refer to: https://github.com/dotnet/core/blob/master/os-lifecycle-policy.md for information on .NET Core support"
+        say_err "Refer to: https://aka.ms/dotnet-os-lifecycle for information on .NET Core support"
         return 1
     fi
 
