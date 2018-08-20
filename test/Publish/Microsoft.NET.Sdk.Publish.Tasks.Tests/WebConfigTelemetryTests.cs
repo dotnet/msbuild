@@ -9,30 +9,6 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
 {
     public class WebConfigTelemetryTests
     {
-        private XDocument WebConfigTemplate => XDocument.Parse(
-@"<configuration>
-    <location path=""."" inheritInChildApplications=""false"">
-      <system.webServer>
-        <handlers>
-          <add name=""aspNetCore"" path=""*"" verb=""*"" modules=""AspNetCoreModule"" resourceType=""Unspecified""/>
-        </handlers>
-        <aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false"" stdoutLogFile="".\logs\stdout"" />
-      </system.webServer>
-  </location >
-</configuration>");
-
-        private XDocument WebConfigTemplateWithProjectGuid => XDocument.Parse(
-@"<configuration>
-  <location path=""."" inheritInChildApplications=""false"">
-      <system.webServer>
-        <handlers>
-          <add name=""aspNetCore"" path=""*"" verb=""*"" modules=""AspNetCoreModule"" resourceType=""Unspecified""/>
-        </handlers>
-        <aspNetCore processPath="".\test.exe"" stdoutLogEnabled=""false"" stdoutLogFile="".\logs\stdout"" />
-      </system.webServer>
-  </location >
-</configuration>
-<!--ProjectGuid: 66964EC2-712A-451A-AB4F-33F18D8F54F1-->");
 
 #if NET46
         [Fact]
@@ -71,13 +47,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             // Arrange
             XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension:".exe", aspNetCoreModuleName:null, aspNetCoreHostingModel:null, environmentName: null);
-            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplate, transformedWebConfig));
             
             //Act 
             XDocument output = WebConfigTelemetry.AddTelemetry(transformedWebConfig, projectGuid, false, null, null);
 
             // Assert
-            Assert.True(XNode.DeepEquals(WebConfigTemplateWithProjectGuid, output));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplateWithProjectGuid, output));
         }
 
         [Theory]
@@ -86,13 +62,13 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             // Arrange
             XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreModuleName: null, aspNetCoreHostingModel:null, environmentName: null);
-            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplate, transformedWebConfig));
 
             //Act 
             XDocument output= WebConfigTelemetry.AddTelemetry(transformedWebConfig, projectGuid, true, null, null);
 
             // Assert
-            Assert.True(XNode.DeepEquals(WebConfigTemplate, output));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplate, output));
         }
 
         [Theory]
@@ -101,16 +77,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
         {
             // Arrange
             XDocument transformedWebConfig = WebConfigTransform.Transform(null, "test.exe", configureForAzure: false, useAppHost: true, extension: ".exe", aspNetCoreModuleName: null, aspNetCoreHostingModel:null, environmentName: null);
-            Assert.True(XNode.DeepEquals(WebConfigTemplate, transformedWebConfig));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplate, transformedWebConfig));
             // Adds Guid to the config
             XDocument transformedWebConfigWithGuid = WebConfigTelemetry.AddTelemetry(transformedWebConfig, projectGuid, false, null, null);
-            Assert.True(XNode.DeepEquals(WebConfigTemplateWithProjectGuid, transformedWebConfigWithGuid));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplateWithProjectGuid, transformedWebConfigWithGuid));
 
             //Act 
             XDocument output = WebConfigTelemetry.AddTelemetry(transformedWebConfigWithGuid, projectGuid, true, null, null);
 
             // Assert
-            Assert.True(XNode.DeepEquals(WebConfigTemplate, output));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplate, output));
         }
 
         private const string TelemetryOptout = "DOTNET_CLI_TELEMETRY_OPTOUT";
@@ -128,7 +104,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             XDocument output = WebConfigTelemetry.AddTelemetry(transformedWebConfig, null, false, null, projectFullPath);
             
             // Assert
-            Assert.True(XNode.DeepEquals(WebConfigTemplateWithProjectGuid, output));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplateWithProjectGuid, output));
 
             // Reset
             Environment.SetEnvironmentVariable(TelemetryOptout, previousValue);
@@ -147,7 +123,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Tests
             XDocument output = WebConfigTelemetry.AddTelemetry(transformedWebConfig, null, false, null, projectFullPath);
 
             // Assert
-            Assert.True(XNode.DeepEquals(WebConfigTemplate, output));
+            Assert.True(XNode.DeepEquals(WebConfigTransformTemplates.WebConfigTemplate, output));
 
             // Reset
             Environment.SetEnvironmentVariable(TelemetryOptout, previousValue);
