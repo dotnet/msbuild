@@ -23,7 +23,19 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
                 webConfig = XDocument.Parse(WebConfigTemplate);
             }
 
-            var rootElement = webConfig.Root.Element("location") == null ? webConfig.Root : webConfig.Root.Element("location");
+            XElement rootElement = null;
+            
+            // Find the first aspNetCore element. If it is null use the default logic. Else use the root containing the aspNetCore element.
+            var firstAspNetCoreElement = webConfig.Root.Descendants(aspNetCoreElementName).FirstOrDefault();
+            if (firstAspNetCoreElement == null)
+            {
+                rootElement = webConfig.Root.Element("location") == null ? webConfig.Root : webConfig.Root.Element("location");
+            }
+            else
+            {
+                rootElement = firstAspNetCoreElement.Ancestors("location").FirstOrDefault() == null ? webConfig.Root : webConfig.Root.Element("location");
+            }
+
             var webServerSection = GetOrCreateChild(rootElement, "system.webServer");
 
             var handlerSection = GetOrCreateChild(webServerSection, HandlersElementName);
