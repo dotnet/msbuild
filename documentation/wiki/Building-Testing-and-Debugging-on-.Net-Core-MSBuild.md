@@ -10,7 +10,7 @@ MSBuild can be successfully built on Windows, OS X 10.13, Ubuntu 14.04, and Ubun
 
 ## The easy way
 
-Install the latest .NET Core SDK from http://dot.net/core. That will ensure all prerequisites for our build are met.
+Install the latest .NET Core SDK from https://github.com/dotnet/core-sdk. That will ensure all prerequisites for our build are met.
 
 ## Manually installing required packages for OSX & Ubuntu
 
