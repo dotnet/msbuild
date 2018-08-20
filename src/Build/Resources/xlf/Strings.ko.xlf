@@ -190,9 +190,9 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료하는 중입니다. 진단 정보는 "{1}"의 파일에서 MSBuild_*.failure.txt 이름으로 찾을 수 있습니다. 이 위치는 MSBUILDDEBUGPATH 환경 변수를 다른 디렉터리로 설정하여 변경할 수 있습니다.</target>
-        <note>{StrBegin="MSB4166: "}</note>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
+        <target state="needs-review-translation">MSB4166: 자식 노드 "{0}"이(가) 중간에 종료되었습니다. 종료하는 중입니다. 진단 정보는 "{1}"의 파일에서 MSBuild_*.failure.txt 이름으로 찾을 수 있습니다. 이 위치는 MSBUILDDEBUGPATH 환경 변수를 다른 디렉터리로 설정하여 변경할 수 있습니다.</target>
+        <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
         <source>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</source>
