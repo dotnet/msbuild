@@ -59,6 +59,7 @@ namespace Microsoft.NET.Build.Tasks
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
                 PlatformLibraryName,
+                null,
                 IsSelfContained);
 
             var packageClosure =  new HashSet<PackageIdentity>();

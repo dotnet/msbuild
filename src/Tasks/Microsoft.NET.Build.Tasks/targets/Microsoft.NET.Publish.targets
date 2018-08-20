@@ -288,6 +288,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                               TargetFramework="$(TargetFrameworkMoniker)"
                               RuntimeIdentifier="$(RuntimeIdentifier)"
                               PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                              RuntimeFrameworks="@(RuntimeFramework)"
                               ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
                               RuntimeStorePackages="@(RuntimeStorePackages)"
                               PreserveStoreLayout="$(PreserveStoreLayout)"
@@ -534,6 +535,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                       IncludeMainProject="$(IncludeMainProjectInDepsFile)"
                       RuntimeIdentifier="$(RuntimeIdentifier)"
                       PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                      RuntimeFrameworks="@(RuntimeFramework)"
                       FilesToSkip="@(_ConflictPackageFiles);@(_PublishConflictPackageFiles)"
                       CompilerOptions="@(DependencyFileCompilerOptions)"
                       ExcludeFromPublishPackageReferences="@(_ExcludeFromPublishPackageReference)"
@@ -612,6 +614,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                        RuntimeConfigPath="$(PublishRuntimeConfigFilePath)"
                                        RuntimeIdentifier="$(RuntimeIdentifier)"
                                        PlatformLibraryName="$(MicrosoftNETPlatformLibrary)"
+                                       RuntimeFrameworks="@(RuntimeFramework)"
                                        UserRuntimeConfig="$(UserRuntimeConfig)"
                                        HostConfigurationOptions="@(RuntimeHostConfigurationOption)"
                                        IsSelfContained="$(SelfContained)" />

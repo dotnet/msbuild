@@ -22,6 +22,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                FrameworkConstants.CommonFrameworks.NetStandard16,
                null,
                Constants.DefaultPlatformLibrary,
+               null,
                isSelfContained: false);
 
             IEnumerable<string> excludeFromPublishPackageIds = new[] { "Microsoft.Extensions.Logging.Abstractions" };

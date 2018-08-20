@@ -51,6 +51,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime,
                 Constants.DefaultPlatformLibrary,
+                null,
                 isSelfContained: !string.IsNullOrEmpty(runtime));
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, includeRuntimeFileVersions: false)
@@ -254,6 +255,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime: null,
                 platformLibraryName: Constants.DefaultPlatformLibrary,
+                null,
                 isSelfContained: false);
 
             CompilationOptions compilationOptions = 

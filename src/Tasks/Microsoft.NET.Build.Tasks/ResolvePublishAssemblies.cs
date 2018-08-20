@@ -29,6 +29,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PlatformLibraryName { get; set; }
 
+        public ITaskItem[] RuntimeFrameworks { get; set; }
+
         public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
 
         public bool PreserveStoreLayout { get; set; }
@@ -67,6 +69,7 @@ namespace Microsoft.NET.Build.Tasks
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
                 PlatformLibraryName,
+                RuntimeFrameworks,
                 IsSelfContained);
 
             projectContext.PackagesToBeFiltered = packagestoBeFiltered;
