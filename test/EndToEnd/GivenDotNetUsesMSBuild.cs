@@ -13,47 +13,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
     public class GivenDotNetUsesMSBuild : TestBase
     {
         [Fact]
-        public void ItCanNewRestoreBuildRunCleanMSBuildProject()
-        {
-            using (DisposableDirectory directory = Temp.CreateDirectory())
-            {
-                string projectDirectory = directory.Path;
-
-                string newArgs = "console -f netcoreapp2.2 --debug:ephemeral-hive --no-restore";
-                new NewCommandShim()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute(newArgs)
-                    .Should().Pass();
-
-                new RestoreCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute("/p:SkipInvalidConfigurations=true")
-                    .Should().Pass();
-
-                new BuildCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute()
-                    .Should().Pass();
-
-                new RunCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .ExecuteWithCapturedOutput()
-                    .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
-
-                var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
-                binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
-
-                new CleanCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute()
-                    .Should().Pass();
-
-                binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
-            }
-        }
-
-        [Fact]
         public void ItCanRunToolsInACSProj()
         {
             var testInstance = TestAssets.Get("MSBuildTestApp")
