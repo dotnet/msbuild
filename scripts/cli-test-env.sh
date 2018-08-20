@@ -13,25 +13,16 @@ done
 
 REPO_ROOT="$( cd -P "$( dirname "$SOURCE" )/../" && pwd )"
 
-uname=$(uname)
-if [ "$(uname)" = "Darwin" ]
-then
-  RID=osx-x64
-else
-  RID=linux-x64
-fi
-
-STAGE2_DIR=$REPO_ROOT/bin/2/$RID/dotnet
+STAGE2_DIR=$REPO_ROOT/bin/2/dotnet
 export PATH=$STAGE2_DIR:$PATH
-
 
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 export NUGET_PACKAGES=$REPO_ROOT/.nuget/packages
-export TEST_PACKAGES=$REPO_ROOT/bin/2/$RID/test/packages
-export TEST_ARTIFACTS=$REPO_ROOT/bin/2/$RID/test/artifacts
-export PreviousStageProps=$REPO_ROOT/bin/2/$RID/PreviousStage.props
+export TEST_PACKAGES=$REPO_ROOT/bin/2/test/packages
+export TEST_ARTIFACTS=$REPO_ROOT/bin/2/test/artifacts
+export PreviousStageProps=$REPO_ROOT/bin/2/PreviousStage.props
 
 # Prevent environment variable get into msbuild
 unset architecture
