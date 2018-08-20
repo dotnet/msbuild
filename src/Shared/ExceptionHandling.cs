@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security;
+using System.Text;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
@@ -360,20 +361,23 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string ReadAnyExceptionFromFile(DateTime fromTimeUtc)
         {
-            string result = "";
+            var builder = new StringBuilder();
             IEnumerable<string> files = FileSystems.Default.EnumerateFiles(DebugDumpPath, "MSBuild*failure.txt");
 
             foreach (string file in files)
             {
                 if (File.GetLastWriteTimeUtc(file) >= fromTimeUtc)
                 {
-                    result += Environment.NewLine;
-                    result += file + ":" + Environment.NewLine;
-                    result += File.ReadAllText(file) + Environment.NewLine;
+                    builder.Append(Environment.NewLine);
+                    builder.Append(file);
+                    builder.Append(":");
+                    builder.Append(Environment.NewLine);
+                    builder.Append(File.ReadAllText(file));
+                    builder.Append(Environment.NewLine);
                 }
             }
 
-            return result;
+            return builder.ToString();
         }
 #endif
 
