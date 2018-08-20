@@ -172,4 +172,19 @@ This is equivalent to deleting project.assets.json.</value>
   <data name="CmdInteractiveRestoreOptionDescription" xml:space="preserve">
     <value>Allows the command to stop and wait for user input or action (for example to complete authentication).</value>
   </data>
+  <data name="CmdLockedModeOptionDescription" xml:space="preserve">
+    <value>Do not allow updating project lock file.</value>
+  </data>
+  <data name="CmdLockFilePathOption" xml:space="preserve">
+    <value>ProjectLockFile_Path</value>
+  </data>
+  <data name="CmdLockFilePathOptionDescription" xml:space="preserve">
+    <value>Project lock file path to be used to write lock file.</value>
+  </data>
+  <data name="CmdReevaluateOptionDescription" xml:space="preserve">
+    <value>Force restore to reevaluate all dependencies even if a lock file already exists.</value>
+  </data>
+  <data name="CmdUseLockFileOptionDescription" xml:space="preserve">
+    <value>Enables project lock file to be generate/ used with restore.</value>
+  </data>
 </root>
