@@ -10,7 +10,7 @@ MSBuild can be successfully built on Windows, OS X 10.13, Ubuntu 14.04, and Ubun
 
 ## The easy way
 
-Install the latest .NET Core SDK from https://github.com/dotnet/core-sdk. That will ensure all prerequisites for our build are met.
+Install the latest .NET Core SDK from http://dot.net/core. That will ensure all prerequisites for our build are met.
 
 ## Manually installing required packages for OSX & Ubuntu
 
@@ -28,7 +28,7 @@ Install the latest .NET Core SDK from https://github.com/dotnet/core-sdk. That w
 
 ## Getting .Net Core MSBuild binaries without building the code
 
-The best way to get .NET Core MSBuild is by installing the [.NET Core SDK](http://dot.net/core), which redistributes us. This will get you the latest released version of MSBuild for .NET Core. After installing it, you can use MSBuild through `dotnet build` or by manual invocation of the `MSBuild.dll` in the dotnet distribution.
+The best way to get .NET Core MSBuild is by installing the [.NET Core SDK](https://github.com/dotnet/core-sdk), which redistributes us. This will get you the latest released version of MSBuild for .NET Core. After installing it, you can use MSBuild through `dotnet build` or by manual invocation of the `MSBuild.dll` in the dotnet distribution.
 
 ## Debugging
 
