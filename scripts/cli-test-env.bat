@@ -18,3 +18,6 @@ set NUGET_PACKAGES=%CLI_REPO_ROOT%.nuget\packages
 set TEST_PACKAGES=%CLI_REPO_ROOT%bin\2\win-x64\test\packages
 set TEST_ARTIFACTS=%CLI_REPO_ROOT%bin\2\win-x64\test\artifacts
 set PreviousStageProps=%CLI_REPO_ROOT%bin\2\win-x64\PreviousStage.props
+
+REM Prevent environment variable get into msbuild
+set architecture=

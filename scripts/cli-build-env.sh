@@ -21,3 +21,6 @@ export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 export DOTNET_MULTILEVEL_LOOKUP=0
 
 export NUGET_PACKAGES=$REPO_ROOT/.nuget/packages
+
+# Prevent environment variable get into msbuild
+unset architecture

@@ -32,3 +32,6 @@ export NUGET_PACKAGES=$REPO_ROOT/.nuget/packages
 export TEST_PACKAGES=$REPO_ROOT/bin/2/$RID/test/packages
 export TEST_ARTIFACTS=$REPO_ROOT/bin/2/$RID/test/artifacts
 export PreviousStageProps=$REPO_ROOT/bin/2/$RID/PreviousStage.props
+
+# Prevent environment variable get into msbuild
+unset architecture
