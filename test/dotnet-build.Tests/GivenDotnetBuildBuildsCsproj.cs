@@ -88,17 +88,13 @@ namespace Microsoft.DotNet.Cli.Build.Tests
         [Fact]
         public void ItRunsWhenRestoringToSpecificPackageDir()
         {
-            var rootPath = TestAssets.CreateTestDirectory().FullName;
+            var testInstance = TestAssets.Get("TestAppSimple")
+                .CreateInstance()
+                .WithSourceFiles();
+            var rootPath = testInstance.Root;
 
             string dir = "pkgs";
             string args = $"--packages {dir}";
-
-            string newArgs = $"console -f netcoreapp2.1 -o \"{rootPath}\" --debug:ephemeral-hive --no-restore";
-            new NewCommandShim()
-                .WithWorkingDirectory(rootPath)
-                .Execute(newArgs)
-                .Should()
-                .Pass();
 
             new RestoreCommand()
                 .WithWorkingDirectory(rootPath)
@@ -115,7 +111,7 @@ namespace Microsoft.DotNet.Cli.Build.Tests
             var configuration = Environment.GetEnvironmentVariable("CONFIGURATION") ?? "Debug";
 
             var outputDll = Directory.EnumerateFiles(
-                Path.Combine(rootPath, "bin", configuration, "netcoreapp2.1"), "*.dll", 
+                Path.Combine(rootPath.FullName, "bin", configuration, "netcoreapp3.0"), "*.dll",
                 SearchOption.TopDirectoryOnly)
                 .Single();
 

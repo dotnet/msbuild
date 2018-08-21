@@ -133,10 +133,9 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                 RunWithHandlingInstallError(() =>
                 {
                     IToolPackage newInstalledPackage = toolPackageInstaller.InstallPackage(
+                        new PackageLocation(nugetConfig: configFile, additionalFeeds: _additionalFeeds),
                         packageId: _packageId,
                         targetFramework: _framework,
-                        nugetConfig: configFile,
-                        additionalFeeds: _additionalFeeds,
                         verbosity: _verbosity);
 
                     foreach (CommandSettings command in newInstalledPackage.Commands)
