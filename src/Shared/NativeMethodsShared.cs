@@ -308,12 +308,12 @@ namespace Microsoft.Build.Shared
 
             public uint Size
             {
-                get {
-#if (CLR2COMPATIBILITY)
-                    return (uint)Marshal.SizeOf(typeof(PROCESS_BASIC_INFORMATION));
-#else
-                    return (uint)Marshal.SizeOf<PROCESS_BASIC_INFORMATION>();
-#endif
+                get
+                {
+                    unsafe
+                    {
+                        return (uint)sizeof(PROCESS_BASIC_INFORMATION);
+                    }
                 }
             }
         };
