@@ -1538,7 +1538,7 @@ namespace Microsoft.Build.Execution
                         IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);
 
                         s.Stop();
-                        Console.WriteLine($"##vso[task.logissue type=warning] {s.Elapsed} spent making new nodes");
+                        Console.WriteLine($"##vso[task.logissue type=warning] {s.Elapsed} spent making {response.NumberOfNodesToCreate} new nodes");
                         PerformSchedulingActions(newResponses);
 
                         break;
