@@ -301,16 +301,22 @@ namespace Microsoft.Build.Shared
         [StructLayout(LayoutKind.Sequential)]
         private struct PROCESS_BASIC_INFORMATION
         {
-            public IntPtr ExitStatus;
+            public uint ExitStatus;
             public IntPtr PebBaseAddress;
-            public IntPtr AffinityMask;
-            public IntPtr BasePriority;
-            public IntPtr UniqueProcessId;
-            public IntPtr InheritedFromUniqueProcessId;
+            public UIntPtr AffinityMask;
+            public int BasePriority;
+            public UIntPtr UniqueProcessId;
+            public UIntPtr InheritedFromUniqueProcessId;
 
-            public int Size
+            public uint Size
             {
-                get { return (6 * IntPtr.Size); }
+                get
+                {
+                    unsafe
+                    {
+                        return (uint)sizeof(PROCESS_BASIC_INFORMATION);
+                    }
+                }
             }
         };
 
@@ -1452,7 +1458,7 @@ namespace Microsoft.Build.Shared
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [DllImport("NTDLL.DLL")]
-        private static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, int cb, ref int pSize);
+        private static extern int NtQueryInformationProcess(SafeProcessHandle hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, uint cb, ref int pSize);
 
         [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
         [return: MarshalAs(UnmanagedType.Bool)]
