@@ -1510,6 +1510,9 @@ namespace Microsoft.Build.Execution
                         break;
 
                     case ScheduleActionType.CreateNode:
+                        Stopwatch s = new Stopwatch();
+                        s.Start();
+
                         var newNodes = new List<NodeInfo>();
 
                         for (int i = 0; i < response.NumberOfNodesToCreate; i++)
@@ -1533,6 +1536,9 @@ namespace Microsoft.Build.Execution
                         }
 
                         IEnumerable<ScheduleResponse> newResponses = _scheduler.ReportNodesCreated(newNodes);
+
+                        s.Stop();
+                        Console.WriteLine($"##vso[task.logissue type=warning] {s.Elapsed} spent making new nodes");
                         PerformSchedulingActions(newResponses);
 
                         break;
