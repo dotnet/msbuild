@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli
                         "--reevaluate",
                         LocalizableStrings.CmdReevaluateOptionDescription,
                         Accept.NoArguments()
-                            .ForwardAs("-property:ReevaluateNuGetLockFile=true")) }).ToArray();
+                            .ForwardAs("-property:ReevaluateRestoreGraph=true")) }).ToArray();
         }
 
         public static Option[] AddImplicitRestoreOptions(
