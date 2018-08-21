@@ -401,4 +401,12 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1070: The application configuration file must have root configuration element.</value>
     <comment>{StrBegin="NETSDK1070: "}</comment>
   </data>
+  <data name="AppHostNotWindows" xml:space="preserve">
+    <value>NETSDK1071: Unable to use '{0}' as application host executable because it's not a Windows PE file.</value>
+    <comment>{StrBegin="NETSDK1071: "}</comment>
+  </data>
+  <data name="AppHostNotWindowsCLI" xml:space="preserve">
+    <value>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</value>
+    <comment>{StrBegin="NETSDK1072: "}</comment>
+  </data>
 </root>

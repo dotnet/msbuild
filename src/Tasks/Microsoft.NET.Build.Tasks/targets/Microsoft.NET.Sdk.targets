@@ -272,7 +272,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     Computes any files that need to be copied to the build output folder for .NET Core.
     ============================================================
     -->
-  <UsingTask TaskName="EmbedAppNameInHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="CreateAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_ComputeNETCoreBuildOutputFiles"
           DependsOnTargets="ResolvePackageAssets"
           AfterTargets="ResolveReferences"
@@ -297,19 +297,21 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <PropertyGroup Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
       <AppHostDestinationDirectoryPath>$(BaseIntermediateOutputPath)\$(TargetFramework)\$(RuntimeIdentifier)\host</AppHostDestinationDirectoryPath>
+      <UseWindowsGraphicalUserInterface Condition="$(RuntimeIdentifier.StartsWith('win')) and '$(OutputType)'=='WinExe'">true</UseWindowsGraphicalUserInterface>
     </PropertyGroup>
 
     <NETSdkError Condition="'@(NativeRestoredAppHostNETCore->Count())' &gt; 1"
                  ResourceName="MultipleFilesResolved"
                  FormatArguments="$(_DotNetAppHostExecutableName)" />
 
-    <EmbedAppNameInHost   AppHostSourcePath="@(NativeRestoredAppHostNETCore)"
-                          AppHostDestinationDirectoryPath="$(AppHostDestinationDirectoryPath)"
-                          AppBinaryName="$(AssemblyName)$(TargetExt)"
-                          Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
+    <CreateAppHost AppHostSourcePath="@(NativeRestoredAppHostNETCore)"
+                   AppHostDestinationDirectoryPath="$(AppHostDestinationDirectoryPath)"
+                   AppBinaryName="$(AssemblyName)$(TargetExt)"
+                   WindowsGraphicalUserInterface="$(UseWindowsGraphicalUserInterface)"
+                   Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
 
       <Output TaskParameter="ModifiedAppHostPath" ItemName="NativeAppHostNETCore" />
-    </EmbedAppNameInHost>
+    </CreateAppHost>
 
     <ItemGroup Condition="'@(NativeAppHostNETCore)' == '' ">
       <NativeAppHostNETCore Include="@(NativeCopyLocalItems)"

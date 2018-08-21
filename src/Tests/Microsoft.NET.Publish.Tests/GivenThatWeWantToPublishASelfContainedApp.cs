@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using FluentAssertions;
-using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.NET.Build.Tasks;
 using Microsoft.NET.TestFramework;
@@ -10,7 +9,6 @@ using Microsoft.NET.TestFramework.Assertions;
 using Microsoft.NET.TestFramework.Commands;
 using System;
 using System.IO;
-using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -91,6 +89,44 @@ namespace Microsoft.NET.Publish.Tests
             publishCommand
                 .Execute(msbuildArgs)
                 .Should().Pass().And.NotHaveStdOutContaining("HelloWorld.exe' already exists");
+        }
+
+        private const int PEHeaderPointerOffset = 0x3C;
+        private const int SubsystemOffset = 0x5C;
+
+        [WindowsOnlyFact]
+        public void It_can_make_a_Windows_GUI_exe()
+        {
+            var runtimeIdentifier = EnvironmentInfo.GetCompatibleRid("netcoreapp2.0");
+
+            var testAsset = _testAssetsManager
+                .CopyTestAsset(TestProjectName)
+                .WithSource()
+                .WithProjectChanges(doc =>
+                {
+                    doc.Root.Element("PropertyGroup").Element("TargetFramework").SetValue(TargetFramework);
+                })
+                .Restore(Log, relativePath: "", args: $"/p:RuntimeIdentifier={runtimeIdentifier}");
+
+            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
+            publishCommand
+                .Execute(
+                    "/p:SelfContained=true",
+                    "/p:OutputType=WinExe",
+                    $"/p:TargetFramework={TargetFramework}",
+                    $"/p:RuntimeIdentifier={runtimeIdentifier}")
+                .Should()
+                .Pass();
+
+            string outputDirectory = publishCommand.GetOutputDirectory(
+                targetFramework: TargetFramework, 
+                runtimeIdentifier: runtimeIdentifier).FullName;
+            byte[] fileContent = File.ReadAllBytes(Path.Combine(outputDirectory, TestProjectName + ".exe"));
+            UInt32 peHeaderOffset = BitConverter.ToUInt32(fileContent, PEHeaderPointerOffset);
+            BitConverter
+                .ToUInt16(fileContent, (int)(peHeaderOffset + SubsystemOffset))
+                .Should()
+                .Be(2);
         }
     }
 }

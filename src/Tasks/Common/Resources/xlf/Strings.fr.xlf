@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../Strings.resx">
     <body>
+      <trans-unit id="AppHostNotWindows">
+        <source>NETSDK1071: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
+        <target state="new">NETSDK1071: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>
+        <note>{StrBegin="NETSDK1071: "}</note>
+      </trans-unit>
+      <trans-unit id="AppHostNotWindowsCLI">
+        <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
+        <target state="new">NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</target>
+        <note>{StrBegin="NETSDK1072: "}</note>
+      </trans-unit>
       <trans-unit id="AppConfigRequiresRootConfiguration">
         <source>NETSDK1070: The application configuration file must have root configuration element.</source>
         <target state="new">NETSDK1070: The application configuration file must have root configuration element.</target>

@@ -3,14 +3,14 @@
 
 using Microsoft.Build.Framework;
 using System.IO;
-using System.Text;
 
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Embeds the App Name into the AppHost.exe  
+    /// Creates the AppHost.exe to be used by the published app.
+    /// This embeds the app dll path into the AppHost.exe and performs additional customizations as requested.
     /// </summary>
-    public class EmbedAppNameInHost : TaskBase
+    public class CreateAppHost : TaskBase
     {
         [Required]
         public string AppHostSourcePath { get; set; }
@@ -20,6 +20,8 @@ namespace Microsoft.NET.Build.Tasks
 
         [Required]
         public string AppBinaryName { get; set; }
+
+        public bool WindowsGraphicalUserInterface { get; set; }
 
         [Output]
         public string ModifiedAppHostPath { get; set; }
@@ -36,7 +38,11 @@ namespace Microsoft.NET.Build.Tasks
                 AppHost.Create(
                     AppHostSourcePath,
                     ModifiedAppHostPath,
-                    AppBinaryName);
+                    AppBinaryName,
+                    options: new AppHostOptions()
+                    {
+                        WindowsGraphicalUserInterface = WindowsGraphicalUserInterface
+                    });
             }
         }
     }
