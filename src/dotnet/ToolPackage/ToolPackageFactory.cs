@@ -21,13 +21,40 @@ namespace Microsoft.DotNet.ToolPackage
             return (toolPackageStore, toolPackageInstaller);
         }
 
+        public static (IToolPackageStore, IToolPackageUninstaller) CreateToolPackageStoreAndUninstaller(
+            DirectoryPath? nonGlobalLocation = null)
+        {
+            IToolPackageStore toolPackageStore = CreateToolPackageStore(nonGlobalLocation);
+            var toolPackageUninstaller = new ToolPackageUninstaller(
+                toolPackageStore);
+
+            return (toolPackageStore, toolPackageUninstaller);
+        }
+
+        public static (IToolPackageStore,
+            IToolPackageInstaller,
+            IToolPackageUninstaller)
+            CreateToolPackageStoreInstallerUninstaller(
+                DirectoryPath? nonGlobalLocation = null)
+        {
+            IToolPackageStore toolPackageStore = CreateToolPackageStore(nonGlobalLocation);
+            var toolPackageInstaller = new ToolPackageInstaller(
+                toolPackageStore,
+                new ProjectRestorer());
+            var toolPackageUninstaller = new ToolPackageUninstaller(
+                toolPackageStore);
+
+            return (toolPackageStore, toolPackageInstaller, toolPackageUninstaller);
+        }
+
         public static IToolPackageStore CreateToolPackageStore(
             DirectoryPath? nonGlobalLocation = null)
         {
             var toolPackageStore =
                 new ToolPackageStore(nonGlobalLocation.HasValue
-                ? new DirectoryPath(ToolPackageFolderPathCalculator.GetToolPackageFolderPath(nonGlobalLocation.Value.Value))
-                : GetPackageLocation());
+                    ? new DirectoryPath(
+                        ToolPackageFolderPathCalculator.GetToolPackageFolderPath(nonGlobalLocation.Value.Value))
+                    : GetPackageLocation());
 
             return toolPackageStore;
         }

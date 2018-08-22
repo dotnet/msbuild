@@ -17,19 +17,19 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
-    internal delegate IToolPackageStore CreateToolPackageStore(DirectoryPath? nonGlobalLocation = null);
+    internal delegate (IToolPackageStore, IToolPackageUninstaller) CreateToolPackageStoreAndUninstaller(DirectoryPath? nonGlobalLocation = null);
     internal class ToolUninstallCommand : CommandBase
     {
         private readonly AppliedOption _options;
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private CreateShellShimRepository _createShellShimRepository;
-        private CreateToolPackageStore _createToolPackageStore;
+        private CreateToolPackageStoreAndUninstaller _createToolPackageStoreAndUninstaller;
 
         public ToolUninstallCommand(
             AppliedOption options,
             ParseResult result,
-            CreateToolPackageStore createToolPackageStore = null,
+            CreateToolPackageStoreAndUninstaller createToolPackageStoreAndUninstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IReporter reporter = null)
             : base(result)
@@ -39,7 +39,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             _errorReporter = reporter ?? Reporter.Error;
 
             _createShellShimRepository = createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
-            _createToolPackageStore = createToolPackageStore ?? ToolPackageFactory.CreateToolPackageStore;
+            _createToolPackageStoreAndUninstaller = createToolPackageStoreAndUninstaller ??
+                                                    ToolPackageFactory.CreateToolPackageStoreAndUninstaller;
         }
 
         public override int Execute()
@@ -71,7 +72,8 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
                 throw new GracefulException(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
             }
 
-            IToolPackageStore toolPackageStore = _createToolPackageStore(toolDirectoryPath);
+            (IToolPackageStore toolPackageStore, IToolPackageUninstaller toolPackageUninstaller)
+                = _createToolPackageStoreAndUninstaller(toolDirectoryPath);
             IShellShimRepository shellShimRepository = _createShellShimRepository(toolDirectoryPath);
 
             var packageId = new PackageId(_options.Arguments.Single());
@@ -114,7 +116,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
                         shellShimRepository.RemoveShim(command.Name);
                     }
 
-                    package.Uninstall();
+                    toolPackageUninstaller.Uninstall(package.PackageDirectory);
 
                     scope.Complete();
                 }

@@ -14,13 +14,13 @@ namespace Microsoft.DotNet.ToolPackage
 {
     internal class ToolPackageInstaller : IToolPackageInstaller
     {
-        private readonly IToolPackageStore _store;
+        private readonly IToolPackageStoreQuery _store;
         private readonly IProjectRestorer _projectRestorer;
         private readonly FilePath? _tempProject;
         private readonly DirectoryPath _offlineFeed;
 
         public ToolPackageInstaller(
-            IToolPackageStore store,
+            IToolPackageStoreQuery store,
             IProjectRestorer projectRestorer,
             FilePath? tempProject = null,
             DirectoryPath? offlineFeed = null)
@@ -85,7 +85,7 @@ namespace Microsoft.DotNet.ToolPackage
                         FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(stageDirectory.Value, packageDirectory.Value));
                         rollbackDirectory = packageDirectory.Value;
 
-                        return new ToolPackageInstance(_store, packageId, version, packageDirectory);
+                        return new ToolPackageInstance(packageId, version, packageDirectory);
                     }
                     catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
                     {

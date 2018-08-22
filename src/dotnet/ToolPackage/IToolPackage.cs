@@ -21,7 +21,5 @@ namespace Microsoft.DotNet.ToolPackage
         IEnumerable<string> Warnings { get; }
 
         IReadOnlyList<FilePath> PackagedShims { get; }
-
-        void Uninstall();
     }
 }

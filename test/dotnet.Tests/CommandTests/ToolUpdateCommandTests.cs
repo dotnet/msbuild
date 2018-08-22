@@ -143,7 +143,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             _reporter,
                             _mockFeeds
                         ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error")),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 _ => GetMockedShellShimRepository(),
                 _reporter);
 
@@ -172,7 +173,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             _reporter,
                             _mockFeeds
                         ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error")),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 _ => GetMockedShellShimRepository(),
                 _reporter);
 
@@ -240,7 +242,8 @@ namespace Microsoft.DotNet.Tests.Commands
                         _fileSystem,
                         _reporter,
                         _mockFeeds
-                    ))),
+                    )),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 (_) => GetMockedShellShimRepository(),
                 _reporter);
         }

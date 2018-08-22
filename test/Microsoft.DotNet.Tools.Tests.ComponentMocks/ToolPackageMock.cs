@@ -16,7 +16,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     {
         private IFileSystem _fileSystem;
         private Lazy<IReadOnlyList<CommandSettings>> _commands;
-        private Action _uninstallCallback;
         private IEnumerable<string> _warnings;
         private readonly IReadOnlyList<FilePath> _packagedShims;
 
@@ -25,7 +24,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             PackageId id,
             NuGetVersion version,
             DirectoryPath packageDirectory,
-            Action uninstallCallback = null,
             IEnumerable<string> warnings = null,
             IReadOnlyList<FilePath> packagedShims = null)
         {
@@ -34,7 +32,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             Version = version ?? throw new ArgumentNullException(nameof(version));
             PackageDirectory = packageDirectory;
             _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
-            _uninstallCallback = uninstallCallback;
             _warnings = warnings ?? new List<string>();
             _packagedShims = packagedShims ?? new List<FilePath>();
         }
@@ -61,58 +58,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             {
                 return _packagedShims;
             }
-        }
-
-        public void Uninstall()
-        {
-            var rootDirectory = PackageDirectory.GetParentPath();
-            string tempPackageDirectory = null;
-
-            TransactionalAction.Run(
-                action: () => {
-                    try
-                    {
-                        if (_fileSystem.Directory.Exists(PackageDirectory.Value))
-                        {
-                            var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                            _fileSystem.Directory.Move(PackageDirectory.Value, tempPath);
-                            tempPackageDirectory = tempPath;
-                        }
-
-                        if (_fileSystem.Directory.Exists(rootDirectory.Value) &&
-                            !_fileSystem.Directory.EnumerateFileSystemEntries(rootDirectory.Value).Any())
-                        {
-                            _fileSystem.Directory.Delete(rootDirectory.Value, false);
-                        }
-
-                        if (_uninstallCallback != null)
-                        {
-                            _uninstallCallback();
-                        }
-                    }
-                    catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
-                    {
-                        throw new ToolPackageException(
-                            string.Format(
-                                CommonLocalizableStrings.FailedToUninstallToolPackage,
-                                Id,
-                                ex.Message),
-                            ex);
-                    }
-                },
-                commit: () => {
-                    if (tempPackageDirectory != null)
-                    {
-                        _fileSystem.Directory.Delete(tempPackageDirectory, true);
-                    }
-                },
-                rollback: () => {
-                    if (tempPackageDirectory != null)
-                    {
-                        _fileSystem.Directory.CreateDirectory(rootDirectory.Value);
-                        _fileSystem.Directory.Move(tempPackageDirectory, PackageDirectory.Value);
-                    }
-                });
         }
 
         private IReadOnlyList<CommandSettings> GetCommands()

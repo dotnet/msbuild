@@ -21,7 +21,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.ToolPackage.Tests
 {
-    public class ToolPackageInstanceTests : TestBase
+    public class ToolPackageUninstallerTests : TestBase
     {
         [Theory]
         [InlineData(false)]
@@ -30,7 +30,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, reporter, fileSystem) = Setup(
+            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
@@ -41,7 +41,9 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             package.PackagedShims.Should().ContainSingle(f => f.Value.Contains("demo.exe") || f.Value.Contains("demo"));
 
-            package.Uninstall();
+            uninstaller.Uninstall(package.PackageDirectory);
+
+            store.EnumeratePackages().Should().BeEmpty();
         }
 
         private static FilePath GetUniqueTempProjectPathEachTest()
@@ -73,7 +75,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static (IToolPackageStore, IToolPackageInstaller, BufferedReporter, IFileSystem) Setup(
+        private static (IToolPackageStore, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem) Setup(
             bool useMock,
             IEnumerable<MockFeed> feeds = null,
             FilePath? tempProject = null,
@@ -85,6 +87,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             IFileSystem fileSystem;
             IToolPackageStore store;
             IToolPackageInstaller installer;
+            IToolPackageUninstaller uninstaller;
             if (useMock)
             {
                 var packagedShimsMap = new Dictionary<PackageId, IReadOnlyList<FilePath>>
@@ -102,6 +105,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         reporter: reporter,
                         feeds: feeds),
                     packagedShimsMap: packagedShimsMap);
+                uninstaller = new ToolPackageUninstallerMock(fileSystem, store);
             }
             else
             {
@@ -112,11 +116,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     projectRestorer: new ProjectRestorer(reporter),
                     tempProject: tempProject ?? GetUniqueTempProjectPathEachTest(),
                     offlineFeed: offlineFeed ?? new DirectoryPath("does not exist"));
+                uninstaller = new ToolPackageUninstaller(store);
             }
 
             store.Root.Value.Should().Be(Path.GetFullPath(root.Value));
 
-            return (store, installer, reporter, fileSystem);
+            return (store, installer, uninstaller, reporter, fileSystem);
         }
 
         private static string GetTestLocalFeedPath() =>

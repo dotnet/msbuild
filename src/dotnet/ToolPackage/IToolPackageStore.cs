@@ -8,18 +8,8 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
-    internal interface IToolPackageStore
+    internal interface IToolPackageStore: IToolPackageStoreQuery
     {
-        DirectoryPath Root { get; }
-
-        DirectoryPath GetRandomStagingDirectory();
-
-        NuGetVersion GetStagedPackageVersion(DirectoryPath stagingDirectory, PackageId packageId);
-
-        DirectoryPath GetRootPackageDirectory(PackageId packageId);
-
-        DirectoryPath GetPackageDirectory(PackageId packageId, NuGetVersion version);
-
         IEnumerable<IToolPackage> EnumeratePackages();
 
         IEnumerable<IToolPackage> EnumeratePackageVersions(PackageId packageId);
