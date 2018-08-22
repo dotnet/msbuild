@@ -104,7 +104,7 @@ namespace Microsoft.NET.Build.Tasks
             {
                 runtimeOptions.tfm = TargetFramework;
 
-                if (projectContext.RuntimeFrameworks == null)
+                if (projectContext.RuntimeFrameworks == null || projectContext.RuntimeFrameworks.Length == 0)
                 {
                     //  If there are no RuntimeFrameworks (which would be set in the ResolveFrameworkReference task based
                     //  on FrameworkReference items), then use package resolved from MicrosoftNETPlatformLibrary for
