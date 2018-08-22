@@ -98,7 +98,8 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
 
                     //  If there were any other items that tied with the loser, report them as conflicts here
                     List<TConflictItem> previouslyUnresolvedConflicts;
-                    if (_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts))
+                    if (_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts) &&
+                        previouslyUnresolvedConflicts.Contains(loser))
                     {
                         foreach (var previouslyUnresolvedItem in previouslyUnresolvedConflicts)
                         {
