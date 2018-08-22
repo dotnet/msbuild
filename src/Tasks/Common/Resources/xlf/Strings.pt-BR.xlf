@@ -77,6 +77,11 @@
         <target state="translated">NETSDK1008: Metadados '{0}' ausentes no item '{1}' '{2}'.</target>
         <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
+      <trans-unit id="UnknownFrameworkReference">
+        <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>
+        <target state="new">NETSDK1073: The FrameworkReference '{0}' was not recognized</target>
+        <note>{StrBegin="NETSDK1073: "}</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
         <target state="translated">NETSDK1009: Token de pré-processador não reconhecido '{0}' em '{1}'.</target>
