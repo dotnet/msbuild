@@ -17,7 +17,7 @@ rebuild=false
 norestore=false
 sign=false
 skipTests=false
-bootstrapOnly=false
+bootstrap=false
 verbosity="minimal"
 hostType="core"
 properties=""
@@ -36,7 +36,7 @@ function Help() {
   echo "  -build                  Build solution"
   echo "  -rebuild                Rebuild solution"
   echo "  -skipTests              Don't run tests"
-  echo "  -bootstrapOnly          Don't run build again with bootstrapped MSBuild"
+  echo "  -bootstrap              Run build again with bootstrapped MSBuild"
   echo "  -sign                   Sign build outputs"
   echo "  -pack                   Package build outputs into NuGet packages and Willow components"
   echo ""
@@ -104,8 +104,8 @@ while [[ $# -gt 0 ]]; do
       skipTests=true
       shift 1
       ;;
-    -bootstraponly)
-      bootstrapOnly=true
+    -bootstrap)
+      bootstrap=true
       shift 1
       ;;
     -usesystemmsbuild)
@@ -392,16 +392,16 @@ function Build {
     commonMSBuildArgs="$commonMSBuildArgs /warnaserror"
   fi
 
-  # Only test using stage 0 MSBuild if -bootstrapOnly is specified
+  # Only test using stage 0 MSBuild if -bootstrap is not specified
   local testStage0=false
-  if $bootstrapOnly
+  if ! $bootstrap
   then
     testStage0=$test
   fi
 
   CallMSBuild $(QQ $RepoToolsetBuildProj) $commonMSBuildArgs $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true $properties
 
-  if ! $bootstrapOnly
+  if $bootstrap
   then
     bootstrapRoot="$ArtifactsConfigurationDir/bootstrap"
 
