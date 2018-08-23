@@ -11,8 +11,11 @@
     <DotnetUserSecretsPackageVersion>2.1.1</DotnetUserSecretsPackageVersion>
     <DotnetWatchPackageVersion>2.1.1</DotnetWatchPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.2.0-preview1-26609-02</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftBuildPackageVersion>15.8.166</MicrosoftBuildPackageVersion>
+    
+    <!-- https://github.com/dotnet/cli/issues/9851  -->
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>3.0.0-preview1-26816-04</MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>
+
+    <MicrosoftBuildPackageVersion>15.9.0-preview-000008</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
@@ -53,7 +56,7 @@
     <NuGetProjectModelPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelPackageVersion>
     <NuGetVersioningPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetVersioningPackageVersion>
     <MicrosoftBuildNuGetSdkResolverPackageVersion>$(NuGetBuildTasksPackageVersion)</MicrosoftBuildNuGetSdkResolverPackageVersion>
-    <MicrosoftNETTestSdkPackageVersion>15.8.0</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.9.0-preview-20180807-05</MicrosoftNETTestSdkPackageVersion>
     <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
     <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
     <XliffTasksPackageVersion>0.2.0-beta-000042</XliffTasksPackageVersion>
@@ -78,7 +81,7 @@
   <PropertyGroup>
     <BuildTasksFeedToolVersion>2.1.0-prerelease-02430-04</BuildTasksFeedToolVersion>
     <VersionToolsVersion>$(BuildTasksFeedToolVersion)</VersionToolsVersion>
-    <DotnetDebToolVersion>2.0.0-preview2-25331-01</DotnetDebToolVersion>
+    <DotnetDebToolVersion>2.0.0</DotnetDebToolVersion>
   </PropertyGroup>
 
 </Project>

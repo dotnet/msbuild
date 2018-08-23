@@ -94,15 +94,15 @@
         UseHardlinksIfPossible="False" />
 
       <!-- Proactively remove all possible Shared Framework and Debian Packages -->
-      <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageFileName)" />
-      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageFileName)" />
-      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageFileName)" />
-      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
+      <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageFileName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageFileName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageFileName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
   <Target Name="TestSdkDeb"
@@ -132,12 +132,15 @@
                   ToolPath="$(DebianInstalledDirectory)" />
 
       <!-- Clean up Packages -->
-      <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" />
-      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" />
+      <!-- The following line is needed. So it won't warning dotnet folder is not empty after uninstall -->
+      <Exec Command="sudo rm -rf /usr/share/dotnet/sdk/NuGetFallbackFolder" />
+
+      <Exec Command="sudo dpkg -r $(SdkDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(AspNetCoreSharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(SharedFxDebianPackageName)" IgnoreStandardErrorWarningFormat="true"  />
+      <Exec Command="sudo dpkg -r $(HostFxrDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(HostDebianPackageName)" IgnoreStandardErrorWarningFormat="true" />
+      <Exec Command="sudo dpkg -r $(RuntimeDepsPackageName)" IgnoreStandardErrorWarningFormat="true" />
   </Target>
 
   <Target Name="PrepareDotnetDebDirectories">
@@ -177,8 +180,9 @@
   <Target Name="TestDebuild">
       <Message Text="Don't remove this" />
 
-      <!-- run Debuild -->
-      <Exec Command="/usr/bin/env debuild -h" ContinueOnError="true">
+      <!-- run Debuild  -->
+      <!-- NB: IgnoreExitCode prevents Exec from failing, but does not prevent us from retrieving the exit code. -->
+      <Exec Command="/usr/bin/env debuild -h > /dev/null 2>&amp;1" IgnoreExitCode="true">
           <Output TaskParameter="ExitCode" PropertyName="DebuildExitCode" />
       </Exec>
 
