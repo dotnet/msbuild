@@ -12,7 +12,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
-    internal class ToolPackageStoreMock : IToolPackageStore
+    internal class ToolPackageStoreMock : IToolPackageStoreQuery, IToolPackageStore
     {
         private IFileSystem _fileSystem;
 
@@ -28,7 +28,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
         public DirectoryPath GetRandomStagingDirectory()
         {
-            return Root.WithSubDirectories(ToolPackageStore.StagingDirectory, Path.GetRandomFileName());
+            return Root.WithSubDirectories(ToolPackageStoreAndQuery.StagingDirectory, Path.GetRandomFileName());
         }
 
         public NuGetVersion GetStagedPackageVersion(DirectoryPath stagingDirectory, PackageId packageId)
@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 var name = Path.GetFileName(subdirectory);
                 var packageId = new PackageId(name);
 
-                if (name == ToolPackageStore.StagingDirectory || name != packageId.ToString())
+                if (name == ToolPackageStoreAndQuery.StagingDirectory || name != packageId.ToString())
                 {
                     continue;
                 }

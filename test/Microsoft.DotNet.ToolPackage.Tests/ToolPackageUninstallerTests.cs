@@ -30,11 +30,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
@@ -43,7 +43,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             uninstaller.Uninstall(package.PackageDirectory);
 
-            store.EnumeratePackages().Should().BeEmpty();
+            storeQuery.EnumeratePackages().Should().BeEmpty();
         }
 
         private static FilePath GetUniqueTempProjectPathEachTest()
@@ -75,42 +75,48 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static (IToolPackageStore, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem) Setup(
-            bool useMock,
-            IEnumerable<MockFeed> feeds = null,
-            FilePath? tempProject = null,
-            DirectoryPath? offlineFeed = null)
+        private static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
+            ) Setup(
+                bool useMock,
+                IEnumerable<MockFeed> feeds = null,
+                FilePath? tempProject = null,
+                DirectoryPath? offlineFeed = null)
         {
             var root = new DirectoryPath(Path.Combine(TempRoot.Root, Path.GetRandomFileName()));
             var reporter = new BufferedReporter();
 
             IFileSystem fileSystem;
             IToolPackageStore store;
+            IToolPackageStoreQuery storeQuery;
             IToolPackageInstaller installer;
             IToolPackageUninstaller uninstaller;
             if (useMock)
             {
                 var packagedShimsMap = new Dictionary<PackageId, IReadOnlyList<FilePath>>
                 {
-                    [TestPackageId] = new FilePath[] {new FilePath("path/demo.exe")}
+                    [TestPackageId] = new FilePath[] { new FilePath("path/demo.exe") }
                 };
 
                 fileSystem = new FileSystemMockBuilder().Build();
-                store = new ToolPackageStoreMock(root, fileSystem);
+                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem);
+                store = toolPackageStoreMock;
+                storeQuery = toolPackageStoreMock;
                 installer = new ToolPackageInstallerMock(
                     fileSystem: fileSystem,
-                    store: store,
+                    store: toolPackageStoreMock,
                     projectRestorer: new ProjectRestorerMock(
                         fileSystem: fileSystem,
                         reporter: reporter,
                         feeds: feeds),
-                    packagedShimsMap: packagedShimsMap);
-                uninstaller = new ToolPackageUninstallerMock(fileSystem, store);
+                     packagedShimsMap: packagedShimsMap);
+                uninstaller = new ToolPackageUninstallerMock(fileSystem, toolPackageStoreMock);
             }
             else
             {
                 fileSystem = new FileSystemWrapper();
-                store = new ToolPackageStore(root);
+                var toolPackageStore = new ToolPackageStoreAndQuery(root);
+                store = toolPackageStore;
+                storeQuery = toolPackageStore;
                 installer = new ToolPackageInstaller(
                     store: store,
                     projectRestorer: new ProjectRestorer(reporter),
@@ -121,7 +127,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             store.Root.Value.Should().Be(Path.GetFullPath(root.Value));
 
-            return (store, installer, uninstaller, reporter, fileSystem);
+            return (store, storeQuery, installer, uninstaller, reporter, fileSystem);
         }
 
         private static string GetTestLocalFeedPath() =>

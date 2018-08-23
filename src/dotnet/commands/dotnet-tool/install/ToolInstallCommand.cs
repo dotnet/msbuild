@@ -18,7 +18,7 @@ using NuGet.Versioning;
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
-    internal delegate (IToolPackageStore, IToolPackageInstaller) CreateToolPackageStoreAndInstaller(DirectoryPath? nonGlobalLocation = null);
+    internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(DirectoryPath? nonGlobalLocation = null);
 
     internal class ToolInstallCommand : CommandBase
     {
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private CreateShellShimRepository _createShellShimRepository;
-        private CreateToolPackageStoreAndInstaller _createToolPackageStoreAndInstaller;
+        private CreateToolPackageStoresAndInstaller _createToolPackageStoresAndInstaller;
 
         private readonly PackageId _packageId;
         private readonly string _packageVersion;
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         public ToolInstallCommand(
             AppliedOption appliedCommand,
             ParseResult parseResult,
-            CreateToolPackageStoreAndInstaller createToolPackageStoreAndInstaller = null,
+            CreateToolPackageStoresAndInstaller createToolPackageStoreAndInstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IEnvironmentPathInstruction environmentPathInstruction = null,
             IReporter reporter = null)
@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
 
-            _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoreAndInstaller;
+            _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
 
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
@@ -106,12 +106,12 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                 toolPath = new DirectoryPath(_toolPath);
             }
 
-            (IToolPackageStore toolPackageStore, IToolPackageInstaller toolPackageInstaller) =
-                _createToolPackageStoreAndInstaller(toolPath);
+            (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageInstaller toolPackageInstaller) =
+                _createToolPackageStoresAndInstaller(toolPath);
             IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
             // Prevent installation if any version of the package is installed
-            if (toolPackageStore.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
+            if (toolPackageStoreQuery.EnumeratePackageVersions(_packageId).FirstOrDefault() != null)
             {
                 _errorReporter.WriteLine(string.Format(LocalizableStrings.ToolAlreadyInstalled, _packageId).Red());
                 return 1;

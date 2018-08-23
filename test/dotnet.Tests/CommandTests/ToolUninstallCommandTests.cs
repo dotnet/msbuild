@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.Tests.Commands
             return new ToolInstallCommand(
                 result["dotnet"]["tool"]["install"],
                 result,
-                (_) => (store, packageInstallerMock),
+                (_) => (store, store, packageInstallerMock),
                 (_) => new ShellShimRepository(
                     new DirectoryPath(_shimsDirectory),
                     fileSystem: _fileSystem,
@@ -219,14 +219,14 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool uninstall " + options);
 
-            (IToolPackageStore, IToolPackageUninstaller) createToolPackageStoreAndUninstaller(
+            (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) createToolPackageStoreAndUninstaller(
                 DirectoryPath? directoryPath)
             {
                 var store = new ToolPackageStoreMock(
                     new DirectoryPath(_toolsDirectory),
                     _fileSystem);
                 var packageUninstaller = new ToolPackageUninstallerMock(_fileSystem, store, uninstallCallback);
-                return (store, packageUninstaller);
+                return (store, store, packageUninstaller);
             }
 
             return new ToolUninstallCommand(

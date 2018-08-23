@@ -10,58 +10,65 @@ namespace Microsoft.DotNet.ToolPackage
 {
     internal static class ToolPackageFactory
     {
-        public static (IToolPackageStore, IToolPackageInstaller) CreateToolPackageStoreAndInstaller(
+        public static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
             DirectoryPath? nonGlobalLocation = null)
         {
-            IToolPackageStore toolPackageStore = CreateToolPackageStore(nonGlobalLocation);
+            ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(
                 toolPackageStore,
                 new ProjectRestorer());
 
-            return (toolPackageStore, toolPackageInstaller);
+            return (toolPackageStore, toolPackageStore, toolPackageInstaller);
         }
 
-        public static (IToolPackageStore, IToolPackageUninstaller) CreateToolPackageStoreAndUninstaller(
+        public static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) CreateToolPackageStoresAndUninstaller(
             DirectoryPath? nonGlobalLocation = null)
         {
-            IToolPackageStore toolPackageStore = CreateToolPackageStore(nonGlobalLocation);
+            ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageUninstaller = new ToolPackageUninstaller(
                 toolPackageStore);
 
-            return (toolPackageStore, toolPackageUninstaller);
+            return (toolPackageStore, toolPackageStore, toolPackageUninstaller);
         }
 
         public static (IToolPackageStore,
+            IToolPackageStoreQuery,
             IToolPackageInstaller,
             IToolPackageUninstaller)
-            CreateToolPackageStoreInstallerUninstaller(
+            CreateToolPackageStoresAndInstallerAndUninstaller(
                 DirectoryPath? nonGlobalLocation = null)
         {
-            IToolPackageStore toolPackageStore = CreateToolPackageStore(nonGlobalLocation);
+            ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(
                 toolPackageStore,
                 new ProjectRestorer());
             var toolPackageUninstaller = new ToolPackageUninstaller(
                 toolPackageStore);
 
-            return (toolPackageStore, toolPackageInstaller, toolPackageUninstaller);
+            return (toolPackageStore, toolPackageStore, toolPackageInstaller, toolPackageUninstaller);
         }
 
-        public static IToolPackageStore CreateToolPackageStore(
+        public static IToolPackageStoreQuery CreateToolPackageStoreQuery(
             DirectoryPath? nonGlobalLocation = null)
         {
-            var toolPackageStore =
-                new ToolPackageStore(nonGlobalLocation.HasValue
-                    ? new DirectoryPath(
-                        ToolPackageFolderPathCalculator.GetToolPackageFolderPath(nonGlobalLocation.Value.Value))
-                    : GetPackageLocation());
-
-            return toolPackageStore;
+            return CreateConcreteToolPackageStore(nonGlobalLocation);
         }
 
         private static DirectoryPath GetPackageLocation()
         {
             return new DirectoryPath(CliFolderPathCalculator.ToolsPackagePath);
+        }
+
+        private static ToolPackageStoreAndQuery CreateConcreteToolPackageStore(
+            DirectoryPath? nonGlobalLocation = null)
+        {
+            var toolPackageStore =
+                new ToolPackageStoreAndQuery(nonGlobalLocation.HasValue
+                    ? new DirectoryPath(
+                        ToolPackageFolderPathCalculator.GetToolPackageFolderPath(nonGlobalLocation.Value.Value))
+                    : GetPackageLocation());
+
+            return toolPackageStore;
         }
     }
 }

@@ -8,9 +8,9 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 internal class ToolPackageUninstaller : IToolPackageUninstaller
 {
-    private readonly IToolPackageStoreQuery _toolPackageStoreQuery;
+    private readonly IToolPackageStore _toolPackageStoreQuery;
 
-    public ToolPackageUninstaller(IToolPackageStoreQuery toolPackageStoreQuery)
+    public ToolPackageUninstaller(IToolPackageStore toolPackageStoreQuery)
     {
         _toolPackageStoreQuery = toolPackageStoreQuery ?? throw new ArgumentException(nameof(toolPackageStoreQuery));
     }

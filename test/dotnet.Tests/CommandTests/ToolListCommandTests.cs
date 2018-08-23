@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenAMissingGlobalOrToolPathOptionItErrors()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
 
             var command = CreateCommand(store.Object);
 
@@ -53,7 +53,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenBothGlobalAndToolPathOptionsItErrors()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
 
             var toolPath = Path.GetTempPath();
             var command = CreateCommand(store.Object, $"-g --tool-path {toolPath}", toolPath);
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNoInstalledPackagesItPrintsEmptyTable()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
             store
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new IToolPackage[0]);
@@ -87,7 +87,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenAnInvalidToolPathItThrowsException()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
             store
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new IToolPackage[0]);
@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenAToolPathItPassesToolPathToStoreFactory()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
             store
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new IToolPackage[0]);
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenASingleInstalledPackageItPrintsThePackage()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
             store
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new[] {
@@ -146,7 +146,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenMultipleInstalledPackagesItPrintsThePackages()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
             store
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new[] {
@@ -183,7 +183,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenAPackageWithMultipleCommandsItListsThem()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
             store
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new[] {
@@ -208,7 +208,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenABrokenPackageItPrintsWarning()
         {
-            var store = new Mock<IToolPackageStore>(MockBehavior.Strict);
+            var store = new Mock<IToolPackageStoreQuery>(MockBehavior.Strict);
             store
                 .Setup(s => s.EnumeratePackages())
                 .Returns(new[] {
@@ -261,7 +261,7 @@ namespace Microsoft.DotNet.Tests.Commands
             return package.Object;
         }
 
-        private ListToolCommand CreateCommand(IToolPackageStore store, string options = "", string expectedToolPath = null)
+        private ListToolCommand CreateCommand(IToolPackageStoreQuery store, string options = "", string expectedToolPath = null)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool list " + options);
             return new ListToolCommand(
@@ -284,7 +284,7 @@ namespace Microsoft.DotNet.Tests.Commands
             }
         }
 
-        private IEnumerable<string> EnumerateExpectedTableLines(IToolPackageStore store)
+        private IEnumerable<string> EnumerateExpectedTableLines(IToolPackageStoreQuery store)
         {
             string GetCommandsString(IToolPackage package)
             {
@@ -292,7 +292,7 @@ namespace Microsoft.DotNet.Tests.Commands
             }
 
             var packages = store.EnumeratePackages().Where(PackageHasCommands).OrderBy(package => package.Id);
-            var columnDelimiter = PrintableTable<IToolPackageStore>.ColumnDelimiter;
+            var columnDelimiter = PrintableTable<IToolPackageStoreQuery>.ColumnDelimiter;
 
             int packageIdColumnWidth = LocalizableStrings.PackageIdColumn.Length;
             int versionColumnWidth = LocalizableStrings.VersionColumn.Length;

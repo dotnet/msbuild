@@ -14,13 +14,13 @@ namespace Microsoft.DotNet.ToolPackage
 {
     internal class ToolPackageInstaller : IToolPackageInstaller
     {
-        private readonly IToolPackageStoreQuery _store;
+        private readonly IToolPackageStore _store;
         private readonly IProjectRestorer _projectRestorer;
         private readonly FilePath? _tempProject;
         private readonly DirectoryPath _offlineFeed;
 
         public ToolPackageInstaller(
-            IToolPackageStoreQuery store,
+            IToolPackageStore store,
             IProjectRestorer projectRestorer,
             FilePath? tempProject = null,
             DirectoryPath? offlineFeed = null)

@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenNoFeedInstallFailsWithException(bool testMockBehaviorIsInSync)
         {
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: new MockFeed[0]);
 
@@ -49,7 +49,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenOfflineFeedInstallSucceeds(bool testMockBehaviorIsInSync)
         {
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 offlineFeed: new DirectoryPath(GetTestLocalFeedPath()),
                 feeds: GetOfflineMockFeed());
@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var package = installer.InstallPackage(new PackageLocation(), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion), targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -70,17 +70,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(emptySource);
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 offlineFeed: new DirectoryPath(GetTestLocalFeedPath()),
                 feeds: GetOfflineMockFeed());
 
-            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {emptySource}),
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { emptySource }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
@@ -101,7 +101,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -113,7 +113,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 transactionScope.Complete();
             }
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -142,7 +142,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
@@ -151,7 +151,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             /*
               From mytool.dll to project.assets.json
@@ -177,14 +177,14 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(useMock: false);
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(useMock: false);
 
             var package = installer.InstallPackage(
                 new PackageLocation(rootConfigDirectory: nugetConfigPath.GetDirectoryPath()), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -196,7 +196,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -217,7 +217,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
@@ -225,7 +225,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion));
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -237,16 +237,16 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -258,7 +258,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
@@ -268,7 +268,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -280,16 +280,16 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
             var package = installer.InstallPackage(
-                new PackageLocation(additionalFeeds: new[] {new Uri(source).AbsoluteUri}), packageId: TestPackageId,
+                new PackageLocation(additionalFeeds: new[] { new Uri(source).AbsoluteUri }), packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -303,17 +303,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(emptySource);
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(emptySource));
 
             var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath,
-                    additionalFeeds: new[] {emptySource}),
+                    additionalFeeds: new[] { emptySource }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -323,7 +323,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         [InlineData(true)]
         public void GivenFailedRestoreInstallWillRollback(bool testMockBehaviorIsInSync)
         {
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync);
 
             Action a = () =>
@@ -350,7 +350,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
@@ -362,7 +362,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+                    installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework);
@@ -384,7 +384,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
@@ -394,14 +394,14 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     TransactionScopeOption.Required,
                     TimeSpan.Zero))
                 {
-                    Action first = () => installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+                    Action first = () => installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework);
 
                     first.ShouldNotThrow();
 
-                    installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+                    installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                         packageId: TestPackageId,
                         versionRange: VersionRange.Parse(TestPackageVersion),
                         targetFramework: _testTargetframework);
@@ -427,18 +427,18 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
-            Action secondCall = () => installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+            Action secondCall = () => installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
@@ -462,7 +462,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             fileSystem
                 .Directory
-                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(ToolPackageStore.StagingDirectory).Value)
+                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(ToolPackageStoreAndQuery.StagingDirectory).Value)
                 .Should()
                 .BeEmpty();
         }
@@ -474,20 +474,20 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
 
-            store.EnumeratePackages().Should().BeEmpty();
+            storeQuery.EnumeratePackages().Should().BeEmpty();
         }
 
         [Theory]
@@ -497,17 +497,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
             var package = installer.InstallPackage(
-                new PackageLocation(additionalFeeds: new[] {source}),
+                new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
@@ -515,12 +515,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             {
                 uninstaller.Uninstall(package.PackageDirectory);
 
-                store.EnumeratePackages().Should().BeEmpty();
+                storeQuery.EnumeratePackages().Should().BeEmpty();
             }
 
-            package = store.EnumeratePackageVersions(TestPackageId).First();
+            package = storeQuery.EnumeratePackageVersions(TestPackageId).First();
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
         }
 
         [Theory]
@@ -531,16 +531,16 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var source = GetTestLocalFeedPath();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] { source }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
@@ -550,7 +550,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 scope.Complete();
             }
 
-            store.EnumeratePackages().Should().BeEmpty();
+            storeQuery.EnumeratePackages().Should().BeEmpty();
         }
 
         [Theory]
@@ -560,7 +560,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForConfigFile(nugetConfigPath));
 
@@ -568,7 +568,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 packageId: new PackageId("GlObAl.TooL.coNsoLe.DemO"),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -579,7 +579,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
             var tempProject = GetUniqueTempProjectPathEachTest();
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: false,
                 tempProject: tempProject);
 
@@ -593,7 +593,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             reporter.Lines.Should().NotContain(l => l.Contains(tempProject.Value));
             reporter.Lines.Clear();
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -609,7 +609,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var root = new DirectoryPath(Path.Combine(TempRoot.Root, nonAscii, Path.GetRandomFileName()));
             var reporter = new BufferedReporter();
             var fileSystem = new FileSystemWrapper();
-            var store = new ToolPackageStore(root);
+            var store = new ToolPackageStoreAndQuery(root);
             var installer = new ToolPackageInstaller(
                 store: store,
                 projectRestorer: new ProjectRestorer(reporter),
@@ -621,7 +621,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 versionRange: VersionRange.Parse(TestPackageVersion),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, store);
 
             new ToolPackageUninstaller(store).Uninstall(package.PackageDirectory);
         }
@@ -636,17 +636,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(emptySource);
 
-            var (store, installer, uninstaller, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(emptySource));
 
             var package = installer.InstallPackage(new PackageLocation(nugetConfig: nugetConfigPath,
-                    additionalFeeds: new[] {emptySource}),
+                    additionalFeeds: new[] { emptySource }),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse("1.0.0-rc*"),
                 targetFramework: _testTargetframework);
 
-            AssertPackageInstall(reporter, fileSystem, package, store);
+            AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
         }
@@ -655,7 +655,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             BufferedReporter reporter,
             IFileSystem fileSystem,
             IToolPackage package,
-            IToolPackageStore store)
+            IToolPackageStore store,
+            IToolPackageStoreQuery storeQuery)
         {
             reporter.Lines.Should().BeEmpty();
 
@@ -663,7 +664,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             package.Version.ToNormalizedString().Should().Be(TestPackageVersion);
             package.PackageDirectory.Value.Should().Contain(store.Root.Value);
 
-            store.EnumeratePackageVersions(TestPackageId)
+            storeQuery.EnumeratePackageVersions(TestPackageId)
                 .Select(p => p.Version.ToNormalizedString())
                 .Should()
                 .Equal(TestPackageVersion);
@@ -685,11 +686,11 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 .Directory
                 .EnumerateFileSystemEntries(store.Root.Value)
                 .Should()
-                .NotContain(e => Path.GetFileName(e) != ToolPackageStore.StagingDirectory);
+                .NotContain(e => Path.GetFileName(e) != ToolPackageStoreAndQuery.StagingDirectory);
 
             fileSystem
                 .Directory
-                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(ToolPackageStore.StagingDirectory).Value)
+                .EnumerateFileSystemEntries(store.Root.WithSubDirectories(ToolPackageStoreAndQuery.StagingDirectory).Value)
                 .Should()
                 .BeEmpty();
         }
@@ -763,7 +764,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
         }
 
-        private static (IToolPackageStore, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
+        private static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller, BufferedReporter, IFileSystem
             ) Setup(
                 bool useMock,
                 IEnumerable<MockFeed> feeds = null,
@@ -775,25 +776,30 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             IFileSystem fileSystem;
             IToolPackageStore store;
+            IToolPackageStoreQuery storeQuery;
             IToolPackageInstaller installer;
             IToolPackageUninstaller uninstaller;
             if (useMock)
             {
                 fileSystem = new FileSystemMockBuilder().Build();
-                store = new ToolPackageStoreMock(root, fileSystem);
+                var toolPackageStoreMock = new ToolPackageStoreMock(root, fileSystem);
+                store = toolPackageStoreMock;
+                storeQuery = toolPackageStoreMock;
                 installer = new ToolPackageInstallerMock(
                     fileSystem: fileSystem,
-                    store: store,
+                    store: toolPackageStoreMock,
                     projectRestorer: new ProjectRestorerMock(
                         fileSystem: fileSystem,
                         reporter: reporter,
                         feeds: feeds));
-                uninstaller = new ToolPackageUninstallerMock(fileSystem, store);
+                uninstaller = new ToolPackageUninstallerMock(fileSystem, toolPackageStoreMock);
             }
             else
             {
                 fileSystem = new FileSystemWrapper();
-                store = new ToolPackageStore(root);
+                var toolPackageStore = new ToolPackageStoreAndQuery(root);
+                store = toolPackageStore;
+                storeQuery = toolPackageStore;
                 installer = new ToolPackageInstaller(
                     store: store,
                     projectRestorer: new ProjectRestorer(reporter),
@@ -804,7 +810,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             store.Root.Value.Should().Be(Path.GetFullPath(root.Value));
 
-            return (store, installer, uninstaller, reporter, fileSystem);
+            return (store, storeQuery, installer, uninstaller, reporter, fileSystem);
         }
 
         private static FilePath WriteNugetConfigFileToPointToTheFeed()

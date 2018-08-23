@@ -8,11 +8,11 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
-    internal class ToolPackageStore : IToolPackageStore
+    internal class ToolPackageStoreAndQuery : IToolPackageStoreQuery, IToolPackageStore
     {
         public const string StagingDirectory = ".stage";
 
-        public ToolPackageStore(DirectoryPath root)
+        public ToolPackageStoreAndQuery(DirectoryPath root)
         {
             Root = new DirectoryPath(Path.GetFullPath(root.Value));
         }

@@ -10,14 +10,10 @@ namespace Microsoft.DotNet.ToolPackage
 {
     internal interface IToolPackageStoreQuery
     {
-        DirectoryPath Root { get; }
+        IEnumerable<IToolPackage> EnumeratePackages();
 
-        DirectoryPath GetRandomStagingDirectory();
+        IEnumerable<IToolPackage> EnumeratePackageVersions(PackageId packageId);
 
-        NuGetVersion GetStagedPackageVersion(DirectoryPath stagingDirectory, PackageId packageId);
-
-        DirectoryPath GetRootPackageDirectory(PackageId packageId);
-
-        DirectoryPath GetPackageDirectory(PackageId packageId, NuGetVersion version);
+        IToolPackage GetPackage(PackageId packageId, NuGetVersion version);
     }
 }

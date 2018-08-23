@@ -16,12 +16,12 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 {
     internal class ToolPackageUninstallerMock : IToolPackageUninstaller
     {
-        private IToolPackageStore _toolPackageStore;
+        private IToolPackageStoreQuery _toolPackageStore;
         private Action _uninstallCallback;
         private IFileSystem _fileSystem;
 
         public ToolPackageUninstallerMock(IFileSystem fileSystem,
-            IToolPackageStore toolPackageStore,
+            IToolPackageStoreQuery toolPackageStore,
             Action uninstallCallback = null)
         {
             _toolPackageStore = toolPackageStore ?? throw new ArgumentNullException(nameof(toolPackageStore));
