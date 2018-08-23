@@ -190,9 +190,9 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: 子節點 "{0}" 已永久結束。正在關閉。診斷資訊可在 "{1}" 中的檔案內找到，且會命名為 MSBuild_*.failure.txt。您可將 MSBUILDDEBUGPATH 環境變數設定為其他目錄來變更此位置。</target>
-        <note>{StrBegin="MSB4166: "}</note>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
+        <target state="needs-review-translation">MSB4166: 子節點 "{0}" 已永久結束。正在關閉。診斷資訊可在 "{1}" 中的檔案內找到，且會命名為 MSBuild_*.failure.txt。您可將 MSBUILDDEBUGPATH 環境變數設定為其他目錄來變更此位置。</target>
+        <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
         <source>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</source>

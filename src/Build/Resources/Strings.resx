@@ -193,8 +193,8 @@
     <comment>{StrBegin="MSB4162: "}</comment>
   </data>
   <data name="ChildExitedPrematurely" UESanitized="false" Visibility="Public">
-    <value>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</value>
-    <comment>{StrBegin="MSB4166: "}</comment>
+    <value>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</value>
+    <comment>{StrBegin="MSB4166: "} {2} is exception text if any</comment>
   </data>
   <data name="ChooseMustContainWhen" UESanitized="false" Visibility="Public">
     <value>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</value>

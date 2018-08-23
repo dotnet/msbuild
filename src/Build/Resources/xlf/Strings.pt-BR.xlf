@@ -190,9 +190,9 @@
         <note>{StrBegin="MSB4162: "}</note>
       </trans-unit>
       <trans-unit id="ChildExitedPrematurely">
-        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.</source>
-        <target state="translated">MSB4166: O nó filho "{0}" foi encerrado prematuramente. Desligando. Informações de diagnóstico poderão ser encontradas nos arquivos em "{1}" e estarão nomeadas como MSBuild_*.failure.txt. Esse local pode ser alterado por meio da configuração da variável de ambiente MSBUILDDEBUGPATH para um diretório diferente.</target>
-        <note>{StrBegin="MSB4166: "}</note>
+        <source>MSB4166: Child node "{0}" exited prematurely. Shutting down. Diagnostic information may be found in files in "{1}" and will be named MSBuild_*.failure.txt. This location can be changed by setting the MSBUILDDEBUGPATH environment variable to a different directory.{2}</source>
+        <target state="needs-review-translation">MSB4166: O nó filho "{0}" foi encerrado prematuramente. Desligando. Informações de diagnóstico poderão ser encontradas nos arquivos em "{1}" e estarão nomeadas como MSBuild_*.failure.txt. Esse local pode ser alterado por meio da configuração da variável de ambiente MSBUILDDEBUGPATH para um diretório diferente.</target>
+        <note>{StrBegin="MSB4166: "} {2} is exception text if any</note>
       </trans-unit>
       <trans-unit id="ChooseMustContainWhen">
         <source>MSB4085: A &lt;Choose&gt; must contain at least one &lt;When&gt;.</source>
