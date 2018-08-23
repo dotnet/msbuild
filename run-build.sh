@@ -154,6 +154,9 @@ export DOTNET_MULTILEVEL_LOOKUP=0
 # Turn off MSBuild Node re-use
 export MSBUILDDISABLENODEREUSE=1
 
+# Workaround for the sockets issue when restoring with many nuget feeds.
+export DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
+
 # Install a stage 0
 INSTALL_ARCHITECTURE=$ARCHITECTURE
 archlower="$(echo $ARCHITECTURE | awk '{print tolower($0)}')"
