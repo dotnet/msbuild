@@ -54,6 +54,23 @@ namespace Microsoft.Build.Shared
 
         private readonly GetFileSystemEntries _getFileSystemEntries;
 
+        private static class FileSpecRegexParts
+        {
+            internal const string BeginningOfLine = "^(?<FIXEDDIR>";
+            internal const string FixedDirWildcardDirSeparator = ")(?<WILDCARDDIR>";
+            internal const string WildcardDirFilenameSeparator = ")(?<FILENAME>";
+            internal const string EndOfLine = ")$";
+
+            internal const string AnyNonSeparator = @"[^/\\]*";
+            internal const string AnySingleCharacterButDot = @"[^\.].";
+            internal const string AnythingButDot = @"[^\.]*";
+            internal const string DirSeparator = @"[/\\]+";
+            internal const string LeftDirs = @"((.*/)|(.*\\)|())";
+            internal const string MiddleDirs = @"((/)|(\\)|(/.*/)|(/.*\\)|(\\.*\\)|(\\.*/))";
+            internal const string SingleCharacter = ".";
+            internal const string UncSlashSlash = @"\\\\";
+        }
+
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
         /// </summary>
@@ -1094,36 +1111,150 @@ namespace Microsoft.Build.Shared
             out bool isLegalFileSpec
         )
         {
-            isLegalFileSpec = true;
-
-            /*
-             * The code below uses tags in the form <:tag:> to encode special information
-             * while building the regular expression.
-             * 
-             * This format was chosen because it's not a legal form for filespecs. If the
-             * filespec comes in with either "<:" or ":>", return isLegalFileSpec=false to
-             * prevent intrusion into the special processing.
-             */
-            if ((fixedDirectoryPart.IndexOf("<:", StringComparison.Ordinal) != -1) ||
-                (fixedDirectoryPart.IndexOf(":>", StringComparison.Ordinal) != -1) ||
-                (wildcardDirectoryPart.IndexOf("<:", StringComparison.Ordinal) != -1) ||
-                (wildcardDirectoryPart.IndexOf(":>", StringComparison.Ordinal) != -1) ||
-                (filenamePart.IndexOf("<:", StringComparison.Ordinal) != -1) ||
-                (filenamePart.IndexOf(":>", StringComparison.Ordinal) != -1))
+            isLegalFileSpec = IsLegalFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
+            if (!isLegalFileSpec)
             {
-                isLegalFileSpec = false;
-                return String.Empty;
+                return string.Empty;
             }
 
-            /*
-             * Its not legal for there to be a ".." after a wildcard.
-             */
-            if (wildcardDirectoryPart.Contains(dotdot))
-            {
-                isLegalFileSpec = false;
-                return String.Empty;
-            }
+            var matchFileExpression = new StringBuilder(
+                fixedDirectoryPart.Length + wildcardDirectoryPart.Length + filenamePart.Length
+                + FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
+                + FileSpecRegexParts.WildcardDirFilenameSeparator.Length + FileSpecRegexParts.EndOfLine.Length
+            );
+            matchFileExpression.Append(FileSpecRegexParts.BeginningOfLine);
 
+            AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
+            matchFileExpression.Append(FileSpecRegexParts.FixedDirWildcardDirSeparator);
+
+            AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
+            matchFileExpression.Append(FileSpecRegexParts.WildcardDirFilenameSeparator);
+
+            AppendRegularExpressionFromFilename(matchFileExpression, filenamePart);
+            matchFileExpression.Append(FileSpecRegexParts.EndOfLine);
+
+            return matchFileExpression.ToString();
+        }
+
+        /*
+         * It is not legal for there to be a ".." after a wildcard.
+         *
+         * By definition, "**" must appear alone between directory slashes. If there is any remaining "**" then this is not
+         * a valid filespec.
+         *
+         * <:tag:> is not a legal form for filespecs. If the
+         * filespec comes in with either "<:" or ":>", return false to
+         * prevent intrusion into the special processing.
+         */
+        private static bool IsLegalFileSpec(string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart) =>
+            !HasDotDot(wildcardDirectoryPart)
+            && !HasMisplacedRecursiveOperator(wildcardDirectoryPart)
+            && !HasMisplacedRecursiveOperator(filenamePart)
+            && !HasTags(fixedDirectoryPart)
+            && !HasTags(wildcardDirectoryPart)
+            && !HasTags(filenamePart);
+
+        private static bool HasDotDot(string str)
+        {
+            for (int i = 0; i < str.Length - 1; i++)
+            {
+                if (str[i] == '.' && str[i + 1] == '.')
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool HasMisplacedRecursiveOperator(string str)
+        {
+            for (int i = 0; i < str.Length - 1; i++)
+            {
+                bool isRecursiveOperator = str[i] == '*' && str[i + 1] == '*';
+
+                // Check boundaries for cases such as **\foo\ and *.cs**
+                bool isSurroundedBySlashes = (i == 0 || FileUtilities.IsAnySlash(str[i - 1]))
+                                             && i < str.Length - 2 && FileUtilities.IsAnySlash(str[i + 2]);
+
+                if (isRecursiveOperator && !isSurroundedBySlashes)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool HasTags(string str)
+        {
+            for (int i = 0; i < str.Length - 1; i++)
+            {
+                bool isLeftTag = str[i] == '<' && str[i + 1] == ':';
+                bool isRightTag = str[i] == ':' && str[i + 1] == '>';
+
+                if (isLeftTag || isRightTag)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static void AppendRegularExpressionFromFixedDirectory(StringBuilder regex, string fixedDir)
+        {
+            /*
+             * Capture the leading \\ in UNC paths, so that the doubled slash isn't
+             * reduced in a later step.
+             */
+            bool isUncPath = fixedDir.Length > 1
+                             && FileUtilities.IsAnySlash(fixedDir[0])
+                             && FileUtilities.IsAnySlash(fixedDir[1]);
+            if (isUncPath)
+            {
+                regex.Append(FileSpecRegexParts.UncSlashSlash);
+            }
+            int startIndex = isUncPath ? IndexOfNextNonCollapsibleChar(fixedDir, 2) : 0;
+
+            for (int i = startIndex; i < fixedDir.Length; i = IndexOfNextNonCollapsibleChar(fixedDir, i + 1))
+            {
+                AppendRegularExpressionFromChar(regex, fixedDir[i]);
+            }
+        }
+
+        private static void AppendRegularExpressionFromWildcardDirectory(StringBuilder regex, string wildcardDir)
+        {
+            // fixed-directory + **\
+            bool hasRecursionOperatorAtStart =
+                wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*'
+                && FileUtilities.IsAnySlash(wildcardDir[2]);
+
+            if (hasRecursionOperatorAtStart)
+            {
+                regex.Append(FileSpecRegexParts.LeftDirs);
+            }
+            int startIndex = hasRecursionOperatorAtStart ? IndexOfNextNonCollapsibleChar(wildcardDir, 3) : 0;
+
+            for (int i = startIndex; i < wildcardDir.Length; i = IndexOfNextNonCollapsibleChar(wildcardDir, i + 1))
+            {
+                char ch = wildcardDir[i];
+
+                bool isRecursionOperator =
+                    i < wildcardDir.Length - 3 && FileUtilities.IsAnySlash(ch) && wildcardDir[i + 1] == '*'
+                    && wildcardDir[i + 2] == '*' && FileUtilities.IsAnySlash(wildcardDir[i + 3]);
+
+                if (isRecursionOperator)
+                {
+                    regex.Append(FileSpecRegexParts.MiddleDirs);
+                    i += 3;
+                }
+                else
+                {
+                    AppendRegularExpressionFromChar(regex, ch);
+                }
+            }
+        }
+
+        private static void AppendRegularExpressionFromFilename(StringBuilder regex, string filename)
+        {
             /* 
              * Trailing dots in file names have to be treated specially.
              * We want:
@@ -1133,176 +1264,127 @@ namespace Microsoft.Build.Shared
              * but 'foo' doesn't have a trailing '.' so we need to handle this while still being careful 
              * not to match 'foo.txt'
              */
-            if (filenamePart.EndsWith(".", StringComparison.Ordinal))
+            bool hasTrailingDot = filename.Length > 0 && filename[filename.Length - 1] == '.';
+            int partLength = hasTrailingDot ? filename.Length - 1 : filename.Length;
+
+            for (int i = 0; i < partLength; i++)
             {
-                filenamePart = filenamePart.Replace("*", "<:anythingbutdot:>");
-                filenamePart = filenamePart.Replace("?", "<:anysinglecharacterbutdot:>");
-                filenamePart = filenamePart.Substring(0, filenamePart.Length - 1);
+                char ch = filename[i];
+
+                if (hasTrailingDot && ch == '*')
+                {
+                    regex.Append(FileSpecRegexParts.AnythingButDot);
+                }
+                else if (hasTrailingDot && ch == '?')
+                {
+                    regex.Append(FileSpecRegexParts.AnySingleCharacterButDot);
+                }
+                else
+                {
+                    AppendRegularExpressionFromChar(regex, ch);
+                }
+
+                if (ch == '*' && i < partLength - 2 && filename[i + 1] == '.' && filename[i + 2] == '*')
+                {
+                    i += 2;
+                }
+            }
+        }
+
+        /*
+         *  Replace characters with their regex equivalents.
+         */
+        private static void AppendRegularExpressionFromChar(StringBuilder regex, char ch)
+        {
+            if (ch == '*')
+            {
+                regex.Append(FileSpecRegexParts.AnyNonSeparator);
+            }
+            else if (ch == '?')
+            {
+                regex.Append(FileSpecRegexParts.SingleCharacter);
+            }
+            else if (FileUtilities.IsAnySlash(ch))
+            {
+                regex.Append(FileSpecRegexParts.DirSeparator);
+            }
+            else if (IsSpecialRegexCharacter(ch))
+            {
+                regex.Append('\\');
+                regex.Append(ch);
+            }
+            else
+            {
+                regex.Append(ch);
+            }
+        }
+
+        private static bool IsSpecialRegexCharacter(char ch) =>
+            ch == '\\' || ch == '$' || ch == '(' || ch == ')' || ch == '+'
+            || ch == '.' || ch == '[' || ch == '^' || ch == '{' || ch == '|';
+
+        /*
+         * Iteratively skip three cases involving directory separators
+         * 
+         *  (1) \.\ -> \
+         *        This is an identity, so for example, these two are equivalent,
+         * 
+         *            dir1\.\dir2 == dir1\dir2
+         * 
+         *    (2) \\ -> \
+         *      Double directory separators are treated as a single directory separator,
+         *      so, for example, this is an identity:
+         * 
+         *          f:\dir1\\dir2 == f:\dir1\dir2
+         * 
+         *      The single exemption is for UNC path names, like this:
+         * 
+         *          \\server\share != \server\share
+         * 
+         *      This case is handled by isUncPath in
+         *      a prior step.
+         *
+         *  (3) **\** -> **
+         */
+        private static int IndexOfNextNonCollapsibleChar(string str, int startIndex)
+        {
+            int i = startIndex;
+            bool isFound = false;
+            bool isPrevRecursiveOperator = i > 2 && str[i - 3] == '*' && str[i - 2] == '*';
+
+            while (!isFound && i < str.Length)
+            {
+                bool isCurDot = str[i] == '.';
+                bool isPrevSlash = i > 0 && FileUtilities.IsAnySlash(str[i - 1]);
+                bool isCurSlash = FileUtilities.IsAnySlash(str[i]);
+                bool isNextSlash = i < str.Length - 1 && FileUtilities.IsAnySlash(str[i + 1]);
+                bool isCurRecursiveOperator = i < str.Length - 1 && str[i] == '*' && str[i + 1] == '*';
+
+                bool isDoubleSeparator = isPrevSlash && isCurSlash;
+                bool isDoubleRelativeSeparator = isPrevSlash && isCurDot && isNextSlash;
+                bool isDoubleRecursiveOperator = isPrevRecursiveOperator && isCurRecursiveOperator;
+                isPrevRecursiveOperator = isCurRecursiveOperator
+                                          || isPrevRecursiveOperator && (isDoubleSeparator || isDoubleRelativeSeparator);
+
+                if (isDoubleRecursiveOperator)
+                {
+                    i += 3;
+                }
+                else if (isDoubleRelativeSeparator)
+                {
+                    i += 2;
+                }
+                else if (isDoubleSeparator)
+                {
+                    i++;
+                }
+                else
+                {
+                    isFound = true;
+                }
             }
 
-            /*
-             * Now, build up the starting filespec but put tags in to identify where the fixedDirectory,
-             * wildcardDirectory and filenamePart are. Also tag the beginning of the line and the end of
-             * the line, so that we can identify patterns by whether they're on one end or the other.
-             */
-            StringBuilder matchFileExpression = new StringBuilder();
-            matchFileExpression.Append("<:bol:>");
-            matchFileExpression.Append("<:fixeddir:>").Append(fixedDirectoryPart).Append("<:endfixeddir:>");
-            matchFileExpression.Append("<:wildcarddir:>").Append(wildcardDirectoryPart).Append("<:endwildcarddir:>");
-            matchFileExpression.Append("<:filename:>").Append(filenamePart).Append("<:endfilename:>");
-            matchFileExpression.Append("<:eol:>");
-
-            /*
-             *  Call out our special matching characters.
-             */
-            foreach (var separator in directorySeparatorStrings)
-            {
-                matchFileExpression.Replace(separator, "<:dirseparator:>");
-            }
-
-            /*
-             * Capture the leading \\ in UNC paths, so that the doubled slash isn't
-             * reduced in a later step.
-             */
-            matchFileExpression.Replace("<:fixeddir:><:dirseparator:><:dirseparator:>", "<:fixeddir:><:uncslashslash:>");
-
-            /*
-             * Iteratively reduce four cases involving directory separators
-             * 
-             *  (1) <:dirseparator:>.<:dirseparator:> -> <:dirseparator:>
-             *        This is an identity, so for example, these two are equivalent,
-             * 
-             *            dir1\.\dir2 == dir1\dir2
-             * 
-             *    (2) <:dirseparator:><:dirseparator:> -> <:dirseparator:>
-             *      Double directory separators are treated as a single directory separator,
-             *      so, for example, this is an identity:
-             * 
-             *          f:\dir1\\dir2 == f:\dir1\dir2
-             * 
-             *      The single exemption is for UNC path names, like this:
-             * 
-             *          \\server\share != \server\share
-             * 
-             *      This case is handled by the <:uncslashslash:> which was substituted in
-             *      a prior step.
-             * 
-             *  (3) <:fixeddir:>.<:dirseparator:>.<:dirseparator:> -> <:fixeddir:>.<:dirseparator:>
-             *      A ".\" at the beginning of a line is equivalent to nothing, so:
-             * 
-             *          .\.\dir1\file.txt == .\dir1\file.txt
-             * 
-             *  (4) <:dirseparator:>.<:eol:> -> <:eol:>
-             *      A "\." at the end of a line is equivalent to nothing, so:
-             * 
-             *          dir1\dir2\. == dir1\dir2             *
-             */
-            int sizeBefore;
-            do
-            {
-                sizeBefore = matchFileExpression.Length;
-
-                // NOTE: all these replacements will necessarily reduce the expression length i.e. length will either reduce or
-                // stay the same through this loop
-                matchFileExpression.Replace("<:dirseparator:>.<:dirseparator:>", "<:dirseparator:>");
-                matchFileExpression.Replace("<:dirseparator:><:dirseparator:>", "<:dirseparator:>");
-                matchFileExpression.Replace("<:fixeddir:>.<:dirseparator:>.<:dirseparator:>", "<:fixeddir:>.<:dirseparator:>");
-                matchFileExpression.Replace("<:dirseparator:>.<:endfilename:>", "<:endfilename:>");
-                matchFileExpression.Replace("<:filename:>.<:endfilename:>", "<:filename:><:endfilename:>");
-
-                ErrorUtilities.VerifyThrow(matchFileExpression.Length <= sizeBefore,
-                    "Expression reductions cannot increase the length of the expression.");
-            } while (matchFileExpression.Length < sizeBefore);
-
-            /*
-             * Collapse **\** into **.
-             */
-            do
-            {
-                sizeBefore = matchFileExpression.Length;
-                matchFileExpression.Replace(recursiveDirectoryMatch + "<:dirseparator:>" + recursiveDirectoryMatch, recursiveDirectoryMatch);
-
-                ErrorUtilities.VerifyThrow(matchFileExpression.Length <= sizeBefore,
-                    "Expression reductions cannot increase the length of the expression.");
-            } while (matchFileExpression.Length < sizeBefore);
-
-            /*
-             * Call out legal recursion operators:
-             * 
-             *        fixed-directory + **\
-             *        \**\
-             *        **\**
-             * 
-             */
-            do
-            {
-                sizeBefore = matchFileExpression.Length;
-                matchFileExpression.Replace("<:dirseparator:>" + recursiveDirectoryMatch + "<:dirseparator:>", "<:middledirs:>");
-                matchFileExpression.Replace("<:wildcarddir:>" + recursiveDirectoryMatch + "<:dirseparator:>", "<:wildcarddir:><:leftdirs:>");
-
-                ErrorUtilities.VerifyThrow(matchFileExpression.Length <= sizeBefore,
-                    "Expression reductions cannot increase the length of the expression.");
-            } while (matchFileExpression.Length < sizeBefore);
-
-
-            /*
-             * By definition, "**" must appear alone between directory slashes. If there is any remaining "**" then this is not
-             * a valid filespec.
-             */
-            // NOTE: this condition is evaluated left-to-right -- this is important because we want the length BEFORE stripping
-            // any "**"s remaining in the expression
-            if (matchFileExpression.Length > matchFileExpression.Replace(recursiveDirectoryMatch, null).Length)
-            {
-                isLegalFileSpec = false;
-                return String.Empty;
-            }
-
-            /*
-             * Remaining call-outs not involving "**"
-             */
-            matchFileExpression.Replace("*.*", "<:anynonseparator:>");
-            matchFileExpression.Replace("*", "<:anynonseparator:>");
-            matchFileExpression.Replace("?", "<:singlecharacter:>");
-
-            /*
-             *  Escape all special characters defined for regular expresssions.
-             */
-            matchFileExpression.Replace("\\", "\\\\"); // Must be first.
-            matchFileExpression.Replace("$", "\\$");
-            matchFileExpression.Replace("(", "\\(");
-            matchFileExpression.Replace(")", "\\)");
-            matchFileExpression.Replace("*", "\\*");
-            matchFileExpression.Replace("+", "\\+");
-            matchFileExpression.Replace(".", "\\.");
-            matchFileExpression.Replace("[", "\\[");
-            matchFileExpression.Replace("?", "\\?");
-            matchFileExpression.Replace("^", "\\^");
-            matchFileExpression.Replace("{", "\\{");
-            matchFileExpression.Replace("|", "\\|");
-
-            /*
-             *  Now, replace call-outs with their regex equivalents.
-             */
-            matchFileExpression.Replace("<:middledirs:>", "((/)|(\\\\)|(/.*/)|(/.*\\\\)|(\\\\.*\\\\)|(\\\\.*/))");
-            matchFileExpression.Replace("<:leftdirs:>", "((.*/)|(.*\\\\)|())");
-            matchFileExpression.Replace("<:rightdirs:>", ".*");
-            matchFileExpression.Replace("<:anything:>", ".*");
-            matchFileExpression.Replace("<:anythingbutdot:>", "[^\\.]*");
-            matchFileExpression.Replace("<:anysinglecharacterbutdot:>", "[^\\.].");
-            matchFileExpression.Replace("<:anynonseparator:>", "[^/\\\\]*");
-            matchFileExpression.Replace("<:singlecharacter:>", ".");
-            matchFileExpression.Replace("<:dirseparator:>", "[/\\\\]+");
-            matchFileExpression.Replace("<:uncslashslash:>", @"\\\\");
-            matchFileExpression.Replace("<:bol:>", "^");
-            matchFileExpression.Replace("<:eol:>", "$");
-            matchFileExpression.Replace("<:fixeddir:>", "(?<FIXEDDIR>");
-            matchFileExpression.Replace("<:endfixeddir:>", ")");
-            matchFileExpression.Replace("<:wildcarddir:>", "(?<WILDCARDDIR>");
-            matchFileExpression.Replace("<:endwildcarddir:>", ")");
-            matchFileExpression.Replace("<:filename:>", "(?<FILENAME>");
-            matchFileExpression.Replace("<:endfilename:>", ")");
-
-            return matchFileExpression.ToString();
+            return i;
         }
 
         /// <summary>
