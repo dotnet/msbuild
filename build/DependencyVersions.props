@@ -31,6 +31,7 @@
     <MicrosoftNETSdkWebPackageVersion>2.1.400-preview1-20180705-1834985</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
+    <MicrosoftNETSdkWpfPackageVersion>3.0.0-alpha-26828-2</MicrosoftNETSdkWpfPackageVersion>
     <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta3</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates20PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates20PackageVersion>
     <MicrosoftDotNetTestProjectTemplates20PackageVersion>1.0.2-beta3-20180716-1864993</MicrosoftDotNetTestProjectTemplates20PackageVersion>
