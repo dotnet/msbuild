@@ -29,7 +29,7 @@
     <MicrosoftNETSdkPackageVersion>2.1.400-preview-63130-06</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>2.1.1</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkWebPackageVersion>2.1.400-preview1-20180705-1834985</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>2.1.500</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta3</MicrosoftDotNetCommonItemTemplatesPackageVersion>
