@@ -77,7 +77,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <EnableFrameworkPathOverride Condition="'$(EnableFrameworkPathOverride)' == ''">false</EnableFrameworkPathOverride>
   </PropertyGroup>
   
-  <!-- Regardless of platform, enable dependency file generation if PreserveCompilatioContext is set. -->
+  <!-- Regardless of platform, enable dependency file generation if PreserveCompilationContext is set. -->
   <PropertyGroup>
     <GenerateDependencyFile Condition="'$(GenerateDependencyFile)' == ''">$(PreserveCompilationContext)</GenerateDependencyFile>
   </PropertyGroup>

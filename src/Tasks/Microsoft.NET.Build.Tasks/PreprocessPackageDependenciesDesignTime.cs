@@ -162,7 +162,7 @@ namespace Microsoft.NET.Build.Tasks
                     dependencyType != DependencyType.Unresolved)
                 {
                     // we ignore all other dependency types since 
-                    //      - assemblies we handle separatelly below 
+                    //      - assemblies we handle separately below 
                     //      - projects we don't care here, since they are sent to project system via other route
                     continue;
                 }
