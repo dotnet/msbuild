@@ -152,11 +152,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" --logger console;verbosity=normal -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
 
             // Verify
-            var trxFilePath = Path.Combine(trxLoggerDirectory, "custom.trx");
-            Assert.True(File.Exists(trxFilePath));
-            result.StdOut.Should().Contain(trxFilePath);
-            result.StdOut.Should().Contain("Passed   VSTestPassTest");
-            result.StdOut.Should().Contain("Failed   VSTestFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                var trxFilePath = Path.Combine(trxLoggerDirectory, "custom.trx");
+                Assert.True(File.Exists(trxFilePath));
+                result.StdOut.Should().Contain(trxFilePath);
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
+            }
 
             // Cleanup trxLoggerDirectory if it exist
             if (Directory.Exists(trxLoggerDirectory))

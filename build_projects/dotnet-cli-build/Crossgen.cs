@@ -82,7 +82,38 @@ namespace Microsoft.DotNet.Build.Tasks
 
         protected override MessageImportance StandardOutputLoggingImportance
         {
-            get { return MessageImportance.High; } // or else the output doesn't get logged by default
+            // Default is low, but we want to see output at normal verbosity.
+            get { return MessageImportance.Normal; }
+        }
+
+        protected override MessageImportance StandardErrorLoggingImportance
+        {
+            // This turns stderr messages into msbuild errors below.
+            get { return MessageImportance.High; }
+        }
+
+        protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance)
+        {
+            // Crossgen's error/warning formatting is inconsistent and so we do
+            // not use the "canonical error format" handling of base.
+            //
+            // Furthermore, we don't want to log crossgen warnings as msbuild
+            // warnings because we cannot prevent them and they are only
+            // occasionally formatted as something that base would recognize as
+            // a canonically formatted warning anyway.
+            //
+            // One thing that is consistent is that crossgne errors go to stderr
+            // and everything else goes to stdout. Above, we set stderr to high
+            // importance above, and stdout to normal. So we can use that here
+            // to distinguish between errors and messages.
+            if (messageImportance == MessageImportance.High)
+            {
+                Log.LogError(singleLine);
+            }
+            else
+            {
+                Log.LogMessage(messageImportance, singleLine);
+            }
         }
 
         protected override string GenerateFullPathToTool()
