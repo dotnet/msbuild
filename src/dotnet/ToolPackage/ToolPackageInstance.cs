@@ -44,18 +44,14 @@ namespace Microsoft.DotNet.ToolPackage
         private const string AssetsFileName = "project.assets.json";
         private const string ToolSettingsFileName = "DotnetToolSettings.xml";
 
-        private IToolPackageStore _store;
         private Lazy<IReadOnlyList<CommandSettings>> _commands;
         private Lazy<ToolConfiguration> _toolConfiguration;
         private Lazy<IReadOnlyList<FilePath>> _packagedShims;
 
-        public ToolPackageInstance(
-            IToolPackageStore store,
-            PackageId id,
+        public ToolPackageInstance(PackageId id,
             NuGetVersion version,
             DirectoryPath packageDirectory)
         {
-            _store = store ?? throw new ArgumentNullException(nameof(store));
             _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
             _packagedShims = new Lazy<IReadOnlyList<FilePath>>(GetPackagedShims);
 
@@ -63,58 +59,6 @@ namespace Microsoft.DotNet.ToolPackage
             Version = version ?? throw new ArgumentNullException(nameof(version));
             PackageDirectory = packageDirectory;
             _toolConfiguration = new Lazy<ToolConfiguration>(GetToolConfiguration);
-        }
-
-        public void Uninstall()
-        {
-            var rootDirectory = PackageDirectory.GetParentPath();
-            string tempPackageDirectory = null;
-
-            TransactionalAction.Run(
-                action: () =>
-                {
-                    try
-                    {
-                        if (Directory.Exists(PackageDirectory.Value))
-                        {
-                            // Use the staging directory for uninstall
-                            // This prevents cross-device moves when temp is mounted to a different device
-                            var tempPath = _store.GetRandomStagingDirectory().Value;
-                            FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(PackageDirectory.Value, tempPath));
-                            tempPackageDirectory = tempPath;
-                        }
-
-                        if (Directory.Exists(rootDirectory.Value) &&
-                            !Directory.EnumerateFileSystemEntries(rootDirectory.Value).Any())
-                        {
-                            Directory.Delete(rootDirectory.Value, false);
-                        }
-                    }
-                    catch (Exception ex) when (ex is UnauthorizedAccessException || ex is IOException)
-                    {
-                        throw new ToolPackageException(
-                            string.Format(
-                                CommonLocalizableStrings.FailedToUninstallToolPackage,
-                                Id,
-                                ex.Message),
-                            ex);
-                    }
-                },
-                commit: () =>
-                {
-                    if (tempPackageDirectory != null)
-                    {
-                        Directory.Delete(tempPackageDirectory, true);
-                    }
-                },
-                rollback: () =>
-                {
-                    if (tempPackageDirectory != null)
-                    {
-                        Directory.CreateDirectory(rootDirectory.Value);
-                        FileAccessRetrier.RetryOnMoveAccessFailure(() => Directory.Move(tempPackageDirectory, PackageDirectory.Value));
-                    }
-                });
         }
 
         private IReadOnlyList<CommandSettings> GetCommands()

@@ -14,7 +14,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.Tools.Tool.List
 {
-    internal delegate IToolPackageStore CreateToolPackageStore(DirectoryPath? nonGlobalLocation = null);
+    internal delegate IToolPackageStoreQuery CreateToolPackageStore(DirectoryPath? nonGlobalLocation = null);
 
     internal class ListToolCommand : CommandBase
     {
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Tools.Tool.List
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
-            _createToolPackageStore = createToolPackageStore ?? ToolPackageFactory.CreateToolPackageStore;
+            _createToolPackageStore = createToolPackageStore ?? ToolPackageFactory.CreateToolPackageStoreQuery;
         }
 
         public override int Execute()

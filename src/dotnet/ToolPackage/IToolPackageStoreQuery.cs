@@ -8,18 +8,12 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
-    internal interface IToolPackage
+    internal interface IToolPackageStoreQuery
     {
-        PackageId Id { get; }
+        IEnumerable<IToolPackage> EnumeratePackages();
 
-        NuGetVersion Version { get; }
+        IEnumerable<IToolPackage> EnumeratePackageVersions(PackageId packageId);
 
-        DirectoryPath PackageDirectory { get; }
-
-        IReadOnlyList<CommandSettings> Commands { get; }
-
-        IEnumerable<string> Warnings { get; }
-
-        IReadOnlyList<FilePath> PackagedShims { get; }
+        IToolPackage GetPackage(PackageId packageId, NuGetVersion version);
     }
 }

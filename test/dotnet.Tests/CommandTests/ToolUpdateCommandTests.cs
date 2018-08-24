@@ -134,7 +134,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var command = new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                _ => (_store,
+                _ => (_store, _store,
                     new ToolPackageInstallerMock(
                         _fileSystem,
                         _store,
@@ -143,7 +143,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             _reporter,
                             _mockFeeds
                         ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error")),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 _ => GetMockedShellShimRepository(),
                 _reporter);
 
@@ -163,7 +164,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var command = new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                _ => (_store,
+                _ => (_store, _store,
                     new ToolPackageInstallerMock(
                         _fileSystem,
                         _store,
@@ -172,7 +173,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             _reporter,
                             _mockFeeds
                         ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error")),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 _ => GetMockedShellShimRepository(),
                 _reporter);
 
@@ -213,7 +215,7 @@ namespace Microsoft.DotNet.Tests.Commands
             return new ToolInstallCommand(
                 result["dotnet"]["tool"]["install"],
                 result,
-                (_) => (_store, new ToolPackageInstallerMock(
+                (_) => (_store, _store, new ToolPackageInstallerMock(
                     _fileSystem,
                     _store,
                     new ProjectRestorerMock(
@@ -233,14 +235,15 @@ namespace Microsoft.DotNet.Tests.Commands
             return new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                (_) => (_store, new ToolPackageInstallerMock(
+                (_) => (_store, _store, new ToolPackageInstallerMock(
                     _fileSystem,
                     _store,
                     new ProjectRestorerMock(
                         _fileSystem,
                         _reporter,
                         _mockFeeds
-                    ))),
+                    )),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 (_) => GetMockedShellShimRepository(),
                 _reporter);
         }
