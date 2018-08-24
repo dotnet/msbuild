@@ -1223,25 +1223,25 @@ namespace Microsoft.Build.Shared
         private static void AppendRegularExpressionFromWildcardDirectory(StringBuilder regex, string wildcardDir)
         {
             // fixed-directory + **\
-            bool hasRecursionOperatorAtStart =
+            bool hasRecursiveOperatorAtStart =
                 wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*'
                 && FileUtilities.IsAnySlash(wildcardDir[2]);
 
-            if (hasRecursionOperatorAtStart)
+            if (hasRecursiveOperatorAtStart)
             {
                 regex.Append(FileSpecRegexParts.LeftDirs);
             }
-            int startIndex = hasRecursionOperatorAtStart ? IndexOfNextNonCollapsibleChar(wildcardDir, 3) : 0;
+            int startIndex = hasRecursiveOperatorAtStart ? IndexOfNextNonCollapsibleChar(wildcardDir, 3) : 0;
 
             for (int i = startIndex; i < wildcardDir.Length; i = IndexOfNextNonCollapsibleChar(wildcardDir, i + 1))
             {
                 char ch = wildcardDir[i];
 
-                bool isRecursionOperator =
+                bool isRecursiveOperator =
                     i < wildcardDir.Length - 3 && FileUtilities.IsAnySlash(ch) && wildcardDir[i + 1] == '*'
                     && wildcardDir[i + 2] == '*' && FileUtilities.IsAnySlash(wildcardDir[i + 3]);
 
-                if (isRecursionOperator)
+                if (isRecursiveOperator)
                 {
                     regex.Append(FileSpecRegexParts.MiddleDirs);
                     i += 3;
