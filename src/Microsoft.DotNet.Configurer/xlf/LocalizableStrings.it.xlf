@@ -62,6 +62,21 @@ Per altre informazioni sulla configurazione di HTTPS, vedere https://go.microsof
         <target state="translated">Non è stato possibile determinare la home directory dell'utente. Impostare la variabile di ambiente '{0}' per specificare la directory da usare.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ShortFirstTimeWelcomeMessage">
+        <source>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

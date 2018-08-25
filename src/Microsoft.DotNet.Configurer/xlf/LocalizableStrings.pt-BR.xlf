@@ -62,6 +62,21 @@ Para obter mais informações de como configurar HTTPS, confira https://go.micro
         <target state="translated">O diretório inicial do usuário não pôde ser definido. Configure a variável de ambiente '{0}' para especificar o diretório a ser utilizado.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ShortFirstTimeWelcomeMessage">
+        <source>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

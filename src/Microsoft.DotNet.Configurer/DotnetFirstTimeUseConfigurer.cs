@@ -51,6 +51,10 @@ namespace Microsoft.DotNet.Configurer
             {
                 PrintFirstTimeUseNotice();
             }
+            else if (ShouldPrintShortFirstTimeUseNotice())
+            {
+                PrintShortFirstTimeUseNotice();
+            }
 
             if (ShouldGenerateAspNetCertificate())
             {
@@ -98,10 +102,24 @@ namespace Microsoft.DotNet.Configurer
                 !_firstTimeUseNoticeSentinel.Exists();
         }
 
+        private bool ShouldPrintShortFirstTimeUseNotice()
+        {
+            return _dotnetFirstRunConfiguration.PrintTelemetryMessage &&
+                !_firstTimeUseNoticeSentinel.Exists();
+        }
+
         private void PrintFirstTimeUseNotice()
         {
             _reporter.WriteLine();
             _reporter.WriteLine(LocalizableStrings.FirstTimeWelcomeMessage);
+
+            _firstTimeUseNoticeSentinel.CreateIfNotExists();
+        }
+
+        private void PrintShortFirstTimeUseNotice()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.ShortFirstTimeWelcomeMessage);
 
             _firstTimeUseNoticeSentinel.CreateIfNotExists();
         }

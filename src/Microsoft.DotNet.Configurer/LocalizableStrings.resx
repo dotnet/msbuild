@@ -149,4 +149,12 @@ For more information on configuring HTTPS see https://go.microsoft.com/fwlink/?l
   <data name="FailedToDetermineUserHomeDirectory" xml:space="preserve">
     <value>The user's home directory could not be determined. Set the '{0}' environment variable to specify the directory to use.</value>
   </data>
+  <data name="ShortFirstTimeWelcomeMessage" xml:space="preserve">
+    <value>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</value>
+  </data>
 </root>

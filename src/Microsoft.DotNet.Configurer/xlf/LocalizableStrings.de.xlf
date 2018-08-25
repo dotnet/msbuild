@@ -62,6 +62,21 @@ Weitere Informationen zur Konfiguration von HTTPS finden Sie unter https://go.mi
         <target state="translated">Das Startverzeichnis des Benutzers konnte nicht ermittelt werden. Legen Sie die Umgebungsvariable "{0}" fest, um das zu verwendende Verzeichnis anzugeben.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ShortFirstTimeWelcomeMessage">
+        <source>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

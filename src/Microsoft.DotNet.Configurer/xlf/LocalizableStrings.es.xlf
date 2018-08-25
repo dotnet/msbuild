@@ -61,6 +61,21 @@ Para obtener más información sobre la configuración HTTPS, vea https://go.mic
         <target state="translated">No se puede determinar el directorio raíz del usuario. Establezca la variable de entorno “{0}” para especificar el directorio que debe usarse.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ShortFirstTimeWelcomeMessage">
+        <source>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

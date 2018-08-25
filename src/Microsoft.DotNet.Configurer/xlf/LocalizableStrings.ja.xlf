@@ -62,6 +62,21 @@ HTTPS を構成する方法の詳細については、https://go.microsoft.com/f
         <target state="translated">ユーザーのホーム ディレクトリを特定できませんでした。使用するディレクトリを指定するには、'{0}' 環境変数を設定してください。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ShortFirstTimeWelcomeMessage">
+        <source>Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Welcome to .NET Core!
+---------------------
+GitHub: https://github.com/dotnet/core
+Docs: https://aka.ms/dotnet-docs
+HTTPS: https://aka.ms/aspnet-core-https
+Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
