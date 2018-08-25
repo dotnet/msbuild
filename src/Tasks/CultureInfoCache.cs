@@ -35,6 +35,20 @@ namespace Microsoft.Build.Tasks
             {
                 ValidCultureNames.Add(cultureName.Name);
             }
+
+            // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
+            // These pseudo-locales are available in versions of Windows from Vista and later.
+            // However, from Windows 10, version 1803, they are not returned when enumerating the
+            // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
+            var pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
+
+            foreach (string pseudoLocale in pseudoLocales)
+            {
+                if (!ValidCultureNames.Contains(pseudoLocale))
+                {
+                    ValidCultureNames.Add(pseudoLocale);
+                }
+            }
         }
 
         /// <summary>
