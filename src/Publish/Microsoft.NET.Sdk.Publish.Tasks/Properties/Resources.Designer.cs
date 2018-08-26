@@ -1781,7 +1781,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to atleast AspNetCoreModuleV2..
+        ///   Looks up a localized string similar to In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to at least AspNetCoreModuleV2..
         /// </summary>
         public static string WebConfigTransform_InvalidHostingOption {
             get {
