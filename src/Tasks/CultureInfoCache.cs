@@ -44,10 +44,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (string pseudoLocale in pseudoLocales)
             {
-                if (!ValidCultureNames.Contains(pseudoLocale))
-                {
-                    ValidCultureNames.Add(pseudoLocale);
-                }
+                ValidCultureNames.Add(pseudoLocale);
             }
         }
 
