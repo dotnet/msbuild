@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1117,7 +1117,7 @@ namespace Microsoft.Build.Shared
             out bool isLegalFileSpec
         )
         {
-            isLegalFileSpec = IsLegalFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
+            isLegalFileSpec = IsLegalFileSpec(wildcardDirectoryPart, filenamePart);
             if (!isLegalFileSpec)
             {
                 return string.Empty;
@@ -1138,8 +1138,7 @@ namespace Microsoft.Build.Shared
          * By definition, "**" must appear alone between directory slashes. If there is any remaining "**" then this is not
          * a valid filespec.
          */
-        private static bool IsLegalFileSpec(string fixedDirectoryPart, string wildcardDirectoryPart,
-            string filenamePart) =>
+        private static bool IsLegalFileSpec(string wildcardDirectoryPart, string filenamePart) =>
             !HasDotDot(wildcardDirectoryPart)
             && !HasMisplacedRecursiveOperator(wildcardDirectoryPart)
             && !HasMisplacedRecursiveOperator(filenamePart);
@@ -1201,7 +1200,6 @@ namespace Microsoft.Build.Shared
             regex.Append(FileSpecRegexParts.FixedDirWildcardDirSeparator);
 
             // fixed-directory + **\
-
             bool hasRecursiveOperatorAtStart = wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*';
 
             if (hasRecursiveOperatorAtStart)
@@ -1218,6 +1216,7 @@ namespace Microsoft.Build.Shared
                 if (isRecursiveOperator)
                 {
                     regex.Append(FileSpecRegexParts.MiddleDirs);
+                    i += 3;
                 }
                 else
                 {
