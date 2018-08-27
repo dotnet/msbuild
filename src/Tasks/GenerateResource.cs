@@ -2474,7 +2474,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM
                 // Install assembly resolution event handler.
                 _eventHandler = new ResolveEventHandler(ResolveAssembly);
-                AppDomain.CurrentDomain.AssemblyResolve += _eventHandler;
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += _eventHandler;
 #endif
 
                 for (int i = 0; i < _inFiles.Count; ++i)
@@ -2495,7 +2495,7 @@ namespace Microsoft.Build.Tasks
             {
 #if FEATURE_ASSEMBLY_LOADFROM
                 // Remove the event handler.
-                AppDomain.CurrentDomain.AssemblyResolve -= _eventHandler;
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= _eventHandler;
                 _eventHandler = null;
 #endif
             }
@@ -2556,7 +2556,7 @@ namespace Microsoft.Build.Tasks
                     {
                         if (candidateAssemblyName.CompareTo(requestedAssemblyName) == 0)
                         {
-                            return Assembly.UnsafeLoadFrom(_assemblyFiles[i].ItemSpec);
+                            return Assembly.ReflectionOnlyLoadFrom(_assemblyFiles[i].ItemSpec);
                         }
                     }
                 }
@@ -2573,7 +2573,13 @@ namespace Microsoft.Build.Tasks
                     {
                         if (String.Compare(requestedAssemblyName.Name, candidateAssemblyName.Name, StringComparison.CurrentCultureIgnoreCase) == 0)
                         {
-                            return Assembly.UnsafeLoadFrom(_assemblyFiles[i].ItemSpec);
+                            string itemSpec = _assemblyFiles[i].ItemSpec;
+
+                            if (requestedAssemblyName.Name.Contains("System.Runtime"))
+                            {
+                                itemSpec = Path.Combine(Path.GetDirectoryName(typeof(object).Assembly.Location), "System.Runtime.dll");
+                            }
+                            return Assembly.ReflectionOnlyLoadFrom(itemSpec);
                         }
                     }
                 }
@@ -3101,23 +3107,29 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                a = Assembly.UnsafeLoadFrom(name);
+                a = Assembly.ReflectionOnlyLoadFrom(name);
                 assemblyName = a.GetName();
 
                 if (_extractResWFiles)
                 {
-                    var targetFrameworkAttribute = a.GetCustomAttribute<TargetFrameworkAttribute>();
-                    if (
-                            targetFrameworkAttribute != null &&
-                            (
-                                targetFrameworkAttribute.FrameworkName.StartsWith("Silverlight,", StringComparison.OrdinalIgnoreCase) ||
-                                targetFrameworkAttribute.FrameworkName.StartsWith("WindowsPhone,", StringComparison.OrdinalIgnoreCase)
-                            )
-                        )
+                    var attributes = a.GetCustomAttributesData();
+
+                    var attrib = attributes
+                        .FirstOrDefault(attr => attr?.AttributeType == typeof(TargetFrameworkAttribute))?.NamedArguments
+                        .Where(arg => arg.MemberName == nameof(TargetFrameworkAttribute.FrameworkName)).ToArray();
+
+                    if (attrib.Any())
                     {
-                        // Skip Silverlight assemblies.
-                        _logger.LogMessageFromResources("GenerateResource.SkippingExtractingFromNonSupportedFramework", name, targetFrameworkAttribute.FrameworkName);
-                        return;
+                        Debug.Assert(attrib.First().TypedValue.ArgumentType == typeof(string));
+                        var frameworkName = (string)attrib.First().TypedValue.Value;
+
+                        if (frameworkName.StartsWith("Silverlight,", StringComparison.OrdinalIgnoreCase) ||
+                            frameworkName.StartsWith("WindowsPhone,", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Skip Silverlight assemblies.
+                            _logger.LogMessageFromResources("GenerateResource.SkippingExtractingFromNonSupportedFramework", name, frameworkName);
+                            return;
+                        }
                     }
 
                     _logger.LogMessageFromResources("GenerateResource.ExtractingResWFiles", name, outFileOrDir);
@@ -3257,10 +3269,17 @@ namespace Microsoft.Build.Tasks
             NeutralResourcesLanguageAttribute neutralResourcesLanguageAttribute = null;
             if (mainAssembly)
             {
-                Object[] attrs = a.GetCustomAttributes(typeof(NeutralResourcesLanguageAttribute), false);
-                if (attrs.Length != 0)
+                var neutralResourcesLanguageAttributeData =
+                    a.GetCustomAttributesData()
+                    .FirstOrDefault(attr =>
+                        attr.AttributeType.FullName == typeof(NeutralResourcesLanguageAttribute).FullName);
+                if (neutralResourcesLanguageAttributeData != null)
                 {
-                    neutralResourcesLanguageAttribute = (NeutralResourcesLanguageAttribute)attrs[0];
+                    neutralResourcesLanguageAttribute =
+                        (NeutralResourcesLanguageAttribute) typeof(NeutralResourcesLanguageAttribute)
+                            .GetConstructor(neutralResourcesLanguageAttributeData.ConstructorArguments.Select(ctorarg => ctorarg.ArgumentType)
+                                .ToArray()).Invoke(neutralResourcesLanguageAttributeData.ConstructorArguments.Select(ctorag => ctorag.Value)
+                                .ToArray());
                     bool fallbackToSatellite = neutralResourcesLanguageAttribute.Location == UltimateResourceFallbackLocation.Satellite;
                     if (!fallbackToSatellite && neutralResourcesLanguageAttribute.Location != UltimateResourceFallbackLocation.MainAssembly)
                         _logger.LogWarningWithCodeFromResources(null, name, 0, 0, 0, 0, "GenerateResource.UnrecognizedUltimateResourceFallbackLocation", neutralResourcesLanguageAttribute.Location, name);
