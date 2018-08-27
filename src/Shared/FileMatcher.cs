@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -70,6 +70,12 @@ namespace Microsoft.Build.Shared
             internal const string SingleCharacter = ".";
             internal const string UncSlashSlash = @"\\\\";
         }
+
+        /*
+         * MAX_PATH + FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
+            + FileSpecRegexParts.WildcardDirFilenameSeparator.Length + FileSpecRegexParts.EndOfLine.Length;
+         */
+        private const int FileSpecRegexInitialBufferSize = 300;
 
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
@@ -1117,17 +1123,13 @@ namespace Microsoft.Build.Shared
                 return string.Empty;
             }
 
-            var matchFileExpression = new StringBuilder(
-                fixedDirectoryPart.Length + wildcardDirectoryPart.Length + filenamePart.Length
-                + FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
-                + FileSpecRegexParts.WildcardDirFilenameSeparator.Length + FileSpecRegexParts.EndOfLine.Length
-            );
+            var matchFileExpression = StringBuilderCache.Acquire(FileSpecRegexInitialBufferSize);
 
             AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
             AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
             AppendRegularExpressionFromFilename(matchFileExpression, filenamePart);
 
-            return matchFileExpression.ToString();
+            return StringBuilderCache.GetStringAndRelease(matchFileExpression);
         }
 
         /*
