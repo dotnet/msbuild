@@ -1201,9 +1201,7 @@ namespace Microsoft.Build.Shared
         private static void AppendRegularExpressionFromWildcardDirectory(StringBuilder regex, string wildcardDir)
         {
             // fixed-directory + **\
-            bool hasRecursiveOperatorAtStart =
-                wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*'
-                && FileUtilities.IsAnySlash(wildcardDir[2]);
+            bool hasRecursiveOperatorAtStart = wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*';
 
             if (hasRecursiveOperatorAtStart)
             {
@@ -1214,15 +1212,11 @@ namespace Microsoft.Build.Shared
             for (int i = startIndex; i < wildcardDir.Length; i = IndexOfNextNonCollapsibleChar(wildcardDir, i + 1))
             {
                 char ch = wildcardDir[i];
-
-                bool isRecursiveOperator =
-                    i < wildcardDir.Length - 3 && FileUtilities.IsAnySlash(ch) && wildcardDir[i + 1] == '*'
-                    && wildcardDir[i + 2] == '*' && FileUtilities.IsAnySlash(wildcardDir[i + 3]);
+                bool isRecursiveOperator = i < wildcardDir.Length - 2 && wildcardDir[i + 1] == '*' && wildcardDir[i + 2] == '*';
 
                 if (isRecursiveOperator)
                 {
                     regex.Append(FileSpecRegexParts.MiddleDirs);
-                    i += 3;
                 }
                 else
                 {
@@ -1326,35 +1320,30 @@ namespace Microsoft.Build.Shared
          */
         private static int IndexOfNextNonCollapsibleChar(string str, int startIndex)
         {
+            if (startIndex > 0 && !FileUtilities.IsAnySlash(str[startIndex - 1]))
+            {
+                return startIndex;
+            }
             int i = startIndex;
             bool isNonCollapsibleCharFound = false;
-            bool isPrevRecursiveOperator = i > 2 && str[i - 3] == '*' && str[i - 2] == '*';
 
             while (!isNonCollapsibleCharFound && i < str.Length)
             {
-                bool isCurDot = str[i] == '.';
-                bool isPrevSlash = i > 0 && FileUtilities.IsAnySlash(str[i - 1]);
-                bool isCurSlash = FileUtilities.IsAnySlash(str[i]);
-                bool isNextSlash = i < str.Length - 1 && FileUtilities.IsAnySlash(str[i + 1]);
-                bool isCurRecursiveOperator = i < str.Length - 1 && str[i] == '*' && str[i + 1] == '*';
+                bool isSeparator = FileUtilities.IsAnySlash(str[i]);
+                bool isRelativeSeparator = i < str.Length - 1 && str[i] == '.' && FileUtilities.IsAnySlash(str[i + 1]);
+                bool isRecursiveOperator = i < str.Length - 1 && str[i] == '*' && str[i + 1] == '*';
 
-                bool isDoubleSeparator = isPrevSlash && isCurSlash;
-                bool isDoubleRelativeSeparator = isPrevSlash && isCurDot && isNextSlash;
-                bool isDoubleRecursiveOperator = isPrevRecursiveOperator && isCurRecursiveOperator;
-                isPrevRecursiveOperator = isCurRecursiveOperator
-                                          || isPrevRecursiveOperator && (isDoubleSeparator || isDoubleRelativeSeparator);
-
-                if (isDoubleRecursiveOperator)
+                if (isSeparator)
                 {
-                    i += 3;
+                    i++;
                 }
-                else if (isDoubleRelativeSeparator)
+                else if (isRelativeSeparator)
                 {
                     i += 2;
                 }
-                else if (isDoubleSeparator)
+                else if (isRecursiveOperator)
                 {
-                    i++;
+                    i += 3;
                 }
                 else
                 {
