@@ -1147,8 +1147,6 @@ namespace Microsoft.Build.UnitTests
             ValidateIllegal("*.cs**");
             ValidateIllegal("...\\*.cs");
             ValidateIllegal("http://www.website.com");
-            ValidateIllegal("<:tag:>");
-            ValidateIllegal("<:\\**");
         }
 
         [Fact]

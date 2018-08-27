@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1141,18 +1141,12 @@ namespace Microsoft.Build.Shared
          *
          * By definition, "**" must appear alone between directory slashes. If there is any remaining "**" then this is not
          * a valid filespec.
-         *
-         * <:tag:> is not a legal form for filespecs. If the
-         * filespec comes in with either "<:" or ":>", return false to
-         * prevent intrusion into the special processing.
          */
-        private static bool IsLegalFileSpec(string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart) =>
+        private static bool IsLegalFileSpec(string fixedDirectoryPart, string wildcardDirectoryPart,
+            string filenamePart) =>
             !HasDotDot(wildcardDirectoryPart)
             && !HasMisplacedRecursiveOperator(wildcardDirectoryPart)
-            && !HasMisplacedRecursiveOperator(filenamePart)
-            && !HasTags(fixedDirectoryPart)
-            && !HasTags(wildcardDirectoryPart)
-            && !HasTags(filenamePart);
+            && !HasMisplacedRecursiveOperator(filenamePart);
 
         private static bool HasDotDot(string str)
         {
@@ -1177,21 +1171,6 @@ namespace Microsoft.Build.Shared
                                              && i < str.Length - 2 && FileUtilities.IsAnySlash(str[i + 2]);
 
                 if (isRecursiveOperator && !isSurroundedBySlashes)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private static bool HasTags(string str)
-        {
-            for (int i = 0; i < str.Length - 1; i++)
-            {
-                bool isLeftTag = str[i] == '<' && str[i + 1] == ':';
-                bool isRightTag = str[i] == ':' && str[i + 1] == '>';
-
-                if (isLeftTag || isRightTag)
                 {
                     return true;
                 }
