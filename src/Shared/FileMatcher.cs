@@ -1184,9 +1184,8 @@ namespace Microsoft.Build.Shared
              * Capture the leading \\ in UNC paths, so that the doubled slash isn't
              * reduced in a later step.
              */
-            bool isUncPath = fixedDir.Length > 1
-                             && FileUtilities.IsAnySlash(fixedDir[0])
-                             && FileUtilities.IsAnySlash(fixedDir[1]);
+            bool isUncPath = NativeMethodsShared.IsWindows && fixedDir.Length > 1
+                             && fixedDir[0] == '\\' && fixedDir[1] == '\\';
             if (isUncPath)
             {
                 regex.Append(FileSpecRegexParts.UncSlashSlash);
