@@ -1122,16 +1122,10 @@ namespace Microsoft.Build.Shared
                 + FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
                 + FileSpecRegexParts.WildcardDirFilenameSeparator.Length + FileSpecRegexParts.EndOfLine.Length
             );
-            matchFileExpression.Append(FileSpecRegexParts.BeginningOfLine);
 
             AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
-            matchFileExpression.Append(FileSpecRegexParts.FixedDirWildcardDirSeparator);
-
             AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
-            matchFileExpression.Append(FileSpecRegexParts.WildcardDirFilenameSeparator);
-
             AppendRegularExpressionFromFilename(matchFileExpression, filenamePart);
-            matchFileExpression.Append(FileSpecRegexParts.EndOfLine);
 
             return matchFileExpression.ToString();
         }
@@ -1180,6 +1174,8 @@ namespace Microsoft.Build.Shared
 
         private static void AppendRegularExpressionFromFixedDirectory(StringBuilder regex, string fixedDir)
         {
+            regex.Append(FileSpecRegexParts.BeginningOfLine);
+
             /*
              * Capture the leading \\ in UNC paths, so that the doubled slash isn't
              * reduced in a later step.
@@ -1200,7 +1196,10 @@ namespace Microsoft.Build.Shared
 
         private static void AppendRegularExpressionFromWildcardDirectory(StringBuilder regex, string wildcardDir)
         {
+            regex.Append(FileSpecRegexParts.FixedDirWildcardDirSeparator);
+
             // fixed-directory + **\
+
             bool hasRecursiveOperatorAtStart = wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*';
 
             if (hasRecursiveOperatorAtStart)
@@ -1223,6 +1222,8 @@ namespace Microsoft.Build.Shared
                     AppendRegularExpressionFromChar(regex, ch);
                 }
             }
+
+            regex.Append(FileSpecRegexParts.WildcardDirFilenameSeparator);
         }
 
         private static void AppendRegularExpressionFromFilename(StringBuilder regex, string filename)
@@ -1261,6 +1262,8 @@ namespace Microsoft.Build.Shared
                     i += 2;
                 }
             }
+
+            regex.Append(FileSpecRegexParts.EndOfLine);
         }
 
         /*
