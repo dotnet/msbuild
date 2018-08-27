@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1327,10 +1327,10 @@ namespace Microsoft.Build.Shared
         private static int IndexOfNextNonCollapsibleChar(string str, int startIndex)
         {
             int i = startIndex;
-            bool isFound = false;
+            bool isNonCollapsibleCharFound = false;
             bool isPrevRecursiveOperator = i > 2 && str[i - 3] == '*' && str[i - 2] == '*';
 
-            while (!isFound && i < str.Length)
+            while (!isNonCollapsibleCharFound && i < str.Length)
             {
                 bool isCurDot = str[i] == '.';
                 bool isPrevSlash = i > 0 && FileUtilities.IsAnySlash(str[i - 1]);
@@ -1358,7 +1358,7 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    isFound = true;
+                    isNonCollapsibleCharFound = true;
                 }
             }
 
