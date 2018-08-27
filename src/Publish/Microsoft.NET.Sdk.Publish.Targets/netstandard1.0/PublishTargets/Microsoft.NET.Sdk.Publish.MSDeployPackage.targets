@@ -24,6 +24,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <UsingTask TaskName="NormalizeServiceUrl" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="ValidateParameter" AssemblyFile="$(_PublishTaskAssemblyFullPath)"/>
   <UsingTask TaskName="CreateManifestFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
+  <UsingTask TaskName="ImportParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateParameterFile" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
   <UsingTask TaskName="CreateMSDeployScript" AssemblyFile="$(_PublishTaskAssemblyFullPath)" />
 
@@ -238,6 +239,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </MsDeployDeclareParameters>
     </ItemGroup>
 
+    <ItemGroup>
+      <ParametersXMLFiles Include="$(MSBuildProjectDirectory)\Parameters.xml" 
+                          Condition="Exists('$(MSBuildProjectDirectory)\Parameters.xml')"/>
+    </ItemGroup>
+
+    <ImportParameterFile Condition="'@(ParametersXMLFiles)' != ''" 
+                         Files="@(ParametersXMLFiles)">
+      <Output TaskParameter="Result"
+              ItemName="_ImportedMSDeployDeclareParameters" />
+    </ImportParameterFile>
+
+    <ItemGroup>
+      <MsDeployDeclareParameters Include="@(_ImportedMSDeployDeclareParameters)"
+                                 Condition="'%(_ImportedMSDeployDeclareParameters.Identity)' !=''">
+        <Value>%(_ImportedMSDeployDeclareParameters.DefaultValue)</Value>
+        <Priority></Priority>
+      </MsDeployDeclareParameters>
+    </ItemGroup>
+    
     <CreateParameterFile
       Parameters="@(MsDeployDeclareParameters)"
       DeclareSetParameterFile="$(_MSDeployParametersFilePath)"

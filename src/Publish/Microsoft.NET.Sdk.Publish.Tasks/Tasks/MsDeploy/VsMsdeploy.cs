@@ -940,7 +940,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 #endif
             }
 
-            Tasks.MsDeploy.Utility.MsDeployEndOfExecuteMessage(Result, dest.Provider, dest.Root, Log);
+            Utility.MsDeployEndOfExecuteMessage(Result, dest.Provider, dest.Root, Log);
             return Result;
         }
 
