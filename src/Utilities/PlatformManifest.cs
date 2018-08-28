@@ -147,7 +147,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    ReadErrorMessage = ResourceUtilities.FormatResourceString("PlatformManifest.MissingPlatformXml", platformManifestPath);
+                    ReadErrorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PlatformManifest.MissingPlatformXml", platformManifestPath);
                 }
             }
             catch (Exception e)

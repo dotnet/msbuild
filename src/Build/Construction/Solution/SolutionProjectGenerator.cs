@@ -301,7 +301,7 @@ namespace Microsoft.Build.Construction
             params object[] args
             )
         {
-            string text = ResourceUtilities.FormatResourceString(out string code, out string helpKeyword, textResourceName, args);
+            string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, textResourceName, args);
 
             if (treatAsLiteral)
             {
@@ -571,7 +571,7 @@ namespace Microsoft.Build.Construction
             params object[] args
             )
         {
-            string text = ResourceUtilities.FormatResourceString(out string code, out string helpKeyword, textResourceName, args);
+            string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, textResourceName, args);
 
             if (treatAsLiteral)
             {

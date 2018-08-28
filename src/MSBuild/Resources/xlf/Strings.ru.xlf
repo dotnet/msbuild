@@ -153,8 +153,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <target state="translated">  @&lt;файл&gt;            Вставьте параметры командной строки из текстового файла. Чтобы указать
                      несколько файлов ответов, укажите каждый из них
                      по отдельности.
-                     
-                     Любые файлы ответов с именем "msbuild.rsp" автоматически 
+
+                     Любые файлы ответов с именем "msbuild.rsp" автоматически
                      используются из следующих расположений:
                      (1) каталог msbuild.exe;
                      (2) каталог первого собираемого проекта или решения.
@@ -476,7 +476,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  /distributedlogger:&lt;центральный_журнал&gt;*&lt;перенаправляющий_журнал&gt; 
+        <target state="translated">  /distributedlogger:&lt;центральный_журнал&gt;*&lt;перенаправляющий_журнал&gt;
                      Используйте это средство ведения журнала для записи событий из MSBuild с прикреплением
                      разных экземпляров к каждому узлу. Чтобы указать
                      несколько журналов, задавайте каждый из них по отдельности.
@@ -1349,14 +1349,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="HelpMessage_31_RestoreSwitch">
         <source>  /restore[:True|False]
                      Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
+                     other targets and ensures the build for these
+                     targets uses the latest restored build logic.
+                     This is useful when your project tree requires
+                     packages to be restored before it can be built.
+                     Specifying /restore is the same as specifying
+                     /restore:True. Use the parameter to override
+                     a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="translated">  /restore[:True|False]
+        <target state="needs-review-translation">  /restore[:True|False]
                      Запускает целевой объект с именем "Восстановление" перед сборкой
                      других целевых объектов. Это может быть полезно, если дереву
                      проектов нужно восстановить пакеты перед
@@ -1389,14 +1391,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;файл&gt;    
-                     Профилирует вычисление MSBuild и записывает результат 
+        <target state="translated">  /profileevaluation:&lt;файл&gt;
+                     Профилирует вычисление MSBuild и записывает результат
                      в указанный файл. Если файл имеет расширение
                      ".md", результат создается в формате Markdown.
                      В противном случае создается файл с разделением табуляцией.

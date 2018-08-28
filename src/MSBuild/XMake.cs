@@ -185,7 +185,7 @@ namespace Microsoft.Build.CommandLine
             }
             while (exception != null);
 
-            Console.WriteLine(ResourceUtilities.FormatResourceString("InvalidConfigurationFile", builder.ToString()));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidConfigurationFile", builder.ToString()));
 
             s_initialized = false;
         }
@@ -671,7 +671,7 @@ namespace Microsoft.Build.CommandLine
             catch (InvalidToolsetDefinitionException e)
             {
                 // Brief prefix to indicate that it's a configuration failure, and provide the "error" indication
-                Console.WriteLine(ResourceUtilities.FormatResourceString("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
 
                 exitType = ExitType.InitializationError;
             }
@@ -689,13 +689,13 @@ namespace Microsoft.Build.CommandLine
                 if (null != e.ErrorCode)
                 {
                     // Brief prefix to indicate that it's a logger failure, and provide the "error" indication
-                    Console.WriteLine(ResourceUtilities.FormatResourceString("LoggerFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
+                    Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
                 }
                 else
                 {
                     // Brief prefix to indicate that it's a logger failure, adding a generic error code to make sure
                     // there's something for the user to look up in the documentation
-                    Console.WriteLine(ResourceUtilities.FormatResourceString("LoggerFailurePrefixWithErrorCode", e.Message));
+                    Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerFailurePrefixWithErrorCode", e.Message));
                 }
 
                 if (null != e.InnerException)
@@ -925,7 +925,7 @@ namespace Microsoft.Build.CommandLine
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
                 String.Equals(Path.GetExtension(projectFile), ".dsp", StringComparison.OrdinalIgnoreCase))
             {
-                InitializationException.Throw(ResourceUtilities.FormatResourceString("ProjectUpgradeNeededToVcxProj", projectFile), null);
+                InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
             bool success = false;
@@ -2086,7 +2086,7 @@ namespace Microsoft.Build.CommandLine
                     // the Engine, and we don't want to do that.
                     if (usingSwitchesFromAutoResponseFile && LoggerVerbosity.Diagnostic == verbosity)
                     {
-                        Console.WriteLine(ResourceUtilities.FormatResourceString("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
                     if (verbosity == LoggerVerbosity.Diagnostic)
@@ -3395,7 +3395,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception ex)
             {
-                var message = ResourceUtilities.FormatResourceString("InvalidLogFileFormat", ex.Message);
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidLogFileFormat", ex.Message);
                 Console.WriteLine(message);
             }
 
@@ -3449,13 +3449,13 @@ namespace Microsoft.Build.CommandLine
                 toolsVersionList = toolsVersionList.Substring(0, toolsVersionList.Length - 2);
             }
 
-            string message = ResourceUtilities.FormatResourceString
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword
                 (
                 "UnrecognizedToolsVersion",
                 toolsVersion,
                 toolsVersionList
                 );
-            message = ResourceUtilities.FormatResourceString("InvalidToolsVersionError", message);
+            message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidToolsVersionError", message);
 
             InitializationException.Throw(message, toolsVersion);
         }
@@ -3474,9 +3474,9 @@ namespace Microsoft.Build.CommandLine
 #endif
 
 #if THISASSEMBLY
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ThisAssembly.AssemblyInformationalVersion, frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CopyrightMessage", ThisAssembly.AssemblyInformationalVersion, frameworkName));
 #else
-            Console.WriteLine(ResourceUtilities.FormatResourceString("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CopyrightMessage", ProjectCollection.Version.ToString(), frameworkName));
 #endif
         }
 

@@ -156,7 +156,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      zvlášť.
 
                      Automaticky se použijí všechny soubory s názvem msbuild.rsp,
-                     které se nacházejí v následujících umístěních: 
+                     které se nacházejí v následujících umístěních:
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
 </target>
@@ -339,7 +339,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                         WarningsOnly – zobrazí jenom upozornění.
                         NoItemAndPropertyList – nezobrazí na začátku sestavení každého
                             projektu seznamy položek a vlastností.
-                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.  
+                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.
                         ShowTimestamp – před každou zprávou zobrazí časové
                             razítko.
                         ShowEventId – zobrazí ID události pro spuštěné a dokončené
@@ -349,11 +349,11 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                         DisableConsoleColor – použije výchozí barvy konzoly
                             pro všechny zprávy protokolování.
                         DisableMPLogging – zakáže víceprocesorový styl výstupu
-                            protokolování při práci 
+                            protokolování při práci
                             v jiném než víceprocesorovém režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
                             protokolování i při práci v jiném než víceprocesorovém
-                            režimu. Tento styl protokolování je ve výchozím nastavení zapnutý. 
+                            režimu. Tento styl protokolování je ve výchozím nastavení zapnutý.
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
                         Verbosity – potlačí nastavení /verbosity pro tento
@@ -477,7 +477,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        /dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        /dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  /distributedlogger:&lt;centrální_protokolovací_nástroj&gt;*&lt;předávací_protokolovací_nástroj&gt; 
+        <target state="translated">  /distributedlogger:&lt;centrální_protokolovací_nástroj&gt;*&lt;předávací_protokolovací_nástroj&gt;
                      Použije tento protokolovací nástroj k protokolování událostí z nástroje MSBuild.
                      Ke každému uzlu připojí jinou instanci protokolovacího nástroje. Pokud chcete
                      zadat několik protokolovacích nástrojů, musíte je zadat jednotlivě.
@@ -571,7 +571,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      do jednoho protokolu. Umístění souboru a další
                      parametry možnosti fileLogger je možné nastavit
                      přidáním přepínače /fileLoggerParameters[n].
-                     Je-li uvedeno n, může nabývat hodnot 1-9, 
+                     Je-li uvedeno n, může nabývat hodnot 1-9,
                      takže celkem je možné připojit až 10 souborů protokolu. (Krátký tvar: /fl[n])
     </target>
         <note>
@@ -597,7 +597,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  /distributedFileLogger  
+        <target state="translated">  /distributedFileLogger
                      Uloží výstup sestavení do několika souborů protokolu,
                      po jednom pro každý uzel nástroje MSBuild. Tyto soubory jsou na počátku umístěny
                      v aktuálním adresáři. Ve výchozím nastavení mají tyto soubory
@@ -649,7 +649,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                        /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  /fileloggerparameters[n]:&lt;parametry&gt;    
+        <target state="translated">  /fileloggerparameters[n]:&lt;parametry&gt;
                      Poskytuje doplňující parametry pro protokolovací nástroje.
                      Přítomnost tohoto přepínače implikuje
                      odpovídající přepínač (filelogger[n].
@@ -731,7 +731,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      užitečné ke zjištění, které soubory se importují
                      a odkud a čím přispějí
                      k sestavení. Ve výchozím stavu se výstup zapíše
-                     do okna konzoly. Pokud je zadaná cesta k výstupnímu souboru, 
+                     do okna konzoly. Pokud je zadaná cesta k výstupnímu souboru,
                      použije se místo toho.
                      (Krátký tvar: /pp)
                      Příklad:
@@ -1353,14 +1353,16 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
       <trans-unit id="HelpMessage_31_RestoreSwitch">
         <source>  /restore[:True|False]
                      Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
+                     other targets and ensures the build for these
+                     targets uses the latest restored build logic.
+                     This is useful when your project tree requires
+                     packages to be restored before it can be built.
+                     Specifying /restore is the same as specifying
+                     /restore:True. Use the parameter to override
+                     a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="translated">  /restore[:True|False]
+        <target state="needs-review-translation">  /restore[:True|False]
                      Před sestavením jiných cílů spustí cíl s názvem
                      Restore. Je to užitečné, když váš strom
                      projektů vyžaduje obnovení balíčků, aby je bylo možné
@@ -1393,14 +1395,14 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;soubor&gt;    
-                     Profiluje vyhodnocení nástroje MSBuild a zapíše výsledek 
+        <target state="translated">  /profileevaluation:&lt;soubor&gt;
+                     Profiluje vyhodnocení nástroje MSBuild a zapíše výsledek
                      do určeného souboru. Pokud je přípona zadaného
                      souboru .md, vygeneruje se výsledek ve formátu
                      markdown, jinak vznikne soubor s hodnotami oddělenými tabulátorem.
@@ -1423,7 +1425,7 @@ Copyright (C) Microsoft Corporation. Všechna práva vyhrazena.
                      Tyto vlastnosti na úrovni projektu nastavte nebo přepište
                      jen během obnovení a nepoužívejte vlastnosti určené
                      argumentem /property. &lt;n&gt; je název vlastnosti
-                     a &lt;v&gt; je hodnota vlastnosti. K oddělení více 
+                     a &lt;v&gt; je hodnota vlastnosti. K oddělení více
                      vlastností použijte středník nebo čárku, případně zadejte
                      každou vlastnost samostatně.
                      (Krátký tvar: /rp)

@@ -265,54 +265,60 @@ function Build {
 
   $msbuildArgs = AddLogCmd "Build" $commonMSBuildArgs
 
-  CallMSBuild $RepoToolsetBuildProj @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true @properties
-
-  if (-not $bootstrapOnly)
+  Try
   {
-    $bootstrapRoot = Join-Path $ArtifactsConfigurationDir "bootstrap"
+    CallMSBuild $RepoToolsetBuildProj @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true @properties
 
-    if ($hostType -eq 'full')
+    if (-not $bootstrapOnly)
     {
-      $msbuildToUse = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.exe"
+      $bootstrapRoot = Join-Path $ArtifactsConfigurationDir "bootstrap"
 
-      if ($configuration -eq "Debug-MONO" -or $configuration -eq "Release-MONO")
+      if ($hostType -eq 'full')
       {
-        # Copy MSBuild.dll to MSBuild.exe so we can run it without a host
-        $sourceDll = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.dll"
-        Copy-Item -Path $sourceDll -Destination $msbuildToUse
+        $msbuildToUse = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.exe"
+
+        if ($configuration -eq "Debug-MONO" -or $configuration -eq "Release-MONO")
+        {
+          # Copy MSBuild.dll to MSBuild.exe so we can run it without a host
+          $sourceDll = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.dll"
+          Copy-Item -Path $sourceDll -Destination $msbuildToUse
+        }
+      }
+      else
+      {
+        $msbuildToUse = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\\MSBuild.dll"
+      }
+
+      # Use separate artifacts folder for stage 2
+      $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
+
+      $msbuildArgs = AddLogCmd "BuildWithBootstrap" $commonMSBuildArgs
+
+      # When using bootstrapped MSBuild:
+      # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+      # - Don't sign
+      # - Don't pack
+      # - Do run tests (if not skipped)
+      # - Don't try to create a bootstrap deployment
+      CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$runTests /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
+    }
+  }
+  Finally
+  {
+    if ($ci)
+    {
+      # Log VSTS errors for build errors
+      Get-Content (Join-Path $LogDir "*.err") | ForEach-Object { "##vso[task.logissue type=error] $_" }
+
+      # Log VSTS errors for changed lines
+      git --no-pager diff HEAD --unified=0 --no-color --exit-code | ForEach-Object { "##vso[task.logissue type=error] $_" }
+      if($LASTEXITCODE -ne 0) {
+        throw "[ERROR] After building, there are changed files.  Please build locally and include these changes in your pull request."
       }
     }
-    else
-    {
-      $msbuildToUse = Join-Path $bootstrapRoot "netcoreapp2.1\MSBuild\\MSBuild.dll"
-    }
-
-    # Use separate artifacts folder for stage 2
-    $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
-
-    $msbuildArgs = AddLogCmd "BuildWithBootstrap" $commonMSBuildArgs
-
-    # When using bootstrapped MSBuild:
-    # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-    # - Don't sign
-    # - Don't pack
-    # - Do run tests (if not skipped)
-    # - Don't try to create a bootstrap deployment
-    CallMSBuild $RepoToolsetBuildProj @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$runTests /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
   }
-  
-  if ($ci)
-  {
-#    CallMSBuild $ToolsetProj /t:restore /m /clp:Summary /warnaserror /v:$verbosity @logCmd | Out-Null
-    git status | Out-Null
-    git --no-pager diff HEAD --word-diff=plain --exit-code | Out-Null
-
-    if($LASTEXITCODE -ne 0) {
-      throw "[ERROR] After building, there are changed files.  Please build locally and include these changes in your pull request."
-    }
-  }
-
 }
+
 function CallMSBuild
 {
   try 
@@ -348,9 +354,10 @@ function AddLogCmd([string] $logName, [string[]] $extraArgs)
     Create-Directory $LogDir
     $extraArgs = $extraArgs + ("/bl:" + (Join-Path $LogDir "$logName.binlog"))
 
-    # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
+    # When running under CI, also create a text error log,
+    # so it can be emitted to VSTS.
     if ($ci) {
-      $extraArgs = $extraArgs + ("/flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"')
+      $extraArgs = $extraArgs + ("/fileloggerparameters:ErrorsOnly;LogFile=" + '"' + (Join-Path $LogDir "$logName.err") + '"')
     }
   }
 

@@ -1709,7 +1709,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             // We should have built the same instance, with the same results, so the target will be skipped.
-            string skippedMessage = ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "test");
+            string skippedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteSuccess", "test");
             Assert.Equal(true, _logger.FullLog.Contains(skippedMessage));
 
             ProjectInstance instance2 = _buildManager.GetProjectInstanceForBuild(project);
@@ -2472,7 +2472,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We should, however, end up skipping Error1 on the second call to B.
             string skippedMessage =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error1");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error1");
             _logger.AssertLogContains(skippedMessage);
             _buildManager.EndBuild();
         }
@@ -2579,20 +2579,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We should end up skipping Error1 on the second call to B.
             string skippedMessage1 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error1");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error1");
             _logger.AssertLogContains(skippedMessage1);
 
             // We shouldn't, however, see skip messages for the OnError targets
             string skippedMessage2 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Target2");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Target2");
             _logger.AssertLogDoesntContain(skippedMessage2);
 
             string skippedMessage3 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "Target3");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteSuccess", "Target3");
             _logger.AssertLogDoesntContain(skippedMessage3);
 
             string skippedMessage4 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteSuccess", "Target4");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteSuccess", "Target4");
             _logger.AssertLogDoesntContain(skippedMessage4);
             _buildManager.EndBuild();
         }
@@ -2678,11 +2678,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // We should also end up skipping them both.
             string skippedMessage1 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error1");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error1");
             _logger.AssertLogContains(skippedMessage1);
 
             string skippedMessage2 =
-                ResourceUtilities.FormatResourceString("TargetAlreadyCompleteFailure", "Error2");
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetAlreadyCompleteFailure", "Error2");
             _logger.AssertLogContains(skippedMessage2);
 
             _buildManager.EndBuild();
@@ -3573,74 +3573,69 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] {"main", "import"}, string.Empty);
 
-            try
+            var importPath = testFiles.CreatedFiles[1];
+            File.WriteAllText(importPath, CleanupFileContents(importProject));
+
+            var root = ProjectRootElement.Create(
+                XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), _projectCollection);
+            root.FullPath = Path.GetTempFileName();
+            root.Save();
+
+            // build a project which runs a target from an imported file
+
+            var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion,
+                _projectCollection);
+            ProjectInstance instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
+
+            instance.TranslateEntireState = shouldSerializeEntireState;
+
+            var request = new BuildRequestData(instance, new[] {"Foo"});
+
+            var parameters = new BuildParameters(_projectCollection)
             {
-                var importPath = testFiles.CreatedFiles[1];
-                File.WriteAllText(importPath, CleanupFileContents(importProject));
+                DisableInProcNode = true,
+                EnableNodeReuse = false,
+                Loggers = new ILogger[] {_logger}
+            };
 
-                var root = ProjectRootElement.Create(
-                    XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), _projectCollection);
-                root.FullPath = Path.GetTempFileName();
-                root.Save();
+            _buildManager.BeginBuild(parameters);
 
-                // build a project which runs a target from an imported file
+            var submission = _buildManager.PendBuildRequest(request);
+            var results = submission.Execute();
+            Assert.True(results.OverallResult == BuildResultCode.Success);
 
-                var project = new Project(root, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion,
-                    _projectCollection);
-                ProjectInstance instance = project.CreateProjectInstance(ProjectInstanceSettings.Immutable).DeepCopy(false);
+            // reset caches to ensure nothing is reused
+            _buildManager.EndBuild();
+            _buildManager.ResetCaches();
 
-                instance.TranslateEntireState = shouldSerializeEntireState;
+            // mutate the file on disk such that the import (containing the target to get executed)
+            // is no longer imported
+            project.SetProperty("ImportIt", "false");
+            project.Save();
 
-                var request = new BuildRequestData(instance, new[] {"Foo"});
+            // Build the initial project instance again.
+            // The project instance is not in sync with the file anymore, making it an in-memory build:
+            // the file does not contain the target Foo, but the project instance does
+            // Building the stale project instance should still succeed when the entire state is translated: MSBuild should use the
+            // in-memory state to build and not reload from disk.
+            _buildManager.BeginBuild(parameters);
+            request = new BuildRequestData(instance, new[] {"Foo"}, null,
+                BuildRequestDataFlags.ReplaceExistingProjectInstance);
+            submission = _buildManager.PendBuildRequest(request);
 
-                var parameters = new BuildParameters(_projectCollection)
-                {
-                    DisableInProcNode = true,
-                    EnableNodeReuse = false,
-                    Loggers = new ILogger[] {_logger}
-                };
+            results = submission.Execute();
 
-                _buildManager.BeginBuild(parameters);
+            _buildManager.EndBuild();
 
-                var submission = _buildManager.PendBuildRequest(request);
-                var results = submission.Execute();
-                Assert.True(results.OverallResult == BuildResultCode.Success);
-
-                // reset caches to ensure nothing is reused
-                _buildManager.EndBuild();
-                _buildManager.ResetCaches();
-
-                // mutate the file on disk such that the import (containing the target to get executed)
-                // is no longer imported
-                project.SetProperty("ImportIt", "false");
-                project.Save();
-
-                // Build the initial project instance again.
-                // The project instance is not in sync with the file anymore, making it an in-memory build:
-                // the file does not contain the target Foo, but the project instance does
-                // Building the stale project instance should still succeed when the entire state is translated: MSBuild should use the
-                // in-memory state to build and not reload from disk.
-                _buildManager.BeginBuild(parameters);
-                request = new BuildRequestData(instance, new[] {"Foo"}, null,
-                    BuildRequestDataFlags.ReplaceExistingProjectInstance);
-                submission = _buildManager.PendBuildRequest(request);
-
-                results = submission.Execute();
-
-                if (shouldSerializeEntireState)
-                {
-                    Assert.Equal(BuildResultCode.Success, results.OverallResult);
-                }
-                else
-                {
-                    Assert.Equal(BuildResultCode.Failure, results.OverallResult);
-                    Assert.Contains("The target \"Foo\" does not exist in the project", _logger.FullLog,
-                        StringComparison.OrdinalIgnoreCase);
-                }
+            if (shouldSerializeEntireState)
+            {
+                Assert.Equal(BuildResultCode.Success, results.OverallResult);
             }
-            finally
+            else
             {
-                _buildManager.EndBuild();
+                Assert.Equal(BuildResultCode.Failure, results.OverallResult);
+                Assert.Contains("The target \"Foo\" does not exist in the project", _logger.FullLog,
+                    StringComparison.OrdinalIgnoreCase);
             }
         }
 

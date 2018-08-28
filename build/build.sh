@@ -151,9 +151,15 @@ function ExitIfError {
   then
     echo "$2"
 
-    if [[ "$ci" != "true" && "$dotnetBuildFromSource" != "true" ]]; # kill command not permitted on CI machines or in source-build
+    if [[ "$ci" == "true" ]];
     then
-      StopProcesses
+      # Log VSTS error for each line in the .err files.
+      find "$LogDir" -name "*.err" | xargs sed -e 's/^/##vso[task.logissue type=error] /'
+
+      if [[ "$dotnetBuildFromSource" != "true" ]]; # kill command not permitted on CI machines or in source-build]]
+      then
+        StopProcesses
+      fi
     fi
 
     exit $1
@@ -199,7 +205,7 @@ function GetLogCmd {
     # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
     if $ci
     then
-      logCmd="$logCmd /fl /flp:Verbosity=diag\;LogFile=$(QQ $LogDir/$1.log)"
+      logCmd="$logCmd /fl /flp:ErrorsOnly\;LogFile=$(QQ $LogDir/$1.err)"
     fi
   else
     logCmd=""

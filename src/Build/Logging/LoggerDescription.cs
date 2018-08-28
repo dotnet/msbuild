@@ -207,7 +207,7 @@ namespace Microsoft.Build.Logging
             catch (InvalidCastException e)
             {
                 // The logger when trying to load has hit an invalid case, this is usually due to the framework assembly being a different version
-                string message = ResourceUtilities.FormatResourceString("LoggerInstantiationFailureErrorInvalidCast", _loggerClassName, _loggerAssembly.AssemblyLocation, e.Message);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerInstantiationFailureErrorInvalidCast", _loggerClassName, _loggerAssembly.AssemblyLocation, e.Message);
                 throw new LoggerException(message, e.InnerException);
             }
             catch (TargetInvocationException e)

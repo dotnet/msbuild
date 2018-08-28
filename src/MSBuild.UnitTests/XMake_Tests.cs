@@ -1565,7 +1565,7 @@ namespace Microsoft.Build.UnitTests
                     MSBuildApp.ProcessProjectSwitch(new[] { projectDirectory }, extensionsToIgnore, projectHelper.GetFiles);
                 });
 
-                exception.Message.ShouldBe(ResourceUtilities.FormatResourceString("AmbiguousProjectDirectoryError", projectDirectory));
+                exception.Message.ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AmbiguousProjectDirectoryError", projectDirectory));
             }
             finally
             {

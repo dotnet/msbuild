@@ -50,10 +50,10 @@ namespace Microsoft.Build.UnitTests
         {
             _folder = new TransientTestFolder();
 
-            var projectDir = Path.Combine(TestRoot, relativePathFromRootToProject);
+            var projectDir = Path.GetFullPath(Path.Combine(TestRoot, relativePathFromRootToProject));
             Directory.CreateDirectory(projectDir);
 
-            ProjectFile = Path.Combine(projectDir, "build.proj");
+            ProjectFile = Path.GetFullPath(Path.Combine(projectDir, "build.proj"));
             File.WriteAllText(ProjectFile, ObjectModelHelpers.CleanupFileContents(projectContents));
 
             CreatedFiles = Helpers.CreateFilesInDirectory(TestRoot, files);

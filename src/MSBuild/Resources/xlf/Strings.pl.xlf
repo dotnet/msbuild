@@ -155,8 +155,8 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                      wiele plików odpowiedzi, określ każdy z tych plików
                      osobno.
 
-                     Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie 
-                     używane z następujących lokalizacji: 
+                     Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie
+                     używane z następujących lokalizacji:
                      (1) katalog programu msbuild.exe
                      (2) katalog pierwszej kompilacji projektu lub rozwiązania
 </target>
@@ -342,7 +342,7 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
                         ShowCommandLine — pokazuje komunikaty TaskCommandLineEvent.
                         ShowTimestamp — wyświetla sygnaturę czasową jako
                             prefiks każdego komunikatu.
-                        ShowEventId — pokazuje identyfikator zdarzenia dla 
+                        ShowEventId — pokazuje identyfikator zdarzenia dla
                             rozpoczętych zdarzeń, zakończonych zdarzeń i komunikatów.
                         ForceNoAlign — nie dopasowuje tekstu do rozmiaru
                             buforu konsoli.
@@ -1348,14 +1348,16 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
       <trans-unit id="HelpMessage_31_RestoreSwitch">
         <source>  /restore[:True|False]
                      Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
+                     other targets and ensures the build for these
+                     targets uses the latest restored build logic.
+                     This is useful when your project tree requires
+                     packages to be restored before it can be built.
+                     Specifying /restore is the same as specifying
+                     /restore:True. Use the parameter to override
+                     a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="translated">  /restore[:True|False]
+        <target state="needs-review-translation">  /restore[:True|False]
                      Uruchamia element docelowy o nazwie Restore przed skompilowaniem
                      innych elementów docelowych. Jest to przydatne, gdy drzewo
                      projektu wymaga przywrócenia pakietów przed ich
@@ -1388,13 +1390,13 @@ Copyright (C) Microsoft Corporation. Wszelkie prawa zastrzeżone.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;plik&gt;    
+        <target state="translated">  /profileevaluation:&lt;plik&gt;
                      Profiluje oszacowanie programu MSBuild i zapisuje wynik
                      w określonym pliku. Jeśli rozszerzenie określonego
                      pliku to „md”, wynik jest generowany w formacie

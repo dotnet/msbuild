@@ -428,7 +428,7 @@ namespace Microsoft.Build.Tasks
                     (
                         new ReferenceResolutionException
                         (
-                            ResourceUtilities.FormatResourceString("General.ExpectedFileGotDirectory", reference.FullPath),
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileGotDirectory", reference.FullPath),
                             null
                         )
                     );
@@ -449,7 +449,7 @@ namespace Microsoft.Build.Tasks
                     {
                         reference.AddError
                         (
-                            new DependencyResolutionException(ResourceUtilities.FormatResourceString("General.ExpectedFileMissing", reference.FullPath), null)
+                            new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
                         );
                     }
                 }
@@ -1089,7 +1089,7 @@ namespace Microsoft.Build.Tasks
             {
                 reference.AddError
                       (
-                          new DependencyResolutionException(ResourceUtilities.FormatResourceString("General.ExpectedFileMissing", reference.FullPath), null)
+                          new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
                       );
 
                 return;
@@ -1327,7 +1327,7 @@ namespace Microsoft.Build.Tasks
                     (
                         new ReferenceResolutionException
                         (
-                            ResourceUtilities.FormatResourceString("General.CouldNotLocateAssembly", assemblyName.FullName),
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.CouldNotLocateAssembly", assemblyName.FullName),
                             null
                         )
                     );

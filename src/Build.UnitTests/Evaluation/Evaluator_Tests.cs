@@ -18,6 +18,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Shouldly;
 using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -1830,11 +1831,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             IDictionary<string, ProjectProperty> allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates = new Dictionary<string, ProjectProperty>(StringComparer.OrdinalIgnoreCase);
 
-            // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. As project.AllEvaluatedProperties
-            // is an ordered collection and since such properties necessarily should occur before other properties, we don't need to scan
-            // the whole list.
-            // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
-            // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
+            // Get all those properties from project.AllEvaluatedProperties which don't have a backing xml. We have to dump it into a dictionary
+            // because AllEvaluatedProperties contains duplicates, but we're preparing to Properties, which doesn't, so we need to make sure
+            // that the final value in AllEvaluatedProperties is the one that matches.
             foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
             {
                 allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
@@ -1997,7 +1996,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // the whole list.
                 // We have to dump it into a dictionary because AllEvaluatedProperties contains duplicates, but we're preparing to Properties,
                 // which doesn't, so we need to make sure that the final value in AllEvaluatedProperties is the one that matches.
-                foreach (ProjectProperty property in project.AllEvaluatedProperties.TakeWhile(property => property.Xml == null))
+                foreach (ProjectProperty property in project.AllEvaluatedProperties.Where(property => property.Xml == null))
                 {
                     allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates[property.Name] = property;
                 }
@@ -2024,7 +2023,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
 
                 // These are the properties which are defined in some file.
-                IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.SkipWhile(property => property.Xml == null);
+                IEnumerable<ProjectProperty> restOfAllEvaluatedProperties = project.AllEvaluatedProperties.Where(property => property.Xml != null);
 
                 Assert.Equal(3, restOfAllEvaluatedProperties.Count());
                 Assert.Equal("1", restOfAllEvaluatedProperties.ElementAt(0).EvaluatedValue);
@@ -4422,6 +4421,60 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 bool result = project.Build(logger);
 
                 Assert.True(result);
+            }
+        }
+
+        [Fact]
+        public void VerifyMSBuildLastModifiedProjectForImport()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                var project1 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+                var project2 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+
+                var primaryProject = testEnvironment.CreateTestProjectWithFiles($@"<Project>
+<Import Project=""{project1.ProjectFile}"" />
+<Import Project=""{project2.ProjectFile}"" />
+</Project>");
+
+                // Project1 and primary project last modified an hour ago, project2 is the newest
+                File.SetLastWriteTime(project1.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(project2.ProjectFile, DateTime.Now);
+                File.SetLastWriteTime(primaryProject.ProjectFile, DateTime.Now.AddHours(-1));
+
+                Project project = new Project(primaryProject.ProjectFile, null, null);
+
+                string propertyValue = project.GetPropertyValue(Constants.MSBuildAllProjectsPropertyName);
+
+                propertyValue.ShouldStartWith(project2.ProjectFile);
+
+                propertyValue.ShouldNotContain(primaryProject.ProjectFile, Case.Insensitive);
+                propertyValue.ShouldNotContain(project1.ProjectFile, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void VerifyMSBuildLastModifiedProjectIsProject()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                var project1 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+                var project2 = testEnvironment.CreateTestProjectWithFiles("<Project />");
+
+                var primaryProject = testEnvironment.CreateTestProjectWithFiles($@"<Project>
+<Import Project=""{project1.ProjectFile}"" />
+<Import Project=""{project2.ProjectFile}"" />
+</Project>");
+
+                // Project1 and project2 last modified an hour ago, primaryProject is the newest
+                File.SetLastWriteTime(project1.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(project2.ProjectFile, DateTime.Now.AddHours(-1));
+                File.SetLastWriteTime(primaryProject.ProjectFile, DateTime.Now);
+
+
+                Project project = new Project(primaryProject.ProjectFile, null, null);
+
+                project.GetPropertyValue(Constants.MSBuildAllProjectsPropertyName).ShouldStartWith(primaryProject.ProjectFile);
             }
         }
 

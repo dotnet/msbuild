@@ -387,7 +387,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         WriteLinePretty(ResourceUtilities.GetResourceString("TargetOutputItemsHeader"));
                         foreach (ITaskItem item in targetOutputs)
                         {
-                            WriteLinePretty(ResourceUtilities.FormatResourceString("TargetOutputItem", item.ItemSpec));
+                            WriteLinePretty(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TargetOutputItem", item.ItemSpec));
                         }
                     }
                 }

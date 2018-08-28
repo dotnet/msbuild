@@ -532,11 +532,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WebReference_EnableLegacyEventingModel Condition=" '$(WebReference_EnableLegacyEventingModel)' == '' ">false</WebReference_EnableLegacyEventingModel>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildProjectFullPath);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-    <MSBuildAllProjects Condition="Exists('$(MSBuildProjectFullPath).user')">$(MSBuildAllProjects);$(MSBuildProjectFullPath).user</MSBuildAllProjects>
-  </PropertyGroup>
-
   <!--
     These parameters control where to look in the registry for directories to search for
     assemblies in the assembly resolution tasks.

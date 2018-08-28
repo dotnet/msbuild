@@ -154,7 +154,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
         <target state="translated">  @&lt;Datei&gt;            Fügt Befehlszeileneinstellungen aus einer Textdatei ein. Um mehrere
                      Antwortdateien anzugeben, geben Sie jede Antwortdatei
                      gesondert an.
-                     
+
                      Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch
                      in den folgenden Speicherorten verwendet:
                      (1) Verzeichnis von "msbuild.exe"
@@ -342,7 +342,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                         ShowCommandLine – Zeigt TaskCommandLineEvent-Meldungen an.
                         ShowTimestamp – Zeigt den Timestamp als Präfix einer
                             Meldung an.
-                        ShowEventId – Zeigt die eventId für gestartete 
+                        ShowEventId – Zeigt die eventId für gestartete
                             Ereignisse, abgeschlossene Ereignisse und Meldungen an.
                         ForceNoAlign – Richtet den Text nicht an der Größe des
                             Konsolenpuffers aus.
@@ -674,8 +674,8 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                        /fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       /flp1:warningsonly;logfile=msbuild.wrn 
+                       /flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       /flp1:warningsonly;logfile=msbuild.wrn
                        /flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -724,7 +724,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      Example:
                        /pp:out.txt
     </source>
-        <target state="translated">  /preprocess[:file] 
+        <target state="translated">  /preprocess[:file]
                      Erstellt eine einzelne, zusammengesetzte Projektdatei
                      durch Einbeziehen aller Dateien, die beim Erstellen
                      importiert werden würden, mit gekennzeichneten Grenzen. Dies kann
@@ -746,7 +746,7 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
                      scheduled to nodes.
                      (Short form: /ds)
     </source>
-        <target state="translated">  /detailedsummary 
+        <target state="translated">  /detailedsummary
                      Zeigt am Ende der Erstellung detaillierte Informationen
                      zu den erstellten Konfigurationen an und enthält eine Erläuterung, wie sie
                      in Knoten geplant wurden.
@@ -1348,14 +1348,16 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
       <trans-unit id="HelpMessage_31_RestoreSwitch">
         <source>  /restore[:True|False]
                      Runs a target named Restore prior to building
-                     other targets.  This is useful when your project
-                     tree requires packages to be restored before they
-                     can be built. Specifying /restore is the same as
-                     specifying /restore:True.  Use the parameter to
-                     override a value that comes from a response file.
+                     other targets and ensures the build for these
+                     targets uses the latest restored build logic.
+                     This is useful when your project tree requires
+                     packages to be restored before it can be built.
+                     Specifying /restore is the same as specifying
+                     /restore:True. Use the parameter to override
+                     a value that comes from a response file.
                      (Short form: /r)
     </source>
-        <target state="translated">  /restore[:True|False]
+        <target state="needs-review-translation">  /restore[:True|False]
                      Führt vor der Erstellung anderer Ziele ein Ziel namens
                      "Restore" aus. Dies ist hilfreich, wenn Pakete in Ihrer
                      Projektstruktur wiederhergestellt werden müssen, bevor sie
@@ -1388,14 +1390,14 @@ Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_32_ProfilerSwitch">
-        <source>  /profileevaluation:&lt;file&gt;    
-                     Profiles MSBuild evaluation and writes the result 
+        <source>  /profileevaluation:&lt;file&gt;
+                     Profiles MSBuild evaluation and writes the result
                      to the specified file. If the extension of the specified
                      file is '.md', the result is generated in markdown
                      format. Otherwise, a tab separated file is produced.
     </source>
-        <target state="translated">  /profileevaluation:&lt;Datei&gt;    
-                     Erstellt ein Profil der MSBuild-Auswertung und speichert das Ergebnis 
+        <target state="translated">  /profileevaluation:&lt;Datei&gt;
+                     Erstellt ein Profil der MSBuild-Auswertung und speichert das Ergebnis
                      in der angegebenen Datei. Wenn die Erweiterung der angegebenen
                      Datei ".md" lautet, wird das Ergebnis im Markdown-
                      Format generiert. Andernfalls wird eine durch Tabstopp getrennte Datei erstellt.
