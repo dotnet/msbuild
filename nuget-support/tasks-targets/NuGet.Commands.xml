@@ -343,7 +343,7 @@
         </member>
         <member name="P:NuGet.Commands.IRestoreResult.PreviousLockFile">
             <summary>
-            The existing lock file. This is null if no lock file was provided on the <see cref="T:NuGet.Commands.RestoreRequest"/>.
+            The existing lock file. This is null if no lock file was provided on the <see cref="T:NuGet.Commands.RestoreRequest" />.
             </summary>
         </member>
         <member name="P:NuGet.Commands.IRestoreResult.MSBuildOutputFiles">
@@ -400,7 +400,7 @@
         <member name="P:NuGet.Commands.PackageSpecificWarningProperties.Properties">
             <summary>
             Contains Package specific No warn properties.
-            NuGetLogCode -> LibraryId -> Set of Frameworks.
+            NuGetLogCode -&gt; LibraryId -&gt; Set of Frameworks.
             </summary>
         </member>
         <member name="M:NuGet.Commands.PackageSpecificWarningProperties.CreatePackageSpecificWarningProperties(NuGet.ProjectModel.PackageSpec)">
@@ -467,7 +467,7 @@
         </member>
         <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,NuGet.Common.LogLevel,System.Boolean)">
             <summary>
-            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger" />, while still
             delegating all log messages to the inner logger.
             </summary>
             <param name="innerLogger">The inner logger used to delegate the logging.</param>
@@ -476,7 +476,7 @@
         </member>
         <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,System.Boolean)">
             <summary>
-            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger" />, while still
             delegating all log messages to the inner logger.
             </summary>
             <param name="innerLogger">The inner logger used to delegate the logging.</param>
@@ -484,7 +484,7 @@
         </member>
         <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger,NuGet.Common.LogLevel)">
             <summary>
-            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger" />, while still
             delegating all log messages to the inner logger.
             </summary>
             <param name="innerLogger">The inner logger used to delegate the logging.</param>
@@ -492,7 +492,7 @@
         </member>
         <member name="M:NuGet.Commands.RestoreCollectorLogger.#ctor(NuGet.Common.ILogger)">
             <summary>
-            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger"/>, while still
+            Initializes an instance of the <see cref="T:NuGet.Commands.RestoreCollectorLogger" />, while still
             delegating all log messages to the inner logger.
             </summary>
             <param name="innerLogger">The inner logger used to delegate the logging.</param>
@@ -662,7 +662,7 @@
         <member name="P:NuGet.Commands.WarningPropertiesCollection.PackageSpecificWarningProperties">
             <summary>
             Contains Package specific properties for Warnings.
-            NuGetLogCode -> LibraryId -> Set of Frameworks.
+            NuGetLogCode -&gt; LibraryId -&gt; Set of Frameworks.
             </summary>
         </member>
         <member name="M:NuGet.Commands.WarningPropertiesCollection.ApplyWarningProperties(NuGet.Common.IRestoreLogMessage)">
@@ -846,7 +846,7 @@
             the dependency constraint, and the child node that was resolved based 
             on this constraint.
             
-            (Parent Node) --(Range Constraint)--> (Resolved Child Node)
+            (Parent Node) --(Range Constraint)--&gt; (Resolved Child Node)
             </summary>
         </member>
         <member name="P:NuGet.Commands.ResolvedDependencyKey.Parent">
@@ -889,7 +889,7 @@
         </member>
         <member name="T:NuGet.Commands.RestoreCommandException">
             <summary>
-            Holds an <see cref="T:NuGet.Common.IRestoreLogMessage"/> and returns the message for the exception.
+            Holds an <see cref="T:NuGet.Common.IRestoreLogMessage" /> and returns the message for the exception.
             </summary>
         </member>
         <member name="T:NuGet.Commands.RestoreCommandProviders">
@@ -909,7 +909,7 @@
         </member>
         <member name="P:NuGet.Commands.RestoreCommandProviders.GlobalPackages">
             <summary>
-            A <see cref="T:NuGet.Repositories.NuGetv3LocalRepository"/> repository may be passed in as part of the request.
+            A <see cref="T:NuGet.Repositories.NuGetv3LocalRepository" /> repository may be passed in as part of the request.
             This allows multiple restores to share the same cache for the global packages folder
             and reduce disk hits.
             </summary>
@@ -948,9 +948,9 @@
         </member>
         <member name="P:NuGet.Commands.RestoreRequest.ExistingLockFile">
             <summary>
-            The existing lock file to use. If not specified, the lock file will be read from the <see cref="P:NuGet.Commands.RestoreRequest.LockFilePath"/>
+            The existing lock file to use. If not specified, the lock file will be read from the <see cref="P:NuGet.Commands.RestoreRequest.LockFilePath" />
             (or, if that property is not specified, from the default location of the lock file, as specified in the
-            description for <see cref="P:NuGet.Commands.RestoreRequest.LockFilePath"/>)
+            description for <see cref="P:NuGet.Commands.RestoreRequest.LockFilePath" />)
             </summary>
         </member>
         <member name="P:NuGet.Commands.RestoreRequest.MaxDegreeOfConcurrency">
@@ -980,12 +980,12 @@
         </member>
         <member name="P:NuGet.Commands.RestoreRequest.PackageSaveMode">
             <summary>
-            Gets or sets the <see cref="T:NuGet.Packaging.PackageSaveMode"/>.
+            Gets or sets the <see cref="T:NuGet.Packaging.PackageSaveMode" />.
             </summary>
         </member>
         <member name="P:NuGet.Commands.RestoreRequest.FallbackRuntimes">
             <summary>
-            These Runtime Ids will be used if <see cref="P:NuGet.Commands.RestoreRequest.RequestedRuntimes"/> and the project runtimes
+            These Runtime Ids will be used if <see cref="P:NuGet.Commands.RestoreRequest.RequestedRuntimes" /> and the project runtimes
             are both empty.
             </summary>
             <remarks>RIDs are case sensitive.</remarks>
@@ -1059,7 +1059,7 @@
         </member>
         <member name="P:NuGet.Commands.RestoreResult.PreviousLockFile">
             <summary>
-            The existing lock file. This is null if no lock file was provided on the <see cref="T:NuGet.Commands.RestoreRequest"/>.
+            The existing lock file. This is null if no lock file was provided on the <see cref="T:NuGet.Commands.RestoreRequest" />.
             </summary>
         </member>
         <member name="P:NuGet.Commands.RestoreResult.ElapsedTime">
@@ -1097,10 +1097,10 @@
         </member>
         <member name="M:NuGet.Commands.RestoreResult.CommitAsync(NuGet.Common.ILogger,System.Threading.CancellationToken)">
             <summary>
-            Commits the lock file contained in <see cref="P:NuGet.Commands.RestoreResult.LockFile"/> and the MSBuild targets/props to
+            Commits the lock file contained in <see cref="P:NuGet.Commands.RestoreResult.LockFile" /> and the MSBuild targets/props to
             the local file system.
             </summary>
-            <remarks>If <see cref="P:NuGet.Commands.RestoreResult.PreviousLockFile"/> and <see cref="P:NuGet.Commands.RestoreResult.LockFile"/> are identical
+            <remarks>If <see cref="P:NuGet.Commands.RestoreResult.PreviousLockFile" /> and <see cref="P:NuGet.Commands.RestoreResult.LockFile" /> are identical
              the file will not be written to disk.</remarks>
         </member>
         <member name="T:NuGet.Commands.RestoreRunner">
@@ -1359,7 +1359,7 @@
         </member>
         <member name="M:NuGet.Commands.LockFileUtils.AddAssets(NuGet.ProjectModel.LockFileLibrary,NuGet.Repositories.LocalPackageInfo,NuGet.Commands.RestoreTargetGraph,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.String,NuGet.ContentModel.ContentItemCollection,NuGet.Packaging.NuspecReader,System.Collections.Generic.IReadOnlyList{NuGet.ContentModel.SelectionCriteria})">
             <summary>
-            Populate assets for a <see cref="T:NuGet.ProjectModel.LockFileLibrary"/>.
+            Populate assets for a <see cref="T:NuGet.ProjectModel.LockFileLibrary" />.
             </summary>
         </member>
         <member name="M:NuGet.Commands.LockFileUtils.AddRuntimeTargets(NuGet.Commands.RestoreTargetGraph,NuGet.LibraryModel.LibraryIncludeFlags,NuGet.ProjectModel.LockFileTargetLibrary,NuGet.Frameworks.NuGetFramework,System.String,NuGet.ContentModel.ContentItemCollection)">
@@ -1443,7 +1443,7 @@
         </member>
         <member name="M:NuGet.Commands.LockFileUtils.ExcludeItems(NuGet.ProjectModel.LockFileTargetLibrary,NuGet.LibraryModel.LibraryIncludeFlags)">
             <summary>
-            Replace excluded asset groups with _._ if they have > 0 items.
+            Replace excluded asset groups with _._ if they have &gt; 0 items.
             </summary>
         </member>
         <member name="T:NuGet.Commands.MSBuildRestoreUtility">
@@ -1790,7 +1790,7 @@
         </member>
         <member name="T:NuGet.Commands.SignCommandException">
             <summary>
-            Holds an <see cref="T:NuGet.Common.ILogMessage"/> and returns the message for the exception.
+            Holds an <see cref="T:NuGet.Common.ILogMessage" /> and returns the message for the exception.
             </summary>
         </member>
         <member name="T:NuGet.Commands.SignCommandRunner">
@@ -1816,22 +1816,22 @@
         </member>
         <member name="P:NuGet.Commands.Strings.AddFileToPackage">
             <summary>
-              Looks up a localized string similar to Add file &apos;{0}&apos; to package as &apos;{1}&apos;.
+              Looks up a localized string similar to Add file '{0}' to package as '{1}'.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.BuildingProjectTargetingFramework">
             <summary>
-              Looks up a localized string similar to Building project &apos;{0}&apos; for target framework &apos;{1}&apos;..
+              Looks up a localized string similar to Building project '{0}' for target framework '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.CannotBeUsedWithOtherValues">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; cannot be used in conjunction with other values..
+              Looks up a localized string similar to '{0}' cannot be used in conjunction with other values..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_BuildFailed">
             <summary>
-              Looks up a localized string similar to Failed to build using &apos;{0} {1}&apos;..
+              Looks up a localized string similar to Failed to build using '{0} {1}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_CannotFindMsbuild">
@@ -1846,7 +1846,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_EmptySourceFileProjectDirectory">
             <summary>
-              Looks up a localized string similar to The project directory for the source file &apos;{0}&apos; could not be found..
+              Looks up a localized string similar to The project directory for the source file '{0}' could not be found..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InputFileNotSpecified">
@@ -1861,22 +1861,22 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInput">
             <summary>
-              Looks up a localized string similar to Invalid input &apos;{0}&apos;. The file type was not recognized..
+              Looks up a localized string similar to Invalid input '{0}'. The file type was not recognized..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInputConfig">
             <summary>
-              Looks up a localized string similar to Invalid input &apos;{0}&apos;. Valid file names are &apos;packages.config&apos; or &apos;packages.*.config&apos;..
+              Looks up a localized string similar to Invalid input '{0}'. Valid file names are 'packages.config' or 'packages.*.config'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidCommandLineInputJson">
             <summary>
-              Looks up a localized string similar to Invalid input &apos;{0}&apos;. Valid file names are &apos;project.json&apos; or &apos;*.project.json&apos;..
+              Looks up a localized string similar to Invalid input '{0}'. Valid file names are 'project.json' or '*.project.json'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidDependencyVersionConstraints">
             <summary>
-              Looks up a localized string similar to Package version constraints for &apos;{0}&apos; return a version range that is empty..
+              Looks up a localized string similar to Package version constraints for '{0}' return a version range that is empty..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidProjectPackageCombo">
@@ -1886,7 +1886,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_InvalidTargetFramework">
             <summary>
-              Looks up a localized string similar to Failed to build package because of an unsupported targetFramework value on &apos;{0}&apos;..
+              Looks up a localized string similar to Failed to build package because of an unsupported targetFramework value on '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_MissingSourceParameter">
@@ -1911,12 +1911,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForLibPackage">
             <summary>
-              Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes assembly files. For help on building symbols package, visit {1}..
+              Looks up a localized string similar to Failed to build package. Ensure '{0}' includes assembly files. For help on building symbols package, visit {1}..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_PackageCommandNoFilesForSymbolsPackage">
             <summary>
-              Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes source and symbol files. For help on building symbols package, visit {1}..
+              Looks up a localized string similar to Failed to build package. Ensure '{0}' includes source and symbol files. For help on building symbols package, visit {1}..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_PackFailed">
@@ -1926,12 +1926,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_ProcessingNuspecFile">
             <summary>
-              Looks up a localized string similar to Error occurred when processing file &apos;{0}&apos;: {1}.
+              Looks up a localized string similar to Error occurred when processing file '{0}': {1}.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_ProjectDoesNotExist">
             <summary>
-              Looks up a localized string similar to Unable to find project &apos;{0}&apos;. Check that the project reference is valid and that the project file exists..
+              Looks up a localized string similar to Unable to find project '{0}'. Check that the project reference is valid and that the project file exists..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_ProjectWithIncorrectDependenciesCount">
@@ -1946,7 +1946,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToFindProjectInfo">
             <summary>
-              Looks up a localized string similar to Unable to find project information for &apos;{0}&apos;. The project file may be invalid or missing targets required for restore..
+              Looks up a localized string similar to Unable to find project information for '{0}'. The project file may be invalid or missing targets required for restore..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToLocateBuildOutput">
@@ -1956,12 +1956,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToLocateRestoreTarget">
             <summary>
-              Looks up a localized string similar to The folder &apos;{0}&apos; does not contain a project to restore..
+              Looks up a localized string similar to The folder '{0}' does not contain a project to restore..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToLocateRestoreTarget_Because">
             <summary>
-              Looks up a localized string similar to Failed to find a project to restore in the folder &apos;{0}&apos;..
+              Looks up a localized string similar to Failed to find a project to restore in the folder '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_UnableToSignPackage">
@@ -1971,27 +1971,27 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Error_UnknownBuildAction">
             <summary>
-              Looks up a localized string similar to Package &apos;{0}&apos; specifies an invalid build action &apos;{1}&apos; for file &apos;{2}&apos;..
+              Looks up a localized string similar to Package '{0}' specifies an invalid build action '{1}' for file '{2}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_WriteResolvedNuSpecOverwriteOriginal">
             <summary>
-              Looks up a localized string similar to Unable to output resolved nuspec file because it would overwrite the original at &apos;{0}&apos;.
+              Looks up a localized string similar to Unable to output resolved nuspec file because it would overwrite the original at '{0}'.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Error_XPROJNotAllowed">
             <summary>
-              Looks up a localized string similar to Invalid input &apos;{0}&apos;. XProj support has been removed. Support for XProj and standalone project.json files has been removed, to continue working with legacy projects use NuGet 3.5.x from https://nuget.org/downloads.
+              Looks up a localized string similar to Invalid input '{0}'. XProj support has been removed. Support for XProj and standalone project.json files has been removed, to continue working with legacy projects use NuGet 3.5.x from https://nuget.org/downloads.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.FailedToBuildProject">
             <summary>
-              Looks up a localized string similar to Failed to build &apos;{0}&apos;..
+              Looks up a localized string similar to Failed to build '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.FileNotAddedToPackage">
             <summary>
-              Looks up a localized string similar to File &apos;{0}&apos; is not added because the package already contains file &apos;{1}&apos;.
+              Looks up a localized string similar to File '{0}' is not added because the package already contains file '{1}'.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.FoundVersionsInSource">
@@ -2016,7 +2016,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.InvalidSource">
             <summary>
-              Looks up a localized string similar to The specified source &apos;{0}&apos; is invalid. Please provide a valid source..
+              Looks up a localized string similar to The specified source '{0}' is invalid. Please provide a valid source..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.LocalsCommand_ClearedSuccessful">
@@ -2051,7 +2051,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.LocalsCommand_FailedToDeletePath">
             <summary>
-              Looks up a localized string similar to Failed to delete &apos;{0}&apos;..
+              Looks up a localized string similar to Failed to delete '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.LocalsCommand_Help">
@@ -2067,7 +2067,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.LocalsCommand_LocalResourcePathNotSet">
             <summary>
-              Looks up a localized string similar to The location of local resource &apos;{0}&apos; is undefined..
+              Looks up a localized string similar to The location of local resource '{0}' is undefined..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.LocalsCommand_LocalsPartiallyCleared">
@@ -2157,7 +2157,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Log_ImportsFallbackWarning">
             <summary>
-              Looks up a localized string similar to Package &apos;{0}&apos; was restored using &apos;{1}&apos; instead of the project target framework &apos;{2}&apos;. This package may not be fully compatible with your project..
+              Looks up a localized string similar to Package '{0}' was restored using '{1}' instead of the project target framework '{2}'. This package may not be fully compatible with your project..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_InstalledSummary">
@@ -2207,22 +2207,22 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Log_PackageCommandAddedFile">
             <summary>
-              Looks up a localized string similar to Added file &apos;{0}&apos;..
+              Looks up a localized string similar to Added file '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_PackageCommandAttemptingToBuildSymbolsPackage">
             <summary>
-              Looks up a localized string similar to Attempting to build symbols package for &apos;{0}&apos;..
+              Looks up a localized string similar to Attempting to build symbols package for '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_PackageCommandInstallPackageToOutputPath">
             <summary>
-              Looks up a localized string similar to Install {0} to output path &apos;{1}&apos;.
+              Looks up a localized string similar to Install {0} to output path '{1}'.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_PackageCommandSuccess">
             <summary>
-              Looks up a localized string similar to Successfully created package &apos;{0}&apos;..
+              Looks up a localized string similar to Successfully created package '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_PackageNotCompatibleWithFx">
@@ -2287,7 +2287,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Log_ResolverConflict">
             <summary>
-              Looks up a localized string similar to Unable to satisfy conflicting requests for &apos;{0}&apos;: {1} Framework: {2}.
+              Looks up a localized string similar to Unable to satisfy conflicting requests for '{0}': {1} Framework: {2}.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_ResolvingConflicts">
@@ -2307,12 +2307,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoreNoOpDGChanged">
             <summary>
-              Looks up a localized string similar to The restore inputs for &apos;{0}&apos; have changed. Continuing restore..
+              Looks up a localized string similar to The restore inputs for '{0}' have changed. Continuing restore..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoreNoOpFinish">
             <summary>
-              Looks up a localized string similar to The restore inputs for &apos;{0}&apos; have not changed. No further actions are required to complete the restore..
+              Looks up a localized string similar to The restore inputs for '{0}' have not changed. No further actions are required to complete the restore..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoringPackages">
@@ -2327,7 +2327,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RestoringToolPackages">
             <summary>
-              Looks up a localized string similar to Restoring packages for tool &apos;{0}&apos; in {1}....
+              Looks up a localized string similar to Restoring packages for tool '{0}' in {1}....
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_RunningNonParallelRestore">
@@ -2392,7 +2392,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Log_UnresolvedDependency">
             <summary>
-              Looks up a localized string similar to Unable to resolve &apos;{0}&apos; for &apos;{1}&apos;..
+              Looks up a localized string similar to Unable to resolve '{0}' for '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Log_UsingPackagesDirectory">
@@ -2422,12 +2422,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.MissingRequiredProperty">
             <summary>
-              Looks up a localized string similar to Missing required property &apos;{0}&apos;..
+              Looks up a localized string similar to Missing required property '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.MissingRequiredPropertyForProjectType">
             <summary>
-              Looks up a localized string similar to Missing required property &apos;{0}&apos; for project type &apos;{1}&apos;..
+              Looks up a localized string similar to Missing required property '{0}' for project type '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.MSBuildWarning_MultiTarget">
@@ -2437,7 +2437,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.NonMatchingProperties">
             <summary>
-              Looks up a localized string similar to Properties &apos;{0}&apos;:&apos;{1}&apos; and &apos;{2}&apos;:&apos;{3}&apos; do not match..
+              Looks up a localized string similar to Properties '{0}':'{1}' and '{2}':'{3}' do not match..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.NuGetDocs">
@@ -2447,32 +2447,32 @@
         </member>
         <member name="P:NuGet.Commands.Strings.PackageCommandFileFromDependencyIsChanged">
             <summary>
-              Looks up a localized string similar to File from dependency is not changed. File &apos;{0}&apos; is not added..
+              Looks up a localized string similar to File from dependency is not changed. File '{0}' is not added..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.PackageCommandFileFromDependencyIsNotChanged">
             <summary>
-              Looks up a localized string similar to File from dependency is not changed. File &apos;{0}&apos; is not added..
+              Looks up a localized string similar to File from dependency is not changed. File '{0}' is not added..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.PackagingFilesFromOutputPath">
             <summary>
-              Looks up a localized string similar to Packing files from &apos;{0}&apos;..
+              Looks up a localized string similar to Packing files from '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.PersistDGFile">
             <summary>
-              Looks up a localized string similar to Persisting restore input to &apos;{0}&apos;..
+              Looks up a localized string similar to Persisting restore input to '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.PropertyNotAllowed">
             <summary>
-              Looks up a localized string similar to Invalid input combination. Property &apos;{0}&apos; is not allowed..
+              Looks up a localized string similar to Invalid input combination. Property '{0}' is not allowed..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.PropertyNotAllowedForProjectType">
             <summary>
-              Looks up a localized string similar to Invalid input combination. Property &apos;{0}&apos; is not allowed for project type &apos;{1}&apos;..
+              Looks up a localized string similar to Invalid input combination. Property '{0}' is not allowed for project type '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.ResolverRequest_ToStringFormat">
@@ -2482,12 +2482,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.SignCommandCertificateFileNotFound">
             <summary>
-              Looks up a localized string similar to Certificate file &apos;{0}&apos; not found. For a list of accepted ways to provide a certificate, please visit https://docs.nuget.org/docs/reference/command-line-reference.
+              Looks up a localized string similar to Certificate file '{0}' not found. For a list of accepted ways to provide a certificate, please visit https://docs.nuget.org/docs/reference/command-line-reference.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SignCommandCertificateStoreNotFound">
             <summary>
-              Looks up a localized string similar to Certificate store &apos;{0}&apos; not found. For a list of accepted ways to provide a certificate, please visit https://docs.nuget.org/docs/reference/command-line-reference.
+              Looks up a localized string similar to Certificate store '{0}' not found. For a list of accepted ways to provide a certificate, please visit https://docs.nuget.org/docs/reference/command-line-reference.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SignCommandDialogMessage">
@@ -2517,17 +2517,17 @@
         </member>
         <member name="P:NuGet.Commands.Strings.SignCommandInvalidCertException">
             <summary>
-              Looks up a localized string similar to Certificate file &apos;{0}&apos; is invalid. For a list of accepted ways to provide a certificate, please visit https://docs.nuget.org/docs/reference/command-line-reference.
+              Looks up a localized string similar to Certificate file '{0}' is invalid. For a list of accepted ways to provide a certificate, please visit https://docs.nuget.org/docs/reference/command-line-reference.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SignCommandInvalidPasswordException">
             <summary>
-              Looks up a localized string similar to Invalid password was provided for the certificate file &apos;{0}&apos;. Please provide a valid password using the &apos;-{1}&apos; option.
+              Looks up a localized string similar to Invalid password was provided for the certificate file '{0}'. Please provide a valid password using the '-{1}' option.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SignCommandMultipleCertException">
             <summary>
-              Looks up a localized string similar to Multiple certificates were found that meet all the given criteria. Use the &apos;-{0}&apos; option with the hash of the desired certificate..
+              Looks up a localized string similar to Multiple certificates were found that meet all the given criteria. Use the '-{0}' option with the hash of the desired certificate..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SignCommandNoCertException">
@@ -2547,22 +2547,22 @@
         </member>
         <member name="P:NuGet.Commands.Strings.SpecValidationDuplicateFrameworks">
             <summary>
-              Looks up a localized string similar to Duplicate frameworks found: &apos;{0}&apos;..
+              Looks up a localized string similar to Duplicate frameworks found: '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SpecValidationInvalidFramework">
             <summary>
-              Looks up a localized string similar to Invalid target framework &apos;{0}&apos;..
+              Looks up a localized string similar to Invalid target framework '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SpecValidationMissingDependency">
             <summary>
-              Looks up a localized string similar to Missing dependency on &apos;{0}&apos;..
+              Looks up a localized string similar to Missing dependency on '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SpecValidationMissingProject">
             <summary>
-              Looks up a localized string similar to Missing project &apos;{0}&apos;..
+              Looks up a localized string similar to Missing project '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.SpecValidationNoFrameworks">
@@ -2582,22 +2582,22 @@
         </member>
         <member name="P:NuGet.Commands.Strings.UnableToExtractAssemblyMetadata">
             <summary>
-              Looks up a localized string similar to Unable to extract metadata from &apos;{0}&apos;..
+              Looks up a localized string similar to Unable to extract metadata from '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.UnableToFindBuildOutput">
             <summary>
-              Looks up a localized string similar to Unable to find &apos;{0}&apos;. Make sure the project has been built..
+              Looks up a localized string similar to Unable to find '{0}'. Make sure the project has been built..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.UnsupportedProject">
             <summary>
-              Looks up a localized string similar to Skipping restore for project &apos;{0}&apos;. The project file may be invalid or missing targets required for restore..
+              Looks up a localized string similar to Skipping restore for project '{0}'. The project file may be invalid or missing targets required for restore..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.UsingNuspecForMetadata">
             <summary>
-              Looks up a localized string similar to Using &apos;{0}&apos; for metadata..
+              Looks up a localized string similar to Using '{0}' for metadata..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.UsingPackagesConfigForDependencies">
@@ -2617,12 +2617,12 @@
         </member>
         <member name="P:NuGet.Commands.Strings.VerifyCommand_PackageIsNotValid">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; is not a valid package file..
+              Looks up a localized string similar to '{0}' is not a valid package file..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.VerifyCommand_Success">
             <summary>
-              Looks up a localized string similar to Successfully verified package(s)..
+              Looks up a localized string similar to Successfully verified package '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.VerifyCommand_VerificationTypeNotSupported">
@@ -2637,17 +2637,17 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_DuplicatePropertyKey">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; key already exists in Properties collection. Overriding value..
+              Looks up a localized string similar to '{0}' key already exists in Properties collection. Overriding value..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_FileDoesNotExist">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; was included in the project but doesn&apos;t exist. Skipping....
+              Looks up a localized string similar to '{0}' was included in the project but doesn't exist. Skipping....
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_FileExcludedByDefault">
             <summary>
-              Looks up a localized string similar to File &apos;{0}&apos; was not added to the package. Files and folders starting with &apos;.&apos; or ending with &apos;.nupkg&apos; are excluded by default. To include this file, use -NoDefaultExcludes from the commandline.
+              Looks up a localized string similar to File '{0}' was not added to the package. Files and folders starting with '.' or ending with '.nupkg' are excluded by default. To include this file, use -NoDefaultExcludes from the commandline.
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_MinVersionDoesNotExist">
@@ -2682,7 +2682,7 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_PackageCommandPackageIssueSummary">
             <summary>
-              Looks up a localized string similar to Issue found with package &apos;{0}&apos;..
+              Looks up a localized string similar to Issue found with package '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_ProjectDependencyMissingLowerBound">
@@ -2692,17 +2692,17 @@
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_SemanticVersion">
             <summary>
-              Looks up a localized string similar to Version &quot;{0}&quot; does not follow semantic versioning guidelines. Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org..
+              Looks up a localized string similar to Version "{0}" does not follow semantic versioning guidelines. Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_UnresolvedFilePath">
             <summary>
-              Looks up a localized string similar to &apos;{0}&apos; was included in the project but the path could not be resolved. Skipping....
+              Looks up a localized string similar to '{0}' was included in the project but the path could not be resolved. Skipping....
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_UnspecifiedField">
             <summary>
-              Looks up a localized string similar to {0} was not specified. Using &apos;{1}&apos;..
+              Looks up a localized string similar to {0} was not specified. Using '{1}'..
             </summary>
         </member>
         <member name="P:NuGet.Commands.Strings.Warning_VersionAboveUpperBound">
@@ -2889,11 +2889,11 @@
         <member name="M:Microsoft.Extensions.Primitives.IChangeToken.RegisterChangeCallback(System.Action{System.Object},System.Object)">
             <summary>
             Registers for a callback that will be invoked when the entry has changed.
-            <see cref="P:Microsoft.Extensions.Primitives.IChangeToken.HasChanged"/> MUST be set before the callback is invoked.
+            <see cref="P:Microsoft.Extensions.Primitives.IChangeToken.HasChanged" /> MUST be set before the callback is invoked.
             </summary>
-            <param name="callback">The <see cref="!:Action&lt;object&gt;"/> to invoke.</param>
+            <param name="callback">The <see cref="!:Action&lt;object&gt;" /> to invoke.</param>
             <param name="state">State to be passed into the callback.</param>
-            <returns>An <see cref="T:System.IDisposable"/> that is used to unregister the callback.</returns>
+            <returns>An <see cref="T:System.IDisposable" /> that is used to unregister the callback.</returns>
         </member>
         <member name="T:Microsoft.AspNet.FileProviders.IDirectoryContents">
             <summary>
@@ -2967,10 +2967,10 @@
         </member>
         <member name="M:Microsoft.AspNet.FileProviders.IFileProvider.Watch(System.String)">
             <summary>
-            Creates a <see cref="T:Microsoft.Extensions.Primitives.IChangeToken"/> for the specified <paramref name="filter"/>.
+            Creates a <see cref="T:Microsoft.Extensions.Primitives.IChangeToken" /> for the specified <paramref name="filter" />.
             </summary>
             <param name="filter">Filter string used to determine what files or folders to monitor. Example: **/*.cs, *.*, subFolder/**/*.cshtml.</param>
-            <returns>An <see cref="T:Microsoft.Extensions.Primitives.IChangeToken"/> that is notified when a file matching <paramref name="filter"/> is added, modified or deleted.</returns>
+            <returns>An <see cref="T:Microsoft.Extensions.Primitives.IChangeToken" /> that is notified when a file matching <paramref name="filter" /> is added, modified or deleted.</returns>
         </member>
         <member name="T:Microsoft.AspNet.FileProviders.NotFoundFileInfo">
             <summary>
@@ -2978,4 +2978,4 @@
             </summary>
         </member>
     </members>
-</doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>94oJQyATHHZlGGY/j9N5lexdrd8=</DigestValue></Reference></SignedInfo><SignatureValue>ZuXI+p6pRLEpgic2XXn8aEK7LQTZwqhMivFlOgthGLFNPhSUQ2/OEvC63PM0Pq7lkCHFO9O5XcnejmCwOkeALnNL6riK2XP2uUgtr+gcuRdTKa2ZWvmmBY+tbyZU2sECs6G7iRUqs+5jGQyy338oAlcCeIPSYBDUe+6WvT4IlQErch/9dvKu03l0gGRqqJspJk9IPH9iAQO32ocVWLWvxHA6cMOo1HB9HvY1ZICdUumQmd+xfZQ3owKBqobHeGxiTdvoIFK0IB684swu4l9HJdekuqfg41IvRHWyaJVz598OeVRKAftVLVlZqFzDQkjz91gjpxMGr6K0Vv2S94RTbQ==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIEwjCCA6qgAwIBAgITMwAAAMEJ+AJBu02q3AAAAAAAwTANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODUwWhcNMTgwOTA3MTc1ODUwWjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046MTJFNy0zMDY0LTYxMTIxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCnQx/5lyl8yUKsOCe7goaBSbYZRGLqqBkrgKhq8dH8OM02K+bXkjkBBc3oxkLyHPwFN5BUpQQY9rEGywPRQNdZs+ORWsZU5DRjq+pmFIB+8mMDl9DoDh9PHn0d+kqLCjTpzeMKMY3OFLCBtZM0mUmAyFGtDbAaT+V/5pR7TFcWohavrNNFERDbFL1h3g33aRN2IS5I0DRISNZe+o5AvedZa+BLADFpBegnHydhbompjhg5oH7PziHYYKnSZB/VtGD9oPcte8fL5xr3zQ/v8VbQLSo4d2Y7yDOgUaeMgguDWFQk/BTyIhAMi2WYLRr1IzjUWafUWXrRAejcH4/LGxGfAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQU5Wc2VV+w+VLFrEvWbjW/iDqtRa8wHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEANDgLKXRowe/Nzu4x3vd07BG2sXKl3uYIgQDBrw83AWJ0nZ15VwL0KHe4hEkjNVn16/j0qOADdl5AS0IemYRZ3Ro9Qexf4jgglAXXm+k+bbHkYfOZ3g+pFhs5+MF6vY6pWB7IHmkJhzs1OHn1rFNBNYVO12DhuPYYr//7KIN52jd6I86oyM+67V1W8ku8SsbnPz2gBDoYIeHkzaSZCoX2+i2eL5EL3d8TEXXqKjnxh5xEcdPzBuVnt3VIu8SjWdyy/ulTzBy+jRFLcTyfGQm19mlerWcwfV271WWbhTpgxAQugy9o6PM4DR9HIEz6vRUYyIfX09FxoX5pENTGzssKyA==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">MIIRowYJKoZIhvcNAQcCoIIRlDCCEZACAQMxCzAJBgUrDgMCGgUAMIIBEwYJKoZIhvcNAQcBoIIBBASCAQBm5cj6nqlEsSmCJzZdefxoQrstBNnCqEyK8WU6C2EYsU0+FJRDb84S8Lrc8zQ+ruWQIcU707ldyd6OYLA6R4Auc0vquIrZc/a5SC2v6By5F1MprZla+aYFj61vJlTawQKzobuJFSqz7mMZDLLffygCVwJ4g9JgENR77pa9PgiVAStyH/128q7TeXSAZGqomykmT0g8f2IBA7fahxVYta/EcDpww6jUcH0e9jVkgJ1S6ZCZ37F9lDejAoGqhsd4bGJN2+ggUrQgHrzizC7iX0cl16S6p+DjUi9EdbJolXPn3w55VEoB+1UtWVmoXMNCSPP3WCOnEwavorRW/ZL3hFNtoIIOTDCCBgcwggPvoAMCAQICCmEWaDQAAAAAABwwDQYJKoZIhvcNAQEFBQAwXzETMBEGCgmSJomT8ixkARkWA2NvbTEZMBcGCgmSJomT8ixkARkWCW1pY3Jvc29mdDEtMCsGA1UEAxMkTWljcm9zb2Z0IFJvb3QgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MB4XDTA3MDQwMzEyNTMwOVoXDTIxMDQwMzEzMDMwOVowdzELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEhMB8GA1UEAxMYTWljcm9zb2Z0IFRpbWUtU3RhbXAgUENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn6Fssd/bSJIqfGsuGeG94uPFmVEjUK3O3RhOJA/u0afRTK10MCAR6wfVVJUVSZQbQpKumFwwJtoAa+h7veyJBw/3DgSY8InMH8szJIed8vRnHCz8e+eIHernTqOhwSNTyo36Rc8J0F6v0LBCBKL5pmyTZ9co3EZTsIbQ5ShGLieshk9VUgzkAyz7apCQMG6H81kwnfp+1pez6CGXfvjSE/MIt1NtUrRFkJ9IAEpHZhEnKWaol+TTBoFKovmEpxFHFAmCn4TtVXj+AZodUAiFABAwRu233iNGu8QtVJ+vHnhBMXfMm987g5OhYQK1HQ2x/PebsgHOIktU//kFw8IgCwIDAQABo4IBqzCCAacwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUIzT42VJGcArtQPt2+7MrsMM1sw8wCwYDVR0PBAQDAgGGMBAGCSsGAQQBgjcVAQQDAgEAMIGYBgNVHSMEgZAwgY2AFA6sgmBAVieX5SUT/CrhClOVWeSkoWOkYTBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHmCEHmtFqFKoKWtTHNY9AcTLmUwUAYDVR0fBEkwRzBFoEOgQYY/aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvbWljcm9zb2Z0cm9vdGNlcnQuY3JsMFQGCCsGAQUFBwEBBEgwRjBEBggrBgEFBQcwAoY4aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNyb3NvZnRSb290Q2VydC5jcnQwEwYDVR0lBAwwCgYIKwYBBQUHAwgwDQYJKoZIhvcNAQEFBQADggIBABCXisNcA0Q23em0rXfbznlRTQGxLnRxW20ME6vOvnuPuC7UEqKMbWK4VwLLTiATUJndekDiV7uvWJoc4R0Bhqy7ePKL0Ow7Ae7ivo8KBciNSOLwUxXdT6uS5OeNatWAweaU8gYvhQPpkSokInD79vzkeJkuDfcH4nC8GE6djmsKcpW4oTmcZy3FUQ7qYlw/FpiLID/iBxoy+cwxSnYxPStyC8jqcD3/hQoT38IKYY7w17gX606Lf8U1K16jv+u8fQtCe9RTciHuMMq7eGVcWwEXChQO0toUmPU8uWZYsy0v5/mFhsxRVuidcJRsrDlM1PZ5v6oYemIp76KbKTQGdxpiyT0ebR+C8AvHLLvPQ7Pl+ex9teOkqHQ1uE7FcSMSJnYLPFKMcVpGQxS8s7OwTWfIn0L/gHkhgJ4VMGboQhJeGsieIiHQQ+kr6bv0SMws1NgygEwmKkgkX1rqVu+m3pmdyjpvvYEndAYR7nYhv5uCwSdUtrFqPYmhdmG0bqETpr+qR/ASb/2KMmyy/t9RyIwjyWa9nR2HEmQCPS2vWY+45CHltbDKY7R4VAXUQS5QrJSwpXirs6CWdRrZkocTdSIvMqgIbqBbjCW/oO+EyiHW6x5PyZruSeD3AWVviQt9yGnI5m7qp5fOMSn/DsVbXNhNG6HY+i+ePy5VFmvJE6P9MIIEwjCCA6qgAwIBAgITMwAAAMEJ+AJBu02q3AAAAAAAwTANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODUwWhcNMTgwOTA3MTc1ODUwWjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046MTJFNy0zMDY0LTYxMTIxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCnQx/5lyl8yUKsOCe7goaBSbYZRGLqqBkrgKhq8dH8OM02K+bXkjkBBc3oxkLyHPwFN5BUpQQY9rEGywPRQNdZs+ORWsZU5DRjq+pmFIB+8mMDl9DoDh9PHn0d+kqLCjTpzeMKMY3OFLCBtZM0mUmAyFGtDbAaT+V/5pR7TFcWohavrNNFERDbFL1h3g33aRN2IS5I0DRISNZe+o5AvedZa+BLADFpBegnHydhbompjhg5oH7PziHYYKnSZB/VtGD9oPcte8fL5xr3zQ/v8VbQLSo4d2Y7yDOgUaeMgguDWFQk/BTyIhAMi2WYLRr1IzjUWafUWXrRAejcH4/LGxGfAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQU5Wc2VV+w+VLFrEvWbjW/iDqtRa8wHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEANDgLKXRowe/Nzu4x3vd07BG2sXKl3uYIgQDBrw83AWJ0nZ15VwL0KHe4hEkjNVn16/j0qOADdl5AS0IemYRZ3Ro9Qexf4jgglAXXm+k+bbHkYfOZ3g+pFhs5+MF6vY6pWB7IHmkJhzs1OHn1rFNBNYVO12DhuPYYr//7KIN52jd6I86oyM+67V1W8ku8SsbnPz2gBDoYIeHkzaSZCoX2+i2eL5EL3d8TEXXqKjnxh5xEcdPzBuVnt3VIu8SjWdyy/ulTzBy+jRFLcTyfGQm19mlerWcwfV271WWbhTpgxAQugy9o6PM4DR9HIEz6vRUYyIfX09FxoX5pENTGzssKyKGCA3cwggJfAgEBMIHioYG4pIG1MIGyMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQwwCgYDVQQLEwNBT0MxJzAlBgNVBAsTHm5DaXBoZXIgRFNFIEVTTjoxMkU3LTMwNjQtNjExMjElMCMGA1UEAxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZaIlCgEBMAkGBSsOAwIaBQADFQCdI2H6U5SstNDFmgfSPf/7UON0hKCBwTCBvqSBuzCBuDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBFU046MjY2NS00QzNGLUM1REUxKzApBgNVBAMTIk1pY3Jvc29mdCBUaW1lIFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJKoZIhvcNAQEFBQACBQDenznYMCIYDzIwMTgwNTEwMjEzNjI0WhgPMjAxODA1MTEyMTM2MjRaMHcwPQYKKwYBBAGEWQoEATEvMC0wCgIFAN6fOdgCAQAwCgIBAAICDCsCAf8wBwIBAAICGzAwCgIFAN6gi1gCAQAwNgYKKwYBBAGEWQoEAjEoMCYwDAYKKwYBBAGEWQoDAaAKMAgCAQACAxbjYKEKMAgCAQACAwehIDANBgkqhkiG9w0BAQUFAAOCAQEAKnF3SLzUucl7kzdgvPhsq1cn1/gpTUQ9SVN63YEFqTbtTweCLWohx60Q2rJR580riUxa9ef0+wcrhe591GoATnUddqDKCONjhfumiJiNkodYjYr32opM9utjQ5zYPyQLK8AHiN69kexQnHkjqo/gp7vxQPaFojaCcaqw6dU0+Bohbq26MGJ91tLVaS0AB2qn16b4Pfh8YN3v48qqXi6XdnZXd8SX7dnP8p8TYlVuNSJ4/7zvrGMT81KMyq2Dt2Pt4sbLS3f2Qf03z2rdYlRGv1fTIS+IbVT1xqxeQGECQ3Iu5zu+vx95X+AOAYWA0oXf/HA4orsY6nrPkHcguOK4BjGCAhUwggIRAgEBMIGOMHcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xITAfBgNVBAMTGE1pY3Jvc29mdCBUaW1lLVN0YW1wIFBDQQITMwAAAMEJ+AJBu02q3AAAAAAAwTAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTgwNTEwMjMyMjE0WjAjBgkqhkiG9w0BCQQxFgQUTULriPgEeXkuig1bk2q9A/cEpKQwDQYJKoZIhvcNAQEFBQAEggEAiUgG5+6KzwcA+NkJfHm1PrCHikx4cBINoj9ugweiDyUafye0HiXOAgJglDjftMg7gKMW8j+IfX/fChufGvDjZBCYga4WACTO82aN+DeK/UIrLkEmMdmAFAqYa1WSeo1PFxoihLWkHKeQDc4VLPjg1t12jNA1PU4rdwh020KPKGsK4WQI8dfCMOX8NzJNY6NEcxrBu1/qysRpGY+ahL3d6V+rFCM1r8exlsQjr92tlW7K//mcB6uE/kAsKXdfYQampUCTSYMWC3+eTfKMI55xEmtYNnDr9UCDPiyzIkQDh8N16SE9dyRGrHzeu3kK0EzARVb/KbnJCXRIlRELO5ot1w==</CounterSignature></Object></Signature></doc>

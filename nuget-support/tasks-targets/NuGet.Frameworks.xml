@@ -70,9 +70,9 @@
             Find all equivalent frameworks, and their equivalent frameworks.
             Example:
             Mappings:
-            A &lt;&#8210;&gt; B
-            B &lt;&#8210;&gt; C
-            C &lt;&#8210;&gt; D
+            A &lt;‒&gt; B
+            B &lt;‒&gt; C
+            C &lt;‒&gt; D
             For A we need to find B, C, and D so we must retrieve equivalent frameworks for A, B, and C
             also as we discover them.
             </summary>
@@ -116,13 +116,13 @@
             <summary>
             Get a list of frameworks supporting the provided framework. This list
             is not meant to be exhaustive but is instead meant to be human-readable.
-            Ex: netstandard1.5 -> netstandardapp1.5, net462, dnxcore50, ...
+            Ex: netstandard1.5 -&gt; netstandardapp1.5, net462, dnxcore50, ...
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkCompatibilityProvider.IsCompatible(NuGet.Frameworks.NuGetFramework,NuGet.Frameworks.NuGetFramework)">
             <summary>
-            Ex: IsCompatible(net45, net40) -> true
-            Ex: IsCompatible(net40, net45) -> false
+            Ex: IsCompatible(net45, net40) -&gt; true
+            Ex: IsCompatible(net40, net45) -&gt; false
             </summary>
             <param name="framework">Project target framework</param>
             <param name="other">Library framework that is going to be installed</param>
@@ -138,24 +138,24 @@
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.IdentifierSynonyms">
             <summary>
-            Synonym &#8210;&gt; Identifier
-            Ex: NET Framework &#8210;&gt; .NET Framework
+            Synonym ‒&gt; Identifier
+            Ex: NET Framework ‒&gt; .NET Framework
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.IdentifierShortNames">
             <summary>
-            Ex: .NET Framework &#8210;&gt; net
+            Ex: .NET Framework ‒&gt; net
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.ProfileShortNames">
             <summary>
-            Ex: WindowsPhone &#8210;&gt; wp
+            Ex: WindowsPhone ‒&gt; wp
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.EquivalentFrameworks">
             <summary>
             Equal frameworks. Used for legacy conversions.
-            ex: Framework: Win8 &lt;&#8210;&gt; Framework: NetCore45 Platform: Win8
+            ex: Framework: Win8 &lt;‒&gt; Framework: NetCore45 Platform: Win8
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.EquivalentProfiles">
@@ -167,14 +167,14 @@
         <member name="P:NuGet.Frameworks.IFrameworkMappings.SubSetFrameworks">
             <summary>
             Frameworks which are subsets of others.
-            Ex: .NETCore &#8210;&gt; .NET
+            Ex: .NETCore ‒&gt; .NET
             Everything in .NETCore maps to .NET and is one way compatible. Version numbers follow the same format.
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.CompatibilityMappings">
             <summary>
             Additional framework compatibility rules beyond name and version matching.
-            Ex: .NETFramework supports &#8210;&gt; Native
+            Ex: .NETFramework supports ‒&gt; Native
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.NonPackageBasedFrameworkPrecedence">
@@ -182,13 +182,13 @@
             Ordered list of framework identifiers. The first framework in the list will be preferred over other 
             framework identifiers. This is enable better tie breaking in scenarios where legacy frameworks are 
             equivalently compatible to a new framework.
-            Example: UAP10.0 &#8210;&gt; win81, wpa81
+            Example: UAP10.0 ‒&gt; win81, wpa81
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.PackageBasedFrameworkPrecedence">
             <summary>
-            Same as <see cref="P:NuGet.Frameworks.IFrameworkMappings.NonPackageBasedFrameworkPrecedence"/> but is only referred to if all of the packages
-            in consideration are package based (determined by <see cref="P:NuGet.Frameworks.NuGetFramework.IsPackageBased"/>).
+            Same as <see cref="P:NuGet.Frameworks.IFrameworkMappings.NonPackageBasedFrameworkPrecedence" /> but is only referred to if all of the packages
+            in consideration are package based (determined by <see cref="P:NuGet.Frameworks.NuGetFramework.IsPackageBased" />).
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.EquivalentFrameworkPrecedence">
@@ -200,13 +200,13 @@
         <member name="P:NuGet.Frameworks.IFrameworkMappings.ShortNameReplacements">
             <summary>
             Rewrite folder short names to the given value.
-            Ex: dotnet50 &#8210;&gt; dotnet
+            Ex: dotnet50 ‒&gt; dotnet
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IFrameworkMappings.FullNameReplacements">
             <summary>
             Rewrite full framework names to the given value.
-            Ex: .NETPlatform,Version=v0.0 &#8210;&gt; .NETPlatform,Version=v5.0
+            Ex: .NETPlatform,Version=v0.0 ‒&gt; .NETPlatform,Version=v5.0
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetIdentifier(System.String,System.String@)">
@@ -274,14 +274,14 @@
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetPortableCompatibilityMappings(System.Int32,System.Collections.Generic.IEnumerable{NuGet.Frameworks.FrameworkRange}@)">
             <summary>
             Returns ranges of frameworks that are known to be supported by the given portable profile number.
-            Ex: Profile7 -> netstandard1.1
+            Ex: Profile7 -&gt; netstandard1.1
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetEquivalentFrameworks(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework}@)">
             <summary>
             Returns a list of all possible substitutions where the framework name
             have equivalents.
-            Ex: sl3 -> wp8
+            Ex: sl3 -&gt; wp8
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetEquivalentFrameworks(NuGet.Frameworks.FrameworkRange,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework}@)">
@@ -292,13 +292,13 @@
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetCompatibilityMappings(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Frameworks.FrameworkRange}@)">
             <summary>
             Returns ranges of frameworks that are known to be supported by the given framework.
-            Ex: net45 -> native
+            Ex: net45 -&gt; native
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetSubSetFrameworks(System.String,System.Collections.Generic.IEnumerable{System.String}@)">
             <summary>
             Returns all sub sets of the given framework.
-            Ex: .NETFramework -> .NETCore
+            Ex: .NETFramework -&gt; .NETCore
             These will have the same version, but a different framework
             </summary>
         </member>
@@ -306,14 +306,14 @@
             <summary>
             The ascending order of frameworks should be based on the following ordered groups:
             
-            1. Non-package-based frameworks in <see cref="P:NuGet.Frameworks.IFrameworkMappings.NonPackageBasedFrameworkPrecedence"/>.
+            1. Non-package-based frameworks in <see cref="P:NuGet.Frameworks.IFrameworkMappings.NonPackageBasedFrameworkPrecedence" />.
             2. Other non-package-based frameworks.
-            3. Package-based frameworks in <see cref="P:NuGet.Frameworks.IFrameworkMappings.PackageBasedFrameworkPrecedence"/>.
+            3. Package-based frameworks in <see cref="P:NuGet.Frameworks.IFrameworkMappings.PackageBasedFrameworkPrecedence" />.
             4. Other package-based frameworks.
             
             For group #1 and #3, the order within the group is based on the order of the respective precedence list.
             For group #2 and #4, the order is the original order in the incoming list. This should later be made
-            consistent between different input orderings by using the <see cref="T:NuGet.Frameworks.NuGetFrameworkSorter"/>.
+            consistent between different input orderings by using the <see cref="T:NuGet.Frameworks.NuGetFrameworkSorter" />.
             </summary>
             <remarks>netcore50 is a special case since netcore451 is not packages based, but netcore50 is.
             This sort will treat all versions of netcore as non-packages based.</remarks>
@@ -323,19 +323,19 @@
             Used to pick between two equivalent frameworks. This is meant to favor the more human-readable
             framework. Note that this comparison does not validate that the provided frameworks are indeed
             equivalent (e.g. with
-            <see cref="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetEquivalentFrameworks(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework}@)"/>).
+            <see cref="M:NuGet.Frameworks.IFrameworkNameProvider.TryGetEquivalentFrameworks(NuGet.Frameworks.NuGetFramework,System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework}@)" />).
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.GetShortNameReplacement(NuGet.Frameworks.NuGetFramework)">
             <summary>
             Returns folder short names rewrites.
-            Ex: dotnet50 -> dotnet
+            Ex: dotnet50 -&gt; dotnet
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.GetFullNameReplacement(NuGet.Frameworks.NuGetFramework)">
             <summary>
             Returns full name rewrites.
-            Ex: .NETPlatform,Version=v0.0 -> .NETPlatform,Version=v5.0
+            Ex: .NETPlatform,Version=v0.0 -&gt; .NETPlatform,Version=v5.0
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.IFrameworkNameProvider.GetNetStandardVersions">
@@ -370,19 +370,19 @@
         </member>
         <member name="P:NuGet.Frameworks.IPortableFrameworkMappings.ProfileFrameworks">
             <summary>
-            Ex: 5 -> net4, win8
+            Ex: 5 -&gt; net4, win8
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IPortableFrameworkMappings.ProfileOptionalFrameworks">
             <summary>
             Additional optional frameworks supported in a portable profile.
-            Ex: 5 -> MonoAndroid1+MonoTouch1
+            Ex: 5 -&gt; MonoAndroid1+MonoTouch1
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.IPortableFrameworkMappings.CompatibilityMappings">
             <summary>
             Compatibility mapping for portable profiles. This is a separate compatibility from that in
-            <see cref="P:NuGet.Frameworks.IFrameworkMappings.CompatibilityMappings"/>.
+            <see cref="P:NuGet.Frameworks.IFrameworkMappings.CompatibilityMappings" />.
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.FallbackFramework.Fallback">
@@ -422,9 +422,9 @@
         </member>
         <member name="F:NuGet.Frameworks.FrameworkNameProvider._identifierSynonyms">
             <summary>
-            Contains identifier -> identifier
-            Ex: .NET Framework -> .NET Framework
-            Ex: NET Framework -> .NET Framework
+            Contains identifier -&gt; identifier
+            Ex: .NET Framework -&gt; .NET Framework
+            Ex: NET Framework -&gt; .NET Framework
             This includes self mappings.
             </summary>
         </member>
@@ -516,13 +516,13 @@
         <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceUpwards(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
             <summary>
             Reduce to the highest framework
-            Ex: net45, net403, net40 -> net45
+            Ex: net45, net403, net40 -&gt; net45
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.FrameworkReducer.ReduceDownwards(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
             <summary>
             Reduce to the lowest framework
-            Ex: net45, net403, net40 -> net40
+            Ex: net45, net403, net40 -&gt; net40
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.FrameworkReducer.ExplodePortableFrameworks(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework},System.Boolean)">
@@ -532,7 +532,7 @@
         </member>
         <member name="M:NuGet.Frameworks.FrameworkReducer.ExplodePortableFramework(NuGet.Frameworks.NuGetFramework,System.Boolean)">
             <summary>
-            portable-net45+win8 -> net45, win8
+            portable-net45+win8 -&gt; net45, win8
             </summary>
         </member>
         <member name="M:NuGet.Frameworks.FrameworkReducer.GetBestPCL(System.Collections.Generic.IEnumerable{NuGet.Frameworks.NuGetFramework})">
@@ -749,7 +749,7 @@
         <member name="M:NuGet.Frameworks.OneWayCompatibilityMappingEntry.#ctor(NuGet.Frameworks.FrameworkRange,NuGet.Frameworks.FrameworkRange)">
             <summary>
             Creates a one way compatibility mapping.
-            Ex: net -supports-> native
+            Ex: net -supports-&gt; native
             </summary>
             <param name="targetFramework">Project framework</param>
             <param name="supportedFramework">Framework that is supported by the project framework</param>
@@ -787,22 +787,22 @@
         </member>
         <member name="P:NuGet.Frameworks.Strings.InvalidFrameworkIdentifier">
             <summary>
-              Looks up a localized string similar to Invalid framework identifier &apos;{0}&apos;..
+              Looks up a localized string similar to Invalid framework identifier '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.Strings.InvalidFrameworkVersion">
             <summary>
-              Looks up a localized string similar to Invalid framework version &apos;{0}&apos;..
+              Looks up a localized string similar to Invalid framework version '{0}'..
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.Strings.InvalidPortableFrameworksDueToHyphen">
             <summary>
-              Looks up a localized string similar to Invalid portable frameworks &apos;{0}&apos;. A hyphen may not be in any of the portable framework names..
+              Looks up a localized string similar to Invalid portable frameworks '{0}'. A hyphen may not be in any of the portable framework names..
             </summary>
         </member>
         <member name="P:NuGet.Frameworks.Strings.MissingPortableFrameworks">
             <summary>
-              Looks up a localized string similar to Invalid portable frameworks for &apos;{0}&apos;. A portable framework must have at least one framework in the profile..
+              Looks up a localized string similar to Invalid portable frameworks for '{0}'. A portable framework must have at least one framework in the profile..
             </summary>
         </member>
         <member name="M:NuGet.Shared.EqualityUtility.OrderedEquals``2(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1},System.Collections.Generic.IComparer{``1},System.Collections.Generic.IEqualityComparer{``0})">
@@ -858,4 +858,4 @@
             </summary>
         </member>
     </members>
-</doc>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" /><DigestValue>qtFEUxvZmWq11uq05zTh5snHnU8=</DigestValue></Reference></SignedInfo><SignatureValue>k9roFdP86Mq39sDdcwPtWUdfdisDR1SiyoGJjgO4YnLQgiGU6TM2JMACeUOGbEUBfgeSOQjO/pj8QD7YzQDTs9nxOB77fvqq/0ZykUlopra5LssryGKVc0OCEpBj2PEuNnl9uWgv1NXXUFhDEoTiSVF19uOvhsWtXsHVJDEuoq1dNNDdwHNljc5TfeIqjfdUhiomz4lJxbpfM3VvgQ5sp2D5nCpzSKwky/rLV63ENam91p9LJAtQx0gRiWM3eKIEQSPMvLuOrnpR1qmkBdH/Sn+APxb/tvruBu47Z74aeQOuLdO3eedDCtfNx6M8KUMJ3SkgpILuaq+MlnLQjz+/AQ==</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>qCn+1BDI/1UKnpkAA1KP3LC/+av4Uf5cjFTCJ85MK5br24Ecy4Yrecp1frhngyaGvdYvHD7HWKqPb5X7WvynxhvBw+hMF04iPbdbVlx/11r1Lbq7pgm/BnzumP5A+TC4a/5Ab3SzuNY4ScnQhwcvMd+2vE6j0J63YntWcHVPZ78FzKOuvgCSwhtQoWE7EAABsYbQKfNA9Q/Zow9Xq2MJqNypaudHQ6e+FcQ9J6ToVlKIz1mZoQCENpvQOdIqDS/mBOK/E5aIg6lRNxhBieL5hZ2OZRo9A2TMxd5QcF3yC4Wpj7FF6Hf/g50Ju3Lg5lYIlbkrgxKJMfznWHIdvfmDIw==</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIE7TCCA9WgAwIBAgITMwAAAXl8LldOUuHK1gABAAABeTANBgkqhkiG9w0BAQUFADB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTAeFw0xNzA4MTEyMDExMTVaFw0xODA4MTEyMDExMTVaMIGDMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BSMR4wHAYDVQQDExVNaWNyb3NvZnQgQ29ycG9yYXRpb24wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCoKf7UEMj/VQqemQADUo/csL/5q/hR/lyMVMInzkwrluvbgRzLhit5ynV+uGeDJoa91i8cPsdYqo9vlfta/KfGG8HD6EwXTiI9t1tWXH/XWvUturumCb8GfO6Y/kD5MLhr/kBvdLO41jhJydCHBy8x37a8TqPQnrdie1ZwdU9nvwXMo66+AJLCG1ChYTsQAAGxhtAp80D1D9mjD1erYwmo3Klq50dDp74VxD0npOhWUojPWZmhAIQ2m9A50ioNL+YE4r8TloiDqVE3GEGJ4vmFnY5lGj0DZMzF3lBwXfILhamPsUXod/+DnQm7cuDmVgiVuSuDEokx/OdYch29+YMjAgMBAAGjggFhMIIBXTATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU+OR+jRxjfACqzHMAStPybTiqzYEwUgYDVR0RBEswSaRHMEUxDTALBgNVBAsTBE1PUFIxNDAyBgNVBAUTKzIyOTgwMysxYWJmOWU1Zi1jZWQwLTQyZTYtYTY1ZC1kOTM1MDk1OWZlMGUwHwYDVR0jBBgwFoAUyxHoytK0FlgByTcuMxYWuUyaCh8wVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljQ29kU2lnUENBXzA4LTMxLTIwMTAuY3JsMFoGCCsGAQUFBwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNDb2RTaWdQQ0FfMDgtMzEtMjAxMC5jcnQwDQYJKoZIhvcNAQEFBQADggEBAG9La36GDdgLJlBrOojIWqn2suoqmaflBjREAe9z+60v/e341YBqNRw0xxMMtV5kPHNrjPJv02m+zjsPm/kFcjwdRuHonD42sW81qaZQVH/h1Fc9Ox56XI8BP3c/XnMnV/qnMOfUcq+L33Ei/Yrg+uAt31/y3ndk39qwBgAJq0aQo/X+gYYskyt1xhEo1+WK4hwnq5eMmsTiBxnT8mQXsSvd8wh6eFCFBjIcOVCjzYtw3gjVe29MP5rodW3kyxNXHClZOF++Raummsr5KZ7NOM+5yAW6LPvEJb9oDd8Pe0IalcePvVprkAtR+te354+yszMocwNcf6NGgpyttjZ3doc=</X509Certificate><X509Certificate>MIIFvDCCA6SgAwIBAgIKYTMmGgAAAAAAMTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTAwODMxMjIxOTMyWhcNMjAwODMxMjIyOTMyWjB5MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSMwIQYDVQQDExpNaWNyb3NvZnQgQ29kZSBTaWduaW5nIFBDQTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJyWVwZMGS/HZpgICBCmXZTbD4b1m/My/Hqa/6XFhDg3zp0gxq3L6Ay7P/ewkJOI9VyANs1VwqJyq4gSfTwaKxNS42lvXlLcZtHB9r9Jd+ddYjPqnNEf9eB2/O98jakyVxF3K+tPeAoaJcap6Vyc1bxF5Tk/TWUcqDWdl8ed0WDhTgW0HNbBbpnUo2lsmkv2hkL/pJ0KeJ2L1TdFDBZ+NKNYv3LyV9GMVC5JxPkQDDPcikQKCLHN049oDI9kM2hOAaFXE5WgigqBTK3S9dPY+fSLWLxRT3nrAgA9kahntFbjCZT6HqqSvJGzzc8OJ60d1ylF56NyxGPVjzBrAlfA9MCAwEAAaOCAV4wggFaMA8GA1UdEwEB/wQFMAMBAf8wHQYDVR0OBBYEFMsR6MrStBZYAck3LjMWFrlMmgofMAsGA1UdDwQEAwIBhjASBgkrBgEEAYI3FQEEBQIDAQABMCMGCSsGAQQBgjcVAgQWBBT90TFO0yaKleGYYDuoMW+mPLzYLTAZBgkrBgEEAYI3FAIEDB4KAFMAdQBiAEMAQTAfBgNVHSMEGDAWgBQOrIJgQFYnl+UlE/wq4QpTlVnkpDBQBgNVHR8ESTBHMEWgQ6BBhj9odHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9taWNyb3NvZnRyb290Y2VydC5jcmwwVAYIKwYBBQUHAQEESDBGMEQGCCsGAQUFBzAChjhodHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vcGtpL2NlcnRzL01pY3Jvc29mdFJvb3RDZXJ0LmNydDANBgkqhkiG9w0BAQUFAAOCAgEAWTk+fyZGr+tvQLEytWrrDi9uqEn361917Uw7LddDrQv+y+ktMaMjzHxQmIAhXaw9L0y6oqhWnONwu7i0+Hm1SXL3PupBf8rhDBdpy6WcIC36C1DEVs0t40rSvHDnqA2iA6VW4LiKS1fylUKc8fPv7uOGHzQ8uFaa8FMjhSqkghyT4pQHHfLiTviMocroE6WRTsgb0o9ylSpxbZsa+BzwU9ZnzCL/XB3Nooy9J7J5Y1ZEolHN+emjWFbdmwJFRC9f9Nqu1IIybvyklRPk62nnqaIsvsgrEA5ljpnb9aL6EiYJZTiU8XofSrvR4Vbo0HiWGFzJNRZf3ZMdSY4tvq00RBzuEBUaAF3dNVshzpjHCe6FDoxPbQ4TTj18KUicctHzbMrB7HCjV5JXfZSNoBtIA1r3z6NnCnSlNu0tLxfI5nI3EvRvsTxngvlSso0zFmUeDordEN5k9G/ORtTTF+l5xAS00/ss3x+KnqwK+xMnQK3k+eGpf0a7B2BHZWBATrBC7E7ts3Z52Ao0CW0cgDEf4g5U3eWh++VHEK1kmP9QFi58vwUheuKVQSdpw5OPlcmN2Jshrg1cnPCiroZogwxqLbt2awAdlq3yFnv2FoMkuYjPaqhHMS+a3ONxPdcAfmJH0c6IybgY+g5yjcGjPa8CQGr/aZuW4hCoELQ3UAjWwz0=</X509Certificate><X509Certificate>MIIFmTCCA4GgAwIBAgIQea0WoUqgpa1Mc1j0BxMuZTANBgkqhkiG9w0BAQUFADBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMDEwNTA5MjMxOTIyWhcNMjEwNTA5MjMyODEzWjBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDzXfqAZ9Rap6kMLJAg0DUIPHWEzbcHiZyJ2t7Ow2D6kWhanpRxKRh2fMLgyCV2lA5Y+gQ0Nubfr/eAuulYCyuT5Z0F43cikfc0ZDwikR1e4QmQvBT+/HVYGeF5tweSo66IWQjYnwfKA1j8aCltMtfSqMtL/OELSDJP5uu4rU/kXG8TlJnbldV126gat5SRtHdb9UgMj2p5fRRwBH1tr5D12nDYR7e/my9s5wW34RFgrHmRFHzF1qbk4X7Vw37lktI8ALU2gt554W3ztW74nzPJy1J9c5g224uha6KVl5uj3sJNJv8GlmclBsjnrOTuEjOVMZnINQhONMp5U9W1vmMyWUA2wKVOBE0921sHM+RYv+8/U2TYQlk1V/0PRXwkBE2e1jh0EZcikM5oRHSSb9VLb7CG48c2QqDQ/MHAWvmjYbkwR3GWChawkcBCle8Qfyhq4yofseTNAz93cQTHIPxJDx1FiKTXy36IrY4t7EXbxFEEySr87IaemhGXW97OU4jm4rf9rJXCKEDb7wSQ34EzOdmyRaUjhwalVYkxuwYtYA5BGH0fLrWXyxHrFdUkpZTvFRSJ/Utz+jJb/NEzAPlZYnAHMuouq0Ate8rdIWcbMJmPFqojqEHRsG4RmzbE3kB0nOFYZcFgHnpbOMiPuwQmfNQWQOW2a2yqhv0Av87BNQIDAQABo1EwTzALBgNVHQ8EBAMCAcYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUDqyCYEBWJ5flJRP8KuEKU5VZ5KQwEAYJKwYBBAGCNxUBBAMCAQAwDQYJKoZIhvcNAQEFBQADggIBAMURTQM6YN1dUhF3j7K7NsiyBb+0t6jYIJ1cEwO2HCL6BhM1tshj1JpHbyZX0lXxBLEmX9apUGigvNK4bszD6azfGc14rFl0rGY0NsQbPmw4TDMOMBINoyb+UVMA/69aToQNDx/kbQUuToVLjWwzb1TSZKu/UK99ejmgN+1jAw/8EwbOFjbUVDuVG1FiOuVNF9QFOZKaJ6hbqr3su77jIIlgcWxWs6UT0G0OI36VA+1oPfLYY7hrTbboMLXhypRL96KqXZkwsj2nwlFsKCABJCcrSwC3nRFrcL6yEIK8DJto0I07JIeqmShynTNfWZC99d6TnjpiWjQ54ohVHbkGsMGJay3XacMZEjaE0Mmg2v8vaXiy5Xra69cMwPe9Yxe4ORM4ojZbe/KFVmodZGLBOOKqv1FmopT1EpxmIhBr8rcwki3yKfA9OxRDaKLxnCk3y844ICVtfGfzfiQSJAMIgUfspZ6X9RjXz7vV73aW7/3O21adlaBC+ZdY4dcxItNfWeY+biIA6kOEtiXb2fMIVmjAZGsdfOy2k6JiV24u2OdYj8QxSSbd3ik1h/UwcXBbFDxpvYkSfesuo/7Yf56CWlIKK8FDK9kwiJ/IEPuJjeahhXUzfmye23MTZGJppS99ypZtn/gETTCSPW4hFCHJPeDD/YprnUr90aGdmUN3P7Da</X509Certificate></X509Data></KeyInfo><Object Id="ts-countersig"><X509Data><X509Certificate>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</X509Certificate><X509Certificate>MIIEwjCCA6qgAwIBAgITMwAAAMDeLD0HlORJeQAAAAAAwDANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODUwWhcNMTgwOTA3MTc1ODUwWjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046N0FCNS0yREYyLURBM0YxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDoiKVSfklVAB4EOc9+r95kl32muXNITYcTbaRtuJl+MQzEnD0eU2JUXx2mI06ONnTfFW39ZQPF1pvUWkHBrS6m8oKy7Em4Ol91RJ5Knwy1VvY2Tawqh+VxwdARRgOeFtFm0S+Pa+BrXtVUhTtGl0BGMsKGEQKdDNGJD259Iq47qPLw3CmllE3/YFw1GGoJ9C3ry+I7ntxIjJYBLXA122vw93OOD/zWFh1SVq2AejPxcjKtHH2hjoeTKwkFeMNtIekrUSvhbuCGxW5r54KW0Yus4o8392l9Vz8lSEn2j/TgPTqD6EZlzkpw54VSwede/vyqgZIrRbat0bAhb8doY8vDAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUFf5K2jOJ0xmF1WRZxNxTQRBPtzUwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAGeJAuzJMR+kovMi8RK/LtfrKazWlR5Lx02hM9GFmMk1zWCScpfVY6xqfzWFllCFHBtOaJZqLiV97jfNCLpG0PULz24CWSkG7jJ+mZaCSicZ7ZC3bWDh1zpc54llYVyyTkRVYx/mtc9GujqbS8CBZgjaT/JsECnvGAPUcLYuSGt53CU1bUuiNwuzAhai4glcYyq3/7qMmmAtbnbCZhR5ySoMy7BwdzN70drLtafCJQncfAHXVO5r6SX4U/2J2zvWhA8lqhZu9SRulFGRvf81VTf+k5rJ2TjL6dYtSchooJ5YVvUk6i7bfV0VBN8xpaUhk8jbBnxhDPKIvDvnZlhPuJg==</X509Certificate></X509Data><CounterSignature ts-format="cms-timestamp-message" xmlns="http://schemas.microsoft.com/xmldsig/timestamp/2003">MIIRogYJKoZIhvcNAQcCoIIRkzCCEY8CAQMxCzAJBgUrDgMCGgUAMIIBEwYJKoZIhvcNAQcBoIIBBASCAQCT2ugV0/zoyrf2wN1zA+1ZR192KwNHVKLKgYmOA7hictCCIZTpMzYkwAJ5Q4ZsRQF+B5I5CM7+mPxAPtjNANOz2fE4Hvt++qr/RnKRSWimtrkuyyvIYpVzQ4ISkGPY8S42eX25aC/U1ddQWEMShOJJUXX246+Gxa1ewdUkMS6irV000N3Ac2WNzlN94iqN91SGKibPiUnFul8zdW+BDmynYPmcKnNIrCTL+stXrcQ1qb3Wn0skC1DHSBGJYzd4ogRBI8y8u46uelHWqaQF0f9Kf4A/Fv+2+u4G7jtnvhp5A64t07d550MK183HozwpQwndKSCkgu5qr4yWctCPP78BoIIOSzCCBgcwggPvoAMCAQICCmEWaDQAAAAAABwwDQYJKoZIhvcNAQEFBQAwXzETMBEGCgmSJomT8ixkARkWA2NvbTEZMBcGCgmSJomT8ixkARkWCW1pY3Jvc29mdDEtMCsGA1UEAxMkTWljcm9zb2Z0IFJvb3QgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MB4XDTA3MDQwMzEyNTMwOVoXDTIxMDQwMzEzMDMwOVowdzELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEhMB8GA1UEAxMYTWljcm9zb2Z0IFRpbWUtU3RhbXAgUENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn6Fssd/bSJIqfGsuGeG94uPFmVEjUK3O3RhOJA/u0afRTK10MCAR6wfVVJUVSZQbQpKumFwwJtoAa+h7veyJBw/3DgSY8InMH8szJIed8vRnHCz8e+eIHernTqOhwSNTyo36Rc8J0F6v0LBCBKL5pmyTZ9co3EZTsIbQ5ShGLieshk9VUgzkAyz7apCQMG6H81kwnfp+1pez6CGXfvjSE/MIt1NtUrRFkJ9IAEpHZhEnKWaol+TTBoFKovmEpxFHFAmCn4TtVXj+AZodUAiFABAwRu233iNGu8QtVJ+vHnhBMXfMm987g5OhYQK1HQ2x/PebsgHOIktU//kFw8IgCwIDAQABo4IBqzCCAacwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUIzT42VJGcArtQPt2+7MrsMM1sw8wCwYDVR0PBAQDAgGGMBAGCSsGAQQBgjcVAQQDAgEAMIGYBgNVHSMEgZAwgY2AFA6sgmBAVieX5SUT/CrhClOVWeSkoWOkYTBfMRMwEQYKCZImiZPyLGQBGRYDY29tMRkwFwYKCZImiZPyLGQBGRYJbWljcm9zb2Z0MS0wKwYDVQQDEyRNaWNyb3NvZnQgUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHmCEHmtFqFKoKWtTHNY9AcTLmUwUAYDVR0fBEkwRzBFoEOgQYY/aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvbWljcm9zb2Z0cm9vdGNlcnQuY3JsMFQGCCsGAQUFBwEBBEgwRjBEBggrBgEFBQcwAoY4aHR0cDovL3d3dy5taWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNyb3NvZnRSb290Q2VydC5jcnQwEwYDVR0lBAwwCgYIKwYBBQUHAwgwDQYJKoZIhvcNAQEFBQADggIBABCXisNcA0Q23em0rXfbznlRTQGxLnRxW20ME6vOvnuPuC7UEqKMbWK4VwLLTiATUJndekDiV7uvWJoc4R0Bhqy7ePKL0Ow7Ae7ivo8KBciNSOLwUxXdT6uS5OeNatWAweaU8gYvhQPpkSokInD79vzkeJkuDfcH4nC8GE6djmsKcpW4oTmcZy3FUQ7qYlw/FpiLID/iBxoy+cwxSnYxPStyC8jqcD3/hQoT38IKYY7w17gX606Lf8U1K16jv+u8fQtCe9RTciHuMMq7eGVcWwEXChQO0toUmPU8uWZYsy0v5/mFhsxRVuidcJRsrDlM1PZ5v6oYemIp76KbKTQGdxpiyT0ebR+C8AvHLLvPQ7Pl+ex9teOkqHQ1uE7FcSMSJnYLPFKMcVpGQxS8s7OwTWfIn0L/gHkhgJ4VMGboQhJeGsieIiHQQ+kr6bv0SMws1NgygEwmKkgkX1rqVu+m3pmdyjpvvYEndAYR7nYhv5uCwSdUtrFqPYmhdmG0bqETpr+qR/ASb/2KMmyy/t9RyIwjyWa9nR2HEmQCPS2vWY+45CHltbDKY7R4VAXUQS5QrJSwpXirs6CWdRrZkocTdSIvMqgIbqBbjCW/oO+EyiHW6x5PyZruSeD3AWVviQt9yGnI5m7qp5fOMSn/DsVbXNhNG6HY+i+ePy5VFmvJE6P9MIIEwjCCA6qgAwIBAgITMwAAAMDeLD0HlORJeQAAAAAAwDANBgkqhkiG9w0BAQUFADB3MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EwHhcNMTYwOTA3MTc1ODUwWhcNMTgwOTA3MTc1ODUwWjCBsjELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIERTRSBFU046N0FCNS0yREYyLURBM0YxJTAjBgNVBAMTHE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDoiKVSfklVAB4EOc9+r95kl32muXNITYcTbaRtuJl+MQzEnD0eU2JUXx2mI06ONnTfFW39ZQPF1pvUWkHBrS6m8oKy7Em4Ol91RJ5Knwy1VvY2Tawqh+VxwdARRgOeFtFm0S+Pa+BrXtVUhTtGl0BGMsKGEQKdDNGJD259Iq47qPLw3CmllE3/YFw1GGoJ9C3ry+I7ntxIjJYBLXA122vw93OOD/zWFh1SVq2AejPxcjKtHH2hjoeTKwkFeMNtIekrUSvhbuCGxW5r54KW0Yus4o8392l9Vz8lSEn2j/TgPTqD6EZlzkpw54VSwede/vyqgZIrRbat0bAhb8doY8vDAgMBAAGjggEJMIIBBTAdBgNVHQ4EFgQUFf5K2jOJ0xmF1WRZxNxTQRBPtzUwHwYDVR0jBBgwFoAUIzT42VJGcArtQPt2+7MrsMM1sw8wVAYDVR0fBE0wSzBJoEegRYZDaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNybDBYBggrBgEFBQcBAQRMMEowSAYIKwYBBQUHMAKGPGh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2VydHMvTWljcm9zb2Z0VGltZVN0YW1wUENBLmNydDATBgNVHSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQUFAAOCAQEAGeJAuzJMR+kovMi8RK/LtfrKazWlR5Lx02hM9GFmMk1zWCScpfVY6xqfzWFllCFHBtOaJZqLiV97jfNCLpG0PULz24CWSkG7jJ+mZaCSicZ7ZC3bWDh1zpc54llYVyyTkRVYx/mtc9GujqbS8CBZgjaT/JsECnvGAPUcLYuSGt53CU1bUuiNwuzAhai4glcYyq3/7qMmmAtbnbCZhR5ySoMy7BwdzN70drLtafCJQncfAHXVO5r6SX4U/2J2zvWhA8lqhZu9SRulFGRvf81VTf+k5rJ2TjL6dYtSchooJ5YVvUk6i7bfV0VBN8xpaUhk8jbBnxhDPKIvDvnZlhPuJqGCA3YwggJeAgEBMIHioYG4pIG1MIGyMQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQwwCgYDVQQLEwNBT0MxJzAlBgNVBAsTHm5DaXBoZXIgRFNFIEVTTjo3QUI1LTJERjItREEzRjElMCMGA1UEAxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZaIlCgEBMAkGBSsOAwIaBQADFQCtr50KepZtJmA5PAblo3MKB9ZAc6CBwTCBvqSBuzCBuDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEMMAoGA1UECxMDQU9DMScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBFU046MjY2NS00QzNGLUM1REUxKzApBgNVBAMTIk1pY3Jvc29mdCBUaW1lIFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJKoZIhvcNAQEFBQACBQDenpBXMCIYDzIwMTgwNTEwMDkzMzExWhgPMjAxODA1MTEwOTMzMTFaMHYwPAYKKwYBBAGEWQoEATEuMCwwCgIFAN6ekFcCAQAwCQIBAAIBIAIB/zAHAgEAAgIbljAKAgUA3p/h1wIBADA2BgorBgEEAYRZCgQCMSgwJjAMBgorBgEEAYRZCgMBoAowCAIBAAIDFuNgoQowCAIBAAIDB6EgMA0GCSqGSIb3DQEBBQUAA4IBAQAtsK2joeGeI1Eg1B2pSmpAGO1LwCtbmJmoXS/Ou0WYxu3oigHGb791IWnfIoYNKNH1H+Nmh6NL+UI1cyffcX9zP6nSNYVyr+OBxhk9YUBFyK9rbhgkG+o0lp6KUkxHJcKeBLeHr9wiG83C71rTElXjJaaxhMz2uEump5dv0H88g0RroNcCtMRkuabJQIfvKQBaPAEif3rDHyAR5FeHm8DWW9J768yKteo26x3s6sEvJY9Ky82l25L2XxoMNE7WO34DGzTt91l05DVRziA8yPSgp65yfGmh+vgEOZK+ZFNxdHz/n7zrY6k6NXMvyl+nAHM3/fOBUSziHSAnsR+a6ocpMYICFTCCAhECAQEwgY4wdzELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEhMB8GA1UEAxMYTWljcm9zb2Z0IFRpbWUtU3RhbXAgUENBAhMzAAAAwN4sPQeU5El5AAAAAADAMAkGBSsOAwIaBQCgXTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3DQEJBTEPFw0xODA1MTAyMzIyMTZaMCMGCSqGSIb3DQEJBDEWBBT+KKnMimXtLJzdnpxF8TSrF/RpfzANBgkqhkiG9w0BAQUFAASCAQC64AUDxAzQEq0UFaMdbpO/jKqPhfUhMTgfzdWeK1/8WP3HJ/bT/Xwter5V0w5HFsvbH29zsC1G7ic6P+rUCmP8RuUWaNzDP76MRusxtk64fZ7aqrNmf6YBFbbGnSRA9jxRWFXOWv7/PtcI1fdoBFy08zT/99HTzlrnnbSH9Mk1RPMlGNw/cYBDBfKJm1ChiXzcSOSXuj1pZaBZzQK4h4tEtLfci3W1q5VzxZMPWVMx+2GSb1ms/z2+e9Uwc4NL3im0oyxZnxw/cxiJo4EINgussg0uDzpoprWrVRy33gSSLPSqX7NNUVerX39nRA1eHwTyT2jDIdQwd9c+Gmiyrfj4</CounterSignature></Object></Signature></doc>

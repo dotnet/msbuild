@@ -12,4 +12,9 @@
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" Condition=" '$(IsPackable)' == 'true' " />
   </ItemGroup>
 
+  <Target Name="_RemoveMSSourceLinkGitHub" AfterTargets="CollectPackageReferences" Condition="'$(MonoBuild)' == 'true'">
+    <ItemGroup>
+      <PackageReference Remove="Microsoft.SourceLink.$(SourceLinkProvider)" />
+    </ItemGroup>
+  </Target>
 </Project>

@@ -11,7 +11,7 @@
          TF=net461 here and let this set up the `bootstrap/` folder. And to avoid the
          `MSBuild` project doing the same, we will disable the `bootstrap` bits from there,
          for mono. -->
-    <TargetFramework Condition="'$(MonoBuild)' == 'true'">net461</TargetFramework>
+    <TargetFramework Condition="'$(MonoBuild)' == 'true'">net471</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +34,14 @@
 
     <!-- Use the NuGet.targets that we bundle, since that is what we will install so we should be testing against that -->
     <Content Include="$(RepoRoot)nuget-support\tasks-targets\*" CopyToOutputDirectory="PreserveNewest" />
+
+    <!-- This is for the second build. Copy over the resolvers from the bootstrap directory, which will include the
+         nuget resolver also -->
+    <Content
+            Condition="'$(CreateBootstrap)' != 'true'"
+            Include="$(MSBuildBinPath)\SdkResolvers\**\*" LinkBase="SdkResolvers" CopyToOutputDirectory="PreserveNewest" />
+
+    <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(MonoBuild)' != 'true'">

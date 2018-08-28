@@ -1001,7 +1001,7 @@
     <Content Update="@(Content)" Pack="false" />
   </ItemGroup>
 
-  <Target Name="CopyMscorlib" AfterTargets="Build">
+  <Target Name="CopyMscorlib" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true'">
     <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />
     <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />
   </Target>

@@ -42,6 +42,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <ItemGroup>
             <Reference Remove="@(Reference)" />
             <Reference Include="@(FilteredReferences)" />
+
+            <ReferenceCopyLocalPaths Remove="%(DeniedReferencesThatCouldNotBeFixed.DeniedAssemblyPath)" />
         </ItemGroup>
     </Target>
 

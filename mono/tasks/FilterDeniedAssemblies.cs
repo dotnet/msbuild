@@ -31,8 +31,8 @@ namespace Mono.Build.Tasks
 
             if (!File.Exists (s_deniedListFullPath)) {
                 if (!s_haveWarnedAboutMissingList) {
-                    Log.LogWarning(null, "MSB3911", null,BuildEngine.ProjectFileOfTaskNode, BuildEngine.LineNumberOfTaskNode, BuildEngine.ColumnNumberOfTaskNode, 0, 0,
-                                    $"INTERNAL WARNING: Could not find the list of denied assemblies at {s_deniedListFullPath}. Please file a bug report at https://bugzilla.xamarin.com .");
+                    Log.LogMessage (MessageImportance.Low,
+                                    $"Could not find the list of denied assemblies at {s_deniedListFullPath}. Please file a bug report at https://github.com/mono/mono/issues .");
 
                     s_haveWarnedAboutMissingList = true;
                 }
@@ -87,9 +87,8 @@ namespace Mono.Build.Tasks
 
                         Log.LogMessage (MessageImportance.Low, $"Changed the denied (windows specific) assembly reference path from {assemblyPathFromReference} to the safe assembly path {safeAssemblyFilePath}.");
                     } else {
-                        Log.LogWarning(null, "MSB3912", null, BuildEngine.ProjectFileOfTaskNode, BuildEngine.LineNumberOfTaskNode, BuildEngine.ColumnNumberOfTaskNode, 0, 0,
-                                        $"INTERNAL WARNING: Could not find the replacement assembly ({assemblyFilename}) for the Windows specific reference {assemblyPathFromReference}." +
-                                        " Please file a bug report at https://bugzilla.xamarin.com .");
+                        Log.LogMessage (MessageImportance.Low,
+                                        $"Could not find the replacement assembly ({assemblyFilename}) for the Windows specific reference {assemblyPathFromReference}.");
 
                         referenceItem.SetMetadata ("FixedDeniedAssemblyPath", "false");
                         deniedReferencesNotFixedItemsList.Add (referenceItem);

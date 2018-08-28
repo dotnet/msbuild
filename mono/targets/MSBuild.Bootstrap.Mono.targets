@@ -39,9 +39,16 @@
 	</Target>
 
 	<!-- FIXME: Support Configurations in task build -->
-	<Target Name="BuildMonoTasks" AfterTargets="Build" Condition="'$(TargetFramework)' != ''">
+	<Target Name="BuildMonoTasks" AfterTargets="Bootstrap" Condition="'$(TargetFramework)' != ''">
 		<MSBuild
 			Projects="$(RepoRoot)\mono\tasks\build.csproj"
-			Properties="OutputPath=$(OutputPath);OutDir=$(OutDir);TargetFramework=$(TargetFramework);MonoBuild=true" />
+			Properties="OutputPath=$(OutputPath);OutDir=$(OutDir);TargetFramework=$(TargetFramework);MonoBuild=true"
+			Targets="Restore;Build" />
+
+		<!-- Copy to the MSBuildExtensionsPath for bootstrap -->
+		<Copy
+			Condition="'$(CreateBootstrap)' == 'true'"
+			SourceFiles="$(OutDir)\Mono.Build.Tasks.dll"
+			DestinationFolder="$(BootstrapDestination)" />
 	</Target>
 </Project>

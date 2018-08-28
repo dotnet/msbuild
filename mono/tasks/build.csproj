@@ -3,22 +3,19 @@
         <OutputType>Library</OutputType>
         <AssemblyName>Mono.Build.Tasks</AssemblyName>
         <DebugType>full</DebugType>
-        <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     </PropertyGroup>
 
-   <ItemGroup>
+    <Import Project="..\..\build\Versions.props" />
+    <ItemGroup>
         <Compile Include="FilterDeniedAssemblies.cs" />
 
         <Reference Include="Microsoft.Build.Framework" HintPath="$(OutDir)\Microsoft.Build.Framework.dll" />
         <Reference Include="Microsoft.Build.Utilities.Core" HintPath="$(OutDir)\Microsoft.Build.Utilities.Core.dll" />
 
-        <Reference Include="System.Reflection.Metadata">
-            <HintPath>$(OutDir)\Roslyn\System.Reflection.Metadata.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Collections.Immutable">
-            <HintPath>$(OutDir)\Roslyn\System.Collections.Immutable.dll</HintPath>
-        </Reference>
-   </ItemGroup>
+        <PackageReference Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+    </ItemGroup>
 
     <Target Name="Test" />
 

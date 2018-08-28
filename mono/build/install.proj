@@ -11,7 +11,7 @@
             <MSBuildInstallBinDir>$(MonoInstallPrefix)\lib\mono\msbuild\$(TargetMSBuildToolsVersion)\bin</MSBuildInstallBinDir>
             <XBuildDir>$(MonoInstallPrefix)\lib\mono\xbuild</XBuildDir>
 
-            <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\$(Configuration)\bin\MSBuild.Bootstrap\net461\</MSBuildBinSrcDir>
+            <MSBuildBinSrcDir>$(RepoRoot)artifacts\2\$(Configuration)\bin\MSBuild.Bootstrap\net471\</MSBuildBinSrcDir>
 
             <AllInstalledFiles_FileCanonical>$(MSBuildThisFileDirectory)\all_files.canon.txt</AllInstalledFiles_FileCanonical>
             <AllInstalledFiles_File>$(MSBuildThisFileDirectory)\all_files.new.txt</AllInstalledFiles_File>
@@ -50,6 +50,7 @@
 
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\TestTask*" />
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\Mono.Build.Tasks.*" />
+            <MSBuildFiles Remove="$(MSBuildBinSrcDir)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\Microsoft.Common.props;$(MSBuildBinSrcDir)\Microsoft.VisualStudioVersion.v*props" />
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\MSBuild.Bootstrap.*" />
             <MSBuildFiles Remove="$(MSBuildBinSrcDir)\System.Runtime.InteropServices.RuntimeInformation.dll" />

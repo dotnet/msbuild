@@ -13,6 +13,12 @@
             Inputs="@(FilesToCopy)"
             Outputs="@(FilesToCopy->'%(OutputDirectory)\%(RecursiveDir)\%(FileName)%(Extension)')">
 
+        <ItemGroup>
+            <FilesToCopy Remove="@(FilesToCopy)" Condition="$([System.String]::new('%(FilesToCopy.RecursiveDir)').Contains('netcoreapp'))" />
+            <FilesToCopy Remove="@(FilesToCopy)" Condition="$([System.String]::new('%(FilesToCopy.RecursiveDir)').Contains('GenerateDeps'))" />
+            <FilesToCopy Remove="@(FilesToCopy)" Condition="'%(FilesToCopy.Extension)' == '.p7s'" />
+        </ItemGroup>
+
         <Copy
             SourceFiles="@(FilesToCopy)"
             DestinationFiles="@(FilesToCopy->'%(OutputDirectory)\%(RecursiveDir)\%(FileName)%(Extension)')">
@@ -20,7 +26,7 @@
         </Copy>
 
         <Exec Command="chmod -x @(CopiedFiles->'%(Identity)', ' ')"
-              Condition="'$(OS)' != 'Windows_NT'" />
+              Condition="'$(OS)' != 'Windows_NT' and '@(CopiedFiles)' != ''" />
     </Target>
 
     <Target Name="EnsureDependencyRestored"
@@ -35,5 +41,10 @@
             Projects="$(MSBuildThisFileDirectory)\sdks\sdks.csproj"
             Targets="Restore"
             Properties="DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion)"/>
+
+        <Error
+            Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')"
+            Text="Tried to restore, but seems to have failed for Sdk/nuget named '$(DependencyPackageName)' version '$(DependencyPackageVersion)'" />
+
     </Target>
 </Project>

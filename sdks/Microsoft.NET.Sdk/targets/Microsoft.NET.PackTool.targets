@@ -13,6 +13,8 @@ Copyright (c) .NET Foundation. All rights reserved.
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask TaskName="Microsoft.NET.Build.Tasks.GenerateToolsSettingsFile"
               AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.NET.Build.Tasks.GenerateShims"
+          AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <!--
     Mark all dependecy as private assets. But keep them as Publish. So dependency DLLs will be included in NuGet package, while
     there is no dependency in nuspec. And add Microsoft.NETCore.Platforms, which is used to select correct RID assets.
@@ -34,24 +36,34 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </ItemGroup>
 
-  <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish" Condition=" '$(PackAsTool)' == 'true' ">
+  <Target Name="PackTool" DependsOnTargets="GenerateToolsSettingsFileFromBuildProperty;Publish;ResolveApphostAsset" Condition=" '$(PackAsTool)' == 'true' ">
 
-    <NETSdkError Condition="'$(SelfContained)' == 'true'"
+    <NETSdkError Condition=" '$(SelfContained)' == 'true' "
                  ResourceName="PackAsToolCannotSupportSelfContained" />
 
+    <NETSdkError Condition=" '$(TargetFrameworkIdentifier)' != '.NETCoreApp' "
+                 ResourceName="DotnetToolOnlySupportNetcoreapp" />
+
+    <NETSdkError Condition=" '$(_TargetFrameworkVersionWithoutV)' &lt; '2.1' "
+                 ResourceName="DotnetToolDoesNotSupportTFMLowerThanNetcoreapp21" />
+
     <ItemGroup>
-        <_GeneratedFiles Include="$(PublishDepsFilePath)"/>
-        <_GeneratedFiles Include="$(PublishRuntimeConfigFilePath)"/>
-        <_GeneratedFiles Include="$(_ToolsSettingsFilePath)"/>
+      <_GeneratedFiles Include="$(PublishDepsFilePath)"/>
+      <_GeneratedFiles Include="$(PublishRuntimeConfigFilePath)"/>
+      <_GeneratedFiles Include="$(_ToolsSettingsFilePath)"/>
     </ItemGroup>
 
     <ItemGroup>
       <TfmSpecificPackageFile Include="@(_GeneratedFiles)">
-        <PackagePath>tools/$(targetframework)/any/%(_GeneratedFiles.RecursiveDir)%(_GeneratedFiles.Filename)%(_GeneratedFiles.Extension)</PackagePath>
+        <PackagePath>tools/$(TargetFramework)/any/%(_GeneratedFiles.RecursiveDir)%(_GeneratedFiles.Filename)%(_GeneratedFiles.Extension)</PackagePath>
       </TfmSpecificPackageFile>
 
       <TfmSpecificPackageFile Include="@(ResolvedFileToPublish->'$([MSBuild]::NormalizeDirectory($(PublishDir)))%(RelativePath)')">
-        <PackagePath>tools/$(targetframework)/any/%(ResolvedFileToPublish.RelativePath)</PackagePath>
+        <PackagePath>tools/$(TargetFramework)/any/%(ResolvedFileToPublish.RelativePath)</PackagePath>
+      </TfmSpecificPackageFile>
+
+      <TfmSpecificPackageFile Include="@(_EmbeddedApphostPaths)">
+        <PackagePath>tools/$(TargetFramework)/any/shims/%(_EmbeddedApphostPaths.ShimRuntimeIdentifier)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
@@ -66,6 +78,28 @@ Copyright (c) .NET Foundation. All rights reserved.
        EntryPointRelativePath="$(ToolEntryPoint)"
        CommandName="$(ToolCommandName)"
        ToolsSettingsFilePath="$(_ToolsSettingsFilePath)" />
+  </Target>
+
+  <Target Name="ResolveApphostAsset" DependsOnTargets="ResolveReferences;Publish">
+    <ItemGroup>
+      <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
+    </ItemGroup>
+
+    <GenerateShims
+      DotNetAppHostExecutableNameWithoutExtension="$(_DotNetAppHostExecutableNameWithoutExtension)"
+      PackagedShimOutputDirectory="$(IntermediateOutputPath)/$(Configuration)/shims/$(TargetFramework)"
+      PackageId="$(PackageId)"
+      PackageVersion="$(Version)"
+      ProjectAssetsFile="$(ProjectAssetsFile)"
+      ProjectPath="$(MSBuildProjectFullPath)"
+      ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
+      TargetFrameworkMoniker="$(NuGetTargetMoniker)"
+      ToolCommandName="$(ToolCommandName)"
+      ToolEntryPoint="$(ToolEntryPoint)"
+      >
+
+      <Output TaskParameter="EmbeddedApphostPaths" ItemName="_EmbeddedApphostPaths" />
+    </GenerateShims>
   </Target>
 
 </Project>
