@@ -75,7 +75,7 @@ namespace Microsoft.Build.Shared
          * MAX_PATH + FileSpecRegexParts.BeginningOfLine.Length + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
             + FileSpecRegexParts.WildcardDirFilenameSeparator.Length + FileSpecRegexParts.EndOfLine.Length;
          */
-        private const int FileSpecRegexInitialBufferSize = 300;
+        private const int FileSpecRegexMinLength = 44;
 
         /// <summary>
         /// The Default FileMatcher does not cache directory enumeration.
@@ -1122,8 +1122,16 @@ namespace Microsoft.Build.Shared
             {
                 return string.Empty;
             }
-
-            var matchFileExpression = StringBuilderCache.Acquire(FileSpecRegexInitialBufferSize);
+#if DEBUG
+            ErrorUtilities.VerifyThrow(
+                FileSpecRegexMinLength == FileSpecRegexParts.BeginningOfLine.Length
+                + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
+                + FileSpecRegexParts.WildcardDirFilenameSeparator.Length
+                + FileSpecRegexParts.EndOfLine.Length,
+                "Checked-in length of known regex components differs from computed length. Update checked-in constant."
+            );
+#endif
+            var matchFileExpression = StringBuilderCache.Acquire(FileSpecRegexMinLength + NativeMethodsShared.MAX_PATH);
 
             AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
             AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
