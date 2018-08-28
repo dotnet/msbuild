@@ -176,10 +176,6 @@
       <SharedFxRpmPackageName>$(SharedFxRpmPackageName.ToLower())</SharedFxRpmPackageName>
       <SharedFxRpmPackageFileName>dotnet-runtime-$(SharedFxRpmPackageFileVersion)</SharedFxRpmPackageFileName>
       <SharedFxRpmPackageFileName>$(SharedFxRpmPackageFileName.ToLower())</SharedFxRpmPackageFileName>
-      <HostFxrRpmPackageVersion>$(HostFxrVersion)</HostFxrRpmPackageVersion>
-      <HostFxrRpmPackageName>dotnet-hostfxr-$(HostFxrRpmPackageVersion)</HostFxrRpmPackageName>
-      <HostFxrRpmPackageName>$(HostFxrRpmPackageName.ToLower())</HostFxrRpmPackageName>
-      <HostRpmPackageName>dotnet-host</HostRpmPackageName>
       <AspNetCoreSharedFxRpmPackageName>aspnetcore-runtime-$(AspNetCoreMajorMinorVersion)</AspNetCoreSharedFxRpmPackageName>
       <AspNetCoreSharedFxRpmPackageName>$(AspNetCoreSharedFxRpmPackageName.ToLower())</AspNetCoreSharedFxRpmPackageName>
       <AspNetCoreSharedFxRpmPackageFileName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxRpmPackageFileName>
@@ -224,14 +220,13 @@
           Outputs="$(RpmTestResultsXmlFile)" >
 
     <!-- Install Dependencies and SDK Packages -->
-    <Exec Command="sudo yum -y install $(DownloadedRuntimeDepsInstallerFile)" />
-    <Exec Command="sudo yum -y install $(DownloadedSharedHostInstallerFile)" />
-    <Exec Command="sudo yum -y install $(DownloadedHostFxrInstallerFile)" />
-    <Exec Command="sudo yum -y install $(DownloadedSharedFrameworkInstallerFile)" />
+    <Exec Command="sudo rpm --install $(DownloadedRuntimeDepsInstallerFile)" />
+    <Exec Command="sudo rpm --install $(DownloadedSharedHostInstallerFile)" />
+    <Exec Command="sudo rpm --install $(DownloadedHostFxrInstallerFile)" />
+    <Exec Command="sudo rpm --install $(DownloadedSharedFrameworkInstallerFile)" />
     <!-- Ignore dependencies, which may have an incoherent dependency on dotnet-runtime -->
     <Exec Command="sudo rpm --install --nodeps $(DownloadedAspNetCoreSharedFxInstallerFile)" />
-
-    <Exec Command="sudo yum -y install $(SdkInstallerFile)" />
+    <Exec Command="sudo rpm --install $(SdkInstallerFile)" />
 
     <!-- Run Tests -->
     <DotNetRestore ProjectPath="$(EndToEndTestProject)"
@@ -242,12 +237,16 @@
                 ToolPath="$(RpmInstalledDirectory)" />
 
     <!-- Clean up Packages -->
-    <Exec Command="sudo yum remove -y $(SdkRpmPackageName)" />
+    <ItemGroup>
+      <InstalledPackageName Include="$(SdkInstallerFile)" />
+      <InstalledPackageName Include="$(DownloadedAspNetCoreSharedFxInstallerFile)" />
+      <InstalledPackageName Include="$(DownloadedSharedFrameworkInstallerFile)" />
+      <InstalledPackageName Include="$(DownloadedHostFxrInstallerFile)" />
+      <InstalledPackageName Include="$(DownloadedSharedHostInstallerFile)" />
+      <InstalledPackageName Include="$(DownloadedRuntimeDepsInstallerFile)" />
+    </ItemGroup>
 
-    <Exec Command="sudo yum remove -y $(AspNetCoreSharedFxRpmPackageFileName)" />
-    <Exec Command="sudo yum remove -y $(SharedFxRpmPackageFileName)" />
-    <Exec Command="sudo yum remove -y $(HostFxrRpmPackageName)" />
-    <Exec Command="sudo yum remove -y $(HostRpmPackageName)" />
-    <Exec Command="sudo yum remove -y $(RuntimeDepsPackageFileName)" />
+    <!-- Query the package name of the file and give it to uninstall input -->
+    <Exec Command="sudo rpm -e `rpm --queryformat &quot;%25{NAME}&quot; -qp %(InstalledPackageName.Identity)`" />
   </Target>
 </Project>
