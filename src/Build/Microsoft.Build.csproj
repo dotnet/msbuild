@@ -16,8 +16,7 @@
 
     <EnableDefaultItems>false</EnableDefaultItems>
 
-    <!-- Generate API only for the more limited .NET Core/Standard flavor. -->
-    <GenerateReferenceAssemblySources Condition="'$(TargetFramework)' != 'netcoreapp2.1'">true</GenerateReferenceAssemblySources>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <CreateTlb>true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</Description>
