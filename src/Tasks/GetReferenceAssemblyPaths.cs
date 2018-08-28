@@ -30,6 +30,8 @@ namespace Microsoft.Build.Tasks
         private static bool? s_net35SP1SentinelAssemblyFound;
 #endif
 
+        private static bool FallbackPathHackOnOSXEnabled = NativeMethodsShared.IsOSX && NativeMethodsShared.IsMono && String.IsNullOrEmpty(Environment.GetEnvironmentVariable("DISABLE_FALLBACK_PATHS_HACK_IN_GRAP_OSX"));
+
         /// <summary>
         /// Hold the reference assembly paths based on the passed in targetframeworkmoniker.
         /// </summary>
@@ -233,12 +235,17 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private IList<String> GetPaths(string rootPath, string targetFrameworkFallbackSearchPaths, FrameworkNameVersioning frameworkmoniker)
         {
+            string fallbackPathsToUse = (FallbackPathHackOnOSXEnabled && String.IsNullOrEmpty(targetFrameworkFallbackSearchPaths))
+                                            ? fallbackPathsToUse = "/Library/Frameworks/Mono.framework/External/xbuild-frameworks"
+                                            : targetFrameworkFallbackSearchPaths;
+
+
             IList<String> pathsToReturn = ToolLocationHelper.GetPathToReferenceAssemblies(
                                                 frameworkmoniker.Identifier,
                                                 frameworkmoniker.Version.ToString(),
                                                 frameworkmoniker.Profile,
                                                 rootPath,
-                                                targetFrameworkFallbackSearchPaths);
+                                                fallbackPathsToUse);
 
             if (!SuppressNotFoundError)
             {
