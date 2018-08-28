@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1133,13 +1133,14 @@ namespace Microsoft.Build.Shared
                 "Checked-in length of known regex components differs from computed length. Update checked-in constant."
             );
 #endif
-            var matchFileExpression = StringBuilderCache.Acquire(FileSpecRegexMinLength + NativeMethodsShared.MAX_PATH);
+            using (var matchFileExpression = new ReuseableStringBuilder(FileSpecRegexMinLength + NativeMethodsShared.MAX_PATH))
+            {
+                AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
+                AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
+                AppendRegularExpressionFromFilename(matchFileExpression, filenamePart);
 
-            AppendRegularExpressionFromFixedDirectory(matchFileExpression, fixedDirectoryPart);
-            AppendRegularExpressionFromWildcardDirectory(matchFileExpression, wildcardDirectoryPart);
-            AppendRegularExpressionFromFilename(matchFileExpression, filenamePart);
-
-            return StringBuilderCache.GetStringAndRelease(matchFileExpression);
+                return matchFileExpression.ToString();
+            }
         }
 
 
@@ -1195,13 +1196,10 @@ namespace Microsoft.Build.Shared
         /// 
         /// (2) Common filespec characters
         /// </summary>
+        private static void AppendRegularExpressionFromFixedDirectory(ReuseableStringBuilder regex, string fixedDir)
         {
             regex.Append(FileSpecRegexParts.BeginningOfLine);
 
-            /*
-             * Capture the leading \\ in UNC paths, so that the doubled slash isn't
-             * reduced in a later step.
-             */
             bool isUncPath = NativeMethodsShared.IsWindows && fixedDir.Length > 1
                              && fixedDir[0] == '\\' && fixedDir[1] == '\\';
             if (isUncPath)
@@ -1225,10 +1223,10 @@ namespace Microsoft.Build.Shared
         /// 
         /// (3) Common filespec characters
         /// </summary>
+        private static void AppendRegularExpressionFromWildcardDirectory(ReuseableStringBuilder regex, string wildcardDir)
         {
             regex.Append(FileSpecRegexParts.FixedDirWildcardDirSeparator);
 
-            // fixed-directory + **\
             bool hasRecursiveOperatorAtStart = wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*';
 
             if (hasRecursiveOperatorAtStart)
@@ -1271,16 +1269,8 @@ namespace Microsoft.Build.Shared
         ///
         /// (3) Ignore the .* portion of any *.* sequence
         /// </summary>
+        private static void AppendRegularExpressionFromFilename(ReuseableStringBuilder regex, string filename)
         {
-            /* 
-             * Trailing dots in file names have to be treated specially.
-             * We want:
-             * 
-             *     *. to match foo
-             * 
-             * but 'foo' doesn't have a trailing '.' so we need to handle this while still being careful 
-             * not to match 'foo.txt'
-             */
             bool hasTrailingDot = filename.Length > 0 && filename[filename.Length - 1] == '.';
             int partLength = hasTrailingDot ? filename.Length - 1 : filename.Length;
 
@@ -1313,6 +1303,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Append the regex equivalents for characters common to all filespec parts.
         /// </summary>
+        private static void AppendRegularExpressionFromChar(ReuseableStringBuilder regex, char ch)
         {
             if (ch == '*')
             {

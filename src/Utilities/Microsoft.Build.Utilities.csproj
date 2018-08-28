@@ -149,6 +149,9 @@
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>Shared\ResourceUtilities.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
+      <Link>Shared\ReuseableStringBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <Link>Shared\StringBuilderCache.cs</Link>
     </Compile>
