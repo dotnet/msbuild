@@ -2210,9 +2210,9 @@ namespace Microsoft.Build.Tasks
                     IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
                     List<DependentAssembly> idealAssemblyRemappings = null;
                     List<AssemblyNameReference> idealAssemblyRemappingsIdentities = null;
-                    bool hasConflicts = autoUnifiedRemappedAssemblies != null && autoUnifiedRemappedAssemblies.Count > 0;
+                    bool shouldRerunClosure = autoUnifiedRemappedAssemblies?.Count > 0  || excludedReferencesExist;
 
-                    if (AutoUnify && FindDependencies && !hasConflicts && !excludedReferencesExist)
+                    if (AutoUnify && FindDependencies && shouldRerunClosure)
                     {
                         idealAssemblyRemappings = autoUnifiedRemappedAssemblies;
                         idealAssemblyRemappingsIdentities = autoUnifiedRemappedAssemblyReferences;
