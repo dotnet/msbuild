@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1098,8 +1098,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Given a file spec, create a regular expression that will match that
-        /// file spec.
+        /// Given a split file spec consisting of a directory without wildcard characters,
+        /// a sub-directory containing wildcard characters,
+        /// and a filename which may contain wildcard characters,
+        /// create a regular expression that will match that file spec.
         /// 
         /// PERF WARNING: this method is called in performance-critical
         /// scenarios, so keep it fast and cheap
@@ -1140,12 +1142,16 @@ namespace Microsoft.Build.Shared
             return StringBuilderCache.GetStringAndRelease(matchFileExpression);
         }
 
-        /*
-         * It is not legal for there to be a ".." after a wildcard.
-         *
-         * By definition, "**" must appear alone between directory slashes. If there is any remaining "**" then this is not
-         * a valid filespec.
-         */
+
+        /// <summary>
+        /// Determine if the filespec is legal according to the following conditions:
+        /// 
+        /// (1) It is not legal for there to be a ".." after a wildcard.
+        /// 
+        /// (2) By definition, "**" must appear alone between directory slashes.If there is any remaining "**" then this is not
+        ///     a valid filespec.
+        /// </summary>
+        /// <returns>True if both parts meet all conditions for a legal filespec.</returns>
         private static bool IsLegalFileSpec(string wildcardDirectoryPart, string filenamePart) =>
             !HasDotDot(wildcardDirectoryPart)
             && !HasMisplacedRecursiveOperator(wildcardDirectoryPart)
@@ -1181,7 +1187,14 @@ namespace Microsoft.Build.Shared
             return false;
         }
 
-        private static void AppendRegularExpressionFromFixedDirectory(StringBuilder regex, string fixedDir)
+
+        /// <summary>
+        /// Append the regex equivalents for character sequences in the fixed directory part of a filespec:
+        ///
+        /// (1) The leading \\ in UNC paths, so that the doubled slash isn't reduced in the last step
+        /// 
+        /// (2) Common filespec characters
+        /// </summary>
         {
             regex.Append(FileSpecRegexParts.BeginningOfLine);
 
@@ -1203,7 +1216,15 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static void AppendRegularExpressionFromWildcardDirectory(StringBuilder regex, string wildcardDir)
+        /// <summary>
+        /// Append the regex equivalents for character sequences in the wildcard directory part of a filespec:
+        ///
+        /// (1) The leading **\ if existing
+        ///
+        /// (2) Each occurence of recursive wildcard \**\
+        /// 
+        /// (3) Common filespec characters
+        /// </summary>
         {
             regex.Append(FileSpecRegexParts.FixedDirWildcardDirSeparator);
 
@@ -1235,7 +1256,21 @@ namespace Microsoft.Build.Shared
             regex.Append(FileSpecRegexParts.WildcardDirFilenameSeparator);
         }
 
-        private static void AppendRegularExpressionFromFilename(StringBuilder regex, string filename)
+        /// <summary>
+        /// Append the regex equivalents for character sequences in the filename part of a filespec:
+        ///
+        /// (1) Trailing dots in file names have to be treated specially.
+        ///     We want:
+        ///
+        ///         *. to match foo
+        ///
+        ///     but 'foo' doesn't have a trailing '.' so we need to handle this while still being careful
+        ///     not to match 'foo.txt' by modifying the generated regex for wildcard characters * and ?
+        /// 
+        /// (2) Common filespec characters
+        ///
+        /// (3) Ignore the .* portion of any *.* sequence
+        /// </summary>
         {
             /* 
              * Trailing dots in file names have to be treated specially.
@@ -1275,10 +1310,9 @@ namespace Microsoft.Build.Shared
             regex.Append(FileSpecRegexParts.EndOfLine);
         }
 
-        /*
-         *  Replace characters with their regex equivalents.
-         */
-        private static void AppendRegularExpressionFromChar(StringBuilder regex, char ch)
+        /// <summary>
+        /// Append the regex equivalents for characters common to all filespec parts.
+        /// </summary>
         {
             if (ch == '*')
             {
@@ -1307,29 +1341,34 @@ namespace Microsoft.Build.Shared
             ch == '\\' || ch == '$' || ch == '(' || ch == ')' || ch == '+'
             || ch == '.' || ch == '[' || ch == '^' || ch == '{' || ch == '|';
 
-        /*
-         * Iteratively skip three cases involving directory separators
-         * 
-         *  (1) \.\ -> \
-         *        This is an identity, so for example, these two are equivalent,
-         * 
-         *            dir1\.\dir2 == dir1\dir2
-         * 
-         *    (2) \\ -> \
-         *      Double directory separators are treated as a single directory separator,
-         *      so, for example, this is an identity:
-         * 
-         *          f:\dir1\\dir2 == f:\dir1\dir2
-         * 
-         *      The single exemption is for UNC path names, like this:
-         * 
-         *          \\server\share != \server\share
-         * 
-         *      This case is handled by isUncPath in
-         *      a prior step.
-         *
-         *  (3) **\** -> **
-         */
+        /// <summary>
+        /// Given an index directly after a directory separator,
+        /// iteratively skip three cases involving directory separators:
+        ///
+        ///  (1) \.\ -> \
+        ///     This is an identity, so for example, these two are equivalent,
+        ///
+        ///         dir1\.\dir2 == dir1\dir2
+        /// 
+        ///     (2) \\ -> \
+        ///         Double directory separators are treated as a single directory separator,
+        ///         so, for example, this is an identity:
+        ///
+        ///             f:\dir1\\dir2 == f:\dir1\dir2
+        ///
+        ///         The single exemption is for UNC path names, like this:
+        ///
+        ///             \\server\share != \server\share
+        /// 
+        ///         This case is handled by isUncPath in
+        ///         a prior step.
+        ///
+        /// (3) \**\**\ -> \**\
+        ///              This is an identity, so for example, these two are equivalent,
+        ///
+        ///                 dir1\**\**\ == dir1\**\
+        /// </summary>
+        /// <returns>The first index of a non-collapsible character.</returns>
         private static int IndexOfNextNonCollapsibleChar(string str, int startIndex)
         {
             if (startIndex > 0 && !FileUtilities.IsAnySlash(str[startIndex - 1]))
