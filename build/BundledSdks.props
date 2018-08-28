@@ -6,6 +6,7 @@
     <BundledSdk Include="Microsoft.NET.Sdk.Web" Version="$(MicrosoftNETSdkWebPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Publish" Version="$(MicrosoftNETSdkPublishPackageVersion)" />
     <BundledSdk Include="Microsoft.NET.Sdk.Web.ProjectSystem" Version="$(MicrosoftNETSdkWebProjectSystemPackageVersion)" />
+    <BundledSdk Include="Microsoft.NET.Sdk.Wpf" Version="$(MicrosoftNETSdkWpfPackageVersion)" />
     <BundledSdk Include="FSharp.NET.Sdk" Version="1.0.4-bundled-0100" />
     <BundledSdk Include="Microsoft.Docker.Sdk" Version="1.1.0" />
   </ItemGroup>

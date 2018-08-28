@@ -137,6 +137,12 @@
       BuildInParallel="False"
       Projects="@(SdksToBundle)">
     </MSBuild>
+
+    <!-- The WPF SDK .nupkg includes some files in the root that we don't want to bundle, so delete them -->
+    <ItemGroup>
+      <SDKFilesToDelete Include="$(ToolsetOutputDirectory)/Sdks/Microsoft.NET.Sdk.Wpf/*" />
+    </ItemGroup>
+    <Delete Files="@(SDKFilesToDelete)" />
   </Target>
 
   <Target Name="ChmodPublishDir"
