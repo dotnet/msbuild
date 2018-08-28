@@ -13,7 +13,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.CodeAnalysis.BuildTasks;
+using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 // PLEASE NOTE: This is a UNICODE file as it contains UNICODE characters!
@@ -32,12 +34,16 @@ namespace Microsoft.Build.UnitTests.FileTracking
         private static string s_cmd32Path;
         private static string s_cmd64Path;
 
-        public FileTrackerTests()
+        private ITestOutputHelper _output;
+
+        public FileTrackerTests(ITestOutputHelper output)
         {
             if (NativeMethodsShared.IsUnixLike)
             {
                 return; // "FileTracker is not supported under Unix"
             }
+
+            _output = output;
 
             s_defaultFileTrackerPathUnquoted = FileTracker.GetFileTrackerPath(ExecutableType.SameAsCurrentProcess);
             s_defaultFileTrackerPath = "\"" + s_defaultFileTrackerPathUnquoted + "\"";
@@ -403,8 +409,6 @@ namespace ConsoleApplication4
         [Fact]
         public void FileTrackerFindStrInIncludeDuplicates()
         {
-            Console.WriteLine("Test: FileTrackerFindStrInIncludeDuplicates");
-
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
@@ -417,20 +421,25 @@ namespace ConsoleApplication4
                 string inputPath = Path.GetFullPath("test.in");
                 codeFile = FileUtilities.GetTemporaryFile();
                 string codeContent = @"using System.IO; class X { static void Main() { File.ReadAllText(@""" + inputPath + @"""); File.ReadAllText(@""" + inputPath + @"""); }}";
+                _output.WriteLine($"Code content: {codeContent}");
                 File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine();
-                csc.Sources = new[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Execute();
+
+                Csc csc = new Csc
+                {
+                    BuildEngine = new MockEngine(),
+                    Sources = new[] { new TaskItem(codeFile) },
+                    OutputAssembly = new TaskItem(outputFile)
+                };
+                csc.Execute().ShouldBeTrue();
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
-                string commandArgs = "/d \"" + fileTrackerPath + "\" /u /c \"" + outputFile + "\"";
 
-                int exit = FileTrackerTestHelper.RunCommand(trackerPath, commandArgs);
-                Console.WriteLine("");
-                Assert.Equal(0, exit);
+                _output.WriteLine($"Using tracker from '{trackerPath}' and FileTracker from '{fileTrackerPath}'");
+
+                string commandArgs = $"/u /c \"{outputFile}\"";
+
+                FileTrackerTestHelper.RunCommand(trackerPath, commandArgs, _output).ShouldBe(0);
             }
             finally
             {
@@ -1305,17 +1314,13 @@ class X
         [Fact]
         public void InProcTrackingSpawnsToolWithTrackerResponseFile()
         {
-            Console.WriteLine("Test: InProcTrackingSpawnsToolWithTrackerResponseFile");
-
-            InProcTrackingSpawnsToolWithTracker(true);
+            InProcTrackingSpawnsToolWithTracker(true, _output);
         }
 
         [Fact]
         public void InProcTrackingSpawnsToolWithTrackerNoResponseFile()
         {
-            Console.WriteLine("Test: InProcTrackingSpawnsToolWithTrackerNoResponseFile");
-
-            InProcTrackingSpawnsToolWithTracker(false);
+            InProcTrackingSpawnsToolWithTracker(false, _output);
         }
 
         [Fact]
@@ -2315,7 +2320,7 @@ namespace ConsoleApplication4
             }
         }
 
-        private static void InProcTrackingSpawnsToolWithTracker(bool useTrackerResponseFile)
+        private static void InProcTrackingSpawnsToolWithTracker(bool useTrackerResponseFile, ITestOutputHelper output)
         {
             const string testInFile = "test.in";
             const string testInFileContent = "foo";
@@ -2347,7 +2352,8 @@ namespace ConsoleApplication4
                         firstParameters,
                         tool,
                         testInFileContent,
-                        testInFile));
+                        testInFile),
+                    output);
 
                 Assert.Equal(0, exit);
                 Assert.Equal("^" + rootingMarker.ToUpperInvariant(),
@@ -2458,8 +2464,8 @@ namespace ConsoleApplication4
 
     internal static class FileTrackerTestHelper
     {
-        public static int RunCommand(string command, string arguments)
-            => RunCommandWithOptions(command, arguments, true /* print stdout & stderr */, out string _);
+        public static int RunCommand(string command, string arguments, ITestOutputHelper output = null)
+            => RunCommandWithOptions(command, arguments, output == null /* print stdout & stderr unless it's logged */, outputAsLog: out string _, output: output);
 
         public static int RunCommandNoStdOut(string command, string arguments)
             => RunCommandWithOptions(command, arguments, false /* don't print stdout & stderr */, out string _);
@@ -2467,26 +2473,31 @@ namespace ConsoleApplication4
         public static int RunCommandWithLog(string command, string arguments, out string outputAsLog)
             => RunCommandWithOptions(command, arguments, true /* print stdout & stderr */, out outputAsLog);
 
-        private static int RunCommandWithOptions(string command, string arguments, bool printOutput, out string outputAsLog)
+        private static int RunCommandWithOptions(string command, string arguments, bool printOutput, out string outputAsLog, ITestOutputHelper output = null)
         {
             outputAsLog = null;
-            ProcessStartInfo si = new ProcessStartInfo(command, arguments);
-            if (printOutput)
+
+            output?.WriteLine($"Running {command} {arguments}");
+
+            ProcessStartInfo si = new ProcessStartInfo(command, arguments)
             {
-                si.RedirectStandardOutput = true;
-                si.RedirectStandardError = true;
-            }
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
 
             si.UseShellExecute = false;
             si.CreateNoWindow = true;
             Process p = Process.Start(si);
             p.WaitForExit();
 
+            outputAsLog = "StdOut: \n" + p.StandardOutput.ReadToEnd() + "\nStdErr: \n" + p.StandardError.ReadToEnd();
+
             if (printOutput)
             {
-                outputAsLog = "StdOut: \n" + p.StandardOutput.ReadToEnd() + "\nStdErr: \n" + p.StandardError.ReadToEnd();
                 Console.Write(outputAsLog);
             }
+
+            output?.WriteLine(outputAsLog);
 
             return p.ExitCode;
         }
