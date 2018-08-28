@@ -2326,7 +2326,7 @@ namespace ConsoleApplication4
             const string tlogRootName = "foo_inline";
             const string sourceFile = "inlinetrackingtest.txt";
             const string trackerResponseFile = "test-tracker.rsp";
-            const string fileTrackerParameters = "/d FileTracker.dll /r \"" + rootingMarker + "\"";
+            const string fileTrackerParameters = "/d FileTracker32.dll /r \"" + rootingMarker + "\"";
 
             File.Delete(toolReadTlog);
             File.Delete(sourceFile);
