@@ -57,6 +57,17 @@
     <None Update="TrackedDependencies\TestFiles\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\**\Tracker.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\**\TrackerUI.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\**\FileTracker*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
   </ItemGroup>
 
 </Project>

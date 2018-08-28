@@ -72,6 +72,9 @@
 
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
+      <InstalledFileTracker Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\**\Tracker.exe" />
+      <InstalledFileTracker Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\**\FileTracker*.dll" />
+
       <ShimTargets Include="Microsoft.Data.Entity.targets" />
       <ShimTargets Include="Microsoft.ServiceModel.targets" />
       <ShimTargets Include="Microsoft.WinFx.targets" />
@@ -128,6 +131,10 @@
 
     <Copy SourceFiles="@(InstalledStaticAnalysisTools)"
           DestinationFiles="@(InstalledStaticAnalysisTools -> '$(BootstrapDestination)..\Team Tools\Static Analysis Tools\%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <Copy SourceFiles="@(InstalledFileTracker)"
+          DestinationFiles="@(InstalledFileTracker -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\bin\%(RecursiveDir)%(Filename)%(Extension)')"
+          Condition="'$(MonoBuild)' != 'true'" />
 
     <Copy SourceFiles="@(InstalledNuGetFiles)"
           DestinationFiles="@(InstalledNuGetFiles->'$(BootstrapDestination)Microsoft\NuGet\%(Filename)%(Extension)')" />
