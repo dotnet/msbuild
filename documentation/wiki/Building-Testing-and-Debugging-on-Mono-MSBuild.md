@@ -6,12 +6,7 @@ Mono maintains a fork of msbuild (for now) at `https://github.com/mono/msbuild/`
 
 **Required packages for OSX & Ubuntu**
 
-MSBuild currently builds with .NET Core 2.1. It requires the [.NET Core prerequisites](https://github.com/dotnet/core/blob/master/Documentation/prereqs.md), which you can acquire manually or easily get by [installing the .NET Core SDK](https://dot.net/core).
-
-* [Mono](http://www.mono-project.com/download/) when doing a Mono-hosted version of MSBuild
-
-**Required packages for Ubuntu**
-* [libunwind](http://www.nongnu.org/libunwind/index.html) is required by .NET Core. Install it using `sudo apt-get install libunwind8`
+MSBuild requires a stable version of [Mono](http://www.mono-project.com/download/) to build itself.
 
 ## Build process ##
 
