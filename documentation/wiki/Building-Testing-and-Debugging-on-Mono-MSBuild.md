@@ -1,6 +1,6 @@
 MSBuild can be successfully built on Windows, OS X 10.11, Ubuntu 14.04, and Ubuntu 16.04.
 
-Mono maintains a fork of msbuild (for now) at `https://github.com/mono/msbuild/`. You can clone that and use the `xplat-master` branch or `mono-2017-10` for the next release branch.
+Mono maintains a fork of msbuild (for now) at `https://github.com/mono/msbuild/`. You can clone that and use the `xplat-master` branch or `mono-2018-04` for the next release branch.
 
 # Unix #
 
