@@ -9,7 +9,7 @@
     <!-- If $(PB_VersionStamp) is empty and $(PB_IsStable) is not true, then a default PackageBuildQuality will be added. -->
     <PackageReleaseVersion Condition="'$(PackageReleaseVersion)' == '' ">3.0.100</PackageReleaseVersion>
     <PackageBuildQuality>$(PB_VersionStamp)</PackageBuildQuality>
-    <PackageBuildQuality Condition=" '$(PackageBuildQuality)' == '' And '$(PB_IsStable)' != 'true' ">preview1</PackageBuildQuality>
+    <PackageBuildQuality Condition=" '$(PackageBuildQuality)' == '' And '$(PB_IsStable)' != 'true' ">preview2</PackageBuildQuality>
     <PackageDateTime Condition="'$(PackageDateTime)' == ''">$([System.DateTime]::Now.ToString("yyyyMMdd"))</PackageDateTime>
     <PackageBuildNumber Condition="'$(PackageBuildNumber)' == ''">0</PackageBuildNumber>
     <PackageBuildNumber Condition="'$(PackageBuildNumber)' == '0' And '$(BUILD_BUILDNUMBER)' != ''">$(BUILD_BUILDNUMBER)</PackageBuildNumber>
