@@ -2206,18 +2206,12 @@ namespace Microsoft.Build.Tasks
                         );
                     }
 
-
                     IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
-                    List<DependentAssembly> idealAssemblyRemappings = null;
-                    List<AssemblyNameReference> idealAssemblyRemappingsIdentities = null;
+                    List<DependentAssembly> idealAssemblyRemappings = autoUnifiedRemappedAssemblies;
+                    List<AssemblyNameReference> idealAssemblyRemappingsIdentities = autoUnifiedRemappedAssemblyReferences;
                     bool shouldRerunClosure = autoUnifiedRemappedAssemblies?.Count > 0  || excludedReferencesExist;
 
-                    if (AutoUnify && FindDependencies && shouldRerunClosure)
-                    {
-                        idealAssemblyRemappings = autoUnifiedRemappedAssemblies;
-                        idealAssemblyRemappingsIdentities = autoUnifiedRemappedAssemblyReferences;
-                    }
-                    else
+                    if (!AutoUnify || !FindDependencies || shouldRerunClosure)
                     {
                         // Compute all dependencies.
                         dependencyTable.ComputeClosure(allRemappedAssemblies, _assemblyFiles, _assemblyNames, generalResolutionExceptions);
