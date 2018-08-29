@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -997,6 +998,32 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(
                 Path.Combine(root, "path1", "path2", "file.txt"),
                 FileUtilities.CombinePaths(root, "path1", "path2", "file.txt"));
+        }
+
+        [Theory]
+        [InlineData(@"c:\a\.\b", true)]
+        [InlineData(@"c:\a\..\b", true)]
+        [InlineData(@"c:\a\..", true)]
+        [InlineData(@"c:\a\.", true)]
+        [InlineData(@".\a", true)]
+        [InlineData(@"..\b", true)]
+        [InlineData(@"..", true)]
+        [InlineData(@".", true)]
+        [InlineData(@"..\", true)]
+        [InlineData(@".\", true)]
+        [InlineData(@"\..", true)]
+        [InlineData(@"\.", true)]
+        [InlineData(@"b..\", false)]
+        [InlineData(@"b.\", false)]
+        [InlineData(@"\b..", false)]
+        [InlineData(@"\b.", false)]
+        [InlineData(@"\b..\", false)]
+        [InlineData(@"\b.\", false)]
+        [InlineData(@"...", false)]
+        [InlineData(@"....", false)]
+        public void ContainsRelativeSegmentsTest(string path, bool expectedResult)
+        {
+            FileUtilities.ContainsRelativePathSegments(path).ShouldBe(expectedResult);
         }
     }
 }

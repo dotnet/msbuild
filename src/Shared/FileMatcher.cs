@@ -1786,15 +1786,26 @@ namespace Microsoft.Build.Shared
         {
             Debug.Assert(projectDirectoryUnescaped != null);
             Debug.Assert(filespecUnescaped != null);
+            Debug.Assert(Path.IsPathRooted(projectDirectoryUnescaped));
+
+            var pathValidityExceptionTriggered = false;
 
             // Ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
             // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
-            filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
 
-            // increase the chance of cache hits when multiple relative globs refer to the same base directory
-            if (filespecUnescaped.Contains(".."))
+            try
             {
-                filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
+
+                // increase the chance of cache hits when multiple relative globs refer to the same base directory
+                if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
+                {
+                    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                pathValidityExceptionTriggered = true;
             }
 
             var excludeSize = 0;
@@ -1807,8 +1818,13 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            using (var sb = new ReuseableStringBuilder(filespecUnescaped.Length + excludeSize))
+            using (var sb = new ReuseableStringBuilder(projectDirectoryUnescaped.Length + filespecUnescaped.Length + excludeSize))
             {
+                if (pathValidityExceptionTriggered)
+                {
+                    sb.Append(projectDirectoryUnescaped);
+                }
+
                 sb.Append(filespecUnescaped);
 
                 if (excludes != null)
