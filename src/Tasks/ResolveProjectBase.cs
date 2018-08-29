@@ -277,6 +277,7 @@ namespace Microsoft.Build.Tasks
                     item.SetMetadata("LinkLibraryDependencies", "false");
                     item.SetMetadata("CopyLocal", "false");
                     item.SetMetadata("SkipGetTargetFrameworkProperties", "true");
+                    item.SetMetadata("GlobalPropertiesToRemove", "TargetFramework");
 
                     updatedProjectReferenceList.Add(item);
                 }
