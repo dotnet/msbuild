@@ -37,7 +37,7 @@ steps:
   inputs:
     command: custom
     custom: tool
-    arguments: 'install --tool-path artifacts nbgv'
+    arguments: 'install --tool-path artifacts nbgv --version 2.2.13'
 
 - task: CmdLine@1
   displayName: Set version with nbgv
