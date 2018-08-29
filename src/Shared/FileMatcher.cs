@@ -1787,8 +1787,8 @@ namespace Microsoft.Build.Shared
             Debug.Assert(projectDirectoryUnescaped != null);
             Debug.Assert(filespecUnescaped != null);
 
-            // Don't include the project directory when the glob is independent of it.
-            // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
+            // Ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
+            // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
             filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
 
             // increase the chance of cache hits when multiple relative globs refer to the same base directory
