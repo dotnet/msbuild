@@ -339,7 +339,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfigAndExternalRestoreSources(new RepoDirectoriesProvider().TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
 
@@ -382,7 +382,7 @@ namespace Microsoft.DotNet.Tests
             var testInstance = TestAssets.Get("AppWithFallbackFolderToolDependency")
                 .CreateInstance()
                 .WithSourceFiles()
-                .WithNuGetConfig(new RepoDirectoriesProvider().TestPackages);
+                .WithNuGetConfigAndExternalRestoreSources(new RepoDirectoriesProvider().TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
 
