@@ -3953,8 +3953,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
+    <!-- ReferenceCopyLocalPaths can contain satellite assemblies, we need to explicitly exclude those so they don't get flagged as primary assemblies. -->
     <ItemGroup>
-      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
+      <_ReferencedSatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
+      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'" 
+                                 Exclude="@(_ReferencedSatelliteAssemblies)">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
     </ItemGroup>
@@ -3986,7 +3989,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ManagedAssemblies="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly)"
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
-        SatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)"
+        SatelliteAssemblies="@(_ReferencedSatelliteAssemblies)"
         TargetCulture="$(TargetCulture)">
 
       <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependencies"/>
