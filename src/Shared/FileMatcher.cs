@@ -1786,10 +1786,26 @@ namespace Microsoft.Build.Shared
         {
             Debug.Assert(projectDirectoryUnescaped != null);
             Debug.Assert(filespecUnescaped != null);
+            Debug.Assert(Path.IsPathRooted(projectDirectoryUnescaped));
 
-            if (filespecUnescaped.Contains(".."))
+            var pathValidityExceptionTriggered = false;
+
+            // Ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
+            // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
+
+            try
             {
-                filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
+
+                // increase the chance of cache hits when multiple relative globs refer to the same base directory
+                if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
+                {
+                    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                pathValidityExceptionTriggered = true;
             }
 
             var excludeSize = 0;
@@ -1802,43 +1818,24 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            var sb = new StringBuilder(
-                projectDirectoryUnescaped.Length + // OK to over allocate a bit, this is a short lived object
-                filespecUnescaped.Length +
-                excludeSize
-                );
-
-            // Don't include the project directory when the glob is independent of it.
-            // Otherwise, if the project-directory-independent glob is used in multiple projects we'll get cache misses
-            if (!FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(projectDirectoryUnescaped, filespecUnescaped))
+            using (var sb = new ReuseableStringBuilder(projectDirectoryUnescaped.Length + filespecUnescaped.Length + excludeSize))
             {
-                sb.Append(projectDirectoryUnescaped);
-            }
-
-            sb.Append(filespecUnescaped);
-
-            if (excludes != null)
-            {
-                foreach (var exclude in excludes)
+                if (pathValidityExceptionTriggered)
                 {
-                    sb.Append(exclude);
+                    sb.Append(projectDirectoryUnescaped);
                 }
-            }
 
-            return sb.ToString();
+                sb.Append(filespecUnescaped);
 
-            bool FilespecIsAnAbsoluteGlobPointingOutsideOfProjectCone(string projectDirectory, string filespec)
-            {
-                try
+                if (excludes != null)
                 {
-                    return Path.IsPathRooted(filespec) &&
-                           !filespec.StartsWith(projectDirectory, StringComparison.OrdinalIgnoreCase);
+                    foreach (var exclude in excludes)
+                    {
+                        sb.Append(exclude);
+                    }
                 }
-                catch
-                {
-                    // glob expansion is "supposed" to silently fail on IO exceptions
-                    return false;
-                }
+
+                return sb.ToString();
             }
         }
 

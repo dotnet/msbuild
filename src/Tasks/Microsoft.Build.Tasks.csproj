@@ -108,6 +108,9 @@
       <Link>StringBuilderCache.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs" >
+      <Link>ReuseableStringBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\StrongNameHelpers.cs">
       <Link>StrongNameHelpers.cs</Link>
     </Compile>
