@@ -52,6 +52,7 @@
           DependsOnTargets="Init;
                             SetupTestProjectData">
     <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
+    <MakeDir Directories="$(TestArtifactsDir)" Condition="!Exists('$(TestArtifactsDir)')"/>
 
     <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
                       File="$(ExternalRestoreSourcesTestsContainer)"
