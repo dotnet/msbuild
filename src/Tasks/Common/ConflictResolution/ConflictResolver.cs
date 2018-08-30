@@ -97,9 +97,13 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                     foundConflict(winner, loser);
 
                     //  If there were any other items that tied with the loser, report them as conflicts here
+                    //  if they lose against the new winner.  Otherwise, keep them in the unresolved conflict
+                    //  list.
                     List<TConflictItem> previouslyUnresolvedConflicts;
-                    if (_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts))
+                    if(_unresolvedConflictItems.TryGetValue(itemKey, out previouslyUnresolvedConflicts) &&
+                        previouslyUnresolvedConflicts.Contains(loser))
                     {
+                        List<TConflictItem> newUnresolvedConflicts = new List<TConflictItem>();
                         foreach (var previouslyUnresolvedItem in previouslyUnresolvedConflicts)
                         {
                             //  Don't re-report the item that just lost and was already reported
@@ -109,13 +113,31 @@ namespace Microsoft.NET.Build.Tasks.ConflictResolution
                             }
 
                             //  Call ResolveConflict with the new winner and item that previously had an unresolved
-                            //  conflict, so that the correct message will be logged recording that the winner
-                            //  won and why
-                            ResolveConflict(winner, previouslyUnresolvedItem, logUnresolvedConflicts: true);
+                            //  conflict, so that if the previously unresolved conflict loses, the correct message
+                            //  will be logged recording that the winner won and why.  If the conflict can't be
+                            //  resolved, then keep the previously unresolved conflict in the list of unresolved
+                            //  conflicts.
+                            var newWinner = ResolveConflict(winner, previouslyUnresolvedItem, logUnresolvedConflicts: true);
+                            if (newWinner == winner)
+                            {
+                                foundConflict(winner, previouslyUnresolvedItem);
+                            }
+                            else if (newWinner == null)
+                            {
+                                if (newUnresolvedConflicts.Count == 0)
+                                {
+                                    newUnresolvedConflicts.Add(winner);
+                                }
+                                newUnresolvedConflicts.Add(previouslyUnresolvedItem);
+                            }
 
-                            foundConflict(winner, previouslyUnresolvedItem);
+                            
                         }
                         _unresolvedConflictItems.Remove(itemKey);
+                        if (newUnresolvedConflicts.Count > 0)
+                        {
+                            _unresolvedConflictItems[itemKey] = newUnresolvedConflicts;
+                        }
                     }
                 }
                 else if (commitWinner)
