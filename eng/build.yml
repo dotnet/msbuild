@@ -1,0 +1,106 @@
+parameters:
+  agentOs: ''
+  queue: {}
+  variables: {}
+
+phases:
+- template: /eng/common/templates/phases/base.yml@arcade  
+  parameters:
+    name: ${{ parameters.agentOs }}
+    enableTelemetry: true
+    enableMicrobuild: true
+    publicBuildReasons: PullRequest
+    queue: ${{ parameters.queue }}
+    variables: 
+      ${{ insert }}: ${{ parameters.variables }}
+      _HelixType: build/product
+      _HelixBuildConfig: $(_BuildConfig)
+      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+        _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
+      ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+        _HelixSource: official/dotnet/sdk/$(Build.SourceBranch)
+
+    steps:
+    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
+          KeyVaultName: EngKeyVault
+          SecretsFilter: 'dotnetfeed-storage-access-key-1'
+        condition: succeeded()
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'HelixProd_KeyVault'
+          KeyVaultName: HelixProdKV
+          SecretsFilter: 'HelixApiAccessToken'
+        condition: always()
+
+    - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
+      - script: build\CIBuild.cmd
+                  -configuration %BuildConfig%
+                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                  /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
+                  /p:PB_PublishType=%PublishType%
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
+
+    - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
+      - script: build\CIBuild.cmd 
+                  -configuration %BuildConfig%
+                  -fullMSBuild
+                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                  /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
+                  /p:PB_PublishType=%PublishType%
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
+
+    - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework') }}:
+      - script: build/cibuild.sh 
+                  --configuration $BuildConfig
+                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                  /p:PB_PublishBlobFeedUrl=$BlobFeedUrl
+                  /p:PB_PublishType=$PublishType
+        displayName: Build
+        env:
+          BuildConfig: $(_BuildConfig)
+          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
+
+    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+      - task: PublishTestResults@1
+        displayName: Publish Test Results
+        inputs:
+          testRunner: XUnit
+          testResultsFiles: '**\*.xml'
+          searchFolder: '$(Build.SourcesDirectory)\artifacts\$(_BuildConfig)\TestResults'
+          testRunTitle: 'Unit Test Results'
+          platform: '$(BuildPlatform)'
+          configuration: '$(_BuildConfig)'
+        condition: and(succeededOrFailed(), ne(variables['PB_SkipTests'], 'true'))
+
+      - task: CopyFiles@2
+        displayName: Stage Build Artifacts
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+           artifacts\$(_BuildConfig)\bin\**\*
+           artifacts\$(_BuildConfig)\log\**\*
+           artifacts\$(_BuildConfig)\packages\**\*
+           artifacts\$(_BuildConfig)\TestResults\**\*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
+
+      - task: PublishBuildArtifacts@1
+        displayName: Publish Build Artifacts
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\artifacts\$(_BuildConfig)'
+          ArtifactName: '$(Build.BuildNumber)'
+          publishLocation: FilePath
+          TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'
+        condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
