@@ -17,6 +17,7 @@ folder InstallDir:\MSBuild\15.0\Bin
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.IO.Redist.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)MSBuild.exe vs.file.ngenArchitecture=x86
   file source=$(X86BinPath)MSBuild.exe.config
   file source=$(TaskHostBinPath)MSBuildTaskHost.exe vs.file.ngenArchitecture=x86
@@ -155,6 +156,7 @@ folder InstallDir:\MSBuild\15.0\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.IO.Redist.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets

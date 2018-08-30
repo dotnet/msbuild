@@ -49,6 +49,7 @@
         "mscorlib.dll",
         "netstandard.dll",
         "System.Collections.Immutable.dll",
-        "System.Threading.Tasks.Dataflow.dll"
+        "System.Threading.Tasks.Dataflow.dll",
+        "Microsoft.IO.Redist.dll"
       ]
 }

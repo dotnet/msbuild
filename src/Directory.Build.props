@@ -5,6 +5,10 @@
     <PackageReference Update="@(PackageReference)" IsImplicitlyDefined="true" />
   </ItemGroup>
 
+  <PropertyGroup>
+      <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
