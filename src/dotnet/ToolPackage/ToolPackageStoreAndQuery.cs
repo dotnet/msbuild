@@ -92,9 +92,10 @@ namespace Microsoft.DotNet.ToolPackage
 
             foreach (var subdirectory in Directory.EnumerateDirectories(packageRootDirectory.Value))
             {
-                yield return new ToolPackageInstance(packageId,
-                    NuGetVersion.Parse(Path.GetFileName(subdirectory)),
-                    new DirectoryPath(subdirectory));
+                yield return new ToolPackageInstance(id: packageId,
+                    version: NuGetVersion.Parse(Path.GetFileName(subdirectory)),
+                    packageDirectory: new DirectoryPath(subdirectory),
+                    assetsJsonParentDirectory: new DirectoryPath(subdirectory));
             }
         }
 
@@ -110,7 +111,11 @@ namespace Microsoft.DotNet.ToolPackage
             {
                 return null;
             }
-            return new ToolPackageInstance(packageId, version, directory);
+
+            return new ToolPackageInstance(id: packageId,
+                version: version,
+                packageDirectory: directory,
+                assetsJsonParentDirectory: directory);
         }
     }
 }

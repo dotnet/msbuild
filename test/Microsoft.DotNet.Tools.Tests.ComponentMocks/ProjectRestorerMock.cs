@@ -112,7 +112,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 fakeExecutablePath);
         }
 
-        private MockFeedPackage GetPackage(
+        public MockFeedPackage GetPackage(
             string packageId,
             VersionRange versionRange = null,
             FilePath? nugetConfig = null)
