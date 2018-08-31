@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdSettingsDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdSettingsFile)
-                              .ForwardAsSingle(o => $"-property:VSTestSetting={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-property:VSTestSetting={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
                   Create.Option(
                         "-t|--list-tests",
                         LocalizableStrings.CmdListTestsDescription,
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdTestAdapterPathDescription,
                         Accept.OneOrMoreArguments()
                               .With(name: LocalizableStrings.CmdTestAdapterPath)
-                              .ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Arguments)}\"")),
+                              .ForwardAsSingle(o => $"-property:VSTestTestAdapterPath=\"{string.Join(";", o.Arguments.Select(CommandDirectoryContext.ExpandPath))}\"")),
                   Create.Option(
                         "-l|--logger",
                         LocalizableStrings.CmdLoggerDescription,
@@ -62,13 +62,13 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdOutputDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdOutputDir)
-                              .ForwardAsSingle(o => $"-property:OutputPath={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
                   Create.Option(
                         "-d|--diag",
                         LocalizableStrings.CmdPathTologFileDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToLogFile)
-                              .ForwardAsSingle(o => $"-property:VSTestDiag={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-property:VSTestDiag={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
                   Create.Option(
                         "--no-build",
                         LocalizableStrings.CmdNoBuildDescription,
@@ -79,7 +79,7 @@ namespace Microsoft.DotNet.Cli
                         LocalizableStrings.CmdResultsDirectoryDescription,
                         Accept.ExactlyOneArgument()
                               .With(name: LocalizableStrings.CmdPathToResultsDirectory)
-                              .ForwardAsSingle(o => $"-property:VSTestResultsDirectory={o.Arguments.Single()}")),
+                              .ForwardAsSingle(o => $"-property:VSTestResultsDirectory={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
                   Create.Option(
                         "--collect",
                         LocalizableStrings.cmdCollectDescription,

@@ -5,7 +5,9 @@ using Microsoft.DotNet.Tools.Pack;
 using FluentAssertions;
 using Xunit;
 using System;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -14,10 +16,13 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -restore -target:pack";
         const string ExpectedNoBuildPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -target:pack";
 
+        private static readonly string WorkingDirectory = 
+            Microsoft.DotNet.Tools.Test.Utilities.TestPathUtilities.CreateAbsolutePath(nameof(GivenDotnetPackInvocation));
+
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-o", "<packageoutputpath>" }, "-property:PackageOutputPath=<packageoutputpath>")]
-        [InlineData(new string[] { "--output", "<packageoutputpath>" }, "-property:PackageOutputPath=<packageoutputpath>")]
+        [InlineData(new string[] { "-o", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath>")]
+        [InlineData(new string[] { "--output", "<packageoutputpath>" }, "-property:PackageOutputPath=<cwd><packageoutputpath>")]
         [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
         [InlineData(new string[] { "--include-symbols" }, "-property:IncludeSymbols=true")]
         [InlineData(new string[] { "--include-source" }, "-property:IncludeSource=true")]
@@ -31,14 +36,19 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "<project>" }, "<project>")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            {
+                expectedAdditionalArgs =
+                    (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
+                    .Replace("<cwd>", WorkingDirectory);
 
-            var msbuildPath = "<msbuildpath>";
-            var command = PackCommand.FromArgs(args, msbuildPath);
-            var expectedPrefix = args.FirstOrDefault() == "--no-build" ? ExpectedNoBuildPrefix : ExpectedPrefix;
+                var msbuildPath = "<msbuildpath>";
+                var command = PackCommand.FromArgs(args, msbuildPath);
+                var expectedPrefix = args.FirstOrDefault() == "--no-build" ? ExpectedNoBuildPrefix : ExpectedPrefix;
 
-            command.SeparateRestoreCommand.Should().BeNull();
-            command.GetProcessStartInfo().Arguments.Should().Be($"{expectedPrefix}{expectedAdditionalArgs}");
+                command.SeparateRestoreCommand.Should().BeNull();
+                command.GetProcessStartInfo().Arguments.Should().Be($"{expectedPrefix}{expectedAdditionalArgs}");
+            });
         }
     }
 }

@@ -5,12 +5,17 @@ using Microsoft.DotNet.Tools.Clean;
 using FluentAssertions;
 using Xunit;
 using System;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetCleanInvocation
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -verbosity:normal -target:Clean";
+
+        private static readonly string WorkingDirectory = 
+            Microsoft.DotNet.Tools.Test.Utilities.TestPathUtilities.CreateAbsolutePath(nameof(GivenDotnetCleanInvocation));
 
         [Fact]
         public void ItAddsProjectToMsbuildInvocation()
@@ -22,8 +27,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 
         [Theory]
         [InlineData(new string[] { }, "")]
-        [InlineData(new string[] { "-o", "<output>" }, "-property:OutputPath=<output>")]
-        [InlineData(new string[] { "--output", "<output>" }, "-property:OutputPath=<output>")]
+        [InlineData(new string[] { "-o", "<output>" }, "-property:OutputPath=<cwd><output>")]
+        [InlineData(new string[] { "--output", "<output>" }, "-property:OutputPath=<cwd><output>")]
         [InlineData(new string[] { "-f", "<framework>" }, "-property:TargetFramework=<framework>")]
         [InlineData(new string[] { "--framework", "<framework>" }, "-property:TargetFramework=<framework>")]
         [InlineData(new string[] { "-c", "<configuration>" }, "-property:Configuration=<configuration>")]
@@ -32,11 +37,16 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            {
+                expectedAdditionalArgs =
+                    (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
+                    .Replace("<cwd>", WorkingDirectory);
 
-            var msbuildPath = "<msbuildpath>";
-            CleanCommand.FromArgs(args, msbuildPath)
-                .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                var msbuildPath = "<msbuildpath>";
+                CleanCommand.FromArgs(args, msbuildPath)
+                    .GetProcessStartInfo().Arguments.Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+            });
         }
     }
 }
