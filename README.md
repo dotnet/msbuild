@@ -8,7 +8,7 @@ For more information on MSBuild, see the [MSBuild documentation](https://docs.mi
 
 The current development branch is `master`. It builds for .NET Core and the full desktop .NET framework. Changes in `master` will go into the next "major" update of MSBuild.
 
-[![Build Status](https://dotnet.visualstudio.com/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_apis/build/status/86?branchname=master)](https://dotnet.visualstudio.com/public/public%20Team/_build?definitionId=86&_a=summary&branchName=master)
+[![Build Status](https://dnceng.visualstudio.com/9ee6d478-d288-47f7-aacc-f6e6d082ae6d/_apis/build/status/86?branchname=master)](https://dnceng.visualstudio.com/public/public%20Team/_build?definitionId=86&_a=summary&branchName=master)
 
 We have forked for MSBuild 15.9 in the branch [`vs15.9`](https://github.com/Microsoft/msbuild/tree/vs15.9).
 
