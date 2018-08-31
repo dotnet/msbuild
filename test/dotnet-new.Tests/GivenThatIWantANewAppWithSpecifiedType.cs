@@ -62,7 +62,7 @@ namespace Microsoft.DotNet.New.Tests
 
             new TestCommand("dotnet")
                 .WithWorkingDirectory(rootPath)
-                .Execute($"restore")
+                .Execute($"restore --disable-parallel")
                 .Should().Pass();
 
             var buildResult = new TestCommand("dotnet")
