@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
                 new SdkReference("Some.Test.Sdk", null, null),
-                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
             result.Success.Should().BeTrue();
@@ -68,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
                 new SdkReference("Some.Test.Sdk", null, "999.99.99"),
-                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
             result.Success.Should().BeFalse();
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
         }
 
         [Fact]
-        public void ItReturnsNullWhenTheSDKRequiresAHigherVersionOfMSBuildThanTheOneAvailable()
+        public void ItReturnsNullWhenTheSDKRequiresAHigherVersionOfMSBuildThanAnyOneAvailable()
         {
             var environment = new TestEnvironment();
             var expected =
@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 new MockContext
                 {
                     MSBuildVersion = new Version(1, 0),
-                    ProjectFilePath = environment.TestDirectory.FullName
+                    ProjectFileDirectory = environment.TestDirectory
                 },
                 new MockFactory());
 
@@ -105,6 +105,73 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             result.Errors.Should().Contain("Version 99.99.99 of the .NET Core SDK requires at least version 2.0 of MSBuild."
                 + " The current available version of MSBuild is 1.0. Change the .NET Core SDK specified in global.json to an older"
                 + " version that requires the MSBuild version currently available.");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItReturnsHighestSdkAvailableThatIsCompatibleWithMSBuild(bool disallowPreviews)
+        {
+            var environment = new TestEnvironment(identifier: disallowPreviews.ToString())
+            {
+                DisallowPrereleaseByDefault = disallowPreviews
+            };
+
+            var compatibleRtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "98.98.98", new Version(19, 0, 0, 0));
+            var compatiblePreview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99-preview", new Version(20, 0, 0, 0));
+            var incompatible = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "100.100.100", new Version(21, 0, 0, 0));
+
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, null),
+                new MockContext
+                {
+                    MSBuildVersion = new Version(20, 0, 0, 0),
+                    ProjectFileDirectory = environment.TestDirectory,
+                },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be((disallowPreviews ? compatibleRtm : compatiblePreview).FullName);
+            result.Version.Should().Be(disallowPreviews ? "98.98.98" : "99.99.99-preview");
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItDoesNotReturnHighestSdkAvailableThatIsCompatibleWithMSBuildWhenVersionInGlobalJsonCannotBeFound(bool disallowPreviews)
+        {
+            var environment = new TestEnvironment(callingMethod: "ItDoesNotReturnHighest___", identifier: disallowPreviews.ToString())
+            {
+                DisallowPrereleaseByDefault = disallowPreviews
+            };
+
+            var compatibleRtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "98.98.98", new Version(19, 0, 0, 0));
+            var compatiblePreview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "99.99.99-preview", new Version(20, 0, 0, 0));
+            var incompatible = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "100.100.100", new Version(21, 0, 0, 0));
+
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.CreateGlobalJson(environment.TestDirectory, "1.2.3");
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, null),
+                new MockContext
+                {
+                    MSBuildVersion = new Version(20, 0, 0, 0),
+                    ProjectFileDirectory = environment.TestDirectory,
+                },
+                new MockFactory());
+
+            result.Success.Should().BeFalse();
+            result.Path.Should().BeNull();
+            result.Version.Should().BeNull();;
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -118,7 +185,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
                 new SdkReference("Some.Test.Sdk", null, "1.0.0"),
-                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
             result.Success.Should().BeFalse();
@@ -142,7 +209,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
                 new SdkReference("Some.Test.Sdk", null, "1.0.0"),
-                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
             result.Success.Should().BeFalse();
@@ -165,7 +232,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
                 new SdkReference("Some.Test.Sdk", null, "99.99.99"),
-                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
             result.Success.Should().BeTrue();
@@ -186,12 +253,165 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var resolver = environment.CreateResolver();
             var result = (MockResult)resolver.Resolve(
                 new SdkReference("Some.Test.Sdk", null, "99.99.99"),
-                new MockContext { ProjectFilePath = environment.TestDirectory.FullName },
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
                 new MockFactory());
 
             result.Success.Should().BeTrue();
             result.Path.Should().Be(expected.FullName);
             result.Version.Should().Be("999.99.99");
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItDisallowsPreviewsBasedOnDefault(bool disallowPreviewsByDefault)
+        {
+            var environment = new TestEnvironment(identifier: disallowPreviewsByDefault.ToString());
+            var rtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "10.0.0");
+            var preview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "11.0.0-preview1");
+            var expected = disallowPreviewsByDefault ? rtm : preview;
+
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.DisallowPrereleaseByDefault = disallowPreviewsByDefault;
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, null),
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be(expected.FullName);
+            result.Version.Should().Be(disallowPreviewsByDefault ? "10.0.0" : "11.0.0-preview1");
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ItDisallowsPreviewsBasedOnFile(bool disallowPreviews)
+        {
+            var environment = new TestEnvironment(identifier: disallowPreviews.ToString());
+            var rtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "10.0.0");
+            var preview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "11.0.0-preview1");
+            var expected = disallowPreviews ? rtm : preview;
+
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.DisallowPrereleaseByDefault = !disallowPreviews;
+            environment.CreateVSSettingsFile(disallowPreviews);
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, null),
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be(expected.FullName);
+            result.Version.Should().Be(disallowPreviews ? "10.0.0" : "11.0.0-preview1");
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Fact]
+        public void ItObservesChangesToVSSettingsFile()
+        {
+            var environment = new TestEnvironment();
+            var rtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "10.0.0");
+            var preview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "11.0.0-preview1");
+
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.CreateVSSettingsFile(disallowPreviews: true);
+            var resolver = environment.CreateResolver();
+
+            void Check(bool disallowPreviews, string message)
+            {
+                // check twice because file-up-to-date is a separate code path
+                for (int i = 0; i < 2; i++)
+                {
+
+                    var result = (MockResult)resolver.Resolve(
+                        new SdkReference("Some.Test.Sdk", null, null),
+                        new MockContext { ProjectFileDirectory = environment.TestDirectory },
+                        new MockFactory());
+
+                    string m = $"{message} ({i})";
+                    var expected = disallowPreviews ? rtm : preview;
+                    result.Success.Should().BeTrue(m);
+                    result.Path.Should().Be(expected.FullName, m);
+                    result.Version.Should().Be(disallowPreviews ? "10.0.0" : "11.0.0-preview1", m);
+                    result.Warnings.Should().BeNullOrEmpty(m);
+                    result.Errors.Should().BeNullOrEmpty(m);
+                }
+            }
+
+            environment.DeleteVSSettingsFile();
+            Check(disallowPreviews: false, message: "default with no file");
+
+            environment.CreateVSSettingsFile(disallowPreviews: true);
+            Check(disallowPreviews: true, message: "file changed to disallow previews");
+
+            environment.CreateVSSettingsFile(disallowPreviews: false);
+            Check(disallowPreviews: false,  message: "file changed to not disallow previews");
+
+            environment.CreateVSSettingsFile(disallowPreviews: true);
+            Check(disallowPreviews: true, message: "file changed back to disallow previews");
+
+            environment.DeleteVSSettingsFile();
+            Check(disallowPreviews: false, message: "file deleted to return to default");
+        }
+
+        [Fact]
+        public void ItAllowsPreviewWhenGlobalJsonHasPreviewIrrespectiveOfSetting()
+        {
+            var environment = new TestEnvironment();
+            var rtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "10.0.0");
+            var preview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "11.0.0-preview1");
+ 
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+            environment.DisallowPrereleaseByDefault = true;
+            environment.CreateGlobalJson(environment.TestDirectory, "11.0.0-preview1");
+
+            var resolver = environment.CreateResolver();
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, null),
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be(preview.FullName);
+            result.Version.Should().Be("11.0.0-preview1");
+            result.Warnings.Should().BeNullOrEmpty();
+            result.Errors.Should().BeNullOrEmpty();
+        }
+
+        [Fact]
+        public void ItRespectsAmbientVSSettings()
+        {
+            // When run in test explorer in VS, this will actually locate the settings for the current VS instance
+            // based on location of testhost executable. This gives us some coverage threw that path but we cannot
+            // fix our expectations since the behavior will vary (by design) based on the current VS instance's settings.
+            var vsSettings = VSSettings.Ambient;
+
+            var environment = new TestEnvironment();
+            var rtm = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "10.0.0");
+            var preview = environment.CreateSdkDirectory(ProgramFiles.X64, "Some.Test.Sdk", "11.0.0-preview1");
+            var expected = vsSettings.DisallowPrerelease() ? rtm : preview;
+
+            environment.CreateMuxerAndAddToPath(ProgramFiles.X64);
+
+            var resolver = environment.CreateResolver(useAmbientSettings: true);
+            var result = (MockResult)resolver.Resolve(
+                new SdkReference("Some.Test.Sdk", null, null),
+                new MockContext { ProjectFileDirectory = environment.TestDirectory },
+                new MockFactory());
+
+            result.Success.Should().BeTrue();
+            result.Path.Should().Be(expected.FullName);
+            result.Version.Should().Be(vsSettings.DisallowPrerelease() ? "10.0.0" : "11.0.0-preview1");
             result.Warnings.Should().BeNullOrEmpty();
             result.Errors.Should().BeNullOrEmpty();
         }
@@ -210,6 +430,8 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public string PathEnvironmentVariable { get; set; }
 
             public DirectoryInfo TestDirectory { get; }
+            public FileInfo VSSettingsFile { get; set; }
+            public bool DisallowPrereleaseByDefault { get; set; }
 
             public TestEnvironment(string identifier = "", [CallerMemberName] string callingMethod = "")
             {
@@ -223,8 +445,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 PathEnvironmentVariable = string.Empty;
             }
 
-            public SdkResolver CreateResolver()
-                => new DotNetMSBuildSdkResolver(GetEnvironmentVariable);
+            public SdkResolver CreateResolver(bool useAmbientSettings = false)
+                => new DotNetMSBuildSdkResolver(
+                    GetEnvironmentVariable, 
+                    useAmbientSettings
+                        ? VSSettings.Ambient
+                        : new VSSettings(VSSettingsFile?.FullName, DisallowPrereleaseByDefault));
 
             public DirectoryInfo GetSdkDirectory(ProgramFiles programFiles, string sdkName, string sdkVersion)
                 => TestDirectory.GetDirectory(
@@ -317,6 +543,34 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 string baseDirectory = AppContext.BaseDirectory;
                 return Path.Combine(baseDirectory, "minimumVSDefinedSDKVersion");
             }
+
+            public void CreateVSSettingsFile(bool disallowPreviews)
+            {
+                VSSettingsFile = TestDirectory.GetFile("sdk.txt");
+
+                // Guard against tests writing too fast for the up-to-date check
+                // It happens more often on Unix due to https://github.com/dotnet/corefx/issues/12403
+                var lastWriteTimeUtc = VSSettingsFile.Exists ? VSSettingsFile.LastWriteTimeUtc : DateTime.MinValue;
+                for (int sleep = 10; sleep < 3000; sleep *= 2)
+                {
+                    File.WriteAllText(VSSettingsFile.FullName, $"UsePreviews={!disallowPreviews}");
+                    VSSettingsFile.Refresh();
+
+                    if (VSSettingsFile.LastWriteTimeUtc > lastWriteTimeUtc)
+                    {
+                        return;
+                    }
+
+                    System.Threading.Thread.Sleep(sleep);
+                }
+
+                throw new InvalidOperationException("LastWriteTime is not changing.");
+            }
+
+            public void DeleteVSSettingsFile()
+            {
+                VSSettingsFile.Delete();
+            }
         }
 
         private sealed class MockContext : SdkResolverContext
@@ -324,6 +578,12 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             public new string ProjectFilePath { get => base.ProjectFilePath; set => base.ProjectFilePath = value; }
             public new string SolutionFilePath { get => base.SolutionFilePath; set => base.SolutionFilePath = value; }
             public new Version MSBuildVersion { get => base.MSBuildVersion; set => base.MSBuildVersion = value; }
+
+            public DirectoryInfo ProjectFileDirectory
+            {
+                get => new DirectoryInfo(Path.GetDirectoryName(ProjectFilePath));
+                set => ProjectFilePath = value.GetFile("test.csproj").FullName;
+            }
 
             public MockContext()
             {
@@ -352,12 +612,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
                 Errors = errors;
             }
 
-            public new bool Success
-            {
-                get => base.Success;
-                private set => base.Success = value;
-            }
-
+            public override bool Success { get; protected set; }
             public override string Version { get; protected set; }
             public override string Path { get; protected set; }
             public IEnumerable<string> Errors { get; }
