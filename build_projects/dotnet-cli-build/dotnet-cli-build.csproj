@@ -28,5 +28,7 @@
     <PackageReference Include="Microsoft.DotNet.VersionTools" Version="$(VersionToolsVersion)" />
     <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(BuildTasksFeedToolVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
+    <PackageReference Include="Nuget.Versioning" Version="4.7.0-preview1-4992" />
+
  </ItemGroup>
 </Project>
