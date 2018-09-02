@@ -44,7 +44,7 @@ Se está ejecutando un comando para rellenar la caché de paquetes local para me
 Here are some options to fix this error:
 ----------------------------------------
 1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
         <target state="translated">Permiso denegado para modificar la carpeta "{0}".
