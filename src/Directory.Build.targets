@@ -38,7 +38,7 @@
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
 
     <XUnitRunnerAdditionalArguments>$(XunitOptions)</XUnitRunnerAdditionalArguments>
-    
+
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
@@ -67,7 +67,7 @@
     <!-- Disable reference assembly source when building for Mono, as some APIs are excluded when compiling for Mono -->
     <GenerateReferenceAssemblySources>false</GenerateReferenceAssemblySources>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
     <GenAPIAssemblyName>$(AssemblyName)</GenAPIAssemblyName>
     <GenAPIAssemblyName Condition="'$(GenAPIAssemblyName)' == ''">$(MSBuildProjectName)</GenAPIAssemblyName>
@@ -76,7 +76,7 @@
     <GenAPIShortFrameworkIdentifier Condition="$(TargetFramework.StartsWith('netcoreapp'))">netstandard</GenAPIShortFrameworkIdentifier>
     <GenAPITargetPath>$(RepoRoot)ref\$(GenAPIAssemblyName)\$(GenAPIShortFrameworkIdentifier)\$(GenAPIAssemblyName).cs</GenAPITargetPath>
   </PropertyGroup>
-  
+
   <ItemGroup Condition="'$(GenerateReferenceAssemblySources)' == 'true' and '$(OsEnvironment)'=='windows'">
     <PackageReference Include="Microsoft.DotNet.BuildTools.GenAPI" Version="$(GenApiVersion)" PrivateAssets="All" />
   </ItemGroup>
@@ -110,6 +110,18 @@
   </Target>
 
   <Import Project="$([System.IO.Path]::Combine('$(RepoRoot)', 'build', 'GetBuildVersionStub.proj'))" Condition="'$(DisableNerdbankVersioning)' == 'true'" />
+
+  <!-- In circumstances where we aren't using GitVersioning, set
+       versions manually to something vaguely correct. -->
+  <Target Name="OverrideRepoToolsetVersions"
+          AfterTargets="_InitializeAssemblyVersion"
+          Condition="'$(DisableNerdbankVersioning)' == 'true'">
+    <PropertyGroup>
+      <AssemblyVersion>15.1.0.0</AssemblyVersion>
+      <FileVersion>15.8.0.0</FileVersion>
+      <InformationalVersion Condition="'$(MonoBuild)' == 'true'">$(FileVersion)-mono</InformationalVersion>
+    </PropertyGroup>
+  </Target>
 
   <Target Name="GetNuGetPackageVersionEx"
     BeforeTargets="GenerateNuspec"
