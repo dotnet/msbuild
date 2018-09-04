@@ -204,6 +204,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private ProjectRootElement _lastModifiedProject;
 
+        private readonly bool _interactive;
+
         /// <summary>
         /// Private constructor called by the static Evaluate method.
         /// </summary>
@@ -219,7 +221,8 @@ namespace Microsoft.Build.Evaluation
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
-            bool profileEvaluation)
+            bool profileEvaluation,
+            bool interactive)
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
@@ -250,6 +253,10 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+
+            // In 15.9 we add support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
+            // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
+            _interactive = interactive || String.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
             // The last modified project is the project itself unless its an in-memory project
             if (projectRootElement.FullPath != null)
@@ -358,7 +365,8 @@ namespace Microsoft.Build.Evaluation
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContext evaluationContext = null)
+            EvaluationContext evaluationContext = null,
+            bool interactive = false)
         {
 #if (!STANDALONEBUILD)
             using (new CodeMarkerStartEnd(CodeMarkerEvent.perfMSBuildProjectEvaluateBegin, CodeMarkerEvent.perfMSBuildProjectEvaluateEnd))
@@ -384,7 +392,8 @@ namespace Microsoft.Build.Evaluation
                     sdkResolverService,
                     submissionId,
                     evaluationContext,
-                    profileEvaluation);
+                    profileEvaluation,
+                    interactive);
 
                 evaluator.Evaluate(loggingService, buildEventContext);
 #if MSBUILDENABLEVSPROFILING 
@@ -703,6 +712,11 @@ namespace Microsoft.Build.Evaluation
                     environmentProperties = AddEnvironmentProperties();
                     toolsetProperties = AddToolsetProperties();
                     globalProperties = AddGlobalProperties();
+
+                    if (_interactive)
+                    {
+                        SetBuiltInProperty(ReservedPropertyNames.interactive, "true");
+                    }
                 }
 
 #if (!STANDALONEBUILD)
@@ -2144,12 +2158,8 @@ namespace Microsoft.Build.Evaluation
                 if (solutionPath == "*Undefined*") solutionPath = null;
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
-                // We currently only support the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
-                // In the future we should add an /interactive command-line argument and pipe that through to here instead.
-                var interactive = String.Equals("true", _data.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
-
                 // Combine SDK path with the "project" relative path
-                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, interactive);
+                sdkResult = _sdkResolverService.ResolveSdk(_submissionId, importElement.ParsedSdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive);
 
                 if (!sdkResult.Success)
                 {

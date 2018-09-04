@@ -85,6 +85,30 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_34_InteractiveSwitch">
+        <source>  /interactive[:True|False]
+                     Indicates that actions in the build are allowed to
+                     interact with the user.  When enabled, the build can
+                     block indefinitely so it should only be specified
+                     in an environment where a user is present.
+                     Specifying /interactive is the same as specifying
+                     /interactive:true.  Use the parameter to override a
+                     value that comes from a response file.
+    </source>
+        <target state="new">  /interactive[:True|False]
+                     Indicates that actions in the build are allowed to
+                     interact with the user.  When enabled, the build can
+                     block indefinitely so it should only be specified
+                     in an environment where a user is present.
+                     Specifying /interactive is the same as specifying
+                     /interactive:true.  Use the parameter to override a
+                     value that comes from a response file.
+    </target>
+        <note>
+      LOCALIZATION: "/interactive" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
         <source>Switches:
 </source>
@@ -761,6 +785,16 @@ Copyright (C) Microsoft Corporation. Tous droits réservés.
       {StrBegin="MSBUILD : Configuration error MSB1043: "}
       UE: This error is shown when the msbuild.exe.config file had invalid content.
       LOCALIZATION: The prefix "MSBUILD : Configuration error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidInteractiveValue">
+        <source>MSBUILD : error MSB1056: Interactive value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1056: Interactive value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1056: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a restore value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="InvalidLoggerError">
