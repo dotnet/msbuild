@@ -55,52 +55,6 @@ namespace EndToEnd
                 "Please update MSBuildExtensions.targets in this repo so these versions match.");
         }
 
-        [Fact]
-        public void StandalonePublishWithLatestTFMUsesBundledAspNetCoreAppVersion()
-        {
-            var _testInstance = TestAssets.Get(AspNetTestProject)
-                .CreateInstance(identifier: LatestSupportedAspNetCoreAppVersion)
-                .WithSourceFiles();
-
-            string projectDirectory = _testInstance.Root.FullName;
-            string projectPath = Path.Combine(projectDirectory, $"{AspNetTestProject}.csproj");
-
-            var project = XDocument.Load(projectPath);
-            var ns = project.Root.Name.Namespace;
-
-            //  Update TargetFramework to the right version of .NET Core
-            project.Root.Element(ns + "PropertyGroup")
-                .Element(ns + "TargetFramework")
-                .Value = "netcoreapp" + LatestSupportedAspNetCoreAppVersion;
-
-            var rid = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.GetRuntimeIdentifier();
-
-            //  Set RuntimeIdentifier to simulate standalone publish
-            project.Root.Element(ns + "PropertyGroup")
-                .Add(new XElement(ns + "RuntimeIdentifier", rid));
-
-            project.Save(projectPath);
-
-            //  Get the implicit version
-            new RestoreCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute()
-                    .Should().Pass();
-
-            var assetsFilePath = Path.Combine(projectDirectory, "obj", "project.assets.json");
-            var assetsFile = new LockFileFormat().Read(assetsFilePath);
-
-            var restoredVersion = GetAspNetCoreAppVersion(assetsFile);
-            restoredVersion.Should().NotBeNull();
-
-            var bundledVersionPath = Path.Combine(projectDirectory, ".BundledAspNetCoreVersion");
-            var bundledVersion = File.ReadAllText(bundledVersionPath).Trim();
-
-            restoredVersion.ToNormalizedString().Should().BeEquivalentTo(bundledVersion,
-                "The bundled aspnetcore versions set in Microsoft.NETCoreSdk.BundledVersions.props should be idenitical to the versions set in DependencyVersions.props." +
-                "Please update MSBuildExtensions.targets in this repo so these versions match.");
-        }
-
         [Theory]
         [MemberData(nameof(SupportedAspNetCoreAppVersions))]
         public void ItRollsForwardToTheLatestVersion(string minorVersion)
@@ -208,7 +162,7 @@ namespace EndToEnd
                 ?.Version;
         }
 
-        public static string LatestSupportedAspNetCoreAppVersion = "2.2";
+        public static string LatestSupportedAspNetCoreAppVersion = "3.0";
 
         public static IEnumerable<object[]> SupportedAspNetCoreAppVersions
         {
