@@ -26,12 +26,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
-
-    <CliTargetFramework>netcoreapp3.0</CliTargetFramework>
-    <!-- We only need this until we get a stage0 with a 2.2 SDK. -->
-    <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
   </PropertyGroup>
 
+  <Import Project="build/TargetFramework.props" />
   <Import Project="build/InitRepo.props" />
   <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(GitCommitInfoProps)" />
   <Import Condition=" '$(GeneratePropsFile)' != 'true' " Project="$(HostInfoProps)" />

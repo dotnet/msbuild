@@ -2,12 +2,11 @@
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
   </PropertyGroup>
+  <Import Project="build/TargetFramework.props" />
   <Import Project="build/InitRepo.props" />
   <Import Project="build/DependencyVersions.props" />
   <PropertyGroup>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
     <NoPackageAnalysis>true</NoPackageAnalysis>
-    <!-- This necessary while we have 2.2 runtime and TFM used in 3.0 branches -->
-    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 </Project>
