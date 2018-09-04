@@ -186,7 +186,4 @@
           DestinationFolder="$(PublishDir)"/>
     
   </Target>
-  
-  
-
 </Project>
