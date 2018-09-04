@@ -1437,10 +1437,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectCollectionVersionIsCorrect()
         {
+            ProjectCollection.Version.ShouldNotBe(new Version(0, 0, 0, 0));
+
+#if THISASSEMBLY
             Version expectedVersion = new Version(ThisAssembly.AssemblyFileVersion);
 
             ProjectCollection.Version.Major.ShouldBe(expectedVersion.Major);
             ProjectCollection.Version.Minor.ShouldBe(expectedVersion.Minor);
+#endif
         }
 
         /// <summary>
