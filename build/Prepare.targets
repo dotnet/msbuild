@@ -117,6 +117,7 @@
     &lt;PropertyGroup&gt;
         &lt;PreviousStageDirectory&gt;$(OutputDirectory)&lt;/PreviousStageDirectory&gt;
         &lt;PreviousStageDotnet&gt;$(DotnetInOutputDirectory)&lt;/PreviousStageDotnet&gt;
+        &lt;PreviousStageBundledVersions&gt;$(SdkOutputDirectory)/Microsoft.NETCoreSdk.BundledVersions.props&lt;/PreviousStageBundledVersions&gt;
         &lt;CliOuterBuildStage&gt;$(CliBuildStage)&lt;/CliOuterBuildStage&gt;
     &lt;/PropertyGroup&gt;
 &lt;/Project&gt;

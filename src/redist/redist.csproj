@@ -176,4 +176,15 @@
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
   </Target>
+
+  <Target Name="CopyBundledVersions"
+          AfterTargets="Publish">
+
+    <Copy SourceFiles="$(PreviousStageBundledVersions)"
+          DestinationFolder="$(PublishDir)"/>
+    
+  </Target>
+  
+  
+
 </Project>
