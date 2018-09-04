@@ -617,14 +617,14 @@ namespace Microsoft.Build.Tasks
         {
             if (instanceLocalLastModifiedCache.TryGetValue(path, out DateTime cachedLastModified))
             {
-                return IsExistingFileTime(cachedLastModified);
+                return FileTimestampIndicatesFileExists(cachedLastModified);
             }
             DateTime lastModified = getLastWriteTime(path);
             instanceLocalLastModifiedCache[path] = lastModified;
-            return IsExistingFileTime(lastModified);
+            return FileTimestampIndicatesFileExists(lastModified);
         }
 
-        private bool IsExistingFileTime(DateTime lastModified)
+        private bool FileTimestampIndicatesFileExists(DateTime lastModified)
         {
             // TODO: Standardize LastWriteTime value for nonexistent files. See https://github.com/Microsoft/msbuild/issues/3699
             return lastModified != DateTime.MinValue && lastModified != DateTime.FromFileTimeUtc(0);
