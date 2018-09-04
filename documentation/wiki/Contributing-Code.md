@@ -33,4 +33,4 @@ Please follow these guidelines when creating new issues in the issue tracker:
 - Subscribe to notifications for the created issue in case there are any follow up questions.
 
 ### Coding Conventions
-- Use the coding style outlined in the [.Net Foundation Coding Guidelines](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/contributing.md)
+- Use the coding style outlined in the [.Net Foundation Coding Guidelines](https://github.com/dotnet/corefx/blob/master/Documentation/coding-guidelines/coding-style.md)
