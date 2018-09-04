@@ -1006,6 +1006,8 @@ namespace Microsoft.Build.CommandLine
 
                 ToolsetDefinitionLocations toolsetDefinitionLocations = ToolsetDefinitionLocations.Default;
 
+                bool preprocessOnly = preprocessWriter != null && !FileUtilities.IsSolutionFilename(projectFile);
+
                 projectCollection = new ProjectCollection
                 (
                     globalProperties,
@@ -1013,7 +1015,8 @@ namespace Microsoft.Build.CommandLine
                     null,
                     toolsetDefinitionLocations,
                     cpuCount,
-                    onlyLogCriticalEvents
+                    onlyLogCriticalEvents,
+                    loadProjectsReadOnly: !preprocessOnly
                 );
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
@@ -1041,7 +1044,7 @@ namespace Microsoft.Build.CommandLine
                 }
 #endif
 
-                if (preprocessWriter != null && !FileUtilities.IsSolutionFilename(projectFile))
+                if (preprocessOnly)
                 {
                     Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
 
