@@ -619,6 +619,8 @@ namespace Microsoft.Build.Tasks
             {
                 return FileTimestampIndicatesFileExists(cachedLastModified);
             }
+
+            // Cache miss; fall back to actual check and populate cache with result
             DateTime lastModified = getLastWriteTime(path);
             instanceLocalLastModifiedCache[path] = lastModified;
             return FileTimestampIndicatesFileExists(lastModified);
