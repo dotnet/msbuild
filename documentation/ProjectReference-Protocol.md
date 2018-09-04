@@ -4,6 +4,10 @@ The MSBuild engine doesn't have a notion of a “project reference”—it only 
 
 That's a powerful tool, but no one would want to have to specify how to build every single reference in every single project. The common targets introduce an item, `ProjectReference`, and a default process for building references declared via that item.
 
+Default protocol implementation:
+- https://github.com/Microsoft/msbuild/blob/master/src/Tasks/Microsoft.Common.CurrentVersion.targets
+- https://github.com/Microsoft/msbuild/blob/master/src/Tasks/Microsoft.Common.CrossTargeting.targets
+
 ## Projects that have references
 
 In its simplest form, a project need only specify the path to another project in a `ProjectReference` item. For example,
