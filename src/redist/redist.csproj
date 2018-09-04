@@ -162,17 +162,19 @@
     <Delete Files="@(PdbsToDelete)" />
   </Target>
 
-  <Target Name="RetargetVSTestConsole"
+  <Target Name="RetargetTools"
           BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
           AfterTargets="Publish">
     <PropertyGroup>
-      <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(BundledNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
+    <ItemGroup>
+      <ToolRuntimeConfigPath Include="$(PublishDir)/**/*.runtimeconfig.json" />
+    </ItemGroup>
     <ReplaceFileContents
-      InputFiles="$(VSTestRuntimeConfigPath)"
-      DestinationFiles="$(VSTestRuntimeConfigPath)"
+      InputFiles="@(ToolRuntimeConfigPath)"
+      DestinationFiles="@(ToolRuntimeConfigPath)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
   </Target>
