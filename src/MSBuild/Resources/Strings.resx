@@ -1107,6 +1107,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <data name="MissingProfileParameterError" xml:space="preserve">
     <value>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</value>
   </data>
+    <data name="ExePath">
+    <value>MSBuild executable path: {0}</value>
+  </data>
+  <data name="CommandLine">
+    <value>Command line arguments: "{0}"</value>
+  </data>
+  <data name="WorkingDirectory">
+    <value>Current working directory: {0}</value>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 

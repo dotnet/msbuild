@@ -10,6 +10,11 @@
       fire this error.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="CommandLine">
+        <source>Command line arguments: "{0}"</source>
+        <target state="new">Command line arguments: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConfigurationFailurePrefixNoErrorCode">
         <source>MSBUILD : Configuration error {0}: {1}</source>
         <target state="translated">MSBUILD : 配置 error {0}: {1}</target>
@@ -39,6 +44,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     MSBuild.exe will only build a single project. The help topic may link to an article about how to author an MSBuild project
     that itself launches MSBuild on a number of other projects.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="ExePath">
+        <source>MSBuild executable path: {0}</source>
+        <target state="new">MSBuild executable path: {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="FatalError">
         <source>MSBUILD : error MSB1025: An internal failure occurred while running MSBuild.</source>
@@ -1441,6 +1451,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <trans-unit id="MissingProfileParameterError">
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD :错误 MSB1054: 必须指定文件名才可生成探查器结果。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WorkingDirectory">
+        <source>Current working directory: {0}</source>
+        <target state="new">Current working directory: {0}</target>
         <note />
       </trans-unit>
     </body>
