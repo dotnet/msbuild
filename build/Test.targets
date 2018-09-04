@@ -59,14 +59,14 @@
           DependsOnTargets="PrepareTests;
                             CreateTestAssetPackageNuPkgs;">
     <DotNetRestore ToolPath="$(OutputDirectory)"
-                   ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
+                   ProjectPath="$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln"
                    AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)" />
   </Target>
 
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
     <DotNetBuild ToolPath="$(OutputDirectory)"
-                 ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
+                 ProjectPath="$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln"
                  AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
                  MaxCpuCount="1" />
   </Target>
