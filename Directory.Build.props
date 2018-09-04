@@ -24,7 +24,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <CLIBuildDll>$(RepoRoot)/$(RelativeCLIBuildBinaries)/$(RelativeCLIBuildDllName)</CLIBuildDll>
     <BuildTasksFeedDll>$(RepoRoot)/build_projects/dotnet-cli-build/bin/Microsoft.DotNet.Build.Tasks.Feed.dll</BuildTasksFeedDll>
 
-    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <DisableImplicitPackageTargetFallback>true</DisableImplicitPackageTargetFallback>
   </PropertyGroup>
 

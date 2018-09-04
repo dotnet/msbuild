@@ -3,9 +3,4 @@
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <RuntimeIdentifier>$(SharedFrameworkRid)</RuntimeIdentifier>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
-  </ItemGroup>
-
 </Project>

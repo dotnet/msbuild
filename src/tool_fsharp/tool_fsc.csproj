@@ -7,7 +7,6 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.NetCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="Microsoft.FSharp.Compiler" Version="$(MicrosoftFSharpCompilerPackageVersion)" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
   </ItemGroup>

@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Cli.Runtime" Version="$(DotnetCliInternalVersion)" />
   </ItemGroup>
 </Project>
