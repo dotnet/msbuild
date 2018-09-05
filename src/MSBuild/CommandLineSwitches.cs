@@ -104,6 +104,7 @@ namespace Microsoft.Build.CommandLine
             ProfileEvaluation,
             RestoreProperty,
             Interactive,
+            IsolateProjects,
             NumberOfParameterizedSwitches,
         }
 
@@ -283,6 +284,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingRestorePropertyError",         true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "interactive" },                       ParameterizedSwitch.Interactive,                null,                           false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "isolateprojects", "isolate" },        ParameterizedSwitch.IsolateProjects,            null ,                          false,          null,                                  true,   false  ),
         };
 
         /// <summary>

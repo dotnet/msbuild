@@ -732,6 +732,49 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void IsolateProjectsSwitchIdentificationTests()
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolate", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("ISOLATE", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolateprojects", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolateProjects", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+        }
+
+        [Fact]
         public void SetParameterlessSwitchTests()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -1129,7 +1172,8 @@ namespace Microsoft.Build.UnitTests
                                         enableRestore: false,
                                         profilerLogger: null,
                                         enableProfiler: false,
-                                        interactive: false);
+                                        interactive: false,
+                                        isolateProjects: false);
                 }
                 finally
                 {
