@@ -2092,10 +2092,17 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PickedUpSwitchesFromAutoResponse", autoResponseFileName));
                     }
 
-                    if (verbosity == LoggerVerbosity.Diagnostic)
+                    if (verbosity >= LoggerVerbosity.Detailed)
                     {
+#if RUNTIME_TYPE_NETCORE
+                        var hostProcess = Process.GetCurrentProcess()?.MainModule?.FileName;
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Dotnethostpath", hostProcess));
+#endif
+                        string currentWorkingDirectory = Directory.GetCurrentDirectory();
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
-                        Console.WriteLine(Path.Combine(s_exePath, s_exeName) + " " + equivalentCommandLine + " " + projectFile);
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ExePath", Path.Combine(s_exePath, s_exeName)));
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CommandLine", equivalentCommandLine + " " + projectFile));
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("WorkingDirectory", currentWorkingDirectory));
                     }
 
 #if FEATURE_XML_SCHEMA_VALIDATION
