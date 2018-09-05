@@ -4,7 +4,6 @@
   <PropertyGroup>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
@@ -13,7 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreAppPackageVersion)" />
     <PackageReference Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksPackageVersion)" />
     <PackageReference Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetSdkResolverPackageVersion)" />
     <PackageReference Include="Microsoft.TestPlatform.CLI" Version="$(MicrosoftTestPlatformCLIPackageVersion)" />
@@ -164,18 +162,28 @@
     <Delete Files="@(PdbsToDelete)" />
   </Target>
 
-  <Target Name="RetargetVSTestConsole"
+  <Target Name="RetargetTools"
           BeforeTargets="PublishStage2WithBackwardsCompatibleRuntimes"
           AfterTargets="Publish">
     <PropertyGroup>
-      <VSTestRuntimeConfigPath>$(PublishDir)/vstest.console.runtimeconfig.json</VSTestRuntimeConfigPath>
       <ReplacementPattern>"version": ".*"</ReplacementPattern>
-      <ReplacementString>"version": "$(MicrosoftNETCoreAppPackageVersion)"</ReplacementString>
+      <ReplacementString>"version": "$(BundledNETCoreAppPackageVersion)"</ReplacementString>
     </PropertyGroup>
+    <ItemGroup>
+      <ToolRuntimeConfigPath Include="$(PublishDir)/**/*.runtimeconfig.json" />
+    </ItemGroup>
     <ReplaceFileContents
-      InputFiles="$(VSTestRuntimeConfigPath)"
-      DestinationFiles="$(VSTestRuntimeConfigPath)"
+      InputFiles="@(ToolRuntimeConfigPath)"
+      DestinationFiles="@(ToolRuntimeConfigPath)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
+  </Target>
+
+  <Target Name="CopyBundledVersions"
+          AfterTargets="Publish">
+
+    <Copy SourceFiles="$(PreviousStageBundledVersions)"
+          DestinationFolder="$(PublishDir)"/>
+    
   </Target>
 </Project>

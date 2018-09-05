@@ -1,5 +1,6 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+using System.IO;
 
 namespace Microsoft.DotNet.Cli.Build
 {
@@ -12,7 +13,7 @@ namespace Microsoft.DotNet.Cli.Build
 
         protected override string Args
         {
-            get { return $"{base.Args} {GetProjectPath()} {GetConfigFile()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()} {AdditionalParameters}"; }
+            get { return $"{base.Args} {GetProjectPath()} {GetConfigFile()} {GetSource()} {GetPackages()} {GetSkipInvalidConfigurations()} {GetRuntime()} {GetBinLogArg()} {AdditionalParameters}"; }
         }
 
         public string ConfigFile { get; set; }
@@ -82,6 +83,16 @@ namespace Microsoft.DotNet.Cli.Build
             if (!string.IsNullOrEmpty(Runtime))
             {
                 return $"-property:RuntimeIdentifier={Runtime}";
+            }
+
+            return null;
+        }
+
+        private string GetBinLogArg()
+        {
+            if (!string.IsNullOrEmpty(ProjectPath))
+            {
+                return $"/bl:restore_{Path.GetFileName(ProjectPath)}.binlog";
             }
 
             return null;

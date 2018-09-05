@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>

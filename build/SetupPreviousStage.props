@@ -2,6 +2,7 @@
     <PropertyGroup Condition="'$(PreviousStageProps)' == ''">
       <PreviousStageDirectory>$(RepoRoot)/.dotnet_stage0/$(Architecture)</PreviousStageDirectory>
       <PreviousStageDotnet>$(PreviousStageDirectory)/dotnet$(ExeExtension)</PreviousStageDotnet>
+      <PreviousStageBundledVersions>$(PreviousStageDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/Microsoft.NETCoreSdk.BundledVersions.props</PreviousStageBundledVersions>
     </PropertyGroup>
 
     <Import Project="$(PreviousStageProps)" Condition="'$(PreviousStageProps)' != ''" />

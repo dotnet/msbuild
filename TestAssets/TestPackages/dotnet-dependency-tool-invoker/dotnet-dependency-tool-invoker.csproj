@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <OutputType>Exe</OutputType>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>

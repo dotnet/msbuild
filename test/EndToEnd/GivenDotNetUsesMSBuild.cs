@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Xunit;
 
@@ -19,11 +21,24 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             {
                 string projectDirectory = directory.Path;
 
-                string newArgs = "console -f netcoreapp2.1 --debug:ephemeral-hive --no-restore";
-                new NewCommandShim()
+                string newArgs = "console --debug:ephemeral-hive --no-restore";
+                var newResult = new NewCommandShim()
                     .WithWorkingDirectory(projectDirectory)
-                    .Execute(newArgs)
-                    .Should().Pass();
+                    .ExecuteWithCapturedOutput(newArgs);
+
+                newResult.Should().Pass();
+
+                string projectPath = Directory.GetFiles(projectDirectory, "*.csproj").Single();
+
+                //  Override TargetFramework since there aren't .NET Core 3 templates yet
+                //  https://github.com/dotnet/core-sdk/issues/24 tracks removing this workaround
+                XDocument project = XDocument.Load(projectPath);
+                var ns = project.Root.Name.Namespace;
+                project.Root.Element(ns + "PropertyGroup")
+                    .Element(ns + "TargetFramework")
+                    .Value = "netcoreapp3.0";
+                project.Save(projectPath);
+
 
                 new RestoreCommand()
                     .WithWorkingDirectory(projectDirectory)
