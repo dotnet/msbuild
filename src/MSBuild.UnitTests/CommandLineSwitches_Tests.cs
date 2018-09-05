@@ -1345,6 +1345,20 @@ namespace Microsoft.Build.UnitTests
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 
+        [Fact]
+        public void ProcessBooleanSwitchTest()
+        {
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: true, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: false, resourceName: null).ShouldBeFalse();
+
+            MSBuildApp.ProcessBooleanSwitch(new [] { "true" }, defaultValue: false, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new[] { "false" }, defaultValue: true, resourceName: null).ShouldBeFalse();
+
+            Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidRestoreValue"));
+        }
+
         /// <summary>
         /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
         /// </summary>

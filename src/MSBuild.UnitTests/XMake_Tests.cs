@@ -2017,6 +2017,25 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", () => logContents);
         }
 
+        [Theory]
+        [InlineData("/interactive")]
+        [InlineData("/p:NuGetInteractive=true")]
+        [InlineData("/interactive /p:NuGetInteractive=true")]
+        public void InteractiveSetsBuiltInProperty(string arguments)
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+
+  <Target Name=""Build"">
+    <Message Text=""MSBuildInteractive = [$(MSBuildInteractive)]"" />
+  </Target>
+  
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: arguments);
+
+            logContents.ShouldContain("MSBuildInteractive = [true]");
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;
