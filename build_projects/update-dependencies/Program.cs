@@ -87,6 +87,13 @@ namespace Microsoft.DotNet.Scripts
             if (s_config.HasVersionFragment("aspnet"))
             {
                 yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreAppPackageVersion", "Microsoft.AspNetCore.App");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetEfPackageVersion", "dotnet-ef");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion", "Microsoft.AspNetCore.DeveloperCertificates.XPlat");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreMvcPackageVersion", "Microsoft.AspNetCore.Mvc");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetDevCertsPackageVersion", "dotnet-dev-certs");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetSqlCachePackageVersion", "dotnet-sql-cache");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetUserSecretsPackageVersion", "dotnet-user-secrets");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetWatchPackageVersion", "dotnet-watch");
             }
             if (s_config.HasVersionFragment("clicommandlineparser"))
             {
