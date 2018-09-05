@@ -25,20 +25,6 @@ Telemetrie
 Weitere Informationen zur Telemetrie der .NET Core-Tools finden Sie unter https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Fehler beim Vorbereiten des NuGet-Caches. Fehler von {0} mit: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">Konfiguration wird durchgeführt...
---------------
-Ein Befehl wird ausgeführt, um Ihren lokalen Paketcache aufzufüllen, die Wiederherstellungsgeschwindigkeit zu verbessern und Onlinezugriff zu ermöglichen. Die Ausführung dieses Befehls nimmt bis zu einer Minute in Anspruch und wird nur einmal ausgeführt.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 

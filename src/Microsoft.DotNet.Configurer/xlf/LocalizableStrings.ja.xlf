@@ -25,20 +25,6 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
 .NET Core CLI ツールのテレメトリに関する詳細情報をお読みください: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">NuGet キャッシュを準備できませんでした。{0} は {1} で失敗しました</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">構成中...
---------------
-ローカル パッケージ キャッシュを設定し、復元速度を向上させ、オフライン アクセスを有効にするため、コマンドを実行しています。このコマンドは 1 回だけ実行され、完了までに最大 1 分かかります。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 

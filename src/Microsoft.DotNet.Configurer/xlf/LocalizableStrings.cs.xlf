@@ -25,20 +25,6 @@ Nástroje .NET Core shromažďují data o využití s cílem usnadnit nám vylep
 Další informace o telemetrii nástrojů .NET Core CLI: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Nepodařilo se naplnit mezipaměť NuGet. {0} selhalo s: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">Probíhá konfigurace...
---------------
-Běží příkaz pro naplnění vaší místní mezipaměti balíčků, aby se vylepšila rychlost obnovování a umožnil se offline přístup. Provádění tohoto příkazu trvá až minutu a proběhne jen jednou.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 

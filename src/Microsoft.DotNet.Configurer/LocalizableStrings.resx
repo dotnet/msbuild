@@ -129,14 +129,6 @@ The .NET Core tools collect usage data in order to help us improve your experien
 
 Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</value>
   </data>
-  <data name="NugetCachePrimeMessage" xml:space="preserve">
-    <value>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</value>
-  </data>
-  <data name="FailedToPrimeCacheError" xml:space="preserve">
-    <value>Failed to prime the NuGet cache. {0} failed with: {1}</value>
-  </data>
   <data name="UnauthorizedAccessMessage" xml:space="preserve">
     <value>Permission denied to modify the '{0}' folder.
 

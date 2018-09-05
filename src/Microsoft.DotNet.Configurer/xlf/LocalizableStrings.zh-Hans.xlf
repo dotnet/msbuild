@@ -25,20 +25,6 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
 若要深入了解 .NET Core CLI 工具遥测，请访问 https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">未能准备好 NuGet 缓存。{0} 失败，错误为: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">正在配置...
---------------
-正在运行一项命令来填充本地包缓存，进而加快还原速度并实现脱机访问。此命令最多需要一分钟即可完成且仅运行一次。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
