@@ -2094,11 +2094,15 @@ namespace Microsoft.Build.CommandLine
 
                     if (verbosity >= LoggerVerbosity.Detailed)
                     {
-                        string currentWorikingDirectory = Directory.GetCurrentDirectory();
+#if RUNTIME_TYPE_NETCORE
+                        var hostProcess = Process.GetCurrentProcess()?.MainModule?.FileName;
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Dotnethostpath", hostProcess));
+#endif
+                        string currentWorkingDirectory = Directory.GetCurrentDirectory();
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
                         Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ExePath", Path.Combine(s_exePath, s_exeName)));
                         Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CommandLine", equivalentCommandLine + " " + projectFile));
-                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("WorkingDirectory", currentWorikingDirectory));
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("WorkingDirectory", currentWorkingDirectory));
                     }
 
 #if FEATURE_XML_SCHEMA_VALIDATION

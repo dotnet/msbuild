@@ -793,7 +793,7 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out successfulExit);
             successfulExit.ShouldBeFalse();
 
-            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + "\r\nCommand line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:diag " : "-v:diag ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
+            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + Environment.NewLine + "Command line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:diag " : "-v:diag ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
         }
 
         /// <summary>
@@ -817,7 +817,7 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out successfulExit);
             successfulExit.ShouldBeFalse();
 
-            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + "\r\nCommand line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:diag " : "-v:diag ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
+            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + Environment.NewLine + "Command line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:diag " : "-v:diag ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
         }
 
         /// <summary>
@@ -844,7 +844,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(current);
             }
 
-            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + "\r\nCommand line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:diag " : "-v:diag ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
+            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + Environment.NewLine + "Command line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:diag " : "-v:diag ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
         }
 
         /// <summary>
@@ -871,7 +871,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(current);
             }
 
-            output.ShouldContain("MSBuild executable path: " + RunnerUtilities.PathToCurrentlyRunningMsBuildExe + "\r\nCommand line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:detailed " : "-v:detailed ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
+            output.ShouldContain("MSBuild executable path: " + RunnerUtilities.PathToCurrentlyRunningMsBuildExe + Environment.NewLine + "Command line arguments: " + (NativeMethodsShared.IsWindows ? "\"/v:detailed " : "-v:detailed ") + _pathToArbitraryBogusFile + "\"", Case.Insensitive);
         }
 
         /// <summary>
