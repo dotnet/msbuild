@@ -21,7 +21,6 @@
   <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateMSBuildExtensionsSWR" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateMsiVersion" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="GenerateNuGetPackagesArchiveVersion" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="MakeRelative" AssemblyFile="$(CLIBuildDll)" />

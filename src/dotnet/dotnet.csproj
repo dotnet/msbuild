@@ -71,7 +71,6 @@
     <PackageReference Include="Microsoft.TemplateEngine.Cli.Localization" Version="$(MicrosoftTemplateEngineCliLocalizationPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Orchestrator.RunnableProjects" Version="$(MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion)" />
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(MicrosoftTemplateEngineUtilsPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
