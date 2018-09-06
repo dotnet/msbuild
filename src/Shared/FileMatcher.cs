@@ -56,10 +56,11 @@ namespace Microsoft.Build.Shared
 
         private static class FileSpecRegexParts
         {
-            internal const string BeginningOfLine = "^(?<FIXEDDIR>";
-            internal const string FixedDirWildcardDirSeparator = ")(?<WILDCARDDIR>";
-            internal const string WildcardDirFilenameSeparator = ")(?<FILENAME>";
-            internal const string EndOfLine = ")$";
+            internal const string FixedDirGroupStart = "^(?<FIXEDDIR>";
+            internal const string WildcardGroupStart = "(?<WILDCARDDIR>";
+            internal const string FilenameGroupStart = "(?<FILENAME>";
+            internal const string GroupEnd = ")";
+            internal const string EndOfLine = "$";
 
             internal const string AnyNonSeparator = @"[^/\\]*";
             internal const string AnySingleCharacterButDot = @"[^\.].";
@@ -1126,9 +1127,10 @@ namespace Microsoft.Build.Shared
             }
 #if DEBUG
             ErrorUtilities.VerifyThrow(
-                FileSpecRegexMinLength == FileSpecRegexParts.BeginningOfLine.Length
-                + FileSpecRegexParts.FixedDirWildcardDirSeparator.Length
-                + FileSpecRegexParts.WildcardDirFilenameSeparator.Length
+                FileSpecRegexMinLength == FileSpecRegexParts.FixedDirGroupStart.Length
+                + FileSpecRegexParts.WildcardGroupStart.Length
+                + FileSpecRegexParts.FilenameGroupStart.Length
+                + FileSpecRegexParts.GroupEnd.Length * 3
                 + FileSpecRegexParts.EndOfLine.Length,
                 "Checked-in length of known regex components differs from computed length. Update checked-in constant."
             );
@@ -1198,7 +1200,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void AppendRegularExpressionFromFixedDirectory(ReuseableStringBuilder regex, string fixedDir)
         {
-            regex.Append(FileSpecRegexParts.BeginningOfLine);
+            regex.Append(FileSpecRegexParts.FixedDirGroupStart);
 
             bool isUncPath = NativeMethodsShared.IsWindows && fixedDir.Length > 1
                              && fixedDir[0] == '\\' && fixedDir[1] == '\\';
@@ -1206,12 +1208,14 @@ namespace Microsoft.Build.Shared
             {
                 regex.Append(FileSpecRegexParts.UncSlashSlash);
             }
-            int startIndex = isUncPath ? IndexOfNextNonCollapsibleChar(fixedDir, 2) : 0;
+            int startIndex = isUncPath ? LastIndexOfDirectorySequence(fixedDir, 0) + 1 : LastIndexOfDirectorySequence(fixedDir, 0);
 
-            for (int i = startIndex; i < fixedDir.Length; i = IndexOfNextNonCollapsibleChar(fixedDir, i + 1))
+            for (int i = startIndex; i < fixedDir.Length; i = LastIndexOfDirectorySequence(fixedDir, i + 1))
             {
                 AppendRegularExpressionFromChar(regex, fixedDir[i]);
             }
+
+            regex.Append(FileSpecRegexParts.GroupEnd);
         }
 
         /// <summary>
@@ -1225,7 +1229,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void AppendRegularExpressionFromWildcardDirectory(ReuseableStringBuilder regex, string wildcardDir)
         {
-            regex.Append(FileSpecRegexParts.FixedDirWildcardDirSeparator);
+            regex.Append(FileSpecRegexParts.WildcardGroupStart);
 
             bool hasRecursiveOperatorAtStart = wildcardDir.Length > 2 && wildcardDir[0] == '*' && wildcardDir[1] == '*';
 
@@ -1233,9 +1237,9 @@ namespace Microsoft.Build.Shared
             {
                 regex.Append(FileSpecRegexParts.LeftDirs);
             }
-            int startIndex = hasRecursiveOperatorAtStart ? IndexOfNextNonCollapsibleChar(wildcardDir, 3) : 0;
+            int startIndex = LastIndexOfDirectoryOrRecursiveSequence(wildcardDir, 0);
 
-            for (int i = startIndex; i < wildcardDir.Length; i = IndexOfNextNonCollapsibleChar(wildcardDir, i + 1))
+            for (int i = startIndex; i < wildcardDir.Length; i = LastIndexOfDirectoryOrRecursiveSequence(wildcardDir, i + 1))
             {
                 char ch = wildcardDir[i];
                 bool isRecursiveOperator = i < wildcardDir.Length - 2 && wildcardDir[i + 1] == '*' && wildcardDir[i + 2] == '*';
@@ -1243,7 +1247,6 @@ namespace Microsoft.Build.Shared
                 if (isRecursiveOperator)
                 {
                     regex.Append(FileSpecRegexParts.MiddleDirs);
-                    i += 3;
                 }
                 else
                 {
@@ -1251,7 +1254,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            regex.Append(FileSpecRegexParts.WildcardDirFilenameSeparator);
+            regex.Append(FileSpecRegexParts.GroupEnd);
         }
 
         /// <summary>
@@ -1267,10 +1270,12 @@ namespace Microsoft.Build.Shared
         /// 
         /// (2) Common filespec characters
         ///
-        /// (3) Ignore the .* portion of any *.* sequence
+        /// (3) Ignore the .* portion of any *.* sequence when no trailing dot exists
         /// </summary>
         private static void AppendRegularExpressionFromFilename(ReuseableStringBuilder regex, string filename)
         {
+            regex.Append(FileSpecRegexParts.FilenameGroupStart);
+
             bool hasTrailingDot = filename.Length > 0 && filename[filename.Length - 1] == '.';
             int partLength = hasTrailingDot ? filename.Length - 1 : filename.Length;
 
@@ -1291,12 +1296,13 @@ namespace Microsoft.Build.Shared
                     AppendRegularExpressionFromChar(regex, ch);
                 }
 
-                if (ch == '*' && i < partLength - 2 && filename[i + 1] == '.' && filename[i + 2] == '*')
+                if (!hasTrailingDot && i < partLength - 2 && ch == '*' && filename[i + 1] == '.' && filename[i + 2] == '*')
                 {
                     i += 2;
                 }
             }
 
+            regex.Append(FileSpecRegexParts.GroupEnd);
             regex.Append(FileSpecRegexParts.EndOfLine);
         }
 
@@ -1329,12 +1335,12 @@ namespace Microsoft.Build.Shared
         }
 
         private static bool IsSpecialRegexCharacter(char ch) =>
-            ch == '\\' || ch == '$' || ch == '(' || ch == ')' || ch == '+'
-            || ch == '.' || ch == '[' || ch == '^' || ch == '{' || ch == '|';
+            ch == '$' || ch == '(' || ch == ')' || ch == '+' || ch == '.'
+            || ch == '[' || ch == '^' || ch == '{' || ch == '|';
 
         /// <summary>
-        /// Given an index directly after a directory separator,
-        /// iteratively skip three cases involving directory separators:
+        /// Given an index at a directory separator,
+        /// iteratively skip to the end of two sequences:
         ///
         ///  (1) \.\ -> \
         ///     This is an identity, so for example, these two are equivalent,
@@ -1354,26 +1360,21 @@ namespace Microsoft.Build.Shared
         ///         This case is handled by isUncPath in
         ///         a prior step.
         ///
-        /// (3) \**\**\ -> \**\
-        ///              This is an identity, so for example, these two are equivalent,
-        ///
-        ///                 dir1\**\**\ == dir1\**\
         /// </summary>
-        /// <returns>The first index of a non-collapsible character.</returns>
-        private static int IndexOfNextNonCollapsibleChar(string str, int startIndex)
+        /// <returns>The last index of a directory sequence.</returns>
+        private static int LastIndexOfDirectorySequence(string str, int startIndex)
         {
-            if (startIndex > 0 && !FileUtilities.IsAnySlash(str[startIndex - 1]))
+            if (startIndex >= str.Length || !FileUtilities.IsAnySlash(str[startIndex]))
             {
                 return startIndex;
             }
             int i = startIndex;
-            bool isNonCollapsibleCharFound = false;
+            bool isSequenceEndFound = false;
 
-            while (!isNonCollapsibleCharFound && i < str.Length)
+            while (!isSequenceEndFound && i < str.Length)
             {
-                bool isSeparator = FileUtilities.IsAnySlash(str[i]);
-                bool isRelativeSeparator = i < str.Length - 1 && str[i] == '.' && FileUtilities.IsAnySlash(str[i + 1]);
-                bool isRecursiveOperator = i < str.Length - 1 && str[i] == '*' && str[i + 1] == '*';
+                bool isSeparator = i < str.Length - 1 && FileUtilities.IsAnySlash(str[i + 1]);
+                bool isRelativeSeparator = i < str.Length - 2 && str[i + 1] == '.' && FileUtilities.IsAnySlash(str[i + 2]);
 
                 if (isSeparator)
                 {
@@ -1383,17 +1384,58 @@ namespace Microsoft.Build.Shared
                 {
                     i += 2;
                 }
-                else if (isRecursiveOperator)
+                else
+                {
+                    isSequenceEndFound = true;
+                }
+            }
+
+            return i;
+        }
+
+        /// <summary>
+        /// Given an index at a directory separator or start of a recursive operator,
+        /// iteratively skip to the end of three sequences:
+        /// 
+        /// (1), (2) Both sequences handled by IndexOfNextNonCollapsibleChar
+        /// 
+        /// (3) \**\**\ -> \**\
+        ///              This is an identity, so for example, these two are equivalent,
+        ///
+        ///                 dir1\**\**\ == dir1\**\
+        /// </summary>
+        /// <returns>]
+        /// If starting at a recursive operator, the last index of a recursive sequence.
+        /// Otherwise, the last index of a directory sequence.
+        /// </returns>
+        private static int LastIndexOfDirectoryOrRecursiveSequence(string str, int startIndex)
+        {
+            bool isRecursiveSequence = startIndex < str.Length - 1
+                                            && str[startIndex] == '*' && str[startIndex + 1] == '*';
+            if (!isRecursiveSequence)
+            {
+                return LastIndexOfDirectorySequence(str, startIndex);
+            }
+
+            int i = startIndex + 2;
+            bool isSequenceEndFound = false;
+
+            while (!isSequenceEndFound && i < str.Length)
+            {
+                i = LastIndexOfDirectorySequence(str, i);
+                bool isRecursiveOperator = i < str.Length - 2 && str[i + 1] == '*' && str[i + 2] == '*';
+
+                if (isRecursiveOperator)
                 {
                     i += 3;
                 }
                 else
                 {
-                    isNonCollapsibleCharFound = true;
+                    isSequenceEndFound = true;
                 }
             }
 
-            return i;
+            return i + 1;
         }
 
         /// <summary>
