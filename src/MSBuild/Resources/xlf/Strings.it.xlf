@@ -88,18 +88,18 @@ Copyright (C) Microsoft Corporation. Tutti i diritti sono riservati.
       <trans-unit id="HelpMessage_34_InteractiveSwitch">
         <source>  /interactive[:True|False]
                      Indicates that actions in the build are allowed to
-                     interact with the user.  When enabled, the build can
-                     block indefinitely so it should only be specified
-                     in an environment where a user is present.
+                     interact with the user.  Do not use this argument
+                     in an automated scenario where interactivity is
+                     not expected.
                      Specifying /interactive is the same as specifying
                      /interactive:true.  Use the parameter to override a
                      value that comes from a response file.
     </source>
         <target state="new">  /interactive[:True|False]
                      Indicates that actions in the build are allowed to
-                     interact with the user.  When enabled, the build can
-                     block indefinitely so it should only be specified
-                     in an environment where a user is present.
+                     interact with the user.  Do not use this argument
+                     in an automated scenario where interactivity is
+                     not expected.
                      Specifying /interactive is the same as specifying
                      /interactive:true.  Use the parameter to override a
                      value that comes from a response file.
