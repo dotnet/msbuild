@@ -1,6 +1,12 @@
-﻿using Microsoft.Extensions.EnvironmentAbstractions;
+﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-internal interface IToolPackageUninstaller
+using Microsoft.Extensions.EnvironmentAbstractions;
+
+namespace Microsoft.DotNet.ToolPackage
 {
-    void Uninstall(DirectoryPath packageDirectory);
+    internal interface IToolPackageUninstaller
+    {
+        void Uninstall(DirectoryPath packageDirectory);
+    }
 }
