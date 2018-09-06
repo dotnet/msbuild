@@ -1083,6 +1083,7 @@ namespace Microsoft.Build.Execution
         public string Directory { get { throw null; } }
         public System.Collections.Generic.List<Microsoft.Build.Construction.ProjectItemElement> EvaluatedItemElements { get { throw null; } }
         public int EvaluationId { get { throw null; } set { } }
+        public System.Collections.Generic.IReadOnlyCollection<string> ExportTargets { get { throw null; } set { } }
         public string FullPath { get { throw null; } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } }
         public System.Collections.Generic.List<string> InitialTargets { get { throw null; } }

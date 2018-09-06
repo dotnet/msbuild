@@ -886,6 +886,8 @@ namespace Microsoft.Build.Evaluation
                     _data.BeforeTargets = targetsWhichRunBeforeByTarget;
                     _data.AfterTargets = targetsWhichRunAfterByTarget;
 
+                    CollectExportTargets();
+
                     if (Traits.Instance.EscapeHatches.DebugEvaluation)
                     {
                         // This is so important for VS performance it's worth always tracing; accidentally having 
@@ -923,6 +925,21 @@ namespace Microsoft.Build.Evaluation
                 ProjectFile = projectFile,
                 ProfilerResult = _evaluationProfiler.ProfiledResult
             });
+        }
+
+        private void CollectExportTargets()
+        {
+            var exportTargets = _data.Items[MSBuildConstants.ExportTargetsItemName];
+
+            foreach (var exportTarget in exportTargets)
+            {
+                if (_data.GetTarget(exportTarget.EvaluatedInclude) == null)
+                {
+                    _evaluationLoggingContext.LogError(new BuildEventFileInfo(_projectRootElement.FullPath), "ExportTargetDoesNotExist", exportTarget.EvaluatedInclude);
+                }
+            }
+
+            _data.ExportTargets = exportTargets.Select(t => t.EvaluatedInclude).ToImmutableArray();
         }
 
         /// <summary>

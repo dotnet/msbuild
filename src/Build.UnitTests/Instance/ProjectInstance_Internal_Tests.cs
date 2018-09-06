@@ -587,6 +587,27 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             @"      <Project>
                     </Project>
                 ")]
+        // Project with export targets
+        [InlineData(
+            @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
+
+                        <ItemGroup>
+                            <ExportTargets Include='t1;t2'/>
+                        </ItemGroup>
+
+                        <Target Name='t1'>
+                            <t1/>
+                        </Target>
+
+                        <Target Name='t2' BeforeTargets=`t1`>
+                            <t2/>
+                        </Target>
+
+                        <Target Name='t3' AfterTargets=`t2`>
+                            <t3/>
+                        </Target>
+                    </Project>
+                ")]
         // Project with one of each direct child(indirect children trees are tested separately)
         [InlineData(
             @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>

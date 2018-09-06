@@ -205,6 +205,8 @@ namespace Microsoft.Build.Evaluation
             get;
         }
 
+        IReadOnlyCollection<string> ExportTargets { get; set; }
+
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>

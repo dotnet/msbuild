@@ -41,6 +41,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 Helpers.AssertDictionariesEqual(((EvaluatorData)x).AfterTargets, ((EvaluatorData)y).AfterTargets, AssertTargetSpecificationPairsEqual);
                 Assert.Equal(x.DefaultTargets, y.DefaultTargets);
                 Assert.Equal(x.InitialTargets, y.InitialTargets);
+                Assert.Equal(x.ExportTargets, y.ExportTargets);
 
                 Assert.Equal(x.Toolset, y.Toolset, new TaskRegistryComparers.ToolsetComparer());
                 Assert.Equal(x.UsingDifferentToolsVersionFromProjectFile, y.UsingDifferentToolsVersionFromProjectFile);

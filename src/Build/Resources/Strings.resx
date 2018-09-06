@@ -306,6 +306,10 @@
     <value>MSB4211: The property "{0}" is being set to a value for the first time, but it was already consumed at "{1}".</value>
     <comment>{StrBegin="MSB4211: "}</comment>
   </data>
+  <data name="ExportTargetDoesNotExist" Visibility="Public">
+    <value>MSB4250: The declared export target "{0}" does not exist.</value>
+    <comment>{StrBegin="MSB4211: "}UE: "export target" is a concept in MSBuild. "{0}" refers to the name of the export target</comment>
+  </data>
   <data name="SelfImport" Visibility="Public">
     <value>MSB4210: "{0}" is attempting to import itself, directly or indirectly. This is most likely a build authoring error. The import will be ignored.</value>
     <comment>{StrBegin="MSB4210: "}</comment>
@@ -1706,7 +1710,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4250.
+        Next message code should be MSB4251.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

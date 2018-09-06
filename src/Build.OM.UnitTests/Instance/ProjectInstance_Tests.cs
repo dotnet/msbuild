@@ -9,11 +9,11 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
 using Microsoft.Build.Framework;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
@@ -135,6 +135,35 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 Assert.Equal("m1", item.GetMetadataValue("m"));
                 Assert.Equal("n1", item.GetMetadataValue("n"));
                 Assert.Equal("o@", item.GetMetadataValue("o"));
+            }
+        }
+
+        [Fact]
+        public void ProjectInstanceShouldExposeExportTargets()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var testProject = env.CreateTestProjectWithFiles(
+                    @"<Project>
+                         <ItemGroup>
+                            <ExportTargets Include='Foo' />
+                         </ItemGroup>
+
+                         <Target Name='Foo'>
+                         </Target>
+
+                         <Target Name='Bar'>
+                         </Target>
+                      </Project>");
+
+                var projectInstance = new ProjectInstance(
+                    testProject.ProjectFile,
+                    null,
+                    MSBuildConstants.CurrentToolsVersion,
+                    env.CreateProjectCollection().Collection);
+
+                projectInstance.ExportTargets.ShouldHaveSingleItem();
+                projectInstance.ExportTargets.ShouldContain("Foo");
             }
         }
 

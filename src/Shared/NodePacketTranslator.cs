@@ -63,6 +63,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private BinaryReader _reader;
 
+            private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
+
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
@@ -295,6 +297,21 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+#if !CLR2COMPATIBILITY
+            public void Translate<T, C>(ref IReadOnlyCollection<T> collection, NodePacketReadonlyCollectionCreator<C, T> collectionFactory) where C : IReadOnlyCollection<T>
+            {
+                Debug.Assert(typeof(T).IsSerializable);
+
+                if (!TranslateNullable(collection))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                collection = collectionFactory(count, new TranslatedCollectionEnumerator<T>(this, count));
+            }
+#endif
+
             /// <summary>
             /// Translates a DateTime.
             /// </summary>
@@ -417,8 +434,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                BinaryFormatter formatter = new BinaryFormatter();
-                value = (T)formatter.Deserialize(_packetStream);
+                value = (T)_binaryFormatter.Deserialize(_packetStream);
             }
 
             public void TranslateException(ref Exception value)
@@ -682,6 +698,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private BinaryWriter _writer;
 
+            private readonly BinaryFormatter _binaryFormatter = new BinaryFormatter();
+
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
@@ -880,6 +898,27 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+#if !CLR2COMPATIBILITY
+            public void Translate<T, C>(ref IReadOnlyCollection<T> collection, NodePacketReadonlyCollectionCreator<C, T> collectionFactory) where C : IReadOnlyCollection<T>
+            {
+                Debug.Assert(typeof(T).IsSerializable);
+
+                if (!TranslateNullable(collection))
+                {
+                    return;
+                }
+
+                int count = collection.Count;
+                _writer.Write(count);
+
+                foreach (var element in collection)
+                {
+                    var elementReference = element;
+                    TranslateDotNet(ref elementReference);
+                }
+            }
+#endif
+
             /// <summary>
             /// Translates a list of T where T implements INodePacketTranslateable
             /// </summary>
@@ -991,8 +1030,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(_packetStream, value);
+                _binaryFormatter.Serialize(_packetStream, value);
             }
 
             public void TranslateException(ref Exception value)
