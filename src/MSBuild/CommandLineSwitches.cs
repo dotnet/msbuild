@@ -103,6 +103,7 @@ namespace Microsoft.Build.CommandLine
             Restore,
             ProfileEvaluation,
             RestoreProperty,
+            Interactive,
             NumberOfParameterizedSwitches,
         }
 
@@ -281,6 +282,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingRestorePropertyError",         true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "interactive" },                       ParameterizedSwitch.Interactive,                null,                           false,          null,                                  true,   false  ),
         };
 
         /// <summary>

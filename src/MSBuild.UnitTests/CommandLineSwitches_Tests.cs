@@ -1128,7 +1128,8 @@ namespace Microsoft.Build.UnitTests
                                         warningsAsMessages: null,
                                         enableRestore: false,
                                         profilerLogger: null,
-                                        enableProfiler: false);
+                                        enableProfiler: false,
+                                        interactive: false);
                 }
                 finally
                 {
@@ -1342,6 +1343,20 @@ namespace Microsoft.Build.UnitTests
 
             MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
+        }
+
+        [Fact]
+        public void ProcessBooleanSwitchTest()
+        {
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: true, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: false, resourceName: null).ShouldBeFalse();
+
+            MSBuildApp.ProcessBooleanSwitch(new [] { "true" }, defaultValue: false, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new[] { "false" }, defaultValue: true, resourceName: null).ShouldBeFalse();
+
+            Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidRestoreValue"));
         }
 
         /// <summary>
