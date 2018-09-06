@@ -168,6 +168,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-install-tool.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdkResolver.Tests", "test\Microsoft.DotNet.MSBuildSdkResolver.Tests\Microsoft.DotNet.MSBuildSdkResolver.Tests.csproj", "{B7C82980-F01D-4B8A-A746-BFA0032CB152}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Tools.Tests.Utilities.Tests", "test\Microsoft.DotNet.Tools.Tests.Utilities.Tests\Microsoft.DotNet.Tools.Tests.Utilities.Tests.csproj", "{3FD18EC2-E80F-4D8C-8B72-025B13C11593}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1288,6 +1290,30 @@ Global
 		{B7C82980-F01D-4B8A-A746-BFA0032CB152}.RelWithDebInfo|x64.Build.0 = Release|Any CPU
 		{B7C82980-F01D-4B8A-A746-BFA0032CB152}.RelWithDebInfo|x86.ActiveCfg = Release|Any CPU
 		{B7C82980-F01D-4B8A-A746-BFA0032CB152}.RelWithDebInfo|x86.Build.0 = Release|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Debug|x64.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Debug|x86.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.MinSizeRel|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.MinSizeRel|Any CPU.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.MinSizeRel|x64.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.MinSizeRel|x64.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.MinSizeRel|x86.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.MinSizeRel|x86.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Release|x64.ActiveCfg = Release|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Release|x64.Build.0 = Release|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Release|x86.ActiveCfg = Release|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.Release|x86.Build.0 = Release|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.RelWithDebInfo|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.RelWithDebInfo|Any CPU.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.RelWithDebInfo|x64.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.RelWithDebInfo|x64.Build.0 = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.RelWithDebInfo|x86.ActiveCfg = Debug|Any CPU
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593}.RelWithDebInfo|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1342,6 +1368,7 @@ Global
 		{E442F4C1-08DB-470F-B9A6-197444CD0295} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{8FE9D802-57F3-493B-9E14-72DF905E3838} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 		{B7C82980-F01D-4B8A-A746-BFA0032CB152} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
+		{3FD18EC2-E80F-4D8C-8B72-025B13C11593} = {17735A9D-BFD9-4585-A7CB-3208CA6EA8A7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B526D2CE-EE2D-4AD4-93EF-1867D90FF1F5}

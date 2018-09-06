@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void ItCreatesTheDotnetUserProfileFolderIfItDoesNotExistAlreadyWhenCreatingTheSentinel()
         {
             var fileSystemMock = _fileSystemMockBuilder.Build();
-            var directoryMock = new DirectoryMock();
+            var directoryMock = new DirectoryMockWithSpy(fileSystemMock.Directory);
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         public void ItDoesNotAttemptToCreateTheDotnetUserProfileFolderIfItAlreadyExistsWhenCreatingTheSentinel()
         {
             var fileSystemMock = _fileSystemMockBuilder.Build();
-            var directoryMock = new DirectoryMock(new List<string> { DOTNET_USER_PROFILE_FOLDER_PATH });
+            var directoryMock = new DirectoryMockWithSpy(fileSystemMock.Directory, new List<string> { DOTNET_USER_PROFILE_FOLDER_PATH });
             var firstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel(
                     DOTNET_USER_PROFILE_FOLDER_PATH,
@@ -134,20 +134,28 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             directoryMock.CreateDirectoryInvoked.Should().BeFalse();
         }
 
-        private class DirectoryMock : IDirectory
+        private class DirectoryMockWithSpy : IDirectory
         {
-            private IList<string> _directories;
+            private readonly IDirectory _directorySystem;
 
             public bool CreateDirectoryInvoked { get; set; }
 
-            public DirectoryMock(IList<string> directories = null)
+            public DirectoryMockWithSpy(IDirectory directorySystem, IList<string> directories = null)
             {
-                _directories = directories ?? new List<string>();
+                if (directorySystem != null) _directorySystem = directorySystem;
+
+                if (directories != null)
+                {
+                    foreach (var directory in directories)
+                    {
+                        _directorySystem.CreateDirectory(directory);
+                    }
+                }
             }
 
             public bool Exists(string path)
             {
-                return _directories.Any(d => d == path);
+                return _directorySystem.Exists(path);
             }
 
             public ITemporaryDirectory CreateTemporaryDirectory()
@@ -155,7 +163,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+            public IEnumerable<string> EnumerateFiles(string path)
             {
                 throw new NotImplementedException();
             }
@@ -170,14 +178,14 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 throw new NotImplementedException();
             }
 
-            public string GetDirectoryFullName(string path)
+            public string GetCurrentDirectory()
             {
                 throw new NotImplementedException();
             }
 
             public void CreateDirectory(string path)
             {
-                _directories.Add(path);
+                _directorySystem.CreateDirectory(path);
                 CreateDirectoryInvoked = true;
             }
 

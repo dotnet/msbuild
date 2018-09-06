@@ -41,7 +41,9 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     {
                         if (_fileSystem.Directory.Exists(packageDirectory.Value))
                         {
-                            var tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                            string systemTempPath = Path.GetTempPath();
+                            _fileSystem.Directory.CreateDirectory(systemTempPath);
+                            var tempPath = Path.Combine(systemTempPath, Path.GetRandomFileName());
                             _fileSystem.Directory.Move(packageDirectory.Value, tempPath);
                             tempPackageDirectory = tempPath;
                         }
