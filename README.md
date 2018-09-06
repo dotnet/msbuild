@@ -74,7 +74,7 @@ The maintainers of the repository will triage new pull requests from community c
 
 The community pull request will be triaged as follows:
 
-* **Approved** - the pull request has been approved by the maintainers and should be assigned to an upcoming release milestone.  Additionally, the pull request should be assigned to a maintainer to assist the completion of the pull request.  The assigned maintainer will review the pull request, mentor the contributor regarding the standards and practices of the codebase, and inform the contributor when there might be an issue blocking the merging of the pull request, such as merge conflicts, changes in schedule necessitating branch retargeting, branch lockdowns, etc.  The assigned maintainer should provide initial feedback to the contributor within **three days** of being assigned the pull request.
+* **Approved** - the pull request has been approved by the maintainers and should be assigned to an upcoming release milestone.  Additionally, the pull request should be assigned to a maintainer to assist the completion of the pull request.  The assigned maintainer will review the pull request, mentor the contributor regarding the standards and practices of the codebase, and inform the contributor when there might be an issue blocking the merging of the pull request, such as merge conflicts, changes in schedule necessitating branch retargeting, branch lockdowns, etc.  The assigned maintainer should provide initial feedback to the contributor within **three business days** of being assigned the pull request.
 * **Pending discussion** - there are questions the maintainers have about the pull request that need to be resolved: the code needs additional work, unit tests are missing, whether or not the pull request aligns with the direction for the codebase, or the maintainers need clarification as to the purpose of the pull request.  Whenever possible, the discussion should take place solely in the GitHub pull request or in a linked GitHub issue.
 * **Rejected** - The pull request is not in the direction the maintainers want to take the codebase, has too much risk, does not solve a problem of meaningful priority, or the pull request is stale and requires additional work to bring into a mergeable state.  Regardless of the reason for rejecting a pull request, maintainers should always thank the contributor for their effort and for being a valued member of the .NET Core community.
 
@@ -88,7 +88,7 @@ As codebases change significantly over time and stale pull requests are unlikely
 
 Reported issues from community members will be treated identically to any other issue, whether discovered by the maintainers, other Microsoft employees, etc.
 
-The maintainers will triage issues **daily**:
+The maintainers will triage issues **each business day**:
 
 * High priority issues (crash, hang, data loss, regression, security, or other major malfunction) will get triaged to a Microsoft developer and put in their queue to address in the current milestone.
 
