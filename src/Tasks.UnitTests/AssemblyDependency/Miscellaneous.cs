@@ -7381,9 +7381,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.FrameworkDirectoryOnProfiles", item.ItemSpec));
         }
 
-        private static void InitializeRARwithMockEngine(out MockEngine mockEngine, out ResolveAssemblyReference rar)
+        private static void InitializeRARwithMockEngine(ITestOutputHelper output, out MockEngine mockEngine, out ResolveAssemblyReference rar)
         {
-            mockEngine = new MockEngine(_output);
+            mockEngine = new MockEngine(output);
             rar = new ResolveAssemblyReference();
             rar.BuildEngine = mockEngine;
         }
