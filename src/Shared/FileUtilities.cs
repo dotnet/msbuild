@@ -105,7 +105,7 @@ namespace Microsoft.Build.Shared
         {
             if (cacheDirectory == null)
             {
-                cacheDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}", Process.GetCurrentProcess().Id));
+                cacheDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", Process.GetCurrentProcess().Id, AppDomain.CurrentDomain.Id));
             }
 
             return cacheDirectory;
