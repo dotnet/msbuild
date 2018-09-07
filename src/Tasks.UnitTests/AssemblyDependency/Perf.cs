@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 StartIOMonitoring();
 
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyNames =
                 {
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 StartIOMonitoring();
 
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyNames =
                 {

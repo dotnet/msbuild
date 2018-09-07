@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             Console.WriteLine("Performing VersioningAndUnification.Prerequisite.StronglyNamedDependency.Exists() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void HighVersionDoesntExist()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         [Fact]
         public void VerifyAssemblyPulledOutOfFrameworkDoesntGetFrameworkFileAttribute()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
                 string actualFrameworkDirectory = s_myVersion20Path;
                 string alternativeFrameworkDirectory = s_myVersion40Path;

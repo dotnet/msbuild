@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TargetCurrentTargetFramework()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RemapAssemblyBasic()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherThanHighestInRedistList()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void HigherThanHighestInRedistListForMSBuildAssembly()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherThanHighestInRedistList3rdPartyRedist()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HigherThanHighestInRedistListWithSpecificVersionMetadata()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void DependenciesHigherThanHighestInRedistList()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Trait("Category", "mono-osx-failing")]
         public void DependenciesHigherThanHighestInRedistListForMSBuildAssembly()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void DependenciesHigherThanHighestInRedistListSpecificVersionMetadata()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TwoDependenciesHigherThanHighestInRedistListIgnoreOnOne()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TwoDependenciesHigherThanHighestInRedistListIgnoreOnBoth()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TwoDependenciesSameNameDependOnHigherVersion()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -448,7 +448,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void MixedDependenciesSpecificVersionOnHigherVersionMetadataSet()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {
@@ -489,7 +489,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void MixedDependenciesSpecificVersionOnLowerVersionMetadataSet()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             ITaskItem[] items = new ITaskItem[]
             {

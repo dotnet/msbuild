@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void SDkNameNotInResolvedSDKListButOnSearchPath()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(@"SDKWinMD");
             taskItem.SetMetadata("SDKName", "NotInstalled, Version=1.0");
 
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private static void ResolveSDKFromRefereneAssemblyLocation(string referenceName, string expectedPath)
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(referenceName);
             taskItem.SetMetadata("SDKName", "FakeSDK, Version=1.0");
 

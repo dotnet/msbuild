@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             Console.WriteLine("Performing VersioningAndUnification.Prerequisite.SpecificVersionPrimary.Exists() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void ExistsDifferentName()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void ExistsOldVersionRange()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void HighVersionDoesntExist()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void LowVersionDoesntExist()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {

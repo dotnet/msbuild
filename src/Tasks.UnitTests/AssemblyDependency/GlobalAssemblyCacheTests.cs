@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -344,7 +344,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -418,7 +418,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -554,7 +554,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -684,7 +684,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -749,7 +749,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -817,7 +817,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {

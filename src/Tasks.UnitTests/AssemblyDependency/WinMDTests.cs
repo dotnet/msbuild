@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyP2PHaveCorrectMetadataWinMD()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(@"C:\WinMD\SampleWindowsRuntimeOnly.Winmd");
 
             ITaskItem[] assemblyFiles = new TaskItem[]
@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyP2PHaveCorrectMetadataWinMDManaged()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem taskItem = new TaskItem(@"C:\WinMD\SampleWindowsRuntimeAndCLR.Winmd");
 
             ITaskItem[] assemblyFiles = new TaskItem[]
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyP2PHaveCorrectMetadataNonWinMD()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void IgnoreReferenceToMscorlib()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void MixedWinMDGoodReferenceToMscorlib()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void WinMdFileDependsOnAnotherWinMDFile()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdBesideDll()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -390,7 +390,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdBesideDll2()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -422,7 +422,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void WinMdFileDependsOnAnotherWinMDFileWithFrameworkDependencies()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {
@@ -459,7 +459,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void DotNetAssemblyDependsOnAWinMDFile()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem(@"DotNetAssemblyDependsOnWinMD");
             // This should not be used for anything, it is recalculated in rar, this is to make sure it is not forwarded to child items.
             item.SetMetadata(ItemMetadataNames.imageRuntime, "FOO");
@@ -504,7 +504,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdWithInvalidPENativeDependency()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem(@"DependsOnInvalidPeHeader");
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
@@ -536,7 +536,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdWithArchitectureDependencyMatchingArchitecturesX86()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem("DependsOnX86");
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
@@ -568,7 +568,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveWinmdWithArchitectureDependencyAnyCPUNative()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // IMAGE_FILE_MACHINE unknown is supposed to work on all machine types
             TaskItem item = new TaskItem("DependsOnAnyCPUUnknown");
@@ -631,7 +631,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private void VerifyImplementationArchitecture(string winmdName, string targetProcessorArchitecture, string implementationFileArch, string warnOrErrorOnTargetArchitectureMismatch)
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             TaskItem item = new TaskItem(winmdName);
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
@@ -701,7 +701,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void DotNetAssemblyDependsOnAWinMDFileWithVersion255()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
             {

@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             Console.WriteLine("Performing VersioningAndUnification.AutoUnify.StronglyNamedDependency.Exists() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
 
                 // Create the engine.
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyNames = new TaskItem[]
                 {
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
 
                 // Create the engine.
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyNames = new TaskItem[]
                 {
@@ -292,7 +292,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
 
                 // Create the engine.
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyNames = new TaskItem[]
                 {
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             File.WriteAllText(subsetListPath, engineOnlySubset);
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -430,7 +430,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void MultipleUnifiedFromNames()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {
@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         public void LowVersionDoesntExist()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
             {

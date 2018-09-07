@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void IgnoreVersionBasic()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOn9, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
 
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
 
             // Do the resolution without the metadata, expect it to not work since we should not be able to find Dependson9 version 10.0.0.0
-            e = new MockEngine();
+            e = new MockEngine(_output);
 
             item = new TaskItem("DependsOn9, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
 
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void IgnoreVersionBasicTestMetadata()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOn9, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             item.SetMetadata("IgnoreVersionForFrameworkReference", "True");
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"))); // "Expected to find assembly, but didn't."
 
             // Do the resolution without the metadata, expect it to not work since we should not be able to find Dependson9 version 10.0.0.0
-            e = new MockEngine();
+            e = new MockEngine(_output);
 
             item = new TaskItem("DependsOn9, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
 
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void IgnoreVersionDisableIfSpecificVersionTrue()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             item.SetMetadata("IgnoreVersionForFrameworkReference", "True");
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void IgnoreVersionDisableIfHintPath()
         {
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
 
             TaskItem item = new TaskItem("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             item.SetMetadata("IgnoreVersionForFrameworkReference", "True");

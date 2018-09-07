@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void CopyLocalDependenciesWhenParentReferenceInGacFalseAllParentsInGac()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
                     {
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ValidateFrameworkNameError()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
                     {
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void CopyLocalDependenciesWhenParentReferenceInGacFalseSomeParentsInGac()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
                     {
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void CopyLocalDependenciesWhenParentReferenceInGacTrueAllParentsInGac()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
                     {
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void CopyLocalDependenciesWhenParentReferenceInGacTrueSomeParentsInGac()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
                     {
@@ -339,7 +339,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void CopyLocalDependenciesWhenParentReferenceNotInGac()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
                     {
@@ -376,7 +376,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void CopyLocalLegacyBehavior()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyNames = new TaskItem[]
                     {
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Console.WriteLine("Performing Miscellaneous.Basic() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Construct a list of assembly files.
             ITaskItem[] assemblyFiles = new TaskItem[]
@@ -744,7 +744,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             for (int i = 0; i < fxVersions.Length; i++)
             {
                 // Create the engine.
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
                 // Now, pass feed resolved primary references into ResolveAssemblyReference.
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
                 t.BuildEngine = engine;
@@ -798,7 +798,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void NOPForEmptyItemLists()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -826,7 +826,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Console.WriteLine("Performing Miscellaneous.DefaultRelatedFileExtensionsAreUsed() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Construct a list of assembly files.
             ITaskItem[] assemblies = new TaskItem[]
@@ -888,7 +888,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Console.WriteLine("Performing Miscellaneous.DefaultRelatedFileExtensionsAreUsed() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Construct a list of assembly files.
             ITaskItem[] assemblies = new TaskItem[]
@@ -925,7 +925,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Console.WriteLine("Performing Miscellaneous.InputRelatedFileExtensionsAreUsed() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Construct a list of assembly files.
             ITaskItem[] assemblies = new TaskItem[]
@@ -977,7 +977,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Console.WriteLine("Performing SimulateCreateProjectAgainstWhidbey() test");
 
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -1036,7 +1036,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
             t.CandidateAssemblyFiles = new string[] { "|" };
@@ -1057,7 +1057,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
             t.AssemblyFiles = new ITaskItem[] { new TaskItem("|") };
@@ -1077,7 +1077,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("|!@#$%::") };
 
@@ -1103,7 +1103,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.TargetFrameworkDirectories = new string[] { "\nc:\\blah\\v2.0.1234" };
 
@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
             t.SearchPaths = new string[] { "|" };
@@ -1143,7 +1143,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
             t.AppConfigFile = "|";
@@ -1163,7 +1163,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[] {
                 new TaskItem("System.Xml"), new TaskItem("System.Nonexistent")
             };
@@ -1195,7 +1195,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[]
             {
                 new TaskItem("DependsOnSimpleA")
@@ -1219,7 +1219,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[]
             {
                 new TaskItem("DependsOnSimpleA")
@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             ITaskItem i = new TaskItem("My.Assembly");
 
@@ -1275,7 +1275,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("mscorlib") };
             t.SearchPaths = new string[]
@@ -1299,7 +1299,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyGrid") };
             t.SearchPaths = DefaultPaths;
@@ -1320,7 +1320,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("CustomComponent") };
             t.SearchPaths = DefaultPaths;
@@ -1342,7 +1342,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyGrid") };
             t.SearchPaths = new string[] { @"{Registry:Software\Microsoft\.NetFramework,2.0,AssemblyFoldersEx}" };
@@ -1366,7 +1366,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchDoesNotMatch()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1392,7 +1392,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchMSILX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1416,7 +1416,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyProcessArchitectureMismatchWarning()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A"), new TaskItem("B") };
@@ -1442,7 +1442,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyProcessArchitectureMismatchWarningDefault()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A"), new TaskItem("B") };
@@ -1467,7 +1467,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void VerifyProcessArchitectureMismatchError()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A"), new TaskItem("B") };
@@ -1495,7 +1495,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchNoneX86()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1516,7 +1516,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchNoneMix()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1545,7 +1545,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchMSILLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1571,7 +1571,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchNoneLastFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1596,7 +1596,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchX86FirstFolder()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1620,7 +1620,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchX86MSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1643,7 +1643,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchX86None()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1666,7 +1666,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchNoneNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1688,7 +1688,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArcMSILNone()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1710,7 +1710,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchNoneMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1733,7 +1733,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void AssemblyFoldersExProcessorArchMSILMSIL()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
@@ -1757,7 +1757,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("A") };
             t.SearchPaths = new string[] { @"{Registry:Software\Regress714052,v2.0.0,X86}" };
@@ -1782,7 +1782,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             ITaskItem assemblyToResolve = new TaskItem("MyGrid");
             assemblyToResolve.SetMetadata("HintPath", @"C:\MyComponents\MyGrid.dll");
@@ -1804,7 +1804,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyRawDropControl") };
             t.SearchPaths = DefaultPaths;
@@ -1825,7 +1825,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyHKLMControl") };
             t.SearchPaths = DefaultPaths;
@@ -1850,7 +1850,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyHKLMandHKCUControl") };
             t.SearchPaths = DefaultPaths;
@@ -1870,7 +1870,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyControlWithFutureTargetNDPVersion") };
             t.SearchPaths = DefaultPaths;
@@ -1890,7 +1890,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyNDP1Control") };
             t.SearchPaths = DefaultPaths;
@@ -1910,7 +1910,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyControlWithPastTargetNDPVersion") };
             t.SearchPaths = DefaultPaths;
@@ -1930,7 +1930,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyControlWithServicePack") };
             t.SearchPaths = DefaultPaths;
@@ -1956,7 +1956,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyDeviceControlAssembly") };
             t.SearchPaths = new string[]
@@ -1995,7 +1995,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyDeviceControlAssembly") };
             t.SearchPaths = new string[]
@@ -2310,7 +2310,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("MyDeviceControlAssembly") };
             t.SearchPaths = new string[]
@@ -2386,7 +2386,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("System.XML") };
             t.SearchPaths = new string[] { "{CandidateAssemblyFiles}" };
@@ -2407,7 +2407,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
             TaskItem item = new TaskItem("System.XML");
             item.SetMetadata("RequiredTargetFramework", "v4.0.255");
             t.Assemblies = new ITaskItem[] { item };
@@ -2427,7 +2427,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
             TaskItem item = new TaskItem("System.XML");
             item.SetMetadata("RequiredTargetFramework", "v4.0.255");
             t.Assemblies = new ITaskItem[] { item };
@@ -2448,7 +2448,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("System.XML") };
@@ -2495,7 +2495,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem(Path.Combine(s_myVersion20Path, "System.Xml.dll")) };
             t.SearchPaths = new string[]
@@ -2990,7 +2990,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
             string previousCurrentDirectory = Directory.GetCurrentDirectory();
@@ -3028,7 +3028,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
             string previousCurrentDirectory = Directory.GetCurrentDirectory();
@@ -3064,7 +3064,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
             string previousCurrentDirectory = Directory.GetCurrentDirectory();
@@ -3101,7 +3101,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             ITaskItem taskItem = new TaskItem(Path.Combine(s_myVersion20Path, "System.Xml.dll"));
             taskItem.SetMetadata("SpecificVersion", "false");
@@ -3126,7 +3126,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             ITaskItem taskItem = new TaskItem(Path.Combine(s_myVersion20Path, "System.Xml.dll"));
             taskItem.SetMetadata("SpecificVersion", "true");
@@ -3151,7 +3151,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -3181,7 +3181,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             TaskItem item = new TaskItem(@"c:\DoesntExist\System.Xml.dll");
@@ -3214,7 +3214,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem(@"c:\DoesntExist\System.Xml.dll") };
@@ -3236,7 +3236,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem("VendorAssembly") };
             t.SearchPaths = new string[] { "{CandidateAssemblyFiles}" };
@@ -3254,7 +3254,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveToGAC()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             t.Assemblies = new ITaskItem[] { new TaskItem("System") };
@@ -3272,7 +3272,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ResolveToGACSpecificVersion()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             TaskItem item = new TaskItem("System");
@@ -3370,7 +3370,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
             t.Assemblies = new ITaskItem[]
             {
@@ -3440,7 +3440,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem(AssemblyRef.SystemData) };
             t.SearchPaths = new string[]
@@ -3463,7 +3463,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] { new TaskItem(AssemblyRef.SystemData) };
             t.SearchPaths = new string[]
@@ -3486,7 +3486,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void PrivateItemInFrameworksGetsCopyLocalTrue()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Create the mocks.
             Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
@@ -3521,7 +3521,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void NoFrameworkDirectoriesStillCopyLocal()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Also construct a set of assembly names to pass in.
             ITaskItem[] assemblyNames = new TaskItem[]
@@ -3547,7 +3547,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void Regress284485_PrivateItemWithBogusValue()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             // Also construct a set of assembly names to pass in.
             ITaskItem[] assemblyNames = new TaskItem[]
@@ -3592,7 +3592,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -3637,7 +3637,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             t.Assemblies = new ITaskItem[] {
@@ -3698,7 +3698,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             t.Assemblies = new ITaskItem[] {
@@ -3743,7 +3743,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             t.Assemblies = new ITaskItem[] {
@@ -3784,7 +3784,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
             t.AutoUnify = true;
 
@@ -3824,7 +3824,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -3861,7 +3861,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -3907,7 +3907,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -3949,7 +3949,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -3994,7 +3994,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4036,7 +4036,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4075,7 +4075,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4111,7 +4111,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4146,7 +4146,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4175,7 +4175,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4200,7 +4200,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] {
                 new TaskItem(@"System.XML, Version=9.9.9999.9, Culture=neutral, PublicKeyToken=abababababababab")
@@ -4223,7 +4223,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[] {
                 new TaskItem(@"System.XML, Version=9.9.9999.9, Culture=neutral, PublicKeyToken=abababababababab")
@@ -4244,7 +4244,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine m = new MockEngine();
+            MockEngine m = new MockEngine(_output);
             t.BuildEngine = m;
 
             t.Assemblies = new ITaskItem[]
@@ -4279,7 +4279,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4318,7 +4318,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4358,7 +4358,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4397,7 +4397,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4438,7 +4438,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4477,7 +4477,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4515,7 +4515,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -4566,7 +4566,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
             t.Assemblies = new ITaskItem[]
@@ -4627,7 +4627,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4690,7 +4690,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4733,7 +4733,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4789,7 +4789,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4841,7 +4841,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4883,7 +4883,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -4910,7 +4910,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void Regress284466_DirectoryIntoAssemblyFiles()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
                     {
@@ -4953,7 +4953,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             try
             {
                 // Create the engine.
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
 
                 ITaskItem[] assemblyFiles = new TaskItem[]
                     {
@@ -4993,7 +4993,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5024,7 +5024,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.AssemblyFiles = new ITaskItem[]
@@ -5048,7 +5048,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5075,7 +5075,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5119,7 +5119,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5156,7 +5156,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5197,7 +5197,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5236,7 +5236,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5273,7 +5273,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5302,7 +5302,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5332,7 +5332,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void Regress271273_BogusAppConfig()
         {
             // Create the engine.
-            MockEngine engine = new MockEngine();
+            MockEngine engine = new MockEngine(_output);
 
             ITaskItem[] assemblyFiles = new TaskItem[]
                     {
@@ -5374,7 +5374,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -5416,7 +5416,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -5462,7 +5462,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -5488,7 +5488,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5540,7 +5540,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -5576,7 +5576,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -5689,7 +5689,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -5742,7 +5742,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -6177,7 +6177,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             string microsoftBuildEnginePath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\Microsoft.Build.Engine.dll");
             string systemXmlPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\System.Xml.dll");
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -6552,7 +6552,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -6685,7 +6685,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTablePrimaryItemInBlackList()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             ResolveAssemblyReference rar = new ResolveAssemblyReference();
             rar.BuildEngine = mockEngine;
 
@@ -6724,7 +6724,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTablePrimaryItemInBlackListSpecificVersionTrue()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             ResolveAssemblyReference rar = new ResolveAssemblyReference();
             rar.BuildEngine = mockEngine;
 
@@ -6802,7 +6802,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTablePrimaryItemInBlackListRemoveOnlyNoWarn()
         {
-            MockEngine mockEngine = new MockEngine();
+            MockEngine mockEngine = new MockEngine(_output);
             ResolveAssemblyReference rar = new ResolveAssemblyReference();
             rar.BuildEngine = mockEngine;
 
@@ -7383,7 +7383,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static void InitializeRARwithMockEngine(out MockEngine mockEngine, out ResolveAssemblyReference rar)
         {
-            mockEngine = new MockEngine();
+            mockEngine = new MockEngine(_output);
             rar = new ResolveAssemblyReference();
             rar.BuildEngine = mockEngine;
         }
@@ -7420,7 +7420,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         private void InitializeMockEngine(out ReferenceTable referenceTable, out MockEngine mockEngine, out ResolveAssemblyReference rar)
         {
-            mockEngine = new MockEngine();
+            mockEngine = new MockEngine(_output);
             rar = new ResolveAssemblyReference();
             rar.BuildEngine = mockEngine;
 
@@ -7481,7 +7481,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 explicitSubsetListPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("v3.5\\SubsetList\\ExplicitList.xml", _xmlOnlySubset);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}" };
 
@@ -7566,7 +7566,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             try
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}" };
@@ -7651,7 +7651,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             try
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}" };
@@ -7691,7 +7691,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             try
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
 
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("System.Xml") };
@@ -7725,7 +7725,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             try
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("System.Xml") };
 
@@ -7761,7 +7761,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             try
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("System.Xml") };
 
@@ -7864,7 +7864,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-                t.BuildEngine = new MockEngine();
+                t.BuildEngine = new MockEngine(_output);
 
                 t.Assemblies = new ITaskItem[]
             {
@@ -7948,7 +7948,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -7980,7 +7980,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -8016,7 +8016,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -8054,7 +8054,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -8089,7 +8089,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             // NB: These are what common targets would set when AutoGenerateBindingRedirects is enabled.
@@ -8132,7 +8132,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -8159,7 +8159,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -8192,7 +8192,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -8235,7 +8235,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -8277,7 +8277,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new ITaskItem[]
@@ -8309,7 +8309,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.Assemblies = new TaskItem[]
@@ -8354,7 +8354,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine();
+            MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
 
             t.AssemblyFiles = new ITaskItem[]
@@ -8397,7 +8397,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.Assemblies = new ITaskItem[]
             {
@@ -8451,7 +8451,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private int RunTargetFrameworkFilteringTest(string projectTargetFramework)
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[]
             {
                 new TaskItem("A"),
@@ -8841,7 +8841,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                MockEngine e = new MockEngine();
+                MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.AssemblyFiles = new ITaskItem[] { new TaskItem(Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll")) };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}", fullFrameworkDirectory };
@@ -8889,7 +8889,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                MockEngine e = new MockEngine();
+                MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 TaskItem item = new TaskItem(Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"));
                 item.SetMetadata("SpecificVersion", "true");
@@ -8933,7 +8933,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                MockEngine e = new MockEngine();
+                MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}", fullFrameworkDirectory };
@@ -8980,7 +8980,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                MockEngine e = new MockEngine();
+                MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}", fullFrameworkDirectory };
@@ -9034,7 +9034,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                MockEngine e = new MockEngine();
+                MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 TaskItem item = new TaskItem(@"DependsOnOnlyv4Assemblies, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
                 t.Assemblies = new ITaskItem[] { item };
@@ -9088,7 +9088,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(fullRedistListContentsErrors, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
-                MockEngine e = new MockEngine();
+                MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}", fullFrameworkDirectory };
