@@ -3,6 +3,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -11,6 +12,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class VerifyTargetFrameworkAttribute : ResolveAssemblyReferenceTestFixture
     {
+        public VerifyTargetFrameworkAttribute(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify there are no warnings if the target framework identifier passed to rar and the target framework identifier in the dll do not match.
         /// </summary>

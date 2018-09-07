@@ -7,6 +7,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -28,6 +29,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private GetAssemblyRuntimeVersion _runtimeVersion = new GetAssemblyRuntimeVersion(MockGetRuntimeVersion);
         private GetPathFromFusionName _getPathFromFusionName = new GetPathFromFusionName(MockGetPathFromFusionName);
         private GetGacEnumerator _gacEnumerator = new GetGacEnumerator(MockAssemblyCacheEnumerator);
+
+        public GlobalAssemblyCacheTests(ITestOutputHelper output) : base(output)
+        {
+        }
 
         /// <summary>
         /// Verify when the GAC enumerator returns

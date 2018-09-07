@@ -6,16 +6,21 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.Prerequisite
 {
     public sealed class StronglyNamedDependency : ResolveAssemblyReferenceTestFixture
     {
+        public StronglyNamedDependency(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-            new internal string[] DefaultPaths
+        new internal string[] DefaultPaths
             {
                 get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
             }

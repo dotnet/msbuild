@@ -5,6 +5,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -13,6 +14,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class VerifyTargetFrameworkHigherThanRedist : ResolveAssemblyReferenceTestFixture
     {
+        public VerifyTargetFrameworkHigherThanRedist(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify there are no warnings when the assembly being resolved is not in the redist list and only has dependencies to references in the redist list with the same
         /// version as is described in the redist list.

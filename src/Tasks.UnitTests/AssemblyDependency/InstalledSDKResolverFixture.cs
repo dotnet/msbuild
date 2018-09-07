@@ -3,6 +3,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -11,6 +12,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class InstalledSDKResolverFixture : ResolveAssemblyReferenceTestFixture
     {
+        public InstalledSDKResolverFixture(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify that we do not find the winmd file even if it on the search path if the sdkname does not match something passed into the ResolvedSDKs property.
         /// </summary>

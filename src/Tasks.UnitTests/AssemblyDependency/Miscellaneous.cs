@@ -13,6 +13,7 @@ using Microsoft.Win32;
 using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -86,6 +87,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "<File AssemblyName='Microsoft.Build.Engine' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
             "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
             "</FileList >";
+
+        public Miscellaneous(ITestOutputHelper output) : base(output)
+        {
+        }
 
 
 

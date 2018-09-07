@@ -4,11 +4,16 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
     public sealed class SpecificVersionPrimary : ResolveAssemblyReferenceTestFixture
     {
+        public SpecificVersionPrimary(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// In this case,
         /// - A single primary version-strict reference was passed in to assembly version 1.0.0.0

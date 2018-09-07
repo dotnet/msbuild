@@ -3,6 +3,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -11,6 +12,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// </summary>
     public sealed class VerifyIgnoreVersionForFrameworkReference : ResolveAssemblyReferenceTestFixture
     {
+        public VerifyIgnoreVersionForFrameworkReference(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Verify that we ignore the version information on the assembly
         /// </summary>

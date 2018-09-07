@@ -3,11 +3,16 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
     public sealed class NonSpecificVersionStrictPrimary : ResolveAssemblyReferenceTestFixture
     {
+        public NonSpecificVersionStrictPrimary(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Return the default search paths.
         /// </summary>

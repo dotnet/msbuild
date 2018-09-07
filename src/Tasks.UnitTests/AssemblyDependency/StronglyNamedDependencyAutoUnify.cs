@@ -5,16 +5,21 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AutoUnify
 {
     public sealed class StronglyNamedDependencyAutoUnify : ResolveAssemblyReferenceTestFixture
     {
+        public StronglyNamedDependencyAutoUnify(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-            new internal string[] DefaultPaths
+        new internal string[] DefaultPaths
         {
                 get { return new string[] { s_myApp_V05Path, s_myApp_V10Path, s_myApp_V20Path, s_myApp_V30Path, s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
         }

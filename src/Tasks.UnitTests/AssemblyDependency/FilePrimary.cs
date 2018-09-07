@@ -5,11 +5,16 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
     public sealed class FilePrimary : ResolveAssemblyReferenceTestFixture
     {
+        public FilePrimary(ITestOutputHelper output) : base(output)
+        {
+        }
+
         /// <summary>
         /// In this case,
         /// - A single primary file reference to assembly version 1.0.0.0 was passed in.

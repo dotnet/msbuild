@@ -13,6 +13,7 @@ using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -164,9 +165,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 </FileList>"
             ;
 
-        public ResolveAssemblyReferenceTestFixture()
+        protected readonly ITestOutputHelper _output;
+
+        public ResolveAssemblyReferenceTestFixture(ITestOutputHelper output)
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", "1");
+
+            _output = output;
         }
 
         public void Dispose()

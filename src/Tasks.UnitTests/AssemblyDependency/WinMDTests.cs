@@ -5,6 +5,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
@@ -15,6 +16,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     [Trait("Category", "non-mono-tests")]
     public sealed class WinMDTests : ResolveAssemblyReferenceTestFixture
     {
+        public WinMDTests(ITestOutputHelper output) : base(output)
+        {
+        }
+
         #region AssemblyInformationIsWinMDFile Tests
 
         /// <summary>

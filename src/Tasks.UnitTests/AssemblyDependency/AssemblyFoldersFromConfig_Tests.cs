@@ -11,12 +11,13 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 {
     public class AssemblyFoldersFromConfig_Tests : ResolveAssemblyReferenceTestFixture
     {
-        public AssemblyFoldersFromConfig_Tests()
+        public AssemblyFoldersFromConfig_Tests(ITestOutputHelper output) : base(output)
         {
             s_existentFiles.AddRange(new[]
             {
