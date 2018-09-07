@@ -2929,16 +2929,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Assert that two strings are equal without regard to case.
-        /// </summary>
-        /// <param name="expected">The expected string.</param>
-        /// <param name="actual">The actual string.</param>
-        internal protected static void AssertNoCase(string message, string expected, string actual)
-        {
-            actual.ShouldBe(expected, message, StringCompareShould.IgnoreCase);
-        }
-
-        /// <summary>
         /// Write out an appConfig file.
         /// Return the filename that was written.
         /// </summary>

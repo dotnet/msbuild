@@ -14,6 +14,7 @@ using Xunit;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using ItemMetadataNames = Microsoft.Build.Tasks.ItemMetadataNames;
 using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -767,7 +768,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         {
                             assembliesFound[j] = true;
                             string assemblyName = Enum.GetName(typeof(EmbedInteropTypes_Indices), j);
-                            AssertNoCase(fxVersion + ": unexpected CopyValue for " + assemblyName, expectedCopyLocal[j, i], copyLocal);
+                            copyLocal.ShouldBe(expectedCopyLocal[j, i], fxVersion + ": unexpected CopyValue for " + assemblyName, StringCompareShould.IgnoreCase);
                             break;
                         }
                     }
