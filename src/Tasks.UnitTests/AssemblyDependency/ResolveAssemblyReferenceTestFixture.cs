@@ -14,6 +14,7 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
 using Xunit.Abstractions;
+using Shouldly;
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -2924,12 +2925,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="actual">The actual string.</param>
         internal protected static void AssertNoCase(string expected, string actual)
         {
-            if (0 != String.Compare(expected, actual, StringComparison.OrdinalIgnoreCase))
-            {
-                string message = String.Format("Expected value '{0}' but received '{1}'", expected, actual);
-                Console.WriteLine(message);
-                Assert.True(false, message);
-            }
+            actual.ShouldBe(expected, StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -2939,11 +2935,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="actual">The actual string.</param>
         internal protected static void AssertNoCase(string message, string expected, string actual)
         {
-            if (0 != String.Compare(expected, actual, StringComparison.OrdinalIgnoreCase))
-            {
-                Console.WriteLine(message);
-                Assert.True(false, message);
-            }
+            actual.ShouldBe(expected, message, StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
