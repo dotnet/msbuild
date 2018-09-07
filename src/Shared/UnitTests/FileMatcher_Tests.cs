@@ -1627,16 +1627,6 @@ namespace Microsoft.Build.UnitTests
             false,
             false
         )]
-        // Special regex characters valid in Windows paths
-        [InlineData(
-            @"$()+.[^{\?$()+.[^{\$()+.[^{",
-            @"$()+.[^{\",
-            @"?$()+.[^{\",
-            "$()+.[^{",
-            @"^(?<FIXEDDIR>\$\(\)\+\.\[\^\{[/\\]+)(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{)$",
-            true,
-            true
-        )]
         // Common wildcard characters in wildcard and filename part
         [InlineData(
             @"*fo?ba?\*fo?ba?",
@@ -1707,6 +1697,43 @@ namespace Microsoft.Build.UnitTests
             true,
             true
         )]
+        public void GetFileSpecInfoCommon(
+            string filespec,
+            string expectedFixedDirectoryPart,
+            string expectedWildcardDirectoryPart,
+            string expectedFilenamePart,
+            string expectedMatchFileExpression,
+            bool expectedNeedsRecursion,
+            bool expectedIsLegalFileSpec
+        )
+        {
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
+                expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+            }
+            TestGetFileSpecInfo(
+                filespec,
+                expectedFixedDirectoryPart,
+                expectedWildcardDirectoryPart,
+                expectedFilenamePart,
+                expectedMatchFileExpression,
+                expectedNeedsRecursion,
+                expectedIsLegalFileSpec
+            );
+        }
+
+        [Theory]
+        // Escape pecial regex characters valid in Windows paths
+        [InlineData(
+            @"$()+.[^{\?$()+.[^{\$()+.[^{",
+            @"$()+.[^{\",
+            @"?$()+.[^{\",
+            "$()+.[^{",
+            @"^(?<FIXEDDIR>\$\(\)\+\.\[\^\{[/\\]+)(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{)$",
+            true,
+            true
+        )]
         // Preserve UNC paths in fixed directory part
         [InlineData(
             @"\\\.\foo/bar",
@@ -1717,7 +1744,70 @@ namespace Microsoft.Build.UnitTests
             false,
             true
         )]
-        public void GetFileSpecInfo(
+        public void GetFileSpecInfoWindows(
+            string filespec,
+            string expectedFixedDirectoryPart,
+            string expectedWildcardDirectoryPart,
+            string expectedFilenamePart,
+            string expectedMatchFileExpression,
+            bool expectedNeedsRecursion,
+            bool expectedIsLegalFileSpec
+        )
+        {
+            TestGetFileSpecInfo(
+                filespec,
+                expectedFixedDirectoryPart,
+                expectedWildcardDirectoryPart,
+                expectedFilenamePart,
+                expectedMatchFileExpression,
+                expectedNeedsRecursion,
+                expectedIsLegalFileSpec
+            );
+        }
+
+        [Theory]
+        // Escape regex characters valid in Unix paths
+        [InlineData(
+            @"$()+.[^{|\?$()+.[^{|\$()+.[^{|",
+            @"$()+.[^{|/",
+            @"?$()+.[^{|/",
+            "$()+.[^{|",
+            @"^(?<FIXEDDIR>\$\(\)\+\.\[\^\{\|[/\\]+)(?<WILDCARDDIR>.\$\(\)\+\.\[\^\{\|[/\\]+)(?<FILENAME>\$\(\)\+\.\[\^\{\|)$",
+            true,
+            true
+        )]
+        // Collapse leading successive directory separators in fixed directory part
+        [InlineData(
+            @"\\\.\foo/bar",
+            @"///./foo/",
+            "",
+            "bar",
+            @"^(?<FIXEDDIR>[/\\]+foo[/\\]+)(?<WILDCARDDIR>)(?<FILENAME>bar)$",
+            false,
+            true
+        )]
+        public void GetFileSpecInfoUnix(
+            string filespec,
+            string expectedFixedDirectoryPart,
+            string expectedWildcardDirectoryPart,
+            string expectedFilenamePart,
+            string expectedMatchFileExpression,
+            bool expectedNeedsRecursion,
+            bool expectedIsLegalFileSpec
+        )
+        {
+            TestGetFileSpecInfo(
+                filespec,
+                expectedFixedDirectoryPart,
+                expectedWildcardDirectoryPart,
+                expectedFilenamePart,
+                expectedMatchFileExpression,
+                expectedNeedsRecursion,
+                expectedIsLegalFileSpec
+            );
+        }
+
+        private void TestGetFileSpecInfo(
             string filespec,
             string expectedFixedDirectoryPart,
             string expectedWildcardDirectoryPart,
@@ -1736,12 +1826,6 @@ namespace Microsoft.Build.UnitTests
                 out bool needsRecursion,
                 out bool isLegalFileSpec
             );
-
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
-                expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
-            }
             fixedDirectoryPart.ShouldBe(expectedFixedDirectoryPart);
             wildcardDirectoryPart.ShouldBe(expectedWildcardDirectoryPart);
             filenamePart.ShouldBe(expectedFilenamePart);
@@ -1749,6 +1833,8 @@ namespace Microsoft.Build.UnitTests
             needsRecursion.ShouldBe(expectedNeedsRecursion);
             isLegalFileSpec.ShouldBe(expectedIsLegalFileSpec);
         }
+
+
 
         #region Support functions.
 
