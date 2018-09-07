@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Xml;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Definition;
@@ -240,6 +239,145 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
+                }
+                );
+        }
+
+        public static IEnumerable<object> ContextDisambiguatesRelativeGlobsData
+        {
+            get
+            {
+                yield return new object[]
+                {
+                    EvaluationContext.SharingPolicy.Shared,
+                    new[]
+                    {
+                        new[] {"0.cs"}, // first project
+                        new[] {"0.cs", "1.cs"}, // second project
+                        new[] {"0.cs"}, // first project reevaluation
+                        new[] {"0.cs", "1.cs"}, // second project reevaluation
+                    }
+                };
+
+                yield return new object[]
+                {
+                    EvaluationContext.SharingPolicy.Isolated,
+                    new[]
+                    {
+                        new[] {"0.cs"},
+                        new[] {"0.cs", "1.cs"},
+                        new[] {"0.cs", "1.cs", "2.cs"},
+                        new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
+        public void ContextDisambiguatesRelativeGlobsUnderProjectCone(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var projectDirectory1 = _env.DefaultTestDirectory.CreateDirectory("1").Path;
+            var projectDirectory2 = _env.DefaultTestDirectory.CreateDirectory("2").Path;
+
+            var context = EvaluationContext.Create(policy);
+
+            var evaluationCount = 0;
+
+            File.WriteAllText(Path.Combine(projectDirectory1, $"1.{evaluationCount}.cs"), "");
+            File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
+
+            EvaluateProjects(
+                new []
+                {
+                    new ProjectSpecification(
+                        Path.Combine(projectDirectory1, "1"),
+                        @"<Project>
+                            <ItemGroup>
+                                <i Include=`**/*.cs` />
+                            </ItemGroup>
+                        </Project>"),
+                    new ProjectSpecification(
+                        Path.Combine(projectDirectory2, "2"),
+                        @"<Project>
+                            <ItemGroup>
+                                <i Include=`**/*.cs` />
+                            </ItemGroup>
+                        </Project>"),
+                },
+                context,
+                project =>
+                {
+                    var projectName = Path.GetFileNameWithoutExtension(project.FullPath);
+
+                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount]
+                        .Select(i => $"{projectName}.{i}")
+                        .ToArray();
+
+                    ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
+
+                    evaluationCount++;
+
+                    File.WriteAllText(Path.Combine(projectDirectory1, $"1.{evaluationCount}.cs"), "");
+                    File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
+                }
+                );
+        }
+
+        [Theory]
+        [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
+        public void ContextDisambiguatesRelativeGlobsOutsideOfProjectCone(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var project1Root = _env.DefaultTestDirectory.CreateDirectory("Project1");
+            var project1Directory = project1Root.CreateDirectory("1").Path;
+            var project1GlobDirectory = project1Root.CreateDirectory("Glob").CreateDirectory("1").Path;
+
+            var project2Root = _env.DefaultTestDirectory.CreateDirectory("Project2");
+            var project2Directory = project2Root.CreateDirectory("2").Path;
+            var project2GlobDirectory = project2Root.CreateDirectory("Glob").CreateDirectory("2").Path;
+
+            var context = EvaluationContext.Create(policy);
+
+            var evaluationCount = 0;
+
+            File.WriteAllText(Path.Combine(project1GlobDirectory, $"1.{evaluationCount}.cs"), "");
+            File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
+
+            EvaluateProjects(
+                new []
+                {
+                    new ProjectSpecification(
+                        Path.Combine(project1Directory, "1"),
+                        @"<Project>
+                            <ItemGroup>
+                                <i Include=`../Glob/**/*.cs` />
+                            </ItemGroup>
+                        </Project>"),
+                    new ProjectSpecification(
+                        Path.Combine(project2Directory, "2"),
+                        @"<Project>
+                            <ItemGroup>
+                                <i Include=`../Glob/**/*.cs` />
+                            </ItemGroup>
+                        </Project>")
+                },
+                context,
+                project =>
+                {
+                    var projectName = Path.GetFileNameWithoutExtension(project.FullPath);
+
+                    // globs have the fixed directory part prepended, so add it to the expected results
+                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount]
+                        .Select(i => Path.Combine("..", "Glob", projectName, $"{projectName}.{i}"))
+                        .ToArray();
+
+                    var actualGlobExpansion = project.GetItems("i");
+                    ObjectModelHelpers.AssertItems(expectedGlobExpansion, actualGlobExpansion);
+
+                    evaluationCount++;
+
+                    File.WriteAllText(Path.Combine(project1GlobDirectory, $"1.{evaluationCount}.cs"), "");
+                    File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
                 }
                 );
         }
