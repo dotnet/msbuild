@@ -52,6 +52,8 @@
     -->
 
     <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702</NoWarn>
+
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
