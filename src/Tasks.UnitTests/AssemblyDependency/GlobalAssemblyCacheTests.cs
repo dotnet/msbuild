@@ -651,7 +651,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 isWinMDFile,
                 readMachineTypeFromPEHeader));
 
-            Console.WriteLine (((MockEngine)t.BuildEngine).Log);
             Assert.True(string.Equals(t.DependsOnNETStandard, "true", StringComparison.OrdinalIgnoreCase)); //                 "Expected netstandard dependency found during build."
 
             // intelli build mode

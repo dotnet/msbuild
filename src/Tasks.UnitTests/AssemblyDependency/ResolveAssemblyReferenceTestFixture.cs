@@ -2760,8 +2760,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Console.WriteLine("subKey={0}", subKey);
-            Assert.True(false, "New GetRegistrySubKeyNames parameters encountered, need to add unittesting support");
+            Assert.True(false, $"New GetRegistrySubKeyNames parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 
@@ -2904,8 +2903,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Console.WriteLine("subKey={0}", subKey);
-            Assert.True(false, "New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support");
+            Assert.True(false, $"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 

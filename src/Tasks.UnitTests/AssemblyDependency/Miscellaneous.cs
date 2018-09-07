@@ -549,7 +549,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Console.WriteLine(item.ItemSpec);
                     Assert.True(false, String.Format("A new resolved file called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
@@ -580,7 +579,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Console.WriteLine(item.ItemSpec);
                     Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
@@ -588,7 +586,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Process the related files.
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                Console.WriteLine(item.ItemSpec);
                 Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
             }
 
@@ -611,7 +608,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Console.WriteLine(item.ItemSpec);
                     Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
@@ -778,7 +774,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                     if (j == assembliesCount)
                     {
-                        Console.WriteLine(item.ItemSpec);
                         Assert.True(false, String.Format("{0}: A new resolved file called '{1}' was found. If this is intentional, then add unittests above.", fxVersion, item.ItemSpec));
                     }
                 }
