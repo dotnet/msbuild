@@ -192,6 +192,32 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(0, t.AssignedFilesWithCulture.Length);
             Assert.Equal(1, t.AssignedFilesWithNoCulture.Length);
         }
+
+        /*
+        * Method:   PseudoLocalization
+        *
+        * Test the usage of Windows Pseudo-Locales
+        * https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
+        */
+        [Theory]
+        [InlineData("qps-ploc")]
+        [InlineData("qps-plocm")]
+        [InlineData("qps-ploca")]
+        [InlineData("qps-Latn-x-sh")] // Windows 10+
+        public void PseudoLocalization(string culture)
+        {
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem($"MyResource.{culture}.resx");
+            t.Files = new ITaskItem[] { i };
+            t.Execute();
+
+            Assert.Equal(1, t.AssignedFiles.Length);
+            Assert.Equal(1, t.CultureNeutralAssignedFiles.Length);
+            Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
     }
 }
 
