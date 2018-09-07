@@ -134,7 +134,7 @@ The idea behind the export targets feature is that it changes the behavior of th
 - Option 3: <Project DefaultTargets="Build" ExportTargets="GetTargetPath">
   - Pros: Easy to find (ish. Could be defined in imported props/targets), similar to DefaultTargets and InitialTargets, not a breaking change
   - Cons: Separated from the target definition
-- Option 4: Property: $(MSBuildExportedTargets)
+- Option 4: Item: @(MSBuildExportedTargets)
   - Pros: Easy to use and query, completely non-breaking
   - Cons: Bad actors can override instead of append
 
