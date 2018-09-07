@@ -1723,6 +1723,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Theory]
         // Escape pecial regex characters valid in Windows paths
         [InlineData(
@@ -1765,6 +1766,7 @@ namespace Microsoft.Build.UnitTests
             );
         }
 
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         [Theory]
         // Escape regex characters valid in Unix paths
         [InlineData(
