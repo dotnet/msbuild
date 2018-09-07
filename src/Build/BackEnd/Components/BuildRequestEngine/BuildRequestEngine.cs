@@ -777,7 +777,10 @@ namespace Microsoft.Build.BackEnd
                     // Now update this result so that the Build Manager can correctly match results from its
                     // own cache.
                     completedEntry.Result.DefaultTargets = configuration.ProjectDefaultTargets;
+
                     completedEntry.Result.InitialTargets = configuration.ProjectInitialTargets;
+
+                    completedEntry.Result.ExportTargets = configuration.ProjectExportTargets;
                 }
 
                 TraceEngine("ERS: Request is now {0}({1}) (nr {2}) has had its builder cleaned up.", completedEntry.Request.GlobalRequestId, completedEntry.Request.ConfigurationId, completedEntry.Request.NodeRequestId);

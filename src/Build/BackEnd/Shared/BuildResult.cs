@@ -9,6 +9,7 @@ using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using static Microsoft.Build.BackEnd.NodePacketTranslatorUtilities;
 
 namespace Microsoft.Build.Execution
 {
@@ -69,6 +70,8 @@ namespace Microsoft.Build.Execution
         /// requests may be properly satisfied from the cache.
         /// </summary>
         private List<string> _defaultTargets;
+
+        private IReadOnlyCollection<string> _exportTargets;
 
         /// <summary>
         /// The set of results for each target.
@@ -266,6 +269,7 @@ namespace Microsoft.Build.Execution
             _circularDependency = result._circularDependency;
             _initialTargets = result._initialTargets;
             _defaultTargets = result._defaultTargets;
+            _exportTargets = result._exportTargets;
             _baseOverallResult = result.OverallResult == BuildResultCode.Success;
         }
 
@@ -465,6 +469,12 @@ namespace Microsoft.Build.Execution
             { return _parentGlobalRequestId == BuildRequest.InvalidGlobalRequestId; }
         }
 
+        public IReadOnlyCollection<string> ExportTargets
+        {
+            get => _exportTargets;
+            set => _exportTargets = value;
+        }
+
         /// <summary>
         /// Indexer which sets or returns results for the specified target
         /// </summary>
@@ -555,6 +565,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _nodeRequestId);
             translator.Translate(ref _initialTargets);
             translator.Translate(ref _defaultTargets);
+            translator.Translate(ref _exportTargets, ImmutableArrayFactory);
             translator.Translate(ref _circularDependency);
             translator.TranslateException(ref _requestException);
             translator.TranslateDictionary(ref _resultsByTarget, TargetResult.FactoryForDeserialization, CreateTargetResultDictionary);

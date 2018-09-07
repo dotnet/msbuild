@@ -998,6 +998,7 @@ namespace Microsoft.Build.Execution
         ClearCachesAfterBuild = 8,
         IgnoreExistingProjectState = 4,
         IgnoreMissingEmptyAndInvalidImports = 64,
+        IsolatedProjectBuild = 128,
         None = 0,
         ProvideProjectStateAfterBuild = 2,
         ProvideSubsetOfStateAfterBuild = 32,
@@ -1010,6 +1011,7 @@ namespace Microsoft.Build.Execution
         public bool CircularDependency { get { throw null; } }
         public int ConfigurationId { get { throw null; } }
         public System.Exception Exception { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<string> ExportTargets { get { throw null; } set { } }
         public int GlobalRequestId { get { throw null; } }
         public Microsoft.Build.Execution.ITargetResult this[string target] { get { throw null; } }
         public int NodeRequestId { get { throw null; } }

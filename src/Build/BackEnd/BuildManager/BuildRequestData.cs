@@ -75,6 +75,11 @@ namespace Microsoft.Build.Execution
         /// This is especially useful during a restore since some imports might come from packages that haven't been restored yet.
         /// </summary>
         IgnoreMissingEmptyAndInvalidImports = 1 << 6,
+
+        /// <summary>
+        /// Turns on logic for graph based isolated project builds
+        /// </summary>
+        IsolatedProjectBuild = 1 << 7
     }
 
     /// <summary>

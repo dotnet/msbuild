@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="right">The right collections.</param>
         /// <param name="comparer">The comparer to use on each element.</param>
         /// <returns>True if the collections are equivalent.</returns>
-        static internal bool CompareCollections<T>(ICollection<T> left, ICollection<T> right, IComparer<T> comparer)
+        static internal bool CompareCollections<T>(IEnumerable<T> left, IEnumerable<T> right, IComparer<T> comparer)
         {
             if (Object.ReferenceEquals(left, right))
             {
@@ -60,15 +60,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 return false;
             }
 
-            if (left.Count != right.Count)
+            var leftArray = left.ToArray();
+            var rightArray = right.ToArray();
+
+            if (leftArray.Length != rightArray.Length)
             {
                 return false;
             }
 
-            T[] leftArray = left.ToArray();
-            T[] rightArray = right.ToArray();
-
-            for (int i = 0; i < leftArray.Length; i++)
+            for (var i = 0; i < leftArray.Length; i++)
             {
                 if (comparer.Compare(leftArray[i], rightArray[i]) != 0)
                 {
