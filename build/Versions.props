@@ -31,6 +31,8 @@
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <MicroBuildPluginsSwixBuildVersion>1.0.422</MicroBuildPluginsSwixBuildVersion>
+
+    <RoslynToolsSignToolVersion>1.0.0-beta2-dev3</RoslynToolsSignToolVersion>
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
@@ -40,5 +42,11 @@
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
+
+  <Target Name="MungeSignToolArguments" BeforeTargets="Sign">
+    <ItemGroup>
+      <SignToolArgs Include='-msbuildBinaryLog "$(ArtifactsLogDir)\signtool.binlog"' />
+    </ItemGroup>
+  </Target>
 
 </Project>

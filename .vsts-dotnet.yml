@@ -68,6 +68,13 @@ steps:
     filename: 'artifacts\nbgv.exe'
     arguments: 'cloud --version=$(NBGV_SemVer1)'
 
+- task: CmdLine@1
+  displayName: Just log every file
+  inputs:
+    filename: dir
+    arguments: '/s /b $(Build.ArtifactStagingDirectory)\..>artifacts\$(BuildConfiguration)\log\Everyfile.log'
+  condition: always()
+
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: logs'
   inputs:
