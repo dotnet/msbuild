@@ -24,7 +24,7 @@ phases:
     agentOs: Windows_NT
     queue:
       ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-        name: Hosted VS2017
+        name: Helix
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
         name: DotNetCore-Build
         demands:
