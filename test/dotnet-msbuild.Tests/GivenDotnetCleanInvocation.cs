@@ -7,6 +7,7 @@ using Xunit;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -15,7 +16,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -verbosity:normal -target:Clean";
 
         private static readonly string WorkingDirectory = 
-            Microsoft.DotNet.Tools.Test.Utilities.TestPathUtilities.CreateAbsolutePath(nameof(GivenDotnetCleanInvocation));
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetCleanInvocation));
 
         [Fact]
         public void ItAddsProjectToMsbuildInvocation()
@@ -37,7 +38,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--verbosity", "diag" }, "-verbosity:diag")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")

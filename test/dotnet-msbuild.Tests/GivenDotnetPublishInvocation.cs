@@ -7,6 +7,7 @@ using FluentAssertions;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Publish;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,7 +16,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     public class GivenDotnetPublishInvocation
     {
         private static readonly string WorkingDirectory = 
-            Microsoft.DotNet.Tools.Test.Utilities.TestPathUtilities.CreateAbsolutePath(nameof(GivenDotnetPublishInvocation));
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPublishInvocation));
         private readonly ITestOutputHelper output;
 
         public GivenDotnetPublishInvocation(ITestOutputHelper output)
@@ -41,7 +42,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "<project>", "<extra-args>" }, "<project> <extra-args>")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
@@ -114,7 +115,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
         public void OptionForwardingIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 var expectedArgs = expectedAdditionalArgs
                     .Replace("<cwd>", WorkingDirectory)

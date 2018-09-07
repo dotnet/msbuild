@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.DotNet.Tools.Build;
 using FluentAssertions;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
@@ -14,7 +15,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
 
         private static readonly string WorkingDirectory = 
-            Microsoft.DotNet.Tools.Test.Utilities.TestPathUtilities.CreateAbsolutePath(nameof(GivenDotnetBuildInvocation));
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetBuildInvocation));
 
         [Theory]
         [InlineData(new string[] { }, "-target:Build")]
@@ -35,7 +36,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
                                   "-target:Rebuild -property:OutputPath=<cwd>myoutput -property:RuntimeIdentifier=myruntime -verbosity:diag /ArbitrarySwitchForMSBuild")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
@@ -62,7 +63,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             string expectedAdditionalArgsForRestore, 
             string expectedAdditionalArgs)
         {
-            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 expectedAdditionalArgsForRestore = expectedAdditionalArgsForRestore.Replace("<cwd>", WorkingDirectory);
 

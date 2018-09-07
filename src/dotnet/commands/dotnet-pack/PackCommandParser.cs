@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.CmdOutputDirDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.CmdOutputDir)
-                        .ForwardAsSingle(o => $"-property:PackageOutputPath={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-property:PackageOutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "--no-build",
                     LocalizableStrings.CmdNoBuildOptionDescription,

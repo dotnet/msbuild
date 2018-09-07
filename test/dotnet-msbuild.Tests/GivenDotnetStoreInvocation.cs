@@ -6,6 +6,7 @@ using Microsoft.DotNet.Tools.Store;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
@@ -15,7 +16,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -target:ComposeStore <project>";
         static readonly string[] ArgsPrefix = { "--manifest", "<project>" };
         private static readonly string WorkingDirectory = 
-            Microsoft.DotNet.Tools.Test.Utilities.TestPathUtilities.CreateAbsolutePath(nameof(GivenDotnetStoreInvocation));
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetStoreInvocation));
 
         [Theory]
         [InlineData("-m")]
@@ -36,7 +37,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--manifest", "one.xml", "--manifest", "two.xml", "--manifest", "three.xml" }, @"-property:AdditionalProjects=<cwd>one.xml%3B<cwd>two.xml%3B<cwd>three.xml")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 args = ArgsPrefix.Concat(args).ToArray();
                 expectedAdditionalArgs =

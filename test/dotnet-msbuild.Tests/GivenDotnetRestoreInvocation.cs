@@ -7,6 +7,7 @@ using Xunit;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -15,7 +16,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         private const string ExpectedPrefix =
             "exec <msbuildpath> -maxcpucount -verbosity:m -nologo -target:Restore";
         private static readonly string WorkingDirectory = 
-            Microsoft.DotNet.Tools.Test.Utilities.TestPathUtilities.CreateAbsolutePath(nameof(GivenDotnetRestoreInvocation));
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetRestoreInvocation));
 
         [Theory]
         [InlineData(new string[] { }, "")]
@@ -35,7 +36,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--verbosity", "minimal" }, @"-verbosity:minimal")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            CommandDirectoryContext.PerformActionWithOverwrittenCurrentDirectory(WorkingDirectory, () =>
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")

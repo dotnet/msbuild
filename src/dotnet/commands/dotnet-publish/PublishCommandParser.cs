@@ -24,7 +24,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-property:PublishDir={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
@@ -34,7 +34,7 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.ManifestOptionDescription,
                     Accept.OneOrMoreArguments()
                         .With(name: LocalizableStrings.ManifestOption)
-                        .ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Arguments.Select(CommandDirectoryContext.ExpandPath))}")),
+                        .ForwardAsSingle(o => $"-property:TargetManifestFiles={string.Join("%3B", o.Arguments.Select(CommandDirectoryContext.GetFullPath))}")),
                 Create.Option(
                     "--no-build",
                     LocalizableStrings.NoBuildOptionDescription,

@@ -38,7 +38,7 @@ namespace Microsoft.DotNet.Cli
                                   return new[]
                                   {
                                       materializedString,
-                                      $"-property:AdditionalProjects={string.Join("%3B", o.Arguments.Skip(1).Select(CommandDirectoryContext.ExpandPath))}"
+                                      $"-property:AdditionalProjects={string.Join("%3B", o.Arguments.Skip(1).Select(CommandDirectoryContext.GetFullPath))}"
                                   };
                               }
                           })),
@@ -55,13 +55,13 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.OutputOption)
-                        .ForwardAsSingle(o => $"-property:ComposeDir={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-property:ComposeDir={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "-w|--working-dir",
                     LocalizableStrings.IntermediateWorkingDirOptionDescription,
                     Accept.ExactlyOneArgument()
                         .With(name: LocalizableStrings.IntermediateWorkingDirOption)
-                        .ForwardAsSingle(o => $"-property:ComposeWorkingDir={CommandDirectoryContext.ExpandPath(o.Arguments.Single())}")),
+                        .ForwardAsSingle(o => $"-property:ComposeWorkingDir={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "--skip-optimization",
                     LocalizableStrings.SkipOptimizationOptionDescription,
