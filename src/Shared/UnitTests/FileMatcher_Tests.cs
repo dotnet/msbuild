@@ -1737,6 +1737,11 @@ namespace Microsoft.Build.UnitTests
                 out bool isLegalFileSpec
             );
 
+            if (NativeMethodsShared.IsUnixLike)
+            {
+                expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
+                expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+            }
             fixedDirectoryPart.ShouldBe(expectedFixedDirectoryPart);
             wildcardDirectoryPart.ShouldBe(expectedWildcardDirectoryPart);
             filenamePart.ShouldBe(expectedFilenamePart);
