@@ -10,6 +10,7 @@ using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -53,7 +54,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2", "assemblyfromconfig2.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
             {
@@ -83,7 +84,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86", "assemblyfromconfig_common.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
             {
@@ -113,7 +114,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
 
                 // Try again changing only the processor architecture
                 t = new ResolveAssemblyReference
@@ -128,7 +129,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
             {

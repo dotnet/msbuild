@@ -139,8 +139,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedDependencyFiles.Length);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            AssertNoCase("false", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
-            AssertNoCase("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
+            t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
+            t.ResolvedFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
         }
 
 
@@ -218,9 +218,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedDependencyFiles.Length);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            AssertNoCase("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
-            AssertNoCase("true", t.ResolvedFiles[1].GetMetadata("CopyLocal"));
-            AssertNoCase("true", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
+            t.ResolvedFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
+            t.ResolvedFiles[1].GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
+            t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -280,8 +280,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedDependencyFiles.Length);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            AssertNoCase("true", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
-            AssertNoCase("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
+            t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
+            t.ResolvedFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -330,9 +330,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedDependencyFiles.Length);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            AssertNoCase("false", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
-            AssertNoCase("true", t.ResolvedFiles[1].GetMetadata("CopyLocal"));
-            AssertNoCase("true", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
+            t.ResolvedFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
+            t.ResolvedFiles[1].GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
+            t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
         }
 
         [Fact]
@@ -364,8 +364,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedDependencyFiles.Length);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            AssertNoCase("true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
-            AssertNoCase("false", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
+            t.ResolvedFiles[0].GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
+            t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -403,8 +403,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedDependencyFiles.Length);
             Assert.Equal(0, engine.Errors);
             Assert.Equal(0, engine.Warnings);
-            AssertNoCase("true", t.ResolvedFiles[0].GetMetadata("CopyLocal"));
-            AssertNoCase("false", t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal"));
+            t.ResolvedFiles[0].GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
+            t.ResolvedDependencyFiles[0].GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -480,61 +480,61 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if (String.Compare(item.ItemSpec, Path.Combine(s_myVersion20Path, "System.XML.dll"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     systemXmlFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("1776", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("false", item.GetMetadata("CopyLocal"));
-                    AssertNoCase("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", item.GetMetadata("FusionName"));
-                    AssertNoCase("v2.0.50727", item.GetMetadata(ItemMetadataNames.imageRuntime));
-                    AssertNoCase("NOPE", item.GetMetadata(ItemMetadataNames.winMDFile));
-                    AssertNoCase("IMPL", item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("1776", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("FusionName").ShouldBe("System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
+                    item.GetMetadata(ItemMetadataNames.imageRuntime).ShouldBe("v2.0.50727", StringCompareShould.IgnoreCase);
+                    item.GetMetadata(ItemMetadataNames.winMDFile).ShouldBe("NOPE", StringCompareShould.IgnoreCase);
+                    item.GetMetadata(ItemMetadataNames.winmdImplmentationFile).ShouldBe("IMPL", StringCompareShould.IgnoreCase);
                 }
                 else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "System.Data.dll")))
                 {
                     systemDataFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("false", item.GetMetadata("CopyLocal"));
-                    AssertNoCase("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", item.GetMetadata("FusionName"));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("FusionName").ShouldBe("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 }
                 else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "MyGacAssembly.dll")))
                 {
                     myGacAssemblyFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("false", item.GetMetadata("CopyLocal"));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
                 }
                 else if (item.ItemSpec.EndsWith(s_myPrivateAssemblyRelPath))
                 {
                     myPrivateAssemblyFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("true", item.GetMetadata("CopyLocal"));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
                 }
                 else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyCopyLocalAssembly.dll")))
                 {
                     myCopyLocalAssemblyFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("true", item.GetMetadata("CopyLocal"));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
                 }
                 else if (item.ItemSpec.EndsWith(Path.Combine("MyProject", "MyDontCopyLocalAssembly.dll")))
                 {
                     myDontCopyLocalAssemblyFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("false", item.GetMetadata("CopyLocal"));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
                 }
                 else if (item.ItemSpec.EndsWith(s_myMissingAssemblyRelPath))
                 {
                     missingAssemblyFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
 
                     // Its debatable whether this file should be CopyLocal or not.
                     // It doesn't exist on disk, but is it ResolveAssemblyReference's job to make sure that it does?
                     // For now, let the default CopyLocal rules apply.
-                    AssertNoCase("true", item.GetMetadata("CopyLocal"));
-                    AssertNoCase("MyMissingAssembly", item.GetMetadata("FusionName"));
+                    item.GetMetadata("CopyLocal").ShouldBe("true", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("FusionName").ShouldBe("MyMissingAssembly", StringCompareShould.IgnoreCase);
                 }
                 else if (String.Compare(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Xml.dll"), StringComparison.OrdinalIgnoreCase) == 0)
                 {
@@ -560,18 +560,18 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "SysTem.dll")))
                 {
                     systemFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("false", item.GetMetadata("CopyLocal"));
-                    AssertNoCase("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", item.GetMetadata("FusionName"));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("FusionName").ShouldBe("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 }
                 else if (item.ItemSpec.EndsWith(Path.Combine("v2.0.MyVersion", "mscorlib.dll")))
                 {
                     mscorlibFound = true;
-                    AssertNoCase("", item.GetMetadata("DestinationSubDirectory"));
-                    AssertNoCase("1776", item.GetMetadata("RandomAttributeThatShouldBeForwarded"));
-                    AssertNoCase("false", item.GetMetadata("CopyLocal"));
-                    AssertNoCase("v2.0.50727", item.GetMetadata(ItemMetadataNames.imageRuntime));
+                    item.GetMetadata("DestinationSubDirectory").ShouldBe("", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("RandomAttributeThatShouldBeForwarded").ShouldBe("1776", StringCompareShould.IgnoreCase);
+                    item.GetMetadata("CopyLocal").ShouldBe("false", StringCompareShould.IgnoreCase);
+                    item.GetMetadata(ItemMetadataNames.imageRuntime).ShouldBe("v2.0.50727", StringCompareShould.IgnoreCase);
                     Assert.Equal(0, item.GetMetadata(ItemMetadataNames.winMDFile).Length);
                     Assert.Equal(0, item.GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
 
@@ -1304,7 +1304,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(@"C:\MyComponents\MyGrid.dll", t.ResolvedFiles[0].ItemSpec);
-            AssertNoCase(@"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1325,7 +1325,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(@"C:\MyComponentsB\CustomComponent.dll", t.ResolvedFiles[0].ItemSpec);
-            AssertNoCase(@"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1347,7 +1347,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(@"C:\MyComponents\MyGrid.dll", t.ResolvedFiles[0].ItemSpec);
-            AssertNoCase(@"{Registry:Software\Microsoft\.NetFramework,2.0,AssemblyFoldersEx}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Microsoft\.NetFramework,2.0,AssemblyFoldersEx}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1400,7 +1400,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(0, mockEngine.Warnings);
             Assert.Equal(0, mockEngine.Errors);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,X86}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,X86}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1426,7 +1426,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, mockEngine.Errors);
             mockEngine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch", "MSIL", @"A", "X86");
             mockEngine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch", "MSIL", @"B", "X86");
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,X86}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,X86}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1451,7 +1451,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, mockEngine.Errors);
             mockEngine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch", "MSIL", @"A", "X86");
             mockEngine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch", "MSIL", @"B", "X86");
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,X86}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,X86}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1477,7 +1477,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(2, mockEngine.Errors);
             mockEngine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch", "MSIL", @"A", "X86");
             mockEngine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch", "MSIL", @"B", "X86");
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,X86}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,X86}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1500,7 +1500,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,X86}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,X86}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1525,7 +1525,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(0, mockEngine.Warnings);
             Assert.Equal(0, mockEngine.Errors);
             Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\Regress714052\Mix\a.winmd", StringComparison.OrdinalIgnoreCase));
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,Mix}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,Mix}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1551,7 +1551,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(t.ResolvedFiles[0].ItemSpec, @"C:\Regress714052\MSIL\A.dll");
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1577,7 +1577,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(t.ResolvedFiles[0].ItemSpec, @"C:\Regress714052\MSIL\A.dll");
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", StringCompareShould.IgnoreCase);
         }
         /// <summary>
         /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
@@ -1602,7 +1602,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(t.ResolvedFiles[0].ItemSpec, @"C:\Regress714052\X86\A.dll");
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,AssemblyFoldersEX}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1625,7 +1625,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,MSIL}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,MSIL}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1648,7 +1648,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,None}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,None}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1671,7 +1671,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,None}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,None}", StringCompareShould.IgnoreCase);
         }
         /// <summary>
         /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
@@ -1693,7 +1693,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,None}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,None}", StringCompareShould.IgnoreCase);
         }
         /// <summary>
         /// The above but now requires us to make sure the processor architecture of what we are targeting matches what we are resolving.
@@ -1715,7 +1715,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,MSIL}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,MSIL}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1738,7 +1738,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,MSIL}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,MSIL}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1762,7 +1762,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(@"C:\Regress714052\X86\A.dll", t.ResolvedFiles[0].ItemSpec);
-            AssertNoCase(@"{Registry:Software\Regress714052,v2.0.0,X86}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Regress714052,v2.0.0,X86}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -1809,7 +1809,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, t.ResolvedFiles.Length);
             Assert.Equal(@"C:\MyRawDropControls\MyRawDropControl.dll", t.ResolvedFiles[0].ItemSpec);
-            AssertNoCase(@"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}", t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+            t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(@"{Registry:Software\Microsoft\.NetFramework,v2.0,AssemblyFoldersEx}", StringCompareShould.IgnoreCase);
         }
 
         /// <summary>
@@ -4925,7 +4925,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(succeeded);
             Assert.Equal(1, t.ResolvedFiles.Length);
-            AssertNoCase("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", t.ResolvedFiles[0].GetMetadata("FusionName"));
+            t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
             Assert.True(
                 engine.Log.Contains
                 (
