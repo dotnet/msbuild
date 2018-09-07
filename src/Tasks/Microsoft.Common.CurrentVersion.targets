@@ -2521,6 +2521,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- Will be copied by the "copy WinMD artifacts" step instead -->
         <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
         <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+        <CopyDocumentationFileToOutputDirectory>false</CopyDocumentationFileToOutputDirectory>
 
         <WinMdExpToolPath Condition="'$(WinMdExpToolPath)' == ''">$(TargetFrameworkSDKToolsDirectory)</WinMdExpToolPath>
         <WinMdExpUTF8Ouput Condition="'$(WinMdExpUTF8Ouput)' == ''">true</WinMdExpUTF8Ouput>
@@ -4165,6 +4166,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup>
       <CopyBuildOutputToOutputDirectory Condition="'$(CopyBuildOutputToOutputDirectory)'==''">true</CopyBuildOutputToOutputDirectory>
       <CopyOutputSymbolsToOutputDirectory Condition="'$(CopyOutputSymbolsToOutputDirectory)'==''">true</CopyOutputSymbolsToOutputDirectory>
+      <CopyDocumentationFileToOutputDirectory Condition="'$(CopyDocumentationFileToOutputDirectory)'==''">true</CopyDocumentationFileToOutputDirectory>
     </PropertyGroup>
 
     <!-- Copy the build product (.dll or .exe). -->
@@ -4258,7 +4260,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         RetryDelayMilliseconds="$(CopyRetryDelayMilliseconds)"
         UseHardlinksIfPossible="$(CreateHardLinksForCopyFilesToOutputDirectoryIfPossible)"
         UseSymboliclinksIfPossible="$(CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible)"
-        Condition="'$(_DocumentationFileProduced)'=='true'">
+        Condition="'$(_DocumentationFileProduced)'=='true' and '$(CopyDocumentationFileToOutputDirectory)'=='true'">
 
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
 
