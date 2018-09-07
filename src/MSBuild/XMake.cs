@@ -556,6 +556,7 @@ namespace Microsoft.Build.CommandLine
                 ProfilerLogger profilerLogger = null;
                 bool enableProfiler = false;
                 bool interactive = false;
+                bool isolateProjects = false;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -586,6 +587,7 @@ namespace Microsoft.Build.CommandLine
                         ref profilerLogger,
                         ref enableProfiler,
                         ref restoreProperties,
+                        ref isolateProjects,
                         recursing: false
                         ))
                 {
@@ -622,7 +624,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive))
+                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -922,7 +924,8 @@ namespace Microsoft.Build.CommandLine
             bool enableRestore,
             ProfilerLogger profilerLogger,
             bool enableProfiler,
-            bool interactive
+            bool interactive,
+            bool isolateProjects
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1084,6 +1087,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.WarningsAsErrors = warningsAsErrors;
                     parameters.WarningsAsMessages = warningsAsMessages;
                     parameters.Interactive = interactive;
+                    parameters.IsolateProjects = isolateProjects;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -1913,6 +1917,7 @@ namespace Microsoft.Build.CommandLine
             ref ProfilerLogger profilerLogger,
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
+            ref bool isolateProjects,
             bool recursing
         )
         {
@@ -2024,6 +2029,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref profilerLogger,
                                                                ref enableProfiler,
                                                                ref restoreProperties,
+                                                               ref isolateProjects,
                                                                recursing: true
                                                              );
                         }
@@ -2069,6 +2075,11 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Interactive))
                     {
                         interactive = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Interactive], defaultValue: true, resourceName: "InvalidInteractiveValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
+                    {
+                        isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
                     }
 
                     // figure out which loggers are going to listen to build events
@@ -3534,6 +3545,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_33_RestorePropertySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

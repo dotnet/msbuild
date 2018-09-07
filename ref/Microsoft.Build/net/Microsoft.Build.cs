@@ -950,6 +950,7 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } set { } }
         public Microsoft.Build.Execution.HostServices HostServices { get { throw null; } set { } }
         public bool Interactive { get { throw null; } set { } }
+        public bool IsolateProjects { get { throw null; } set { } }
         public bool LegacyThreadingSemantics { get { throw null; } set { } }
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Framework.ILogger> Loggers { get { throw null; } set { } }
         public bool LogInitialPropertiesAndItems { get { throw null; } set { } }
