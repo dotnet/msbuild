@@ -7322,7 +7322,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            InitializeRARwithMockEngine(out mockEngine, out rar);
+            InitializeRARwithMockEngine(_output, out mockEngine, out rar);
 
             rar.TargetFrameworkSubsets = new string[] { "Client" };
             rar.ProfileName = "Client";
@@ -7339,7 +7339,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            InitializeRARwithMockEngine(out mockEngine, out rar);
+            InitializeRARwithMockEngine(_output, out mockEngine, out rar);
 
             rar.InstalledAssemblySubsetTables = new ITaskItem[] { new TaskItem("Client.xml") };
             rar.ProfileName = "Client";
@@ -7358,7 +7358,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            InitializeRARwithMockEngine(out mockEngine, out rar);
+            InitializeRARwithMockEngine(_output, out mockEngine, out rar);
             rar.ProfileName = "Client";
             Assert.False(rar.Execute());
             mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.MustSetProfileNameAndFolderLocations"));
@@ -7373,7 +7373,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            InitializeRARwithMockEngine(out mockEngine, out rar);
+            InitializeRARwithMockEngine(_output, out mockEngine, out rar);
             TaskItem item = new TaskItem("Client.xml");
             rar.ProfileName = "Client";
             rar.FullFrameworkAssemblyTables = new ITaskItem[] { item };
