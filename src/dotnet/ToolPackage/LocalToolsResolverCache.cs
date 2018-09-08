@@ -24,22 +24,21 @@ namespace Microsoft.DotNet.ToolPackage
         }
 
         public void Save(
-            IDictionary<RestoreCommandIdentifier, RestoredCommand> commandSettingsMap,
+            IDictionary<RestoredCommandIdentifier, RestoredCommand> restoredCommandMap,
             DirectoryPath nuGetGlobalPackagesFolder)
         {
             EnsureFileStorageExists();
 
-            foreach (var distinctPackageIdAndPair in commandSettingsMap.GroupBy(x => x.Key.PackageId))
+            foreach (var distinctPackageIdAndRestoredCommandMap in restoredCommandMap.GroupBy(x => x.Key.PackageId))
             {
-                PackageId distinctPackageId = distinctPackageIdAndPair.Key;
-
+                PackageId distinctPackageId = distinctPackageIdAndRestoredCommandMap.Key;
                 string packageCacheFile = GetCacheFile(distinctPackageId);
                 if (_fileSystem.File.Exists(packageCacheFile))
                 {
                     var existingCacheTable = GetCacheTable(packageCacheFile);
 
-                    var diffedRow = distinctPackageIdAndPair
-                        .Where(pair => !TryGetMatchingCommandSettingsList(
+                    var diffedRow = distinctPackageIdAndRestoredCommandMap
+                        .Where(pair => !TryGetMatchingRestoredCommand(
                             pair.Key,
                             nuGetGlobalPackagesFolder,
                             existingCacheTable, out _))
@@ -52,8 +51,12 @@ namespace Microsoft.DotNet.ToolPackage
                 else
                 {
                     var rowsToAdd =
-                        distinctPackageIdAndPair
-                            .Select(x => ConvertToCacheRow(x.Key, x.Value, nuGetGlobalPackagesFolder));
+                        distinctPackageIdAndRestoredCommandMap
+                            .Select(mapWithSamePackageId
+                                => ConvertToCacheRow(
+                                    mapWithSamePackageId.Key,
+                                    mapWithSamePackageId.Value,
+                                    nuGetGlobalPackagesFolder));
 
                     _fileSystem.File.WriteAllText(
                         packageCacheFile,
@@ -63,15 +66,15 @@ namespace Microsoft.DotNet.ToolPackage
         }
 
         public bool TryLoad(
-            RestoreCommandIdentifier restoreCommandIdentifier,
+            RestoredCommandIdentifier restoredCommandIdentifier,
             DirectoryPath nuGetGlobalPackagesFolder,
             out RestoredCommand restoredCommand)
         {
-            string packageCacheFile = GetCacheFile(restoreCommandIdentifier.PackageId);
+            string packageCacheFile = GetCacheFile(restoredCommandIdentifier.PackageId);
             if (_fileSystem.File.Exists(packageCacheFile))
             {
-                if (TryGetMatchingCommandSettingsList(
-                    restoreCommandIdentifier,
+                if (TryGetMatchingRestoredCommand(
+                    restoredCommandIdentifier,
                     nuGetGlobalPackagesFolder,
                     GetCacheTable(packageCacheFile),
                     out restoredCommand))
@@ -102,7 +105,7 @@ namespace Microsoft.DotNet.ToolPackage
         }
 
         public bool TryLoadHighestVersion(
-            CommandSettingsListIdVersionRange query,
+            RestoredCommandIdentifierVersionRange query,
             DirectoryPath nuGetGlobalPackagesFolder,
             out RestoredCommand restoredCommandList)
         {
@@ -113,16 +116,16 @@ namespace Microsoft.DotNet.ToolPackage
                 var list = GetCacheTable(packageCacheFile)
                     .Select(c => Convert(query.PackageId, c, nuGetGlobalPackagesFolder))
                     .Where(strongTypeStored =>
-                        query.VersionRange.Satisfies(strongTypeStored.commandSettingsListId.Version))
+                        query.VersionRange.Satisfies(strongTypeStored.restoredCommandIdentifier.Version))
                     .Where(onlyVersionSatisfies =>
-                        onlyVersionSatisfies.commandSettingsListId ==
-                        query.WithVersion(onlyVersionSatisfies.commandSettingsListId.Version))
-                    .OrderByDescending(allMatched => allMatched.commandSettingsListId.Version)
+                        onlyVersionSatisfies.restoredCommandIdentifier ==
+                        query.WithVersion(onlyVersionSatisfies.restoredCommandIdentifier.Version))
+                    .OrderByDescending(allMatched => allMatched.restoredCommandIdentifier.Version)
                     .FirstOrDefault();
 
-                if (!list.commandSettingsList.Equals(default(RestoredCommand)))
+                if (!list.restoredCommand.Equals(default(RestoredCommand)))
                 {
-                    restoredCommandList = list.commandSettingsList;
+                    restoredCommandList = list.restoredCommand;
                     return true;
                 }
             }
@@ -141,16 +144,16 @@ namespace Microsoft.DotNet.ToolPackage
         }
 
         private static CacheRow ConvertToCacheRow(
-            RestoreCommandIdentifier restoreCommandIdentifier,
+            RestoredCommandIdentifier restoredCommandIdentifier,
             RestoredCommand restoredCommandList,
             DirectoryPath nuGetGlobalPackagesFolder)
         {
             return new CacheRow
             {
-                Version = restoreCommandIdentifier.Version.ToNormalizedString(),
-                TargetFramework = restoreCommandIdentifier.TargetFramework.GetShortFolderName(),
-                RuntimeIdentifier = restoreCommandIdentifier.RuntimeIdentifier.ToLowerInvariant(),
-                Name = restoreCommandIdentifier.CommandName,
+                Version = restoredCommandIdentifier.Version.ToNormalizedString(),
+                TargetFramework = restoredCommandIdentifier.TargetFramework.GetShortFolderName(),
+                RuntimeIdentifier = restoredCommandIdentifier.RuntimeIdentifier.ToLowerInvariant(),
+                Name = restoredCommandIdentifier.CommandName,
                 Runner = restoredCommandList.Runner,
                 RelativeToNuGetGlobalPackagesFolderPathToDll =
                     Path.GetRelativePath(nuGetGlobalPackagesFolder.Value, restoredCommandList.Executable.Value)
@@ -158,47 +161,51 @@ namespace Microsoft.DotNet.ToolPackage
         }
 
         private static
-            (RestoreCommandIdentifier commandSettingsListId,
-            RestoredCommand commandSettingsList)
+            (RestoredCommandIdentifier restoredCommandIdentifier,
+            RestoredCommand restoredCommand)
             Convert(
                 PackageId packageId,
                 CacheRow cacheRow,
                 DirectoryPath nuGetGlobalPackagesFolder)
         {
-            RestoreCommandIdentifier restoreCommandIdentifier = new RestoreCommandIdentifier(
-                packageId,
-                NuGetVersion.Parse(cacheRow.Version),
-                NuGetFramework.Parse(cacheRow.TargetFramework),
-                cacheRow.RuntimeIdentifier,
-                cacheRow.Name);
+            RestoredCommandIdentifier restoredCommandIdentifier =
+                new RestoredCommandIdentifier(
+                    packageId,
+                    NuGetVersion.Parse(cacheRow.Version),
+                    NuGetFramework.Parse(cacheRow.TargetFramework),
+                    cacheRow.RuntimeIdentifier,
+                    cacheRow.Name);
 
-            RestoredCommand restoredCommand = new RestoredCommand(cacheRow.Name, cacheRow.Runner,
-                nuGetGlobalPackagesFolder
-                    .WithFile(cacheRow.RelativeToNuGetGlobalPackagesFolderPathToDll));
+            RestoredCommand restoredCommand =
+                new RestoredCommand(
+                    cacheRow.Name,
+                    cacheRow.Runner,
+                    nuGetGlobalPackagesFolder
+                        .WithFile(cacheRow.RelativeToNuGetGlobalPackagesFolderPathToDll));
 
-            return (restoreCommandIdentifier, restoredCommand);
+            return (restoredCommandIdentifier, restoredCommand);
         }
 
-        private static bool TryGetMatchingCommandSettingsList(
-            RestoreCommandIdentifier restoreCommandIdentifier,
+        private static bool TryGetMatchingRestoredCommand(
+            RestoredCommandIdentifier restoredCommandIdentifier,
             DirectoryPath nuGetGlobalPackagesFolder,
             CacheRow[] cacheTable,
             out RestoredCommand restoredCommandList)
         {
-            (RestoreCommandIdentifier commandSettingsListId, RestoredCommand commandSettingsList)[]
+            (RestoredCommandIdentifier restoredCommandIdentifier, RestoredCommand restoredCommand)[]
                 matchingRow = cacheTable
-                    .Select(c => Convert(restoreCommandIdentifier.PackageId, c, nuGetGlobalPackagesFolder))
-                    .Where(candidate => candidate.commandSettingsListId == restoreCommandIdentifier).ToArray();
+                    .Select(c => Convert(restoredCommandIdentifier.PackageId, c, nuGetGlobalPackagesFolder))
+                    .Where(candidate => candidate.restoredCommandIdentifier == restoredCommandIdentifier).ToArray();
 
             if (matchingRow.Length >= 2)
             {
                 throw new ResolverCacheInconsistentException(
-                    $"more than one row for {restoreCommandIdentifier.DebugToString()}");
+                    $"more than one row for {restoredCommandIdentifier.DebugToString()}");
             }
 
             if (matchingRow.Length == 1)
             {
-                restoredCommandList = matchingRow[0].commandSettingsList;
+                restoredCommandList = matchingRow[0].restoredCommand;
                 return true;
             }
 

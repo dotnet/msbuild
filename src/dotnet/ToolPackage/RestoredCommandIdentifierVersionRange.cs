@@ -9,11 +9,11 @@ using NuGet.Versioning;
 namespace Microsoft.DotNet.ToolPackage
 {
     /// <summary>
-    ///     A range of RestoreCommandIdentifier that is only different in the Version field.
+    ///     A range of RestoredCommandIdentifier that is only different in the Version field.
     /// </summary>
-    internal class CommandSettingsListIdVersionRange
+    internal class RestoredCommandIdentifierVersionRange
     {
-        public CommandSettingsListIdVersionRange(
+        public RestoredCommandIdentifierVersionRange(
             PackageId packageId,
             VersionRange versionRange,
             NuGetFramework targetFramework,
@@ -33,9 +33,9 @@ namespace Microsoft.DotNet.ToolPackage
         public string RuntimeIdentifier { get; }
         public string CommandName { get; }
 
-        public RestoreCommandIdentifier WithVersion(NuGetVersion version)
+        public RestoredCommandIdentifier WithVersion(NuGetVersion version)
         {
-            return new RestoreCommandIdentifier(PackageId, version, TargetFramework, RuntimeIdentifier, CommandName);
+            return new RestoredCommandIdentifier(PackageId, version, TargetFramework, RuntimeIdentifier, CommandName);
         }
     }
 }

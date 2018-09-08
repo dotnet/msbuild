@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.ToolPackage
     /// <summary>
     ///     Given the following parameter, a list of RestoredCommand of a NuGet package can be uniquely identified
     /// </summary>
-    internal class RestoreCommandIdentifier : IEquatable<RestoreCommandIdentifier>
+    internal class RestoredCommandIdentifier : IEquatable<RestoredCommandIdentifier>
     {
-        public RestoreCommandIdentifier(
+        public RestoredCommandIdentifier(
             PackageId packageId,
             NuGetVersion version,
             NuGetFramework targetFramework,
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ToolPackage
         public string RuntimeIdentifier { get; }
         public string CommandName { get; }  
 
-        public bool Equals(RestoreCommandIdentifier other)
+        public bool Equals(RestoredCommandIdentifier other)
         {
             return other != null &&
                    PackageId.Equals(other.PackageId) &&
@@ -46,12 +46,12 @@ namespace Microsoft.DotNet.ToolPackage
                    string.Equals(
                        CommandName,
                        other.CommandName,
-                       StringComparison.InvariantCulture);
+                       StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as RestoreCommandIdentifier);
+            return Equals(obj as RestoredCommandIdentifier);
         }
 
         public override int GetHashCode()
@@ -61,12 +61,12 @@ namespace Microsoft.DotNet.ToolPackage
                 StringComparer.OrdinalIgnoreCase.GetHashCode(CommandName));
         }
 
-        public static bool operator ==(RestoreCommandIdentifier id1, RestoreCommandIdentifier id2)
+        public static bool operator ==(RestoredCommandIdentifier id1, RestoredCommandIdentifier id2)
         {
-            return EqualityComparer<RestoreCommandIdentifier>.Default.Equals(id1, id2);
+            return EqualityComparer<RestoredCommandIdentifier>.Default.Equals(id1, id2);
         }
 
-        public static bool operator !=(RestoreCommandIdentifier id1, RestoreCommandIdentifier id2)
+        public static bool operator !=(RestoredCommandIdentifier id1, RestoredCommandIdentifier id2)
         {
             return !(id1 == id2);
         }
