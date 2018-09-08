@@ -15,13 +15,6 @@ steps:
   displayName: Install IBCMerge Plugin
 
 - task: CmdLine@1
-  displayName: save build number
-  inputs:
-    filename: echo
-    arguments: '##vso[task.setvariable variable=BUILD_BUILDNUMBER_SAVED]%BUILD_BUILDNUMBER%'
-  condition: always()
-
-- task: CmdLine@1
   displayName: Print Vars
   inputs:
     filename: set
@@ -37,25 +30,18 @@ steps:
   inputs:
     command: custom
     custom: tool
-    arguments: 'install --tool-path artifacts nbgv'
+    arguments: 'install --tool-path artifacts nbgv --version 2.2.13'
 
 - task: CmdLine@1
-  displayName: Set version with nbgv
+  displayName: Compute version with nbgv
   inputs:
     filename: 'artifacts\nbgv.exe'
-    arguments: 'cloud'
+    arguments: 'cloud --all-vars'
 
 - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
   displayName: Install Swix Plugin
   inputs:
-    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
-
-- task: CmdLine@1
-  displayName: restore build number
-  inputs:
-    filename: echo
-    arguments: '##vso[build.updatebuildnumber]%BUILD_BUILDNUMBER_SAVED%'
-  condition: always()
+    dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(NBGV_SemVer1)/$(Build.BuildId)'
 
 - task: CmdLine@1
   displayName: Print Vars
@@ -77,10 +63,10 @@ steps:
   condition: always()
 
 - task: CmdLine@1
-  displayName: Set build version to meaningful one again
+  displayName: Set final version with nbgv
   inputs:
     filename: 'artifacts\nbgv.exe'
-    arguments: 'cloud'
+    arguments: 'cloud --version=$(NBGV_SemVer1)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: logs'

@@ -2911,7 +2911,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <returns>The last write time.</returns>
         private static DateTime GetLastWriteTime(string path)
         {
-            return DateTime.FromOADate(0.0);
+            return fileExists(path) ? DateTime.FromFileTimeUtc(1) : DateTime.FromFileTimeUtc(0);
         }
 
         /// <summary>

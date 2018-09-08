@@ -207,6 +207,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectLoadSettings _projectLoadSettings = ProjectLoadSettings.Default;
 
+        private bool _interactive;
+
+        private bool _isolateProjects;
+
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
@@ -283,6 +287,8 @@ namespace Microsoft.Build.Execution
             WarningsAsErrors = other.WarningsAsErrors == null ? null : new HashSet<string>(other.WarningsAsErrors, StringComparer.OrdinalIgnoreCase);
             WarningsAsMessages = other.WarningsAsMessages == null ? null : new HashSet<string>(other.WarningsAsMessages, StringComparer.OrdinalIgnoreCase);
             _projectLoadSettings = other._projectLoadSettings;
+            _interactive = other._interactive;
+            _isolateProjects = other._isolateProjects;
         }
 
 #if FEATURE_THREAD_PRIORITY
@@ -713,6 +719,23 @@ namespace Microsoft.Build.Execution
             set => _projectLoadSettings = value;
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating if the build is allowed to interact with the user.
+        /// </summary>
+        public bool Interactive
+        {
+            get => _interactive;
+            set => _interactive = value;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether projects should build in isolation.
+        /// </summary>
+        public bool IsolateProjects
+        {
+            get => _isolateProjects;
+            set => _isolateProjects = value;
+        }
 
         /// <summary>
         /// Retrieves a toolset.
@@ -762,6 +785,8 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _logTaskInputs);
             translator.Translate(ref _logInitialPropertiesAndItems);
             translator.TranslateEnum(ref _projectLoadSettings, (int) _projectLoadSettings);
+            translator.Translate(ref _interactive);
+            translator.Translate(ref _isolateProjects);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

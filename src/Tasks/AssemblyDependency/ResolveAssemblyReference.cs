@@ -2207,35 +2207,41 @@ namespace Microsoft.Build.Tasks
                     }
 
                     IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
+                    List<DependentAssembly> idealAssemblyRemappings = autoUnifiedRemappedAssemblies;
+                    List<AssemblyNameReference> idealAssemblyRemappingsIdentities = autoUnifiedRemappedAssemblyReferences;
+                    bool shouldRerunClosure = autoUnifiedRemappedAssemblies?.Count > 0  || excludedReferencesExist;
 
-                    // Compute all dependencies.
-                    dependencyTable.ComputeClosure(allRemappedAssemblies, _assemblyFiles, _assemblyNames, generalResolutionExceptions);
-
-                    try
+                    if (!AutoUnify || !FindDependencies || shouldRerunClosure)
                     {
-                        excludedReferencesExist = false;
-                        if (redistList != null && redistList.Count > 0)
+                        // Compute all dependencies.
+                        dependencyTable.ComputeClosure(allRemappedAssemblies, _assemblyFiles, _assemblyNames, generalResolutionExceptions);
+
+                        try
                         {
-                            excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(blackList);
+                            excludedReferencesExist = false;
+                            if (redistList != null && redistList.Count > 0)
+                            {
+                                excludedReferencesExist = dependencyTable.MarkReferencesForExclusion(blackList);
+                            }
                         }
-                    }
-                    catch (InvalidOperationException e)
-                    {
-                        Log.LogErrorWithCodeFromResources("ResolveAssemblyReference.ProblemDeterminingFrameworkMembership", e.Message);
-                        return false;
-                    }
+                        catch (InvalidOperationException e)
+                        {
+                            Log.LogErrorWithCodeFromResources("ResolveAssemblyReference.ProblemDeterminingFrameworkMembership", e.Message);
+                            return false;
+                        }
 
-                    if (excludedReferencesExist)
-                    {
-                        dependencyTable.RemoveReferencesMarkedForExclusion(false /* Remove the reference and warn*/, subsetOrProfileName);
-                    }
+                        if (excludedReferencesExist)
+                        {
+                            dependencyTable.RemoveReferencesMarkedForExclusion(false /* Remove the reference and warn*/, subsetOrProfileName);
+                        }
 
-                    // Resolve any conflicts.
-                    dependencyTable.ResolveConflicts
-                    (
-                        out List<DependentAssembly> idealAssemblyRemappings,
-                        out List<AssemblyNameReference> idealAssemblyRemappingsIdentities
-                    );
+                        // Resolve any conflicts.
+                        dependencyTable.ResolveConflicts
+                        (
+                            out idealAssemblyRemappings,
+                            out idealAssemblyRemappingsIdentities
+                        );
+                    }
 
                     // Build the output tables.
                     dependencyTable.GetReferenceItems

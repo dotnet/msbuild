@@ -2586,7 +2586,8 @@ namespace Microsoft.Build.Execution
                 ProjectRootElementCache,
                 buildEventContext,
                 sdkResolverService ?? SdkResolverService.Instance,
-                submissionId);
+                submissionId,
+                interactive: buildParameters.Interactive);
 
             ErrorUtilities.VerifyThrow(EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
         }

@@ -732,6 +732,49 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void IsolateProjectsSwitchIdentificationTests()
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolate", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("ISOLATE", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolateprojects", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("isolateProjects", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.IsolateProjects, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+        }
+
+        [Fact]
         public void SetParameterlessSwitchTests()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -1128,7 +1171,9 @@ namespace Microsoft.Build.UnitTests
                                         warningsAsMessages: null,
                                         enableRestore: false,
                                         profilerLogger: null,
-                                        enableProfiler: false);
+                                        enableProfiler: false,
+                                        interactive: false,
+                                        isolateProjects: false);
                 }
                 finally
                 {
@@ -1342,6 +1387,20 @@ namespace Microsoft.Build.UnitTests
 
             MSBuildApp.GatherCommandLineSwitches(new ArrayList(new[] { "/profileevaluation" }), commandLineSwitches);
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
+        }
+
+        [Fact]
+        public void ProcessBooleanSwitchTest()
+        {
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: true, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new string[0], defaultValue: false, resourceName: null).ShouldBeFalse();
+
+            MSBuildApp.ProcessBooleanSwitch(new [] { "true" }, defaultValue: false, resourceName: null).ShouldBeTrue();
+
+            MSBuildApp.ProcessBooleanSwitch(new[] { "false" }, defaultValue: true, resourceName: null).ShouldBeFalse();
+
+            Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidRestoreValue"));
         }
 
         /// <summary>

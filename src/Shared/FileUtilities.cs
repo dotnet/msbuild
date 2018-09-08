@@ -105,7 +105,7 @@ namespace Microsoft.Build.Shared
         {
             if (cacheDirectory == null)
             {
-                cacheDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}", Process.GetCurrentProcess().Id));
+                cacheDirectory = Path.Combine(Path.GetTempPath(), String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", Process.GetCurrentProcess().Id, AppDomain.CurrentDomain.Id));
             }
 
             return cacheDirectory;
@@ -254,6 +254,56 @@ namespace Microsoft.Build.Shared
                 return FixFilePath(fullPath.Substring(0, i));
             }
             return null;
+        }
+
+        internal static bool ContainsRelativePathSegments(string path)
+        {
+            for (int i = 0; i < path.Length; i++)
+            {
+                if (i + 1 < path.Length && path[i] == '.' && path[i + 1] == '.')
+                {
+                    if (RelativePathBoundsAreValid(path, i, i + 1))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        i = i + 2;
+                        continue;
+                    }
+                }
+
+                if (path[i] == '.' && RelativePathBoundsAreValid(path, i, i))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+#if !CLR2COMPATIBILITY
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        private static bool RelativePathBoundsAreValid(string path, int leftIndex, int rightIndex)
+        {
+            var leftBound = leftIndex - 1 >= 0
+                ? path[leftIndex - 1]
+                : (char?)null;
+
+            var rightBound = rightIndex + 1 < path.Length
+                ? path[rightIndex + 1]
+                : (char?)null;
+
+            return IsValidRelativePathBound(leftBound) && IsValidRelativePathBound(rightBound);
+        }
+
+#if !CLR2COMPATIBILITY
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        private static bool IsValidRelativePathBound(char? c)
+        {
+            return c == null || IsAnySlash(c.Value);
         }
 
         /// <summary>

@@ -555,6 +555,8 @@ namespace Microsoft.Build.CommandLine
                 bool enableRestore = Traits.Instance.EnableRestoreFirst;
                 ProfilerLogger profilerLogger = null;
                 bool enableProfiler = false;
+                bool interactive = false;
+                bool isolateProjects = false;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -581,9 +583,11 @@ namespace Microsoft.Build.CommandLine
                         ref warningsAsErrors,
                         ref warningsAsMessages,
                         ref enableRestore,
+                        ref interactive,
                         ref profilerLogger,
                         ref enableProfiler,
                         ref restoreProperties,
+                        ref isolateProjects,
                         recursing: false
                         ))
                 {
@@ -620,7 +624,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler))
+                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -919,7 +923,9 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningsAsMessages,
             bool enableRestore,
             ProfilerLogger profilerLogger,
-            bool enableProfiler
+            bool enableProfiler,
+            bool interactive,
+            bool isolateProjects
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1080,6 +1086,8 @@ namespace Microsoft.Build.CommandLine
                     parameters.LogTaskInputs = logTaskInputs;
                     parameters.WarningsAsErrors = warningsAsErrors;
                     parameters.WarningsAsMessages = warningsAsMessages;
+                    parameters.Interactive = interactive;
+                    parameters.IsolateProjects = isolateProjects;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -1905,9 +1913,11 @@ namespace Microsoft.Build.CommandLine
             ref ISet<string> warningsAsErrors,
             ref ISet<string> warningsAsMessages,
             ref bool enableRestore,
+            ref bool interactive,
             ref ProfilerLogger profilerLogger,
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
+            ref bool isolateProjects,
             bool recursing
         )
         {
@@ -2015,9 +2025,11 @@ namespace Microsoft.Build.CommandLine
                                                                ref warningsAsErrors,
                                                                ref warningsAsMessages,
                                                                ref enableRestore,
+                                                               ref interactive,
                                                                ref profilerLogger,
                                                                ref enableProfiler,
                                                                ref restoreProperties,
+                                                               ref isolateProjects,
                                                                recursing: true
                                                              );
                         }
@@ -2057,7 +2069,17 @@ namespace Microsoft.Build.CommandLine
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Restore))
                     {
-                        enableRestore = ProcessRestoreSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Restore]);
+                        enableRestore = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Restore], defaultValue: true, resourceName: "InvalidRestoreValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Interactive))
+                    {
+                        interactive = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Interactive], defaultValue: true, resourceName: "InvalidInteractiveValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
+                    {
+                        isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
                     }
 
                     // figure out which loggers are going to listen to build events
@@ -2232,27 +2254,27 @@ namespace Microsoft.Build.CommandLine
             return warningsAsMessages;
         }
 
-        internal static bool ProcessRestoreSwitch(string[] parameters)
+        internal static bool ProcessBooleanSwitch(string[] parameters, bool defaultValue, string resourceName)
         {
-            bool enableRestore = true;
+            bool value = defaultValue;
 
             if (parameters.Length > 0)
             {
                 try
                 {
-                    enableRestore = bool.Parse(parameters[parameters.Length - 1]);
+                    value = bool.Parse(parameters[parameters.Length - 1]);
                 }
                 catch (FormatException ex)
                 {
-                    CommandLineSwitchException.Throw("InvalidRestoreValue", parameters[parameters.Length - 1], ex.Message);
+                    CommandLineSwitchException.Throw(resourceName, parameters[parameters.Length - 1], ex.Message);
                 }
                 catch (ArgumentNullException ex)
                 {
-                    CommandLineSwitchException.Throw("InvalidRestoreValue", parameters[parameters.Length - 1], ex.Message);
+                    CommandLineSwitchException.Throw(resourceName, parameters[parameters.Length - 1], ex.Message);
                 }
             }
 
-            return enableRestore;
+            return value;
         }
 
         /// <summary>
@@ -3522,6 +3544,8 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_31_RestoreSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_33_RestorePropertySwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));
