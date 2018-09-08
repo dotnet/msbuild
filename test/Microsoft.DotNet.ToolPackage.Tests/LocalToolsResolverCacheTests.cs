@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Utils;
@@ -51,25 +52,29 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
 
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
 
             localToolsResolverCache
-                .Load(
+                .TryLoad(
                     new CommandSettingsListId(packageId, NuGetVersion.Parse("1.0.0-wrong-version"), targetFramework,
-                        runtimeIdentifier), nuGetGlobalPackagesFolder)
-                .Should().BeEmpty();
+                        runtimeIdentifier, listOfCommandSettings[0].Name), nuGetGlobalPackagesFolder, out _)
+                .Should().BeFalse();
 
             localToolsResolverCache
-                .Load(
+                .TryLoad(
                     new CommandSettingsListId(packageId, nuGetVersion, NuGetFramework.Parse("wrongFramework"),
-                        runtimeIdentifier), nuGetGlobalPackagesFolder)
-                .Should().BeEmpty();
+                        runtimeIdentifier, listOfCommandSettings[0].Name), nuGetGlobalPackagesFolder, out _)
+                .Should().BeFalse();
 
             localToolsResolverCache
-                .Load(new CommandSettingsListId(packageId, nuGetVersion, targetFramework, "wrongRuntimeIdentifier"),
-                    nuGetGlobalPackagesFolder)
-                .Should().BeEmpty();
+                .TryLoad(
+                    new CommandSettingsListId(packageId, nuGetVersion, targetFramework,
+                        "wrongRuntimeIdentifier", listOfCommandSettings[0].Name),
+                    nuGetGlobalPackagesFolder, out _)
+                .Should().BeFalse();
         }
 
         [Fact]
@@ -88,20 +93,24 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
 
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
 
-            IReadOnlyList<CommandSettings> loadedResolverCache =
-                localToolsResolverCache.Load(
-                    new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                    nuGetGlobalPackagesFolder);
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings[0].Name),
+                nuGetGlobalPackagesFolder, out var commandSettingsTool1).Should().BeTrue();
 
-            loadedResolverCache.Should().ContainSingle(c =>
-                c.Name == "tool1" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool1.dll").ToString());
-            loadedResolverCache.Should().ContainSingle(c =>
-                c.Name == "tool2" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool2.dll").ToString());
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings[1].Name),
+                nuGetGlobalPackagesFolder, out var commandSettingsTool2).Should().BeTrue();
+
+
+            commandSettingsTool1.ShouldBeEquivalentTo(listOfCommandSettings[0]);
+            commandSettingsTool2.ShouldBeEquivalentTo(listOfCommandSettings[1]);
         }
 
         [Fact]
@@ -120,23 +129,30 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
 
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
+
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
 
-            IReadOnlyList<CommandSettings> loadedResolverCache =
-                localToolsResolverCache.Load(
-                    new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                    nuGetGlobalPackagesFolder);
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings[0].Name),
+                nuGetGlobalPackagesFolder, out var commandSettingsTool1);
 
-            loadedResolverCache.Should().ContainSingle(c =>
-                c.Name == "tool1" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool1.dll").ToString());
-            loadedResolverCache.Should().ContainSingle(c =>
-                c.Name == "tool2" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool2.dll").ToString());
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings[1].Name),
+                nuGetGlobalPackagesFolder, out var commandSettingsTool2);
+
+
+            commandSettingsTool1.ShouldBeEquivalentTo(listOfCommandSettings[0]);
+            commandSettingsTool2.ShouldBeEquivalentTo(listOfCommandSettings[1]);
         }
 
         [Fact]
@@ -167,28 +183,35 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
 
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, previewNuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings0, nuGetGlobalPackagesFolder);
+                listOfCommandSettings0.ToDictionary(
+                    c => new CommandSettingsListId(packageId, previewNuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
+
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings1, nuGetGlobalPackagesFolder);
+                listOfCommandSettings1.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
+
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings2, nuGetGlobalPackagesFolder);
+                listOfCommandSettings2.ToDictionary(
+                    c => new CommandSettingsListId(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
+
 
             bool loadSuccess =
                 localToolsResolverCache.TryLoadHighestVersion(
                     new CommandSettingsListIdVersionRange(
                         packageId,
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
-                        targetFramework, runtimeIdentifier),
-                    nuGetGlobalPackagesFolder, out IReadOnlyList<CommandSettings> loadedResolverCache);
+                        targetFramework, runtimeIdentifier, "tool1"),
+                    nuGetGlobalPackagesFolder, out CommandSettings loadedResolverCache);
 
             loadSuccess.Should().BeTrue();
 
-            loadedResolverCache.Should().Contain(c =>
-                c.Name == "tool1" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool1.dll").ToString());
+            loadedResolverCache.ShouldBeEquivalentTo(listOfCommandSettings1[0]);
         }
 
         [Fact]
@@ -201,8 +224,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new CommandSettingsListIdVersionRange(
                         new PackageId("my.toolBundle"),
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
-                        NuGetFramework.Parse("netcoreapp2.1"), "any"),
-                    nuGetGlobalPackagesFolder, out IReadOnlyList<CommandSettings> _);
+                        NuGetFramework.Parse("netcoreapp2.1"), "any", "tool1"),
+                    nuGetGlobalPackagesFolder, out _);
 
             loadSuccess.Should().BeFalse();
         }
@@ -219,7 +242,6 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             IReadOnlyList<CommandSettings> listOfCommandSettings = new[]
             {
                 new CommandSettings("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
-                new CommandSettings("tool2", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2.dll"))
             };
 
             NuGetVersion newerNuGetVersion = NuGetVersion.Parse("2.0.2");
@@ -227,41 +249,37 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             {
                 new CommandSettings("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1new.dll")),
                 new CommandSettings("tool2", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2new.dll")),
-                new CommandSettings("tool3", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool3new.dll"))
             };
 
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
+
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings2, nuGetGlobalPackagesFolder);
+                listOfCommandSettings2.ToDictionary(
+                    c => new CommandSettingsListId(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
 
-            IReadOnlyList<CommandSettings> loadedResolverCacheOlderVersion =
-                localToolsResolverCache.Load(
-                    new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                    nuGetGlobalPackagesFolder);
-            IReadOnlyList<CommandSettings> loadedResolverCacheNewerVersion =
-                localToolsResolverCache.Load(
-                    new CommandSettingsListId(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier),
-                    nuGetGlobalPackagesFolder);
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings[0].Name),
+                nuGetGlobalPackagesFolder, out CommandSettings tool1);
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings2[0].Name),
+                nuGetGlobalPackagesFolder, out CommandSettings tool1Newer);
 
-            loadedResolverCacheOlderVersion.Should().ContainSingle(c =>
-                c.Name == "tool1" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool1.dll").ToString());
-            loadedResolverCacheOlderVersion.Should().ContainSingle(c =>
-                c.Name == "tool2" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool2.dll").ToString());
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings2[1].Name),
+                nuGetGlobalPackagesFolder, out CommandSettings tool2Newer);
 
-            loadedResolverCacheNewerVersion.Should().ContainSingle(c =>
-                c.Name == "tool1" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool1new.dll").ToString());
-            loadedResolverCacheNewerVersion.Should().ContainSingle(c =>
-                c.Name == "tool2" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool2new.dll").ToString());
-            loadedResolverCacheNewerVersion.Should().ContainSingle(c =>
-                c.Name == "tool3" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool3new.dll").ToString());
+            tool1.ShouldBeEquivalentTo(listOfCommandSettings[0]);
+            tool1Newer.ShouldBeEquivalentTo(listOfCommandSettings2[0]);
+            tool2Newer.ShouldBeEquivalentTo(listOfCommandSettings2[1]);
         }
 
         [Fact]
@@ -311,8 +329,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
 
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
 
             var cachePath = cacheDirectory
                 .WithSubDirectories(version.ToString())
@@ -326,17 +346,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             // Save after corruption
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
 
-            IReadOnlyList<CommandSettings> loadedResolverCache =
-                localToolsResolverCache.Load(
-                    new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                    nuGetGlobalPackagesFolder);
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings[0].Name),
+                nuGetGlobalPackagesFolder, out CommandSettings commandSettings);
 
-            loadedResolverCache.Should().ContainSingle(c =>
-                c.Name == "tool1" && c.Runner == "dotnet" &&
-                c.Executable.ToString() == nuGetGlobalPackagesFolder.WithFile("tool1.dll").ToString());
+            commandSettings.ShouldBeEquivalentTo(listOfCommandSettings[0]);
         }
 
         private static void WhenTheCacheIsCorruptedItShouldLoadAsEmpty(
@@ -368,8 +388,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             };
 
             localToolsResolverCache.Save(
-                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                listOfCommandSettings, nuGetGlobalPackagesFolder);
+                listOfCommandSettings.ToDictionary(
+                    c => new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                        c.Name)),
+                nuGetGlobalPackagesFolder);
 
             var cachePath = cacheDirectory
                 .WithSubDirectories(version.ToString())
@@ -381,14 +403,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
             corruptCache(fileSystem, cachePath, existingCache);
 
-            IReadOnlyList<CommandSettings> loadedResolverCache = null;
-            Action a = () => loadedResolverCache =
-                localToolsResolverCache.Load(
-                    new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier),
-                    nuGetGlobalPackagesFolder);
-
-            a.ShouldNotThrow("Cache file corruption is expected");
-            loadedResolverCache.Should().BeEmpty("Consider corrupted file cache miss");
+            localToolsResolverCache.TryLoad(
+                new CommandSettingsListId(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
+                    listOfCommandSettings[0].Name),
+                nuGetGlobalPackagesFolder, out _).Should().BeFalse("Consider corrupted file cache miss");
         }
     }
 }

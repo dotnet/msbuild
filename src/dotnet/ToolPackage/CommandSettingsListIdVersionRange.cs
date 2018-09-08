@@ -17,22 +17,25 @@ namespace Microsoft.DotNet.ToolPackage
             PackageId packageId,
             VersionRange versionRange,
             NuGetFramework targetFramework,
-            string runtimeIdentifier)
+            string runtimeIdentifier,
+            string commandName)
         {
             PackageId = packageId;
             VersionRange = versionRange ?? throw new ArgumentException(nameof(versionRange));
             TargetFramework = targetFramework ?? throw new ArgumentException(nameof(targetFramework));
             RuntimeIdentifier = runtimeIdentifier ?? throw new ArgumentException(nameof(runtimeIdentifier));
+            CommandName = commandName ?? throw new ArgumentException(nameof(commandName));
         }
 
         public PackageId PackageId { get; }
         public VersionRange VersionRange { get; }
         public NuGetFramework TargetFramework { get; }
         public string RuntimeIdentifier { get; }
+        public string CommandName { get; }
 
         public CommandSettingsListId WithVersion(NuGetVersion version)
         {
-            return new CommandSettingsListId(PackageId, version, TargetFramework, RuntimeIdentifier);
+            return new CommandSettingsListId(PackageId, version, TargetFramework, RuntimeIdentifier, CommandName);
         }
     }
 }
