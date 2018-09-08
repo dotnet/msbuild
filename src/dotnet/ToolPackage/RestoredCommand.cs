@@ -6,9 +6,9 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ToolPackage
 {
-    internal class CommandSettings
+    internal class RestoredCommand
     {
-        public CommandSettings(string name, string runner, FilePath executable)
+        public RestoredCommand(string name, string runner, FilePath executable)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Runner = runner ?? throw new ArgumentNullException(nameof(runner));

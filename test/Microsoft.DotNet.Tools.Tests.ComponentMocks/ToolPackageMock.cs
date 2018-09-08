@@ -15,7 +15,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     internal class ToolPackageMock : IToolPackage
     {
         private IFileSystem _fileSystem;
-        private Lazy<IReadOnlyList<CommandSettings>> _commands;
+        private Lazy<IReadOnlyList<RestoredCommand>> _commands;
         private IEnumerable<string> _warnings;
         private readonly IReadOnlyList<FilePath> _packagedShims;
 
@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             Id = id;
             Version = version ?? throw new ArgumentNullException(nameof(version));
             PackageDirectory = packageDirectory;
-            _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
+            _commands = new Lazy<IReadOnlyList<RestoredCommand>>(GetCommands);
             _warnings = warnings ?? new List<string>();
             _packagedShims = packagedShims ?? new List<FilePath>();
         }
@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
         public DirectoryPath PackageDirectory { get; private set; }
 
-        public IReadOnlyList<CommandSettings> Commands
+        public IReadOnlyList<RestoredCommand> Commands
         {
             get
             {
@@ -60,16 +60,16 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             }
         }
 
-        private IReadOnlyList<CommandSettings> GetCommands()
+        private IReadOnlyList<RestoredCommand> GetCommands()
         {
             try
             {
                 // The mock restorer wrote the path to the executable into project.assets.json (not a real assets file)
                 // Currently only "dotnet" commands are supported
                 var executablePath = _fileSystem.File.ReadAllText(Path.Combine(PackageDirectory.Value, "project.assets.json"));
-                return new CommandSettings[]
+                return new RestoredCommand[]
                 {
-                    new CommandSettings(
+                    new RestoredCommand(
                         ProjectRestorerMock.FakeCommandName,
                         "dotnet",
                         PackageDirectory.WithFile(executablePath))

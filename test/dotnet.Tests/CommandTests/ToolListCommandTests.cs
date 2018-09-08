@@ -131,7 +131,7 @@ namespace Microsoft.DotNet.Tests.Commands
                         "test.tool",
                         "1.3.5-preview",
                         new[] {
-                            new CommandSettings("foo", "dotnet", new FilePath("tool"))
+                            new RestoredCommand("foo", "dotnet", new FilePath("tool"))
                         }
                     )
                 });
@@ -154,21 +154,21 @@ namespace Microsoft.DotNet.Tests.Commands
                         "test.tool",
                         "1.3.5-preview",
                         new[] {
-                            new CommandSettings("foo", "dotnet", new FilePath("tool"))
+                            new RestoredCommand("foo", "dotnet", new FilePath("tool"))
                         }
                     ),
                     CreateMockToolPackage(
                         "another.tool",
                         "2.7.3",
                         new[] {
-                            new CommandSettings("bar", "dotnet", new FilePath("tool"))
+                            new RestoredCommand("bar", "dotnet", new FilePath("tool"))
                         }
                     ),
                     CreateMockToolPackage(
                         "some.tool",
                         "1.0.0",
                         new[] {
-                            new CommandSettings("fancy-foo", "dotnet", new FilePath("tool"))
+                            new RestoredCommand("fancy-foo", "dotnet", new FilePath("tool"))
                         }
                     )
                 });
@@ -191,9 +191,9 @@ namespace Microsoft.DotNet.Tests.Commands
                         "test.tool",
                         "1.3.5-preview",
                         new[] {
-                            new CommandSettings("foo", "dotnet", new FilePath("tool")),
-                            new CommandSettings("bar", "dotnet", new FilePath("tool")),
-                            new CommandSettings("baz", "dotnet", new FilePath("tool"))
+                            new RestoredCommand("foo", "dotnet", new FilePath("tool")),
+                            new RestoredCommand("bar", "dotnet", new FilePath("tool")),
+                            new RestoredCommand("baz", "dotnet", new FilePath("tool"))
                         }
                     )
                 });
@@ -216,7 +216,7 @@ namespace Microsoft.DotNet.Tests.Commands
                         "test.tool",
                         "1.3.5-preview",
                         new[] {
-                            new CommandSettings("foo", "dotnet", new FilePath("tool"))
+                            new RestoredCommand("foo", "dotnet", new FilePath("tool"))
                         }
                     ),
                     CreateMockBrokenPackage("another.tool", "2.7.3"),
@@ -224,7 +224,7 @@ namespace Microsoft.DotNet.Tests.Commands
                         "some.tool",
                         "1.0.0",
                         new[] {
-                            new CommandSettings("fancy-foo", "dotnet", new FilePath("tool"))
+                            new RestoredCommand("fancy-foo", "dotnet", new FilePath("tool"))
                         }
                     )
                 });
@@ -241,7 +241,7 @@ namespace Microsoft.DotNet.Tests.Commands
                         "broken").Yellow()));
         }
 
-        private IToolPackage CreateMockToolPackage(string id, string version, IReadOnlyList<CommandSettings> commands)
+        private IToolPackage CreateMockToolPackage(string id, string version, IReadOnlyList<RestoredCommand> commands)
         {
             var package = new Mock<IToolPackage>(MockBehavior.Strict);
 

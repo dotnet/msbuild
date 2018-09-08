@@ -9,7 +9,7 @@ using NuGet.Versioning;
 namespace Microsoft.DotNet.ToolPackage
 {
     /// <summary>
-    ///     Given the following parameter, a list of CommandSettings of a NuGet package can be uniquely identified
+    ///     Given the following parameter, a list of RestoredCommand of a NuGet package can be uniquely identified
     /// </summary>
     internal class CommandSettingsListId : IEquatable<CommandSettingsListId>
     {

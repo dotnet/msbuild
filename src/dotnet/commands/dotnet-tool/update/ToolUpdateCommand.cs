@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             {
                 RunWithHandlingUninstallError(() =>
                 {
-                    foreach (CommandSettings command in oldPackage.Commands)
+                    foreach (RestoredCommand command in oldPackage.Commands)
                     {
                         shellShimRepository.RemoveShim(command.Name);
                     }
@@ -140,7 +140,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                         targetFramework: _framework,
                         verbosity: _verbosity);
 
-                    foreach (CommandSettings command in newInstalledPackage.Commands)
+                    foreach (RestoredCommand command in newInstalledPackage.Commands)
                     {
                         shellShimRepository.CreateShim(command.Executable, command.Name);
                     }

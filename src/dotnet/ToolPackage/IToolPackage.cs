@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.ToolPackage
 
         DirectoryPath PackageDirectory { get; }
 
-        IReadOnlyList<CommandSettings> Commands { get; }
+        IReadOnlyList<RestoredCommand> Commands { get; }
 
         IEnumerable<string> Warnings { get; }
 

@@ -130,8 +130,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             {
                 Id = packageId,
                 Version = NuGetVersion.Parse(package.Version),
-                Commands = new List<CommandSettings> {
-                    new CommandSettings(ProjectRestorerMock.FakeCommandName, "runner", executable) },
+                Commands = new List<RestoredCommand> {
+                    new RestoredCommand(ProjectRestorerMock.FakeCommandName, "runner", executable) },
                 Warnings = Array.Empty<string>(),
                 PackagedShims = Array.Empty<FilePath>()
             };
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             public NuGetVersion Version { get; set; }
             public DirectoryPath PackageDirectory { get; set; }
 
-            public IReadOnlyList<CommandSettings> Commands { get; set; }
+            public IReadOnlyList<RestoredCommand> Commands { get; set; }
 
             public IEnumerable<string> Warnings { get; set; }
 
