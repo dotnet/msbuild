@@ -74,12 +74,7 @@ namespace Microsoft.Build.Execution
         /// When this flag is present, projects loaded during build will ignore missing imports (<see cref="ProjectLoadSettings.IgnoreMissingImports"/> and <see cref="ProjectLoadSettings.IgnoreInvalidImports"/>).
         /// This is especially useful during a restore since some imports might come from packages that haven't been restored yet.
         /// </summary>
-        IgnoreMissingEmptyAndInvalidImports = 1 << 6,
-
-        /// <summary>
-        /// Turns on logic for graph based isolated project builds
-        /// </summary>
-        IsolatedProjectBuild = 1 << 7
+        IgnoreMissingEmptyAndInvalidImports = 1 << 6
     }
 
     /// <summary>

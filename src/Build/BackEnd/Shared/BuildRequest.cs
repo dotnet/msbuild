@@ -363,10 +363,5 @@ namespace Microsoft.Build.BackEnd
         {
             return _globalRequestId == result.GlobalRequestId && _nodeRequestId == result.NodeRequestId;
         }
-
-        public bool IsIsolatedProjectBuild()
-        {
-            return (BuildRequestDataFlags & BuildRequestDataFlags.IsolatedProjectBuild) == BuildRequestDataFlags.IsolatedProjectBuild;
-        }
     }
 }

@@ -658,11 +658,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets the list of targets which are used to build the specified request, including all initial and applicable default targets
+        /// Gets the list of targets which are used to build the specified request, including all initial and applicable default targets.
+        /// Isolated builds also inject the export targets.
         /// </summary>
-        /// <param name="request">The request </param>
         /// <returns>An array of t</returns>
-        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request)
+        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request, bool isIsolatedBuild = false)
         {
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
@@ -671,8 +671,6 @@ namespace Microsoft.Build.BackEnd
 
             List<string> initialTargets = _projectInitialTargets;
             List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
-
-            var isIsolatedBuild = request.IsIsolatedProjectBuild();
 
             var exportTargetsSize = isIsolatedBuild
                 ? _projectExportTargets.Count
