@@ -22,11 +22,8 @@ namespace Microsoft.Build.Graph
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile)
         {
-            var graphNode = new ProjectGraphNode
-            {
-                Project = ProjectCollection.GlobalProjectCollection.LoadProject(entryProjectFile)
-            };
-
+            var graphNode =
+                new ProjectGraphNode(ProjectCollection.GlobalProjectCollection.LoadProject(entryProjectFile));
             _projectNodes.Add(graphNode);
         }
 

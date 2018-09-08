@@ -30,9 +30,9 @@ namespace Microsoft.Build.Graph.UnitTests
             File.WriteAllText(projectPath, projectContents);
             var projectGraph = new ProjectGraph(projectPath);
             
-            Assert.True(projectGraph.ProjectNodes.Count == 1);
+            Assert.Equal(1, projectGraph.ProjectNodes.Count);
             Project projectNode = projectGraph.ProjectNodes.First().Project;
-            Assert.True(projectNode.FullPath == projectPath);
+            Assert.Equal(projectPath, projectNode.FullPath);
         }
     }
 
