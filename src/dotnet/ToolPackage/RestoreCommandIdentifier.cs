@@ -11,9 +11,9 @@ namespace Microsoft.DotNet.ToolPackage
     /// <summary>
     ///     Given the following parameter, a list of RestoredCommand of a NuGet package can be uniquely identified
     /// </summary>
-    internal class CommandSettingsListId : IEquatable<CommandSettingsListId>
+    internal class RestoreCommandIdentifier : IEquatable<RestoreCommandIdentifier>
     {
-        public CommandSettingsListId(
+        public RestoreCommandIdentifier(
             PackageId packageId,
             NuGetVersion version,
             NuGetFramework targetFramework,
@@ -33,7 +33,7 @@ namespace Microsoft.DotNet.ToolPackage
         public string RuntimeIdentifier { get; }
         public string CommandName { get; }  
 
-        public bool Equals(CommandSettingsListId other)
+        public bool Equals(RestoreCommandIdentifier other)
         {
             return other != null &&
                    PackageId.Equals(other.PackageId) &&
@@ -51,7 +51,7 @@ namespace Microsoft.DotNet.ToolPackage
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as CommandSettingsListId);
+            return Equals(obj as RestoreCommandIdentifier);
         }
 
         public override int GetHashCode()
@@ -61,12 +61,12 @@ namespace Microsoft.DotNet.ToolPackage
                 StringComparer.OrdinalIgnoreCase.GetHashCode(CommandName));
         }
 
-        public static bool operator ==(CommandSettingsListId id1, CommandSettingsListId id2)
+        public static bool operator ==(RestoreCommandIdentifier id1, RestoreCommandIdentifier id2)
         {
-            return EqualityComparer<CommandSettingsListId>.Default.Equals(id1, id2);
+            return EqualityComparer<RestoreCommandIdentifier>.Default.Equals(id1, id2);
         }
 
-        public static bool operator !=(CommandSettingsListId id1, CommandSettingsListId id2)
+        public static bool operator !=(RestoreCommandIdentifier id1, RestoreCommandIdentifier id2)
         {
             return !(id1 == id2);
         }
