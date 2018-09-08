@@ -23,6 +23,6 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Gets the evaluated project represented by this node in the graph.
         /// </summary>
-        public Project Project => new Project();
+        public Project Project { get; protected set; }
     }
 }
