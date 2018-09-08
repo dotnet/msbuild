@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 
 namespace Microsoft.Build.Graph
@@ -12,12 +13,22 @@ namespace Microsoft.Build.Graph
     /// </summary>
     internal sealed class ProjectGraph
     {
+        private readonly List<ProjectGraphNode> _projectNodes = new List<ProjectGraphNode>();
+
         /// <summary>
         /// Constructs a graph starting from the given project file.
         /// </summary>
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
-        public ProjectGraph(string entryProjectFile) { }
+        public ProjectGraph(string entryProjectFile)
+        {
+            var graphNode = new ProjectGraphNode
+            {
+                Project = ProjectCollection.GlobalProjectCollection.LoadProject(entryProjectFile)
+            };
+
+            _projectNodes.Add(graphNode);
+        }
 
         /// <summary>
         /// Constructs a graph starting from the given project files.
@@ -29,6 +40,6 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Get an unordered collection of all project nodes in the graph.
         /// </summary>
-        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes => Array.Empty<ProjectGraphNode>();
+        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes => _projectNodes;
     }
 }
