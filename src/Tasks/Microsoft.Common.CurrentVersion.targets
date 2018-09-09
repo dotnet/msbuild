@@ -3990,11 +3990,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)"
         TargetCulture="$(TargetCulture)">
 
-      <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependencies"/>
+      <Output TaskParameter="OutputAssemblies" ItemName="_UnfilteredDeploymentManifestDependencies"/>
       <Output TaskParameter="OutputFiles" ItemName="_DeploymentManifestFiles"/>
       <Output TaskParameter="OutputEntryPoint" ItemName="_DeploymentResolvedManifestEntryPoint"/>
 
     </ResolveManifestFiles>
+    
+    <!-- _DeploymentManifestDependencies contains every file that has to be copied locally, we have to filter out scatter files, 
+    <!-- since those aren't actually depencies for the ClickOnce manifest. -->
+    <ItemGroup>
+      <_DeploymentManifestDependencies Include="@(_UnfilteredDeploymentManifestDependencies)" Exclude="@(_ReferenceScatterPaths)" />
+    </ItemGroup>
 
     <PropertyGroup>
       <_DeploymentManifestType>ClickOnce</_DeploymentManifestType>
