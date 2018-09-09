@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
         /// <returns>Returns the manifest name</returns>
-        internal static string CreateManifestNameImpl
+        internal static string CreateManifestNameImplOld
         (
             string fileName,
             string linkFileName,
@@ -185,6 +185,33 @@ namespace Microsoft.Build.Tasks
             }
 
             return manifestName.ToString();
+        }
+
+        // New impl
+        internal static string CreateManifestNameImpl
+        (
+            string fileName,
+            string linkFileName,
+            bool prependCultureAsDirectory, // true by default
+            string rootNamespace, // May be null
+            string dependentUponFileName, // May be null
+            string culture,
+            Stream binaryStream, // File contents binary stream, may be null
+            TaskLoggingHelper log
+        )
+        {
+            return ManifestNameCreator.CreateNameForResource
+            (
+                fileName,
+                linkFileName,
+                prependCultureAsDirectory,
+                rootNamespace,
+                dependentUponFileName,
+                culture,
+                binaryStream,
+                VisualBasicParserUtilities.GetFirstClassNameFullyQualified,
+                log
+            );
         }
 
         /// <summary>
