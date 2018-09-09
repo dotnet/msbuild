@@ -89,111 +89,18 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log
         )
         {
-            // Use the link file name if there is one, otherwise, fall back to file name.
-            string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
-            if (string.IsNullOrEmpty(embeddedFileName))
-            {
-                embeddedFileName = FileUtilities.FixFilePath(fileName);
-            }
-
-            dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
-            Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
-
-            // If the item has a culture override, respect that. 
-            if (!String.IsNullOrEmpty(culture))
-            {
-                info.culture = culture;
-            }
-
-            var manifestName = new StringBuilder();
-            if (binaryStream != null)
-            {
-                // Resource depends on a form. Now, get the form's class name fully 
-                // qualified with a namespace.
-                ExtractedClassName result = CSharpParserUtilities.GetFirstClassNameFullyQualified(binaryStream);
-
-                if (result.IsInsideConditionalBlock)
-                {
-                    log?.LogWarningWithCodeFromResources("CreateManifestResourceName.DefinitionFoundWithinConditionalDirective", dependentUponFileName, embeddedFileName);
-                }
-
-                if (!string.IsNullOrEmpty(result.Name))
-                {
-                    manifestName.Append(result.Name);
-
-                    // Append the culture if there is one.        
-                    if (!string.IsNullOrEmpty(info.culture))
-                    {
-                        manifestName.Append(".").Append(info.culture);
-                    }
-                }
-            }
-
-            // If there's no manifest name at this point, then fall back to using the
-            // RootNamespace+Filename_with_slashes_converted_to_dots         
-            if (manifestName.Length == 0)
-            {
-                // If Rootnamespace was null, then it wasn't set from the project resourceFile.
-                // Empty namespaces are allowed.
-                if (!string.IsNullOrEmpty(rootNamespace))
-                {
-                    manifestName.Append(rootNamespace).Append(".");
-                }
-
-                // Replace spaces in the directory name with underscores. Needed for compatibility with Everett.
-                // Note that spaces in the file name itself are preserved.
-                string everettCompatibleDirectoryName = MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
-
-                // only strip extension for .resx and .restext files
-
-                string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
-                if (
-                        (0 == String.Compare(sourceExtension, ".resx", StringComparison.OrdinalIgnoreCase))
-                        ||
-                        (0 == String.Compare(sourceExtension, ".restext", StringComparison.OrdinalIgnoreCase))
-                        ||
-                        (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
-                    )
-                {
-                    manifestName.Append(Path.Combine(everettCompatibleDirectoryName, Path.GetFileNameWithoutExtension(info.cultureNeutralFilename)));
-
-                    // Replace all '\' with '.'
-                    manifestName.Replace(Path.DirectorySeparatorChar, '.');
-                    manifestName.Replace(Path.AltDirectorySeparatorChar, '.');
-
-                    // Append the culture if there is one.        
-                    if (!string.IsNullOrEmpty(info.culture))
-                    {
-                        manifestName.Append(".").Append(info.culture);
-                    }
-
-                    // If the original extension was .resources, add it back
-                    if (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
-                    {
-                        manifestName.Append(sourceExtension);
-                    }
-                }
-                else
-                {
-                    manifestName.Append(Path.Combine(everettCompatibleDirectoryName, Path.GetFileName(info.cultureNeutralFilename)));
-
-                    // Replace all '\' with '.'
-                    manifestName.Replace(Path.DirectorySeparatorChar, '.');
-                    manifestName.Replace(Path.AltDirectorySeparatorChar, '.');
-
-                    if (prependCultureAsDirectory)
-                    {
-                        // Prepend the culture as a subdirectory if there is one.        
-                        if (!string.IsNullOrEmpty(info.culture))
-                        {
-                            manifestName.Insert(0, Path.DirectorySeparatorChar);
-                            manifestName.Insert(0, info.culture);
-                        }
-                    }
-                }
-            }
-
-            return manifestName.ToString();
+            return ManifestNameCreator.CreateNameForResource
+            (
+                fileName,
+                linkFileName,
+                prependCultureAsDirectory,
+                rootNamespace,
+                dependentUponFileName,
+                culture,
+                binaryStream,
+                CSharpParserUtilities.GetFirstClassNameFullyQualified,
+                log
+            );
         }
 
         /// <summary>

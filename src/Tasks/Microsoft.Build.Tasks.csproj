@@ -108,7 +108,7 @@
       <Link>StringBuilderCache.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\ReuseableStringBuilder.cs" >
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
       <Link>ReuseableStringBuilder.cs</Link>
     </Compile>
     <Compile Include="..\Shared\StrongNameHelpers.cs">
@@ -454,6 +454,7 @@
     <Compile Include="MakeDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ManifestNameCreator.cs" />
     <Compile Include="Message.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
