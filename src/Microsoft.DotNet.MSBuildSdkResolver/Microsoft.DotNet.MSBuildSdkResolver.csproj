@@ -16,12 +16,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly)" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
   </ItemGroup>
 
   <Target Name="ResolveHostfxrCopyLocalContent" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" DependsOnTargets="RunResolvePackageDependencies" BeforeTargets="AssignTargetPaths">
@@ -34,6 +35,14 @@
         <Link>x64/hostfxr.dll</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="LinkVSEmbeddableAssemblies" DependsOnTargets="ResolveReferences" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferencePath Condition="'%(ReferencePath.FileName)' == 'Microsoft.VisualStudio.Setup.Configuration.Interop'">
+        <EmbedInteropTypes>true</EmbedInteropTypes>
+      </ReferencePath>
     </ItemGroup>
   </Target>
 </Project>

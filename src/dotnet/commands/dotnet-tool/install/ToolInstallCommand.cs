@@ -18,7 +18,9 @@ using NuGet.Versioning;
 namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
-    internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(DirectoryPath? nonGlobalLocation = null);
+    internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
+		DirectoryPath? nonGlobalLocation = null,
+		IEnumerable<string> forwardRestoreArguments = null);
 
     internal class ToolInstallCommand : CommandBase
     {
@@ -36,6 +38,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly bool _global;
         private readonly string _verbosity;
         private readonly string _toolPath;
+        private IEnumerable<string> _forwardRestoreArguments;
 
         public ToolInstallCommand(
             AppliedOption appliedCommand,
@@ -61,6 +64,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
 
             _createToolPackageStoresAndInstaller = createToolPackageStoreAndInstaller ?? ToolPackageFactory.CreateToolPackageStoresAndInstaller;
+			_forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
 
             _environmentPathInstruction = environmentPathInstruction
                 ?? EnvironmentPathFactory.CreateEnvironmentPathInstruction();
@@ -107,7 +111,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             }
 
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageInstaller toolPackageInstaller) =
-                _createToolPackageStoresAndInstaller(toolPath);
+                _createToolPackageStoresAndInstaller(toolPath, _forwardRestoreArguments);
             IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
             // Prevent installation if any version of the package is installed

@@ -12,6 +12,7 @@
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
     <RoslynDirectory>$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/Roslyn</RoslynDirectory>
+    <ExternalRestoreSourcesTestsContainer>$(TestArtifactsDir)/ExternalRestoreSourcesForTestsContainer.txt</ExternalRestoreSourcesTestsContainer>
   </PropertyGroup>
 
   <Target Name="Test"
@@ -54,6 +55,11 @@
                             SetupTestProjectData;
                             OverlaySdkOnLKG">
     <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
+
+    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
+                      File="$(ExternalRestoreSourcesTestsContainer)"
+                      Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Identity)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
+                      Overwrite="false" />
   </Target>
 
   <Target Name="RestoreTests"

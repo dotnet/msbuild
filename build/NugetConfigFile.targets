@@ -32,6 +32,7 @@
     <add key="linux-musl-bootstrap-feed" value="https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json" />
     <add key="dotnet-msbuild" value="https://dotnet.myget.org/F/msbuild/api/v3/index.json" />
     <add key="myget-vstest" value="https://dotnet.myget.org/F/vstest/api/v3/index.json" />
+    <add key="BlobFeed-2.1.3-runtime" value="https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json"/>
         ]]>
       </NugetConfigCLIFeeds>
 
