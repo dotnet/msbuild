@@ -2,6 +2,14 @@
   <PropertyGroup>
     <TargetFrameworks>net461;$(CliTargetFramework)</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(CliTargetFramework)</TargetFrameworks>
+
+    <!--
+     https://github.com/dotnet/cli/issues/9851: For now test only on net461 on Windows because
+     we can't load a different hostfxr.dll into the test than the one that is already loaded
+     on Core.
+     -->
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net461</TargetFrameworks>
+
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -18,9 +26,9 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
-    <PackageReference Include="runtime.linux-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" />
-    <PackageReference Include="runtime.osx-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" />
-    <PackageReference Include="runtime.linux-musl-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" />
+    <PackageReference Include="runtime.linux-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly)" />
+    <PackageReference Include="runtime.osx-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly)" />
+    <PackageReference Include="runtime.linux-musl-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,5 +41,12 @@
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+  <!--
+  https://github.com/dotnet/cli/issues/9851: We also can't load a different hostfxr.dll on RHEL
+  -->
+  <ItemGroup Condition="$(Rid.StartsWith('rhel'))">
+    <Compile Remove="GivenAnMSBuildSdkResolver.cs" />
   </ItemGroup>
 </Project>

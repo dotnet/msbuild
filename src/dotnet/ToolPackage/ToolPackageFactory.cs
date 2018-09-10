@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.ToolPackage
     internal static class ToolPackageFactory
     {
         public static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
-            DirectoryPath? nonGlobalLocation = null,  additionalRestoreArguments = null)
+            DirectoryPath? nonGlobalLocation = null,  IEnumerable<string> additionalRestoreArguments = null)
         {
             ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ToolPackage
             IToolPackageInstaller,
             IToolPackageUninstaller)
             CreateToolPackageStoresAndInstallerAndUninstaller(
-                DirectoryPath? nonGlobalLocation = null, additionalRestoreArguments = null)
+                DirectoryPath? nonGlobalLocation = null, IEnumerable<string> additionalRestoreArguments = null)
         {
             ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(
