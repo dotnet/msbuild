@@ -624,12 +624,12 @@ namespace Microsoft.Build.Tasks
             if(identity == null)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
-                // in a referenced nuget package and calling AssemblyIdentity. We just need to ignore those, 
-                // since they aren't actually references we care about. So we filter them out.
+                // in a referenced nuget package, which will yield null here. We just need to ignore those, 
+                // since those aren't actually references we care about.
                 return true;
             }
 
-            if (identity != null && identity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
+            if (identity.IsInFramework(Constants.DotNetFrameworkIdentifier, TargetFrameworkVersion))
             {
                 return true;
             }
