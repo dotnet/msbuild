@@ -90,7 +90,6 @@ namespace Microsoft.DotNet.Cli
             var lastArg = 0;
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
-            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel())
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel())
             {
@@ -171,7 +170,6 @@ namespace Microsoft.DotNet.Cli
                             skipFirstRunExperience);
 
                         ConfigureDotNetForFirstTimeUse(
-                            nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
@@ -252,7 +250,6 @@ namespace Microsoft.DotNet.Cli
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
-            INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
@@ -262,16 +259,10 @@ namespace Microsoft.DotNet.Cli
         {
             using (PerfTrace.Current.CaptureTiming())
             {
-                var nugetPackagesArchiver = new NuGetPackagesArchiver();
                 var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
-                var nugetCachePrimer = new NuGetCachePrimer(
-                    nugetPackagesArchiver,
-                    nugetCacheSentinel);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
-                    nugetCachePrimer,
-                    nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
                     aspNetCertificateSentinel,
                     aspnetCertificateGenerator,
