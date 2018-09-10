@@ -3960,11 +3960,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
     <ItemGroup>
       <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
+      <_DeploymentReferencePaths Include="@(ReferencePath)" Condition="'%(CopyLocal)' == 'false'" />
       <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" 
                                  Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
-      <_DeploymentReferencePaths Include="@(ReferencePath)" Condition="'%(CopyLocal)' == 'false'" />
       <_ManifestManagedReferences Include="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly)"
                                Exclude="@(_SatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
     </ItemGroup>
