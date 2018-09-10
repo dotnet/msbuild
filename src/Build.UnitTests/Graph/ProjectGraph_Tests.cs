@@ -5,11 +5,13 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.UnitTests;
 using Xunit;
+using Shouldly;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
-    public class ProjectGraphTests
+    public class ProjectgraphTests
     {
         [Fact]
         public void TestGraphWithSingleNode()
@@ -25,14 +27,15 @@ namespace Microsoft.Build.Graph.UnitTests
                   </Target>
                 </Project>
                 ";
-            string testDirectory = Path.GetTempPath();
-            string projectPath = Path.Combine(testDirectory, "ProjectGraphTest.proj");
-            File.WriteAllText(projectPath, projectContents);
-            var projectGraph = new ProjectGraph(projectPath);
-            
-            Assert.Equal(1, projectGraph.ProjectNodes.Count);
-            Project projectNode = projectGraph.ProjectNodes.First().Project;
-            Assert.Equal(projectPath, projectNode.FullPath);
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles testProject =
+                    env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
+                var projectGraph = new ProjectGraph(testProject.ProjectFile);
+                projectGraph.ProjectNodes.Count.ShouldBe(1);
+                Project projectNode = projectGraph.ProjectNodes.First().Project;
+                projectNode.FullPath.ShouldBe(testProject.ProjectFile);
+            }
         }
     }
 
