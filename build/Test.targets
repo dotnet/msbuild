@@ -87,12 +87,13 @@
                    ProjectPath="%(TestPackageProject.ProjectPath)"
                    AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
                    />
- 
+
     <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
+                ReleaseSuffix="%(TestPackageProject.ReleaseSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
   </Target>
 
