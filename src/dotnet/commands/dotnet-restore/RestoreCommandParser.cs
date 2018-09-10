@@ -70,7 +70,7 @@ namespace Microsoft.DotNet.Cli
                     showHelp ? LocalizableStrings.CmdPackagesOptionDescription : string.Empty,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdPackagesOption)
-                          .ForwardAsSingle(o => $"-property:RestorePackagesPath={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"-property:RestorePackagesPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "--disable-parallel",
                     showHelp ? LocalizableStrings.CmdDisableParallelOptionDescription : string.Empty,
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Cli
                     showHelp ? LocalizableStrings.CmdConfigFileOptionDescription : string.Empty,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.CmdConfigFileOption)
-                          .ForwardAsSingle(o => $"-property:RestoreConfigFile={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"-property:RestoreConfigFile={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 Create.Option(
                     "--no-cache",
                     showHelp ? LocalizableStrings.CmdNoCacheOptionDescription : string.Empty,
