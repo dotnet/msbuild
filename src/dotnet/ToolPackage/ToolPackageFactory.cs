@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.Tools.Tool.Install;
@@ -11,12 +12,12 @@ namespace Microsoft.DotNet.ToolPackage
     internal static class ToolPackageFactory
     {
         public static (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller) CreateToolPackageStoresAndInstaller(
-            DirectoryPath? nonGlobalLocation = null)
+            DirectoryPath? nonGlobalLocation = null,  IEnumerable<string> additionalRestoreArguments = null)
         {
             ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(
                 toolPackageStore,
-                new ProjectRestorer());
+                 new ProjectRestorer(additionalRestoreArguments: additionalRestoreArguments));
 
             return (toolPackageStore, toolPackageStore, toolPackageInstaller);
         }
@@ -36,12 +37,12 @@ namespace Microsoft.DotNet.ToolPackage
             IToolPackageInstaller,
             IToolPackageUninstaller)
             CreateToolPackageStoresAndInstallerAndUninstaller(
-                DirectoryPath? nonGlobalLocation = null)
+                DirectoryPath? nonGlobalLocation = null, IEnumerable<string> additionalRestoreArguments = null)
         {
             ToolPackageStoreAndQuery toolPackageStore = CreateConcreteToolPackageStore(nonGlobalLocation);
             var toolPackageInstaller = new ToolPackageInstaller(
                 toolPackageStore,
-                new ProjectRestorer());
+                new ProjectRestorer(additionalRestoreArguments: additionalRestoreArguments));
             var toolPackageUninstaller = new ToolPackageUninstaller(
                 toolPackageStore);
 

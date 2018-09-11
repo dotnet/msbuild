@@ -20,6 +20,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         private string _stage2Sdk;
         private string _testPackages;
         private string _testWorkingFolder;
+        private string _testArtifactsFolder;
 
         public static string RepoRoot
         {
@@ -63,6 +64,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         public string Stage2Sdk => _stage2Sdk;
         public string TestPackages => _testPackages;
         public string TestWorkingFolder => _testWorkingFolder;
+        public string TestArtifactsFolder => _testArtifactsFolder;
 
         public RepoDirectoriesProvider(
             string artifacts = null,
@@ -89,6 +91,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             {
                 throw new InvalidOperationException("TEST_PACKAGES environment variable not set");
             }
+
+            _testArtifactsFolder = Path.Combine(_artifacts, "test", "artifacts");
 
             _testWorkingFolder = Path.Combine(RepoRoot,
                                               "bin",

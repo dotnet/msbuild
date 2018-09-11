@@ -12,6 +12,7 @@
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
     <RoslynDirectory>$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/Roslyn</RoslynDirectory>
+    <ExternalRestoreSourcesTestsContainer>$(TestArtifactsDir)/ExternalRestoreSourcesForTestsContainer.txt</ExternalRestoreSourcesTestsContainer>
   </PropertyGroup>
 
   <Target Name="Test"
@@ -54,6 +55,16 @@
                             SetupTestProjectData;
                             OverlaySdkOnLKG">
     <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
+
+    <PropertyGroup>
+      <!-- Some tests depends on $(RID) property in project file -->
+      <RidPassedToPrepareTest Condition="'$(Rid)' != ''">"/p:Rid=$(Rid)"</RidPassedToPrepareTest>
+    </PropertyGroup>
+
+    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
+                      File="$(ExternalRestoreSourcesTestsContainer)"
+                      Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Identity)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
+                      Overwrite="false" />
   </Target>
 
   <Target Name="RestoreTests"
@@ -62,14 +73,14 @@
 
     <DotNetRestore ToolPath="$(SdkOutputDirectory)"
                    ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
-                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)" />
+                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath) $(RidPassedToPrepareTest)" />
   </Target>
 
   <Target Name="BuildTests"
           DependsOnTargets="RestoreTests;">
     <DotNetBuild ToolPath="$(SdkOutputDirectory)"
                  ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
-                 AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
+                 AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath) $(RidPassedToPrepareTest)"
                  MaxCpuCount="1" />
   </Target>
 

@@ -20,7 +20,8 @@ namespace Microsoft.DotNet.Tools.Tool.Update
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
 
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller) CreateToolPackageStoresAndInstallerAndUninstaller(
-        DirectoryPath? nonGlobalLocation = null);
+        DirectoryPath? nonGlobalLocation = null,
+		IEnumerable<string> additionalRestoreArguments = null);
 
     internal class ToolUpdateCommand : CommandBase
     {

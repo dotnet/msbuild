@@ -9,13 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Tools.Tests.Utilities", "..\..\test\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj", "{E548D3D0-50E3-4485-B531-95585A5D0B85}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.TestFramework", "..\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj", "{182FFFA6-AE8F-431C-9B17-2F30B2A8FE42}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestDependencies", "TestDependencies", "{0F45009E-9053-401D-91CA-8046D9EB310B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.DotNet.Cli.Utils", "..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj", "{7F68DEFE-F2D3-453C-B155-51B674604D29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Cli.Utils", "..\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj", "{7F68DEFE-F2D3-453C-B155-51B674604D29}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.InternalAbstractions", "..\Microsoft.DotNet.InternalAbstractions\Microsoft.DotNet.InternalAbstractions.csproj", "{A54567A1-E8DE-4B8C-9156-D895B9D016DB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.TestFramework", "..\..\test\Microsoft.DotNet.TestFramework\Microsoft.DotNet.TestFramework.csproj", "{47C99775-27DF-4452-A1A3-2182FFA19BF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,6 @@ Global
 		{E548D3D0-50E3-4485-B531-95585A5D0B85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E548D3D0-50E3-4485-B531-95585A5D0B85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E548D3D0-50E3-4485-B531-95585A5D0B85}.Release|Any CPU.Build.0 = Release|Any CPU
-		{182FFFA6-AE8F-431C-9B17-2F30B2A8FE42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{182FFFA6-AE8F-431C-9B17-2F30B2A8FE42}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{182FFFA6-AE8F-431C-9B17-2F30B2A8FE42}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{182FFFA6-AE8F-431C-9B17-2F30B2A8FE42}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7F68DEFE-F2D3-453C-B155-51B674604D29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7F68DEFE-F2D3-453C-B155-51B674604D29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F68DEFE-F2D3-453C-B155-51B674604D29}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -47,14 +43,21 @@ Global
 		{A54567A1-E8DE-4B8C-9156-D895B9D016DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A54567A1-E8DE-4B8C-9156-D895B9D016DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A54567A1-E8DE-4B8C-9156-D895B9D016DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47C99775-27DF-4452-A1A3-2182FFA19BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47C99775-27DF-4452-A1A3-2182FFA19BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47C99775-27DF-4452-A1A3-2182FFA19BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47C99775-27DF-4452-A1A3-2182FFA19BF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E548D3D0-50E3-4485-B531-95585A5D0B85} = {0F45009E-9053-401D-91CA-8046D9EB310B}
-		{182FFFA6-AE8F-431C-9B17-2F30B2A8FE42} = {0F45009E-9053-401D-91CA-8046D9EB310B}
 		{7F68DEFE-F2D3-453C-B155-51B674604D29} = {0F45009E-9053-401D-91CA-8046D9EB310B}
 		{A54567A1-E8DE-4B8C-9156-D895B9D016DB} = {0F45009E-9053-401D-91CA-8046D9EB310B}
+		{47C99775-27DF-4452-A1A3-2182FFA19BF2} = {0F45009E-9053-401D-91CA-8046D9EB310B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DAE5F0E8-9018-4F6B-BB7F-541CA5E0E98B}
 	EndGlobalSection
 EndGlobal
