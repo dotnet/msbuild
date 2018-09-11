@@ -13,7 +13,10 @@ namespace Microsoft.Build.Graph
     internal sealed class ProjectGraphNode
     {
         // No public creation.
-        internal ProjectGraphNode() { }
+        internal ProjectGraphNode(Project project)
+        {
+            Project = project;
+        }
 
         /// <summary>
         /// Gets an unordered collection of graph nodes for projects which this project references.
@@ -23,6 +26,6 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Gets the evaluated project represented by this node in the graph.
         /// </summary>
-        public Project Project => new Project();
+        public Project Project { get; }
     }
 }
