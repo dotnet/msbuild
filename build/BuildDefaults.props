@@ -33,6 +33,5 @@
     <NoWarn>NU1701;NU5104</NoWarn>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
   </PropertyGroup>
 </Project>
