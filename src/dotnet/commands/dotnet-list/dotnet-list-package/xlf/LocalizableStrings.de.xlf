@@ -3,7 +3,7 @@
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="AppFullName">
-        <source>List all packages references of the project.</source>
+        <source>List all package references of the project or solution.</source>
         <target state="needs-review-translation">Hiermit listen Sie alle Projekt-zu-Projekt-Verweise des Projekts auf.</target>
         <note />
       </trans-unit>
@@ -27,44 +27,34 @@
         <target state="new">Lists transitive and top-level packages.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MultipleProjectsFound">
-        <source>The directory given includes multiple projects. Please specify one of the following projects:</source>
-        <target state="new">The directory given includes multiple projects. Please specify one of the following projects:</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="MultipleSolutionsFound">
-        <source>The directory given includes multiple solutions. Please specify one of the following solutions:</source>
-        <target state="new">The directory given includes multiple solutions. Please specify one of the following solutions:</target>
-        <note />
-      </trans-unit>
       <trans-unit id="NoProjectsOrSolutions">
-        <source>The given directory does not include any solution or project.</source>
-        <target state="new">The given directory does not include any solution or project.</target>
+        <source>A project or solution file could not be found in {0}. Specify a project or solution file to use.</source>
+        <target state="new">A project or solution file could not be found in {0}. Specify a project or solution file to use.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfig">
-        <source>CONFIG FILE</source>
-        <target state="new">CONFIG FILE</target>
+        <source>CONFIG_FILE</source>
+        <target state="new">CONFIG_FILE</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdConfigDescription">
-        <source>A path to a config file to specify sources. Works only with `--outdated`.</source>
-        <target state="new">A path to a config file to specify sources. Works only with `--outdated`.</target>
+        <source>The path to the NuGet config file to use. Requires the '--outdated' option.</source>
+        <target state="new">The path to the NuGet config file to use. Requires the '--outdated' option.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestMinorDescription">
-        <source>Considers only the versions that have matching major when looking for latest version. Works only with `--outdated`.</source>
-        <target state="new">Considers only the versions that have matching major when looking for latest version. Works only with `--outdated`.</target>
+        <source>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdHighestPatchDescription">
-        <source>Considers only the versions that have matching minor and major when looking for latest version. Works only with `--outdated`.</source>
-        <target state="new">Considers only the versions that have matching minor and major when looking for latest version. Works only with `--outdated`.</target>
+        <source>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdPrereleaseDescription">
-        <source>Considers prerelease versions when looking for latest version. Works only with `--outdated`.</source>
-        <target state="new">Considers prerelease versions when looking for latest version. Works only with `--outdated`.</target>
+        <source>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdSource">
@@ -73,18 +63,18 @@
         <note />
       </trans-unit>
       <trans-unit id="CmdSourceDescription">
-        <source>Sources to lookup for latest versions. Works only with `--outdated`.</source>
-        <target state="new">Sources to lookup for latest versions. Works only with `--outdated`.</target>
+        <source>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</source>
+        <target state="new">The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutdatedOptionOnly">
-        <source>This option `{0}` can only be used with `--outdated` present.</source>
-        <target state="new">This option `{0}` can only be used with `--outdated` present.</target>
+        <source>Option '{0}' requires the '--outdated' option to be specified.</source>
+        <target state="new">Option '{0}' requires the '--outdated' option to be specified.</target>
         <note />
       </trans-unit>
       <trans-unit id="FileNotFound">
-        <source>The given file was not found. Please make sure that you are passing the correct path.</source>
-        <target state="new">The given file was not found. Please make sure that you are passing the correct path.</target>
+        <source>Could not find file or directory '{0}'.</source>
+        <target state="new">Could not find file or directory '{0}'.</target>
         <note />
       </trans-unit>
     </body>

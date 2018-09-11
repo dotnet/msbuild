@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Common;
 using Microsoft.DotNet.Tools.NuGet;
 
@@ -27,25 +28,15 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
                 throw new ArgumentNullException(nameof(appliedCommand));
             }
 
-            // Gets the absolute path of the given path
             _fileOrDirectory = PathUtility.GetAbsolutePath(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()),
                                                            appliedCommand.Arguments.Single());
-
-            FileAttributes attr = File.GetAttributes(_fileOrDirectory);
-
-            if (attr.HasFlag(FileAttributes.Directory))
-            {
-                _fileOrDirectory = PathUtility.EnsureTrailingSlash(_fileOrDirectory);
-            }
 
             _appliedCommand = appliedCommand["package"];
         }
 
         public override int Execute()
         {
-            var result = NuGetCommand.Run(TransformArgs());
-
-            return result;
+            return NuGetCommand.Run(TransformArgs());
         }
 
         private string[] TransformArgs()
@@ -58,63 +49,31 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
 
             args.Add(GetProjectOrSolution());
 
-            if (_appliedCommand.HasOption("outdated"))
-            {
-                args.Add("--outdated");
-            }
-
-            if (_appliedCommand.HasOption("include-transitive"))
-            {
-                args.Add("--include-transitive");
-            }
-
-            if (_appliedCommand.HasOption("framework"))
-            {
-                //Forward framework as multiple flags
-                foreach (var framework in _appliedCommand.AppliedOptions["framework"].Arguments)
-                {
-                    args.Add("--framework");
-                    args.Add(framework);
-                }
-            }
+            args.AddRange(_appliedCommand.OptionValuesToBeForwarded());
 
             if (_appliedCommand.HasOption("include-prerelease"))
             {
                 CheckForOutdated("--include-prerelease");
-                args.Add("--include-prerelease");
             }
 
             if (_appliedCommand.HasOption("highest-patch"))
             {
                 CheckForOutdated("--highest-patch");
-                args.Add("--highest-patch");
             }
 
             if (_appliedCommand.HasOption("highest-minor"))
             {
                 CheckForOutdated("--highest-minor");
-                args.Add("--highest-minor");
             }
 
             if (_appliedCommand.HasOption("config"))
             {
                 CheckForOutdated("--config");
-                args.Add("--config");
-                //Config path absolute path
-                var configPath = PathUtility.GetAbsolutePath(PathUtility.EnsureTrailingSlash(Directory.GetCurrentDirectory()),
-                                        _appliedCommand.AppliedOptions["config"].Arguments.Single());
-                args.Add(configPath);
             }
 
             if (_appliedCommand.HasOption("source"))
             {
                 CheckForOutdated("--source");
-                //Forward source as multiple flags
-                foreach (var source in _appliedCommand.AppliedOptions["source"].Arguments)
-                {
-                    args.Add("--source");
-                    args.Add(source);
-                }
             }
 
             return args.ToArray();
@@ -129,7 +88,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
         {
             if (!_appliedCommand.HasOption("outdated"))
             {
-                throw new Exception(string.Format(LocalizableStrings.OutdatedOptionOnly, option));
+                throw new GracefulException(LocalizableStrings.OutdatedOptionOnly, option);
 
             }
             
@@ -144,16 +103,15 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
         private string GetProjectOrSolution()
         {
             string resultPath = _fileOrDirectory;
-            FileAttributes attr = File.GetAttributes(resultPath);
             
-            if (attr.HasFlag(FileAttributes.Directory))
+            if (Directory.Exists(resultPath))
             {
                 var possibleSolutionPath = Directory.GetFiles(resultPath, "*.sln", SearchOption.TopDirectoryOnly);
 
                 //If more than a single sln file is found, an error is thrown since we can't determine which one to choose.
                 if (possibleSolutionPath.Count() > 1)
                 {
-                    throw new Exception(LocalizableStrings.MultipleSolutionsFound + Environment.NewLine + string.Join(Environment.NewLine, possibleSolutionPath.ToArray()));
+                    throw new GracefulException(CommonLocalizableStrings.MoreThanOneSolutionInDirectory, resultPath);
                 }
                 //If a single solution is found, use it.
                 else if (possibleSolutionPath.Count() == 1)
@@ -170,7 +128,7 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
                     //No projects found throws an error that no sln nor projs were found
                     if (possibleProjectPath.Count() == 0)
                     {
-                        throw new Exception(LocalizableStrings.NoProjectsOrSolutions);
+                        throw new GracefulException(LocalizableStrings.NoProjectsOrSolutions, resultPath);
                     }
                     //A single project found, use it
                     else if (possibleProjectPath.Count() == 1)
@@ -180,15 +138,14 @@ namespace Microsoft.DotNet.Tools.List.PackageReferences
                     //More than one project found. Not sure which one to choose
                     else
                     {
-                        throw new Exception(LocalizableStrings.MultipleProjectsFound + Environment.NewLine + string.Join(Environment.NewLine, possibleProjectPath.ToArray()));
+                        throw new GracefulException(CommonLocalizableStrings.MoreThanOneProjectInDirectory, resultPath);
                     }
                 }
             }
             
-            //Make sure the file exists
             if (!File.Exists(resultPath))
             {
-                throw new FileNotFoundException(LocalizableStrings.FileNotFound, resultPath);
+                throw new GracefulException(LocalizableStrings.FileNotFound, resultPath);
             }
             
             return resultPath;

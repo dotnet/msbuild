@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using LocalizableStrings = Microsoft.DotNet.Tools.List.PackageReferences.LocalizableStrings;
@@ -12,32 +13,46 @@ namespace Microsoft.DotNet.Cli
         public static Command ListPackageReferences() => Create.Command(
                 "package",
                 LocalizableStrings.AppFullName,
-                Accept.ZeroOrOneArgument(),
+                Accept.NoArguments(),
                 CommonOptions.HelpOption(),
                 Create.Option("--outdated",
-                              LocalizableStrings.CmdOutdatedDescription),
+                              LocalizableStrings.CmdOutdatedDescription,
+                              Accept.NoArguments().ForwardAs("--outdated")),
                 Create.Option("--framework",
                               LocalizableStrings.CmdFrameworkDescription,
                               Accept.OneOrMoreArguments()
                                     .With(name: LocalizableStrings.CmdFramework)
-                                    .ForwardAsSingle(o => $"--framework {string.Join("%3B", o.Arguments)}")),
+                                    .ForwardAsMany(o => ForwardedArguments("--framework", o.Arguments))),
                 Create.Option("--include-transitive",
-                              LocalizableStrings.CmdTransitiveDescription),
+                              LocalizableStrings.CmdTransitiveDescription,
+                              Accept.NoArguments().ForwardAs("--include-transitive")),
                 Create.Option("--include-prerelease",
-                              LocalizableStrings.CmdPrereleaseDescription),
+                              LocalizableStrings.CmdPrereleaseDescription,
+                              Accept.NoArguments().ForwardAs("--include-prerelease")),
                 Create.Option("--highest-patch",
-                              LocalizableStrings.CmdHighestPatchDescription),
+                              LocalizableStrings.CmdHighestPatchDescription,
+                              Accept.NoArguments().ForwardAs("--highest-patch")),
                 Create.Option("--highest-minor",
-                              LocalizableStrings.CmdHighestMinorDescription),
+                              LocalizableStrings.CmdHighestMinorDescription,
+                              Accept.NoArguments().ForwardAs("--highest-minor")),
                 Create.Option("--config",
                               LocalizableStrings.CmdConfigDescription,
                               Accept.ExactlyOneArgument()
                                     .With(name: LocalizableStrings.CmdConfig)
-                                    .ForwardAsSingle(o => $"--config {o.Arguments.Single()}")),
+                                    .ForwardAsMany(o => new [] { "--config", o.Arguments.Single() })),
                 Create.Option("--source",
                               LocalizableStrings.CmdSourceDescription,
                               Accept.OneOrMoreArguments()
                                     .With(name: LocalizableStrings.CmdSource)
-                                    .ForwardAsSingle(o => $"--source {string.Join("%3B", o.Arguments)}")));
+                                    .ForwardAsMany(o => ForwardedArguments("--source", o.Arguments))));
+
+        private static IEnumerable<string> ForwardedArguments(string token, IEnumerable<string> arguments)
+        {
+            foreach (var arg in arguments)
+            {
+                yield return token;
+                yield return arg;
+            }
+        }
     }
 }

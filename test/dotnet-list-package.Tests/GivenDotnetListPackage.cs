@@ -36,11 +36,11 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
             cmd.Should().Pass();
 
             new RestoreCommand()
-               .WithWorkingDirectory(projectDirectory)
-               .Execute()
-               .Should()
-               .Pass()
-               .And.NotHaveStdErr();
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
 
             new ListPackageCommand()
                 .WithPath(projectDirectory)
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         }
 
         [Fact]
-        public void AutoReferencedPackages()
+        public void ItListsAutoReferencedPackages()
         {
             var testAsset = "TestAppSimple";
             var projectDirectory = TestAssets
@@ -63,11 +63,11 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .FullName;
 
             new RestoreCommand()
-               .WithWorkingDirectory(projectDirectory)
-               .Execute()
-               .Should()
-               .Pass()
-               .And.NotHaveStdErr();
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
 
             new ListPackageCommand()
                 .WithPath(projectDirectory)
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         }
 
         [Fact]
-        public void RunOnSolution()
+        public void ItRunOnSolution()
         {
             var sln = "TestAppWithSlnAndSolutionFolders";
             var projectDirectory = TestAssets
@@ -91,11 +91,11 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .FullName;
 
             new RestoreCommand()
-               .WithWorkingDirectory(projectDirectory)
-               .Execute()
-               .Should()
-               .Pass()
-               .And.NotHaveStdErr();
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
 
             new ListPackageCommand()
                 .WithPath(projectDirectory)
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         }
 
         [Fact]
-        public void TransitivePackagePrinted()
+        public void ItListsTransitivePackage()
         {
             var testAsset = "NewtonSoftDependentProject";
             var projectDirectory = TestAssets
@@ -137,11 +137,11 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .FullName;
 
             new RestoreCommand()
-              .WithWorkingDirectory(projectDirectory)
-              .Execute()
-              .Should()
-              .Pass()
-              .And.NotHaveStdErr();
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
 
             new ListPackageCommand()
                 .WithPath(projectDirectory)
@@ -161,13 +161,13 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
         }
 
         [Theory]
-        [InlineData("", "[.NETFramework,Version=v4.5.1]", null)]
-        [InlineData("", "[.NETCoreApp,Version=v2.2]", null)]
-        [InlineData("--framework netcoreapp2.2 --framework net451", "[.NETFramework,Version=v4.5.1]", null)]
-        [InlineData("--framework netcoreapp2.2 --framework net451", "[.NETCoreApp,Version=v2.2]", null)]
-        [InlineData("--framework netcoreapp2.2", "[.NETCoreApp,Version=v2.2]", "[.NETFramework,Version=v4.5.1]")]
-        [InlineData("--framework net451", "[.NETFramework,Version=v4.5.1]", "[.NETCoreApp,Version=v2.2]")]
-        public void FrameworkSpecificList_Success(string args, string shouldInclude, string shouldntInclude)
+        [InlineData("", "[net451]", null)]
+        [InlineData("", "[netcoreapp2.2]", null)]
+        [InlineData("--framework netcoreapp2.2 --framework net451", "[net451]", null)]
+        [InlineData("--framework netcoreapp2.2 --framework net451", "[netcoreapp2.2]", null)]
+        [InlineData("--framework netcoreapp2.2", "[netcoreapp2.2]", "[net451]")]
+        [InlineData("--framework net451", "[net451]", "[netcoreapp2.2]")]
+        public void ItListsValidFrameworks(string args, string shouldInclude, string shouldntInclude)
         {
             var testAsset = "MSBuildAppWithMultipleFrameworks";
             var projectDirectory = TestAssets
@@ -178,38 +178,38 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .FullName;
 
             new RestoreCommand()
-              .WithWorkingDirectory(projectDirectory)
-              .Execute()
-              .Should()
-              .Pass()
-              .And.NotHaveStdErr();
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
 
             if (shouldntInclude == null)
             {
                 new ListPackageCommand()
-                .WithPath(projectDirectory)
-                .Execute(args)
-                .Should()
-                .Pass()
-                .And.NotHaveStdErr()
-                .And.HaveStdOutContainingIgnoreSpaces(shouldInclude.Replace(" ", ""));
+                    .WithPath(projectDirectory)
+                    .Execute(args)
+                    .Should()
+                    .Pass()
+                    .And.NotHaveStdErr()
+                    .And.HaveStdOutContainingIgnoreSpaces(shouldInclude.Replace(" ", ""));
             }
             else
             {
                 new ListPackageCommand()
-                .WithPath(projectDirectory)
-                .Execute(args)
-                .Should()
-                .Pass()
-                .And.NotHaveStdErr()
-                .And.HaveStdOutContainingIgnoreSpaces(shouldInclude.Replace(" ", ""))
-                .And.NotHaveStdOutContaining(shouldntInclude.Replace(" ", ""));
+                    .WithPath(projectDirectory)
+                    .Execute(args)
+                    .Should()
+                    .Pass()
+                    .And.NotHaveStdErr()
+                    .And.HaveStdOutContainingIgnoreSpaces(shouldInclude.Replace(" ", ""))
+                    .And.NotHaveStdOutContaining(shouldntInclude.Replace(" ", ""));
             }
             
         }
 
         [Fact]
-        public void FrameworkSpecificList_Fail()
+        public void ItDoesNotAcceptInvalidFramework()
         {
             var testAsset = "MSBuildAppWithMultipleFrameworks";
             var projectDirectory = TestAssets
@@ -220,20 +220,20 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .FullName;
 
             new RestoreCommand()
-              .WithWorkingDirectory(projectDirectory)
-              .Execute()
-              .Should()
-              .Pass();
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass();
 
             new ListPackageCommand()
-            .WithPath(projectDirectory)
-            .Execute("--framework invalid")
-            .Should()
-            .Fail();
+                .WithPath(projectDirectory)
+                .Execute("--framework invalid")
+                .Should()
+                .Fail();
         }
 
         [Fact]
-        public void FSharpProject()
+        public void ItListsFSharpProject()
         {
             var testAsset = "FSharpTestAppSimple";
             var projectDirectory = TestAssets
@@ -244,11 +244,11 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
                 .FullName;
 
             new RestoreCommand()
-              .WithWorkingDirectory(projectDirectory)
-              .Execute()
-              .Should()
-              .Pass()
-              .And.NotHaveStdErr();
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should()
+                .Pass()
+                .And.NotHaveStdErr();
 
             new ListPackageCommand()
                 .WithPath(projectDirectory)

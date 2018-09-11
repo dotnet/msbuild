@@ -894,8 +894,8 @@ setx PATH "%PATH%;{0}"
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentDescription">
-        <source>The project (or solution only with package command) file to operate on. If a file is not specified, the command will search the current directory for a (solution if used with package command then a) project.</source>
-        <target state="new">The project (or solution only with package command) file to operate on. If a file is not specified, the command will search the current directory for a (solution if used with package command then a) project.</target>
+        <source>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</source>
+        <target state="new">The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionOrProjectArgumentName">

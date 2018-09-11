@@ -647,7 +647,7 @@ setx PATH "%PATH%;{0}"
     <value>VERSION_SUFFIX</value>
   </data>
   <data name="SolutionOrProjectArgumentDescription" xml:space="preserve">
-    <value>The project (or solution only with package command) file to operate on. If a file is not specified, the command will search the current directory for a (solution if used with package command then a) project.</value>
+    <value>The project or solution file to operate on. If a file is not specified, the command will search the current directory for one.</value>
   </data>
   <data name="SolutionOrProjectArgumentName" xml:space="preserve">
     <value>PROJECT | SOLUTION</value>

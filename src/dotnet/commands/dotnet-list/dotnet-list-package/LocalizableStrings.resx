@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppFullName" xml:space="preserve">
-    <value>List all packages references of the project.</value>
+    <value>List all package references of the project or solution.</value>
   </data>
   <data name="CmdFramework" xml:space="preserve">
     <value>FRAMEWORK | FRAMEWORK\RID</value>
@@ -132,40 +132,34 @@
   <data name="CmdTransitiveDescription" xml:space="preserve">
     <value>Lists transitive and top-level packages.</value>
   </data>
-  <data name="MultipleProjectsFound" xml:space="preserve">
-    <value>The directory given includes multiple projects. Please specify one of the following projects:</value>
-  </data>
-  <data name="MultipleSolutionsFound" xml:space="preserve">
-    <value>The directory given includes multiple solutions. Please specify one of the following solutions:</value>
-  </data>
   <data name="NoProjectsOrSolutions" xml:space="preserve">
-    <value>The given directory does not include any solution or project.</value>
+    <value>A project or solution file could not be found in {0}. Specify a project or solution file to use.</value>
   </data>
   <data name="CmdConfig" xml:space="preserve">
-    <value>CONFIG FILE</value>
+    <value>CONFIG_FILE</value>
   </data>
   <data name="CmdConfigDescription" xml:space="preserve">
-    <value>A path to a config file to specify sources. Works only with `--outdated`.</value>
+    <value>The path to the NuGet config file to use. Requires the '--outdated' option.</value>
   </data>
   <data name="CmdHighestMinorDescription" xml:space="preserve">
-    <value>Considers only the versions that have matching major when looking for latest version. Works only with `--outdated`.</value>
+    <value>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</value>
   </data>
   <data name="CmdHighestPatchDescription" xml:space="preserve">
-    <value>Considers only the versions that have matching minor and major when looking for latest version. Works only with `--outdated`.</value>
+    <value>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</value>
   </data>
   <data name="CmdPrereleaseDescription" xml:space="preserve">
-    <value>Considers prerelease versions when looking for latest version. Works only with `--outdated`.</value>
+    <value>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</value>
   </data>
   <data name="CmdSource" xml:space="preserve">
     <value>SOURCE</value>
   </data>
   <data name="CmdSourceDescription" xml:space="preserve">
-    <value>Sources to lookup for latest versions. Works only with `--outdated`.</value>
+    <value>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</value>
   </data>
   <data name="OutdatedOptionOnly" xml:space="preserve">
-    <value>This option `{0}` can only be used with `--outdated` present.</value>
+    <value>Option '{0}' requires the '--outdated' option to be specified.</value>
   </data>
   <data name="FileNotFound" xml:space="preserve">
-    <value>The given file was not found. Please make sure that you are passing the correct path.</value>
+    <value>Could not find file or directory '{0}'.</value>
   </data>
 </root>
