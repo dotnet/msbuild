@@ -5,7 +5,7 @@
 ### Motivations
 - Stock projects can build with "project-level build" and if clean onboard to MS internal build engines with cache/distribution
 - Stock projects will be "project-level build" clean.
-- Add determinism to MSBuild
+- Add determinism to MSBuild w.r.t. project dependencies. Today MSBuild discovers projects just in time, as it finds MSBuild tasks. This means there’s no guarantee that the same graph is produced two executions in a row, other than hopefully sane project files. With the static graph, you’d know the shape of the build graph before the build starts.
 - Potential perf gain in graph scheduling
 - Increase perf of interaction between MSBuild and higher-order build engines (eg. MS internal build engines) - reuse evaluation and MSBuild nodes
 - **Existing functionality must still work. This new behavior is opt-in only.**
