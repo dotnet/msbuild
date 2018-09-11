@@ -4,7 +4,7 @@ parameters:
   variables: {}
 
 phases:
-- template: /eng/common/templates/phases/base.yml@arcade  
+- template: /eng/common/templates/phases/base.yml
   parameters:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true

@@ -1,15 +1,6 @@
 trigger:
 - master
 
-resources:
-  repositories:
-  # shared library repository
-  - repository: arcade
-    type: github
-    endpoint: DotNet-Bot GitHub Connection
-    name: dotnet/arcade
-    ref: refs/heads/master
-
 variables:
   teamName: Roslyn-Project-System
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
@@ -26,9 +17,7 @@ phases:
       ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
         name: Helix
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-        name: DotNetCore-Build
-        demands:
-        - agent.os -equals Windows_NT        
+        name: DotNetCore-Windows
       parallel: 2
       matrix:
         ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
