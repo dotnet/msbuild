@@ -1,5 +1,6 @@
 ﻿<Project>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
   <PropertyGroup>
     <VersionPrefix>1.0.0-rc</VersionPrefix>
@@ -15,4 +16,5 @@
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 </Project>
