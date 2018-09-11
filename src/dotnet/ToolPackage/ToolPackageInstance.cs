@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.ToolPackage
 
         public DirectoryPath PackageDirectory { get; private set; }
 
-        public IReadOnlyList<CommandSettings> Commands
+        public IReadOnlyList<RestoredCommand> Commands
         {
             get
             {
@@ -56,7 +56,7 @@ namespace Microsoft.DotNet.ToolPackage
         private const string AssetsFileName = "project.assets.json";
         private const string ToolSettingsFileName = "DotnetToolSettings.xml";
 
-        private Lazy<IReadOnlyList<CommandSettings>> _commands;
+        private Lazy<IReadOnlyList<RestoredCommand>> _commands;
         private Lazy<ToolConfiguration> _toolConfiguration;
         private Lazy<LockFile> _lockFile;
         private Lazy<IReadOnlyList<FilePath>> _packagedShims;
@@ -66,7 +66,7 @@ namespace Microsoft.DotNet.ToolPackage
             DirectoryPath packageDirectory,
             DirectoryPath assetsJsonParentDirectory)
         {
-            _commands = new Lazy<IReadOnlyList<CommandSettings>>(GetCommands);
+            _commands = new Lazy<IReadOnlyList<RestoredCommand>>(GetCommands);
             _packagedShims = new Lazy<IReadOnlyList<FilePath>>(GetPackagedShims);
 
             Id = id;
@@ -78,11 +78,11 @@ namespace Microsoft.DotNet.ToolPackage
                     () => new LockFileFormat().Read(assetsJsonParentDirectory.WithFile(AssetsFileName).Value));
         }
 
-        private IReadOnlyList<CommandSettings> GetCommands()
+        private IReadOnlyList<RestoredCommand> GetCommands()
         {
             try
             {
-                var commands = new List<CommandSettings>();
+                var commands = new List<RestoredCommand>();
                 LockFileTargetLibrary library = FindLibraryInLockFile(_lockFile.Value);
                 ToolConfiguration configuration = _toolConfiguration.Value;
                 LockFileItem entryPointFromLockFile = FindItemInTargetLibrary(library, configuration.ToolAssemblyEntryPoint);
@@ -96,7 +96,7 @@ namespace Microsoft.DotNet.ToolPackage
                 }
 
                 // Currently only "dotnet" commands are supported
-                commands.Add(new CommandSettings(
+                commands.Add(new RestoredCommand(
                     configuration.CommandName,
                     "dotnet",
                     LockFileRelativePathToFullFilePath(entryPointFromLockFile.Path, library)));
