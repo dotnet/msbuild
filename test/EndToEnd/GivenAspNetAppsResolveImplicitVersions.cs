@@ -50,8 +50,11 @@ namespace EndToEnd
             var restoredVersion = GetAspNetCoreAppVersion(assetsFile, portable: true);
             restoredVersion.Should().NotBeNull();
 
-            restoredVersion.ToNormalizedString().Should().BeEquivalentTo(PinnedAspNetCoreImplicitVersion,
-                "The bundled aspnetcore versions set in Microsoft.NETCoreSdk.BundledVersions.props should be idenitical to the versions set in DependencyVersions.props." +
+            var bundledVersionPath = Path.Combine(projectDirectory, ".DefaultPatchVersionForAspNetCoreApp2_1");
+            var bundledVersion = File.ReadAllText(bundledVersionPath).Trim();
+
+            restoredVersion.ToNormalizedString().Should().BeEquivalentTo(bundledVersion,
+                "The bundled aspnetcore versions set in Microsoft.NETCoreSdk.BundledVersions.props should be identical to the versions generated." +
                 "Please update MSBuildExtensions.targets in this repo so these versions match.");
         }
 

@@ -34,6 +34,7 @@
     <add key="dotnet-cli" value="https://dotnet.myget.org/F/dotnet-cli/api/v3/index.json" />
     <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json"/>
     <add key="myget-vstest" value="https://dotnet.myget.org/F/vstest/api/v3/index.json" />
+    <add key="BlobFeed-2.1.3-runtime" value="https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json"/>
         ]]>
       </NugetConfigCLIFeeds>
 

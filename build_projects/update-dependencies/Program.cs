@@ -86,7 +86,14 @@ namespace Microsoft.DotNet.Scripts
             
             if (s_config.HasVersionFragment("aspnet"))
             {
-                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreAppPackageVersion", "Microsoft.AspNetCore.App");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreAllPackageVersion", "Microsoft.AspNetCore.All");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetEfPackageVersion", "dotnet-ef");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion", "Microsoft.AspNetCore.DeveloperCertificates.XPlat");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreMvcPackageVersion", "Microsoft.AspNetCore.Mvc");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetDevCertsPackageVersion", "dotnet-dev-certs");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetSqlCachePackageVersion", "dotnet-sql-cache");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetUserSecretsPackageVersion", "dotnet-user-secrets");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetWatchPackageVersion", "dotnet-watch");
             }
             if (s_config.HasVersionFragment("clicommandlineparser"))
             {
@@ -125,7 +132,7 @@ namespace Microsoft.DotNet.Scripts
             if (s_config.HasVersionFragment("templating"))
             {
                 yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetCommonItemTemplatesPackageVersion", "Microsoft.DotNet.Common.ItemTemplates");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetTestProjectTemplates20PackageVersion", "Microsoft.DotNet.Test.ProjectTemplates.2.0");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetTestProjectTemplates22PackageVersion", "Microsoft.DotNet.Test.ProjectTemplates.2.0");
                 yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftTemplateEngineCliPackageVersion", "Microsoft.TemplateEngine.Cli");
             }
             if (s_config.HasVersionFragment("websdk"))
