@@ -39,10 +39,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
-  </ItemGroup>
-
   <!--
   https://github.com/dotnet/cli/issues/9851: We also can't load a different hostfxr.dll on RHEL
   -->
