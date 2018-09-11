@@ -11,7 +11,7 @@ using Shouldly;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
-    public class ProjectgraphTests
+    public class ProjectGraphTests
     {
         [Fact]
         public void TestGraphWithSingleNode()
