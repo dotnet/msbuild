@@ -31,10 +31,10 @@ Weitere Informationen zur Telemetrie der .NET Core-Tools finden Sie unter https:
 Here are some options to fix this error:
 ----------------------------------------
 1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="translated">Die Berechtigung zum Ändern des Ordners "{0}" wurde verweigert.
+        <target state="needs-review-translation">Die Berechtigung zum Ändern des Ordners "{0}" wurde verweigert.
 
 Im Folgenden finden Sie einige Optionen, um diesen Fehler zu beheben:
 ----------------------------------------
