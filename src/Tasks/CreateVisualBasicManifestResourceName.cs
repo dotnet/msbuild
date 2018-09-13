@@ -96,6 +96,9 @@ namespace Microsoft.Build.Tasks
                 embeddedFileName = fileName;
             }
 
+
+            // #1 Non-mutative: parameter cleansing
+            // dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
 
             // If the item has a culture override, respect that. 
@@ -109,6 +112,9 @@ namespace Microsoft.Build.Tasks
             {
                 // Resource depends on a form. Now, get the form's class name fully 
                 // qualified with a namespace.
+
+                // #2 Extracted as Func<Stream, ExtractedClassName> parameter for generic use:
+                // ExtractedClassName result = getFirstClassNameFullyQualified(binaryStream);
                 ExtractedClassName result = VisualBasicParserUtilities.GetFirstClassNameFullyQualified(binaryStream);
 
                 if (result.IsInsideConditionalBlock)
@@ -118,6 +124,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!string.IsNullOrEmpty(result.Name))
                 {
+                    // #region #3 Extra code block that includes rootNamespace
                     if (!string.IsNullOrEmpty(rootNamespace))
                     {
                         manifestName.Append(rootNamespace).Append(".").Append(result.Name);
@@ -126,6 +133,10 @@ namespace Microsoft.Build.Tasks
                     {
                         manifestName.Append(result.Name);
                     }
+                    // #endregion
+                    // #3.instead:
+                    // manifestName.Append(result.Name);
+
 
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))
@@ -134,6 +145,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+            // So far: 3 differences from above.
+
 
             // If there's no manifest name at this point, then fall back to using the
             // RootNamespace+Base file name
@@ -146,6 +159,11 @@ namespace Microsoft.Build.Tasks
                     manifestName.Append(rootNamespace).Append(".");
                 }
 
+
+                // #4 Missing spaces/underscores replacement for directory names:
+                // string everettCompatibleDirectoryName = CreateManifestResourceName.MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
+
+
                 // only strip extension for .resx and .restext files
                 string sourceExtension = Path.GetExtension(info.cultureNeutralFilename);
                 if (
@@ -156,6 +174,7 @@ namespace Microsoft.Build.Tasks
                         (0 == String.Compare(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     )
                 {
+                    // #4b Did not Path.Combine DirectoryName with FileNameWithoutExtensionPath
                     manifestName.Append(Path.GetFileNameWithoutExtension(info.cultureNeutralFilename));
 
                     // Append the culture if there is one.        
@@ -172,6 +191,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
+                    // #4b Did not Path.Combine DirectoryName with FileNameWithoutExtensionPath
                     manifestName.Append(Path.GetFileName(info.cultureNeutralFilename));
 
                     if (prependCultureAsDirectory)
