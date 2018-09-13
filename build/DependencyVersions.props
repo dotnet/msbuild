@@ -10,11 +10,8 @@
     <DotnetSqlCachePackageVersion>2.1.1</DotnetSqlCachePackageVersion>
     <DotnetUserSecretsPackageVersion>2.1.1</DotnetUserSecretsPackageVersion>
     <DotnetWatchPackageVersion>2.1.1</DotnetWatchPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.1.4</MicrosoftNETCoreAppPackageVersion>
-  
-    <!-- https://github.com/dotnet/cli/issues/9851  -->
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>3.0.0-preview1-26816-04</MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>
-
+    <MicrosoftNETCoreAppPackageVersion>2.1.5-servicing-26911-03</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.9.0-preview-000013</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
