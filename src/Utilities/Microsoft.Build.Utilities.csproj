@@ -104,9 +104,6 @@
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>Shared\FrameworkLocationHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\HybridDictionary.cs">
-      <Link>Shared\HybridDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>Shared\IConstrainedEqualityComparer.cs</Link>
     </Compile>

@@ -246,10 +246,9 @@ namespace Microsoft.Build.Execution
             {
                 _propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
 
-                // Use a HybridDictionary because these are usually very small
-                _namesOfPropertiesWithRequiredAttribute = new HybridDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                _namesOfPropertiesWithOutputAttribute = new HybridDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                _namesOfPropertiesWithAmbiguousMatches = new HybridDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _namesOfPropertiesWithRequiredAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _namesOfPropertiesWithOutputAttribute = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _namesOfPropertiesWithAmbiguousMatches = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 bool taskTypeImplementsIGeneratedTask = typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
                 TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();

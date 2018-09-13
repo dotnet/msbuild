@@ -73,9 +73,6 @@
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\HybridDictionary.cs">
-      <Link>HybridDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\INodeEndpoint.cs">
       <Link>INodeEndpoint.cs</Link>
     </Compile>
