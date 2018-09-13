@@ -137,7 +137,7 @@
 
   <PropertyGroup>
     <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
-    <IBCMergeBranch>master</IBCMergeBranch>
+    <IBCMergeBranch>lab/ml</IBCMergeBranch>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' != 'true'">
