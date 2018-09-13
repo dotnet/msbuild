@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log
         )
         {
-            return ManifestNameCreator.CreateNameForResource
+            return ManifestNameCreator.CreateNameForCSharpManifestResource
             (
                 fileName,
                 linkFileName,
@@ -100,7 +100,6 @@ namespace Microsoft.Build.Tasks
                 dependentUponFileName,
                 culture,
                 binaryStream,
-                CSharpParserUtilities.GetFirstClassNameFullyQualified,
                 log
             );
         }
