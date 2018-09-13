@@ -200,7 +200,7 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log
         )
         {
-            return ManifestNameCreator.CreateNameForResource
+            return ManifestNameCreator.CreateNameForVisualBasicManifestResource
             (
                 fileName,
                 linkFileName,
@@ -209,7 +209,6 @@ namespace Microsoft.Build.Tasks
                 dependentUponFileName,
                 culture,
                 binaryStream,
-                VisualBasicParserUtilities.GetFirstClassNameFullyQualified,
                 log
             );
         }

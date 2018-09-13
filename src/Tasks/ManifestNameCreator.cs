@@ -8,7 +8,64 @@ namespace Microsoft.Build.Tasks
 {
     internal static class ManifestNameCreator
     {
-        public static string CreateNameForResource
+        public static string CreateNameForCSharpManifestResource
+        (
+            string fileName,
+            string linkFileName,
+            bool prependCultureAsDirectory, // true by default
+            string rootNamespace, // May be null
+            string dependentUponFileName, // May be null
+            string culture, // may be null 
+            Stream binaryStream, // File contents binary stream, may be null
+            TaskLoggingHelper log
+        )
+        {
+            return CreateNameForResource
+            (
+                fileName,
+                linkFileName,
+                prependCultureAsDirectory,
+                rootNamespace,
+                dependentUponFileName,
+                culture,
+                binaryStream,
+                CSharpParserUtilities.GetFirstClassNameFullyQualified,
+                log,
+                includeRootNamespace: false,
+                includeSubFolder: true
+            );
+        }
+
+        public static string CreateNameForVisualBasicManifestResource
+        (
+            string fileName,
+            string linkFileName,
+            bool prependCultureAsDirectory, // true by default
+            string rootNamespace, // May be null
+            string dependentUponFileName, // May be null
+            string culture, // may be null 
+            Stream binaryStream, // File contents binary stream, may be null
+            TaskLoggingHelper log
+        )
+        {
+            return CreateNameForResource
+            (
+                fileName,
+                linkFileName,
+                prependCultureAsDirectory,
+                rootNamespace,
+                dependentUponFileName,
+                culture,
+                binaryStream,
+                VisualBasicParserUtilities.GetFirstClassNameFullyQualified,
+                log,
+                includeRootNamespace: true,
+                includeSubFolder: false
+            );
+        }
+
+
+        private static string CreateNameForResource
         (
             string fileName,
             string linkFileName,
@@ -18,7 +75,9 @@ namespace Microsoft.Build.Tasks
             string culture, // may be null 
             Stream binaryStream, // File contents binary stream, may be null
             Func<Stream, ExtractedClassName> getFirstClassNameFullyQualified, // may be null if binaryStream is null. must not be null when stream is not
-            TaskLoggingHelper log
+            TaskLoggingHelper log,
+            bool includeRootNamespace,
+            bool includeSubFolder
         )
         {
             // (C#/VBParserUtilities).GetFirstClassNameFullyQualified() is required to extract the
@@ -27,6 +86,7 @@ namespace Microsoft.Build.Tasks
             {
                 throw new ArgumentNullException(nameof(getFirstClassNameFullyQualified));
             }
+
 
             // Use the link file name if there is one, otherwise, fall back to file name.
             string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
@@ -39,7 +99,7 @@ namespace Microsoft.Build.Tasks
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName);
 
             // If the item has a culture override, respect that. 
-            if (!String.IsNullOrEmpty(culture))
+            if (!string.IsNullOrEmpty(culture))
             {
                 info.culture = culture;
             }
@@ -58,7 +118,14 @@ namespace Microsoft.Build.Tasks
 
                 if (!string.IsNullOrEmpty(result.Name))
                 {
-                    manifestName.Append(result.Name);
+                    if (includeRootNamespace && !string.IsNullOrEmpty(rootNamespace))
+                    {
+                        manifestName.Append(rootNamespace).Append(".").Append(result.Name);
+                    }
+                    else
+                    {
+                        manifestName.Append(result.Name);
+                    }
 
                     // Append the culture if there is one.        
                     if (!string.IsNullOrEmpty(info.culture))
@@ -81,7 +148,8 @@ namespace Microsoft.Build.Tasks
 
                 // Replace spaces in the directory name with underscores. Needed for compatibility with Everett.
                 // Note that spaces in the file name itself are preserved.
-                string everettCompatibleDirectoryName = CreateManifestResourceName.MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename));
+                string everettCompatibleDirectoryName =
+                    includeSubFolder ? CreateManifestResourceName.MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename)) : "";
 
                 // only strip extension for .resx and .restext files
 
@@ -107,7 +175,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // If the original extension was .resources, add it back
-                    if (String.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(sourceExtension, ".resources", StringComparison.OrdinalIgnoreCase))
                     {
                         manifestName.Append(sourceExtension);
                     }
