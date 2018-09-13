@@ -1983,6 +1983,11 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
+#if !CLR2COMPATIBILITY
+            // For case-insensitive file systems, we need to get an exact file name from a possibly-differently-cased path.
+            fullPath = FileUtilities.GetExactPath(fullPath);
+#endif
+
             var document = new XmlDocumentWithLocation(loadAsReadOnly ? true : (bool?) null)
             {
                 FullPath = fullPath,

@@ -315,7 +315,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string NormalizePath(string path)
         {
-
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
             string fullPath = GetFullPath(path);
             return FixFilePath(fullPath);
@@ -392,6 +391,70 @@ namespace Microsoft.Build.Shared
             */
             return isUNC || path.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1;
         }
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Gets the exact case used on the file system for an existing file or directory.
+        /// </summary>
+        /// <remarks>
+        /// This method may be called on case-sensitive file systems as well, in which case it will always return the provided path.
+        /// </remarks>
+        /// <param name="path">A relative or absolute path.</param>
+        /// <returns>The full path using the correct case if the path exists. Otherwise, the provided path.</returns>
+        internal static string GetExactPath(string path)
+        {
+            // DirectoryInfo accepts either a file path or a directory path, and most of its properties work for either.
+            // However, its Exists property only works for a directory path, so we need an explicit file existence check.
+            var directory = new DirectoryInfo(path);
+            if (!File.Exists(path) && !directory.Exists)
+            {
+                // If the path doesn't exist, just return the full path.
+                return path;
+            }
+
+            // We know exactly how long the string will be, so avoid unnecessary intermediate allocations.
+            var chars = new char[directory.FullName.Length];
+            var currentLocation = chars.Length;
+
+            DirectoryInfo parentDirectory = directory.Parent;
+            while (parentDirectory != null)
+            {
+                FileSystemInfo entry = parentDirectory.EnumerateFileSystemInfos(directory.Name).First();
+
+                // Copy the correctly-cased path part to our working character array.
+                string pathPart = entry.Name;
+                currentLocation -= pathPart.Length;
+                pathPart.CopyTo(0, chars, currentLocation, pathPart.Length);
+
+                // Account for the directory separators.
+                currentLocation--;
+                chars[currentLocation] = Path.DirectorySeparatorChar;
+
+                directory = parentDirectory;
+                parentDirectory = directory.Parent;
+            }
+
+            // Handle the drive letter on Windows, which we'll always normalize to upper case.
+            string root = directory.FullName;
+            if (NativeMethodsShared.IsWindows
+                && root.Length == 3 // Windows drive letters are single characters
+                && root[1] == Path.VolumeSeparatorChar
+                && root[2] == Path.DirectorySeparatorChar)
+            {
+                chars[0] = char.ToUpperInvariant(root[0]);
+                chars[1] = Path.VolumeSeparatorChar;
+                // Directory separator character already copied in the previous loop
+            }
+            else
+            {
+                // For Windows UNC paths, we'll just leave it as specified.
+                // For Unix-like, root will just be "/".
+                root.CopyTo(0, chars, 0, root.Length);
+            }
+
+            return new string(chars);
+        }
+#endif
 
         internal static string FixFilePath(string path)
         {

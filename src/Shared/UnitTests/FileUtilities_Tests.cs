@@ -2,13 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -534,6 +530,58 @@ namespace Microsoft.Build.UnitTests
             {
                 FileUtilities.NormalizePath(filePath);
             });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetExactPathFileExists()
+        {
+            string exactPath = FileUtilities.GetTemporaryFile();
+
+            // Since drive letters are normalized to upper case, use lower case. The rest of the path isn't all upper, so use upper case there.
+            string incorrectCasing = char.ToLower(exactPath[0]) + exactPath.Substring(1).ToUpper();
+
+            // Sanity checks
+            File.Exists(exactPath).ShouldBeTrue();
+            incorrectCasing.ShouldNotBe(exactPath);
+
+            // Path is case-corrected
+            FileUtilities.GetExactPath(incorrectCasing).ShouldBe(exactPath);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetExactPathUncPath()
+        {
+            // Something like \\MACHINE\C$\foo\bar\baz
+            string exactPath = FileUtilities.GetTemporaryFile();
+            exactPath = @"\\" + Environment.MachineName + @"\" + exactPath[0] + @"$" + exactPath.Substring(2);
+
+            string incorrectCasing = exactPath.ToUpper();
+
+            // Sanity checks
+            File.Exists(exactPath).ShouldBeTrue();
+            incorrectCasing.ShouldNotBe(exactPath);
+
+            // Path is case-corrected
+            FileUtilities.GetExactPath(incorrectCasing).ShouldBe(exactPath);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void GetExactPathFileDoesNotExist()
+        {
+            string exactPath = @"C:\abc\def";
+            string incorrectCasing = @"c:\AbC\dEf";
+
+            // Sanity checks
+            File.Exists(exactPath).ShouldBeFalse();
+            incorrectCasing.ShouldNotBe(exactPath);
+
+            // Path is not case-corrected
+            var normalizedPath = FileUtilities.GetExactPath(incorrectCasing);
+            normalizedPath.ShouldNotBe(exactPath);
+            normalizedPath.ShouldBe(incorrectCasing);
         }
 
         [Fact]

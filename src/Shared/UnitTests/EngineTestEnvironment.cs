@@ -24,15 +24,24 @@ namespace Microsoft.Build.UnitTests
         ///     Creates a test variant representing a test project with files relative to the project root. All files
         ///     and the root will be cleaned up when the test completes.
         /// </summary>
+        /// <param name="projectFileName">Name of the project file with extension to be created.</param>
+        /// <param name="projectContents">Contents of the project file to be created.</param>
+        /// <param name="files">Files to be created.</param>
+        /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to 
+        /// the root of the project directory.</param>
+        public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectFileName, string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
+            => WithTransientTestState(new TransientTestProjectWithFiles(projectFileName, projectContents, files, relativePathFromRootToProject));
+
+        /// <summary>
+        ///     Creates a test variant representing a test project with files relative to the project root. All files
+        ///     and the root will be cleaned up when the test completes.
+        /// </summary>
         /// <param name="projectContents">Contents of the project file to be created.</param>
         /// <param name="files">Files to be created.</param>
         /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to 
         /// the root of the project directory.</param>
         public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
-        {
-            return WithTransientTestState(
-                new TransientTestProjectWithFiles(projectContents, files, relativePathFromRootToProject));
-        }
+            => CreateTestProjectWithFiles("build.proj", projectContents, files, relativePathFromRootToProject);
     }
     
     public class TransientTestProjectWithFiles : TransientTestState
@@ -45,7 +54,10 @@ namespace Microsoft.Build.UnitTests
 
         public string ProjectFile { get; }
 
-        public TransientTestProjectWithFiles(string projectContents, string[] files,
+        public TransientTestProjectWithFiles(
+            string projectFileName,
+            string projectContents,
+            string[] files,
             string relativePathFromRootToProject = ".")
         {
             _folder = new TransientTestFolder();
@@ -53,7 +65,7 @@ namespace Microsoft.Build.UnitTests
             var projectDir = Path.GetFullPath(Path.Combine(TestRoot, relativePathFromRootToProject));
             Directory.CreateDirectory(projectDir);
 
-            ProjectFile = Path.GetFullPath(Path.Combine(projectDir, "build.proj"));
+            ProjectFile = Path.GetFullPath(Path.Combine(projectDir, projectFileName));
             File.WriteAllText(ProjectFile, ObjectModelHelpers.CleanupFileContents(projectContents));
 
             CreatedFiles = Helpers.CreateFilesInDirectory(TestRoot, files);

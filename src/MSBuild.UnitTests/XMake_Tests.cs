@@ -2036,6 +2036,48 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain("MSBuildInteractive = [true]");
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        public void ProjectFilesAreCaseCorrected()
+        {
+            string project1Contents = ObjectModelHelpers.CleanupFileContents(@"<Project>
+  <Target Name=`T`>
+   <Message Importance=`High` Text=`MSBuildProjectFullPath: $(MSBuildProjectFullPath)` />
+   <Message Importance=`High` Text=`MSBuildThisFileFullPath: $(MSBuildThisFileFullPath)` />
+   <Message Importance=`High` Text=`MSBuildProjectName: $(MSBuildProjectName)` />
+   <MSBuild Projects=`teST2.proj` Targets=`T` />
+  </Target>
+</Project>");
+            string project2Contents = ObjectModelHelpers.CleanupFileContents(@"<Project>
+  <Target Name=`T`>
+   <Message Importance=`High` Text=`MSBuildProjectFullPath: $(MSBuildProjectFullPath)` />
+   <Message Importance=`High` Text=`MSBuildThisFileFullPath: $(MSBuildThisFileFullPath)` />
+   <Message Importance=`High` Text=`MSBuildProjectName: $(MSBuildProjectName)` />
+  </Target>
+</Project>");
+
+            using (TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles project1 = testEnvironment.CreateTestProjectWithFiles("TEst.proj", project1Contents, new string[0]);
+                string expectedProjectFile1 = project1.ProjectFile;
+
+                string expectedProjectFile2 = Path.Combine(project1.TestRoot, "TEst2.proj");
+                File.WriteAllText(expectedProjectFile2, project2Contents);
+
+                string output = RunnerUtilities.ExecMSBuild($"\"{Path.Combine(project1.TestRoot, "teST.proj")}\"", out bool success, _output);
+
+                success.ShouldBeTrue(() => output);
+
+                output.ShouldContain($"MSBuildProjectFullPath: {expectedProjectFile1}", () => output, Case.Sensitive);
+                output.ShouldContain($"MSBuildThisFileFullPath: {expectedProjectFile1}", () => output, Case.Sensitive);
+                output.ShouldContain("MSBuildProjectName: TEst", () => output, Case.Sensitive);
+
+                output.ShouldContain($"MSBuildProjectFullPath: {expectedProjectFile2}", () => output, Case.Sensitive);
+                output.ShouldContain($"MSBuildThisFileFullPath: {expectedProjectFile2}", () => output, Case.Sensitive);
+                output.ShouldContain("MSBuildProjectName: TEst2", () => output, Case.Sensitive);
+            }
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;
