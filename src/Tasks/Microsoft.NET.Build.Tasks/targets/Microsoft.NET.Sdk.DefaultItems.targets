@@ -155,6 +155,43 @@ Copyright (c) .NET Foundation. All rights reserved.
   <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(DisableImplicitFrameworkReferences)' != 'true'">
     <VerifyMatchingImplicitPackageVersion Condition="'$(VerifyMatchingImplicitPackageVersion)' == ''">true</VerifyMatchingImplicitPackageVersion>
   </PropertyGroup>
+
+  <!-- ImplicitPackageReferenceVersion will go in BundledVersions, but until they do, put defaults here -->
+  <ItemGroup Condition="'@(ImplicitPackageReferenceVersion)' == ''">
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.App"
+                                     TargetFrameworkVersion="2.1"
+                                     DefaultVersion="2.1.1"
+                                     LatestVersion="2.1.3"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.All"
+                                     TargetFrameworkVersion="2.1"
+                                     DefaultVersion="2.1.1"
+                                     LatestVersion="2.1.3"/>
+
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.App"
+                                     TargetFrameworkVersion="2.2"
+                                     DefaultVersion="$(BundledAspNetCoreAppPackageVersion)"
+                                     LatestVersion="$(BundledAspNetCoreAppPackageVersion)"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.All"
+                                     TargetFrameworkVersion="2.2"
+                                     DefaultVersion="$(BundledAspNetCoreAllPackageVersion)"
+                                     LatestVersion="$(BundledAspNetCoreAllPackageVersion)"/>
+  </ItemGroup>
+  
+  <UsingTask TaskName="ApplyImplicitVersions" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <Target Name="ApplyImplicitVersions" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+    <ApplyImplicitVersions TargetFrameworkVersion="$(_TargetFrameworkVersionWithoutV)"
+                           TargetLatestRuntimePatch="$(TargetLatestRuntimePatch)"
+                           PackageReferences="@(PackageReference)"
+                           ImplicitPackageReferenceVersions="@(ImplicitPackageReferenceVersion)">
+      <Output TaskParameter="PackageReferencesToUpdate" ItemName="PackageReferenceToUpdate" />
+    </ApplyImplicitVersions>
+
+    <ItemGroup>
+      <PackageReference Remove="@(PackageReferenceToUpdate)" />
+      <PackageReference Include="@(PackageReferenceToUpdate)" />
+    </ItemGroup>
+  </Target>
   
   <!--
     Automatically add Link metadata to items of specific types if they are outside of the project folder and don't already have the Link metadata set.
