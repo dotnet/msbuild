@@ -10,13 +10,15 @@ using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 {
     public class AssemblyFoldersFromConfig_Tests : ResolveAssemblyReferenceTestFixture
     {
-        public AssemblyFoldersFromConfig_Tests()
+        public AssemblyFoldersFromConfig_Tests(ITestOutputHelper output) : base(output)
         {
             s_existentFiles.AddRange(new[]
             {
@@ -43,7 +45,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig2")},
                     SearchPaths = new[] {moniker}
                 };
@@ -52,7 +54,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2", "assemblyfromconfig2.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
             {
@@ -72,7 +74,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig_common.dll")},
                     SearchPaths = new[] {moniker},
                     TargetProcessorArchitecture = "x86"
@@ -82,7 +84,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86", "assemblyfromconfig_common.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
             {
@@ -102,7 +104,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     Assemblies = new ITaskItem[] { new TaskItem("v5assembly.dll") },
                     SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
@@ -112,12 +114,12 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
 
                 // Try again changing only the processor architecture
                 t = new ResolveAssemblyReference
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     Assemblies = new ITaskItem[] { new TaskItem("v5assembly.dll") },
                     SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "AMD64"
@@ -127,7 +129,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Assert.Equal(1, t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
-                AssertNoCase(moniker, t.ResolvedFiles[0].GetMetadata("ResolvedFrom"));
+                t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
             finally
             {
@@ -146,7 +148,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             {
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
-                    BuildEngine = new MockEngine(),
+                    BuildEngine = new MockEngine(_output),
                     Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig_common.dll")},
                     SearchPaths = new[] {moniker},
                     TargetProcessorArchitecture = "x86"
@@ -171,7 +173,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
             try
             {
-                MockEngine engine = new MockEngine();
+                MockEngine engine = new MockEngine(_output);
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = engine,
