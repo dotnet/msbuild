@@ -137,9 +137,6 @@
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Shared\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ReuseableStringBuilder.cs" >
-      <Link>Shared\ReuseableStringBuilder.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
       <Link>Shared\Collections\ReadOnlyEmptyDictionary.cs</Link>
     </Compile>
@@ -151,6 +148,9 @@
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>Shared\ResourceUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
+      <Link>Shared\ReuseableStringBuilder.cs</Link>
     </Compile>
     <Compile Include="..\Shared\StringBuilderCache.cs">
       <Link>Shared\StringBuilderCache.cs</Link>
