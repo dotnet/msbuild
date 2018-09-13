@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
@@ -153,7 +154,7 @@ namespace Microsoft.DotNet.ToolPackage
                 Version = restoredCommandIdentifier.Version.ToNormalizedString(),
                 TargetFramework = restoredCommandIdentifier.TargetFramework.GetShortFolderName(),
                 RuntimeIdentifier = restoredCommandIdentifier.RuntimeIdentifier.ToLowerInvariant(),
-                Name = restoredCommandIdentifier.CommandName,
+                Name = restoredCommandIdentifier.CommandName.Value,
                 Runner = restoredCommandList.Runner,
                 RelativeToNuGetGlobalPackagesFolderPathToDll =
                     Path.GetRelativePath(nuGetGlobalPackagesFolder.Value, restoredCommandList.Executable.Value)
@@ -174,11 +175,11 @@ namespace Microsoft.DotNet.ToolPackage
                     NuGetVersion.Parse(cacheRow.Version),
                     NuGetFramework.Parse(cacheRow.TargetFramework),
                     cacheRow.RuntimeIdentifier,
-                    cacheRow.Name);
+                    new ToolCommandName(cacheRow.Name));
 
             RestoredCommand restoredCommand =
                 new RestoredCommand(
-                    cacheRow.Name,
+                    new ToolCommandName(cacheRow.Name),
                     cacheRow.Runner,
                     nuGetGlobalPackagesFolder
                         .WithFile(cacheRow.RelativeToNuGetGlobalPackagesFolderPathToDll));

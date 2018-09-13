@@ -97,7 +97,7 @@ namespace Microsoft.DotNet.ToolPackage
 
                 // Currently only "dotnet" commands are supported
                 commands.Add(new RestoredCommand(
-                    configuration.CommandName,
+                    new ToolCommandName(configuration.CommandName),
                     "dotnet",
                     LockFileRelativePathToFullFilePath(entryPointFromLockFile.Path, library)));
 

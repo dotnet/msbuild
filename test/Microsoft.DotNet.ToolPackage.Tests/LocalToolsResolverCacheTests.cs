@@ -47,8 +47,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
-                new RestoredCommand("tool2", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2.dll"))
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
+                new RestoredCommand(new ToolCommandName("tool2"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2.dll"))
             };
 
             localToolsResolverCache.Save(
@@ -88,8 +88,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
-                new RestoredCommand("tool2", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2.dll"))
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
+                new RestoredCommand(new ToolCommandName("tool2"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2.dll"))
             };
 
             localToolsResolverCache.Save(
@@ -123,8 +123,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
-                new RestoredCommand("tool2", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2.dll"))
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
+                new RestoredCommand(new ToolCommandName("tool2"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2.dll"))
             };
 
             localToolsResolverCache.Save(
@@ -166,19 +166,19 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetVersion previewNuGetVersion = NuGetVersion.Parse("0.0.2");
             IReadOnlyList<RestoredCommand> restoredCommandsV0 = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1preview.dll")),
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1preview.dll")),
             };
 
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommandsV1 = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
             };
 
             NuGetVersion newerNuGetVersion = NuGetVersion.Parse("2.0.2");
             IReadOnlyList<RestoredCommand> restoredCommandsV2 = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1new.dll")),
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1new.dll")),
             };
 
             localToolsResolverCache.Save(
@@ -204,7 +204,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new RestoredCommandIdentifierVersionRange(
                         packageId,
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
-                        targetFramework, runtimeIdentifier, "tool1"),
+                        targetFramework, runtimeIdentifier, new ToolCommandName("tool1")),
                     nuGetGlobalPackagesFolder, out RestoredCommand loadedResolverCache);
 
             loadSuccess.Should().BeTrue();
@@ -222,7 +222,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new RestoredCommandIdentifierVersionRange(
                         new PackageId("my.toolBundle"),
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
-                        NuGetFramework.Parse("netcoreapp2.1"), "any", "tool1"),
+                        NuGetFramework.Parse("netcoreapp2.1"), "any", new ToolCommandName("tool1")),
                     nuGetGlobalPackagesFolder, out _);
 
             loadSuccess.Should().BeFalse();
@@ -239,14 +239,14 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
             };
 
             NuGetVersion newerNuGetVersion = NuGetVersion.Parse("2.0.2");
             IReadOnlyList<RestoredCommand> restoredCommandsNewer = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1new.dll")),
-                new RestoredCommand("tool2", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2new.dll")),
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1new.dll")),
+                new RestoredCommand(new ToolCommandName("tool2"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool2new.dll")),
             };
 
             localToolsResolverCache.Save(
@@ -323,7 +323,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
             };
 
             localToolsResolverCache.Save(
@@ -382,7 +382,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
             {
-                new RestoredCommand("tool1", "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
+                new RestoredCommand(new ToolCommandName("tool1"), "dotnet", nuGetGlobalPackagesFolder.WithFile("tool1.dll")),
             };
 
             localToolsResolverCache.Save(

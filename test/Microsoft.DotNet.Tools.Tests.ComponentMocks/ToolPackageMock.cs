@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
@@ -70,7 +71,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 return new RestoredCommand[]
                 {
                     new RestoredCommand(
-                        ProjectRestorerMock.FakeCommandName,
+                        new ToolCommandName(ProjectRestorerMock.FakeCommandName),
                         "dotnet",
                         PackageDirectory.WithFile(executablePath))
                 };

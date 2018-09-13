@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Transactions;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
@@ -131,7 +132,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 Id = packageId,
                 Version = NuGetVersion.Parse(package.Version),
                 Commands = new List<RestoredCommand> {
-                    new RestoredCommand(ProjectRestorerMock.FakeCommandName, "runner", executable) },
+                    new RestoredCommand(new ToolCommandName(ProjectRestorerMock.FakeCommandName), "runner", executable) },
                 Warnings = Array.Empty<string>(),
                 PackagedShims = Array.Empty<FilePath>()
             };

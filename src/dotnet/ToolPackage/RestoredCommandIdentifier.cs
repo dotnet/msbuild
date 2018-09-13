@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.DotNet.Cli.Utils;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -18,20 +19,20 @@ namespace Microsoft.DotNet.ToolPackage
             NuGetVersion version,
             NuGetFramework targetFramework,
             string runtimeIdentifier,
-            string commandName)
+            ToolCommandName commandName)
         {
             PackageId = packageId;
             Version = version ?? throw new ArgumentException(nameof(version));
             TargetFramework = targetFramework ?? throw new ArgumentException(nameof(targetFramework));
             RuntimeIdentifier = runtimeIdentifier ?? throw new ArgumentException(nameof(runtimeIdentifier));
-            CommandName = commandName ?? throw new ArgumentException(nameof(commandName));
+            CommandName = commandName;
         }
 
         public PackageId PackageId { get; }
         public NuGetVersion Version { get; }
         public NuGetFramework TargetFramework { get; }
         public string RuntimeIdentifier { get; }
-        public string CommandName { get; }  
+        public ToolCommandName CommandName { get; }
 
         public bool Equals(RestoredCommandIdentifier other)
         {
@@ -43,10 +44,8 @@ namespace Microsoft.DotNet.ToolPackage
                        RuntimeIdentifier,
                        other.RuntimeIdentifier,
                        StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(
-                       CommandName,
-                       other.CommandName,
-                       StringComparison.OrdinalIgnoreCase);
+                   CommandName.Equals(
+                       other.CommandName);
         }
 
         public override bool Equals(object obj)
@@ -56,9 +55,8 @@ namespace Microsoft.DotNet.ToolPackage
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(PackageId, Version, TargetFramework,
-                StringComparer.OrdinalIgnoreCase.GetHashCode(RuntimeIdentifier),
-                StringComparer.OrdinalIgnoreCase.GetHashCode(CommandName));
+            return HashCode.Combine(PackageId, Version, TargetFramework, CommandName,
+                StringComparer.OrdinalIgnoreCase.GetHashCode(RuntimeIdentifier));
         }
 
         public static bool operator ==(RestoredCommandIdentifier id1, RestoredCommandIdentifier id2)
