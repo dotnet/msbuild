@@ -88,7 +88,7 @@ Because we are using ProjectReferences to determine the graph, we will need to d
 
 **OPEN ISSUE:** Are there other "build dimensions" similar to cross-targeting? Cross-targeting has a well-known pattern, but there may be others. Like runtime id (e.g. win10, win8, osx, linux14, linux16, etc), which give TFM x RID combinations. We wouldn't want to teach the engine how to handle each type of build dimension. Even if we have to hardcode details about certain build dimensions (to avoid having a ton of sdk writers to change), should we bother designing a way in which sdk writers can declare how new build dimensions affect the graph? To avoid adding more and more coupling to build logic?
 
-**OPEN ISSUE:** What about MSBuild calls which pass in global properties not on the ProjectReference? Worse, if the global properties are computed at runtime? The sfproj SDK does this with PublishDir, which tells the project where to put its outputs so the parent sfproj can consume them. We may need to work with sfproj folks and other SDK owners, which may not be necessarily a bad thing since already the sfproj SDK requires 2 complete builds of dependencies (ProjectReference + this PublishDir thing) and can be optimized. A possible short term fix: Add nodes to graph to special case these kinds of SDKs.
+**OPEN ISSUE:** What about MSBuild calls which pass in global properties not on the ProjectReference? Worse, if the global properties are computed at runtime? The sfproj SDK does this with PublishDir, which tells the project where to put its outputs so the referencing sfproj can consume them. We may need to work with sfproj folks and other SDK owners, which may not be necessarily a bad thing since already the sfproj SDK requires 2 complete builds of dependencies (ProjectReference + this PublishDir thing) and can be optimized. A possible short term fix: Add nodes to graph to special case these kinds of SDKs.
 
 Note that graph cycles are disallowed, even if they're using disconnected targets. This is a breaking change, as today you can have two projects where each project depends on a target from the other project, but that target doesn't depend the default target or anything in its target graph.
 
@@ -141,37 +141,37 @@ This is a proposal for what the public API may look like:
 
 ## Inferring which targets to run for a project within the graph
 
-One property of the static build graph is that a project (project, globalproperties, toolsversion) is "built" / visited only once when the project graph is executed. This is in conflict with current P2P patterns (project to project) where a project may be built multiple times during a build with different targets and global properties (examples in [p2p protocol](https://github.com/Microsoft/msbuild/blob/master/documentation/ProjectReference-Protocol.md)).
+One property of the static build graph is that a project (project, globalproperties, toolsversion) is executed only once when the project graph is executed. This is in conflict with current P2P patterns (project-to-project) where a project may be called multiple times with different targets and global properties (examples in [p2p protocol](https://github.com/Microsoft/msbuild/blob/master/documentation/ProjectReference-Protocol.md)).
 
-Additionaly, projects are built bottom up, whereas the classical msbuild scheduler builds projects top down. In the top down traversal, the parent project chooses which targets to call on the child projects. But in the bottom up traversal, we don't know the entry targets for a child because we visit the children before the parents.
+During a static graph based build projects are built before the projects that reference them, whereas the classical msbuild scheduler builds projects just in time. In the classic traversal, the referencing project chooses which targets to call on the referenced projects. But in the static graph traversal, we don't know the entry targets for a reference because we visit the references before the referencing projects.
 
-We need to represent project to project calling patterns in such a way that a graph build can infer the entry targets for a project. These protocols apply to an entire graph. They can be regular or irregular. **Regular** operations consist of recursively calling the same target on all children (e.g. build, clean, rebuild). **Irregular** operations consist of calling different targets on different nodes in the graph (e.g. publish calls publish on the root node but build on the rest). As a complication, today nothing prevents projects to turn regular operations into irregular operations (e.g. a project file reimplements Clean by calling Clean2 on children).
+We need to represent project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project. These protocols apply to an entire graph. They can be regular or irregular. **Regular** operations consist of recursively calling the same target on all referenced projects (e.g. build, clean, rebuild). **Irregular** operations consist of calling different targets on different nodes in the graph (e.g. publish calls publish on the root node but build on the rest). As a complication, today nothing prevents projects to turn regular operations into irregular operations (e.g. a project file reimplements Clean by calling Clean2 on referenced projects).
 
-Some project reference protocols require multiple calls (MSBuild task calls) between the parent and child project. Therefore we need to not only specify the entry targets, but also the helper targets.
+Some project reference protocols require multiple calls (MSBuild task calls) between the referencing project and referenced project. Therefore we need to not only specify the entry targets, but also the helper targets.
 
-Therefore the project reference protocols will need to be explicitily described. Each project specifies the project reference protocol targets it supports, in the form of a taret mapping:
+Therefore the project reference protocols will need to be explicitly described. Each project specifies the project reference protocol targets it supports, in the form of a target mapping:
 
 $target \to targetList$
 
-$target$ represents the project reference entry target, and $targetList$ represents the list of targets that $target$ ends up calling on each child.
+$target$ represents the project reference entry target, and $targetList$ represents the list of targets that $target$ ends up calling on each referenced project.
 
-For example, a simple recursive rule would be $A \to A$, which says that a project called with target $A$ will call target $A$ on its children. Here's an example execution with two nodes:
+For example, a simple recursive rule would be $A \to A$, which says that a project called with target $A$ will call target $A$ on its referenced projects. Here's an example execution with two nodes:
 
 ```
-Build A+-->Proj1   A->A
-             +
-             |
-             | A
-             |
-             v
-           Proj2   A->A
+Execute target A+-->Proj1   A->A
+               +
+               |
+               | A
+               |
+               v
+             Proj2   A->A
 ```
 
-Proj1 depends on Proj2, and we want to build the graph with target $A$. Proj1 gets inspected for the project reference protocol for target $A$ (represented to the right of Proj1). The protocol says the children will be called with $A$. Therefore Proj2 gets built with target $A$. After Proj2 builds, Proj1 then also builds with $A$ (because Proj1 is the root of the graph).
+Proj1 depends on Proj2, and we want to build the graph with target $A$. Proj1 gets inspected for the project reference protocol for target $A$ (represented to the right of Proj1). The protocol says the referenced projects will be called with $A$. Therefore Proj2 gets called with target $A$. After Proj2 builds, Proj1 then also builds with $A$ (because Proj1 is the root of the graph).
 
-A project reference protocol could contain multiple targets, for example $A \to B, A$. This means that building $A$ on the parent will lead to $B$ and $A$ getting called on the children. If all nodes in the graph repeat the same rule, then the rule is repeated recursively on all nodes (this would be a regular operation). However, a node can choose to implement the protocol differently, which would lead to an irregular protocol. In the following example, the entry targets are:
-- Proj4 is built with targets $B, A, C, D$. On multiple parents, the incoming targets get concatenated. The order does not matter, as MSBuild has non-deterministic p2p ordering.
-- Proj3 and Proj2 build with $B, A$, as specified by the rule in Proj1.
+A project reference protocol could contain multiple targets, for example $A \to B, A$. This means that building $A$ on the referencing project will lead to $B$ and $A$ getting called on the referenced projects. If all nodes in the graph repeat the same rule, then the rule is repeated recursively on all nodes (this would be a regular operation). However, a node can choose to implement the protocol differently, which would lead to an irregular protocol. In the following example, the entry targets are:
+- Proj4 is called with targets $B, A, C, D$. On multiple references, the incoming targets get concatenated. The order does not matter, as MSBuild has non-deterministic p2p ordering.
+- Proj3 and Proj2 get called with $B, A$, as specified by the rule in Proj1.
 - Proj1 builds with A, because it's the root of the graph.
 
 ```
@@ -195,7 +195,7 @@ Here are the rules for the common protocols:
 
 $Build \to GetTargetFrameworks, \langle default \rangle, GetNativeManifest, GetCopyToOutputDirectoryItems$
 
-The default target (represented here as $\langle default \rangle$) is resolved for each project.
+The default target (represented in this spec's pseudo protocol representation as $\langle default \rangle$) is resolved for each project.
 
 $Clean \to GetTargetFrameworks, Clean$
 
@@ -208,11 +208,11 @@ Restore is a composition of two rules:
 
 - $\_GenerateRestoreProjectPathWalk \to \_IsProjectRestoreSupported, \_GenerateRestoreProjectPathWalk, \_GenerateRestoreGraphProjectEntry$
 
-**Open Issue:** Restore is a bit complicated, and we may need new concepts to represent it. The root project calls the recursive $\_GenerateRestoreProjectPathWalk$ on itself to collect the children closure, and then after the recursion call returns (after having walked the graph), it calls the other targets on each returned child in a non-recursive manner. So the above protocol is not a truthful representation of what happens, but it correctly captures all targets called on each node in the graph.
+**Open Issue:** Restore is a bit complicated, and we may need new concepts to represent it. The root project calls the recursive $\_GenerateRestoreProjectPathWalk$ on itself to collect the referenced projects closure, and then after the recursion call returns (after having walked the graph), it calls the other targets on each returned referenced project in a non-recursive manner. So the above protocol is not a truthful representation of what happens, but it correctly captures all targets called on each node in the graph.
 
 **Open Issue:** How do we differentiate between targets called on the outer build project and targets called on the inner build projects?
 
-We'll represent the project reference protocols as items in MSBuild:
+We'll represent the project reference protocols as items in MSBuild. The target list will be stored as properties for ease of extensibility.
 ```xml
 <PropertyGroup>
   <ProjectReferenceTargetsForClean>GetTargetFrameworks;Clean</ProjectReferenceTargetsForClean>
@@ -234,7 +234,7 @@ After execution, the results of the entry targets will be cached in the BuildMan
 
 For projects which depend on other projects, the MSBuild task will look up the target result in the cache. If the target is missing from the cache, an error will be logged and the build will fail. If the project is calling into itself either via `CallTarget` or via `MSBuild` with a different set of global properties, this will be always allowed (support for cross-targeting).
 
-Initially this result cache will just be in-memory, similar to the existing MSBuild target result cache, but eventually could persist across builds so that an incremental build of a particular project in the project graph would not require re-evaluation or any target execution in that project's dependencies. This may have significant perf improvements for incremental builds.
+Initially this result cache will just be in-memory, similar to the existing MSBuild target result cache, but eventually could persist across builds so that an incremental build of a particular project in the project graph would not require re-evaluation or any target execution in that project's dependencies. This may have significant performance improvements for incremental builds.
 
 Note that because projects have a concrete start and end time, this allows for easy integration with Tracker to observe all inputs and outputs for a project. Note however that export target I/O would be attributed to the dependency (project doing the exporting), not the dependent project (project with the project reference). This differs from today's behavior, but seems like a desirable difference anyway.
 
@@ -243,7 +243,7 @@ To support distribution with export targets (eg. for the MS internal build engin
 - Option 1 (easier): Run export targets only for dependencies, no build.
   - Requires re-evaluation of the dependency, but no big MSBuild support beyond allowing the no-Build mode for dependencies.
 - Option 2 (better): Serialize the export target state
-  - Best for perf, but requires a serialization protocol and a way to specify how to import the state
+  - Best for performance, but requires a serialization protocol and a way to specify how to import the state
   - Possibly same mechanism as the persistent cross-build cache described above.
 
 ## I/O Tracking
