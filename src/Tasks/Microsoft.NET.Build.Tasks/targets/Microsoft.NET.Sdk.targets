@@ -309,6 +309,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CreateAppHost AppHostSourcePath="@(NativeRestoredAppHostNETCore)"
                    AppHostDestinationDirectoryPath="$(AppHostDestinationDirectoryPath)"
                    AppBinaryName="$(AssemblyName)$(TargetExt)"
+                   IntermediateAssembly="@(IntermediateAssembly)"
                    WindowsGraphicalUserInterface="$(UseWindowsGraphicalUserInterface)"
                    Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
 

@@ -31,6 +31,7 @@ namespace Microsoft.NET.Build.Tasks
             string appHostSourceFilePath,
             string appHostDestinationFilePath,
             string appBinaryFilePath,
+            string intermediateAssembly,
             bool overwriteExisting = false,
             AppHostOptions options = null)
         {
@@ -54,7 +55,7 @@ namespace Microsoft.NET.Build.Tasks
 
             // Copy resources from managed dll to the apphost
             new ResourceUpdater(appHostDestinationFilePath)
-                .AddResourcesFrom(appBinaryFilePath)
+                .AddResourcesFrom(intermediateAssembly)
                 .Update();
 
             // Re-write ModifiedAppHostPath with the proper contents.
