@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.Graph
 {
@@ -13,7 +16,10 @@ namespace Microsoft.Build.Graph
     /// </summary>
     internal sealed class ProjectGraph
     {
-        private readonly List<ProjectGraphNode> _projectNodes = new List<ProjectGraphNode>();
+        private const string ProjectReferenceString = "ProjectReference";
+        private const string FullPathString = "FullPath";
+
+        private Dictionary<string, ProjectGraphNode> _allParsedProjects = new Dictionary<string, ProjectGraphNode>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Constructs a graph starting from the given project file.
@@ -22,9 +28,7 @@ namespace Microsoft.Build.Graph
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile)
         {
-            var graphNode =
-                new ProjectGraphNode(ProjectCollection.GlobalProjectCollection.LoadProject(entryProjectFile));
-            _projectNodes.Add(graphNode);
+            AddNewNode(entryProjectFile);
         }
 
         /// <summary>
@@ -32,11 +36,61 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <param name="entryProjectFiles">The project files to use as the entry points in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
-        public ProjectGraph(IEnumerable<string> entryProjectFiles) { }
+        public ProjectGraph(IEnumerable<string> entryProjectFiles)
+        {
+            var projectsToParse = new Queue<string>();
+            foreach (var entryProjectFile in entryProjectFiles)
+            {
+                projectsToParse.Enqueue(entryProjectFile);
+            }
+
+            LoadGraph(projectsToParse);
+        }
 
         /// <summary>
         /// Get an unordered collection of all project nodes in the graph.
         /// </summary>
-        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes => _projectNodes;
+        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes => _allParsedProjects.Values;
+
+        private ProjectGraphNode AddNewNode(string projectFilePath)
+        {
+            var graphNode =
+                new ProjectGraphNode(ProjectCollection.GlobalProjectCollection.LoadProject(projectFilePath));
+            _allParsedProjects.Add(projectFilePath, graphNode);
+            return graphNode;
+        }
+
+        private List<ProjectGraphNode> LoadGraph(Queue<string> projectsToParse)
+        {
+            var parsedProjects = new List<ProjectGraphNode>();
+            while (projectsToParse.Count != 0)
+            {
+                string projectToParse = projectsToParse.Dequeue();
+                if (_allParsedProjects.TryGetValue(projectToParse, out ProjectGraphNode parsedProject))
+                {
+                    parsedProjects.Add(parsedProject);
+                }
+                else
+                {
+                    parsedProject = AddNewNode(projectToParse);
+                    parsedProjects.Add(parsedProject);
+                    ProjectInstance projectInstance = parsedProject.Project.CreateProjectInstance();
+                    IEnumerable<ProjectItemInstance> projectReferenceItems = projectInstance.GetItems(ProjectReferenceString);
+                    var projectReferencesToParse = new Queue<string>();
+                    if (projectReferenceItems != null && projectReferenceItems.Any())
+                    {
+                        foreach (var projectReferenceToParse in projectReferenceItems)
+                        {
+                            string projectReferencePath = projectReferenceToParse.GetMetadataValue(FullPathString);
+                            projectReferencesToParse.Enqueue(projectReferencePath);
+                        }
+                        parsedProject.AddProjectReferences(LoadGraph(projectReferencesToParse));
+                    }
+                }
+            }
+
+            return parsedProjects;
+        }
+  
     }
 }
