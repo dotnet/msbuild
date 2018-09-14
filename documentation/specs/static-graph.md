@@ -1,3 +1,25 @@
+- [Static Graph](#static-graph)
+    - [Overview](#overview)
+        - [Motivations](#motivations)
+        - [M1 - MVP](#m1---mvp)
+        - [M1 non-goals](#m1-non-goals)
+        - [M2 - Single Project Enforcement](#m2---single-project-enforcement)
+        - [M3 - Dependency Tracking](#m3---dependency-tracking)
+        - [M4 - Ready for Caching/Distribution](#m4---ready-for-cachingdistribution)
+        - [M5 - Performance](#m5---performance)
+    - [Project Graph](#project-graph)
+        - [Building a project graph](#building-a-project-graph)
+        - [Public API](#public-api)
+    - [Inferring which targets to run and cache for a project within the graph](#inferring-which-targets-to-run-and-cache-for-a-project-within-the-graph)
+        - [Graph operations](#graph-operations)
+            - [Specifying graph operations](#specifying-graph-operations)
+            - [Inferring graph operations for a specific node](#inferring-graph-operations-for-a-specific-node)
+        - [Export Targets](#export-targets)
+            - [Syntax](#syntax)
+            - [Building using export targets](#building-using-export-targets)
+    - [Distribution](#distribution)
+    - [I/O Tracking](#io-tracking)
+
 # Static Graph
 
 ## Overview
@@ -5,7 +27,7 @@
 ### Motivations
 - Stock projects can build with "project-level build" and if clean onboard to MS internal build engines with cache/distribution
 - Stock projects will be "project-level build" clean.
-- Add determinism to MSBuild
+- Add determinism to MSBuild w.r.t. project dependencies. Today MSBuild discovers projects just in time, as it finds MSBuild tasks. This means there’s no guarantee that the same graph is produced two executions in a row, other than hopefully sane project files. With the static graph, you’d know the shape of the build graph before the build starts.
 - Potential perf gain in graph scheduling
 - Increase perf of interaction between MSBuild and higher-order build engines (eg. MS internal build engines) - reuse evaluation and MSBuild nodes
 - **Existing functionality must still work. This new behavior is opt-in only.**
@@ -121,10 +143,22 @@ This is a proposal for what the public API may look like:
         }
     }
 
-## Export Targets
-The idea behind the export targets feature is that it changes the behavior of the MSBuild task to always pull the target results from cache rather than actually evaluating and executing the list targets. This has several benefits such as each project having a concrete lifetime within the build, may reduce re-evaluation cost, and opens up maybe caching and distribution scenarios.
+## Inferring which targets to run and cache for a project within the graph
 
-### Syntax
+One property of the static build graph is that a project (project, globalproperties, toolsversion) is "built" / visited only once when the project graph is executed.
+
+This is in conflict with current P2P patterns (project to project) where a project may be built multiple times during a build with different targets and global properties (examples in [p2p protocol](https://github.com/Microsoft/msbuild/blob/master/documentation/ProjectReference-Protocol.md)). Thus we need a mechanism through which the project files self describe all the ways they can be built in. We need a public interface of msbuild targets w.r.t. the build graph. We call this interface the **exported targets**.
+
+Executing projects with export targets within the graph means changing the behavior of the MSBuild task to always pull the target results from cache rather than actually evaluating and executing the list targets. This has several benefits such as each project having a concrete lifetime within the build, may reduce re-evaluation cost, and opens up maybe caching and distribution scenarios.
+
+In addition to export targets, we also need to represent operations on entire msbuild p2p graphs in such a way that a graph build can infer the entry targets for a project. Graph operations are operations that apply to an entire graph. They can be regular or irregular. Regular operations consist of recursively calling the same target on all children (e.g. restore, clean, rebuild). Irregular operations consist of calling different targets on different nodes in the graph (e.g. publish calls publish on the root node but build on the rest). As a complication, today nothing prevents projects to turn regular operations into irregular operations (e.g. a project file reimplements Clean by calling Clean2 on children).
+
+### Graph operations
+#### Specifying graph operations
+#### Inferring graph operations for a specific node
+
+### Export Targets
+#### Syntax
 - Option 1: <ExportTarget Name="GetTargetPath" />.
   - Pros: Easy to search, very extensible (can export targets which you don't "own")
   - Cons: Separated from the target definition, breaking change
@@ -140,7 +174,7 @@ The idea behind the export targets feature is that it changes the behavior of th
 
 **Option 4** seems like the best choice.
 
-### Building using export targets
+#### Building using export targets
 When using export targets, the project graph is required to build the projects in the correct order. An individual project will be built using `/p:BuildProjectReferences=false` to avoid recursive builds inside a project
 
 **OPEN ISSUE:** Can we get away with not setting `/p:BuildProjectReferences=false`? It would mean we'd need to export Build, Rebuild, and Clean, but would eliminate any need for setting extra global properties. Perhaps this is fine, or perhaps the entry point for a project is always considered exported?
