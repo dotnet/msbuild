@@ -185,12 +185,21 @@ Copyright (c) .NET Foundation. All rights reserved.
                            PackageReferences="@(PackageReference)"
                            ImplicitPackageReferenceVersions="@(ImplicitPackageReferenceVersion)">
       <Output TaskParameter="PackageReferencesToUpdate" ItemName="PackageReferenceToUpdate" />
+      <Output TaskParameter="SdkBuildWarnings" ItemName="SdkBuildWarning" />
     </ApplyImplicitVersions>
 
     <ItemGroup>
       <PackageReference Remove="@(PackageReferenceToUpdate)" />
       <PackageReference Include="@(PackageReferenceToUpdate)" />
     </ItemGroup>
+  </Target>
+  
+  <!-- This target runs before build but not before restore, to avoid duplicating these warnings
+       if building with an implicit restore. -->
+  <Target Name="WarnForExplicitVersions" BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          DependsOnTargets="ApplyImplicitVersions"
+          Condition="'@(SdkBuildWarning)' != ''">
+    <NetSdkWarning FormattedText="%(SdkBuildWarning.Identity)" />
   </Target>
   
   <!--

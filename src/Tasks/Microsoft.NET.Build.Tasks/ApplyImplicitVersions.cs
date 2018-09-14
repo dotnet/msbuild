@@ -21,8 +21,16 @@ namespace Microsoft.NET.Build.Tasks
         [Output]
         public ITaskItem[] PackageReferencesToUpdate { get; set; }
 
+        //  This task runs both before restore and build, so if it logged warnings directly they could show up
+        //  twice when building with implicit restore.  So instead we generate the warnings here, and keep them
+        //  in an item where they'll be logged in a target that runs before build, but not before restore.
+        [Output]
+        public string[] SdkBuildWarnings { get; set; }
+
         protected override void ExecuteCore()
         {
+            List<string> buildWarnings = new List<string>();
+
             var packageReferencesToUpdate = new List<ITaskItem>();
 
             var implicitReferencesForThisFramework = ImplicitPackageReferenceVersions
@@ -48,12 +56,13 @@ namespace Microsoft.NET.Build.Tasks
                     else
                     {
                         // NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended.  For more information, see https://aka.ms/sdkimplicitrefs
-                        Log.LogWarning(Strings.PackageReferenceVersionNotRecommended, packageReference.ItemSpec, versionOnPackageReference);
+                        buildWarnings.Add(string.Format(Strings.PackageReferenceVersionNotRecommended, packageReference.ItemSpec, versionOnPackageReference));
                     }
                 }
             }
 
             PackageReferencesToUpdate = packageReferencesToUpdate.ToArray();
+            SdkBuildWarnings = buildWarnings.ToArray();
         }
 
         class ImplicitPackageReferenceVersion
