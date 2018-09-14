@@ -52,6 +52,11 @@ namespace Microsoft.NET.Build.Tasks
             // Copy AppHostSourcePath to ModifiedAppHostPath so it inherits the same attributes\permissions.
             File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwriteExisting);
 
+            // Copy resources from managed dll to the apphost
+            new ResourceUpdater(appHostDestinationFilePath)
+                .AddResourcesFrom(appBinaryFilePath)
+                .Update();
+
             // Re-write ModifiedAppHostPath with the proper contents.
             using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
             {

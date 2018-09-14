@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 string sourceAppHostMock = PrepareAppHostMockFile(testDirectory, content =>
                 {
-                    // Corrupt the has value
+                    // Corrupt the hash value
                     content[WindowsFileHeader.Length + 1]++;
                 });
                 string destinationFilePath = Path.Combine(testDirectory.Path, "DestinationAppHost.exe.mock");
@@ -185,7 +185,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         private string PrepareAppHostMockFile(TestDirectory testDirectory, Action<byte[]> customize = null)
         {
             // For now we're testing the AppHost on Windows PE files only.
-            // The only customization which we do on non-Windows files is the embeding
+            // The only customization which we do on non-Windows files is the embedding
             // of the binary path, which works the same regardless of the file format.
 
             int size = WindowsFileHeader.Length + AppBinaryPathPlaceholderSearchValue.Length;
