@@ -22,5 +22,8 @@
 
     <SdkVersion>$(NugetVersion)</SdkVersion>
     <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion>
+
+    <FullNugetVersion Condition=" '$(IsNotOrchestratedPublish)' == 'false' ">$(NugetVersion)</FullNugetVersion>
+
   </PropertyGroup>
 </Project>

@@ -49,9 +49,13 @@
                      Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' " />
       <ForPublishing Include="$(PackagesDirectory)/runtime.*.Microsoft.DotNet.SDK.*.symbols.nupkg" />
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).*.nupkg"
-                     Condition=" '$(OS)' == 'Windows_NT' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' ">
+        <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
+      </ForPublishing>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.*.nupkg"
-                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
+                     Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' ">
+        <ManifestArtifactData>NonShipping=true</ManifestArtifactData>
+      </ForPublishing>
       <ForPublishing Include="$(PackagesDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.swr"
                      Condition=" '$(OS)' == 'Windows_NT' And '$(Architecture)' == 'x64' "/>
       <ForPublishing Include="$(PackagesDirectory)/nuGetPackagesArchive.lzma"
