@@ -47,11 +47,6 @@ namespace Microsoft.Build.Shared
         internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
 
         /// <summary>
-        /// Name of the item containing a list of export targets for static graph builds
-        /// </summary>
-        internal const string ExportTargetsItemName = "ExportTargets";
-
-        /// <summary>
         /// The name of the environment variable that users can specify to override where NuGet assemblies are loaded from in the NuGetSdkResolver.
         /// </summary>
         internal const string NuGetAssemblyPathEnvironmentVariableName = "MSBUILD_NUGET_PATH";

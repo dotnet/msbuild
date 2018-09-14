@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -338,7 +338,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             result.InitialTargets = new List<string> { "a", "b" };
             result.DefaultTargets = new List<string> { "c", "d" };
-            result.ExportTargets = ImmutableArray.Create(new []{"e", "f"});
 
             result.AddResultsForTarget("alpha", new TargetResult(new TaskItem[] { fooTaskItem }, TestUtilities.GetSuccessResult()));
             result.AddResultsForTarget("omega", new TargetResult(new TaskItem[] { }, TestUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
@@ -351,7 +350,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(result.ConfigurationId, deserializedResult.ConfigurationId);
             Assert.True(TranslationHelpers.CompareCollections(result.DefaultTargets, deserializedResult.DefaultTargets, StringComparer.Ordinal));
-            Assert.True(TranslationHelpers.CompareCollections(result.ExportTargets, deserializedResult.ExportTargets, StringComparer.Ordinal));
             Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
             Assert.Equal(result.Exception.Message, deserializedResult.Exception.Message);
             Assert.Equal(result.GlobalRequestId, deserializedResult.GlobalRequestId);

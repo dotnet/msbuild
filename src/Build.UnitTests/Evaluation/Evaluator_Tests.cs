@@ -11,7 +11,6 @@ using System.Xml;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Definition;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -1012,36 +1011,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
            );
         }
-
-        [Fact]
-        public void NonExistingExportTargetsEmitsError()
-        {
-            using (var env = TestEnvironment.Create())
-            {
-                var testProject = env.CreateTestProjectWithFiles(
-                    @"<Project>
-                         <ItemGroup>
-                            <ExportTargets Include='Foo' />
-                         </ItemGroup>
-                      </Project>");
-
-                var projectCollection = env.CreateProjectCollection().Collection;
-
-                var logger = new MockLogger();
-
-                projectCollection.RegisterLogger(logger);
-
-                var project = Project.FromFile(
-                    testProject.ProjectFile,
-                    new ProjectOptions()
-                    {
-                        ProjectCollection = projectCollection
-                    });
-
-                logger.AssertLogContains("MSB4250");
-            }
-        }
-
         /// <summary>
         /// MSBuildDefaultTargets was not getting cleared out between reevaluations.
         /// </summary>

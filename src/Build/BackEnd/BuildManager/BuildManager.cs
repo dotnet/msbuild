@@ -1392,11 +1392,6 @@ namespace Microsoft.Build.Execution
                 {
                     configuration.ProjectInitialTargets = result.InitialTargets;
                 }
-
-                if (configuration.ProjectExportTargets == null)
-                {
-                    configuration.ProjectExportTargets = result.ExportTargets;
-                }
             }
 
             IEnumerable<ScheduleResponse> response = _scheduler.ReportResult(node, result);

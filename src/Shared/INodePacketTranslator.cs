@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -22,83 +21,6 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     /// <typeparam name="T">The type of dictionary to be created.</typeparam>
     internal delegate T NodePacketCollectionCreator<T>(int capacity);
-
-    internal delegate C NodePacketReadonlyCollectionCreator<C, E>(int capacity, TranslatedCollectionEnumerator<E> elementEnumerator);
-
-    internal struct TranslatedCollectionEnumerator<T> : IEnumerable<T>
-    {
-        private readonly INodePacketTranslator _translator;
-        private readonly int _count;
-
-        public TranslatedCollectionEnumerator(INodePacketTranslator translator, int count) : this()
-        {
-            _translator = translator;
-            _count = count;
-        }
-
-        public Enumerator GetEnumerator()
-        {
-            return new Enumerator(_translator, _count);
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        internal struct Enumerator : IEnumerator<T>
-        {
-            private readonly INodePacketTranslator _translator;
-            private readonly int _count;
-
-            private int _index;
-
-            public Enumerator(INodePacketTranslator translator, int count)
-            {
-                _translator = translator;
-                _count = count;
-                _index = 0;
-
-                Current = default;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public bool MoveNext()
-            {
-                if (_index >= _count)
-                {
-                    Current = default;
-                    return false;
-                }
-
-                _index++;
-
-                T current = default;
-                _translator.TranslateDotNet(ref current);
-
-                Current = current;
-
-                return true;
-            }
-
-            public void Reset()
-            {
-                throw new NotSupportedException();
-            }
-
-            public T Current { get; private set; }
-
-            object IEnumerator.Current => Current;
-        }
-    }
 
     /// <summary>
     /// The serialization mode.
@@ -240,12 +162,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">factory to create type T</param>
         /// <typeparam name="T">A TaskItemType</typeparam>
         void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable;
-
-
-#if !CLR2COMPATIBILITY
-        void Translate<T, C>(ref IReadOnlyCollection<T> collection, NodePacketReadonlyCollectionCreator<C, T> collectionFactory) where C : IReadOnlyCollection<T>;
-        
-#endif
 
         /// <summary>
         /// Translates a list of T where T implements INodePacketTranslateable using a collection factory

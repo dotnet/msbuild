@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -19,7 +17,7 @@ namespace Microsoft.Build.BackEnd
     /// officially supported by INodePacketTranslator, but that we still want to do 
     /// custom translation of.  
     /// </summary>
-    internal static class NodePacketTranslatorUtilities
+    internal static class NodePacketTranslatorExtensions
     {
         private static Lazy<ConcurrentDictionary<Type, ConstructorInfo>> parameterlessConstructorCache = new Lazy<ConcurrentDictionary<Type, ConstructorInfo>>(() => new ConcurrentDictionary<Type, ConstructorInfo>());
 
@@ -105,18 +103,6 @@ namespace Microsoft.Build.BackEnd
             targetInstanceChild.Translate(translator);
 
             return (T) targetInstanceChild;
-        }
-
-        public static ImmutableArray<T> ImmutableArrayFactory<T>(int capacity, TranslatedCollectionEnumerator<T> elementEnumerator)
-        {
-            var builder = ImmutableArray.CreateBuilder<T>(capacity);
-
-            foreach (var element in elementEnumerator)
-            {
-                builder.Add(element);
-            }
-
-            return builder.ToImmutable();
         }
     }
 }

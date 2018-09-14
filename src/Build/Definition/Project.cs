@@ -3052,7 +3052,6 @@ namespace Microsoft.Build.Evaluation
             public ItemDictionary<ProjectItem> Items { get; private set; }
 
             public List<ProjectItemElement> EvaluatedItemElements { get; private set; }
-            public IReadOnlyCollection<string> ExportTargets { get; set; }
 
             /// <summary>
             /// List of items that link the XML items and evaluated items,
@@ -3197,7 +3196,6 @@ namespace Microsoft.Build.Evaluation
             public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
             {
                 DefaultTargets = null;
-                ExportTargets = ImmutableArray<string>.Empty;
                 Properties = new PropertyDictionary<ProjectProperty>();
                 ConditionedProperties = new Dictionary<string, List<string>>(MSBuildNameIgnoreCaseComparer.Default);
                 Items = new ItemDictionary<ProjectItem>();
