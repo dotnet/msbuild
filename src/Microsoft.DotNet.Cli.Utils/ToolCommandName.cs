@@ -9,9 +9,14 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         public ToolCommandName(string name)
         {
-            if (string.IsNullOrEmpty(name))
+            if (name == null)
             {
                 throw new ArgumentNullException(nameof(name));
+            }
+
+            if (name == string.Empty)
+            {
+                throw new ArgumentException(message: "cannot be empty", paramName: nameof(name));
             }
 
             Value = name;
