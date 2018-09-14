@@ -123,13 +123,14 @@ This section is created when building a project. Settings include:
     * Full list of [configuration properties](https://github.com/dotnet/coreclr/blob/master/Documentation/project-docs/clr-configuration-knobs.md) for CoreCLR.
     * `System.GC.Server` (old: `gcServer`) - Boolean indicating if the server GC should be used (Default: `true`).
     * `System.GC.Concurrent` (old: `gcConcurrent`) - Boolean indicating if background garbage collection should be used.
-* `framework` - Indicates the `name`, `version`, and other properties of the shared framework to use when activating the application including `applyPathes` and `rollForwardOnNoCandidateFx`. The presence of this section indicates that the application is a framework-dependent app.
+* `framework` - Indicates the `name`, `version`, and other properties of the shared framework to use when activating the application including `applyPathes` and `rollForwardOnNoCandidateFx`. The presence of this section (or another framework in the new `frameworks` section) indicates that the application is a framework-dependent app.
 * `applyPatches` - When `false`, the framework version is strictly obeyed by the host. When `applyPatches` is unspecified or `true`, the framework from either the same or a higher version that differs only by the patch field will be used.
   * For example, if `version=1.0.1` and `applyPatches` is `true`, the host would load the shared framework from `1.0.{n}`, where `n >= 1`, but will not load from `1.1.0`, even if present. When `applyPatches` is `false`, the shared framework will be loaded from `1.0.1` strictly.
   * **Note:** This does not apply to `pre-release` versions; it applies only to `production` releases.
   * **Note:** This section should not exist self-contained applications because they do not rely upon a shared framework.
 * `rollForwardOnNoCandidateFx` - Determines roll-forward behavior of major and minor. Only applies to `production` releases. Values: 0(Off), 1 (roll forward on [minor]), 2 (Roll forward on [major] and [minor])
  See [roll-forward-on-no-candidate documentation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/roll-forward-on-no-candidate-fx.md) for more information.
+* `frameworks` - This is an optional array added in 3.0 that allows multiple frameworks to be specified. The `name`, `version`, `applyPatches` and `rollForwardOnNoCandidateFx` properties are available. The `framework` section is no longer necessary in 3.0, but if present is treated as if it was the first framework in the `frameworks` section. The presence of frameworks in this section (or the `framework` section) indicates that the application is a framework-dependent app. See the notes at the end of this document for more information.
 
 These settings are read by host (apphost or dotnet executable) to determine how to initialize the runtime. All versions of the host **must ignore** settings in this section that they do not understand (thus allowing new settings to be added in later versions).
 
@@ -166,7 +167,6 @@ Only dependencies with a `type` value of `package` should be considered by the h
 ### `libraries` Section (`.deps.json`)
 
 This section contains a union of all the dependencies found in the various targets, and contains common metadata for them. Specifically, it contains the `type`, as well as a boolean indicating if the library can be serviced (`serviceable`, only for `package`-typed libraries) and a SHA-512 hash of the package file (`sha512`, only for `package`-typed libraries.
-
 ## How the file is used
 
 The file is read by two different components:
@@ -199,6 +199,24 @@ In the framework-dependent deployment model, the `*.runtimeConfig.json` file wil
 ```
 
 This data is used to locate the shared framework folder. The exact mechanics of which version are selected are defined elsewhere, but in general, it locates the shared runtime in the `shared` folder located beside it by using the relative path `shared/[runtimeOptions.framework.name]/[runtimeOptions.framework.version]`. Once it has applied any version roll-forward logic and come to a final path to the shared framework, it locates the `[runtimeOptions.framework.name].deps.json` file within that folder and loads it **first**.
+
+Note, starting with 3.0, the "framework" section is optional and a new "frameworks" section supports multiple frameworks:
+```json
+{
+    "runtimeOptions": {
+        "frameworks": [
+            {
+                "name": "Microsoft.AspNetCore.All",
+                "version": "3.0.0"
+            },
+            {
+                "name": "Microsoft.Forms",
+                "version": "3.0.0"
+            }
+        ]
+    }
+}
+```
 
 Next, the deps file from the application is loaded and merged into this deps file (this is conceptual, the host implementation doesn't necessary have to directly merge the data ;)). Data from the app-local deps file trumps data from the shared framework.
 
@@ -288,51 +306,53 @@ Note one important aspect about asset resolution: The resolution scope is **per-
 
 The path to a runtime-specific asset is resolved in the same way as a normal asset (first check Servicing, then Package Cache, App-Local, Global Packages Location, etc.) with **one exception**. When searching app-local, rather than just looking for the simple file name in the app-local directory, a runtime-specific asset is expected to be located in a subdirectory matching the relative path information for that asset in the lock file. So the `native` `sni.dll` asset for `win7-x64` in the `System.Data.SqlClient` example above would be located at `APPROOT/runtimes/win7-x64/native/sni.dll`, rather than the normal app-local path of `APPROOT/sni.dll`.
 
-## Opt-In [appname].runtimeconfig.json Explicit Overrides for Framework Settings
-In order to address potential issues with compatibility, an application can override a framework's runtimeconfig.json settings. This should only be done with the understanding that any settings specified here have unintended consequences and may prevent future upgrade \ roll-forward compatibility. The settings include `version`, `rollForwardOnNoCandidateFx` and `applyPatches`.
+## Additional information on runtimeconfig.json frammework settings (3.0+)
+With the addition of the `frameworks` section in 3.0, an application (or another framework) can reference multiple frameworks. This is necessary when more than one framework is being used by the application (or framework). Previously, an application or framework could only reference one framework, causing a "chain" of frameworks. Now, with multiple frameworks at each level, a "graph" or "tree" of frameworks is supported.
 
-As an example, assume the following framework layering:
-- Application
-- Microsoft.AspNetCore.All
-- Microsoft.AspNetCore.App
-- Microsoft.NetCore.App
+In addition to specifying a dependency on more than one framework, the `frameworks` section can also be used to override settings from a framework's `runtimeconfig.json`; this should only be done with the understanding of all consequences including preventing roll-forward compatibility to future versions. The settings include `version`, `rollForwardOnNoCandidateFx` and `applyPatches`, with `version` the most likely value to be changed.
 
-Except for Microsoft.NetCore.App (since it does not have a lower-level framework), each layer has a runtimeconfig.json setting specifying a single lower-layer framework's `name`, `version` and optional `rollForwardOnNoCandidateFx` and `applyPatches`.
-
-The normal hierarchy processing for most knobs, such as `rollForwardOnNoCandidateFx`:
- - a) Default value determined by the framework (e.g. roll-forward on [Minor])
- - b) Environment variable override (e.g. `DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX`)
- - c) Each layer's `runtimeOptions` override setting in its runtimeconfig.json, starting with app (e.g. `rollForwardOnNoCandidateFx`). Lower layers can override this.
- - d) The app's `additionalFrameworks` override section in `[appname].runtimeconfig.json` which specifies knobs per-framework.
- - e) A `--` command line value such as `--roll-forward-on-no-candidate-fx`
-
-In a hypothetical example, `Microsoft.AspNetCore.App` turns on the ability via mechanism `c` above to roll-forward `Microsoft.NetCore.App` on [major] releases by specifying `rollForwardOnNoCandidateFx = 2` in its runtimeconfig.json. For example:
-```json
-{
-    "runtimeOptions": {
-        "framework": {
-            "name": "Microsoft.NetCore.App",
-            "version": "2.2.0"
-        },
-        "rollForwardOnNoCandidateFx": "2"
-    }
-}
-```
-
-However, if that behavior is not wanted by the app, the app has the option of overriding. This cannot be done by the same mechanism `c` because the app's runtimeconfig settings would be overridden by the sample above since the sample is in a lower layer. Thus to override the setting, mechanism `d` is used. An example of the `additionalFrameworks` section for mechanism `d`:
-```json
-{
-    "runtimeOptions": {
-        "framework": {
-            "name": "Microsoft.AspNetCore.All",
-            "version": "1.0.1"
-        },
-        "additionalFrameworks": [
-            {
-                "name": "Microsoft.AspNetCore.App",
-                "rollForwardOnNoCandidateFx": "1",
-            }
-        ]
-    }
-}
+Overriding a value is always "most restrictive". This means if `applyPatches` is already `false` in a lower-level framework, then it cannot be changed to `true`. For `rollForwardOnNoCandidateFx` the value 0=off is the most restrictive, then 1=minor\patch, then 2=major\minor\patch. For `version`, the highest version requested will be used.
+ 
+As an example of overriding settings, assume the following framework layering: 
+- Application 
+- Microsoft.AspNetCore.All 
+- Microsoft.AspNetCore.App 
+- Microsoft.NetCore.App 
+ 
+Except for Microsoft.NetCore.App (since it does not have a lower-level framework), each layer has a runtimeconfig.json setting specifying a single lower-layer framework's `name`, `version` and optional `rollForwardOnNoCandidateFx` and `applyPatches`. 
+ 
+The normal hierarchy processing for most knobs, such as `rollForwardOnNoCandidateFx`: 
+ - a) Default value determined by the framework (e.g. roll-forward on [Minor]) 
+ - b) Environment variable override (e.g. `DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX`) 
+ - c) Each layer's `runtimeOptions` override setting in its runtimeconfig.json, starting with app (e.g. `rollForwardOnNoCandidateFx`). Lower layers can override this. 
+ - d) The app's `frameworks` section in `[appname].runtimeconfig.json` which allows knobs per-framework.
+ - e) A `--` command line value such as `--roll-forward-on-no-candidate-fx` 
+ 
+In a hypothetical example, `Microsoft.AspNetCore.App` references version `2.2.0` of `Microsoft.NetCore.App` in `Microsoft.AspNetCore.App.runtimeconfig.json`: 
+```json 
+{ 
+    "runtimeOptions": { 
+        "framework": { 
+            "name": "Microsoft.NetCore.App", 
+            "version": "2.2.0" 
+        }, 
+     } 
+} 
+``` 
+However, if the app requires the newer version `2.2.1` of `Microsoft.NetCore.App`, then mechanism `d` is used. An example of the `frameworks` section for mechanism `d` in the app's `runtimeconfig.json`: 
+```json 
+{ 
+    "runtimeOptions": { 
+        "framework": { 
+            "name": "Microsoft.AspNetCore.All", 
+            "version": "1.0.1" 
+        }, 
+        "frameworks": [ 
+            { 
+                "name": "Microsoft.AspNetCore.App", 
+                "version": "2.2.1",
+            } 
+        ] 
+    } 
+} 
 ```
