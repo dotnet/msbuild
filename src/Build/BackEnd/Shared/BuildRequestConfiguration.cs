@@ -101,8 +101,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private List<string> _projectDefaultTargets;
 
-        private IReadOnlyCollection<string> _projectExportTargets;
-
         /// <summary>
         /// This is the lookup representing the current project items and properties 'state'.
         /// </summary>
@@ -173,7 +171,10 @@ namespace Microsoft.Build.BackEnd
             // The following information only exists when the request is populated with an existing project.
             if (data.ProjectInstance != null)
             {
-                SetProjectBasedState(data.ProjectInstance);
+                _project = data.ProjectInstance;
+                _projectInitialTargets = data.ProjectInstance.InitialTargets;
+                _projectDefaultTargets = data.ProjectInstance.DefaultTargets;
+                _translateEntireProjectInstanceState = data.ProjectInstance.TranslateEntireState;
 
                 if (data.PropertiesToTransfer != null)
                 {
@@ -208,8 +209,10 @@ namespace Microsoft.Build.BackEnd
             _toolsVersion = instance.ToolsVersion;
             _globalProperties = instance.GlobalPropertiesDictionary;
 
-            SetProjectBasedState(instance);
-
+            _project = instance;
+            _projectInitialTargets = instance.InitialTargets;
+            _projectDefaultTargets = instance.DefaultTargets;
+            _translateEntireProjectInstanceState = instance.TranslateEntireState;
             IsCacheable = false;
         }
 
@@ -227,7 +230,6 @@ namespace Microsoft.Build.BackEnd
             _transferredProperties = other._transferredProperties;
             _projectDefaultTargets = other._projectDefaultTargets;
             _projectInitialTargets = other._projectInitialTargets;
-            _projectExportTargets = other._projectExportTargets;
             _projectFullPath = other._projectFullPath;
             _toolsVersion = other._toolsVersion;
             _explicitToolsVersionSpecified = other._explicitToolsVersionSpecified;
@@ -398,8 +400,6 @@ namespace Microsoft.Build.BackEnd
             _projectDefaultTargets = null;
             _projectInitialTargets = null;
 
-            _projectExportTargets = _project.ExportTargets;
-
             ProjectDefaultTargets = _project.DefaultTargets;
             ProjectInitialTargets = _project.InitialTargets;
             _translateEntireProjectInstanceState = _project.TranslateEntireState;
@@ -471,16 +471,6 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrow(_projectDefaultTargets == null, "Default targets cannot be reset once they have been set.");
                 _projectDefaultTargets = value;
-            }
-        }
-
-        public IReadOnlyCollection<string> ProjectExportTargets
-        {
-            get => _projectExportTargets;
-            set
-            {
-                ErrorUtilities.VerifyThrow(_projectExportTargets == null, "Export targets cannot be reset once they have been set.");
-                _projectExportTargets = value;
             }
         }
 
@@ -658,33 +648,23 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets the list of targets which are used to build the specified request, including all initial and applicable default targets.
-        /// Isolated builds also inject the export targets.
+        /// Gets the list of targets which are used to build the specified request, including all initial and applicable default targets
         /// </summary>
+        /// <param name="request">The request </param>
         /// <returns>An array of t</returns>
-        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request, bool isIsolatedBuild = false)
+        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request)
         {
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
             ErrorUtilities.VerifyThrow(_projectDefaultTargets != null, "Default targets have not been set.");
-            ErrorUtilities.VerifyThrow(_projectExportTargets != null,  "Export targets have not been set.");
 
             List<string> initialTargets = _projectInitialTargets;
             List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
 
-            var exportTargetsSize = isIsolatedBuild
-                ? _projectExportTargets.Count
-                : 0;
-
-            var allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count + exportTargetsSize);
+            var allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count);
 
             allTargets.AddRange(initialTargets);
             allTargets.AddRange(nonInitialTargets);
-
-            if (isIsolatedBuild)
-            {
-                allTargets.AddRange(_projectExportTargets);
-            }
 
             return allTargets;
         }

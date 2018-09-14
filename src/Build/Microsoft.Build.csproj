@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'" />
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'"/>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
 
     <Reference Include="System.Configuration" />
@@ -310,7 +310,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IPropertyCache.cs" />
     <Compile Include="BackEnd\Components\Caching\IResultsCache.cs" />
-    <Compile Include="BackEnd\Components\Communications\NodePacketTranslatorUtilities.cs" />
+    <Compile Include="BackEnd\Components\Communications\NodePacketTranslatorExtensions.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" />

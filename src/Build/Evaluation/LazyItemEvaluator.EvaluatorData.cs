@@ -41,12 +41,6 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            public IReadOnlyCollection<string> ExportTargets
-            {
-                get => throw new NotImplementedException();
-                set => throw new NotImplementedException();
-            }
-
             public ICollection<I> GetItems(string itemType)
             {
                 return _itemGetter(itemType);

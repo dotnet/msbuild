@@ -23,13 +23,11 @@ using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance
 using System.Xml;
 using System.IO;
 using System.Collections;
-using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
-using static Microsoft.Build.BackEnd.NodePacketTranslatorUtilities;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Execution
@@ -179,7 +177,6 @@ namespace Microsoft.Build.Execution
         private TaskRegistry _taskRegistry;
         private bool _translateEntireState;
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
-        private IReadOnlyCollection<string> _exportTargets;
 
 
         /// <summary>
@@ -332,7 +329,6 @@ namespace Microsoft.Build.Execution
             this.InitialTargets = new List<string>();
             this.DefaultTargets = new List<string>();
             this.DefaultTargets.Add("Build");
-            this.ExportTargets = projectToInheritFrom.ExportTargets;
             this.TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
 
@@ -510,7 +506,6 @@ namespace Microsoft.Build.Execution
                     _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
                 }
 
-                this.ExportTargets = that.ExportTargets;
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
@@ -712,17 +707,6 @@ namespace Microsoft.Build.Execution
         {
             get;
             private set;
-        }
-
-        /// <summary>
-        /// ExportTargets specified in the project.
-        /// The build builds these in isolated build scenarios.
-        /// to build.
-        /// </summary>
-        public IReadOnlyCollection<string> ExportTargets
-        {
-            get => _exportTargets;
-            set => _exportTargets = value;
         }
 
         /// <summary>
@@ -971,14 +955,6 @@ namespace Microsoft.Build.Execution
             get
             { return DefaultTargets; }
             set { DefaultTargets = value; }
-        }
-
-        IReadOnlyCollection<string> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.ExportTargets
-        {
-            [DebuggerStepThrough]
-            get
-            { return ExportTargets; }
-            set { ExportTargets = value; }
         }
 
         /// <summary>
@@ -1968,18 +1944,18 @@ namespace Microsoft.Build.Execution
 
             translator.Translate(ref _defaultTargets);
             translator.Translate(ref _initialTargets);
+        }
 
-            translator.Translate(ref _exportTargets, ImmutableArrayFactory);
+        // todo move to nested function after c#7
+        private static void TranslatorForTargetSpecificDictionaryKey(ref string key, INodePacketTranslator translator)
+        {
+            translator.Translate(ref key);
+        }
 
-            void TranslatorForTargetSpecificDictionaryKey(ref string key, INodePacketTranslator t)
-            {
-                t.Translate(ref key);
-            }
-
-            void TranslatorForTargetSpecificDictionaryValue(ref List<TargetSpecification> value, INodePacketTranslator t)
-            {
-                t.Translate(ref value, TargetSpecification.FactoryForDeserialization);
-            }
+        // todo move to nested function after c#7
+        private static void TranslatorForTargetSpecificDictionaryValue(ref List<TargetSpecification> value, INodePacketTranslator translator)
+        {
+            translator.Translate(ref value, TargetSpecification.FactoryForDeserialization);
         }
 
         private void TranslateItems(INodePacketTranslator translator)
@@ -2632,7 +2608,6 @@ namespace Microsoft.Build.Execution
         {
             this.DefaultTargets = new List<string>(data.DefaultTargets);
             this.InitialTargets = new List<string>(data.InitialTargets);
-            this.ExportTargets = data.ExportTargets;
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(data.BeforeTargets, StringComparer.OrdinalIgnoreCase);
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).AfterTargets = CreateCloneDictionary(data.AfterTargets, StringComparer.OrdinalIgnoreCase);
 

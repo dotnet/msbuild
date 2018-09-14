@@ -38,11 +38,6 @@
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
-      <trans-unit id="ExportTargetDoesNotExist">
-        <source>MSB4250: The declared export target "{0}" does not exist.</source>
-        <target state="new">MSB4250: The declared export target "{0}" does not exist.</target>
-        <note>{StrBegin="MSB4211: "}UE: "export target" is a concept in MSBuild. "{0}" refers to the name of the export target</note>
-      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="new">Metaproject "{0}" generated.</target>
@@ -330,7 +325,7 @@
       </trans-unit>
       <trans-unit id="UsedUninitializedProperty">
         <source>MSB4211: The property "{0}" is being set to a value for the first time, but it was already consumed at "{1}".</source>
-        <target state="needs-review-translation">MSB4211: 正要將屬性 "{0}" 第一次設定為某個值，但是它已經在 "{1}" 使用過了。</target>
+        <target state="translated">MSB4211: 正要將屬性 "{0}" 第一次設定為某個值，但是它已經在 "{1}" 使用過了。</target>
         <note>{StrBegin="MSB4211: "}</note>
       </trans-unit>
       <trans-unit id="SelfImport">
