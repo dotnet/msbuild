@@ -10,7 +10,7 @@ namespace Microsoft.Build.Graph
     /// <summary>
     /// Represents the node for a particular project in a project graph.
     /// </summary>
-    internal sealed class ProjectGraphNode
+    public sealed class ProjectGraphNode
     {
         // No public creation.
         internal ProjectGraphNode(Project project)

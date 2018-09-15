@@ -21,6 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -1142,7 +1143,14 @@ namespace Microsoft.Build.CommandLine
 
                             if (!restoreOnly)
                             {
-                                results = ExecuteBuild(buildManager, request);
+                                if (isolateProjects)
+                                {
+                                    results = ExecuteGraphBuild(projectFile, targets, buildManager, projectCollection, globalProperties, toolsVersion);
+                                }
+                                else
+                                {
+                                    results = ExecuteBuild(buildManager, request);
+                                }
                             }
                         }
                         finally
@@ -1227,6 +1235,35 @@ namespace Microsoft.Build.CommandLine
         {
             lock (s_buildLock)
             {
+                s_activeBuild = buildManager.PendBuildRequest(request);
+
+                // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
+                // That's so the build does not appear to have completed successfully.
+                if (s_buildCancellationSource.IsCancellationRequested)
+                {
+                    buildManager.CancelAllSubmissions();
+                }
+            }
+
+            return s_activeBuild.Execute();
+        }
+
+        private static BuildResult ExecuteGraphBuild(
+            string projectFile,
+            string[] targets,
+            BuildManager buildManager,
+            ProjectCollection projectCollection,
+            Dictionary<string, string> globalProperties,
+            string toolsVersion)
+        {
+            lock (s_buildLock)
+            {
+                var projectGraph = new ProjectGraph(projectFile, projectCollection, globalProperties, toolsVersion);
+
+                // TODO: Do a full graph traversal
+                var projectInstance = projectGraph.EntryProjectNode.Project.CreateProjectInstance();
+                var request = new BuildRequestData(projectInstance, targets);
+
                 s_activeBuild = buildManager.PendBuildRequest(request);
 
                 // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
