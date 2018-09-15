@@ -5,6 +5,7 @@
   <Import Project="build/TargetFramework.props" />
   <Import Project="build/InitRepo.props" />
   <Import Project="build/DependencyVersions.props" />
+  <Import Project="build/Version.props" />
   <PropertyGroup>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
     <NoPackageAnalysis>true</NoPackageAnalysis>

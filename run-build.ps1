@@ -76,6 +76,9 @@ $env:DOTNET_MULTILEVEL_LOOKUP=0
 # Turn off MSBuild Node re-use
 $env:MSBUILDDISABLENODEREUSE=1
 
+# Workaround for the sockets issue when restoring with many nuget feeds.
+$env:DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
+
 # Enable vs test console logging
 $env:VSTEST_BUILD_TRACE=1
 $env:VSTEST_TRACE_BUILD=1
@@ -109,7 +112,7 @@ if ($NoBuild)
 }
 else
 {
-    dotnet msbuild build.proj /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParametersNoTargets
-    dotnet msbuild build.proj /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
+    dotnet msbuild build.proj /bl:msbuild.generatepropsfile.binlog /p:Architecture=$Architecture /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles $ExtraParametersNoTargets
+    dotnet msbuild build.proj /bl:msbuild.mainbuild.binlog /m /v:normal /fl /flp:v=diag /p:Architecture=$Architecture $ExtraParameters
     if($LASTEXITCODE -ne 0) { throw "Failed to build" } 
 }

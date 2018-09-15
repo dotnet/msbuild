@@ -11,6 +11,7 @@
     <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
     <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
     <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
+    <ExternalRestoreSourcesTestsContainer>$(TestArtifactsDir)/ExternalRestoreSourcesForTestsContainer.txt</ExternalRestoreSourcesTestsContainer>
   </PropertyGroup>
 
   <Target Name="Test"
@@ -53,6 +54,12 @@
                             SetupTestProjectData;
                             OverlaySdkOnLKG">
     <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
+    <MakeDir Directories="$(TestArtifactsDir)" Condition="!Exists('$(TestArtifactsDir)')"/>
+
+    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
+                      File="$(ExternalRestoreSourcesTestsContainer)"
+                      Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Identity)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
+                      Overwrite="false" />
   </Target>
 
   <Target Name="RestoreTests"
@@ -80,12 +87,13 @@
                    ProjectPath="%(TestPackageProject.ProjectPath)"
                    AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath)"
                    />
- 
+
     <!-- https://github.com/NuGet/Home/issues/4063 -->
     <DotNetPack Output="$(TestPackagesDir)"
                 ProjectPath="%(TestPackageProject.ProjectPath)"
                 ToolPath="$(OutputDirectory)"
                 VersionSuffix="%(TestPackageProject.VersionSuffix)"
+                ReleaseSuffix="%(TestPackageProject.ReleaseSuffix)"
                 MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
   </Target>
 
