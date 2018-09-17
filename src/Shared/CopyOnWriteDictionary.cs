@@ -177,7 +177,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// A special single dummy instance that always appears empty.
         /// </summary>
-        internal static CopyOnWriteDictionary<K, V> Dummy { get; } = new CopyOnWriteDictionary<K, V>();
+        internal static CopyOnWriteDictionary<K, V> Dummy { get; } = new CopyOnWriteDictionary<K, V> { _isDummy = true };
 
         /// <summary>
         /// Whether this is a dummy instance that always appears empty.
@@ -186,15 +186,16 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                if (ReferenceEquals(this, Dummy))
+                if (_isDummy)
                 {
                     ErrorUtilities.VerifyThrow(backing == null || backing.Count == 0, "count"); // check count without recursion
-                    return true;
                 }
 
-                return false;
+                return _isDummy;
             }
         }
+
+        private bool _isDummy;
 
         /// <summary>
         /// Comparer used for keys
