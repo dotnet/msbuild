@@ -305,7 +305,6 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                // Toss the dictionaries if we can as often they are empty (at least the last three are)
                 _propertyInfoCache = _propertyInfoCache ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance;
 
                 _namesOfPropertiesWithRequiredAttribute = _namesOfPropertiesWithRequiredAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance;
