@@ -35,7 +35,7 @@ namespace Microsoft.DotNet.Tools.Run
         public bool NoLaunchProfile { get; private set; }
         private bool UseLaunchProfile => !NoLaunchProfile;
 
-        public int Start()
+        public int Execute()
         {
             Initialize();
 
@@ -129,7 +129,7 @@ namespace Microsoft.DotNet.Tools.Run
                         var launchSettingsFileContents = File.ReadAllText(launchSettingsPath);
                         var applyResult = LaunchSettingsManager.TryApplyLaunchSettings(launchSettingsFileContents, ref runCommand, LaunchProfile);
                         if (!applyResult.Success)
-                        {                            
+                        {
                             //Error that the launch profile couldn't be applied
                             Reporter.Error.WriteLine(string.Format(LocalizableStrings.RunCommandExceptionCouldNotApplyLaunchSettings, profileName, applyResult.FailureReason).Bold().Red());
                         }
@@ -259,9 +259,9 @@ namespace Microsoft.DotNet.Tools.Run
             if (string.IsNullOrWhiteSpace(Project))
             {
                 Project = Directory.GetCurrentDirectory();
-            } 
-            
-            if (Directory.Exists(Project)) 
+            }
+
+            if (Directory.Exists(Project))
             {
                 Project = FindSingleProjectInDirectory(Project);
             }

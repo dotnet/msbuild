@@ -35,18 +35,7 @@ namespace Microsoft.DotNet.Tools.Run
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            RunCommand cmd;
-
-            try
-            {
-                cmd = FromArgs(args);
-            }
-            catch (CommandCreationException e)
-            {
-                return e.ExitCode;
-            }
-
-            return cmd.Start();
+            return FromArgs(args).Execute();
         }
     }
 }
