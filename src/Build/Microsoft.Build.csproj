@@ -121,9 +121,6 @@
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\Constants.cs</Link>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\HybridDictionary.cs">
-      <Link>Collections\HybridDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
       <Link>IConstrainedEqualityComparer.cs</Link>
     </Compile>

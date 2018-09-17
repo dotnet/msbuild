@@ -487,7 +487,7 @@ namespace Microsoft.Build.Collections
         /// <typeparam name="K1">The key type.</typeparam>
         /// <typeparam name="V1">The value type.</typeparam>
         [Serializable]
-        private class CopyOnWriteBackingDictionary<K1, V1> : HybridDictionary<K1, V1> where V1 : class
+        private class CopyOnWriteBackingDictionary<K1, V1> : Dictionary<K1, V1> where V1 : class
         {
             /// <summary>
             /// An empty dictionary 
