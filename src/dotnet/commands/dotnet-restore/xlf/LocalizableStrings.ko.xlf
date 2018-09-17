@@ -94,6 +94,31 @@ project.assets.json을 삭제하는 것과 동일합니다.</target>
         <target state="translated">명령을 중지하고 사용자 입력 또는 작업을 기다리도록 허용합니다(예: 인증 완료).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdLockedModeOptionDescription">
+        <source>Do not allow updating project lock file.</source>
+        <target state="new">Do not allow updating project lock file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOption">
+        <source>ProjectLockFile_Path</source>
+        <target state="new">ProjectLockFile_Path</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOptionDescription">
+        <source>Project lock file path to be used to write lock file.</source>
+        <target state="new">Project lock file path to be used to write lock file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdReevaluateOptionDescription">
+        <source>Force restore to reevaluate all dependencies even if a lock file already exists.</source>
+        <target state="new">Force restore to reevaluate all dependencies even if a lock file already exists.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdUseLockFileOptionDescription">
+        <source>Enables project lock file to be generate/ used with restore.</source>
+        <target state="new">Enables project lock file to be generate/ used with restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -94,6 +94,31 @@ Esta acción es equivalente a eliminar project.assets.json.</target>
         <target state="translated">Permite que el comando se detenga y espere la entrada o acción del usuario (por ejemplo, para autenticarse).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdLockedModeOptionDescription">
+        <source>Do not allow updating project lock file.</source>
+        <target state="new">Do not allow updating project lock file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOption">
+        <source>ProjectLockFile_Path</source>
+        <target state="new">ProjectLockFile_Path</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOptionDescription">
+        <source>Project lock file path to be used to write lock file.</source>
+        <target state="new">Project lock file path to be used to write lock file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdReevaluateOptionDescription">
+        <source>Force restore to reevaluate all dependencies even if a lock file already exists.</source>
+        <target state="new">Force restore to reevaluate all dependencies even if a lock file already exists.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdUseLockFileOptionDescription">
+        <source>Enables project lock file to be generate/ used with restore.</source>
+        <target state="new">Enables project lock file to be generate/ used with restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
