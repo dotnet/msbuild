@@ -21,10 +21,10 @@
       <MSBuildExtensionsGenerateMsiPowershellScript>$(RepoRoot)/packaging/windows/msbuildextensions/generatemsi.ps1</MSBuildExtensionsGenerateMsiPowershellScript>
 
       <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
-      <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(FullNugetVersion).nupkg</SdkInstallerNupkgFile>
+      <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(SuffixedNugetVersion).nupkg</SdkInstallerNupkgFile>
 
       <SdkMSBuildExtensionsNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.nuspec</SdkMSBuildExtensionsNuspecFile>
-      <SdkMSBuildExtensionsNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(FullNugetVersion).nupkg</SdkMSBuildExtensionsNupkgFile>
+      <SdkMSBuildExtensionsNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(SuffixedNugetVersion).nupkg</SdkMSBuildExtensionsNupkgFile>
       <SdkMSBuildExtensionsSwrFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.swr</SdkMSBuildExtensionsSwrFile>
     </PropertyGroup>
 
@@ -172,7 +172,7 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
                       '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(FullNugetVersion)'
+                      '$(SuffixedNugetVersion)'
                       '$(SdkInstallerNuspecFile)'
                       '$(SdkInstallerNupkgFile)'" />
     </Target>
@@ -187,7 +187,7 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
                       '$(MSBuildExtensionsLayoutDirectory)'
-                      '$(FullNugetVersion)'
+                      '$(SuffixedNugetVersion)'
                       '$(SdkMSBuildExtensionsNuspecFile)'
                       '$(SdkMSBuildExtensionsNupkgFile)'" />
       
