@@ -21,7 +21,6 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string AppBinaryName { get; set; }
 
-        [Required]
         public string IntermediateAssembly { get; set; }
 
         public bool WindowsGraphicalUserInterface { get; set; }
@@ -42,11 +41,12 @@ namespace Microsoft.NET.Build.Tasks
                     AppHostSourcePath,
                     ModifiedAppHostPath,
                     AppBinaryName,
-                    IntermediateAssembly,
                     options: new AppHostOptions()
                     {
                         WindowsGraphicalUserInterface = WindowsGraphicalUserInterface
-                    });
+                    },
+                    intermediateAssembly: IntermediateAssembly,
+                    log: Log);
             }
         }
     }

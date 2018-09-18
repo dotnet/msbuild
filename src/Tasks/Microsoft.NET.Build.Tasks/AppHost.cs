@@ -31,9 +31,9 @@ namespace Microsoft.NET.Build.Tasks
             string appHostSourceFilePath,
             string appHostDestinationFilePath,
             string appBinaryFilePath,
-            string intermediateAssembly,
             bool overwriteExisting = false,
-            AppHostOptions options = null)
+            AppHostOptions options = null,
+            string intermediateAssembly = null,
         {
             var hostExtension = Path.GetExtension(appHostSourceFilePath);
             var appbaseName = Path.GetFileNameWithoutExtension(appBinaryFilePath);

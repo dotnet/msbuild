@@ -49,7 +49,7 @@ namespace Microsoft.NET.Build.Tests
             outputDirectory.Should().HaveFiles(new[] { testProject.Name + ".exe" });
 
             string apphostPath = Path.Combine(outputDirectory.FullName, testProject.Name + ".exe");
-            var apphostVersion = FileVersionInfo.GetVersionInfo(apphostPath);
+            var apphostVersion = FileVersionInfo.GetVersionInfo(apphostPath).FileVersion;
             apphostVersion.Should().Be(version);
         }
     }
