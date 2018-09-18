@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 file = FileUtilities.GetTemporaryFile();
-                FileInfo info = FileUtilities.GetFileInfoNoThrow(file);
+                var info = FileUtilities.GetFileInfoNoThrow(file);
                 Assert.Equal(info.LastWriteTime, new FileInfo(file).LastWriteTime);
             }
             finally
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetFileInfoNoThrowNonexistent()
         {
-            FileInfo info = FileUtilities.GetFileInfoNoThrow("this_file_is_nonexistent");
+            var info = FileUtilities.GetFileInfoNoThrow("this_file_is_nonexistent");
             Assert.Null(info);
         }
 

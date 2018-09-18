@@ -12,7 +12,8 @@
         https://dotnet.myget.org/F/roslyn/api/v3/index.json;
         https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
         https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
-        https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
+        https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
+        https://dotnet.myget.org/F/dotnet-core/api/v3/index.json
     </RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
@@ -35,7 +36,7 @@
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
-    <DotNetCliVersion>2.1.300</DotNetCliVersion>
+    <DotNetCliVersion>2.1.401</DotNetCliVersion>
     <!-- We are pretty much always on a preview SDK. No need to warn about it. -->
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <VSWhereVersion>2.2.7</VSWhereVersion>

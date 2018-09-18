@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <FullFrameworkTFM>net472</FullFrameworkTFM>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('windows'))">windows</OsEnvironment>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('linux'))">linux</OsEnvironment>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('osx'))">osx</OsEnvironment>

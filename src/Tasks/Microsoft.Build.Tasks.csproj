@@ -952,6 +952,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Memory" />
   </ItemGroup>
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
@@ -966,6 +967,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
@@ -999,6 +1001,7 @@
     <Content Update="@(Content)" Pack="false" />
   </ItemGroup>
 
+  <!-- The RoslynCodeTaskFactory needs ref assemblies to compile against. -->
   <Target Name="CopyMscorlib" AfterTargets="Build">
     <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\netstandard.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />
     <Copy SourceFiles="$(NuGetPackageRoot)\netstandard.library\2.0.3\build\netstandard2.0\ref\mscorlib.dll" DestinationFolder="$(ArtifactsBinDir)/MSBuild/$(TargetFramework)/ref" />

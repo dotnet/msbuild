@@ -12,7 +12,7 @@ Param(
   [switch] $sign,
   [switch] $skiptests,
   [switch] $test,
-  [switch] $bootstrapOnly,
+  [switch] $bootstrap,
   [string] $verbosity = "minimal",
   [string] $hostType,
   [switch] $DotNetBuildFromSource,
@@ -38,7 +38,7 @@ function Print-Usage() {
     Write-Host "  -rebuild                Rebuild solution"
     Write-Host "  -skipTests              Don't run tests"
     Write-Host "  -test                   Run tests. Ignores skipTests"
-    Write-Host "  -bootstrapOnly          Don't run build again with bootstrapped MSBuild"
+    Write-Host "  -bootstrap              Run build again with bootstrapped MSBuild."
     Write-Host "  -sign                   Sign build outputs"
     Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
     Write-Host ""
@@ -256,9 +256,9 @@ function Build {
     $commonMSBuildArgs = $commonMSBuildArgs + "/p:SignToolDataPath=`"$emptySignToolDataPath`""
   }
 
-  # Only test using stage 0 MSBuild if -bootstrapOnly is specified
+  # Only test using stage 0 MSBuild if -bootstrap is not specified
   $testStage0 = $false
-  if ($bootstrapOnly)
+  if (-not $bootstrap)
   {
     $testStage0 = $runTests
   }
@@ -269,18 +269,18 @@ function Build {
   {
     CallMSBuild $RepoToolsetBuildProj @msbuildArgs /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$testStage0 /p:Sign=$sign /p:Pack=$pack /p:CreateBootstrap=true @properties
 
-    if (-not $bootstrapOnly)
+    if ($bootstrap)
     {
       $bootstrapRoot = Join-Path $ArtifactsConfigurationDir "bootstrap"
 
       if ($hostType -eq 'full')
       {
-        $msbuildToUse = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.exe"
+        $msbuildToUse = Join-Path $bootstrapRoot "net472\MSBuild\15.0\Bin\MSBuild.exe"
 
         if ($configuration -eq "Debug-MONO" -or $configuration -eq "Release-MONO")
         {
           # Copy MSBuild.dll to MSBuild.exe so we can run it without a host
-          $sourceDll = Join-Path $bootstrapRoot "net46\MSBuild\15.0\Bin\MSBuild.dll"
+          $sourceDll = Join-Path $bootstrapRoot "net472\MSBuild\15.0\Bin\MSBuild.dll"
           Copy-Item -Path $sourceDll -Destination $msbuildToUse
         }
       }
