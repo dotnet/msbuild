@@ -12,6 +12,8 @@
     - [Public API](#public-api)
   - [Inferring which targets to run for a project within the graph](#inferring-which-targets-to-run-for-a-project-within-the-graph)
   - [Building a single project](#building-a-single-project)
+    - [Entry targets](#entry-targets)
+    - [Caching](#caching)
   - [Distribution](#distribution)
   - [I/O Tracking](#io-tracking)
 
@@ -74,7 +76,9 @@
 
 ## Project Graph
 
-Calculating the project graph will be very similar to the MS internal build engine's existing Traversal logic. For a given evaluated project, all project references will be identified and recursively evaluated (with deduping). Each project + global props combo can be evaluated in parallel.
+Calculating the project graph will be very similar to the MS internal build engine's existing Traversal logic. For a given evaluated project, all project references will be identified and recursively evaluated (with deduping). 
+
+A node in the graph is a tuple of the project file and global properties. Each (project, global props) combo can be evaluated in parallel.
 
 For cross-targeting projects, the project will be seen just as 1 uber project. Behaviorally this is the same as what happens when building a cross-targeting project directly today; the outer build ends up calling the MSBuild task for every target framework.
 
@@ -145,33 +149,33 @@ One property of the static build graph is that a project (project, globalpropert
 
 During a static graph based build projects are built before the projects that reference them, whereas the classical msbuild scheduler builds projects just in time. In the classic traversal, the referencing project chooses which targets to call on the referenced projects. But in the static graph traversal, we don't know the entry targets for a reference because we visit the references before the referencing projects.
 
-We need to represent project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project. These protocols apply to an entire graph. They can be regular or irregular. **Regular** operations consist of recursively calling the same target on all referenced projects (e.g. build, clean, rebuild). **Irregular** operations consist of calling different targets on different nodes in the graph (e.g. publish calls publish on the root node but build on the rest). As a complication, today nothing prevents projects to turn regular operations into irregular operations (e.g. a project file reimplements Clean by calling Clean2 on referenced projects).
+We need to represent project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project. These protocols apply to an entire graph and consist of recursively calling the same target on all referenced projects (e.g. build, clean, rebuild). As a complication, individual projects can change the protocol (e.g. a project file reimplements Clean by calling Clean2 on referenced projects).
 
 Some project reference protocols require multiple calls (MSBuild task calls) between the referencing project and referenced project. Therefore we need to not only specify the entry targets, but also the helper targets.
 
 Therefore the project reference protocols will need to be explicitly described. Each project specifies the project reference protocol targets it supports, in the form of a target mapping:
 
-$target \to targetList$
+*target -> targetList*
 
-$target$ represents the project reference entry target, and $targetList$ represents the list of targets that $target$ ends up calling on each referenced project.
+*target* represents the project reference entry target, and *targetList* represents the list of targets that `target` ends up calling on each referenced project.
 
-For example, a simple recursive rule would be $A \to A$, which says that a project called with target $A$ will call target $A$ on its referenced projects. Here's an example execution with two nodes:
+For example, a simple recursive rule would be *A -> A*, which says that a project called with target `A` will call target `A` on its referenced projects. Here's an example execution with two nodes:
 
 ```
 Execute target A+-->Proj1   A->A
-               +
-               |
-               | A
-               |
-               v
-             Proj2   A->A
+                    +
+                    |
+                    | A
+                    |
+                    v
+                    Proj2   A->A
 ```
 
-Proj1 depends on Proj2, and we want to build the graph with target $A$. Proj1 gets inspected for the project reference protocol for target $A$ (represented to the right of Proj1). The protocol says the referenced projects will be called with $A$. Therefore Proj2 gets called with target $A$. After Proj2 builds, Proj1 then also builds with $A$ (because Proj1 is the root of the graph).
+Proj1 depends on Proj2, and we want to build the graph with target `A`. Proj1 gets inspected for the project reference protocol for target `A` (represented to the right of Proj1). The protocol says the referenced projects will be called with `A`. Therefore Proj2 gets called with target `A`. After Proj2 builds, Proj1 then also builds with `A` (because Proj1 is the root of the graph).
 
-A project reference protocol could contain multiple targets, for example $A \to B, A$. This means that building $A$ on the referencing project will lead to $B$ and $A$ getting called on the referenced projects. If all nodes in the graph repeat the same rule, then the rule is repeated recursively on all nodes (this would be a regular operation). However, a node can choose to implement the protocol differently, which would lead to an irregular protocol. In the following example, the entry targets are:
-- Proj4 is called with targets $B, A, C, D$. On multiple references, the incoming targets get concatenated. The order does not matter, as MSBuild has non-deterministic p2p ordering.
-- Proj3 and Proj2 get called with $B, A$, as specified by the rule in Proj1.
+A project reference protocol could contain multiple targets, for example `A -> B, A`. This means that building `A` on the referencing project will lead to `B` and `A` getting called on the referenced projects. If all nodes in the graph repeat the same rule, then the rule is repeated recursively on all nodes. However, a node can choose to implement the protocol differently. In the following example, the entry targets are:
+- Proj4 is called with targets `B, A, C, D`. On multiple references, the incoming targets get concatenated. The order does not matter, as MSBuild has non-deterministic p2p ordering.
+- Proj3 and Proj2 get called with `B, A`, as specified by the rule in Proj1.
 - Proj1 builds with A, because it's the root of the graph.
 
 ```
@@ -193,22 +197,22 @@ The common project reference protocols (Build, Rebuild, Restore, Clean) will be 
 
 Here are the rules for the common protocols:
 
-$Build \to GetTargetFrameworks, \langle default \rangle, GetNativeManifest, GetCopyToOutputDirectoryItems$
+`Build -> GetTargetFrameworks, <default>, GetNativeManifest, GetCopyToOutputDirectoryItems`
 
-The default target (represented in this spec's pseudo protocol representation as $\langle default \rangle$) is resolved for each project.
+The default target (represented in this spec's pseudo protocol representation as `<default>`) is resolved for each project.
 
-$Clean \to GetTargetFrameworks, Clean$
+`Clean -> GetTargetFrameworks, Clean`
 
-$Rebuild \to \$Clean, \$Build$
+`Rebuild -> Clean, Build`
 
-$Rebuild$ maps to two referenced protocols. $\$Clean$ and $\$Build$ get substituted with the contents of the $Clean$ and $Build$ protocols.
+`Rebuild` maps to two referenced protocols. `Clean` and `Build` get substituted with the contents of the `Clean` and `Build` protocols.
 
 Restore is a composition of two rules:
-- $Restore \to \_IsProjectRestoreSupported, \_GenerateRestoreProjectPathWalk, \_GenerateRestoreGraphProjectEntry$
+- `Restore -> _IsProjectRestoreSupported, _GenerateRestoreProjectPathWalk, _GenerateRestoreGraphProjectEntry`
 
-- $\_GenerateRestoreProjectPathWalk \to \_IsProjectRestoreSupported, \_GenerateRestoreProjectPathWalk, \_GenerateRestoreGraphProjectEntry$
+- `_GenerateRestoreProjectPathWalk -> _IsProjectRestoreSupported, _GenerateRestoreProjectPathWalk, _GenerateRestoreGraphProjectEntry`
 
-**Open Issue:** Restore is a bit complicated, and we may need new concepts to represent it. The root project calls the recursive $\_GenerateRestoreProjectPathWalk$ on itself to collect the referenced projects closure, and then after the recursion call returns (after having walked the graph), it calls the other targets on each returned referenced project in a non-recursive manner. So the above protocol is not a truthful representation of what happens, but it correctly captures all targets called on each node in the graph.
+**Open Issue:** Restore is a bit complicated, and we may need new concepts to represent it. The root project calls the recursive `_GenerateRestoreProjectPathWalk` on itself to collect the referenced projects closure, and then after the recursion call returns (after having walked the graph), it calls the other targets on each returned referenced project in a non-recursive manner. So the above protocol is not a truthful representation of what happens, but it correctly captures all targets called on each node in the graph.
 
 **Open Issue:** How do we differentiate between targets called on the outer build project and targets called on the inner build projects?
 
@@ -228,11 +232,17 @@ The project graph is required to build the projects in the correct order. An ind
 
 **OPEN ISSUE:** Can we get away with not setting `/p:BuildProjectReferences=false`?
 
+### Entry targets
 When building a project, run the initial targets and the entry targets as computed by the [project reference protocol](#inferring-which-targets-to-run-for-a-project-within-the-graph).
 
-After execution, the results of the entry targets will be cached in the BuildManager and the project can be disposed. Note that this gives project execution a concrete start and end, while previously projects needed to remain active just in case any other project needed to execute a target on it.
+### Caching
+After execution, the results of the entry targets will be cached in the BuildManager and the project can be disposed. Note that this gives project execution a concrete start and end. In classical msbuild execution projects needed to remain active just in case any other project needed to execute a target on it.
+
+**Open Issue:** With this approach initial targets will also get included due to how the RequestBuilder composes entry targets and how TargetBuilder reports build results. Is this an issue? Is it just a perf optimization to take them out from the cache?
 
 For projects which depend on other projects, the MSBuild task will look up the target result in the cache. If the target is missing from the cache, an error will be logged and the build will fail. If the project is calling into itself either via `CallTarget` or via `MSBuild` with a different set of global properties, this will be always allowed (support for cross-targeting).
+
+Because referenced projects and their entry targets are guaranteed to be in the cache, they will not build again. Therefore we do not need to set `/p:BuildProjectReferences=false` or any other gesture that tells SDKs to not do recursive operations.
 
 Initially this result cache will just be in-memory, similar to the existing MSBuild target result cache, but eventually could persist across builds so that an incremental build of a particular project in the project graph would not require re-evaluation or any target execution in that project's dependencies. This may have significant performance improvements for incremental builds.
 
