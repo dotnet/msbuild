@@ -74,9 +74,6 @@
       <Link>FileDelegates.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\HybridDictionary.cs">
-      <Link>HybridDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\NativeMethodsShared.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
