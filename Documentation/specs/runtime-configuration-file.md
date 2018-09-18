@@ -32,6 +32,7 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
             "System.Threading.ThreadPool.MinThreads": 4,
             "System.Threading.ThreadPool.MaxThreads": 8
         },
+        "tfm": "netcoreapp2.1",
         "framework": {
             "name": "Microsoft.NETCore.App",
             "version": "2.1.0"
@@ -59,12 +60,15 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
     "warningsAsErrors": false,
   },
   "targets": {
-    ".NETCoreApp,Version=v2.0": {
+    ".NETCoreApp,Version=v2.1": {
       "MyApp/1.0.0": {
         "dependencies": {
           "System.Banana": "1.0.0"
         },
         "runtime": {
+          "MyApp.dll": {}
+        },
+        "compile": {
           "MyApp.dll": {}
         }
       },
@@ -73,18 +77,24 @@ The files are both JSON files stored in UTF-8 encoding. Below are sample files. 
           "System.Foo": "1.0.0"
         },
         "runtime": {
-          "lib/netcoreapp2.0/System.Banana.dll": {
+          "lib/netcoreapp2.1/System.Banana.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
+        },
+        "compile": {
+          "ref/netcoreapp2.1/System.Banana.dll": {}
         }
       },
       "System.Foo/1.0.0": {
         "runtime": {
-          "lib/netcoreapp2.0/System.Foo.dll": {
+          "lib/netcoreapp2.1/System.Foo.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
+        },
+        "compile": {
+          "ref/netcodeapp2.1/System.Foo.dll": {}
         }
       }
     }
@@ -131,12 +141,15 @@ This section is created when building a project. Settings include:
 * `rollForwardOnNoCandidateFx` - Determines roll-forward behavior of major and minor. Only applies to `production` releases. Values: 0(Off), 1 (roll forward on [minor]), 2 (Roll forward on [major] and [minor])
  See [roll-forward-on-no-candidate documentation](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/roll-forward-on-no-candidate-fx.md) for more information.
 * `frameworks` - This is an optional array added in 3.0 that allows multiple frameworks to be specified. The `name`, `version`, `applyPatches` and `rollForwardOnNoCandidateFx` properties are available. The `framework` section is no longer necessary in 3.0, but if present is treated as if it was the first framework in the `frameworks` section. The presence of frameworks in this section (or the `framework` section) indicates that the application is a framework-dependent app. See the notes at the end of this document for more information.
+* `additionalProbingPaths` - Optional property which specifies additional paths to consider when looking for dependencies. The value is either a single string, or an array of strings.
+* `tfm` - Optional string value which specifies the Target Framework Moniker.
 
 These settings are read by host (apphost or dotnet executable) to determine how to initialize the runtime. All versions of the host **must ignore** settings in this section that they do not understand (thus allowing new settings to be added in later versions).
 
 ### `compilationOptions` Section (`.deps.json`)
 
-This section is created during build from the project's settings. The exact settings found here are specific to the compiler that produced the original application binary. Some example settings include: `defines`, `languageVersion` (e.g. the version of C# or VB), `allowUnsafe` (a C# option), etc.
+This section is created during build from the project's settings. The exact settings found here are specific to the compiler that produced the original application binary. Some example settings include: `defines`, `languageVersion` (e.g. the version of C# or VB), `allowUnsafe` (a C# option), etc.  
+This section is ignored by the runtime host. It is only potentially used by the application itself.
 
 ### `runtimeTarget` Section (`.deps.json`)
 
@@ -144,11 +157,11 @@ This property contains the name of the target from `targets` that should be used
 
 ### `targets` Section (`.deps.json`)
 
-This section contains subsetted data from the input `project.lock.json`.
+Each property under `targets` describes a "target", which is a collection of libraries required by the application when run or compiled in a certain framework and platform context. A target **must** specify a Framework name, and **may** specify a Runtime Identifier. Targets without Runtime Identifiers represent the dependencies and assets which are platform agnostic. These targets can also represent dependencies and assets which are used for compiling the application for a particular framework. Targets with Runtime Identifiers represent the dependencies and assets used for running the application under a particular framework and on the platform defined by the Runtime Identifier.  
+In the example above, the `.NETStandardApp,Version=v2.1` target lists the dependencies and assets used to run and compile the application for `netcoreapp2.1`.  
+If the app was published specifically for 64-bit Mac OS X 10.10 machine, it would also contain a target `.NETStandardApp,Version=v2.1/osx.10.10-x64` which would list the dependencies and assets used to run the application on that specific platform.
 
-Each property under `targets` describes a "target", which is a collection of libraries required by the application when run or compiled in a certain framework and platform context. A target **must** specify a Framework name, and **may** specify a Runtime Identifier. Targets without Runtime Identifiers represent the dependencies and assets used for compiling the application for a particular framework. Targets with Runtime Identifiers represent the dependencies and assets used for running the application under a particular framework and on the platform defined by the Runtime Identifier. In the example above, the `.NETStandardApp,Version=v1.5` target lists the dependencies and assets used to compile the application for `dnxcore50`, and the `.NETStandardApp,Version=v1.5/osx.10.10-x64` target lists the dependencies and assets used to run the application on `dnxcore50` on a 64-bit Mac OS X 10.10 machine.
-
-There will always be two targets in the `[appname].runtimeconfig.json` file: A compilation target, and a runtime target. The compilation target will be named with the framework name used for the compilation (`.NETStandardApp,Version=v1.5` in the example above). The runtime target will be named with the framework name and runtime identifier used to execute the application (`.NETStandardApp,Version=v1.5/osx.10.10-x64` in the example above). However, the runtime target will also be identified by name in the `runtimeOptions` section, so that the host does not need to parse and understand target names.
+There will always at least one target in the `[appname].deps.json` file: the platform neutral list of runtime and compilation dependencies. In cases of a platform specific application there would be two targets: a compilation target, and a runtime target. The compilation target will be named with the framework name used for the compilation (`.NETStandardApp,Version=v2.1` in the example above). The runtime target will be named with the framework name and runtime identifier used to execute the application (`.NETStandardApp,Version=v2.5/osx.10.10-x64` in the example above). However, the runtime target will also be identified by name in the `runtimeOptions` section, so that the host does not need to parse and understand target names.
 
 The content of each target property in the JSON is a JSON object. Each property of that JSON object represents a single dependency required by the application when compiled for/run on that target. The name of the property contains the ID and Version of the dependency in the form `[Id]/[Version]`. The content of the property is another JSON object containing metadata about the dependency.
 
@@ -160,13 +173,34 @@ The `resources` property of a dependency object lists the relative paths and loc
 
 The `native` property of a dependency object lists the relative paths to Native Libraries required to be available at runtime in order to satisfy this dependency. The paths are relative to the location of the Dependency (see below for further details on locating a dependency).
 
-In compilation targets, the `runtime`, `resources` and `native` properties of a dependency are omitted, because they are not relevant to compilation. Similarly, in runtime targets, the `compile` property is omitted, because it is not relevant to runtime.
+The `runtimeTargets` property of a dependency object lists RID-specific assets. This is only used for framework dependent applications. See the description of framework dependent apps below for more details.
 
-Only dependencies with a `type` value of `package` should be considered by the host. There may be other items, used for other purposes (for example, Projects, Reference Assemblies, etc.
+The `compile` property of a dependency object lists the relative paths to Reference Assemblies which were used to compile the application.
+
+If a given dependency is only listed for compilation, then its `runtime`, `resources` and `native` properties is omitted. Similarly if the dependency is only listed for runtime, then its `compile` property is omitted.
+
+Only dependencies with a `type` value of `package` (as perf the `libraries` section described below) should be considered by the host. There may be other items, used for other purposes (for example, Projects, Reference Assemblies, etc).
 
 ### `libraries` Section (`.deps.json`)
 
 This section contains a union of all the dependencies found in the various targets, and contains common metadata for them. Specifically, it contains the `type`, as well as a boolean indicating if the library can be serviced (`serviceable`, only for `package`-typed libraries) and a SHA-512 hash of the package file (`sha512`, only for `package`-typed libraries.
+
+### `runtimes` Section (`.deps.json`)
+
+This section is only present in the root framework's (so `Microsoft.NETCore.App`) `.deps.json` and it contains the RID fallback graph. See below for detailed description of this section. Example (trimmed):
+```json
+{
+    "runtimes": {
+        "win-x64": [
+            "win",
+            "any",
+            "base"
+        ]
+    }
+}
+```
+
+
 ## How the file is used
 
 The file is read by two different components:
@@ -179,7 +213,8 @@ The file is read by two different components:
 
 ## Opt-In Compilation Data
 
-Some of the sections in the `.deps.json` file contain data used for runtime compilation. This data is not provided in the file by default. Instead, a project.json setting `preserveCompilationContext` must be set to true in order to ensure this data is added. Without this setting, the `compilationOptions` will not be present in the file, and the `targets` section will contain only the runtime target.
+Some of the sections in the `.deps.json` file contain data used for runtime compilation. This data is not provided in the file by default. Instead, an MSBuild property `PreserveCompilationContext` must be set to `true` (typically in the project file) in order to ensure this data is added. Without this setting, the `compilationOptions` will not be present in the file, and the `targets` section will contain only the runtime dependencies.  
+Note that ASP.NET projects (those using `Microsoft.NET.Sdk.Web` SDK) has this property set to `true` by default.
 
 ## Framework-dependent Deployment Model
 
@@ -252,7 +287,7 @@ The shared framework's deps file will also contain a `runtimes` section defining
 }
 ```
 
-The host will detect the RID at runtime (for example, `win10-x64` for Windows 64-bit). It will look up the corresponding entry in the `runtimes` section to identify what the fallback list is for `win10-x64`. The fallbacks are identified from most-specific to least-specific. In the case of `win10-x64` and the example above, the fallback list is: `"win10-x64", "win10", "win81-x64", "win81", "win8-x64", "win8", "win7-x64", "win7", "win-x64", "win", "any", "base"` (note that an exact match on the RID itself is the first preference, followed by the first item in the fallback list, then the next item, and so on).
+The host will detect the RID at runtime (for example, `ubuntu.14.04-x64` for Ubuntu 14.04 64bit). It will look up the corresponding entry in the `runtimes` section to identify what the fallback list is for `ubuntu.14.04-x64`. The fallbacks are identified from most-specific to least-specific. In the case of `ubuntu.14.04-x64` and the example above, the fallback list is: `"debian.8-x64", "linux-x64", "linux", "unix", "any", "base"` (note that an exact match on the RID itself is the first preference, followed by the first item in the fallback list, then the next item, and so on).
 
 In the app-local deps file for a `framework-dependent` application, the package entries may have an additional `runtimeTargets` section detailing RID-specific assets. The host should use this data, along with the current RID and the RID fallback data defined in the `runtimes` section of the shared framework deps file to select one **and only one** RID value out of each package individually. The most specific RID present within the package should always be selected.
 
