@@ -19,6 +19,10 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.targets" />
 
-  <Import Project="$(MSBuildThisFileDirectory)Sdk.DefaultItems.targets" />
+  <PropertyGroup Condition="'$(EnableWebSdkImplicitPackageVersions)' == ''">
+    <EnableWebSdkImplicitPackageVersions>true</EnableWebSdkImplicitPackageVersions>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)Sdk.DefaultItems.targets" Condition="'$(EnableWebSdkImplicitPackageVersions)' == 'true'"/>
 
 </Project>
