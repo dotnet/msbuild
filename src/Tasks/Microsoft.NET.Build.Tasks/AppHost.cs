@@ -59,16 +59,24 @@ namespace Microsoft.NET.Build.Tasks
                 .Update();
 
             // Re-write ModifiedAppHostPath with the proper contents.
+            bool appHostIsPEImage = false;
             using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
             {
                 using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
                 {
                     SearchAndReplace(accessor, AppBinaryPathPlaceholderSearchValue, bytesToWrite, appHostSourceFilePath);
 
+                    appHostIsPEImage = IsPEImage(accessor);
+
                     if (options != null)
                     {
                         if (options.WindowsGraphicalUserInterface)
                         {
+                            if (!appHostIsPEImage)
+                            {
+                                throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourceFilePath);
+                            }
+
                             SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
                         }
                     }
@@ -223,8 +231,38 @@ namespace Microsoft.NET.Build.Tasks
         private const UInt16 WindowsCUISubsystem = 0x3;
 
         /// <summary>
-        /// If the apphost file is a windows PE file (checked by looking at the first few bytes)
-        /// this method will set its subsystem to GUI.
+        /// Check whether the apphost file is a windows PE image by looking at the first few bytes.
+        /// </summary>
+        /// <param name="accessor">The memory accessor which has the apphost file opened.</param>
+        /// <returns>true if the accessor represents a PE image, false otherwise.</returns>
+        private static unsafe bool IsPEImage(MemoryMappedViewAccessor accessor)
+        {
+            byte* pointer = null;
+
+            try
+            {
+                accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
+                byte* bytes = pointer + accessor.PointerOffset;
+
+                // https://en.wikipedia.org/wiki/Portable_Executable
+                // Validate that we're looking at Windows PE file
+                if (((UInt16*)bytes)[0] != PEFileSignature || accessor.Capacity < PEHeaderPointerOffset + sizeof(UInt32))
+                {
+                    return false;
+                }
+                return true;
+            }
+            finally
+            {
+                if (pointer != null)
+                {
+                    accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+                }
+            }
+        }
+
+        /// <summary>
+        /// This method will attempt to set the subsistem to GUI. The apphost file should be a windows PE file.
         /// </summary>
         /// <param name="accessor">The memory accessor which has the apphost file opened.</param>
         /// <param name="appHostSourcePath">The path to the source apphost.</param>
@@ -238,13 +276,6 @@ namespace Microsoft.NET.Build.Tasks
             {
                 accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
                 byte* bytes = pointer + accessor.PointerOffset;
-
-                // https://en.wikipedia.org/wiki/Portable_Executable
-                // Validate that we're looking at Windows PE file
-                if (((UInt16*)bytes)[0] != PEFileSignature || accessor.Capacity < PEHeaderPointerOffset + sizeof(UInt32))
-                {
-                    throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourcePath);
-                }
 
                 UInt32 peHeaderOffset = ((UInt32*)(bytes + PEHeaderPointerOffset))[0];
 
