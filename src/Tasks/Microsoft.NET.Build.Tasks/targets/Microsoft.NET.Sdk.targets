@@ -276,9 +276,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     -->
   <UsingTask TaskName="CreateAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="ResolvePackageAssets"
-          AfterTargets="ResolveReferences"
-          BeforeTargets="AssignTargetPaths"
+          DependsOnTargets="ResolvePackageAssets;CoreCompile"
+          BeforeTargets="GetCopyToOutputDirectoryItems"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
     <!--
@@ -309,7 +308,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <CreateAppHost AppHostSourcePath="@(NativeRestoredAppHostNETCore)"
                    AppHostDestinationDirectoryPath="$(AppHostDestinationDirectoryPath)"
                    AppBinaryName="$(AssemblyName)$(TargetExt)"
-                   IntermediateAssembly="@(IntermediateAssembly)"
+                   IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
                    WindowsGraphicalUserInterface="$(UseWindowsGraphicalUserInterface)"
                    Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
 
@@ -341,6 +340,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ItemGroup>
       <!-- Use 'None' so we can rename files using the 'Link' metadata as necessary -->
       <None Include="@(AllNETCoreCopyLocalItems)" />
+    </ItemGroup>
+    <AssignTargetPath Files="@(AllNETCoreCopyLocalItems)" RootFolder="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="AssignedFiles" ItemName="_AllNETCoreCopyLocalItemsWithTargetPath" />
+    </AssignTargetPath>
+    <ItemGroup>
+      <_NoneWithTargetPath Include="@(_AllNETCoreCopyLocalItemsWithTargetPath)" />
     </ItemGroup>
 
   </Target>
