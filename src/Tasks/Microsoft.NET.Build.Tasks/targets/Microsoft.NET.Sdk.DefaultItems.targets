@@ -158,23 +158,28 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!-- ImplicitPackageReferenceVersion will go in BundledVersions, but until they do, put defaults here -->
   <ItemGroup Condition="'@(ImplicitPackageReferenceVersion)' == ''">
-    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.App"
-                                     TargetFrameworkVersion="2.1"
-                                     DefaultVersion="2.1.1"
-                                     LatestVersion="2.1.3"/>
-    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.All"
-                                     TargetFrameworkVersion="2.1"
-                                     DefaultVersion="2.1.1"
-                                     LatestVersion="2.1.3"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.NETCore.App" TargetFrameworkVersion="1.0" DefaultVersion="1.0.5" LatestVersion="1.0.12"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.NETCore.App" TargetFrameworkVersion="1.1" DefaultVersion="1.1.2" LatestVersion="1.1.9"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.NETCore.App" TargetFrameworkVersion="2.0" DefaultVersion="2.0.0" LatestVersion="2.0.9"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.NETCore.App" TargetFrameworkVersion="2.1" DefaultVersion="2.1.0" LatestVersion="2.1.2"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.NETCore.App" TargetFrameworkVersion="2.2" DefaultVersion="$(BundledNETCoreAppPackageVersion)" LatestVersion="$(BundledNETCoreAppPackageVersion)"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.App" TargetFrameworkVersion="2.1" DefaultVersion="2.1.1" LatestVersion="2.1.3"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.All" TargetFrameworkVersion="2.1" DefaultVersion="2.1.1" LatestVersion="2.1.3"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.App" TargetFrameworkVersion="2.2" DefaultVersion="$(BundledAspNetCoreAppPackageVersion)" LatestVersion="$(BundledAspNetCoreAppPackageVersion)"/>
+    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.All" TargetFrameworkVersion="2.2" DefaultVersion="$(BundledAspNetCoreAllPackageVersion)" LatestVersion="$(BundledAspNetCoreAllPackageVersion)"/>
+  </ItemGroup>
 
-    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.App"
-                                     TargetFrameworkVersion="2.2"
-                                     DefaultVersion="$(BundledAspNetCoreAppPackageVersion)"
-                                     LatestVersion="$(BundledAspNetCoreAppPackageVersion)"/>
-    <ImplicitPackageReferenceVersion Include="Microsoft.AspNetCore.All"
-                                     TargetFrameworkVersion="2.2"
-                                     DefaultVersion="$(BundledAspNetCoreAllPackageVersion)"
-                                     LatestVersion="$(BundledAspNetCoreAllPackageVersion)"/>
+  <ItemGroup>
+    <!-- Set implicit metadata on ASP.NET package references -->
+    <PackageReference Update="Microsoft.AspNetCore.App">
+      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">true</PrivateAssets>
+      <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
+    </PackageReference>
+  
+    <PackageReference Update="Microsoft.AspNetCore.All">
+      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">true</PrivateAssets>
+      <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
+    </PackageReference>
   </ItemGroup>
   
   <UsingTask TaskName="ApplyImplicitVersions" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />

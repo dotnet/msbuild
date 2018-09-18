@@ -51,8 +51,6 @@ namespace Microsoft.NET.Build.Tasks
                             TargetLatestRuntimePatch ? implicitVersion.LatestVersion : implicitVersion.DefaultVersion);
 
                         packageReference.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
-                        packageReference.SetMetadata("PrivateAssets", "all");
-                        packageReference.SetMetadata("Publish", "true");
 
                         packageReferencesToUpdate.Add(packageReference);
                     }
