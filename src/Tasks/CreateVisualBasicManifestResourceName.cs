@@ -220,7 +220,7 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log
         )
         {
-            return ManifestNameCreator.CreateNameForVisualBasicManifestResource
+            return ManifestNameCreator.CreateVisualBasicManifestResourceName
             (
                 fileName,
                 linkFileName,
