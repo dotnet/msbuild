@@ -8,7 +8,8 @@ namespace Microsoft.NET.Build.Tasks
 {
 
     //  TODO: Provide way to opt out of warning when Version is specified (possibly with the DisableImplicitFrameworkReferences property)
-    public class ApplyImplicitVersions : TaskBase
+    //  TODO: Add behavior (and test) for duplicate PackageReferences
+    public sealed class ApplyImplicitVersions : TaskBase
     {
         public string TargetFrameworkVersion { get; set; }
 
@@ -19,13 +20,13 @@ namespace Microsoft.NET.Build.Tasks
         public ITaskItem[] ImplicitPackageReferenceVersions { get; set; } = Array.Empty<ITaskItem>();
 
         [Output]
-        public ITaskItem[] PackageReferencesToUpdate { get; set; }
+        public ITaskItem[] PackageReferencesToUpdate { get; private set; }
 
         //  This task runs both before restore and build, so if it logged warnings directly they could show up
         //  twice when building with implicit restore.  So instead we generate the warnings here, and keep them
         //  in an item where they'll be logged in a target that runs before build, but not before restore.
         [Output]
-        public string[] SdkBuildWarnings { get; set; }
+        public string[] SdkBuildWarnings { get; private set; }
 
         protected override void ExecuteCore()
         {
@@ -46,7 +47,6 @@ namespace Microsoft.NET.Build.Tasks
                     string versionOnPackageReference = packageReference.GetMetadata(MetadataKeys.Version);
                     if (string.IsNullOrEmpty(versionOnPackageReference))
                     {
-                        
                         packageReference.SetMetadata(MetadataKeys.Version, 
                             TargetLatestRuntimePatch ? implicitVersion.LatestVersion : implicitVersion.DefaultVersion);
 
@@ -55,7 +55,6 @@ namespace Microsoft.NET.Build.Tasks
                         packageReference.SetMetadata("Publish", "true");
 
                         packageReferencesToUpdate.Add(packageReference);
-
                     }
                     else
                     {
@@ -69,13 +68,15 @@ namespace Microsoft.NET.Build.Tasks
             SdkBuildWarnings = buildWarnings.ToArray();
         }
 
-        class ImplicitPackageReferenceVersion
+        private sealed class ImplicitPackageReferenceVersion
         {
-            ITaskItem _item;
+            private ITaskItem _item;
+
             public ImplicitPackageReferenceVersion(ITaskItem item)
             {
                 _item = item;
             }
+
             //  The name / Package ID
             public string Name => _item.ItemSpec;
 
@@ -85,7 +86,6 @@ namespace Microsoft.NET.Build.Tasks
             public string DefaultVersion => _item.GetMetadata("DefaultVersion");
 
             public string LatestVersion => _item.GetMetadata("LatestVersion");
-
         }
     }
 }
