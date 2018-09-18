@@ -1259,10 +1259,12 @@ namespace Microsoft.Build.CommandLine
             lock (s_buildLock)
             {
                 var projectGraph = new ProjectGraph(projectFile, projectCollection, globalProperties, toolsVersion);
+                var targetLists = projectGraph.GetTargetLists(targets);
 
                 // TODO: Do a full graph traversal
-                var projectInstance = projectGraph.EntryProjectNode.Project.CreateProjectInstance();
-                var request = new BuildRequestData(projectInstance, targets);
+                var project = projectGraph.EntryProjectNode.Project;
+                var targetList = targetLists[projectGraph.EntryProjectNode];
+                var request = new BuildRequestData(project, targetList.ToArray());
 
                 s_activeBuild = buildManager.PendBuildRequest(request);
 

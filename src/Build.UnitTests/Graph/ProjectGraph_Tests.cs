@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Collections.Immutable;
 using System.Linq;
-using Microsoft.Build.Evaluation;
+using System.Text;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -14,194 +14,300 @@ namespace Microsoft.Build.Graph.UnitTests
 {
     public class ProjectGraphTests
     {
-        private const string ProjA = "A.proj";
-        private const string ProjB = "B.proj";
-        private const string ProjC = "C.proj";
-        private const string ProjD = "D.proj";
-        private const string ProjE = "E.proj";
-        private const string ProjF = "F.proj";
-        private const string ProjG = "G.proj";
-
         [Fact]
-        public void TestGraphWithSingleNode()
+        public void ConstructWithSingleNode()
         {
-            string projectContents = @"
-                <Project>
-                  <Target Name='Build'>
-                    <Message Text='Building test project'/>
-                  </Target>
-                </Project>
-                ";
             using (var env = TestEnvironment.Create())
             {
-                TransientTestProjectWithFiles testProject =
-                    env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
-                var projectGraph = new ProjectGraph(testProject.ProjectFile);
+                TransientTestFile entryProject = CreateProject(env, 1);
+                var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
-                Project projectNode = projectGraph.ProjectNodes.First().Project;
-                projectNode.FullPath.ShouldBe(testProject.ProjectFile);
+                projectGraph.ProjectNodes.First().Project.FullPath.ShouldBe(entryProject.Path);
             }
         }
 
         /// <summary>
-        ///  A  
-        /// / \ 
-        ///B   C
+        ///   1
+        ///  / \
+        /// 2   3
         /// </summary>
         [Fact]
-        public void TestGraphWithThreeNodes()
+        public void ConstructWithThreeNodes()
         {
-            string projectAContents = @"
-                <Project>
-                  <ItemGroup>
-                    <ProjectReference Include=""B.proj"" />
-                    <ProjectReference Include=""C.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectBContents = @"<Project/>";
-
-            string projectCContents = @"<Project/>";
-
             using (var env = TestEnvironment.Create())
             {
-                TransientTestProjectWithFiles projectA =
-                    env.CreateTestProjectWithFiles(ProjA, projectAContents, new []{ProjB, ProjC});
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjB), projectBContents);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjC), projectCContents);
-                ProjectGraph graph = new ProjectGraph(projectA.ProjectFile);
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                CreateProject(env, 2);
+                CreateProject(env, 3);
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
                 graph.ProjectNodes.Count.ShouldBe(3);
-                ProjectGraphNode projectNodeA = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectA.ProjectFile));
-                ProjectGraphNode projectNodeB = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjB));
-                ProjectGraphNode projectNodeC = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjC));
-                projectNodeA.ProjectReferences.Count.ShouldBe(2);
-                projectNodeB.ProjectReferences.Count.ShouldBe(0);
-                projectNodeC.ProjectReferences.Count.ShouldBe(0);
+                GetNodeForProject(graph, 1).ProjectReferences.Count.ShouldBe(2);
+                GetNodeForProject(graph, 2).ProjectReferences.Count.ShouldBe(0);
+                GetNodeForProject(graph, 3).ProjectReferences.Count.ShouldBe(0);
             }
         }
 
         /// <summary>
-        /// Test the following graph with entry project B
-        /// B depends on F,E,C
-        /// F depends on A
-        /// E depends on G
-        /// A depends on D,E
+        /// Test the following graph with entry project 2
+        /// 2 depends on 3,5,6
+        /// 6 depends on 1
+        /// 5 depends on 7
+        /// 1 depends on 4,5
         /// </summary>
         [Fact]
-        public void TestGraphWithMultipleNodes()
+        public void ConstructWithMultipleNodes()
         {
-            string projectAContents = @"
-                <Project>
-                 <ItemGroup>
-                    <ProjectReference Include=""D.proj"" />
-                    <ProjectReference Include=""E.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectBContents = @"
-                <Project>
-                  <ItemGroup>
-                    <ProjectReference Include=""F.proj"" />
-                    <ProjectReference Include=""E.proj"" />
-                    <ProjectReference Include=""C.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectCContents = @"<Project/>";
-
-            string projectDContents = @"<Project/>";
-
-            string projectEContents = @"
-                <Project>
-                  <ItemGroup>
-                    <ProjectReference Include=""G.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectFContents = @"
-                <Project>
-                  <ItemGroup>
-                    <ProjectReference Include=""A.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectGContents = @"<Project/>";
-
             using (var env = TestEnvironment.Create())
             {
-                var projectFiles = new string[] {ProjB, ProjC, ProjD, ProjE, ProjF};
-                TransientTestProjectWithFiles projectA =
-                    env.CreateTestProjectWithFiles(ProjA, projectAContents, projectFiles);
-                string projBFullPath = Path.Combine(projectA.TestRoot, ProjB);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjB), projectBContents);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjC), projectCContents);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjD), projectDContents);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjE), projectEContents);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjF), projectFContents);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjG), projectGContents);
-                ProjectGraph graph = new ProjectGraph(projBFullPath);
+                CreateProject(env, 1, new[] { 4, 5 });
+                TransientTestFile entryProject = CreateProject(env, 2, new[] { 3, 5, 6 });
+                CreateProject(env, 3);
+                CreateProject(env, 4);
+                CreateProject(env, 5, new[] { 7 });
+                CreateProject(env, 6, new[] { 1 });
+                CreateProject(env, 7);
+
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
                 graph.ProjectNodes.Count.ShouldBe(7);
-                ProjectGraphNode projectNodeA = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectA.ProjectFile));
-                ProjectGraphNode projectNodeB = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjB));
-                ProjectGraphNode projectNodeC = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjC));
-                ProjectGraphNode projectNodeE = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjE));
-                ProjectGraphNode projectNodeF = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjF));
-                ProjectGraphNode projectNodeG = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjG));
-                projectNodeA.ProjectReferences.Count.ShouldBe(2);
-                projectNodeB.ProjectReferences.Count.ShouldBe(3);
-                projectNodeC.ProjectReferences.Count.ShouldBe(0);
-                projectNodeF.ProjectReferences.Count.ShouldBe(1);
-                // confirm that there is a path from B -> F -> A -> E
-                projectNodeB.ProjectReferences.ShouldContain(projectNodeF);
-                projectNodeF.ProjectReferences.ShouldContain(projectNodeA);
-                projectNodeA.ProjectReferences.ShouldContain(projectNodeE);
-                projectNodeE.ProjectReferences.ShouldContain(projectNodeG);
+                GetNodeForProject(graph, 1).ProjectReferences.Count.ShouldBe(2);
+                GetNodeForProject(graph, 2).ProjectReferences.Count.ShouldBe(3);
+                GetNodeForProject(graph, 3).ProjectReferences.Count.ShouldBe(0);
+                GetNodeForProject(graph, 4).ProjectReferences.Count.ShouldBe(0);
+                GetNodeForProject(graph, 5).ProjectReferences.Count.ShouldBe(1);
+                GetNodeForProject(graph, 6).ProjectReferences.Count.ShouldBe(1);
+                GetNodeForProject(graph, 7).ProjectReferences.Count.ShouldBe(0);
+
+                // confirm that there is a path from 2 -> 6 -> 1 -> 5 -> 7
+                GetNodeForProject(graph, 2).ProjectReferences.ShouldContain(GetNodeForProject(graph, 6));
+                GetNodeForProject(graph, 6).ProjectReferences.ShouldContain(GetNodeForProject(graph, 1));
+                GetNodeForProject(graph, 1).ProjectReferences.ShouldContain(GetNodeForProject(graph, 5));
+                GetNodeForProject(graph, 5).ProjectReferences.ShouldContain(GetNodeForProject(graph, 7));
             }
         }
 
         [Fact]
-        public void TestCycleInGraph()
+        public void ConstructWithCycle()
         {
-            string projectAContents = @"
-                <Project>
-                  <ItemGroup>
-                    <ProjectReference Include=""B.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectBContents = @"
-                <Project>
-                  <ItemGroup>
-                    <ProjectReference Include=""C.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectCContents = @"
-                <Project>
-                  <ItemGroup>
-                    <ProjectReference Include=""A.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
             using (var env = TestEnvironment.Create())
             {
-                TransientTestProjectWithFiles projectA =
-                    env.CreateTestProjectWithFiles(ProjA, projectAContents, new []{ProjB, ProjC});
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjB), projectBContents);
-                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjC), projectCContents);
-                ProjectGraph graph = new ProjectGraph(projectA.ProjectFile);
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
+                CreateProject(env, 2, new[] { 3 });
+                CreateProject(env, 3, new[] { 1 });
+
+                // TODO: This should eventually throw, but for now not infinite-looping is sufficient.
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 graph.ProjectNodes.Count.ShouldBe(3);
             }
         }
+
+        [Fact]
+        public void GetTargetListsAggregatesFromMultipleEdges()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } });
+                CreateProject(env, 2, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "C" } } });
+                CreateProject(env, 3, new[] { 4 }, new Dictionary<string, string[]> { { "B", new[] { "D" } } });
+                CreateProject(env, 4);
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(4);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new[] { "A" });
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetNodeForProject(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetNodeForProject(projectGraph, 2)].ShouldBe(new[] { "B" });
+                targetLists[GetNodeForProject(projectGraph, 3)].ShouldBe(new[] { "B" });
+                targetLists[GetNodeForProject(projectGraph, 4)].ShouldBe(new[] { "C", "D" }); // From B => C and B => D
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsDedupesTargets()
+        {
+            var projectReferenceTargets = new Dictionary<string, string[]>
+            {
+                { "A" , new[] { "B", "X", "C" } },
+                { "B" , new[] { "X", "Y" } },
+                { "C" , new[] { "X", "Z" } },
+            };
+
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, projectReferenceTargets);
+                CreateProject(env, 2, new[] { 3 }, projectReferenceTargets);
+                CreateProject(env, 3, Array.Empty<int>(), projectReferenceTargets);
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(3);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new[] { "A" });
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetNodeForProject(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetNodeForProject(projectGraph, 2)].ShouldBe(new[] { "B", "X", "C" });
+                targetLists[GetNodeForProject(projectGraph, 3)].ShouldBe(new[] { "X", "Y", "Z" }); // Simplified from X, Y, X, Z
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsForComplexGraph()
+        {
+            var projectReferenceTargets = new Dictionary<string, string[]>
+            {
+                { "A" , new[] { "B" } },
+                { "B" , new[] { "C" } },
+                { "C" , new[] { "D" } },
+                { "D" , new[] { "E" } },
+            };
+
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3, 5 }, projectReferenceTargets);
+                CreateProject(env, 2, new[] { 4, 5 }, projectReferenceTargets);
+                CreateProject(env, 3, new[] { 5, 6 }, projectReferenceTargets);
+                CreateProject(env, 4, new[] { 5 }, projectReferenceTargets);
+                CreateProject(env, 5, new[] { 6 }, projectReferenceTargets);
+                CreateProject(env, 6, Array.Empty<int>(), projectReferenceTargets);
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(6);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(new[] { "A" });
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetNodeForProject(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetNodeForProject(projectGraph, 2)].ShouldBe(new[] { "B" });
+                targetLists[GetNodeForProject(projectGraph, 3)].ShouldBe(new[] { "B" });
+                targetLists[GetNodeForProject(projectGraph, 4)].ShouldBe(new[] { "C" });
+                targetLists[GetNodeForProject(projectGraph, 5)].ShouldBe(new[] { "B", "C", "D" });
+                targetLists[GetNodeForProject(projectGraph, 6)].ShouldBe(new[] { "C", "D", "E" });
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsNullEntryTargets()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { "B" } } }, "A");
+                CreateProject(env, 2);
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(null);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetNodeForProject(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetNodeForProject(projectGraph, 2)].ShouldBe(new[] { "B" });
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsDefaultTargetsAreExpanded()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "A", new[] { ".default" } } }, defaultTargets: "A");
+                CreateProject(env, 2, defaultTargets: "B");
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(null);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetNodeForProject(projectGraph, 1)].ShouldBe(new[] { "A" });
+                targetLists[GetNodeForProject(projectGraph, 2)].ShouldBe(new[] { "B" });
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsUnspecifiedTargetsDefaultToBuild()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 }, new Dictionary<string, string[]> { { "Build", new[] { "A", ".default" } } });
+                CreateProject(env, 2);
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(null);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetNodeForProject(projectGraph, 1)].ShouldBe(new[] { "Build" });
+                targetLists[GetNodeForProject(projectGraph, 2)].ShouldBe(new[] { "A", "Build" });
+            }
+        }
+
+        [Fact]
+        public void GetTargetListsDefaultComplexPropagation()
+        {
+            var projectReferenceTargets = new Dictionary<string, string[]>
+            {
+                { "Build", new[] { "A", ".default" } },
+                { "X", new[] { "B", ".default" } },
+                { "Y", new[] { "C", ".default" } },
+            };
+
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3, 4 }, projectReferenceTargets, defaultTargets: null);
+                CreateProject(env, 2, new[] { 5 }, projectReferenceTargets, defaultTargets: null);
+                CreateProject(env, 3, new[] { 6 }, projectReferenceTargets, defaultTargets: "X");
+                CreateProject(env, 4, new[] { 7 }, projectReferenceTargets, defaultTargets: "Y");
+                CreateProject(env, 5, defaultTargets: null);
+                CreateProject(env, 6, defaultTargets: null);
+                CreateProject(env, 7, defaultTargets: "Z;W");
+
+                var projectGraph = new ProjectGraph(entryProject.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(7);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(null);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[GetNodeForProject(projectGraph, 1)].ShouldBe(new[] { "Build" });
+                targetLists[GetNodeForProject(projectGraph, 2)].ShouldBe(new[] { "A", "Build" });
+                targetLists[GetNodeForProject(projectGraph, 3)].ShouldBe(new[] { "A", "X" });
+                targetLists[GetNodeForProject(projectGraph, 4)].ShouldBe(new[] { "A", "Y" });
+                targetLists[GetNodeForProject(projectGraph, 5)].ShouldBe(new[] { "A", "Build" });
+                targetLists[GetNodeForProject(projectGraph, 6)].ShouldBe(new[] { "B", "Build" });
+                targetLists[GetNodeForProject(projectGraph, 7)].ShouldBe(new[] { "C", "Z", "W" });
+            }
+        }
+
+        private static TransientTestFile CreateProject(
+            TestEnvironment env,
+            int projectNumber,
+            int[] projectReferences = null,
+            Dictionary<string, string[]> projectReferenceTargets = null,
+            string defaultTargets = null)
+        {
+            var sb = new StringBuilder(64);
+
+            // Use "Build" when the default target is unspecified since in practice that is usually the default target.
+            sb.AppendFormat("<Project DefaultTargets=\"{0}\"><ItemGroup>", defaultTargets ?? "Build");
+
+            if (projectReferences != null)
+            {
+                foreach (int projectReference in projectReferences)
+                {
+                    sb.AppendFormat("<ProjectReference Include=\"{0}.proj\" />", projectReference);
+                }
+            }
+
+            if (projectReferenceTargets != null)
+            {
+                foreach (KeyValuePair<string, string[]> pair in projectReferenceTargets)
+                {
+                    sb.AppendFormat("<ProjectReferenceTargets Include=\"{0}\" Targets=\"{1}\" />", pair.Key, string.Join(";", pair.Value));
+                }
+            }
+
+            sb.Append("</ItemGroup></Project>");
+
+            return env.CreateFile(projectNumber + ".proj", sb.ToString());
+        }
+
+        private static ProjectGraphNode GetNodeForProject(ProjectGraph graph, int projectNum) => graph.ProjectNodes.First(node => node.Project.FullPath.EndsWith(projectNum + ".proj"));
     }
 
 }

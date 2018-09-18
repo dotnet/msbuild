@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.Graph
 {
@@ -15,7 +14,7 @@ namespace Microsoft.Build.Graph
         private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
 
         // No public creation.
-        internal ProjectGraphNode(Project project)
+        internal ProjectGraphNode(ProjectInstance project)
         {
             Project = project;
         }
@@ -28,7 +27,7 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Gets the evaluated project represented by this node in the graph.
         /// </summary>
-        public Project Project { get; }
+        public ProjectInstance Project { get; }
 
         internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
     }
