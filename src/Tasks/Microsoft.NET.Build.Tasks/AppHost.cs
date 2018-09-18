@@ -5,13 +5,14 @@ using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
     /// Embeds the App Name into the AppHost.exe
     /// </summary>
-    public static class AppHost
+    internal static class AppHost
     {
         /// <summary>
         /// hash value embedded in default apphost executable in a place where the path to the app binary should be stored.
@@ -34,6 +35,7 @@ namespace Microsoft.NET.Build.Tasks
             bool overwriteExisting = false,
             AppHostOptions options = null,
             string intermediateAssembly = null,
+            Logger log = null)
         {
             var hostExtension = Path.GetExtension(appHostSourceFilePath);
             var appbaseName = Path.GetFileNameWithoutExtension(appBinaryFilePath);
@@ -52,11 +54,6 @@ namespace Microsoft.NET.Build.Tasks
 
             // Copy AppHostSourcePath to ModifiedAppHostPath so it inherits the same attributes\permissions.
             File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwriteExisting);
-
-            // Copy resources from managed dll to the apphost
-            new ResourceUpdater(appHostDestinationFilePath)
-                .AddResourcesFrom(intermediateAssembly)
-                .Update();
 
             // Re-write ModifiedAppHostPath with the proper contents.
             bool appHostIsPEImage = false;
@@ -80,6 +77,21 @@ namespace Microsoft.NET.Build.Tasks
                             SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
                         }
                     }
+                }
+            }
+
+            if (intermediateAssembly != null && appHostIsPEImage)
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Copy resources from managed dll to the apphost
+                    new ResourceUpdater(appHostDestinationFilePath)
+                        .AddResourcesFrom(intermediateAssembly)
+                        .Update();
+                }
+                else if (log != null)
+                {
+                    log.LogWarning(Strings.AppHostCustomizationRequiresWindowsHostWarning);
                 }
             }
 

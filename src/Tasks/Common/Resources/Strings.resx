@@ -413,4 +413,8 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1073: The FrameworkReference '{0}' was not recognized</value>
     <comment>{StrBegin="NETSDK1073: "}</comment>
   </data>
+  <data name="AppHostCustomizationRequiresWindowsHostWarning" xml:space="preserve">
+    <value>NETSDK1074: Unable to add resources to the application host executable because it's not being built on Windows.</value>
+    <comment>{StrBegin="NETSDK1074: "}</comment>
+  </data>
 </root>

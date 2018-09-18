@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx">
     <body>
+      <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
+        <source>NETSDK1074: Unable to add resources to the application host executable because it's not being built on Windows.</source>
+        <target state="new">NETSDK1074: Unable to add resources to the application host executable because it's not being built on Windows.</target>
+        <note>{StrBegin="NETSDK1074: "}</note>
+      </trans-unit>
       <trans-unit id="AppHostNotWindows">
         <source>NETSDK1071: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
         <target state="new">NETSDK1071: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>

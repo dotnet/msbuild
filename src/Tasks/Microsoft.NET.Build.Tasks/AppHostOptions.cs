@@ -3,7 +3,7 @@
     /// <summary>
     /// Options to customize the apphost.
     /// </summary>
-    public class AppHostOptions
+    internal class AppHostOptions
     {
         /// <summary>
         /// If this is set to true and the apphost is a Windows PE executable, it will have its subsystem set to GUI.
