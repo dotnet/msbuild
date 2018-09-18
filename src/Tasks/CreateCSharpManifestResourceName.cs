@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log
         )
         {
-            return ManifestNameCreator.CreateNameForCSharpManifestResource
+            return ManifestNameCreator.CreateCSharpManifestResourceName
             (
                 fileName,
                 linkFileName,

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Shared;
@@ -6,9 +9,29 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
+    /// <summary>
+    /// Helper class that contains manifest resource name creating functions,
+    /// from a generic name-creation function to minimize code differences.
+    /// </summary>
     internal static class ManifestNameCreator
     {
-        public static string CreateNameForCSharpManifestResource
+        /// <summary>
+        /// Utility function for creating a C#-style manifest name from 
+        /// a resource name. Note that this function attempts to emulate the
+        /// Everret implementation of this code which can be found by searching for
+        /// ComputeNonWFCResourceName() or ComputeWFCResourceName() in
+        /// \vsproject\langproj\langbldmgrsite.cpp
+        /// </summary>
+        /// <param name="fileName">The file name of the dependent (usually a .resx)</param>
+        /// <param name="linkFileName">The file name of the dependent (usually a .resx)</param>
+        /// <param name="rootNamespace">The root namespace (usually from the project file). May be null</param>
+        /// <param name="prependCultureAsDirectory">should the culture name be prepended to the manifest name as a path</param>
+        /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .cs file). May be null</param>
+        /// <param name="culture">The override culture of this resource, if any</param>
+        /// <param name="binaryStream">File contents binary stream, may be null</param>
+        /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
+        /// <returns>Returns the manifest name</returns>
+        public static string CreateCSharpManifestResourceName
         (
             string fileName,
             string linkFileName,
@@ -17,7 +40,7 @@ namespace Microsoft.Build.Tasks
             string dependentUponFileName, // May be null
             string culture, // may be null 
             Stream binaryStream, // File contents binary stream, may be null
-            TaskLoggingHelper log
+            TaskLoggingHelper log // Should not be null
         )
         {
             return CreateNameForResource
@@ -36,7 +59,24 @@ namespace Microsoft.Build.Tasks
             );
         }
 
-        public static string CreateNameForVisualBasicManifestResource
+
+        /// <summary>
+        /// Utility function for creating a VB-style manifest name from 
+        /// a resource name. Note that this function attempts to emulate the
+        /// Everret implementation of this code which can be found by searching for
+        /// ComputeNonWFCResourceName() or ComputeWFCResourceName() in
+        /// \vsproject\langproj\langbldmgrsite.cpp
+        /// </summary>
+        /// <param name="fileName">The file name of the dependent (usually a .resx)</param>
+        /// <param name="linkFileName">The file name of the dependent (usually a .resx)</param>
+        /// <param name="prependCultureAsDirectory">should the culture name be prepended to the manifest name as a path</param>
+        /// <param name="rootNamespace">The root namespace (usually from the project file). May be null</param>
+        /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .vb file). May be null</param>
+        /// <param name="culture">The override culture of this resource, if any</param>
+        /// <param name="binaryStream">File contents binary stream, may be null</param>
+        /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
+        /// <returns>Returns the manifest name</returns>
+        public static string CreateVisualBasicManifestResourceName
         (
             string fileName,
             string linkFileName,
@@ -45,7 +85,7 @@ namespace Microsoft.Build.Tasks
             string dependentUponFileName, // May be null
             string culture, // may be null 
             Stream binaryStream, // File contents binary stream, may be null
-            TaskLoggingHelper log
+            TaskLoggingHelper log // Should not be null
         )
         {
             return CreateNameForResource
@@ -64,7 +104,27 @@ namespace Microsoft.Build.Tasks
             );
         }
 
-
+        /// <summary>
+        /// Need to take a look at "ComputeNonWFCResourceName() or ComputeWFCResourceName()"
+        /// to relate what this function is trying to emulate?
+        /// </summary>
+        /// <param name="fileName">The file name of the dependent (usually a .resx)</param>
+        /// <param name="linkFileName">The file name of the dependent (usually a .resx)</param>
+        /// <param name="rootNamespace">The root namespace (usually from the project file). May be null</param>
+        /// <param name="prependCultureAsDirectory">should the culture name be prepended to the manifest name as a path</param>
+        /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .cs/.vb file). May be null</param>
+        /// <param name="culture">The override culture of this resource, if any</param>
+        /// <param name="binaryStream">File contents binary stream, may be null</param>
+        /// <param name="getFirstClassNameFullyQualified">
+        /// A function that takes a parameter of (text) stream and returns an ExtractedClassName
+        /// object. It should extract according to the dependentUponFile language type, i.e.:
+        /// CSharpParserUtilities.GetFirstClassNameFullyQualified should be used if file type is .cs
+        /// Nullability relates to binaryStream, nullable if binaryStream is null, unnullable otherwise.
+        /// </param>
+        /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
+        /// <param name="includeRootNamespace">Option to include root namespace as part of the manifest name</param>
+        /// <param name="includeSubFolder">Option to include subfolder as part of the manifest name</param>
+        /// <returns>Returns the manifest name</returns>
         private static string CreateNameForResource
         (
             string fileName,
@@ -149,7 +209,7 @@ namespace Microsoft.Build.Tasks
                 // Replace spaces in the directory name with underscores. Needed for compatibility with Everett.
                 // Note that spaces in the file name itself are preserved.
                 string everettCompatibleDirectoryName =
-                    includeSubFolder ? CreateManifestResourceName.MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename)) : "";
+                    includeSubFolder ? CreateManifestResourceName.MakeValidEverettIdentifier(Path.GetDirectoryName(info.cultureNeutralFilename)) : string.Empty;
 
                 // only strip extension for .resx and .restext files
 
