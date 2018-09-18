@@ -3218,7 +3218,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 var testProject = env.CreateTestProjectWithFiles(@"
                     <Project Sdk='MSBuildUnitTestSdk'>
-                    </Project>", null);
+                    </Project>");
                 env.SetEnvironmentVariable("MSBuildSDKsPath", testSdkRoot);
 
                 string content = @"
