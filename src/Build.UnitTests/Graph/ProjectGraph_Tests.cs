@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
@@ -13,6 +13,14 @@ namespace Microsoft.Build.Graph.UnitTests
 {
     public class ProjectGraphTests
     {
+        private const string ProjA = "A.proj";
+        private const string ProjB = "B.proj";
+        private const string ProjC = "C.proj";
+        private const string ProjD = "D.proj";
+        private const string ProjE = "E.proj";
+        private const string ProjF = "F.proj";
+        private const string ProjG = "G.proj";
+
         [Fact]
         public void TestGraphWithSingleNode()
         {
@@ -38,49 +46,13 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
-        public void TestGraphWithSingleEntryPointMultipleNodes()
-        {
-            string projectAContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                  <ItemGroup>
-                    <ProjectReference Include=""..\B\build.proj"" />
-                  </ItemGroup>
-                </Project>
-                ";
-
-            string projectBContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                </Project>
-                ";
-
-            using (var env = TestEnvironment.Create())
-            {
-                TransientTestProjectWithFiles projectA =
-                    env.CreateTestProjectWithFiles(projectAContents, Array.Empty<string>(), "..\\A");
-                TransientTestProjectWithFiles projectB =
-                    env.CreateTestProjectWithFiles(projectBContents, Array.Empty<string>(), "..\\B");
-
-                List<string> projectsToParse = new List<string>();
-                projectsToParse.Add(projectA.ProjectFile);
-                ProjectGraph graph = new ProjectGraph(projectsToParse);
-                graph.ProjectNodes.Count.ShouldBe(2);
-            }
-        }
-
         /// <summary>
-        /// A  B
-        /// \ /
-        ///  C
+        ///  A  
+        /// / \ 
+        ///B   C
         /// </summary>
         [Fact]
-        public void TestGraphWithMultipleEntryPointsMultipleNodes()
+        public void TestGraphWithThreeNodes()
         {
             string projectAContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
@@ -88,7 +60,8 @@ namespace Microsoft.Build.Graph.UnitTests
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include=""..\C\build.proj"" />
+                    <ProjectReference Include=""B.proj"" />
+                    <ProjectReference Include=""C.proj"" />
                   </ItemGroup>
                 </Project>
                 ";
@@ -98,9 +71,6 @@ namespace Microsoft.Build.Graph.UnitTests
                   <PropertyGroup>
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
-                  <ItemGroup>
-                    <ProjectReference Include=""..\C\build.proj"" />
-                  </ItemGroup>
                 </Project>
                 ";
 
@@ -115,36 +85,30 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 TransientTestProjectWithFiles projectA =
-                    env.CreateTestProjectWithFiles(projectAContents, Array.Empty<string>(), "..\\A");
-                TransientTestProjectWithFiles projectB =
-                    env.CreateTestProjectWithFiles(projectBContents, Array.Empty<string>(), "..\\B");
-                TransientTestProjectWithFiles projectC =
-                    env.CreateTestProjectWithFiles(projectCContents, Array.Empty<string>(), "..\\C");
-                List<string> projectsToParse = new List<string>();
-                projectsToParse.Add(projectA.ProjectFile);
-                projectsToParse.Add(projectB.ProjectFile);
-                ProjectGraph graph = new ProjectGraph(projectsToParse);
+                    env.CreateTestProjectWithFiles(ProjA, projectAContents, new []{ProjB, ProjC});
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjB), projectBContents);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjC), projectCContents);
+                ProjectGraph graph = new ProjectGraph(projectA.ProjectFile);
 
                 graph.ProjectNodes.Count.ShouldBe(3);
                 ProjectGraphNode projectNodeA = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectA.ProjectFile));
-                ProjectGraphNode projectNodeB = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectB.ProjectFile));
-                ProjectGraphNode projectNodeC = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectC.ProjectFile));
-                projectNodeA.ProjectReferences.Count.ShouldBe(1);
-                projectNodeB.ProjectReferences.Count.ShouldBe(1);
+                ProjectGraphNode projectNodeB = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjB));
+                ProjectGraphNode projectNodeC = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjC));
+                projectNodeA.ProjectReferences.Count.ShouldBe(2);
+                projectNodeB.ProjectReferences.Count.ShouldBe(0);
                 projectNodeC.ProjectReferences.Count.ShouldBe(0);
             }
         }
 
         /// <summary>
-        /// Test the following graph with entry projects (A,B,C)
-        ///  F   B---C
-        ///  |   |
-        ///  A   |
-        /// / \  |
-        /// D   E 
+        /// Test the following graph with entry project B
+        /// B depends on F,E,C
+        /// F depends on A
+        /// E depends on G
+        /// A depends on D,E
         /// </summary>
         [Fact]
-        public void TestGraphWithMultipleEntryPointsMultipleNodes2()
+        public void TestGraphWithMultipleNodes()
         {
             string projectAContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
@@ -152,8 +116,8 @@ namespace Microsoft.Build.Graph.UnitTests
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include=""..\D\build.proj"" />
-                    <ProjectReference Include=""..\E\build.proj"" />
+                    <ProjectReference Include=""D.proj"" />
+                    <ProjectReference Include=""E.proj"" />
                   </ItemGroup>
                 </Project>
                 ";
@@ -164,9 +128,9 @@ namespace Microsoft.Build.Graph.UnitTests
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include=""..\F\build.proj"" />
-                    <ProjectReference Include=""..\E\build.proj"" />
-                    <ProjectReference Include=""..\C\build.proj"" />
+                    <ProjectReference Include=""F.proj"" />
+                    <ProjectReference Include=""E.proj"" />
+                    <ProjectReference Include=""C.proj"" />
                   </ItemGroup>
                 </Project>
                 ";
@@ -192,6 +156,9 @@ namespace Microsoft.Build.Graph.UnitTests
                   <PropertyGroup>
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include=""G.proj"" />
+                  </ItemGroup>
                 </Project>
                 ";
 
@@ -201,45 +168,54 @@ namespace Microsoft.Build.Graph.UnitTests
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include=""..\A\build.proj"" />
+                    <ProjectReference Include=""A.proj"" />
                   </ItemGroup>
+                </Project>
+                ";
+
+            string projectGContents = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                  <PropertyGroup>
+                    <TestProperty>value</TestProperty>
+                  </PropertyGroup>
                 </Project>
                 ";
 
             using (var env = TestEnvironment.Create())
             {
+                var projectFiles = new string[] {ProjB, ProjC, ProjD, ProjE, ProjF};
                 TransientTestProjectWithFiles projectA =
-                    env.CreateTestProjectWithFiles(projectAContents, Array.Empty<string>(), "..\\A");
-                TransientTestProjectWithFiles projectB =
-                    env.CreateTestProjectWithFiles(projectBContents, Array.Empty<string>(), "..\\B");
-                TransientTestProjectWithFiles projectC =
-                    env.CreateTestProjectWithFiles(projectCContents, Array.Empty<string>(), "..\\C");
-                TransientTestProjectWithFiles projectD =
-                    env.CreateTestProjectWithFiles(projectDContents, Array.Empty<string>(), "..\\D");
-                TransientTestProjectWithFiles projectE =
-                    env.CreateTestProjectWithFiles(projectEContents, Array.Empty<string>(), "..\\E");
-                TransientTestProjectWithFiles projectF =
-                    env.CreateTestProjectWithFiles(projectFContents, Array.Empty<string>(), "..\\F");
+                    env.CreateTestProjectWithFiles(ProjA, projectAContents, projectFiles);
+                string projBFullPath = Path.Combine(projectA.TestRoot, ProjB);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjB), projectBContents);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjC), projectCContents);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjD), projectDContents);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjE), projectEContents);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjF), projectFContents);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjG), projectGContents);
+                ProjectGraph graph = new ProjectGraph(projBFullPath);
 
-                // pass A,B,C in initial list of targets
-                List<string> projectsToParse = new List<string>();
-                projectsToParse.Add(projectA.ProjectFile);
-                projectsToParse.Add(projectB.ProjectFile);
-                projectsToParse.Add(projectC.ProjectFile);
-                ProjectGraph graph = new ProjectGraph(projectsToParse);
-
-                graph.ProjectNodes.Count.ShouldBe(6);
+                graph.ProjectNodes.Count.ShouldBe(7);
                 ProjectGraphNode projectNodeA = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectA.ProjectFile));
-                ProjectGraphNode projectNodeB = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectB.ProjectFile));
-                ProjectGraphNode projectNodeC = graph.ProjectNodes.First(node => node.Project.FullPath.Equals(projectC.ProjectFile));
+                ProjectGraphNode projectNodeB = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjB));
+                ProjectGraphNode projectNodeC = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjC));
+                ProjectGraphNode projectNodeE = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjE));
+                ProjectGraphNode projectNodeF = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjF));
+                ProjectGraphNode projectNodeG = graph.ProjectNodes.First(node => node.Project.FullPath.Contains(ProjG));
                 projectNodeA.ProjectReferences.Count.ShouldBe(2);
                 projectNodeB.ProjectReferences.Count.ShouldBe(3);
                 projectNodeC.ProjectReferences.Count.ShouldBe(0);
+                projectNodeF.ProjectReferences.Count.ShouldBe(1);
+                // confirm that there is a path from B -> F -> A -> E
+                projectNodeB.ProjectReferences.ShouldContain(projectNodeF);
+                projectNodeF.ProjectReferences.ShouldContain(projectNodeA);
+                projectNodeA.ProjectReferences.ShouldContain(projectNodeE);
+                projectNodeE.ProjectReferences.ShouldContain(projectNodeG);
             }
         }
 
         [Fact]
-        public void TestSingleEntryWithCycle()
+        public void TestCycleInGraph()
         {
             string projectAContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
@@ -247,7 +223,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include=""..\B\build.proj"" />
+                    <ProjectReference Include=""B.proj"" />
                   </ItemGroup>
                 </Project>
                 ";
@@ -258,7 +234,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include=""..\C\build.proj"" />
+                    <ProjectReference Include=""C.proj"" />
                   </ItemGroup>
                 </Project>
                 ";
@@ -269,21 +245,17 @@ namespace Microsoft.Build.Graph.UnitTests
                     <TestProperty>value</TestProperty>
                   </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include=""..\A\build.proj"" />
+                    <ProjectReference Include=""A.proj"" />
                   </ItemGroup>
                 </Project>
                 ";
             using (var env = TestEnvironment.Create())
             {
                 TransientTestProjectWithFiles projectA =
-                    env.CreateTestProjectWithFiles(projectAContents, Array.Empty<string>(), "..\\A");
-                TransientTestProjectWithFiles projectB =
-                    env.CreateTestProjectWithFiles(projectBContents, Array.Empty<string>(), "..\\B");
-                TransientTestProjectWithFiles projectC =
-                    env.CreateTestProjectWithFiles(projectCContents, Array.Empty<string>(), "..\\C");
-                List<string> projectsToParse = new List<string>();
-                projectsToParse.Add(projectA.ProjectFile);
-                ProjectGraph graph = new ProjectGraph(projectsToParse);
+                    env.CreateTestProjectWithFiles(ProjA, projectAContents, new []{ProjB, ProjC});
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjB), projectBContents);
+                File.WriteAllText(Path.Combine(projectA.TestRoot, ProjC), projectCContents);
+                ProjectGraph graph = new ProjectGraph(projectA.ProjectFile);
                 graph.ProjectNodes.Count.ShouldBe(3);
             }
         }

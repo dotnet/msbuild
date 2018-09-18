@@ -12,7 +12,7 @@ namespace Microsoft.Build.Graph
     /// </summary>
     public sealed class ProjectGraphNode
     {
-        private List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
+        private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
 
         // No public creation.
         internal ProjectGraphNode(Project project)
@@ -30,9 +30,9 @@ namespace Microsoft.Build.Graph
         /// </summary>
         public Project Project { get; }
 
-        internal void AddProjectReferences(List<ProjectGraphNode> projectGraphNodes)
+        internal void AddProjectReference(ProjectGraphNode projectGraphNode)
         {
-            _projectReferences.AddRange(projectGraphNodes);
+            _projectReferences.Add(projectGraphNode);
         }
     }
 }
