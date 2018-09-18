@@ -304,15 +304,21 @@ Consider an application built for `ubuntu.14.04-x64` and the following snippet f
                 "runtimeTargets": {
                     "runtimes/unix/lib/netstandard1.5/System.Data.SqlClient.dll": {
                         "assetType": "runtime",
-                        "rid": "unix"
+                        "rid": "unix",
+                        "assemblyVersion": "4.0.0.0",
+                        "fileVersion": "4.5.12345.0"
                     },
                     "runtimes/win7-x64/lib/netstandard1.5/System.Data.SqlClient.dll": {
                         "assetType": "runtime",
-                        "rid": "win7-x64"
+                        "rid": "win7-x64",
+                        "assemblyVersion": "4.0.0.0",
+                        "fileVersion": "4.5.12345.0"
                     },
                     "runtimes/win7-x86/lib/netstandard1.5/System.Data.SqlClient.dll": {
                         "assetType": "runtime",
-                        "rid": "win7-x86"
+                        "rid": "win7-x86",
+                        "assemblyVersion": "4.0.0.0",
+                        "fileVersion": "4.5.12345.0"
                     },
                     "runtimes/win7-x64/native/sni.dll": {
                         "assetType": "native",
@@ -340,6 +346,8 @@ When setting up the TPA and native library lists, it will do the following for t
 Note one important aspect about asset resolution: The resolution scope is **per-package**, **not per-application**, **nor per-asset**. For each individual package, the most appropriate RID is selected, and **all** assets taken from that package must match the selected RID exactly. For example, if a package provides both a `linux-x64` and a `unix` RID (in the `ubuntu.14.04-x64` example above), **only** the `linux-x64` asset would be selected for that package. However, if a different package provides only a `unix` RID, then the asset from the `unix` RID would be selected.
 
 The path to a runtime-specific asset is resolved in the same way as a normal asset (first check Servicing, then Package Cache, App-Local, Global Packages Location, etc.) with **one exception**. When searching app-local, rather than just looking for the simple file name in the app-local directory, a runtime-specific asset is expected to be located in a subdirectory matching the relative path information for that asset in the lock file. So the `native` `sni.dll` asset for `win7-x64` in the `System.Data.SqlClient` example above would be located at `APPROOT/runtimes/win7-x64/native/sni.dll`, rather than the normal app-local path of `APPROOT/sni.dll`.
+
+Each entry in the `runtime` or `runtimeTargets` sections can also have `assemblyVersion` and `fileVersion` properties. These specify the assembly and file version of the assembly being referenced. These versions are used when resolving assemblies with non-patch roll forward. See the [Multi Level Shared FX Lookup](https://github.com/dotnet/core-setup/blob/master/Documentation/design-docs/multilevel-sharedfx-lookup.md#hostpolicy-changes-for-21) for more details.
 
 ## Additional information on runtimeconfig.json frammework settings (3.0+)
 With the addition of the `frameworks` section in 3.0, an application (or another framework) can reference multiple frameworks. This is necessary when more than one framework is being used by the application (or framework). Previously, an application or framework could only reference one framework, causing a "chain" of frameworks. Now, with multiple frameworks at each level, a "graph" or "tree" of frameworks is supported.
