@@ -1,6 +1,6 @@
 {
   "sdk": {
-    "version": "2.2.100-preview2-009404"
+    "version": "2.2.100-preview3-009413"
   },
   "msbuild-sdks": {
     "RoslynTools.RepoToolset": "1.0.0-beta2-62912-01"
