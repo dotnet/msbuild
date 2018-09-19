@@ -47,6 +47,7 @@ namespace Microsoft.Build.Graph
         {
             LoadGraph(entryProjectFile, projectCollection, globalProperties, toolsVersion);
             EntryProjectNode = _allParsedProjects[entryProjectFile];
+            ProjectNodes = _allParsedProjects.Values;
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Get an unordered collection of all project nodes in the graph.
         /// </summary>
-        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes => _allParsedProjects.Values;
+        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes;
 
         private ProjectGraphNode CreateNewNode(
             string projectFilePath,
