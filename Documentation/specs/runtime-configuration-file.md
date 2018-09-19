@@ -179,11 +179,16 @@ The `compile` property of a dependency object lists the relative paths to Refere
 
 If a given dependency is only listed for compilation, then its `runtime`, `resources` and `native` properties is omitted. Similarly if the dependency is only listed for runtime, then its `compile` property is omitted.
 
-Only dependencies with a `type` value of `package` (as perf the `libraries` section described below) should be considered by the host. There may be other items, used for other purposes (for example, Projects, Reference Assemblies, etc).
+Only dependencies with a `type` value of `package` (as per the `libraries` section described below) should be considered by the host. There may be other items, used for other purposes (for example, Projects, Reference Assemblies, etc). Note that currently host basically ignores the `type` property.
 
 ### `libraries` Section (`.deps.json`)
 
-This section contains a union of all the dependencies found in the various targets, and contains common metadata for them. Specifically, it contains the `type`, as well as a boolean indicating if the library can be serviced (`serviceable`, only for `package`-typed libraries) and a SHA-512 hash of the package file (`sha512`, only for `package`-typed libraries.
+This section contains a union of all the dependencies found in the various targets, and contains common metadata for them. Specifically, it contains:
+* `type` - the type of the library. `package` for NuGet packages. `project` for a project reference. Can be other things as well.
+* `path` - in the `package` library this is a relative path where to find the assets.
+* `serviceable` - a boolean indicating if the library can be serviced (only for `package`-typed libraries)
+* `sha512` - SHA-512 hash of the package file (`package`-typed libraries).
+* `hashPath` - in the `package` library this is a relative path to the `.nupkg.sha512` has file.
 
 ### `runtimes` Section (`.deps.json`)
 
