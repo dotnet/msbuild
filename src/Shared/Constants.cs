@@ -58,12 +58,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild.
         /// </summary>
-        internal const string CurrentVisualStudioVersion = "15.0";
+        internal const string CurrentVisualStudioVersion = "16.0";
 
         /// <summary>
         /// The most current ToolsVersion known to this version of MSBuild.
         /// </summary>
-        internal const string CurrentToolsVersion = CurrentVisualStudioVersion;
+        internal const string CurrentToolsVersion = "15.0";
 
         // if you change the key also change the following clones
         // Microsoft.Build.OpportunisticIntern.BucketedPrioritizedStringList.TryIntern
@@ -82,13 +82,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
         /// </summary>
-        internal static string CurrentProductVersion
-        {
-            get
-            {
-                return "15.0";
-            }
-        }
+        internal static string CurrentProductVersion => "16.0";
     }
 
     /// <summary>

@@ -224,7 +224,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 env.WithEnvironment("VSINSTALLDIR", env.TempFolderRoot);
-                env.WithEnvironment("VisualStudioVersion", "15.0");
+                env.WithEnvironment("VisualStudioVersion", "16.0");
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
                 BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
@@ -265,8 +265,8 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData("15.0")]
-        [InlineData("15.3")]
+        [InlineData("16.0")]
+        [InlineData("16.3")]
         public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion)
         {
             using (var env = new EmptyVSEnviroment())
