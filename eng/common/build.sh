@@ -12,39 +12,24 @@ while [[ -h "$source" ]]; do
 done
 scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
-build=false
-ci=false
-configuration='Debug'
 help=false
-pack=false
-prepare_machine=false
-rebuild=false
 restore=false
-sign=false
-projects=''
+build=false
+rebuild=false
 test=false
 perf=false
+pack=false
+integration_test=false
+performance_test=false
+sign=false
+public=false
+ci=false
+
+projects=''
+configuration='Debug'
+prepare_machine=false
 verbosity='minimal'
 properties=''
-
-repo_root="$scriptroot/.."
-
-if [[ -z $DOTNET_SDK_ARTIFACTS_DIR ]]; then
-  artifacts_dir="$repo_root/artifacts"
-else
-  artifacts_dir="$DOTNET_SDK_ARTIFACTS_DIR"
-fi
-
-artifacts_configuration_dir="$artifacts_dir/$configuration"
-toolset_dir="$artifacts_dir/toolset"
-log_dir="$artifacts_configuration_dir/log"
-build_log="$log_dir/Build.binlog"
-toolset_restore_log="$log_dir/ToolsetRestore.binlog"
-temp_dir="$artifacts_configuration_dir/tmp"
-
-global_json_file="$repo_root/global.json"
-build_driver=""
-toolset_build_proj=""
 
 while (($# > 0)); do
   lowerI="$(echo $1 | awk '{print tolower($0)}')"
@@ -124,6 +109,18 @@ while (($# > 0)); do
       perf=true
       shift 1
       ;;
+    --integrationtest)
+      integration_test=true
+      shift 1
+      ;;
+    --performancetest)
+      performance_test=true
+      shift 1
+      ;;
+    --publish)
+      publish=true
+      shift 1
+      ;;
     --verbosity)
       verbosity=$2
       shift 2
@@ -135,13 +132,22 @@ while (($# > 0)); do
   esac
 done
 
-# ReadJson [filename] [json key]
-# Result: Sets 'readjsonvalue' to the value of the provided json key
-# Note: this method may return unexpected results if there are duplicate
-# keys in the json
-function ReadJson {
-  local file=$1
-  local key=$2
+repo_root="$scriptroot/../.."
+eng_root="$scriptroot/.."
+artifacts_dir="$repo_root/artifacts"
+toolset_dir="$artifacts_dir/toolset"
+log_dir="$artifacts_dir/log/$configuration"
+build_log="$log_dir/Build.binlog"
+toolset_restore_log="$log_dir/ToolsetRestore.binlog"
+temp_dir="$artifacts_dir/tmp/$configuration"
+
+global_json_file="$repo_root/global.json"
+build_driver=""
+toolset_build_proj=""
+
+# ReadVersionFromJson [json key]
+function ReadGlobalVersion {
+  local key=$1
 
   local unamestr="$(uname)"
   local sedextended='-r'
@@ -149,11 +155,14 @@ function ReadJson {
     sedextended='-E'
   fi;
 
-  readjsonvalue="$(grep -m 1 "\"$key\"" $file | sed $sedextended 's/^ *//;s/.*: *"//;s/",?//')"
-  if [[ ! "$readjsonvalue" ]]; then
-    echo "Error: Cannot find \"$key\" in $file" >&2;
+  local version="$(grep -m 1 "\"$key\"" $global_json_file | sed $sedextended 's/^ *//;s/.*: *"//;s/",?//')"
+  if [[ ! "$version" ]]; then
+    echo "Error: Cannot find \"$key\" in $global_json_file" >&2;
     ExitWithExitCode 1
   fi;
+
+  # return value
+  echo "$version"
 }
 
 function InitializeDotNetCli {
@@ -168,11 +177,8 @@ function InitializeDotNetCli {
     export DOTNET_INSTALL_DIR="$DotNetCoreSdkDir"
   fi
 
-  # Save MSBuild crash files info to log directory so that they are captured as build artifacts
-  export MSBUILDDEBUGPATH="$log_dir"
-
-  ReadJson "$global_json_file" "version"
-  local dotnet_sdk_version="$readjsonvalue"
+  
+  local dotnet_sdk_version=`ReadGlobalVersion "dotnet"`
   local dotnet_root=""
 
   # Use dotnet installation specified in DOTNET_INSTALL_DIR if it contains the required SDK version, 
@@ -226,8 +232,7 @@ function GetDotNetInstallScript {
 }
 
 function InitializeToolset {
-  ReadJson $global_json_file "RoslynTools.RepoToolset"
-  local toolset_version=$readjsonvalue
+  local toolset_version=`ReadGlobalVersion "Microsoft.DotNet.Arcade.Sdk"`
   local toolset_location_file="$toolset_dir/$toolset_version.txt"
 
   if [[ -a "$toolset_location_file" ]]; then
@@ -245,7 +250,7 @@ function InitializeToolset {
   
   local proj="$toolset_dir/restore.proj"
 
-  echo '<Project Sdk="RoslynTools.RepoToolset"/>' > $proj
+  echo '<Project Sdk="Microsoft.DotNet.Arcade.Sdk"/>' > $proj
   "$build_driver" msbuild $proj /t:__WriteToolsetLocation /m /nologo /clp:None /warnaserror /bl:$toolset_restore_log /v:$verbosity /p:__ToolsetLocationOutputFile=$toolset_location_file 
   local lastexitcode=$?
 
@@ -255,57 +260,42 @@ function InitializeToolset {
   fi
 
   toolset_build_proj=`cat $toolset_location_file`
+
+  if [[ ! -a "$toolset_build_proj" ]]; then
+    echo "Invalid toolset path: $toolset_build_proj"
+    ExitWithExitCode 3
+  fi
 }
 
 function InitializeCustomToolset {
-  if [[ "$dogfood" == true ]]; then
-    export SDK_REPO_ROOT="$RepoRoot"
-    export SDK_CLI_VERSION="$DotNetCliVersion"
-    export MSBuildSDKsPath="$ArtifactsConfigurationDir/bin/Sdks"
-    export DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR="$MSBuildSDKsPath"
-    export NETCoreSdkBundledVersionsProps="$DotNetRoot/sdk/$DotNetCliVersion/Microsoft.NETCoreSdk.BundledVersions.props"
-    export CustomAfterMicrosoftCommonTargets="$MSBuildSDKsPath/Microsoft.NET.Build.Extensions/msbuildExtensions-ver/Microsoft.Common.Targets/ImportAfter/Microsoft.NET.Build.Extensions.targets"
-    export MicrosoftNETBuildExtensionsTargets="$CustomAfterMicrosoftCommonTargets"
-  fi
+  local script="$eng_root/RestoreToolset.sh"
 
-  if [[ "$restore" != true ]]; then
-    return
-  fi
-
-  # The following frameworks and tools are used only for testing.
-  # Do not attempt to install them in source build.
-  if [[ "$DotNetBuildFromSource" == "true" ]]; then
-    return
-  fi
-  
-  InstallDotNetSharedFramework $DOTNET_INSTALL_DIR "1.0.5"
-  InstallDotNetSharedFramework $DOTNET_INSTALL_DIR "1.1.2"
-  InstallDotNetSharedFramework $DOTNET_INSTALL_DIR "2.1.0"
-}
-
-# Installs additional shared frameworks for testing purposes
-function InstallDotNetSharedFramework {
-  local dotnet_root=$1
-  local version=$2
-  local fx_dir="$dotnet_root/shared/Microsoft.NETCore.App/$version"
-
-  if [[ ! -d "$fx_dir" ]]; then
-    local install_script=`GetDotNetInstallScript $dotnet_root`
-    
-    bash "$install_script" --version $version --install-dir $dotnet_root --shared-runtime
-    local lastexitcode=$?
-    
-    if [[ $lastexitcode != 0 ]]; then
-      echo "Failed to install Shared Framework $version to '$dotnet_root' (exit code '$lastexitcode')."
-      ExitWithExitCode $lastexitcode
-    fi
+  if [[ -a "$script" ]]; then
+    . "$script"
   fi
 }
 
 function Build {
-  "$build_driver" msbuild $toolset_build_proj /m /nologo /clp:Summary /warnaserror \
-    /v:$verbosity /bl:$build_log /p:Configuration=$configuration /p:Projects=$projects /p:RepoRoot="$repo_root" \
-    /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Deploy=$deploy /p:Test=$test /p:PerformanceTest=$perf /p:Sign=$sign /p:Pack=$pack /p:CIBuild=$ci \
+  "$build_driver" msbuild $toolset_build_proj \
+    /m /nologo /clp:Summary /warnaserror \
+    /v:$verbosity \
+    /bl:$build_log \
+    /p:Configuration=$configuration \
+    /p:Projects=$projects \
+    /p:RepoRoot="$repo_root" \
+    /p:Restore=$restore \
+    /p:Build=$build \
+    /p:Rebuild=$rebuild \
+    /p:Deploy=$deploy \
+    /p:Test=$test \
+    /p:PerformanceTest=$perf \
+    /p:Pack=$pack \
+    /p:IntegrationTest=$integration_test \
+    /p:PerformanceTest=$performance_test \
+    /p:Sign=$sign \
+    /p:Publish=$publish \
+    /p:ContinuousIntegrationBuild=$ci \
+    /p:CIBuild=$ci \
     $properties
   local lastexitcode=$?
 
@@ -363,6 +353,8 @@ function Main {
   if [[ "$dogfood" != true ]]; then
     Build
   fi
+
+  ExitWithExitCode $?
 }
 
 Main
