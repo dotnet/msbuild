@@ -58,7 +58,15 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Get an unordered collection of all project nodes in the graph.
         /// </summary>
-        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes;
+        public IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; }
+
+        private ProjectGraphNode CreateNewNode(string projectFilePath)
+        {
+            var graphNode =
+                new ProjectGraphNode(ProjectCollection.GlobalProjectCollection.LoadProject(projectFilePath));
+            _allParsedProjects.Add(projectFilePath, graphNode);
+            return graphNode;
+        }
 
         private ProjectGraphNode CreateNewNode(
             string projectFilePath,
