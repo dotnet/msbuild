@@ -54,7 +54,7 @@ namespace Microsoft.NET.Build.Tasks
 
                         packageReferencesToUpdate.Add(packageReference);
                     }
-                    else
+                    else if (!(packageReference.GetBooleanMetadata(MetadataKeys.AllowExplicitVersion) ?? false))
                     {
                         // NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended.  For more information, see https://aka.ms/sdkimplicitrefs
                         buildWarnings.Add(string.Format(Strings.PackageReferenceVersionNotRecommended, packageReference.ItemSpec, versionOnPackageReference));
