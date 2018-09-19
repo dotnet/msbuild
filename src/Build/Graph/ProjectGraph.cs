@@ -60,14 +60,6 @@ namespace Microsoft.Build.Graph
         /// </summary>
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; }
 
-        private ProjectGraphNode CreateNewNode(string projectFilePath)
-        {
-            var graphNode =
-                new ProjectGraphNode(ProjectCollection.GlobalProjectCollection.LoadProject(projectFilePath));
-            _allParsedProjects.Add(projectFilePath, graphNode);
-            return graphNode;
-        }
-
         private ProjectGraphNode CreateNewNode(
             string projectFilePath,
             ProjectCollection projectCollection,
