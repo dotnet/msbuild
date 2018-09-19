@@ -10,7 +10,8 @@ namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
     /// Provides methods for modifying the embedded native resources
-    /// in a PE image.
+    /// in a PE image. It currently only works on Windows, because it
+    /// requires various kernel32 APIs.
     /// </summary>
     public class ResourceUpdater
     {
@@ -151,17 +152,13 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         /// <summary>
-        /// Add all resources from a source PE file. This will not
-        /// modify the target until Update() is called.
+        /// Add all resources from a source PE file. It is assumed
+        /// that the input is a valid PE file. If it is not, an
+        /// exception will be thrown. This will not modify the target
+        /// until Update() is called.
         /// </summary>
         public ResourceUpdater AddResourcesFrom(string peFile)
         {
-            // TODO: check that they're both valid PE files
-
-            // TODO: produce something if we're not on windows
-
-            // TODO: if it has no resources? maybe do a lazy beginupdateresource instead.
-
             // Using both flags lets the OS loader decide how to load
             // it most efficiently. Either mode will prevent other
             // processes from modifying the module while it is loaded.
@@ -215,7 +212,6 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool EnumTypesCallback(IntPtr hModule, ushort lpType, IntPtr lParam)
         {
-            // Console.WriteLine("resource type " + lpType);
             // TODO: what if the lpType is a string identifier?
             var enumNamesCallback = new EnumResNameProc(EnumNamesCallback);
             if (!EnumResourceNames(hModule, lpType, enumNamesCallback, lParam))
@@ -228,7 +224,6 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool EnumNamesCallback(IntPtr hModule, ushort lpType, ushort lpName, IntPtr lParam)
         {
-            // Console.WriteLine("resource name " + lpName);
             // TODO: what if name is a string rather than an int?
             var enumLanguagesCallback = new EnumResLangProc(EnumLanguagesCallback);
             if (!EnumResourceLanguages(hModule, lpType, lpName, enumLanguagesCallback, lParam))
