@@ -146,6 +146,11 @@ Bieżący element {1}: „{2}”.</target>
         <target state="translated">Platforma docelowa uruchomienia. Platforma docelowa musi być również określona w pliku projektu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
