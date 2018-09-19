@@ -63,7 +63,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The most current ToolsVersion known to this version of MSBuild.
         /// </summary>
-        internal const string CurrentToolsVersion = CurrentVisualStudioVersion;
+        internal const string CurrentToolsVersion = "15.0";
 
         // if you change the key also change the following clones
         // Microsoft.Build.OpportunisticIntern.BucketedPrioritizedStringList.TryIntern
