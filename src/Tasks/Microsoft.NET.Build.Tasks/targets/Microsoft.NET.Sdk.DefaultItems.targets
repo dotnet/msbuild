@@ -198,16 +198,14 @@ Copyright (c) .NET Foundation. All rights reserved.
         PackageReferenceItems="@(PackageReference)"
         MoreInformationLink="$(ImplicitPackageReferenceInformationLink)">
       <Output TaskParameter="ItemsToRemove" ItemName="_PackageReferenceToRemove" />
+      <Output TaskParameter="ItemsToAdd" ItemName="_PackageReferenceToAdd" />
     </CheckForImplicitPackageReferenceOverrides>
 
     <ItemGroup>
-      <!-- Note that the condition here is important, otherwise the Remove will operate based just on item identity and remove all items
-           that had duplicates, instead of leaving the ones without IsImplicitlyDefined set to true. -->
-      <PackageReference Remove="@(_PackageReferenceToRemove)" Condition="'%(PackageReference.IsImplicitlyDefined)' == 'true' "/>
-    
-      <!-- If we've already warned that an implicit PackageReference was overridden, don't also warn that the version was explicitly
-           specified -->
-      <PackageReference Update="@(_PackageReferenceToRemove)" AllowExplicitVersion="true"/>
+      <!-- Remove and add the PackageReference items according to the output from the task -->
+      <PackageReference Remove="@(_PackageReferenceToRemove)" />
+
+      <PackageReference Include="@(_PackageReferenceToAdd)" />
     </ItemGroup>
     
     <!-- If any implicit package references were overridden, then don't check that RuntimeFrameworkVersion matches the package version -->

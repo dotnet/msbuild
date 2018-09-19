@@ -6,9 +6,6 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.NET.Build.Tasks
 {
-
-    //  TODO: Provide way to opt out of warning when Version is specified (possibly with the DisableImplicitFrameworkReferences property)
-    //  TODO: Add behavior (and test) for duplicate PackageReferences
     public sealed class ApplyImplicitVersions : TaskBase
     {
         public string TargetFrameworkVersion { get; set; }
