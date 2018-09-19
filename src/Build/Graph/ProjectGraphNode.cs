@@ -30,9 +30,6 @@ namespace Microsoft.Build.Graph
         /// </summary>
         public Project Project { get; }
 
-        internal void AddProjectReference(ProjectGraphNode projectGraphNode)
-        {
-            _projectReferences.Add(projectGraphNode);
-        }
+        internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.Build.Graph
     /// </summary>
     public sealed class ProjectGraph
     {
-        private const string ProjectReferenceString = "ProjectReference";
+        private const string ProjectReferenceItemName = "ProjectReference";
         private const string FullPathString = "FullPath";
 
         private readonly Dictionary<string, ProjectGraphNode> _allParsedProjects =
@@ -76,7 +76,6 @@ namespace Microsoft.Build.Graph
         /// Maintain a queue of projects to be processed- each queue item is a key value pair of the project to be evaluated and its parent
         /// Once the project has been evaluated, add a project reference to this evaluated target from the parent node
         /// </summary>
-        /// <param name="entryProjectFile"></param>
         private void LoadGraph(string entryProjectFile, ProjectCollection projectCollection, Dictionary<string, string> globalProperties, string toolsVersion)
         {
             var projectsToEvaluate = new Queue<KeyValuePair<string, ProjectGraphNode>>();
@@ -90,7 +89,7 @@ namespace Microsoft.Build.Graph
                 {
                     parsedProject = CreateNewNode(projectToEvaluate, projectCollection, globalProperties, toolsVersion);
                     IEnumerable<ProjectItem> projectReferenceItems =
-                        parsedProject.Project.GetItems(ProjectReferenceString);
+                        parsedProject.Project.GetItems(ProjectReferenceItemName);
                     foreach (var projectReferenceToParse in projectReferenceItems)
                     {
                         string projectReferencePath = projectReferenceToParse.GetMetadataValue(FullPathString);

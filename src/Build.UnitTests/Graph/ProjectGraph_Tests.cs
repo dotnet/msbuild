@@ -25,11 +25,7 @@ namespace Microsoft.Build.Graph.UnitTests
         public void TestGraphWithSingleNode()
         {
             string projectContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-
+                <Project>
                   <Target Name='Build'>
                     <Message Text='Building test project'/>
                   </Target>
@@ -55,10 +51,7 @@ namespace Microsoft.Build.Graph.UnitTests
         public void TestGraphWithThreeNodes()
         {
             string projectAContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
+                <Project>
                   <ItemGroup>
                     <ProjectReference Include=""B.proj"" />
                     <ProjectReference Include=""C.proj"" />
@@ -66,21 +59,9 @@ namespace Microsoft.Build.Graph.UnitTests
                 </Project>
                 ";
 
-            string projectBContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                </Project>
-                ";
+            string projectBContents = @"<Project/>";
 
-            string projectCContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                </Project>
-                ";
+            string projectCContents = @"<Project/>";
 
             using (var env = TestEnvironment.Create())
             {
@@ -111,11 +92,8 @@ namespace Microsoft.Build.Graph.UnitTests
         public void TestGraphWithMultipleNodes()
         {
             string projectAContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                  <ItemGroup>
+                <Project>
+                 <ItemGroup>
                     <ProjectReference Include=""D.proj"" />
                     <ProjectReference Include=""E.proj"" />
                   </ItemGroup>
@@ -123,10 +101,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 ";
 
             string projectBContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
+                <Project>
                   <ItemGroup>
                     <ProjectReference Include=""F.proj"" />
                     <ProjectReference Include=""E.proj"" />
@@ -135,27 +110,12 @@ namespace Microsoft.Build.Graph.UnitTests
                 </Project>
                 ";
 
-            string projectCContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                </Project>
-                ";
+            string projectCContents = @"<Project/>";
 
-            string projectDContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                </Project>
-                ";
+            string projectDContents = @"<Project/>";
 
             string projectEContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
+                <Project>
                   <ItemGroup>
                     <ProjectReference Include=""G.proj"" />
                   </ItemGroup>
@@ -163,23 +123,14 @@ namespace Microsoft.Build.Graph.UnitTests
                 ";
 
             string projectFContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
+                <Project>
                   <ItemGroup>
                     <ProjectReference Include=""A.proj"" />
                   </ItemGroup>
                 </Project>
                 ";
 
-            string projectGContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
-                </Project>
-                ";
+            string projectGContents = @"<Project/>";
 
             using (var env = TestEnvironment.Create())
             {
@@ -218,10 +169,7 @@ namespace Microsoft.Build.Graph.UnitTests
         public void TestCycleInGraph()
         {
             string projectAContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
+                <Project>
                   <ItemGroup>
                     <ProjectReference Include=""B.proj"" />
                   </ItemGroup>
@@ -229,10 +177,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 ";
 
             string projectBContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
+                <Project>
                   <ItemGroup>
                     <ProjectReference Include=""C.proj"" />
                   </ItemGroup>
@@ -240,10 +185,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 ";
 
             string projectCContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                  <PropertyGroup>
-                    <TestProperty>value</TestProperty>
-                  </PropertyGroup>
+                <Project>
                   <ItemGroup>
                     <ProjectReference Include=""A.proj"" />
                   </ItemGroup>
