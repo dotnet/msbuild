@@ -12,6 +12,8 @@ namespace Microsoft.Build.Graph
     /// </summary>
     public sealed class ProjectGraphNode
     {
+        private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
+
         // No public creation.
         internal ProjectGraphNode(Project project)
         {
@@ -21,11 +23,13 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Gets an unordered collection of graph nodes for projects which this project references.
         /// </summary>
-        public IReadOnlyCollection<ProjectGraphNode> ProjectReferences => Array.Empty<ProjectGraphNode>();
+        public IReadOnlyCollection<ProjectGraphNode> ProjectReferences => _projectReferences;
 
         /// <summary>
         /// Gets the evaluated project represented by this node in the graph.
         /// </summary>
         public Project Project { get; }
+
+        internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
     }
 }
