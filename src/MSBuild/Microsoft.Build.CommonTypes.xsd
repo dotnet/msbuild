@@ -1100,6 +1100,16 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="AspNetConfiguration" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AspNetCoreHostingModel" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_textPackageId _locComment="" -->Indicates whether to run an ASP.NET Core application using IIS in-process or out-of-process.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="AspNetCoreHostingName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_textPackageId _locComment="" -->Indicates which AspNetCoreModule version to use. Versions include V1 and V2.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="AssemblyKeyContainerName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AssemblyKeyProviderName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AssemblyName" type="msb:StringPropertyType" substitutionGroup="msb:Property">
