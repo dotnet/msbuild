@@ -850,13 +850,11 @@ namespace Microsoft.Build.Execution
                     }
 
                     // Submit the build request.
-                    BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(),
-                        new[] {submission.BuildRequest});
                     _workQueue.Post(() =>
                     {
                         try
                         {
-                            IssueRequestToScheduler(submission, allowMainThreadBuild, blocker);
+                            IssueBuildSubmissionToScheduler(submission, allowMainThreadBuild);
                         }
                         catch (BuildAbortedException bae)
                         {
@@ -1074,9 +1072,10 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// The submission is a top level build request entering the BuildManager.
         /// Sends the request to the scheduler with optional legacy threading semantics behavior.
         /// </summary>
-        private void IssueRequestToScheduler(BuildSubmission submission, bool allowMainThreadBuild, BuildRequestBlocker blocker)
+        private void IssueBuildSubmissionToScheduler(BuildSubmission submission, bool allowMainThreadBuild)
         {
             bool resetMainThreadOnFailure = false;
             try
@@ -1096,6 +1095,8 @@ namespace Microsoft.Build.Execution
                             _legacyThreadingData.MainThreadSubmissionId = submission.SubmissionId;
                         }
                     }
+
+                    BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] {submission.BuildRequest});
 
                     HandleNewRequest(Scheduler.VirtualNode, blocker);
                 }
