@@ -111,6 +111,11 @@ Copyright (c) .NET Foundation. All rights reserved.
                       Version="$(RuntimeFrameworkVersion)"
                       Condition="'$(RuntimeFrameworkVersion)' != ''" 
                       AllowExplicitVersion="true"/>
+    
+    <!-- If implicit PackageReferences are disabled, then don't warn about explicit versions at all -->
+    <PackageReference Update="@(PackageReference)"
+                      Condition="'$(DisableImplicitFrameworkReferences)' == 'true'"
+                      AllowExplicitVersion="true"/>
   </ItemGroup>
   
   <UsingTask TaskName="ApplyImplicitVersions" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
