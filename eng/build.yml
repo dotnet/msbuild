@@ -36,7 +36,7 @@ phases:
         condition: always()
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: build\CIBuild.cmd
+      - script: eng\common\CIBuild.cmd
                   -configuration %BuildConfig%
                   /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
@@ -48,7 +48,7 @@ phases:
           PublishType: $(_PublishType)
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-      - script: build\CIBuild.cmd 
+      - script: eng\common\CIBuild.cmd 
                   -configuration %BuildConfig%
                   -fullMSBuild
                   /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
@@ -61,7 +61,7 @@ phases:
           PublishType: $(_PublishType)
 
     - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework') }}:
-      - script: build/cibuild.sh 
+      - script: eng/common/cibuild.sh 
                   --configuration $BuildConfig
                   /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
                   /p:PB_PublishBlobFeedUrl=$BlobFeedUrl
