@@ -26,7 +26,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                return MSBuildConstants.CurrentProductVersion;
+                return MSBuildConstants.CurrentToolsVersion;
             }
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                return MSBuildConstants.CurrentProductVersion;
+                return MSBuildConstants.CurrentToolsVersion;
             }
         }
 
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                yield return new ToolsetPropertyDefinition(MSBuildConstants.CurrentProductVersion, string.Empty, _sourceLocation);
+                yield return new ToolsetPropertyDefinition(MSBuildConstants.CurrentToolsVersion, string.Empty, _sourceLocation);
             }
         }
 

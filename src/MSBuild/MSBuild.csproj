@@ -262,7 +262,7 @@
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.overridetasks" TargetFramework="%(_TargetFrameworks.Identity)" />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="15.0\" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="Current\" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.tasks" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
