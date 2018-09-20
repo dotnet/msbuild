@@ -31,15 +31,12 @@ namespace Microsoft.NET.Build.Tasks
 
             var packageReferencesToUpdate = new List<ITaskItem>();
 
-            var implicitReferencesForThisFramework = ImplicitPackageReferenceVersions
-                .Select(item => new ImplicitPackageReferenceVersion(item))
-                .Where(item => item.TargetFrameworkVersion == this.TargetFrameworkVersion)
-                .ToDictionary(implicitVersion => implicitVersion.Name);
+            var implicitVersionTable = GetApplicableImplicitVersionTable();
 
             foreach (var packageReference in PackageReferences)
             {
                 ImplicitPackageReferenceVersion implicitVersion;
-                if (implicitReferencesForThisFramework.TryGetValue(packageReference.ItemSpec, out implicitVersion))
+                if (implicitVersionTable.TryGetValue(packageReference.ItemSpec, out implicitVersion))
                 {
                     string versionOnPackageReference = packageReference.GetMetadata(MetadataKeys.Version);
                     if (string.IsNullOrEmpty(versionOnPackageReference))
@@ -61,6 +58,22 @@ namespace Microsoft.NET.Build.Tasks
 
             PackageReferencesToUpdate = packageReferencesToUpdate.ToArray();
             SdkBuildWarnings = buildWarnings.ToArray();
+        }
+
+        private Dictionary<string, ImplicitPackageReferenceVersion> GetApplicableImplicitVersionTable()
+        {
+            var result = new Dictionary<string, ImplicitPackageReferenceVersion>();
+            foreach (var item in ImplicitPackageReferenceVersions)
+            {
+                var implicitPackageReferenceVersion = new ImplicitPackageReferenceVersion(item);
+
+                if (implicitPackageReferenceVersion.TargetFrameworkVersion == this.TargetFrameworkVersion)
+                {
+                    result.Add(implicitPackageReferenceVersion.Name, implicitPackageReferenceVersion);
+                }
+            }
+
+            return result;
         }
 
         private sealed class ImplicitPackageReferenceVersion
