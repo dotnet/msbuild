@@ -277,104 +277,62 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void InvalidToolsVersionTooHighMappedToCurrent()
         {
-            string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
-            string oldTreatHigherToolsVersions = Environment.GetEnvironmentVariable("MSBUILDTREATHIGHERTOOLSVERSIONASCURRENT");
+            ProjectCollection p = new ProjectCollection();
+            MockLogger mockLogger = new MockLogger();
+            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(mockLogger);
 
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDTREATHIGHERTOOLSVERSIONASCURRENT", "1");
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='98.6' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            bool success = false;
+            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='98.6' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <Target Name='Foo'>
                         </Target>
                        </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+            success = project.Build(mockLogger);
 
-                Assert.True(success);
+            Assert.True(success);
 
-                mockLogger.AssertLogContains("ToolsVersion=\"98.6\"");
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDTREATHIGHERTOOLSVERSIONASCURRENT", oldTreatHigherToolsVersions);
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", oldLegacyToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            mockLogger.AssertLogContains("ToolsVersion=\"98.6\"");
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
 
         [Fact]
         public void InvalidToolsVersionMissingLowMappedToCurrent()
         {
-            string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
+            ProjectCollection p = new ProjectCollection();
+            MockLogger mockLogger = new MockLogger();
+            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(mockLogger);
 
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='0.1' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            bool success = false;
+            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='0.1' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+            success = project.Build(mockLogger);
 
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"0.1\"");
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", oldLegacyToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            Assert.True(success);
+            mockLogger.AssertLogContains("ToolsVersion=\"0.1\"");
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
 
         [Fact]
         public void InvalidToolsVersionMissingMappedToCurrent()
         {
-            string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
+            ProjectCollection p = new ProjectCollection();
+            MockLogger mockLogger = new MockLogger();
+            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(mockLogger);
 
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='invalidToolsVersion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            bool success = false;
+            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='invalidToolsVersion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+            success = project.Build(mockLogger);
 
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"invalidToolsVersion\"");
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", oldLegacyToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            Assert.True(success);
+            mockLogger.AssertLogContains("ToolsVersion=\"invalidToolsVersion\"");
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
 
         [Fact]
@@ -404,89 +362,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ToolsVersionMappedToCurrent()
         {
-            string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
-            string oldForceToolsVersionToCurrent = Environment.GetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT");
-
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    <Target Name='Foo'>
-                    </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
-
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", oldLegacyToolsVersion);
-                Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", oldForceToolsVersionToCurrent);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
-        }
-
-#if FEATURE_MULTIPLE_TOOLSETS
-        /// <summary>
-        /// Validate that a custom defined toolset is honored
-        /// </summary>
-        [Fact]
-        public void CustomToolsVersionIsHonored()
-        {
-            Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", String.Empty);
-            try
-            {
-                string content = @"<Project ToolsVersion=""14.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
-    <Target Name=""a"">
-        <Message Text=""[$(MSBUILDTOOLSVERSION)]"" />
-    </Target>
-</Project>
-";
-                string projectPath = Path.GetTempFileName();
-                File.WriteAllText(projectPath, content);
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                Toolset source = p.GetToolset("15.0");
-                Toolset potato = new Toolset("potato", source.ToolsPath, ProjectCollection.GlobalProjectCollection, source.ToolsPath);
-                p.AddToolset(potato);
-
-                bool success = false;
-                Project project = p.LoadProject(projectPath, "potato");
-                success = project.Build(mockLogger);
-
-                Assert.True(success);
-                mockLogger.AssertLogContains("[potato]");
-            }
-            finally
-            {
-                // Nothing
-            }
-        }
-
-        /// <summary>
-        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
-        /// </summary>
-        [Fact]
-        public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist()
-        {
             ProjectCollection p = new ProjectCollection();
-            p.RemoveToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
-
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
@@ -496,53 +372,47 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Target Name='Foo'>
                     </Target>
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-
-            Assert.Equal("4.0", project.ToolsVersion);
             success = project.Build(mockLogger);
 
             Assert.True(success);
-            mockLogger.AssertLogContains("\"4.0\"");
-            mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
+            mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
-#endif
 
+#if FEATURE_MULTIPLE_TOOLSETS
         /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
-        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
+        /// Validate that a custom defined toolset is honored
         /// </summary>
         [Fact]
-        public void ToolsVersionFromEnvironmentVariable()
+        public void CustomToolsVersionIsHonored()
         {
-            string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
+            string content = @"<Project ToolsVersion=""14.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+    <Target Name=""a"">
+        <Message Text=""[$(MSBUILDTOOLSVERSION)]"" />
+    </Target>
+</Project>
+";
+            string projectPath = Path.GetTempFileName();
+            File.WriteAllText(projectPath, content);
 
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
-                InternalUtilities.RefreshInternalEnvironmentValues();
+            ProjectCollection p = new ProjectCollection();
+            MockLogger mockLogger = new MockLogger();
+            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(mockLogger);
 
-                ProjectCollection p = new ProjectCollection();
-                p.AddToolset(new Toolset("foo", @"c:\foo", p, @"c:\foo\override"));
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
+            Toolset source = p.GetToolset("Current");
+            Toolset potato = new Toolset("potato", source.ToolsPath, ProjectCollection.GlobalProjectCollection, source.ToolsPath);
+            p.AddToolset(potato);
 
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    <Target Name='Foo'>
-                    </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+            bool success = false;
+            Project project = p.LoadProject(projectPath, "potato");
+            success = project.Build(mockLogger);
 
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                mockLogger.AssertLogContains("ToolsVersion=\"foo\"");
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", oldDefaultToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            Assert.True(success);
+            mockLogger.AssertLogContains("[potato]");
         }
+
+#endif
 
         /// <summary>
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
@@ -551,35 +421,22 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void InvalidToolsVersionFromEnvironmentVariable()
         {
-            string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
+            ProjectCollection p = new ProjectCollection();
+            MockLogger mockLogger = new MockLogger();
+            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(mockLogger);
 
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            bool success = false;
+            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+            success = project.Build(mockLogger);
 
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                // falls back to the current ToolsVersion
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", oldDefaultToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            Assert.True(success);
+            mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
+            // falls back to the current ToolsVersion
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
 
         /// <summary>
@@ -589,51 +446,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ToolsVersionMappedToCurrent_CreateProjectInstance()
         {
-            string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
-            string oldForceToolsVersionToCurrent = Environment.GetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT");
-
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    <Target Name='Foo'>
-                    </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-
-                ProjectInstance pi = project.CreateProjectInstance();
-                success = pi.Build(new ILogger[] { mockLogger });
-
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", oldLegacyToolsVersion);
-                Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", oldForceToolsVersionToCurrent);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
-        }
-
-#if FEATURE_MULTIPLE_TOOLSETS
-        /// <summary>
-        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
-        /// </summary>
-        [Fact]
-        public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_CreateProjectInstance()
-        {
             ProjectCollection p = new ProjectCollection();
-            p.RemoveToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
-
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
@@ -645,53 +458,11 @@ namespace Microsoft.Build.UnitTests.Definition
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
             ProjectInstance pi = project.CreateProjectInstance();
-            Assert.Equal("4.0", pi.ToolsVersion);
             success = pi.Build(new ILogger[] { mockLogger });
 
             Assert.True(success);
-            mockLogger.AssertLogContains("\"4.0\"");
-            mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
-        }
-#endif
-
-        /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
-        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
-        /// </summary>
-        [Fact]
-        public void ToolsVersionFromEnvironmentVariable_CreateProjectInstance()
-        {
-            string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
-
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                p.AddToolset(new Toolset("foo", @"c:\foo", p, @"c:\foo\override"));
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    <Target Name='Foo'>
-                    </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-
-                ProjectInstance pi = project.CreateProjectInstance();
-                success = pi.Build(new ILogger[] { mockLogger });
-
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                mockLogger.AssertLogContains("ToolsVersion=\"foo\"");
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", oldDefaultToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
 
 #if FEATURE_MULTIPLE_TOOLSETS
@@ -702,37 +473,24 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void InvalidToolsVersionFromEnvironmentVariable_CreateProjectInstance()
         {
-            string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
+            ProjectCollection p = new ProjectCollection();
+            MockLogger mockLogger = new MockLogger();
+            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(mockLogger);
 
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            bool success = false;
+            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = project.CreateProjectInstance();
-                success = pi.Build(new ILogger[] { mockLogger });
+            ProjectInstance pi = project.CreateProjectInstance();
+            success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                // falls back to the current ToolsVersion
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", oldDefaultToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            Assert.True(success);
+            mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
+            // falls back to the current ToolsVersion
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
 #endif
 
@@ -743,51 +501,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ToolsVersionMappedToCurrent_ProjectInstance()
         {
-            string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
-            string oldForceToolsVersionToCurrent = Environment.GetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT");
-
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    <Target Name='Foo'>
-                    </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = pi.Build(new ILogger[] { mockLogger });
-
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", oldLegacyToolsVersion);
-                Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", oldForceToolsVersionToCurrent);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
-        }
-
-#if FEATURE_MULTIPLE_TOOLSETS
-        /// <summary>
-        /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
-        /// </summary>
-        [Fact]
-        public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_ProjectInstance()
-        {
             ProjectCollection p = new ProjectCollection();
-            p.RemoveToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
-
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
@@ -799,54 +513,12 @@ namespace Microsoft.Build.UnitTests.Definition
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
             ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-            Assert.Equal("4.0", pi.ToolsVersion);
             success = pi.Build(new ILogger[] { mockLogger });
 
             Assert.True(success);
-            mockLogger.AssertLogContains("\"4.0\"");
-            mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
+            mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
-
-        /// <summary>
-        /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
-        /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
-        /// </summary>
-        [Fact]
-        public void ToolsVersionFromEnvironmentVariable_ProjectInstance()
-        {
-            string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
-
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                p.AddToolset(new Toolset("foo", @"c:\foo", p, @"c:\foo\override"));
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    <Target Name='Foo'>
-                    </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = pi.Build(new ILogger[] { mockLogger });
-
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                mockLogger.AssertLogContains("ToolsVersion=\"foo\"");
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", oldDefaultToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
-        }
-#endif
 
         /// <summary>
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
@@ -855,37 +527,24 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void InvalidToolsVersionFromEnvironmentVariable_ProjectInstance()
         {
-            string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
+            ProjectCollection p = new ProjectCollection();
+            MockLogger mockLogger = new MockLogger();
+            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.RegisterLogger(mockLogger);
 
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection p = new ProjectCollection();
-                MockLogger mockLogger = new MockLogger();
-                LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.RegisterLogger(mockLogger);
-
-                bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            bool success = false;
+            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Target Name='Foo'>
                     </Target>
                    </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = pi.Build(new ILogger[] { mockLogger });
+            ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+            success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
-                mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
-                // falls back to the current ToolsVersion
-                mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", oldDefaultToolsVersion);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+            Assert.True(success);
+            mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
+            // falls back to the current ToolsVersion
+            mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
         }
 
         /// <summary>

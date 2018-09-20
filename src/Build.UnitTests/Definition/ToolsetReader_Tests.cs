@@ -2113,49 +2113,6 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// The absence of the ToolsVersion attribute on the main Project element in a project file means
-        /// that the engine's default tools version should be used.
-        /// </summary>
-        [Fact]
-        public void ToolsVersionAttributeNotSpecifiedOnProjectElementAndDefaultVersionSpecifiedInRegistry()
-        {
-            string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
-
-            try
-            {
-                // In the new world of figuring out the ToolsVersion to use, we completely ignore the default
-                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying 
-                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.  
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
-
-                ProjectCollection projectCollection = new ProjectCollection();
-
-                string msbuildOverrideTasksPath = null;
-                projectCollection.AddToolset(new Toolset("2.0", "20toolsPath", projectCollection, msbuildOverrideTasksPath));
-                projectCollection.AddToolset(new Toolset(ObjectModelHelpers.MSBuildDefaultToolsVersion, "120toolsPath", projectCollection, msbuildOverrideTasksPath));
-
-                string projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("x.proj", @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" />");
-
-                Project project = projectCollection.LoadProject(projectPath);
-
-                string defaultExpected = "15.0";
-                if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
-                {
-                    defaultExpected = ObjectModelHelpers.MSBuildDefaultToolsVersion;
-                }
-
-                Assert.Equal(defaultExpected, project.ToolsVersion);
-                Assert.Equal(defaultExpected, projectCollection.DefaultToolsVersion);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", oldValue);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
-        }
-
-        /// <summary>
         /// Tests the case when no values are specified in the registry
         /// </summary>
         [Fact]

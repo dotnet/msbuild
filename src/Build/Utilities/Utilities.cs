@@ -19,51 +19,12 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    static internal class Utilities
+    internal static class Utilities
     {
-        /// <summary>
-        /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current 
-        /// toolsversion.  (Some hosts require this.)
-        /// </summary>
-        private static bool s_shouldTreatHigherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATHIGHERTOOLSVERSIONASCURRENT") != null);
-
-        /// <summary>
-        /// Save off the contents of the environment variable that specifies whether we should treat all toolsversions, regardless of 
-        /// whether they are higher or lower, as the current toolsversion.  (Some hosts require this.)
-        /// </summary>
-        private static bool s_shouldTreatOtherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT") != null);
-
-        /// <summary>
-        /// If set, default to the ToolsVersion from the project file (or if that doesn't isn't set, default to 2.0).  Otherwise, use Dev12+ 
-        /// defaulting logic: first check the MSBUILDDEFAULTTOOLSVERSION environment variable, then check for a DefaultOverrideToolsVersion, 
-        /// then if both fail, use the current ToolsVersion. 
-        /// </summary>
-        private static bool s_uselegacyDefaultToolsVersionBehavior = (Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION") != null);
-
-        /// <summary>
-        /// If set, will be used as the ToolsVersion to build with (unless MSBUILDLEGACYDEFAULTTOOLSVERSION is set).
-        /// </summary>
-        private static string s_defaultToolsVersionFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
-
         /// <summary>
         /// Delegate for a method that, given a ToolsVersion string, returns the matching Toolset.
         /// </summary>
         internal delegate Toolset GetToolset(string toolsVersion);
-
-        /// <summary>
-        /// INTERNAL FOR UNIT-TESTING ONLY
-        /// 
-        /// We've got several environment variables that we read into statics since we don't expect them to ever 
-        /// reasonably change, but we need some way of refreshing their values so that we can modify them for 
-        /// unit testing purposes. 
-        /// </summary>
-        internal static void RefreshInternalEnvironmentValues()
-        {
-            s_shouldTreatHigherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATHIGHERTOOLSVERSIONASCURRENT") != null);
-            s_shouldTreatOtherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT") != null);
-            s_uselegacyDefaultToolsVersionBehavior = (Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION") != null);
-            s_defaultToolsVersionFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
-        }
 
         /// <summary>
         /// Sets the inner XML/text of the given XML node, escaping as necessary.
@@ -323,130 +284,38 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Figure out what ToolsVersion to use to actually build the project with. 
         /// </summary>
+        /// <remarks>
+        /// In Dev16 we dropped support for most of the logic around ToolsVersion. If an explicit ToolsVersion is specified via the
+        /// API we will use that if it's available. Otherwise in all cases the ToolsVersion is 'Current'.
+        /// </remarks>
         /// <param name="explicitToolsVersion">The user-specified ToolsVersion (through e.g. /tv: on the command line)</param>
         /// <param name="toolsVersionFromProject">The ToolsVersion from the project file</param>
         /// <param name="getToolset">Delegate used to test whether a toolset exists for a given ToolsVersion.  May be null, in which
         /// case we act as though that toolset existed.</param>
         /// <param name="defaultToolsVersion">The default ToolsVersion</param>
-        /// <param name="usingDifferentToolsVersionFromProjectFile">true if the project file specifies an explicit toolsversion but a different one is chosen</param>
+        /// <param name="usingDifferentToolsVersionFromProjectFile">true if the project file specifies an explicit ToolsVersion but a different one is chosen</param>
         /// <returns>The ToolsVersion we should use to build this project.  Should never be null.</returns>
-        internal static string GenerateToolsVersionToUse(string explicitToolsVersion, string toolsVersionFromProject, GetToolset getToolset, string defaultToolsVersion, out bool usingDifferentToolsVersionFromProjectFile)
+        internal static string GenerateToolsVersionToUse(string explicitToolsVersion, string toolsVersionFromProject,
+            GetToolset getToolset, string defaultToolsVersion, out bool usingDifferentToolsVersionFromProjectFile)
         {
-            string toolsVersionToUse = explicitToolsVersion;
-
-            // hosts may need to treat toolsversions later than the current one as the current one ... or may just 
-            // want to treat all toolsversions as though they're the current one, so give them that ability 
-            // through an environment variable
-            if (s_shouldTreatOtherToolsVersionsAsCurrent)
+            usingDifferentToolsVersionFromProjectFile = false;
+            
+            if (!string.IsNullOrEmpty(explicitToolsVersion))
             {
-                toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
+                usingDifferentToolsVersionFromProjectFile =
+                    UsingDifferentToolsVersionFromProjectFile(toolsVersionFromProject, explicitToolsVersion, true);
+                return explicitToolsVersion;
             }
-            else
+            
+
+            if (!string.IsNullOrEmpty(toolsVersionFromProject))
             {
-                if (s_shouldTreatHigherToolsVersionsAsCurrent)
-                {
-                    Version toolsVersionAsVersion;
 
-                    if (Version.TryParse(toolsVersionFromProject, out toolsVersionAsVersion))
-                    {
-                        // This is higher than the current toolsversion
-                        // Therefore we need to enter best effort mode
-                        // and present the current one. 
-                        if (toolsVersionAsVersion > MSBuildConstants.CurrentToolsVersionAsVersion)
-                        {
-                            toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
-                        }
-                    }
-                }
-
-                // If ToolsVersion has not either been explicitly set or been overridden via one of the methods 
-                // mentioned above
-                if (toolsVersionToUse == null)
-                {
-                    // We want to generate the ToolsVersion based on the legacy behavior if EITHER: 
-                    // - the environment variable (MSBUILDLEGACYDEFAULTTOOLSVERSION) is set 
-                    // - the current ToolsVersion doesn't actually exist.  This is extremely unlikely 
-                    //   to happen normally, but may happen in checked-in toolset scenarios, in which 
-                    //   case we want to make sure we're at least as tolerant as Dev11 was. 
-                    Toolset currentToolset = null;
-
-                    if (getToolset != null)
-                    {
-                        currentToolset = getToolset(MSBuildConstants.CurrentToolsVersion);
-                    }
-
-                    // if we want to do the legacy behavior, act as we did through Dev11:  
-                    // - If project file defines a ToolsVersion that has a valid toolset associated with it, use that
-                    // - Otherwise, if project file defines an invalid ToolsVersion, use the current ToolsVersion
-                    // - Otherwise, if project file does not define a ToolsVersion, use the default ToolsVersion (must 
-                    //   be "2.0" since 2.0 projects did not have a ToolsVersion field). 
-                    if (s_uselegacyDefaultToolsVersionBehavior || (getToolset != null && currentToolset == null))
-                    {
-                        if (!String.IsNullOrEmpty(toolsVersionFromProject))
-                        {
-                            toolsVersionToUse = toolsVersionFromProject;
-
-                            // If we can tell that the toolset specified in the project is not present
-                            // then we'll use the current version.  Otherwise, we'll assume our caller 
-                            // knew what it was doing. 
-                            if (getToolset != null && getToolset(toolsVersionToUse) == null)
-                            {
-                                toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
-                            }
-                        }
-                        else
-                        {
-                            toolsVersionToUse = defaultToolsVersion;
-                        }
-                    }
-                    else
-                    {
-                        // Otherwise, first check to see if the default ToolsVersion has been set in the environment.  
-                        // Ideally we'll check to make sure it's a valid ToolsVersion, but if we don't have the ability 
-                        // to do so, we'll assume the person who set the environment variable knew what they were doing. 
-                        if (!String.IsNullOrEmpty(s_defaultToolsVersionFromEnvironment))
-                        {
-                            if (getToolset == null || getToolset(s_defaultToolsVersionFromEnvironment) != null)
-                            {
-                                toolsVersionToUse = s_defaultToolsVersionFromEnvironment;
-                            }
-                        }
-
-                        // Otherwise, check to see if the override default toolsversion from the toolset works.  Though 
-                        // it's attached to the Toolset, it's actually MSBuild version dependent, so any loaded Toolset 
-                        // should have the same one. 
-                        //
-                        // And if that doesn't work, then just fall back to the current ToolsVersion. 
-                        if (toolsVersionToUse == null)
-                        {
-                            if (getToolset != null && currentToolset != null)
-                            {
-                                string defaultOverrideToolsVersion = currentToolset.DefaultOverrideToolsVersion;
-
-                                if (!String.IsNullOrEmpty(defaultOverrideToolsVersion) && getToolset(defaultOverrideToolsVersion) != null)
-                                {
-                                    toolsVersionToUse = defaultOverrideToolsVersion;
-                                }
-                                else
-                                {
-                                    toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
-                                }
-                            }
-                            else
-                            {
-                                toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
-                            }
-                        }
-                    }
-                }
+                usingDifferentToolsVersionFromProjectFile =
+                    UsingDifferentToolsVersionFromProjectFile(toolsVersionFromProject, MSBuildConstants.CurrentToolsVersion, false);
             }
 
-            ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(toolsVersionToUse), "Should always return a ToolsVersion");
-
-            var explicitToolsVersionSpecified = explicitToolsVersion != null;
-            usingDifferentToolsVersionFromProjectFile = UsingDifferentToolsVersionFromProjectFile(toolsVersionFromProject, toolsVersionToUse, explicitToolsVersionSpecified);
-
-            return toolsVersionToUse;
+            return MSBuildConstants.CurrentToolsVersion;
         }
 
         private static bool UsingDifferentToolsVersionFromProjectFile(string toolsVersionFromProject, string toolsVersionToUse, bool explicitToolsVersionSpecified)

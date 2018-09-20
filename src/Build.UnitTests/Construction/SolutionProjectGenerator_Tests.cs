@@ -384,7 +384,6 @@ namespace Microsoft.Build.UnitTests.Construction
                     EndGlobal
                 ";
 
-
             string solutionFileContentsDev11 = solutionFilePreambleV11 + solutionBodySingleProjectContents;
             string solutionFileContentsDev12 = solutionFilePreambleV12 + solutionBodySingleProjectContents;
 
@@ -392,58 +391,46 @@ namespace Microsoft.Build.UnitTests.Construction
             string[] projects = { classLibraryContentsToolsV4, classLibraryContentsToolsV4, classLibraryContentsToolsV12 };
             string[] logoutputs = { ".[11.0]. .[4.0].", ".[11.0]. .[4.0].", String.Format(".[{0}]. .[{0}].", ObjectModelHelpers.MSBuildDefaultToolsVersion) };
 
-            string previousLegacyEnvironmentVariable = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
 
-            try
+            for (int i = 0; i < solutions.Length; i++)
             {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
-                InternalUtilities.RefreshInternalEnvironmentValues();
+                string solutionFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.sln", solutions[i]);
+                string projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary1.csproj", projects[i]);
+                SolutionFile sp = new SolutionFile();
 
-                for (int i = 0; i < solutions.Length; i++)
-                {
-                    string solutionFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.sln", solutions[i]);
-                    string projectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary1.csproj", projects[i]);
-                    SolutionFile sp = new SolutionFile();
+                sp.FullPath = solutionFile;
+                sp.ParseSolutionFile();
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
 
-                    sp.FullPath = solutionFile;
-                    sp.ParseSolutionFile();
-                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
+                MockLogger logger = new MockLogger(output);
+                List<ILogger> loggers = new List<ILogger>(1);
+                loggers.Add(logger);
 
-                    MockLogger logger = new MockLogger(output);
-                    List<ILogger> loggers = new List<ILogger>(1);
-                    loggers.Add(logger);
-
-                    instances[0].Build(loggers);
-                    logger.AssertLogContains(logoutputs[i]);
-                }
-
-                // Test Dev 12 sln and mixed v4.0 and v12.0 projects
-                string solutionFileContentsDev12MultipleProjects = solutionFilePreambleV12 + solutionBodyMultipleProjectsContents;
-
-                string solutionFileMultipleProjects = ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.sln", solutionFileContentsDev12MultipleProjects);
-                string projectFileV4 = ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary1.csproj", classLibraryContentsToolsV4);
-                string projectFileV12 = ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary2.csproj", classLibraryContentsToolsV12);
-
-                SolutionFile sp1 = new SolutionFile();
-
-                sp1.FullPath = solutionFileMultipleProjects;
-                sp1.ParseSolutionFile();
-
-                ProjectInstance[] instances1 = SolutionProjectGenerator.Generate(sp1, null, null, _buildEventContext, CreateMockLoggingService());
-
-                MockLogger logger1 = new MockLogger(output);
-                List<ILogger> loggers1 = new List<ILogger>(1);
-                loggers1.Add(logger1);
-
-                instances1[0].Build(loggers1);
-                logger1.AssertLogContains(".[11.0]. .[4.0].");
-                logger1.AssertLogContains(String.Format(".[{0}]. .[{0}].", ObjectModelHelpers.MSBuildDefaultToolsVersion));
+                instances[0].Build(loggers);
+                logger.AssertLogContains(logoutputs[i]);
             }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", previousLegacyEnvironmentVariable);
-                InternalUtilities.RefreshInternalEnvironmentValues();
-            }
+
+            // Test Dev 12 sln and mixed v4.0 and v12.0 projects
+            string solutionFileContentsDev12MultipleProjects = solutionFilePreambleV12 + solutionBodyMultipleProjectsContents;
+
+            string solutionFileMultipleProjects = ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.sln", solutionFileContentsDev12MultipleProjects);
+            string projectFileV4 = ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary1.csproj", classLibraryContentsToolsV4);
+            string projectFileV12 = ObjectModelHelpers.CreateFileInTempProjectDirectory("ClassLibrary2.csproj", classLibraryContentsToolsV12);
+
+            SolutionFile sp1 = new SolutionFile();
+
+            sp1.FullPath = solutionFileMultipleProjects;
+            sp1.ParseSolutionFile();
+
+            ProjectInstance[] instances1 = SolutionProjectGenerator.Generate(sp1, null, null, _buildEventContext, CreateMockLoggingService());
+
+            MockLogger logger1 = new MockLogger(output);
+            List<ILogger> loggers1 = new List<ILogger>(1);
+            loggers1.Add(logger1);
+
+            instances1[0].Build(loggers1);
+            logger1.AssertLogContains(".[11.0]. .[4.0].");
+            logger1.AssertLogContains(String.Format(".[{0}]. .[{0}].", ObjectModelHelpers.MSBuildDefaultToolsVersion));
         }
 
         /// <summary>
