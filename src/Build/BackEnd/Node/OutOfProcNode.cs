@@ -133,30 +133,15 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private readonly ISdkResolverService _sdkResolverService;
 
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-        private string _clientToServerPipeHandle;
-        private string _serverToClientPipeHandle;
-#endif
-
         /// <summary>
         /// Constructor.
         /// </summary>
-        public OutOfProcNode(
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-            string clientToServerPipeHandle,
-            string serverToClientPipeHandle
-#endif       
-            )
+        public OutOfProcNode()
         {
             s_isOutOfProcNode = true;
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
-
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-            _clientToServerPipeHandle = clientToServerPipeHandle;
-            _serverToClientPipeHandle = serverToClientPipeHandle;
 #endif
 
             _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
@@ -249,14 +234,10 @@ namespace Microsoft.Build.Execution
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(bool enableReuse, out Exception shutdownException)
         {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             // Console.WriteLine("Run called at {0}", DateTime.Now);
             string pipeName = "MSBuild" + Process.GetCurrentProcess().Id;
 
             _nodeEndpoint = new NodeEndpointOutOfProc(pipeName, this, enableReuse);
-#else
-            _nodeEndpoint = new NodeEndpointOutOfProc(_clientToServerPipeHandle, _serverToClientPipeHandle, this, enableReuse);
-#endif
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
