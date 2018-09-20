@@ -117,7 +117,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="NetListCommand" xml:space="preserve">
-    <value>List references or packages of a .NET project.</value>
+  <data name="AppFullName" xml:space="preserve">
+    <value>List all package references of the project or solution.</value>
+  </data>
+  <data name="CmdFramework" xml:space="preserve">
+    <value>FRAMEWORK | FRAMEWORK\RID</value>
+  </data>
+  <data name="CmdFrameworkDescription" xml:space="preserve">
+    <value>Chooses a framework to show its packages. Use the option multiple times for multiple frameworks.</value>
+  </data>
+  <data name="CmdOutdatedDescription" xml:space="preserve">
+    <value>Lists packages that have newer versions.</value>
+  </data>
+  <data name="CmdTransitiveDescription" xml:space="preserve">
+    <value>Lists transitive and top-level packages.</value>
+  </data>
+  <data name="NoProjectsOrSolutions" xml:space="preserve">
+    <value>A project or solution file could not be found in {0}. Specify a project or solution file to use.</value>
+  </data>
+  <data name="CmdConfig" xml:space="preserve">
+    <value>CONFIG_FILE</value>
+  </data>
+  <data name="CmdConfigDescription" xml:space="preserve">
+    <value>The path to the NuGet config file to use. Requires the '--outdated' option.</value>
+  </data>
+  <data name="CmdHighestMinorDescription" xml:space="preserve">
+    <value>Consider only the packages with a matching major version number when searching for newer packages. Requires the '--outdated' option.</value>
+  </data>
+  <data name="CmdHighestPatchDescription" xml:space="preserve">
+    <value>Consider only the packages with a matching major and minor version numbers when searching for newer packages. Requires the '--outdated' option.</value>
+  </data>
+  <data name="CmdPrereleaseDescription" xml:space="preserve">
+    <value>Consider packages with prerelease versions when searching for newer packages. Requires the '--outdated' option.</value>
+  </data>
+  <data name="CmdSource" xml:space="preserve">
+    <value>SOURCE</value>
+  </data>
+  <data name="CmdSourceDescription" xml:space="preserve">
+    <value>The NuGet sources to use when searching for newer packages. Requires the '--outdated' option.</value>
+  </data>
+  <data name="OutdatedOptionOnly" xml:space="preserve">
+    <value>Option '{0}' requires the '--outdated' option to be specified.</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>Could not find file or directory '{0}'.</value>
   </data>
 </root>
