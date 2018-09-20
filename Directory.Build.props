@@ -38,7 +38,7 @@
     <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
     <PackageTags>MSBuild</PackageTags>
 
-    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
+    <TargetMSBuildToolsVersion>Current</TargetMSBuildToolsVersion>
   </PropertyGroup>
 
   <PropertyGroup>
