@@ -19,7 +19,7 @@ namespace Microsoft.NET.Build.Tests
         {
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void It_contains_resources_from_the_managed_dll()
         {
             var targetFramework = "netcoreapp2.0";
