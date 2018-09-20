@@ -15,36 +15,18 @@ namespace Microsoft.Build.Evaluation
 {
     internal class ToolsetLocalReader : ToolsetReader
     {
-        private IElementLocation _sourceLocation = new RegistryLocation("ToolsetLocalReader");
+        private readonly IElementLocation _sourceLocation = new RegistryLocation("ToolsetLocalReader");
 
         internal ToolsetLocalReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties)
            : base(environmentProperties, globalProperties)
         {
         }
 
-        protected override string DefaultOverrideToolsVersion
-        {
-            get
-            {
-                return MSBuildConstants.CurrentToolsVersion;
-            }
-        }
+        protected override string DefaultOverrideToolsVersion => MSBuildConstants.CurrentToolsVersion;
 
-        protected override string DefaultToolsVersion
-        {
-            get
-            {
-                return MSBuildConstants.CurrentToolsVersion;
-            }
-        }
+        protected override string DefaultToolsVersion => MSBuildConstants.CurrentToolsVersion;
 
-        protected override string MSBuildOverrideTasksPath
-        {
-            get
-            {
-                return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
-            }
-        }
+        protected override string MSBuildOverrideTasksPath => BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
 
         protected override IEnumerable<ToolsetPropertyDefinition> ToolsVersions
         {
