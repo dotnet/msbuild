@@ -297,7 +297,7 @@ namespace Microsoft.Build.Internal
         /// <returns>The modified XML string.</returns>
         internal static string RemoveXmlNamespace(string xml)
         {
-            return s_xmlnsPattern.Replace(xml, String.Empty);
+            return s_xmlnsPattern.Replace(xml, string.Empty);
         }
 
         /// <summary>
@@ -305,7 +305,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static string CreateToolsVersionListString(IEnumerable<Toolset> toolsets)
         {
-            string toolsVersionList = String.Empty;
+            string toolsVersionList = string.Empty;
             foreach (Toolset toolset in toolsets)
             {
                 toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
@@ -453,7 +453,7 @@ namespace Microsoft.Build.Internal
         {
             return (!explicitToolsVersionSpecified &&
                     !string.IsNullOrEmpty(toolsVersionFromProject) &&
-                    !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
+                    !string.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -507,7 +507,7 @@ namespace Microsoft.Build.Internal
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
             // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
 
-            bool useLegacyMSBuildExtensionsPathBehavior = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
+            bool useLegacyMSBuildExtensionsPathBehavior = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
 
             string programFiles = FrameworkLocationHelper.programFiles;
             string extensionsPath;
@@ -526,24 +526,24 @@ namespace Microsoft.Build.Internal
             // Windows XP and Windows Server 2003 don't define LocalAppData in their environment.
             // We'll set it here if the environment doesn't have it so projects can reliably
             // depend on $(LocalAppData).
-            string localAppData = String.Empty;
+            string localAppData = string.Empty;
             ProjectPropertyInstance localAppDataProp = environmentProperties.GetProperty(ReservedPropertyNames.localAppData);
             if (localAppDataProp != null)
             {
                 localAppData = localAppDataProp.EvaluatedValue;
             }
 
-            if (String.IsNullOrEmpty(localAppData))
+            if (string.IsNullOrEmpty(localAppData))
             {
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             }
 
-            if (String.IsNullOrEmpty(localAppData))
+            if (string.IsNullOrEmpty(localAppData))
             {
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             }
 
-            if (String.IsNullOrEmpty(localAppData))
+            if (string.IsNullOrEmpty(localAppData))
             {
                 localAppData = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
             }
@@ -555,28 +555,25 @@ namespace Microsoft.Build.Internal
             string userExtensionsPath = Path.Combine(localAppData, ReservedPropertyNames.userExtensionsPathSuffix);
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
 
-            if (environmentVariablesBag != null)
+            foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
             {
-                foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
+                // We're going to just skip environment variables that contain names
+                // with characters we can't handle. There's no logger registered yet
+                // when this method is called, so we can't really log anything.
+                string environmentVariableName = environmentVariable.Key;
+
+                if (XmlUtilities.IsValidElementName(environmentVariableName) &&
+                    !XMakeElements.ReservedItemNames.Contains(environmentVariableName) &&
+                    !ReservedPropertyNames.IsReservedProperty(environmentVariableName))
                 {
-                    // We're going to just skip environment variables that contain names
-                    // with characters we can't handle. There's no logger registered yet
-                    // when this method is called, so we can't really log anything.
-                    string environmentVariableName = environmentVariable.Key;
+                    ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);
 
-                    if (XmlUtilities.IsValidElementName(environmentVariableName) &&
-                        !XMakeElements.ReservedItemNames.Contains(environmentVariableName) &&
-                        !ReservedPropertyNames.IsReservedProperty(environmentVariableName))
-                    {
-                        ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);
-
-                        environmentProperties.Set(environmentProperty);
-                    }
-                    else
-                    {
-                        // The name was invalid, so we just didn't add the environment variable.
-                        // That's fine, continue for the next one.
-                    }
+                    environmentProperties.Set(environmentProperty);
+                }
+                else
+                {
+                    // The name was invalid, so we just didn't add the environment variable.
+                    // That's fine, continue for the next one.
                 }
             }
 
