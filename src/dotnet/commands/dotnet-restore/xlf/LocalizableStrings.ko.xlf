@@ -95,28 +95,28 @@ project.assets.json을 삭제하는 것과 동일합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockedModeOptionDescription">
-        <source>Do not allow updating project lock file.</source>
-        <target state="new">Do not allow updating project lock file.</target>
+        <source>Don't allow updating project lock file.</source>
+        <target state="new">Don't allow updating project lock file.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockFilePathOption">
-        <source>ProjectLockFile_Path</source>
-        <target state="new">ProjectLockFile_Path</target>
+        <source>LOCK_FILE_PATH</source>
+        <target state="new">LOCK_FILE_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockFilePathOptionDescription">
-        <source>Project lock file path to be used to write lock file.</source>
-        <target state="new">Project lock file path to be used to write lock file.</target>
+        <source>Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</source>
+        <target state="new">Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdReevaluateOptionDescription">
-        <source>Force restore to reevaluate all dependencies even if a lock file already exists.</source>
-        <target state="new">Force restore to reevaluate all dependencies even if a lock file already exists.</target>
+        <source>Forces restore to reevaluate all dependencies even if a lock file already exists.</source>
+        <target state="new">Forces restore to reevaluate all dependencies even if a lock file already exists.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdUseLockFileOptionDescription">
-        <source>Enables project lock file to be generate/ used with restore.</source>
-        <target state="new">Enables project lock file to be generate/ used with restore.</target>
+        <source>Enables project lock file to be generated and used with restore.</source>
+        <target state="new">Enables project lock file to be generated and used with restore.</target>
         <note />
       </trans-unit>
     </body>

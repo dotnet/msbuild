@@ -49,10 +49,10 @@ namespace Microsoft.DotNet.Cli
                             .With(name: LocalizableStrings.CmdLockFilePathOption)
                             .ForwardAsSingle(o => $"-property:NuGetLockFilePath={o.Arguments.Single()}")),
                     Create.Option(
-                        "--reevaluate",
+                        "--force-evaluate",
                         LocalizableStrings.CmdReevaluateOptionDescription,
                         Accept.NoArguments()
-                            .ForwardAs("-property:ReevaluateRestoreGraph=true")) }).ToArray();
+                            .ForwardAs("-property:RestoreForceEvaluate=true")) }).ToArray();
         }
 
         public static Option[] AddImplicitRestoreOptions(
