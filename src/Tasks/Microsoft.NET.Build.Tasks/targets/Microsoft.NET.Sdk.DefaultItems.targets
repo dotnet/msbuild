@@ -129,6 +129,15 @@ Copyright (c) .NET Foundation. All rights reserved.
       <PackageReference Remove="@(PackageReferenceToUpdate)" />
       <PackageReference Include="@(PackageReferenceToUpdate)" />
     </ItemGroup>
+
+    <ItemGroup>
+      <!-- Support using a patch version in the TargetFramework, ie netcoreapp1.1.1
+           Note that this isn't officially supported, but it worked in the past so
+           this should prevent breaking it. -->
+      <PackageReference Condition="'%(PackageReference.Identity)' == 'Microsoft.NETCore.App'">
+        <Version Condition="'%(PackageReference.Version)' == ''">$(_TargetFrameworkVersionWithoutV)</Version>
+      </PackageReference>
+    </ItemGroup>
   </Target>
   
   <!-- This target runs before build but not before restore, to avoid duplicating these warnings
