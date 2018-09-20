@@ -54,10 +54,8 @@ namespace Microsoft.NET.Build.Tasks
 
         // Loading and freeing PE files
 
-        // TODO: use safe handle implementation?
         private enum LoadLibraryFlags : uint
         {
-            None = 0,
             LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE = 0x00000040,
             LOAD_LIBRARY_AS_IMAGE_RESOURCE = 0x00000020
         }
@@ -74,19 +72,19 @@ namespace Microsoft.NET.Build.Tasks
         // Enumerating resources
 
         private delegate bool EnumResTypeProc(IntPtr hModule,
-                                                     ushort lpType,
-                                                     IntPtr lParam);
+                                              IntPtr lpType,
+                                              IntPtr lParam);
 
         private delegate bool EnumResNameProc(IntPtr hModule,
-                                                     ushort lpType,
-                                                     ushort lpName,
-                                                     IntPtr lParam);
+                                              IntPtr lpType,
+                                              IntPtr lpName,
+                                              IntPtr lParam);
 
         private delegate bool EnumResLangProc(IntPtr hModule,
-                                                     ushort lpType,
-                                                     ushort lpName,
-                                                     ushort wLang,
-                                                     IntPtr lParam);
+                                              IntPtr lpType,
+                                              IntPtr lpName,
+                                              ushort wLang,
+                                              IntPtr lParam);
 
         [DllImport("kernel32.dll",SetLastError=true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -97,15 +95,15 @@ namespace Microsoft.NET.Build.Tasks
         [DllImport("kernel32.dll", SetLastError=true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool EnumResourceNames(IntPtr hModule,
-                                                     ushort lpType,
+                                                     IntPtr lpType,
                                                      EnumResNameProc lpEnumFunc,
                                                      IntPtr lParam);
 
         [DllImport("kernel32.dll", SetLastError=true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool EnumResourceLanguages(IntPtr hModule,
-                                                         ushort lpType,
-                                                         ushort lpName,
+                                                         IntPtr lpType,
+                                                         IntPtr lpName,
                                                          EnumResLangProc lpEnumFunc,
                                                          IntPtr lParam);
 
@@ -128,8 +126,6 @@ namespace Microsoft.NET.Build.Tasks
         private static extern uint SizeofResource(IntPtr hModule,
                                                   IntPtr hResInfo);
 
-        public const ushort LangID_LangNeutral_SublangNeutral = 0;
-
         /// <summary>
         /// Holds the native handle for the resource update.
         /// </summary>
@@ -140,7 +136,9 @@ namespace Microsoft.NET.Build.Tasks
         /// acquire a native resource update handle for the file,
         /// preparing it for updates. Resources can be added to this
         /// updater, which will queue them for update. The target PE
-        /// file will not be modified until Update() is called.
+        /// file will not be modified until Update() is called, after
+        /// which the ResourceUpdater can not be used for further
+        /// updates.
         /// </summary>
         public ResourceUpdater(string peFile)
         {
@@ -156,9 +154,15 @@ namespace Microsoft.NET.Build.Tasks
         /// that the input is a valid PE file. If it is not, an
         /// exception will be thrown. This will not modify the target
         /// until Update() is called.
+        /// Throws an InvalidOperationException if Update() was already called.
         /// </summary>
-        public ResourceUpdater AddResourcesFrom(string peFile)
+        public ResourceUpdater AddResourcesFromPEImage(string peFile)
         {
+            if (hUpdate == IntPtr.Zero)
+            {
+                ThrowExceptionForInvalidUpdate();
+            }
+
             // Using both flags lets the OS loader decide how to load
             // it most efficiently. Either mode will prevent other
             // processes from modifying the module while it is loaded.
@@ -169,50 +173,87 @@ namespace Microsoft.NET.Build.Tasks
                 ThrowExceptionForLastWin32Error();
             }
 
-            var enumTypesCallback = new EnumResTypeProc(EnumTypesCallback);
-            if (!EnumResourceTypes(hModule, enumTypesCallback, IntPtr.Zero))
+            try
             {
-                ThrowExceptionForLastWin32Error();
+                var enumTypesCallback = new EnumResTypeProc(EnumTypesCallback);
+                if (!EnumResourceTypes(hModule, enumTypesCallback, IntPtr.Zero))
+                {
+                    ThrowExceptionForLastWin32Error();
+                }
             }
-
-            if (!FreeLibrary(hModule))
+            finally
             {
-                ThrowExceptionForLastWin32Error();
+                if (!FreeLibrary(hModule))
+                {
+                    ThrowExceptionForLastWin32Error();
+                }
             }
 
             return this;
         }
 
+        private const ushort LangID_LangNeutral_SublangNeutral = 0;
+
+        private static bool IsIntResource(IntPtr lpType)
+        {
+            return ((uint)lpType >> 16) == 0;
+        }
+
         /// <summary>
-        /// Add a language-neutral resource from a byte[] with a
-        /// particular type and name. This will not modify the target
-        /// until Update() is called.
+        /// Add a language-neutral integer resource from a byte[] with
+        /// a particular type and name. This will not modify the
+        /// target until Update() is called.
+        /// Throws an InvalidOperationException if Update() was already called.
         /// </summary>
         public ResourceUpdater AddResource(byte[] data, IntPtr lpType, IntPtr lpName)
         {
-            //if (!UpdateResource(hUpdate, lpType, lpName, LangID_LangNeutral_SublangNeutral, data, data.Length))
-            //{
-                //ThrowExceptionForLastWin32Error();
-            //}
+            if (hUpdate == IntPtr.Zero)
+            {
+                ThrowExceptionForInvalidUpdate();
+            }
+
+            if (!IsIntResource(lpType) || !IsIntResource(lpName))
+            {
+                throw new ArgumentException("AddResource can only be used with integer resource types.");
+            }
+
+            if (!UpdateResource(hUpdate, lpType, lpName, LangID_LangNeutral_SublangNeutral, data, (uint)data.Length))
+            {
+                ThrowExceptionForLastWin32Error();
+            }
 
             return this;
         }
 
         /// <summary>
-        /// Write the pending resource updates to the target PE file.
+        /// Write the pending resource updates to the target PE
+        /// file. After this, the ResourceUpdater no longer maintains
+        /// an update handle, and can not be used for further updates.
+        /// Throws an InvalidOperationException if Update() was already called.
         /// </summary>
         public void Update()
         {
-            if (!EndUpdateResource(hUpdate, false))
+            if (hUpdate == IntPtr.Zero)
             {
-                ThrowExceptionForLastWin32Error();
+                ThrowExceptionForInvalidUpdate();
+            }
+
+            try
+            {
+                if (!EndUpdateResource(hUpdate, false))
+                {
+                    ThrowExceptionForLastWin32Error();
+                }
+            }
+            finally
+            {
+                hUpdate = IntPtr.Zero;
             }
         }
 
 
-        private bool EnumTypesCallback(IntPtr hModule, ushort lpType, IntPtr lParam)
+        private bool EnumTypesCallback(IntPtr hModule, IntPtr lpType, IntPtr lParam)
         {
-            // TODO: what if the lpType is a string identifier?
             var enumNamesCallback = new EnumResNameProc(EnumNamesCallback);
             if (!EnumResourceNames(hModule, lpType, enumNamesCallback, lParam))
             {
@@ -222,9 +263,8 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        private bool EnumNamesCallback(IntPtr hModule, ushort lpType, ushort lpName, IntPtr lParam)
+        private bool EnumNamesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, IntPtr lParam)
         {
-            // TODO: what if name is a string rather than an int?
             var enumLanguagesCallback = new EnumResLangProc(EnumLanguagesCallback);
             if (!EnumResourceLanguages(hModule, lpType, lpName, enumLanguagesCallback, lParam))
             {
@@ -234,34 +274,42 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        private bool EnumLanguagesCallback(IntPtr hModule, ushort lpType, ushort lpName, ushort wLang, IntPtr lParam)
+        private bool EnumLanguagesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, ushort wLang, IntPtr lParam)
         {
-            IntPtr hResource = FindResourceEx(hModule, (IntPtr)lpType, (IntPtr)lpName, wLang);
+            IntPtr hResource = FindResourceEx(hModule, lpType, lpName, wLang);
             if (hResource == IntPtr.Zero)
             {
                 ThrowExceptionForLastWin32Error();
             }
 
+            // hResourceLoadedq is just a handle to the resource,
+            // which can be used to get the resource data
             IntPtr hResourceLoaded = LoadResource(hModule, hResource);
             if (hResourceLoaded == IntPtr.Zero)
             {
                 ThrowExceptionForLastWin32Error();
             }
 
+            // This doesn't actually lock memory. It just retrieves a
+            // pointer to the resource data. The pointer is valid
+            // until the module is unloaded.
             IntPtr lpResourceData = LockResource(hResourceLoaded);
             if (lpResourceData == IntPtr.Zero)
             {
-                // TODO: better exception
-                throw new Exception("failed to lock resource");
+                throw new Exception("Failed to lock resource.");
              }
 
-            if (!UpdateResource(hUpdate, (IntPtr)lpType, (IntPtr)lpName, wLang, lpResourceData, SizeofResource(hModule, hResource)))
+            if (!UpdateResource(hUpdate, lpType, lpName, wLang, lpResourceData, SizeofResource(hModule, hResource)))
             {
                 ThrowExceptionForLastWin32Error();
             }
-            // TODO: cast ushort to intptr?
 
             return true;
+        }
+
+        private static void ThrowExceptionForInvalidUpdate()
+        {
+            throw new InvalidOperationException("Update handle is invalid. This instance may not be used for further updates.");
         }
 
         private static void ThrowExceptionForLastWin32Error()

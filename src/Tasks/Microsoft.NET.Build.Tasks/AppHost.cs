@@ -86,7 +86,7 @@ namespace Microsoft.NET.Build.Tasks
                 {
                     // Copy resources from managed dll to the apphost
                     new ResourceUpdater(appHostDestinationFilePath)
-                        .AddResourcesFrom(intermediateAssembly)
+                        .AddResourcesFromPEImage(intermediateAssembly)
                         .Update();
                 }
                 else if (log != null)
