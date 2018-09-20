@@ -224,7 +224,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (var env = new EmptyVSEnviroment())
             {
                 env.WithEnvironment("VSINSTALLDIR", env.TempFolderRoot);
-                env.WithEnvironment("VisualStudioVersion", "15.0");
+                env.WithEnvironment("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
                 BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
@@ -265,8 +265,8 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData("15.0")]
-        [InlineData("15.3")]
+        [InlineData("16.0")]
+        [InlineData("16.3")]
         public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion)
         {
             using (var env = new EmptyVSEnviroment())
@@ -473,7 +473,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 try
                 {
                     var files = new[] { "msbuild.exe", "msbuild.exe.config" };
-                    BuildDirectory = Path.Combine(TempFolderRoot, "MSBuild", "15.0", "Bin");
+                    BuildDirectory = Path.Combine(TempFolderRoot, "MSBuild", MSBuildConstants.CurrentToolsVersion, "Bin");
                     BuildDirectory64 = Path.Combine(BuildDirectory, "amd64");
                     DevEnvPath = Path.Combine(TempFolderRoot, "Common7", "IDE", "devenv.exe");
                     BlendPath = Path.Combine(TempFolderRoot, "Common7", "IDE", "blend.exe");

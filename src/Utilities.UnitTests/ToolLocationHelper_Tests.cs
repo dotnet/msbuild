@@ -3546,12 +3546,12 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(manifestFile, manifestExtensionSDK);
                 ExtensionSDK extensionSDK = new ExtensionSDK(
-                    $"CppUnitTestFramework, Version={ObjectModelHelpers.MSBuildDefaultToolsVersion}", manifestPath);
+                    $"CppUnitTestFramework, Version={ObjectModelHelpers.CurrentVisualStudioVersion}", manifestPath);
 
                 extensionSDK.Identifier.ShouldBe("CppUnitTestFramework");
                 extensionSDK.MaxPlatformVersion.ShouldBe(new Version("8.0"));
                 extensionSDK.MinVSVersion.ShouldBe(new Version("11.0"));
-                extensionSDK.Version.ShouldBe(new Version(ObjectModelHelpers.MSBuildDefaultToolsVersion));
+                extensionSDK.Version.ShouldBe(new Version(ObjectModelHelpers.CurrentVisualStudioVersion));
             }
             finally
             {
