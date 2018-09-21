@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: Web サイト プロジェクト "{0}" をビルドできません。ASP.NET コンパイラは MSBuild の .Net Framework バージョンでのみ利用可能です。</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -33,14 +33,14 @@
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <target state="translated">MSB4248: 式 "{0}" の中のメタデータを展開できません。 {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">メタプロジェクト "{0}" が生成されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -1046,7 +1046,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">"$(AspNetConfiguration)" 構成はこの Web プロジェクトではサポートされていないため、省略します。AspNetConfiguration プロパティを使用し、/p:AspNetConfiguration=&lt;value&gt; をコマンド ラインに追加することによって、Web プロジェクトをビルドするのに使われた構成を上書きすることができます。現在、Web プロジェクトでは、Debug 構成と Release 構成のみがサポートされています。</target>
+        <target state="translated">"$(AspNetConfiguration)" 構成はこの Web プロジェクトではサポートされていないため、省略します。AspNetConfiguration プロパティを使用し、/p:AspNetConfiguration=&lt;value&gt; をコマンド ラインに追加することによって、Web プロジェクトをビルドするのに使われた構成をオーバーライドすることができます。現在、Web プロジェクトでは、Debug 構成と Release 構成のみがサポートされています。</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -2000,7 +2000,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidBinaryLoggerParameters">
         <source>MSB4234: Invalid binary logger parameter(s): "{0}". Expected: ProjectImports={{None,Embed,ZipFile}} and/or [LogFile=]filePath.binlog (the log file name or path, must have the ".binlog" extension).</source>
-        <target state="translated">MSB4234: バイナリー ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
+        <target state="translated">MSB4234: バイナリ ロガーのパラメーターが無効です: "{0}"。次のいずれかまたは両方が必要です: ProjectImports={{None,Embed,ZipFile}} および [LogFile=]filePath.binlog (ログ ファイル名またはパス。".binlog" 拡張子が必要)。</target>
         <note />
       </trans-unit>
       <trans-unit id="IncludeRemoveOrUpdate">
