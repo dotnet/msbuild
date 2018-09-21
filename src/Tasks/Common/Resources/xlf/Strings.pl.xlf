@@ -67,6 +67,11 @@
         <target state="translated">NETSDK1008: Brak metadanych „{0}” w elemencie „{1}” „{2}”.</target>
         <note>{StrBegin="NETSDK1008: "}</note>
       </trans-unit>
+      <trans-unit id="PackageReferenceVersionNotRecommended">
+        <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
+        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UnrecognizedPreprocessorToken">
         <source>NETSDK1009: Unrecognized preprocessor token '{0}' in '{1}'.</source>
         <target state="translated">NETSDK1009: Nierozpoznany token preprocesora „{0}” w elemencie „{1}”.</target>

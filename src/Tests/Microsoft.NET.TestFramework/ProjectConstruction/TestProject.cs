@@ -145,9 +145,13 @@ namespace Microsoft.NET.TestFramework.ProjectConstruction
 
             foreach (TestPackageReference packageReference in PackageReferences)
             {
-                packageReferenceItemGroup.Add(new XElement(ns + "PackageReference",
-                    new XAttribute("Include", $"{packageReference.ID}"),
-                    new XAttribute("Version", $"{packageReference.Version}")));
+                var packageReferenceElement = new XElement(ns + "PackageReference",
+                    new XAttribute("Include", packageReference.ID));
+                if (packageReference.Version != null)
+                {
+                    packageReferenceElement.Add(new XAttribute("Version", packageReference.Version));
+                }
+                packageReferenceItemGroup.Add(packageReferenceElement);
             }
 
             foreach (TestPackageReference dotnetCliToolReference in DotNetCliToolReferences)
