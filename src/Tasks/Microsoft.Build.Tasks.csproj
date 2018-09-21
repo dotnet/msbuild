@@ -977,6 +977,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
+    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="..\..\15.0\Bin\Roslyn" />
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
