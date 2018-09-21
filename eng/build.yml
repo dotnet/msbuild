@@ -78,7 +78,7 @@ phases:
         inputs:
           testRunner: XUnit
           testResultsFiles: '**\*.xml'
-          searchFolder: '$(Build.SourcesDirectory)\artifacts\$(_BuildConfig)\TestResults'
+          searchFolder: '$(Build.SourcesDirectory)\artifacts\TestResults\$(_BuildConfig)'
           testRunTitle: 'Unit Test Results'
           platform: '$(BuildPlatform)'
           configuration: '$(_BuildConfig)'

@@ -19,6 +19,7 @@ phases:
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
         name: DotNetCore-Windows
       parallel: 2
+      timeoutInMinutes: 120
       matrix:
         ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
           Build_Debug:
@@ -41,6 +42,7 @@ phases:
       queue:
         name: DotNetCore-Windows
         parallel: 2
+        timeoutInMinutes: 120
         matrix:
           Build_Debug:
             _BuildConfig: Debug
@@ -57,6 +59,7 @@ phases:
       queue: 
         name: DotNetCore-Linux
         parallel: 2
+        timeoutInMinutes: 120
         matrix:
           Build_Debug:
             _BuildConfig: Debug
@@ -75,6 +78,7 @@ phases:
       queue: 
         name: DotNetCore-Linux
         parallel: 2
+        timeoutInMinutes: 120
         matrix:
           Build_Debug:
             _BuildConfig: Debug
@@ -93,6 +97,7 @@ phases:
       queue: 
         name: DotNetCore-Mac
         parallel: 2
+        timeoutInMinutes: 120
         matrix:
           Build_Debug:
             _BuildConfig: Debug
