@@ -31,6 +31,14 @@
         <target state="translated">無法完成作業，因為建置已經在進行中。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In graph based builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</source>
+        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In graph based builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: 無法在運算式 "{0}" 中展開中繼資料。{1}</target>
