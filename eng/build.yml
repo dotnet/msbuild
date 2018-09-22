@@ -77,8 +77,7 @@ phases:
         displayName: Publish Test Results
         inputs:
           testRunner: XUnit
-          testResultsFiles: '**\*.xml'
-          searchFolder: '$(Build.SourcesDirectory)\artifacts\TestResults\$(_BuildConfig)'
+          testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
           testRunTitle: 'Unit Test Results'
           platform: '$(BuildPlatform)'
           configuration: '$(_BuildConfig)'
@@ -89,17 +88,17 @@ phases:
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)'
           Contents: |
-           artifacts\$(_BuildConfig)\bin\**\*
-           artifacts\$(_BuildConfig)\log\**\*
-           artifacts\$(_BuildConfig)\packages\**\*
-           artifacts\$(_BuildConfig)\TestResults\**\*
+           artifacts\bin\$(_BuildConfig)\**\*
+           artifacts\log\$(_BuildConfig)\**\*
+           artifacts\packages\$(_BuildConfig)\**\*
+           artifacts\TestResults\$(_BuildConfig)\**\*
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
         condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
 
       - task: PublishBuildArtifacts@1
         displayName: Publish Build Artifacts
         inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\artifacts\$(_BuildConfig)'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)\artifacts'
           ArtifactName: '$(Build.BuildNumber)'
           publishLocation: FilePath
           TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'
