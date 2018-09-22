@@ -146,6 +146,11 @@ Geçerli {1}: '{2}'.</target>
         <target state="translated">Çalıştırılacak hedef çerçeve. Hedef çerçevenin proje dosyasında da belirtilmesi gerekir.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
