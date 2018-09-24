@@ -417,4 +417,16 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1074: Unable to add resources to the application host executable because it's not being built on Windows.</value>
     <comment>{StrBegin="NETSDK1074: "}</comment>
   </data>
+  <data name="InvalidResourceUpdate" xml:space="preserve">
+    <value>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</value>
+    <comment>{StrBegin="NETSDK1075: "}</comment>
+  </data>
+  <data name="AddResourceWithNonIntegerResource" xml:space="preserve">
+    <value>NETSDK1076: AddResource can only be used with integer resource types.</value>
+    <comment>{StrBegin="NETSDK1076: "}</comment>
+  </data>
+  <data name="FailedToLockResource" xml:space="preserve">
+    <value>NETSDK1077: Failed to lock resource.</value>
+    <comment>{StrBegin="NETSDK1077: "}</comment>
+  </data>
 </root>

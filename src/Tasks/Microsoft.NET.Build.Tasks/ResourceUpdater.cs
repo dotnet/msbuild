@@ -214,7 +214,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (!IsIntResource(lpType) || !IsIntResource(lpName))
             {
-                throw new ArgumentException("AddResource can only be used with integer resource types.");
+                throw new ArgumentException(Strings.AddResourceWithNonIntegerResource);
             }
 
             if (!UpdateResource(hUpdate, lpType, lpName, LangID_LangNeutral_SublangNeutral, data, (uint)data.Length))
@@ -296,7 +296,7 @@ namespace Microsoft.NET.Build.Tasks
             IntPtr lpResourceData = LockResource(hResourceLoaded);
             if (lpResourceData == IntPtr.Zero)
             {
-                throw new Exception("Failed to lock resource.");
+                throw new Exception(Strings.FailedToLockResource);
              }
 
             if (!UpdateResource(hUpdate, lpType, lpName, wLang, lpResourceData, SizeofResource(hModule, hResource)))
@@ -309,7 +309,7 @@ namespace Microsoft.NET.Build.Tasks
 
         private static void ThrowExceptionForInvalidUpdate()
         {
-            throw new InvalidOperationException("Update handle is invalid. This instance may not be used for further updates.");
+            throw new InvalidOperationException(Strings.InvalidResourceUpdate);
         }
 
         private static void ThrowExceptionForLastWin32Error()
