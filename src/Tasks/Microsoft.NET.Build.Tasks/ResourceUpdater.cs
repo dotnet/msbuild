@@ -180,7 +180,7 @@ namespace Microsoft.NET.Build.Tasks
 
             try
             {
-                var enumTypesCallback = new Kernel32.EnumResTypeProc(EnumTypesCallback);
+                var enumTypesCallback = new Kernel32.EnumResTypeProc(EnumAndUpdateTypesCallback);
                 if (!Kernel32.EnumResourceTypes(hModule, enumTypesCallback, IntPtr.Zero))
                 {
                     ThrowExceptionForLastWin32Error();
@@ -257,9 +257,9 @@ namespace Microsoft.NET.Build.Tasks
         }
 
 
-        private bool EnumTypesCallback(IntPtr hModule, IntPtr lpType, IntPtr lParam)
+        private bool EnumAndUpdateTypesCallback(IntPtr hModule, IntPtr lpType, IntPtr lParam)
         {
-            var enumNamesCallback = new Kernel32.EnumResNameProc(EnumNamesCallback);
+            var enumNamesCallback = new Kernel32.EnumResNameProc(EnumAndUpdateNamesCallback);
             if (!Kernel32.EnumResourceNames(hModule, lpType, enumNamesCallback, lParam))
             {
                 ThrowExceptionForLastWin32Error();
@@ -268,9 +268,9 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        private bool EnumNamesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, IntPtr lParam)
+        private bool EnumAndUpdateNamesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, IntPtr lParam)
         {
-            var enumLanguagesCallback = new Kernel32.EnumResLangProc(EnumLanguagesCallback);
+            var enumLanguagesCallback = new Kernel32.EnumResLangProc(EnumAndUpdateLanguagesCallback);
             if (!Kernel32.EnumResourceLanguages(hModule, lpType, lpName, enumLanguagesCallback, lParam))
             {
                 ThrowExceptionForLastWin32Error();
@@ -279,7 +279,7 @@ namespace Microsoft.NET.Build.Tasks
             return true;
         }
 
-        private bool EnumLanguagesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, ushort wLang, IntPtr lParam)
+        private bool EnumAndUpdateLanguagesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, ushort wLang, IntPtr lParam)
         {
             IntPtr hResource = Kernel32.FindResourceEx(hModule, lpType, lpName, wLang);
             if (hResource == IntPtr.Zero)
