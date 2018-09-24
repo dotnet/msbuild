@@ -289,6 +289,7 @@ namespace Microsoft.NET.Build.Tasks
                 accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
                 byte* bytes = pointer + accessor.PointerOffset;
 
+                // https://en.wikipedia.org/wiki/Portable_Executable
                 UInt32 peHeaderOffset = ((UInt32*)(bytes + PEHeaderPointerOffset))[0];
 
                 if (accessor.Capacity < peHeaderOffset + SubsystemOffset + sizeof(UInt16))
