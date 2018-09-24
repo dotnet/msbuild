@@ -28,6 +28,8 @@ namespace Microsoft.NET.Build.Tasks
         /// <param name="appBinaryFilePath">Full path to app binary or relative path to the result apphost file</param>
         /// <param name="overwriteExisting">If override the file existed in <paramref name="appHostDestinationFilePath"/></param>
         /// <param name="options">Options to customize the created apphost</param>
+        /// <param name="intermediateAssembly">Path to the intermediate assembly, used for copying resources to PE apphosts.</param>
+        /// <param name="log">Specify the logger used to log warnings and messages. If null, no logging is done.</param>
         public static void Create(
             string appHostSourceFilePath,
             string appHostDestinationFilePath,
