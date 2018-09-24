@@ -155,17 +155,16 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
                             identityValues[i] = item.GetMetadata(parameterIdentities[i]);
                             if (string.Equals(parameterIdentities[i], ExistingDeclareParameterMetadata.Match.ToString().ToLowerInvariant()))
                             {
-                                string unEscapedString = item.GetMetadata(parameterIdentities[i]);
+                                string metadataValue = item.GetMetadata(parameterIdentities[i]);
 
-                                string escapedString = Regex.Escape(unEscapedString);
-                                if (!string.IsNullOrEmpty(unEscapedString) 
-                                    && (Directory.Exists(unEscapedString) 
-                                    || File.Exists(unEscapedString)))
+                                if (!string.IsNullOrEmpty(metadataValue)
+                                    && (Directory.Exists(metadataValue)
+                                    || File.Exists(metadataValue)))
                                 {
-                                    escapedString = $"^{escapedString}$";
+                                    metadataValue = $"^{Regex.Escape(metadataValue)}$";
                                 }
 
-                                identityValues[i] = escapedString;
+                                identityValues[i] = metadataValue;
                             }
                         }
 
