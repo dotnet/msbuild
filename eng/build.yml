@@ -15,10 +15,22 @@ phases:
       ${{ insert }}: ${{ parameters.variables }}
       _HelixType: build/product
       _HelixBuildConfig: $(_BuildConfig)
+      _TeamName: DotNetCore
       ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
         _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: ''
+        _PublishArgs: ''
+        _SignArgs: ''
       ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
         _HelixSource: official/dotnet/sdk/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                  /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                  /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                  /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                  /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                  /p:PB_PublishType=$(_PublishType)
+        _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
     steps:
     - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
@@ -26,7 +38,7 @@ phases:
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'
           KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnetfeed-storage-access-key-1'
+          SecretsFilter: 'dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
         condition: succeeded()
       - task: AzureKeyVault@1
         inputs:
@@ -38,9 +50,9 @@ phases:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: eng\common\CIBuild.cmd
                   -configuration %BuildConfig%
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
-                  /p:PB_PublishType=%PublishType%
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -51,9 +63,9 @@ phases:
       - script: eng\common\CIBuild.cmd 
                   -configuration %BuildConfig%
                   -fullMSBuild
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
-                  /p:PB_PublishType=%PublishType%
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -63,9 +75,9 @@ phases:
     - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework') }}:
       - script: eng/common/cibuild.sh 
                   --configuration $BuildConfig
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=$BlobFeedUrl
-                  /p:PB_PublishType=$PublishType
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
