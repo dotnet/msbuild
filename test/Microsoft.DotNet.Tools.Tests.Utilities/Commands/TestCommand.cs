@@ -230,6 +230,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         private void AddEnvironmentVariablesTo(ProcessStartInfo psi)
         {
+            AddDotnetToolPathToAvoidSettingPermanentEnvInBuildMachineOnWindows();
+
             foreach (var item in Environment)
             {
 #if NET451
@@ -241,6 +243,31 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
             //  Flow the TEST_PACKAGES environment variable to the child process
             psi.Environment["TEST_PACKAGES"] = System.Environment.GetEnvironmentVariable("TEST_PACKAGES");
+        }
+
+        private void AddDotnetToolPathToAvoidSettingPermanentEnvInBuildMachineOnWindows()
+        {
+            string home = string.Empty;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (!Environment.TryGetValue("DOTNET_CLI_HOME", out home) || string.IsNullOrEmpty(home))
+                {
+                    Environment.TryGetValue("USERPROFILE", out home);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(home))
+            {
+                var dotnetToolPath = Path.Combine(home, ".dotnet", "tools");
+                if (Environment.ContainsKey("PATH"))
+                {
+                    Environment["PATH"] = Environment["PATH"] + ";" + dotnetToolPath;
+                }
+                else
+                {
+                    Environment["PATH"] = dotnetToolPath;
+                }
+            }
         }
 
         private void AddWorkingDirectoryTo(ProcessStartInfo psi)
