@@ -15,116 +15,120 @@ namespace Microsoft.NET.Build.Tasks
     /// </summary>
     public class ResourceUpdater
     {
-        //
-        // Native methods for updating resources
-        //
 
-        [DllImport("kernel32.dll", SetLastError=true)]
-        private static extern IntPtr BeginUpdateResource(string pFileName,
-                                                         [MarshalAs(UnmanagedType.Bool)]bool bDeleteExistingResources);
-
-        // Update a resource with data from an IntPtr
-        [DllImport("kernel32.dll", SetLastError=true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UpdateResource(IntPtr hUpdate,
-                                                  IntPtr lpType,
-                                                  IntPtr lpName,
-                                                  ushort wLanguage,
-                                                  IntPtr lpData,
-                                                  uint cbData);
-
-        // Update a resource with data from a managed byte[]
-        [DllImport("kernel32.dll", SetLastError=true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UpdateResource(IntPtr hUpdate,
-                                                  IntPtr lpType,
-                                                  IntPtr lpName,
-                                                  ushort wLanguage,
-                                                  [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=5)] byte[] lpData,
-                                                  uint cbData);
-
-        [DllImport("kernel32.dll", SetLastError=true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool EndUpdateResource(IntPtr hUpdate,
-                                                     bool fDiscard);
-
-        //
-        // Native methods used to read resources from a PE file
-        //
-
-        // Loading and freeing PE files
-
-        private enum LoadLibraryFlags : uint
+        private sealed class Kernel32
         {
-            LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE = 0x00000040,
-            LOAD_LIBRARY_AS_IMAGE_RESOURCE = 0x00000020
-        }
+            //
+            // Native methods for updating resources
+            //
 
-        [DllImport("kernel32.dll", SetLastError=true)]
-        private static extern IntPtr LoadLibraryEx(string lpFileName,
-                                                   IntPtr hReservedNull,
-                                                   LoadLibraryFlags dwFlags);
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            public static extern IntPtr BeginUpdateResource(string pFileName,
+                                                             [MarshalAs(UnmanagedType.Bool)]bool bDeleteExistingResources);
 
-        [DllImport("kernel32.dll", SetLastError=true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool FreeLibrary(IntPtr hModule);
-
-        // Enumerating resources
-
-        private delegate bool EnumResTypeProc(IntPtr hModule,
-                                              IntPtr lpType,
-                                              IntPtr lParam);
-
-        private delegate bool EnumResNameProc(IntPtr hModule,
-                                              IntPtr lpType,
-                                              IntPtr lpName,
-                                              IntPtr lParam);
-
-        private delegate bool EnumResLangProc(IntPtr hModule,
-                                              IntPtr lpType,
-                                              IntPtr lpName,
-                                              ushort wLang,
-                                              IntPtr lParam);
-
-        [DllImport("kernel32.dll",SetLastError=true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool EnumResourceTypes(IntPtr hModule,
-                                                     EnumResTypeProc lpEnumFunc,
-                                                     IntPtr lParam);
-
-        [DllImport("kernel32.dll", SetLastError=true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool EnumResourceNames(IntPtr hModule,
+            // Update a resource with data from an IntPtr
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool UpdateResource(IntPtr hUpdate,
                                                      IntPtr lpType,
-                                                     EnumResNameProc lpEnumFunc,
-                                                     IntPtr lParam);
+                                                     IntPtr lpName,
+                                                     ushort wLanguage,
+                                                     IntPtr lpData,
+                                                     uint cbData);
 
-        [DllImport("kernel32.dll", SetLastError=true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool EnumResourceLanguages(IntPtr hModule,
-                                                         IntPtr lpType,
-                                                         IntPtr lpName,
-                                                         EnumResLangProc lpEnumFunc,
+            // Update a resource with data from a managed byte[]
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool UpdateResource(IntPtr hUpdate,
+                                                     IntPtr lpType,
+                                                     IntPtr lpName,
+                                                     ushort wLanguage,
+                                                     [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=5)] byte[] lpData,
+                                                     uint cbData);
+
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool EndUpdateResource(IntPtr hUpdate,
+                                                        bool fDiscard);
+
+            //
+            // Native methods used to read resources from a PE file
+            //
+
+            // Loading and freeing PE files
+
+            public enum LoadLibraryFlags : uint
+            {
+                LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE = 0x00000040,
+                LOAD_LIBRARY_AS_IMAGE_RESOURCE = 0x00000020
+            }
+
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            public static extern IntPtr LoadLibraryEx(string lpFileName,
+                                                      IntPtr hReservedNull,
+                                                      LoadLibraryFlags dwFlags);
+
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool FreeLibrary(IntPtr hModule);
+
+            // Enumerating resources
+
+            public delegate bool EnumResTypeProc(IntPtr hModule,
+                                                 IntPtr lpType,
+                                                 IntPtr lParam);
+
+            public delegate bool EnumResNameProc(IntPtr hModule,
+                                                 IntPtr lpType,
+                                                 IntPtr lpName,
+                                                 IntPtr lParam);
+
+            public delegate bool EnumResLangProc(IntPtr hModule,
+                                                 IntPtr lpType,
+                                                 IntPtr lpName,
+                                                 ushort wLang,
+                                                 IntPtr lParam);
+
+            [DllImport(nameof(Kernel32),SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool EnumResourceTypes(IntPtr hModule,
+                                                         EnumResTypeProc lpEnumFunc,
                                                          IntPtr lParam);
 
-        // Querying and loading resources
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool EnumResourceNames(IntPtr hModule,
+                                                         IntPtr lpType,
+                                                         EnumResNameProc lpEnumFunc,
+                                                         IntPtr lParam);
 
-        [DllImport("kernel32.dll", SetLastError=true)]
-        private static extern IntPtr FindResourceEx(IntPtr hModule,
-                                                    IntPtr lpType,
-                                                    IntPtr lpName,
-                                                    ushort wLanguage);
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool EnumResourceLanguages(IntPtr hModule,
+                                                            IntPtr lpType,
+                                                            IntPtr lpName,
+                                                            EnumResLangProc lpEnumFunc,
+                                                            IntPtr lParam);
 
-        [DllImport("kernel32.dll", SetLastError=true)]
-        private static extern IntPtr LoadResource(IntPtr hModule,
-                                                  IntPtr hResInfo);
+            // Querying and loading resources
 
-        [DllImport("kernel32.dll")] // does not call SetLastError
-        private static extern IntPtr LockResource(IntPtr hResData);
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            public static extern IntPtr FindResourceEx(IntPtr hModule,
+                                                       IntPtr lpType,
+                                                       IntPtr lpName,
+                                                       ushort wLanguage);
 
-        [DllImport("kernel32.dll", SetLastError=true)]
-        private static extern uint SizeofResource(IntPtr hModule,
-                                                  IntPtr hResInfo);
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            public static extern IntPtr LoadResource(IntPtr hModule,
+                                                     IntPtr hResInfo);
+
+            [DllImport(nameof(Kernel32))] // does not call SetLastError
+            public static extern IntPtr LockResource(IntPtr hResData);
+
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            public static extern uint SizeofResource(IntPtr hModule,
+                                                     IntPtr hResInfo);
+        }
 
         /// <summary>
         /// Holds the native handle for the resource update.
@@ -142,7 +146,7 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public ResourceUpdater(string peFile)
         {
-            hUpdate = BeginUpdateResource(peFile, false);
+            hUpdate = Kernel32.BeginUpdateResource(peFile, false);
             if (hUpdate == IntPtr.Zero)
             {
                 ThrowExceptionForLastWin32Error();
@@ -166,8 +170,9 @@ namespace Microsoft.NET.Build.Tasks
             // Using both flags lets the OS loader decide how to load
             // it most efficiently. Either mode will prevent other
             // processes from modifying the module while it is loaded.
-            IntPtr hModule = LoadLibraryEx(peFile, IntPtr.Zero,
-                                           LoadLibraryFlags.LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE | LoadLibraryFlags.LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+            IntPtr hModule = Kernel32.LoadLibraryEx(peFile, IntPtr.Zero,
+                                                    Kernel32.LoadLibraryFlags.LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE |
+                                                    Kernel32.LoadLibraryFlags.LOAD_LIBRARY_AS_IMAGE_RESOURCE);
             if (hModule == IntPtr.Zero)
             {
                 ThrowExceptionForLastWin32Error();
@@ -175,15 +180,15 @@ namespace Microsoft.NET.Build.Tasks
 
             try
             {
-                var enumTypesCallback = new EnumResTypeProc(EnumTypesCallback);
-                if (!EnumResourceTypes(hModule, enumTypesCallback, IntPtr.Zero))
+                var enumTypesCallback = new Kernel32.EnumResTypeProc(EnumTypesCallback);
+                if (!Kernel32.EnumResourceTypes(hModule, enumTypesCallback, IntPtr.Zero))
                 {
                     ThrowExceptionForLastWin32Error();
                 }
             }
             finally
             {
-                if (!FreeLibrary(hModule))
+                if (!Kernel32.FreeLibrary(hModule))
                 {
                     ThrowExceptionForLastWin32Error();
                 }
@@ -217,7 +222,7 @@ namespace Microsoft.NET.Build.Tasks
                 throw new ArgumentException(Strings.AddResourceWithNonIntegerResource);
             }
 
-            if (!UpdateResource(hUpdate, lpType, lpName, LangID_LangNeutral_SublangNeutral, data, (uint)data.Length))
+            if (!Kernel32.UpdateResource(hUpdate, lpType, lpName, LangID_LangNeutral_SublangNeutral, data, (uint)data.Length))
             {
                 ThrowExceptionForLastWin32Error();
             }
@@ -240,7 +245,7 @@ namespace Microsoft.NET.Build.Tasks
 
             try
             {
-                if (!EndUpdateResource(hUpdate, false))
+                if (!Kernel32.EndUpdateResource(hUpdate, false))
                 {
                     ThrowExceptionForLastWin32Error();
                 }
@@ -254,8 +259,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool EnumTypesCallback(IntPtr hModule, IntPtr lpType, IntPtr lParam)
         {
-            var enumNamesCallback = new EnumResNameProc(EnumNamesCallback);
-            if (!EnumResourceNames(hModule, lpType, enumNamesCallback, lParam))
+            var enumNamesCallback = new Kernel32.EnumResNameProc(EnumNamesCallback);
+            if (!Kernel32.EnumResourceNames(hModule, lpType, enumNamesCallback, lParam))
             {
                 ThrowExceptionForLastWin32Error();
             }
@@ -265,8 +270,8 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool EnumNamesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, IntPtr lParam)
         {
-            var enumLanguagesCallback = new EnumResLangProc(EnumLanguagesCallback);
-            if (!EnumResourceLanguages(hModule, lpType, lpName, enumLanguagesCallback, lParam))
+            var enumLanguagesCallback = new Kernel32.EnumResLangProc(EnumLanguagesCallback);
+            if (!Kernel32.EnumResourceLanguages(hModule, lpType, lpName, enumLanguagesCallback, lParam))
             {
                 ThrowExceptionForLastWin32Error();
             }
@@ -276,15 +281,15 @@ namespace Microsoft.NET.Build.Tasks
 
         private bool EnumLanguagesCallback(IntPtr hModule, IntPtr lpType, IntPtr lpName, ushort wLang, IntPtr lParam)
         {
-            IntPtr hResource = FindResourceEx(hModule, lpType, lpName, wLang);
+            IntPtr hResource = Kernel32.FindResourceEx(hModule, lpType, lpName, wLang);
             if (hResource == IntPtr.Zero)
             {
                 ThrowExceptionForLastWin32Error();
             }
 
-            // hResourceLoadedq is just a handle to the resource,
-            // which can be used to get the resource data
-            IntPtr hResourceLoaded = LoadResource(hModule, hResource);
+            // hResourceLoaded is just a handle to the resource, which
+            // can be used to get the resource data
+            IntPtr hResourceLoaded = Kernel32.LoadResource(hModule, hResource);
             if (hResourceLoaded == IntPtr.Zero)
             {
                 ThrowExceptionForLastWin32Error();
@@ -293,13 +298,13 @@ namespace Microsoft.NET.Build.Tasks
             // This doesn't actually lock memory. It just retrieves a
             // pointer to the resource data. The pointer is valid
             // until the module is unloaded.
-            IntPtr lpResourceData = LockResource(hResourceLoaded);
+            IntPtr lpResourceData = Kernel32.LockResource(hResourceLoaded);
             if (lpResourceData == IntPtr.Zero)
             {
                 throw new Exception(Strings.FailedToLockResource);
              }
 
-            if (!UpdateResource(hUpdate, lpType, lpName, wLang, lpResourceData, SizeofResource(hModule, hResource)))
+            if (!Kernel32.UpdateResource(hUpdate, lpType, lpName, wLang, lpResourceData, Kernel32.SizeofResource(hModule, hResource)))
             {
                 ThrowExceptionForLastWin32Error();
             }
