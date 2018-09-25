@@ -4,10 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
@@ -18,12 +22,22 @@ namespace Microsoft.Build.Graph
     {
         private const string ProjectReferenceItemName = "ProjectReference";
         private const string FullPathMetadataName = "FullPath";
+        private const string ToolsVersionMetadataName = "ToolsVersion";
+        private const string PropertiesMetadataName = "Properties";
+        private const string UndefinePropertiesMetadataName = "UndefineProperties";
+        private const string AdditionalPropertiesMetadataName = "AdditionalProperties";
+        private const string SetConfigurationMetadataName = "SetConfiguration";
+        private const string SetPlatformMetadataName = "SetPlatform";
+        private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
+        private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
         private const string ProjectReferenceTargetsItemType = "ProjectReferenceTargets";
         private const string ProjectReferenceTargetsMetadataName = "Targets";
         private const string DefaultTargetsMarker = ".default";
 
-        private readonly Dictionary<string, ProjectGraphNode> _allParsedProjects =
-            new Dictionary<string, ProjectGraphNode>(StringComparer.OrdinalIgnoreCase);
+        private static readonly char[] PropertySeparator = { ';' };
+
+        private readonly Dictionary<ConfigurationMetadata, ProjectGraphNode> _allParsedProjects =
+            new Dictionary<ConfigurationMetadata, ProjectGraphNode>();
 
         // TODO: We probably want to mirror all relevant constructor overloads from Project
 
@@ -33,7 +47,7 @@ namespace Microsoft.Build.Graph
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile)
-            : this(entryProjectFile, ProjectCollection.GlobalProjectCollection, null, null)
+            : this(entryProjectFile, ProjectCollection.GlobalProjectCollection, null)
         {
         }
 
@@ -43,16 +57,33 @@ namespace Microsoft.Build.Graph
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case the containing project collection's global properties will be used.</param>
-        /// <param name="toolsVersion">The tools version. May be null.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(
             string entryProjectFile,
             ProjectCollection projectCollection,
-            Dictionary<string, string> globalProperties,
-            string toolsVersion)
+            Dictionary<string, string> globalProperties)
         {
-            LoadGraph(entryProjectFile, projectCollection, globalProperties, toolsVersion);
-            EntryProjectNode = _allParsedProjects[entryProjectFile];
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+
+            PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary;
+            if (globalProperties == null)
+            {
+                globalPropertyDictionary = new PropertyDictionary<ProjectPropertyInstance>(0);
+            }
+            else
+            {
+                globalPropertyDictionary = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
+                foreach (KeyValuePair<string, string> entry in globalProperties)
+                {
+                    globalPropertyDictionary[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
+                }
+            }
+
+            LoadGraph(
+                FileUtilities.NormalizePath(entryProjectFile),
+                projectCollection,
+                globalPropertyDictionary);
+            EntryProjectNode = _allParsedProjects[new ConfigurationMetadata(entryProjectFile, globalPropertyDictionary)];
             ProjectNodes = _allParsedProjects.Values;
         }
 
@@ -159,14 +190,20 @@ namespace Microsoft.Build.Graph
         }
 
         private ProjectGraphNode CreateNewNode(
-            string projectFilePath,
-            ProjectCollection projectCollection,
-            Dictionary<string, string> globalProperties,
-            string toolsVersion)
+            ConfigurationMetadata configurationMetadata,
+            ProjectCollection projectCollection)
         {
-            var project = new ProjectInstance(projectFilePath, globalProperties, toolsVersion, projectCollection);
-            var graphNode = new ProjectGraphNode(project);
-            _allParsedProjects.Add(projectFilePath, graphNode);
+            // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
+            var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
+            var project = new ProjectInstance(
+                configurationMetadata.ProjectFullPath,
+                globalProperties,
+                configurationMetadata.ToolsVersion,
+                projectCollection);
+            var graphNode = new ProjectGraphNode(
+                project,
+                globalProperties);
+            _allParsedProjects.Add(configurationMetadata, graphNode);
             return graphNode;
         }
 
@@ -175,31 +212,41 @@ namespace Microsoft.Build.Graph
         /// Maintain a queue of projects to be processed- each queue item is a key value pair of the project to be evaluated and its parent
         /// Once the project has been evaluated, add a project reference to this evaluated target from the parent node
         /// </summary>
-        private void LoadGraph(string entryProjectFile, ProjectCollection projectCollection, Dictionary<string, string> globalProperties, string toolsVersion)
+        private void LoadGraph(string entryProjectFile, ProjectCollection projectCollection, PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
-            var projectsToEvaluate = new Queue<KeyValuePair<string, ProjectGraphNode>>();
+            var projectsToEvaluate = new Queue<KeyValuePair<ConfigurationMetadata, ProjectGraphNode>>();
             // entry project node has no parent
-            projectsToEvaluate.Enqueue(new KeyValuePair<string, ProjectGraphNode>(entryProjectFile, null));
+            projectsToEvaluate.Enqueue(new KeyValuePair<ConfigurationMetadata, ProjectGraphNode>(new ConfigurationMetadata(entryProjectFile, globalProperties), null));
             while (projectsToEvaluate.Count != 0)
             {
-                KeyValuePair<string, ProjectGraphNode> projectToEvaluateAndParentNode = projectsToEvaluate.Dequeue();
-                string projectToEvaluate = projectToEvaluateAndParentNode.Key;
+                KeyValuePair<ConfigurationMetadata, ProjectGraphNode> projectToEvaluateAndParentNode = projectsToEvaluate.Dequeue();
+                ConfigurationMetadata projectToEvaluate = projectToEvaluateAndParentNode.Key;
+                ProjectGraphNode parentNode = projectToEvaluateAndParentNode.Value;
+
                 if (!_allParsedProjects.TryGetValue(projectToEvaluate, out ProjectGraphNode parsedProject))
                 {
-                    parsedProject = CreateNewNode(projectToEvaluate, projectCollection, globalProperties, toolsVersion);
+                    parsedProject = CreateNewNode(projectToEvaluate, projectCollection);
                     IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.Project.GetItems(ProjectReferenceItemName);
                     foreach (var projectReferenceToParse in projectReferenceItems)
                     {
-                        string projectReferencePath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
-                        projectsToEvaluate.Enqueue(new KeyValuePair<string, ProjectGraphNode>(projectReferencePath, parsedProject));
+                        if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
+                        {
+                            throw new InvalidOperationException(string.Format(
+                                CultureInfo.InvariantCulture,
+                                ResourceUtilities.GetResourceString("ProjectGraphDoesNotSupportProjectReferenceWithToolset"),
+                                projectReferenceToParse.EvaluatedInclude,
+                                parsedProject.Project.FullPath));
+                        }
+
+                        string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
+
+                        PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
+                        var configurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
+                        projectsToEvaluate.Enqueue(new KeyValuePair<ConfigurationMetadata, ProjectGraphNode>(configurationMetadata, parsedProject));
                     }
                 }
 
-                if (projectToEvaluateAndParentNode.Value != null)
-                {
-                    ProjectGraphNode parentNode = projectToEvaluateAndParentNode.Value;
-                    parentNode.AddProjectReference(parsedProject);
-                }
+                parentNode?.AddProjectReference(parsedProject);
             }
         }
 
@@ -241,6 +288,98 @@ namespace Microsoft.Build.Graph
             }
 
             return targets;
+        }
+
+        /// <summary>
+        /// Gets the effective global properties for a project reference.
+        /// </summary>
+        /// <remarks>
+        /// The behavior of this method should match the logic in Microsoft.Common.CurrentVersion.targets and the MSBuild task.
+        /// </remarks>
+        private static PropertyDictionary<ProjectPropertyInstance> GetProjectReferenceGlobalProperties(ProjectItemInstance projectReference, PropertyDictionary<ProjectPropertyInstance> requesterGlobalProperties)
+        {
+            string propertiesString = projectReference.GetMetadataValue(PropertiesMetadataName);
+            string additionalPropertiesString = projectReference.GetMetadataValue(AdditionalPropertiesMetadataName);
+            string undefinePropertiesString = projectReference.GetMetadataValue(UndefinePropertiesMetadataName);
+            string globalPropertiesToRemoveString = projectReference.GetMetadataValue(GlobalPropertiesToRemoveMetadataName);
+
+            // The properties on the project reference supersede the ones from the MSBuild task instad of appending.
+            if (string.IsNullOrEmpty(propertiesString))
+            {
+                // TODO: Mimic AssignProjectConfiguration's behavior for determining the values for these.
+                string setConfigurationString = projectReference.GetMetadataValue(SetConfigurationMetadataName);
+                string setPlatformString = projectReference.GetMetadataValue(SetPlatformMetadataName);
+                string setTargetFrameworkString = projectReference.GetMetadataValue(SetTargetFrameworkMetadataName);
+
+                if (!string.IsNullOrEmpty(setConfigurationString) || !string.IsNullOrEmpty(setPlatformString) || !string.IsNullOrEmpty(setTargetFrameworkString))
+                {
+                    propertiesString = $"{setConfigurationString};{setPlatformString};{setTargetFrameworkString}";
+                }
+            }
+
+            // If none of these are set, we can just reuse the requestor's global properties directly.
+            if (string.IsNullOrEmpty(propertiesString)
+                && string.IsNullOrEmpty(additionalPropertiesString)
+                && string.IsNullOrEmpty(undefinePropertiesString)
+                && string.IsNullOrEmpty(globalPropertiesToRemoveString))
+            {
+                return requesterGlobalProperties;
+            }
+
+            // Make a copy to avoid mutating the requester
+            var globalProperties = new PropertyDictionary<ProjectPropertyInstance>(requesterGlobalProperties);
+
+            // Append and remove properties as specified by the various metadata
+            MergeIntoPropertyDictionary(globalProperties, propertiesString, PropertiesMetadataName);
+            MergeIntoPropertyDictionary(globalProperties, additionalPropertiesString, AdditionalPropertiesMetadataName);
+            RemoveFromPropertyDictionary(globalProperties, globalPropertiesToRemoveString);
+            RemoveFromPropertyDictionary(globalProperties, undefinePropertiesString);
+
+            return globalProperties;
+        }
+
+        private static void MergeIntoPropertyDictionary(
+            PropertyDictionary<ProjectPropertyInstance> properties,
+            string propertyNameAndValuesString,
+            string syntaxName)
+        {
+            if (!string.IsNullOrEmpty(propertyNameAndValuesString))
+            {
+                if (PropertyParser.GetTableWithEscaping(
+                    null,
+                    null,
+                    null,
+                    propertyNameAndValuesString.Split(PropertySeparator, StringSplitOptions.RemoveEmptyEntries),
+                    out Dictionary<string, string> propertiesTable))
+                {
+                    foreach (KeyValuePair<string, string> pair in propertiesTable)
+                    {
+                        properties[pair.Key] = ProjectPropertyInstance.Create(pair.Key, pair.Value);
+                    }
+                }
+                else
+                {
+                    throw new InvalidProjectFileException(string.Format(
+                        CultureInfo.InvariantCulture,
+                        ResourceUtilities.GetResourceString("General.InvalidPropertyError"),
+                        syntaxName,
+                        propertyNameAndValuesString));
+                }
+            }
+        }
+
+        private static void RemoveFromPropertyDictionary(
+            PropertyDictionary<ProjectPropertyInstance> properties,
+            string propertyNamesString)
+        {
+            if (!string.IsNullOrEmpty(propertyNamesString))
+            {
+                var propertiesToRemove = propertyNamesString.Split(PropertySeparator, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string propertyName in propertiesToRemove)
+                {
+                    properties.Remove(propertyName);
+                }
+            }
         }
 
         private struct ProjectGraphBuildRequest : IEquatable<ProjectGraphBuildRequest>

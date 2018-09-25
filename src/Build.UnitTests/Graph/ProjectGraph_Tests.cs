@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -99,6 +101,171 @@ namespace Microsoft.Build.Graph.UnitTests
                 // TODO: This should eventually throw, but for now not infinite-looping is sufficient.
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 graph.ProjectNodes.Count.ShouldBe(3);
+            }
+        }
+
+        [Fact]
+        public void ConstructWithDifferentGlobalProperties()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                env.CreateFile("2.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""4.proj"" />
+  </ItemGroup>
+</Project>");
+                env.CreateFile("3.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""4.proj"" AdditionalProperties=""A=B"" />
+  </ItemGroup>
+</Project>");
+                CreateProject(env, 4);
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+
+                // Project 4 requires 2 nodes
+                graph.ProjectNodes.Count.ShouldBe(5);
+
+                // Projects 2 and 3 both reference project 4, but with different properties, so they should not point to the same node.
+                GetNodeForProject(graph, 2).ProjectReferences.First().ShouldNotBe(GetNodeForProject(graph, 3).ProjectReferences.First());
+                GetNodeForProject(graph, 2).ProjectReferences.First().Project.FullPath.ShouldEndWith("4.proj");
+                GetNodeForProject(graph, 2).ProjectReferences.First().GlobalProperties.ShouldBeEmpty();
+                GetNodeForProject(graph, 3).ProjectReferences.First().Project.FullPath.ShouldEndWith("4.proj");
+                GetNodeForProject(graph, 3).ProjectReferences.First().GlobalProperties.ShouldNotBeEmpty();
+            }
+        }
+
+        [Fact]
+        public void ConstructWithConvergingProperties()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                env.CreateFile("2.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""4.proj"" AdditionalProperties=""Foo=A"" />
+  </ItemGroup>
+</Project>");
+                env.CreateFile("3.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""4.proj"" AdditionalProperties=""Foo=B"" />
+  </ItemGroup>
+</Project>");
+                env.CreateFile("4.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""5.proj"" GlobalPropertiesToRemove=""Foo"" />
+  </ItemGroup>
+</Project>");
+                CreateProject(env, 5);
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+
+                // Project 4 requires 2 nodes, but project 5 does not
+                graph.ProjectNodes.Count.ShouldBe(6);
+
+                var node4A = GetNodeForProject(graph, 2).ProjectReferences.First();
+                var node4B = GetNodeForProject(graph, 3).ProjectReferences.First();
+                node4A.ShouldNotBe(node4B);
+
+                node4A.ProjectReferences.Count.ShouldBe(1);
+                node4B.ProjectReferences.Count.ShouldBe(1);
+                node4A.ProjectReferences.First().ShouldBe(node4B.ProjectReferences.First());
+            }
+        }
+
+        [Fact]
+        public void ConstructWithSameEffectiveProperties()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                env.CreateFile("2.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""4.proj"" AdditionalProperties=""Foo=Bar"" />
+  </ItemGroup>
+</Project>");
+                env.CreateFile("3.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""4.proj"" GlobalPropertiesToRemove=""DoesNotExist"" />
+  </ItemGroup>
+</Project>");
+                CreateProject(env, 4);
+                ProjectGraph graph = new ProjectGraph(
+                    entryProject.Path,
+                    ProjectCollection.GlobalProjectCollection,
+                    new Dictionary<string, string> { { "Foo", "Bar" } });
+
+                // Project 4 does not require 2 nodes
+                graph.ProjectNodes.Count.ShouldBe(4);
+
+                // The project references end up using the same effective properties
+                GetNodeForProject(graph, 2).ProjectReferences.First().ShouldBe(GetNodeForProject(graph, 3).ProjectReferences.First());
+            }
+        }
+
+        [Fact]
+        public void ConstructWithCaseDifferences()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3, 4 });
+                env.CreateFile("2.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""5.proj"" AdditionalProperties=""foo=bar"" />
+  </ItemGroup>
+</Project>");
+                env.CreateFile("3.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""5.proj"" AdditionalProperties=""FOO=bar"" />
+  </ItemGroup>
+</Project>");
+                env.CreateFile("4.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""5.proj"" AdditionalProperties=""foo=BAR"" />
+  </ItemGroup>
+</Project>");
+                CreateProject(env, 5);
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+
+                // Project 5 requires 2 nodes
+                graph.ProjectNodes.Count.ShouldBe(6);
+
+                // Property names are case-insensitive, so projects 2 and 3 point to the same project 5 node.
+                GetNodeForProject(graph, 2).ProjectReferences.First().ShouldBe(GetNodeForProject(graph, 3).ProjectReferences.First());
+                GetNodeForProject(graph, 2).ProjectReferences.First().Project.FullPath.ShouldEndWith("5.proj");
+                GetNodeForProject(graph, 2).ProjectReferences.First().GlobalProperties["FoO"].ShouldBe("bar");
+
+                // Property values are case-sensitive, so project 4 points to a different project 5 node than proejcts 2 and 3
+                GetNodeForProject(graph, 4).ProjectReferences.First().ShouldNotBe(GetNodeForProject(graph, 2).ProjectReferences.First());
+                GetNodeForProject(graph, 4).ProjectReferences.First().Project.FullPath.ShouldEndWith("5.proj");
+                GetNodeForProject(graph, 4).ProjectReferences.First().GlobalProperties["FoO"].ShouldBe("BAR");
+            }
+        }
+
+        [Fact]
+        public void ConstructWithInvalidProperties()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
+                env.CreateFile("2.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""3.proj"" AdditionalProperties=""ThisIsntValid"" />
+  </ItemGroup>
+</Project>");
+                CreateProject(env, 3);
+
+                Should.Throw<InvalidProjectFileException>(() => new ProjectGraph(entryProject.Path));
             }
         }
 

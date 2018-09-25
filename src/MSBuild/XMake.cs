@@ -1145,7 +1145,7 @@ namespace Microsoft.Build.CommandLine
                             {
                                 if (isolateProjects)
                                 {
-                                    results = ExecuteGraphBuild(projectFile, targets, buildManager, projectCollection, globalProperties, toolsVersion);
+                                    results = ExecuteGraphBuild(projectFile, targets, buildManager, projectCollection, globalProperties);
                                 }
                                 else
                                 {
@@ -1253,12 +1253,11 @@ namespace Microsoft.Build.CommandLine
             string[] targets,
             BuildManager buildManager,
             ProjectCollection projectCollection,
-            Dictionary<string, string> globalProperties,
-            string toolsVersion)
+            Dictionary<string, string> globalProperties)
         {
             lock (s_buildLock)
             {
-                var projectGraph = new ProjectGraph(projectFile, projectCollection, globalProperties, toolsVersion);
+                var projectGraph = new ProjectGraph(projectFile, projectCollection, globalProperties);
                 var targetLists = projectGraph.GetTargetLists(targets);
 
                 // TODO: Do a full graph traversal
