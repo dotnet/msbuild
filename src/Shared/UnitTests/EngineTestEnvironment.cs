@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
         public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
             => CreateTestProjectWithFiles("build.proj", projectContents, files, relativePathFromRootToProject);
     }
-    
+
     public class TransientTestProjectWithFiles : TransientTestState
     {
         private readonly TransientTestFolder _folder;
@@ -54,7 +54,10 @@ namespace Microsoft.Build.UnitTests
 
         public string ProjectFile { get; }
 
-        public TransientTestProjectWithFiles(string projectFileName, string projectContents, string[] files,
+        public TransientTestProjectWithFiles(
+            string projectFileName,
+            string projectContents,
+            string[] files,
             string relativePathFromRootToProject = ".")
         {
             _folder = new TransientTestFolder();

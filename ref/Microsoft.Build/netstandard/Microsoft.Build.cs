@@ -1408,11 +1408,12 @@ namespace Microsoft.Build.Graph
         public ProjectGraph(string entryProjectFile, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Collections.Generic.Dictionary<string, string> globalProperties, string toolsVersion) { }
         public Microsoft.Build.Graph.ProjectGraphNode EntryProjectNode { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectNodes { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Graph.ProjectGraphNode, System.Collections.Immutable.ImmutableList<string>> GetTargetLists(string[] entryProjectTargets) { throw null; }
     }
     public sealed partial class ProjectGraphNode
     {
         internal ProjectGraphNode() { }
-        public Microsoft.Build.Evaluation.Project Project { get { throw null; } }
+        public Microsoft.Build.Execution.ProjectInstance Project { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectReferences { get { throw null; } }
     }
 }
