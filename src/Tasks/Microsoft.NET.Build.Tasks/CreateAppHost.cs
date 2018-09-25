@@ -41,10 +41,7 @@ namespace Microsoft.NET.Build.Tasks
                     AppHostSourcePath,
                     ModifiedAppHostPath,
                     AppBinaryName,
-                    options: new AppHostOptions()
-                    {
-                        WindowsGraphicalUserInterface = WindowsGraphicalUserInterface
-                    },
+                    windowsGraphicalUserInterface : WindowsGraphicalUserInterface,
                     intermediateAssembly: IntermediateAssembly,
                     log: Log);
             }

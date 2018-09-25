@@ -29,8 +29,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     sourceAppHostMock,
                     destinationFilePath,
                     appBinaryFilePath,
-                    overwriteExisting: false,
-                    options: null);
+                    overwriteExisting: false);
 
                 byte[] binaryPathBlob = Encoding.UTF8.GetBytes(appBinaryFilePath);
                 byte[] result = File.ReadAllBytes(destinationFilePath);
@@ -65,8 +64,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         sourceAppHostMock,
                         destinationFilePath,
                         appBinaryFilePath,
-                        overwriteExisting: false,
-                        options: null))
+                        overwriteExisting: false))
                     .Message
                     .Should()
                     .Contain(sourceAppHostMock)
@@ -89,8 +87,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         sourceAppHostMock,
                         destinationFilePath,
                         appBinaryFilePath,
-                        overwriteExisting: false,
-                        options: null))
+                        overwriteExisting: false))
                     .Message
                     .Should()
                     .Contain(appBinaryFilePath);
@@ -111,10 +108,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     destinationFilePath,
                     appBinaryFilePath,
                     overwriteExisting: false,
-                    options: new AppHostOptions
-                    {
-                        WindowsGraphicalUserInterface = true
-                    });
+                    windowsGraphicalUserInterface: true);
 
                 BitConverter
                     .ToUInt16(File.ReadAllBytes(destinationFilePath), SubsystemOffset)
@@ -143,10 +137,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         destinationFilePath,
                         appBinaryFilePath,
                         overwriteExisting: false,
-                        options: new AppHostOptions
-                        {
-                            WindowsGraphicalUserInterface = true
-                        }))
+                        windowsGraphicalUserInterface: true))
                     .Message
                     .Should()
                     .Contain(sourceAppHostMock);
@@ -172,10 +163,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         destinationFilePath,
                         appBinaryFilePath,
                         overwriteExisting: false,
-                        options: new AppHostOptions
-                        {
-                            WindowsGraphicalUserInterface = true
-                        }))
+                        windowsGraphicalUserInterface: true))
                     .Message
                     .Should()
                     .Contain(sourceAppHostMock);

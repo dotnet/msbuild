@@ -27,7 +27,7 @@ namespace Microsoft.NET.Build.Tasks
         /// <param name="appHostDestinationFilePath">The destination path for desired location to place, including the file name</param>
         /// <param name="appBinaryFilePath">Full path to app binary or relative path to the result apphost file</param>
         /// <param name="overwriteExisting">If override the file existed in <paramref name="appHostDestinationFilePath"/></param>
-        /// <param name="options">Options to customize the created apphost</param>
+        /// <param name="windowsGraphicalUserInterface">Specify whether to set the subsystem to GUI. Only valid for PE apphosts.</param>
         /// <param name="intermediateAssembly">Path to the intermediate assembly, used for copying resources to PE apphosts.</param>
         /// <param name="log">Specify the logger used to log warnings and messages. If null, no logging is done.</param>
         public static void Create(
@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks
             string appHostDestinationFilePath,
             string appBinaryFilePath,
             bool overwriteExisting = false,
-            AppHostOptions options = null,
+            bool windowsGraphicalUserInterface = false,
             string intermediateAssembly = null,
             Logger log = null)
         {
@@ -67,17 +67,14 @@ namespace Microsoft.NET.Build.Tasks
 
                     appHostIsPEImage = IsPEImage(accessor);
 
-                    if (options != null)
+                    if (windowsGraphicalUserInterface)
                     {
-                        if (options.WindowsGraphicalUserInterface)
+                        if (!appHostIsPEImage)
                         {
-                            if (!appHostIsPEImage)
-                            {
-                                throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourceFilePath);
-                            }
-
-                            SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
+                            throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourceFilePath);
                         }
+
+                        SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
                     }
                 }
             }
