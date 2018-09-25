@@ -116,6 +116,8 @@ namespace Microsoft.NET.Build.Tasks
                                                             EnumResLangProc lpEnumFunc,
                                                             IntPtr lParam);
 
+            public const int UserStoppedResourceEnumerationHRESULT = unchecked((int)0x80073B02);
+
             // Querying and loading resources
 
             [DllImport(nameof(Kernel32), SetLastError=true)]
@@ -207,16 +209,24 @@ namespace Microsoft.NET.Build.Tasks
                 ThrowExceptionForLastWin32Error();
             }
 
+            var enumTypesCallback = new Kernel32.EnumResTypeProc(EnumAndUpdateTypesCallback);
+            var errorInfo = new EnumResourcesErrorInfo();
+            GCHandle errorInfoHandle = GCHandle.Alloc(errorInfo);
+            var errorInfoPtr = GCHandle.ToIntPtr(errorInfoHandle);
+
             try
             {
-                var enumTypesCallback = new Kernel32.EnumResTypeProc(EnumAndUpdateTypesCallback);
-                if (!Kernel32.EnumResourceTypes(hModule, enumTypesCallback, IntPtr.Zero))
+                if (!Kernel32.EnumResourceTypes(hModule, enumTypesCallback, errorInfoPtr))
                 {
-                    ThrowExceptionForLastWin32Error();
+                    CaptureEnumResourcesErrorInfo(errorInfoPtr);
+
+                    errorInfo.ThrowException();
                 }
             }
             finally
             {
+                errorInfoHandle.Free();
+
                 if (!Kernel32.FreeLibrary(hModule))
                 {
                     ThrowExceptionForLastWin32Error();
@@ -285,15 +295,14 @@ namespace Microsoft.NET.Build.Tasks
             }
         }
 
-
         private bool EnumAndUpdateTypesCallback(IntPtr hModule, IntPtr lpType, IntPtr lParam)
         {
             var enumNamesCallback = new Kernel32.EnumResNameProc(EnumAndUpdateNamesCallback);
             if (!Kernel32.EnumResourceNames(hModule, lpType, enumNamesCallback, lParam))
             {
-                ThrowExceptionForLastWin32Error();
+                CaptureEnumResourcesErrorInfo(lParam);
+                return false;
             }
-
             return true;
         }
 
@@ -302,9 +311,9 @@ namespace Microsoft.NET.Build.Tasks
             var enumLanguagesCallback = new Kernel32.EnumResLangProc(EnumAndUpdateLanguagesCallback);
             if (!Kernel32.EnumResourceLanguages(hModule, lpType, lpName, enumLanguagesCallback, lParam))
             {
-                ThrowExceptionForLastWin32Error();
+                CaptureEnumResourcesErrorInfo(lParam);
+                return false;
             }
-
             return true;
         }
 
@@ -313,7 +322,8 @@ namespace Microsoft.NET.Build.Tasks
             IntPtr hResource = Kernel32.FindResourceEx(hModule, lpType, lpName, wLang);
             if (hResource == IntPtr.Zero)
             {
-                ThrowExceptionForLastWin32Error();
+                CaptureEnumResourcesErrorInfo(lParam);
+                return false;
             }
 
             // hResourceLoaded is just a handle to the resource, which
@@ -321,7 +331,8 @@ namespace Microsoft.NET.Build.Tasks
             IntPtr hResourceLoaded = Kernel32.LoadResource(hModule, hResource);
             if (hResourceLoaded == IntPtr.Zero)
             {
-                ThrowExceptionForLastWin32Error();
+                CaptureEnumResourcesErrorInfo(lParam);
+                return false;
             }
 
             // This doesn't actually lock memory. It just retrieves a
@@ -330,40 +341,69 @@ namespace Microsoft.NET.Build.Tasks
             IntPtr lpResourceData = Kernel32.LockResource(hResourceLoaded);
             if (lpResourceData == IntPtr.Zero)
             {
-                throw new ResourceNotAvailableException(Strings.FailedToLockResource);
-             }
+                ((EnumResourcesErrorInfo)GCHandle.FromIntPtr(lParam).Target).failedToLockResource = true;
+            }
 
             if (!Kernel32.UpdateResource(hUpdate, lpType, lpName, wLang, lpResourceData, Kernel32.SizeofResource(hModule, hResource)))
             {
-                ThrowExceptionForLastWin32Error();
+                CaptureEnumResourcesErrorInfo(lParam);
+                return false;
             }
 
             return true;
         }
 
+        private class EnumResourcesErrorInfo
+        {
+            public int hResult;
+            public bool failedToLockResource;
+
+            public void ThrowException()
+            {
+                if (failedToLockResource)
+                {
+                    Debug.Assert(hResult == 0);
+                    throw new ResourceNotAvailableException(Strings.FailedToLockResource);
+                }
+
+                Debug.Assert(hResult != 0);
+                throw new HResultException(hResult);
+            }
+        }
+
+        private static void CaptureEnumResourcesErrorInfo(IntPtr errorInfoPtr)
+        {
+            int hResult = Marshal.GetHRForLastWin32Error();
+            if (hResult != Kernel32.UserStoppedResourceEnumerationHRESULT)
+            {
+                GCHandle errorInfoHandle = GCHandle.FromIntPtr(errorInfoPtr);
+                var errorInfo = (EnumResourcesErrorInfo)errorInfoHandle.Target;
+                errorInfo.hResult = hResult;
+            }
+        }
+
         private class ResourceNotAvailableException : Exception
         {
-            public ResourceNotAvailableException()
-            {
-            }
-
             public ResourceNotAvailableException(string message) : base(message)
             {
             }
+        }
 
-            public ResourceNotAvailableException(string message, Exception inner) : base(message, inner)
+        private class HResultException : Exception
+        {
+            public HResultException(int hResult) : base(hResult.ToString("X4"))
             {
             }
+        }
+
+        private static void ThrowExceptionForLastWin32Error()
+        {
+            throw new HResultException(Marshal.GetHRForLastWin32Error());
         }
 
         private static void ThrowExceptionForInvalidUpdate()
         {
             throw new InvalidOperationException(Strings.InvalidResourceUpdate);
-        }
-
-        private static void ThrowExceptionForLastWin32Error()
-        {
-            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
         }
 
         public void Dispose()
