@@ -21,6 +21,7 @@ namespace Microsoft.NET.Build.Tasks
         [Required]
         public string AppBinaryName { get; set; }
 
+        [Required]
         public string IntermediateAssembly { get; set; }
 
         public bool WindowsGraphicalUserInterface { get; set; }
