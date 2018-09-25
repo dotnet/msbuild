@@ -330,7 +330,7 @@ namespace Microsoft.NET.Build.Tasks
             IntPtr lpResourceData = Kernel32.LockResource(hResourceLoaded);
             if (lpResourceData == IntPtr.Zero)
             {
-                throw new Exception(Strings.FailedToLockResource);
+                throw new ResourceNotAvailableException(Strings.FailedToLockResource);
              }
 
             if (!Kernel32.UpdateResource(hUpdate, lpType, lpName, wLang, lpResourceData, Kernel32.SizeofResource(hModule, hResource)))
@@ -339,6 +339,21 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             return true;
+        }
+
+        private class ResourceNotAvailableException : Exception
+        {
+            public ResourceNotAvailableException()
+            {
+            }
+
+            public ResourceNotAvailableException(string message) : base(message)
+            {
+            }
+
+            public ResourceNotAvailableException(string message, Exception inner) : base(message, inner)
+            {
+            }
         }
 
         private static void ThrowExceptionForInvalidUpdate()
