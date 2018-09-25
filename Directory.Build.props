@@ -13,19 +13,7 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
-
-    <!--
-      Tools and packages produced by this repository support infrastructure and are not shipping on NuGet or via any other official channel.
-    -->
     <IsShipping>true</IsShipping>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- 
-      'NetFxTfm' is the standard desktop Target Framework Moniker which this repo's packages are targeting
-      ie.  Place 'NetFxTfm' in the 'TargetFramework' property of a csproj like <TargetFrameworks>$(NetFxTfm);netcoreapp2.0</TargetFrameworks> 
-    -->
-    <NetFxTfm>net461</NetFxTfm>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
