@@ -57,6 +57,8 @@ namespace Microsoft.NET.Build.Tasks
             public static extern bool EndUpdateResource(IntPtr hUpdate,
                                                         bool fDiscard);
 
+            public const ushort LangID_LangNeutral_SublangNeutral = 0;
+
             //
             // Native methods used to read resources from a PE file
             //
@@ -236,8 +238,6 @@ namespace Microsoft.NET.Build.Tasks
             return this;
         }
 
-        private const ushort LangID_LangNeutral_SublangNeutral = 0;
-
         private static bool IsIntResource(IntPtr lpType)
         {
             return ((uint)lpType >> 16) == 0;
@@ -261,7 +261,7 @@ namespace Microsoft.NET.Build.Tasks
                 throw new ArgumentException(Strings.AddResourceWithNonIntegerResource);
             }
 
-            if (!Kernel32.UpdateResource(hUpdate, lpType, lpName, LangID_LangNeutral_SublangNeutral, data, (uint)data.Length))
+            if (!Kernel32.UpdateResource(hUpdate, lpType, lpName, Kernel32.LangID_LangNeutral_SublangNeutral, data, (uint)data.Length))
             {
                 ThrowExceptionForLastWin32Error();
             }
