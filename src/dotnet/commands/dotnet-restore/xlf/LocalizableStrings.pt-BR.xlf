@@ -94,6 +94,31 @@ Isso equivale a excluir o project.assets.json.</target>
         <target state="translated">Permite que o comando seja interrompido e aguarde a ação ou entrada do usuário (por exemplo, para concluir a autenticação).</target>
         <note />
       </trans-unit>
+      <trans-unit id="CmdLockedModeOptionDescription">
+        <source>Don't allow updating project lock file.</source>
+        <target state="new">Don't allow updating project lock file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOption">
+        <source>LOCK_FILE_PATH</source>
+        <target state="new">LOCK_FILE_PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdLockFilePathOptionDescription">
+        <source>Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</source>
+        <target state="new">Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdReevaluateOptionDescription">
+        <source>Forces restore to reevaluate all dependencies even if a lock file already exists.</source>
+        <target state="new">Forces restore to reevaluate all dependencies even if a lock file already exists.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CmdUseLockFileOptionDescription">
+        <source>Enables project lock file to be generated and used with restore.</source>
+        <target state="new">Enables project lock file to be generated and used with restore.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
