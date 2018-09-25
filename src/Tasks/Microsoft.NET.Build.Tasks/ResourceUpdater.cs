@@ -13,9 +13,8 @@ namespace Microsoft.NET.Build.Tasks
     /// in a PE image. It currently only works on Windows, because it
     /// requires various kernel32 APIs.
     /// </summary>
-    public class ResourceUpdater
+    public class ResourceUpdater : IDisposable
     {
-
         private sealed class Kernel32
         {
             //
@@ -23,13 +22,13 @@ namespace Microsoft.NET.Build.Tasks
             //
 
             [DllImport(nameof(Kernel32), SetLastError=true)]
-            public static extern IntPtr BeginUpdateResource(string pFileName,
-                                                             [MarshalAs(UnmanagedType.Bool)]bool bDeleteExistingResources);
+            public static extern SafeUpdateHandle BeginUpdateResource(string pFileName,
+                                                                      [MarshalAs(UnmanagedType.Bool)]bool bDeleteExistingResources);
 
             // Update a resource with data from an IntPtr
             [DllImport(nameof(Kernel32), SetLastError=true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool UpdateResource(IntPtr hUpdate,
+            public static extern bool UpdateResource(SafeUpdateHandle hUpdate,
                                                      IntPtr lpType,
                                                      IntPtr lpName,
                                                      ushort wLanguage,
@@ -39,13 +38,20 @@ namespace Microsoft.NET.Build.Tasks
             // Update a resource with data from a managed byte[]
             [DllImport(nameof(Kernel32), SetLastError=true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool UpdateResource(IntPtr hUpdate,
+            public static extern bool UpdateResource(SafeUpdateHandle hUpdate,
                                                      IntPtr lpType,
                                                      IntPtr lpName,
                                                      ushort wLanguage,
                                                      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=5)] byte[] lpData,
                                                      uint cbData);
 
+            [DllImport(nameof(Kernel32), SetLastError=true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool EndUpdateResource(SafeUpdateHandle hUpdate,
+                                                        bool fDiscard);
+
+            // The IntPtr version of this dllimport is used in the
+            // SafeHandle implementation
             [DllImport(nameof(Kernel32), SetLastError=true)]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool EndUpdateResource(IntPtr hUpdate,
@@ -131,9 +137,32 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         /// <summary>
+        /// Holds the update handle returned by BeginUpdateResource.
+        /// Normally, native resources for the update handle are
+        /// released by a call to ResourceUpdater.Update(). In case
+        /// this doesn't happen, the SafeUpdateHandle will release the
+        /// native resources for the update handle without updating
+        /// the target file.
+        /// </summary>
+        private class SafeUpdateHandle : SafeHandle
+        {
+            private SafeUpdateHandle() : base(IntPtr.Zero, true)
+            {
+            }
+
+            public override bool IsInvalid => handle == IntPtr.Zero;
+
+            protected override bool ReleaseHandle()
+            {
+                // discard pending updates without writing them
+                return Kernel32.EndUpdateResource(handle, true);
+            }
+        }
+
+        /// <summary>
         /// Holds the native handle for the resource update.
         /// </summary>
-        private IntPtr hUpdate = IntPtr.Zero;
+        private readonly SafeUpdateHandle hUpdate;
 
         /// <summary>
         /// Create a resource updater for the given PE file. This will
@@ -147,7 +176,7 @@ namespace Microsoft.NET.Build.Tasks
         public ResourceUpdater(string peFile)
         {
             hUpdate = Kernel32.BeginUpdateResource(peFile, false);
-            if (hUpdate == IntPtr.Zero)
+            if (hUpdate.IsInvalid)
             {
                 ThrowExceptionForLastWin32Error();
             }
@@ -162,7 +191,7 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public ResourceUpdater AddResourcesFromPEImage(string peFile)
         {
-            if (hUpdate == IntPtr.Zero)
+            if (hUpdate.IsInvalid)
             {
                 ThrowExceptionForInvalidUpdate();
             }
@@ -212,7 +241,7 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public ResourceUpdater AddResource(byte[] data, IntPtr lpType, IntPtr lpName)
         {
-            if (hUpdate == IntPtr.Zero)
+            if (hUpdate.IsInvalid)
             {
                 ThrowExceptionForInvalidUpdate();
             }
@@ -238,7 +267,7 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         public void Update()
         {
-            if (hUpdate == IntPtr.Zero)
+            if (hUpdate.IsInvalid)
             {
                 ThrowExceptionForInvalidUpdate();
             }
@@ -252,7 +281,7 @@ namespace Microsoft.NET.Build.Tasks
             }
             finally
             {
-                hUpdate = IntPtr.Zero;
+                hUpdate.SetHandleAsInvalid();
             }
         }
 
@@ -320,6 +349,20 @@ namespace Microsoft.NET.Build.Tasks
         private static void ThrowExceptionForLastWin32Error()
         {
             Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                hUpdate.Dispose();
+            }
         }
     }
 }
