@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
@@ -133,7 +132,7 @@ namespace Microsoft.Build.Execution
         /// Value is a dictionary of all possible matches for that 
         /// task name, by unique identity.
         /// </summary>
-        private Dictionary<string, HybridDictionary<RegisteredTaskIdentity, RegisteredTaskRecord>> _cachedTaskRecordsWithFuzzyMatch;
+        private Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>> _cachedTaskRecordsWithFuzzyMatch;
 
         /// <summary>
         /// Cache of task declarations i.e. the &lt;UsingTask&gt; tags fed to this registry,
@@ -490,7 +489,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    HybridDictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords;
+                    Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords;
 
                     if (_cachedTaskRecordsWithFuzzyMatch != null && _cachedTaskRecordsWithFuzzyMatch.TryGetValue(taskIdentity.Name, out taskRecords))
                     {
@@ -558,7 +557,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                _cachedTaskRecordsWithFuzzyMatch = _cachedTaskRecordsWithFuzzyMatch ?? new Dictionary<string, HybridDictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>(StringComparer.OrdinalIgnoreCase);
+                _cachedTaskRecordsWithFuzzyMatch = _cachedTaskRecordsWithFuzzyMatch ?? new Dictionary<string, Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>>(StringComparer.OrdinalIgnoreCase);
 
                 // Since this is a fuzzy match, we could conceivably have several sets of task identity parameters that match
                 // each other ... but might be mutually exclusive themselves.  E.g. CLR4|x86 and CLR2|x64 both match *|*.  
@@ -574,10 +573,10 @@ namespace Microsoft.Build.Execution
                 // 3. Look up Foo | baz (gets its own entry because it doesn't match Foo | bar)
                 // 4. Look up Foo | * (should get the Foo | * under Foo | bar, but depending on what the dictionary looks up 
                 //    first, might get Foo | baz, which also matches, instead) 
-                HybridDictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords;
+                Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord> taskRecords;
                 if (!_cachedTaskRecordsWithFuzzyMatch.TryGetValue(taskIdentity.Name, out taskRecords))
                 {
-                    taskRecords = new HybridDictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                    taskRecords = new Dictionary<RegisteredTaskIdentity, RegisteredTaskRecord>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
                 }
 
                 taskRecords[taskIdentity] = taskRecord;

@@ -10,7 +10,7 @@
       </trans-unit>
       <trans-unit id="AspNetCompiler.UnsupportedMSBuildVersion">
         <source>MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</source>
-        <target state="new">MSB4249: Unable to build website project "{0}". The ASP.NET compiler is only available on the .NET Framework version of MSBuild.</target>
+        <target state="translated">MSB4249: Não foi possível compilar o projeto do site da Web "{0}". O compilador do ASP.NET está disponível apenas na versão .NET Framework do MSBuild.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -33,14 +33,14 @@
       </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
-        <target state="new">MSB4248: Cannot expand metadata in expression "{0}". {1}</target>
+        <target state="translated">MSB4248: Não é possível expandir os metadados na expressão "{0}". {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
-        <target state="new">Metaproject "{0}" generated.</target>
+        <target state="translated">Metaprojeto "{0}" gerado.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">

@@ -54,9 +54,6 @@
     <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\HybridDictionary_Tests.cs">
-      <Link>HybridDictionary_Tests.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\UnitTests\MockEngine.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
