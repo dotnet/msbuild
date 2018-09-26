@@ -79,8 +79,9 @@ namespace Microsoft.Build.Graph
                 }
             }
 
+            entryProjectFile = FileUtilities.NormalizePath(entryProjectFile);
             LoadGraph(
-                FileUtilities.NormalizePath(entryProjectFile),
+                entryProjectFile,
                 projectCollection,
                 globalPropertyDictionary);
             EntryProjectNode = _allParsedProjects[new ConfigurationMetadata(entryProjectFile, globalPropertyDictionary)];
