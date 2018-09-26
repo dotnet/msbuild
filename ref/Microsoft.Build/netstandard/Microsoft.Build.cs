@@ -1405,7 +1405,7 @@ namespace Microsoft.Build.Graph
     public sealed partial class ProjectGraph
     {
         public ProjectGraph(string entryProjectFile) { }
-        public ProjectGraph(string entryProjectFile, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Collections.Generic.Dictionary<string, string> globalProperties, string toolsVersion) { }
+        public ProjectGraph(string entryProjectFile, Microsoft.Build.Evaluation.ProjectCollection projectCollection, System.Collections.Generic.Dictionary<string, string> globalProperties) { }
         public Microsoft.Build.Graph.ProjectGraphNode EntryProjectNode { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectNodes { get { throw null; } }
         public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Graph.ProjectGraphNode, System.Collections.Immutable.ImmutableList<string>> GetTargetLists(string[] entryProjectTargets) { throw null; }
@@ -1413,6 +1413,7 @@ namespace Microsoft.Build.Graph
     public sealed partial class ProjectGraphNode
     {
         internal ProjectGraphNode() { }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> GlobalProperties { get { throw null; } }
         public Microsoft.Build.Execution.ProjectInstance Project { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectReferences { get { throw null; } }
     }

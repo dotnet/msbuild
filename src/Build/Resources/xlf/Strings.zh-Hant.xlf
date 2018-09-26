@@ -48,6 +48,14 @@
         <target state="translated">無法完成作業，因為尚未呼叫 BeginBuild。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="new">MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>
         <target state="translated">無法完成作業，因為已經呼叫 EndBuild，但尚未完成現有的提交。</target>
