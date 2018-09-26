@@ -102,17 +102,17 @@
             Inputs="@(GenerateSdkMsiInputs)"
             Outputs="$(SdkInstallerFile)">
 
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateMsiPowershellScript)
-                      '$(SdkLayoutOutputDirectory)'
-                      '$(SdkInstallerFile)'
-                      '$(WixRoot)'
-                      '$(SdkBrandName)'
-                      '$(MsiVersion)'
-                      '$(SimpleVersion)'
-                      '$(NugetVersion)'
-                      '$(SdkInstallerUpgradeCode)'
-                      '$(Architecture)'
-                      '$(SdkStableFileIdForApphostTransform)'
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateMsiPowershellScript) ^
+                      '$(SdkLayoutOutputDirectory)' ^
+                      '$(SdkInstallerFile)' ^
+                      '$(WixRoot)' ^
+                      '$(SdkBrandName)' ^
+                      '$(MsiVersion)' ^
+                      '$(SimpleVersion)' ^
+                      '$(NugetVersion)' ^
+                      '$(SdkInstallerUpgradeCode)' ^
+                      '$(Architecture)' ^
+                      '$(SdkStableFileIdForApphostTransform)' ^
                       " />
     </Target>
 
@@ -122,15 +122,15 @@
             Inputs="@(GenerateMSBuildExtensionsMsiInputs)"
             Outputs="$(MSBuildExtensionsInstallerFile)">
 
-      <Exec Command="powershell -NoProfile -NoLogo $(MSBuildExtensionsGenerateMsiPowershellScript)
-                      '$(MSBuildExtensionsOutputDirectory)'
-                      '$(MSBuildExtensionsInstallerFile)'
-                      '$(WixRoot)'
-                      '$(MSBuildExtensionsBrandName)'
-                      '$(SimpleVersion)'
-                      '$(SimpleVersion)'
-                      '$(NugetVersion)'
-                      '$(MSBuildExtensionsInstallerUpgradeCode)'
+      <Exec Command="powershell -NoProfile -NoLogo $(MSBuildExtensionsGenerateMsiPowershellScript) ^
+                      '$(MSBuildExtensionsOutputDirectory)' ^
+                      '$(MSBuildExtensionsInstallerFile)' ^
+                      '$(WixRoot)' ^
+                      '$(MSBuildExtensionsBrandName)' ^
+                      '$(SimpleVersion)' ^
+                      '$(SimpleVersion)' ^
+                      '$(NugetVersion)' ^
+                      '$(MSBuildExtensionsInstallerUpgradeCode)' ^
                       '$(Architecture)'" />
     </Target>
 
@@ -144,21 +144,21 @@
                     $(SdkGenerateBundlePowershellScript)"
             Outputs="$(CombinedFrameworkSdkHostInstallerFile)">
 
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateBundlePowershellScript)
-                      '$(SdkInstallerFile)'
-                      '$(DownloadedAspNetCoreSharedFxInstallerFile)'
-                      '$(DownloadedSharedFrameworkInstallerFile)'
-                      '$(DownloadedHostFxrInstallerFile)'
-                      '$(DownloadedSharedHostInstallerFile)'
-                      '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(WixRoot)'
-                      '$(SdkBrandName)'
-                      '$(MsiVersion)'
-                      '$(SimpleVersion)'
-                      '$(NugetVersion)'
-                      '$(CombinedFrameworkSDKHostInstallerUpgradeCode)'
-                      '$(Architecture)'
-                      '$(MicrosoftNETCoreAppPackageVersion)'
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateBundlePowershellScript) ^
+                      '$(SdkInstallerFile)' ^
+                      '$(DownloadedAspNetCoreSharedFxInstallerFile)' ^
+                      '$(DownloadedSharedFrameworkInstallerFile)' ^
+                      '$(DownloadedHostFxrInstallerFile)' ^
+                      '$(DownloadedSharedHostInstallerFile)' ^
+                      '$(CombinedFrameworkSdkHostInstallerFile)' ^
+                      '$(WixRoot)' ^
+                      '$(SdkBrandName)' ^
+                      '$(MsiVersion)' ^
+                      '$(SimpleVersion)' ^
+                      '$(NugetVersion)' ^
+                      '$(CombinedFrameworkSDKHostInstallerUpgradeCode)' ^
+                      '$(Architecture)' ^
+                      '$(MicrosoftNETCoreAppPackageVersion)' ^
                       '$(AspNetCoreVersion)'" />
     </Target>
 
@@ -170,10 +170,10 @@
                     $(SdkGenerateNupkgPowershellScript)"
             Outputs="$(SdkInstallerNupkgFile)">
 
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
-                      '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(FullNugetVersion)'
-                      '$(SdkInstallerNuspecFile)'
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
+                      '$(CombinedFrameworkSdkHostInstallerFile)' ^
+                      '$(FullNugetVersion)' ^
+                      '$(SdkInstallerNuspecFile)' ^
                       '$(SdkInstallerNupkgFile)'" />
     </Target>
 
@@ -185,10 +185,10 @@
                     $(SdkGenerateNupkgPowershellScript)"
             Outputs="$(SdkMSBuildExtensionsNupkgFile);$(SdkMSBuildExtensionsSwrFile)">
 
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
-                      '$(MSBuildExtensionsLayoutDirectory)'
-                      '$(FullNugetVersion)'
-                      '$(SdkMSBuildExtensionsNuspecFile)'
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
+                      '$(MSBuildExtensionsLayoutDirectory)' ^
+                      '$(FullNugetVersion)' ^
+                      '$(SdkMSBuildExtensionsNuspecFile)' ^
                       '$(SdkMSBuildExtensionsNupkgFile)'" />
       
       <GenerateMSBuildExtensionsSWR MSBuildExtensionsLayoutDirectory="$(MSBuildExtensionsLayoutDirectory)"
@@ -202,9 +202,9 @@
             DependsOnTargets="Init;MsiTargetsSetupInputOutputs;GenerateSdkMsi"
             Condition=" '$(OS)' == 'Windows_NT'" >
 
-      <Exec Command ="powershell -NoProfile -NoLogo $(SdkTestMsiPowershellScript)
-                      -InputMsi '$(SdkInstallerFile)'
-                      -DotnetDir '$(PreviousStageDirectory)'
+      <Exec Command ="powershell -NoProfile -NoLogo $(SdkTestMsiPowershellScript) ^
+                      -InputMsi '$(SdkInstallerFile)' ^
+                      -DotnetDir '$(PreviousStageDirectory)' ^
                       -TestDir '$(TestOutputDir)'" />
 
       <WriteLinesToFile
