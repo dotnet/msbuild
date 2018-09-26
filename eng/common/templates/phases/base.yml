@@ -88,3 +88,20 @@ phases:
       parameters:
         helixSource: $(_HelixSource)
         helixType: $(_HelixType)
+
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - task: CopyFiles@2
+        displayName: Gather Asset Manifests
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/AssetManifest'
+          TargetFolder: '$(Build.StagingDirectory)/AssetManifests'
+        continueOnError: false
+        condition: and(succeeded(), eq(variables['_DotNetPublishToBlobFeed'], 'true'))
+      - task: PublishBuildArtifacts@1
+        displayName: Push Asset Manifests
+        inputs:
+          PathtoPublish: '$(Build.StagingDirectory)/AssetManifests'
+          PublishLocation: Container
+          ArtifactName: AssetManifests
+        continueOnError: false
+        condition: and(succeeded(), eq(variables['_DotNetPublishToBlobFeed'], 'true'))
