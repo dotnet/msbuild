@@ -1257,7 +1257,7 @@ namespace Microsoft.Build.CommandLine
         {
             lock (s_buildLock)
             {
-                var projectGraph = new ProjectGraph(projectFile, projectCollection, globalProperties);
+                var projectGraph = new ProjectGraph(projectFile, globalProperties, projectCollection);
                 var targetLists = projectGraph.GetTargetLists(targets);
 
                 // TODO: Do a full graph traversal

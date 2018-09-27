@@ -198,7 +198,6 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProject(env, 4);
                 ProjectGraph graph = new ProjectGraph(
                     entryProject.Path,
-                    ProjectCollection.GlobalProjectCollection,
                     new Dictionary<string, string> { { "Foo", "Bar" } });
 
                 // Project 4 does not require 2 nodes
