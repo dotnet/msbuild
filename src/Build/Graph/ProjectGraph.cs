@@ -39,29 +39,40 @@ namespace Microsoft.Build.Graph
         private readonly Dictionary<ConfigurationMetadata, ProjectGraphNode> _allParsedProjects =
             new Dictionary<ConfigurationMetadata, ProjectGraphNode>();
 
-        // TODO: We probably want to mirror all relevant constructor overloads from Project
-
         /// <summary>
-        /// Constructs a graph starting from the given project file.
+        /// Constructs a graph starting from the given project file, evaluating with the global project collection and no global properties.
         /// </summary>
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile)
-            : this(entryProjectFile, ProjectCollection.GlobalProjectCollection, null)
+            : this(entryProjectFile, null, ProjectCollection.GlobalProjectCollection)
         {
         }
 
         /// <summary>
-        /// Constructs a graph starting from the given project file.
+        /// Constructs a graph starting from the given project file, evaluating with the provided global properties and the global project collection.
         /// </summary>
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
-        /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case the containing project collection's global properties will be used.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(
             string entryProjectFile,
-            ProjectCollection projectCollection,
-            Dictionary<string, string> globalProperties)
+            IDictionary<string, string> globalProperties)
+            : this(entryProjectFile, globalProperties, ProjectCollection.GlobalProjectCollection)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a graph starting from the given project file, evaluating with the provided global properties and the provided project collection.
+        /// </summary>
+        /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
+        /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case the containing project collection's global properties will be used.</param>
+        /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
+        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        public ProjectGraph(
+            string entryProjectFile,
+            IDictionary<string, string> globalProperties,
+            ProjectCollection projectCollection)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
