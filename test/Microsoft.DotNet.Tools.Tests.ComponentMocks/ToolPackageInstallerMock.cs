@@ -97,7 +97,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                     IReadOnlyList<FilePath> packedShims = null;
                     _packagedShimsMap.TryGetValue(packageId, out packedShims);
 
-                    return new ToolPackageMock(_fileSystem, packageId, version, packageDirectory, warnings: warnings, packagedShims: packedShims);
+                    return new ToolPackageMock(_fileSystem, packageId, version,
+                        packageDirectory, warnings: warnings, packagedShims: packedShims);
                 },
                 rollback: () =>
                 {
@@ -132,7 +133,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 Id = packageId,
                 Version = NuGetVersion.Parse(package.Version),
                 Commands = new List<RestoredCommand> {
-                    new RestoredCommand(new ToolCommandName(ProjectRestorerMock.FakeCommandName), "runner", executable) },
+                    new RestoredCommand(new ToolCommandName(package.ToolCommandName), "runner", executable) },
                 Warnings = Array.Empty<string>(),
                 PackagedShims = Array.Empty<FilePath>()
             };

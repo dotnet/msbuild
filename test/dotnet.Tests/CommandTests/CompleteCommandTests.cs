@@ -16,7 +16,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenOnlyDotnetItSuggestsTopLevelCommandsAndOptions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--diagnostics",
                 "--help",
                 "--info",
@@ -55,7 +55,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenASlashItSuggestsTopLevelOptions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--diagnostics",
                 "--help",
                 "--info",
@@ -76,7 +76,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact(Skip = "https://github.com/dotnet/cli/issues/9737")]
         public void GivenNewCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--dry-run",
                 "--force",
                 "--help",
@@ -105,7 +105,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--help",
                 "--verbosity",
                 "--version",
@@ -124,7 +124,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetDeleteCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--api-key",
                 "--force-english-output",
                 "--help",
@@ -144,7 +144,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetLocalsCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--clear",
                 "--force-english-output",
                 "--help",
@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenNuGetPushCommandItDisplaysCompletions()
         {
-            var expected = new string[] {
+            var expected = new[] {
                 "--api-key",
                 "--disable-buffering",
                 "--force-english-output",

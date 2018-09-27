@@ -50,5 +50,16 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return !name1.Equals(name2);
         }
+
+        public static ToolCommandName[] Convert(string[] toolCommandNameStringArray)
+        {
+            var toolCommadNames = new ToolCommandName[toolCommandNameStringArray.Length];
+            for (int i = 0; i < toolCommandNameStringArray.Length; i++)
+            {
+                toolCommadNames[i] = new ToolCommandName(toolCommandNameStringArray[i]);
+            }
+
+            return toolCommadNames;
+        }
     }
 }

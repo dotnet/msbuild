@@ -55,7 +55,30 @@ namespace Microsoft.Extensions.EnvironmentAbstractions
 
         public DirectoryPath GetParentPath()
         {
-            return new DirectoryPath(Path.GetDirectoryName(Value));
+            // new DirectoryInfo and directoryInfo.Parent does not have side effects
+
+            var directoryInfo = new DirectoryInfo(Value);
+
+            DirectoryInfo parentDirectory = directoryInfo.Parent;
+            if (directoryInfo.Parent is null)
+            {
+                throw new InvalidOperationException(Value + " does not have parent directory.");
+            }
+
+            return new DirectoryPath(parentDirectory.FullName);
+        }
+
+        public DirectoryPath? GetParentPathNullable()
+        {
+            var directoryInfo = new DirectoryInfo(Value);
+
+            DirectoryInfo parentDirectory = directoryInfo.Parent;
+            if (directoryInfo.Parent is null)
+            {
+                return null;
+            }
+
+            return new DirectoryPath(parentDirectory.FullName);
         }
     }
 }

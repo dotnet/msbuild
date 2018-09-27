@@ -13,7 +13,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolPackage
 {
-    internal class LocalToolsResolverCache
+    internal class LocalToolsResolverCache : ILocalToolsResolverCache
     {
         private readonly DirectoryPath _cacheVersionedDirectory;
         private readonly IFileSystem _fileSystem;

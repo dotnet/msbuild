@@ -275,7 +275,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                         if (charLocation > 0)
                         {
-                            volume = path.Substring(0, charLocation);
+                            volume = path.Substring(0, charLocation).ToLowerInvariant();
                             path = path.Substring(charLocation + 2);
                         }
                     }

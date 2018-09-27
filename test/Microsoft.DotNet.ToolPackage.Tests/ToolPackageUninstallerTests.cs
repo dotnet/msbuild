@@ -68,7 +68,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         new MockFeedPackage
                         {
                             PackageId = TestPackageId.ToString(),
-                            Version = TestPackageVersion
+                            Version = TestPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
                         }
                     }
                 }

@@ -8,9 +8,11 @@ using System.Linq;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.DotNet.ToolPackage.ToolConfigurationDeserialization;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Newtonsoft.Json;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -18,9 +20,10 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
     internal class ProjectRestorerMock : IProjectRestorer
     {
         public const string FakeEntrypointName = "SimulatorEntryPoint.dll";
-        public const string FakeCommandName = "SimulatorCommand";
+        public const string DefaultToolCommandName = "SimulatorCommand";
         public const string DefaultPackageName = "global.tool.console.demo";
         public const string DefaultPackageVersion = "1.0.4";
+        public const string FakeCommandSettingsFileName = "FakeDotnetToolSettings.json";
 
         private readonly IFileSystem _fileSystem;
         private readonly IReporter _reporter;
@@ -45,7 +48,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                             new MockFeedPackage
                             {
                                 PackageId = DefaultPackageName,
-                                Version = DefaultPackageVersion
+                                Version = DefaultPackageVersion,
+                                ToolCommandName = DefaultToolCommandName,
                             }
                         }
                     });
@@ -110,6 +114,9 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             _fileSystem.File.WriteAllText(
                 assetJsonOutput.WithFile("project.assets.json").Value,
                 fakeExecutablePath);
+            _fileSystem.File.WriteAllText(
+                assetJsonOutput.WithFile(FakeCommandSettingsFileName).Value,
+                JsonConvert.SerializeObject(new { Name = feedPackage.ToolCommandName }));
         }
 
         public MockFeedPackage GetPackage(

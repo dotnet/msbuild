@@ -9,6 +9,7 @@ using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
+using Newtonsoft.Json.Linq;
 using NuGet.Versioning;
 
 namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
@@ -40,7 +41,6 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         public PackageId Id { get; private set; }
 
         public NuGetVersion Version { get; private set; }
-
         public DirectoryPath PackageDirectory { get; private set; }
 
         public IReadOnlyList<RestoredCommand> Commands
@@ -68,10 +68,13 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 // The mock restorer wrote the path to the executable into project.assets.json (not a real assets file)
                 // Currently only "dotnet" commands are supported
                 var executablePath = _fileSystem.File.ReadAllText(Path.Combine(PackageDirectory.Value, "project.assets.json"));
+
+                var fakeSettingFile = _fileSystem.File.ReadAllText(Path.Combine(PackageDirectory.Value, ProjectRestorerMock.FakeCommandSettingsFileName));
+
                 return new RestoredCommand[]
                 {
                     new RestoredCommand(
-                        new ToolCommandName(ProjectRestorerMock.FakeCommandName),
+                        new ToolCommandName((string)JObject.Parse(fakeSettingFile)["Name"]),
                         "dotnet",
                         PackageDirectory.WithFile(executablePath))
                 };

@@ -7,6 +7,7 @@ using System.Reflection;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Cli;
+using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.Extensions.DependencyModel.Tests;
@@ -93,7 +94,8 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         new MockFeedPackage
                         {
                             PackageId = TestPackageId.ToString(),
-                            Version = TestPackageVersion
+                            Version = TestPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
                         }
                     }
                 }

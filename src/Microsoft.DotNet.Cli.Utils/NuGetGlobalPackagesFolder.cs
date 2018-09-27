@@ -4,7 +4,7 @@
 using System.IO;
 using NuGet.Configuration;
 
-namespace Microsoft.DotNet.Tools.Test.Utilities
+namespace Microsoft.DotNet.Cli.Utils
 {
     public static class NuGetGlobalPackagesFolder
     {

@@ -41,6 +41,7 @@ namespace Microsoft.DotNet.Tests.Commands
         private readonly string _pathToPlacePackages;
         private const string PackageId = "global.tool.console.demo";
         private const string PackageVersion = "1.0.4";
+        private const string ToolCommandName = "SimulatorCommand";
 
         public ToolInstallCommandTests()
         {
@@ -100,7 +101,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
 
             var toolToolPackageInstaller = CreateToolPackageInstaller(
-            feeds: new MockFeed[] {
+            feeds: new[] {
                     new MockFeed
                     {
                         Type = MockFeedType.ImplicitAdditionalFeed,
@@ -110,7 +111,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             new MockFeedPackage
                             {
                                 PackageId = PackageId,
-                                Version = PackageVersion
+                                Version = PackageVersion,
+                                ToolCommandName = ToolCommandName,
                             }
                         }
                     }
@@ -226,7 +228,7 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(string.Format(
                     CommonLocalizableStrings.ShellShimConflict,
-                    ProjectRestorerMock.FakeCommandName));
+                    ToolCommandName));
 
             _fileSystem.Directory.Exists(Path.Combine(_pathToPlacePackages, PackageId)).Should().BeFalse();
         }
@@ -275,7 +277,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -325,7 +327,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -351,7 +353,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -401,7 +403,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -474,7 +476,7 @@ namespace Microsoft.DotNet.Tests.Commands
         public void AndPackagedShimIsProvidedWhenRunWithPackageIdItCreateShimUsingPackagedShim()
         {
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
-            var prepackagedShimPath = Path.Combine (_temporaryDirectory, ProjectRestorerMock.FakeCommandName + extension);
+            var prepackagedShimPath = Path.Combine (_temporaryDirectory, ToolCommandName + extension);
             var tokenToIdentifyPackagedShim = "packagedShim";
             _fileSystem.File.WriteAllText(prepackagedShimPath, tokenToIdentifyPackagedShim);
 
@@ -525,7 +527,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
             return Path.Combine(
                 _pathToPlaceShim,
-                ProjectRestorerMock.FakeCommandName + extension);
+                ToolCommandName + extension);
         }
 
         private class NoOpFilePermissionSetter : IFilePermissionSetter

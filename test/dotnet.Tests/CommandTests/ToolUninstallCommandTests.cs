@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Contain(string.Format(
                     InstallLocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ProjectRestorerMock.DefaultToolCommandName,
                     PackageId,
                     PackageVersion));
 
@@ -81,7 +81,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .WithSubDirectories(PackageId, PackageVersion);
             var shimPath = Path.Combine(
                 _shimsDirectory,
-                ProjectRestorerMock.FakeCommandName +
+                ProjectRestorerMock.DefaultToolCommandName +
                     (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
 
             _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeTrue();
@@ -115,7 +115,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Contain(string.Format(
                     InstallLocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ProjectRestorerMock.DefaultToolCommandName,
                     PackageId,
                     PackageVersion));
 
@@ -123,7 +123,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .WithSubDirectories(PackageId, PackageVersion);
             var shimPath = Path.Combine(
                 _shimsDirectory,
-                ProjectRestorerMock.FakeCommandName +
+                ProjectRestorerMock.DefaultToolCommandName +
                     (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
 
             _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeTrue();

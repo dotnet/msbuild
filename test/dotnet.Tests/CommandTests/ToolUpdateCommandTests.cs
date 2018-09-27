@@ -54,12 +54,14 @@ namespace Microsoft.DotNet.Tests.Commands
                         new MockFeedPackage
                         {
                             PackageId = _packageId.ToString(),
-                            Version = LowerPackageVersion
+                            Version = LowerPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
                         },
                         new MockFeedPackage
                         {
                             PackageId = _packageId.ToString(),
-                            Version = HigherPackageVersion
+                            Version = HigherPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
                         }
                     }
                 }
