@@ -267,6 +267,64 @@ Copyright (c) .NET Foundation. All rights reserved.
     <AdditionalProbingPath Include="$(UserProfileRuntimeStorePath)$([System.IO.Path]::DirectorySeparatorChar)|arch|$([System.IO.Path]::DirectorySeparatorChar)|tfm|" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <CompileDependsOn>
+      $(CompileDependsOn)
+      _CreateAppHost;
+    </CompileDependsOn>
+  </PropertyGroup>
+
+  <!--
+    ============================================================
+                                        _CreateAppHost
+    If we found a restored apphost, create the modified destiniation apphost
+    with options from the project.
+    ============================================================
+     -->
+  <UsingTask TaskName="CreateAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  <Target Name="_CreateAppHost"
+          DependsOnTargets="_GetAppHostPaths;CoreCompile"
+          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
+    <PropertyGroup>
+      <UseWindowsGraphicalUserInterface Condition="$(RuntimeIdentifier.StartsWith('win')) and '$(OutputType)'=='WinExe'">true</UseWindowsGraphicalUserInterface>
+    </PropertyGroup>
+    <CreateAppHost AppHostSourcePath="@(NativeRestoredAppHostNETCore)"
+                   AppHostDestinationPath="@(NativeAppHostNETCore)"
+                   AppBinaryName="$(AssemblyName)$(TargetExt)"
+                   IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
+                   WindowsGraphicalUserInterface="$(UseWindowsGraphicalUserInterface)"
+                   Condition="'@(NativeRestoredAppHostNETCore)' != '' " />
+  </Target>
+
+  <!--
+    ============================================================
+                                        _GetAppHostPaths
+
+    Gets the path to the restored apphost, and if the restored apphost
+    was present, computes the path for the destination apphost.
+    ============================================================
+     -->
+  <Target Name="_GetAppHostPaths"
+          DependsOnTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
+                                    Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
+      <AppHostDestinationDirectoryPath>$(BaseIntermediateOutputPath)\$(TargetFramework)\$(RuntimeIdentifier)\host</AppHostDestinationDirectoryPath>
+    </PropertyGroup>
+
+    <NETSdkError Condition="'@(NativeRestoredAppHostNETCore->Count())' &gt; 1"
+                 ResourceName="MultipleFilesResolved"
+                 FormatArguments="$(_DotNetAppHostExecutableName)" />
+
+    <ItemGroup>
+      <NativeAppHostNETCore Condition="'@(NativeRestoredAppHostNETCore)' != ''"
+                            Include="@(NativeRestoredAppHostNETCore->'$(AppHostDestinationDirectoryPath)\$(AssemblyName)%(Extension)')" />
+    </ItemGroup>
+  </Target>
+
   <!--
     ============================================================
                                         _ComputeNETCoreBuildOutputFiles
@@ -274,9 +332,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     Computes any files that need to be copied to the build output folder for .NET Core.
     ============================================================
     -->
-  <UsingTask TaskName="CreateAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_ComputeNETCoreBuildOutputFiles"
-          DependsOnTargets="ResolvePackageAssets;CoreCompile"
+          DependsOnTargets="_GetAppHostPaths"
           BeforeTargets="GetCopyToOutputDirectoryItems"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
 
@@ -291,29 +348,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                                    Condition="'$(SelfContained)' == 'true' and
                                               ('%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostPolicyLibraryName)' or
                                                '%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostFxrLibraryName)')" />
-
-      <NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
-                                   Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
     </ItemGroup>
-
-    <PropertyGroup Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
-      <AppHostDestinationDirectoryPath>$(BaseIntermediateOutputPath)\$(TargetFramework)\$(RuntimeIdentifier)\host</AppHostDestinationDirectoryPath>
-      <UseWindowsGraphicalUserInterface Condition="$(RuntimeIdentifier.StartsWith('win')) and '$(OutputType)'=='WinExe'">true</UseWindowsGraphicalUserInterface>
-    </PropertyGroup>
-
-    <NETSdkError Condition="'@(NativeRestoredAppHostNETCore->Count())' &gt; 1"
-                 ResourceName="MultipleFilesResolved"
-                 FormatArguments="$(_DotNetAppHostExecutableName)" />
-
-    <CreateAppHost AppHostSourcePath="@(NativeRestoredAppHostNETCore)"
-                   AppHostDestinationDirectoryPath="$(AppHostDestinationDirectoryPath)"
-                   AppBinaryName="$(AssemblyName)$(TargetExt)"
-                   IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
-                   WindowsGraphicalUserInterface="$(UseWindowsGraphicalUserInterface)"
-                   Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
-
-      <Output TaskParameter="ModifiedAppHostPath" ItemName="NativeAppHostNETCore" />
-    </CreateAppHost>
 
     <ItemGroup Condition="'@(NativeAppHostNETCore)' == '' ">
       <NativeAppHostNETCore Include="@(NativeCopyLocalItems)"

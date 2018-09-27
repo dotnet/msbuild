@@ -16,7 +16,7 @@ namespace Microsoft.NET.Build.Tasks
         public string AppHostSourcePath { get; set; }
 
         [Required]
-        public string AppHostDestinationDirectoryPath { get; set; }
+        public string AppHostDestinationPath { get; set; }
 
         [Required]
         public string AppBinaryName { get; set; }
@@ -26,21 +26,16 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool WindowsGraphicalUserInterface { get; set; }
 
-        [Output]
-        public string ModifiedAppHostPath { get; set; }
-
         protected override void ExecuteCore()
         {
             var hostExtension = Path.GetExtension(AppHostSourcePath);
             var appbaseName = Path.GetFileNameWithoutExtension(AppBinaryName);
-            var destinationDirectory = Path.GetFullPath(AppHostDestinationDirectoryPath);
-            ModifiedAppHostPath = Path.Combine(destinationDirectory, $"{appbaseName}{hostExtension}");
 
-            if (!File.Exists(ModifiedAppHostPath))
+            if (!File.Exists(AppHostDestinationPath))
             {
                 AppHost.Create(
                     AppHostSourcePath,
-                    ModifiedAppHostPath,
+                    AppHostDestinationPath,
                     AppBinaryName,
                     windowsGraphicalUserInterface : WindowsGraphicalUserInterface,
                     intermediateAssembly: IntermediateAssembly,
