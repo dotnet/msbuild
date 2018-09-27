@@ -101,6 +101,7 @@ namespace Microsoft.Build.CommandLine
             RestoreProperty,
             Interactive,
             IsolateProjects,
+            GraphBuild,
             NumberOfParameterizedSwitches,
         }
 
@@ -277,6 +278,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingRestorePropertyError",         true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "interactive" },                       ParameterizedSwitch.Interactive,                null,                           false,          null,                                  true,   false  ),
             new ParameterizedSwitchInfo(  new string[] { "isolateprojects", "isolate" },        ParameterizedSwitch.IsolateProjects,            null ,                          false,          null,                                  true,   false  ),
+            new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null ,                          false,          null,                                  true,   false  ),
         };
 
         /// <summary>

@@ -117,6 +117,7 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      that the project graph be statically discoverable at
                      evaluation time, but can improve scheduling and reduce
                      memory overhead when building a large set of projects.
+                     (Short form: /isolate)
     </source>
         <target state="new">  /isolateProjects[:True|False]
                      Causes MSBuild to build each project in isolation.
@@ -125,11 +126,39 @@ Copyright (C) Microsoft Corporation.All rights reserved.
                      that the project graph be statically discoverable at
                      evaluation time, but can improve scheduling and reduce
                      memory overhead when building a large set of projects.
+                     (Short form: /isolate)
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.
       LOCALIZATION: "/isolateProjects" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.</note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_36_GraphBuildSwitch">
+        <source>  /graphBuild[:True|False]
+                     Causes MSBuild to construct and build a project graph.
+
+                     Constructing a graph involves identifying project
+                     references to form dependencies. Building that graph
+                     involves attempting to build project references prior
+                     to the projects that reference them, differing from
+                     traditional MSBuild scheduling.
+                     (Short form: /graph)
+    </source>
+        <target state="new">  /graphBuild[:True|False]
+                     Causes MSBuild to construct and build a project graph.
+
+                     Constructing a graph involves identifying project
+                     references to form dependencies. Building that graph
+                     involves attempting to build project references prior
+                     to the projects that reference them, differing from
+                     traditional MSBuild scheduling.
+                     (Short form: /graph)
+    </target>
+        <note>
+      LOCALIZATION: "MSBuild" should not be localized.
+      LOCALIZATION: "/graphBuild" and "/graph" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
       </trans-unit>
       <trans-unit id="HelpMessage_3_SwitchesHeader">
         <source>Switches:
@@ -807,6 +836,16 @@ Copyright (C) Microsoft Corporation.All rights reserved.
       {StrBegin="MSBUILD : Configuration error MSB1043: "}
       UE: This error is shown when the msbuild.exe.config file had invalid content.
       LOCALIZATION: The prefix "MSBUILD : Configuration error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidGraphBuildValue">
+        <source>MSBUILD : error MSB1057: Graph build value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1057: Graph build value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1057: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the /graphBuild parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
       <trans-unit id="InvalidInteractiveValue">
