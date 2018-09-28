@@ -1255,27 +1255,66 @@ namespace Microsoft.Build.CommandLine
             ProjectCollection projectCollection,
             Dictionary<string, string> globalProperties)
         {
-            lock (s_buildLock)
+            // TODO: Handle Ctrl-C cancellation properly.
+            // s_activeBuild is supposed to be the active build, but we may have multiple going at once.
+            // This may be solved once better integration with the scheduler (#3774) is done.
+            var projectGraph = new ProjectGraph(projectFile, globalProperties, projectCollection);
+            var targetLists = projectGraph.GetTargetLists(targets);
+
+            var waitHandle = new AutoResetEvent(true);
+            var graphBuildStateLock = new object();
+
+            var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
+            var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
+            var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
+            BuildResult entryProjectResult = null;
+            while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
             {
-                var projectGraph = new ProjectGraph(projectFile, globalProperties, projectCollection);
-                var targetLists = projectGraph.GetTargetLists(targets);
+                waitHandle.WaitOne();
 
-                // TODO: Do a full graph traversal
-                var project = projectGraph.EntryProjectNode.Project;
-                var targetList = targetLists[projectGraph.EntryProjectNode];
-                var request = new BuildRequestData(project, targetList.ToArray());
-
-                s_activeBuild = buildManager.PendBuildRequest(request);
-
-                // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
-                // That's so the build does not appear to have completed successfully.
-                if (s_buildCancellationSource.IsCancellationRequested)
+                lock (graphBuildStateLock)
                 {
-                    buildManager.CancelAllSubmissions();
+                    var unblockedNodes = blockedNodes
+                        .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
+                        .ToList();
+                    foreach (var node in unblockedNodes)
+                    {
+                        var targetList = targetLists[node];
+                        if (targetList.Count == 0)
+                        {
+                            // An empty target list here means "no targets" instead of "default targets", so don't even build it.
+                            finishedNodes.Add(node);
+                            blockedNodes.Remove(node);
+                            continue;
+                        }
+
+                        var request = new BuildRequestData(node.Project, targetList.ToArray());
+                        var buildSubmission = buildManager.PendBuildRequest(request);
+                        buildingNodes.Add(buildSubmission, node);
+                        blockedNodes.Remove(node);
+                        buildSubmission.ExecuteAsync(finishedBuildSubmission =>
+                        {
+                            ProjectGraphNode finishedNode;
+                            lock (graphBuildStateLock)
+                            {
+                                finishedNode = buildingNodes[finishedBuildSubmission];
+
+                                finishedNodes.Add(finishedNode);
+                                buildingNodes.Remove(finishedBuildSubmission);
+                            }
+
+                            if (finishedNode == projectGraph.EntryProjectNode)
+                            {
+                                entryProjectResult = finishedBuildSubmission.BuildResult;
+                            }
+
+                            waitHandle.Set();
+                        }, null);
+                    }
                 }
             }
 
-            return s_activeBuild.Execute();
+            return entryProjectResult;
         }
 
         private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
