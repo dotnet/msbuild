@@ -731,6 +731,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      evaluation time, but can improve scheduling and reduce
                      memory overhead when building a large set of projects.
                      (Short form: /isolate)
+
+                     This flag is experimental and may not work as intended.
     </value>
     <comment>
       LOCALIZATION: "MSBuild" should not be localized.
@@ -747,6 +749,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                      to the projects that reference them, differing from
                      traditional MSBuild scheduling.
                      (Short form: /graph)
+
+                     This flag is experimental and may not work as intended.
     </value>
     <comment>
       LOCALIZATION: "MSBuild" should not be localized.
