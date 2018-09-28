@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.UnitTests;
@@ -97,10 +98,25 @@ namespace Microsoft.Build.Graph.UnitTests
                 TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
                 CreateProject(env, 2, new[] { 3 });
                 CreateProject(env, 3, new[] { 1 });
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
+            }
+        }
 
-                // TODO: This should eventually throw, but for now not infinite-looping is sufficient.
-                ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                graph.ProjectNodes.Count.ShouldBe(3);
+        [Fact]
+        // graph with a cycle between 2->3->6->7->2
+        public void ConstructBigGraphWithCycle()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] {2,3,4});
+                CreateProject(env, 2, new[] {5, 6});
+                CreateProject(env, 3, new[] {2, 8});
+                CreateProject(env, 4);
+                CreateProject(env, 5);
+                CreateProject(env, 6, new[] { 7});
+                CreateProject(env, 7, new[] { 3 });
+                CreateProject(env, 8);
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
             }
         }
 

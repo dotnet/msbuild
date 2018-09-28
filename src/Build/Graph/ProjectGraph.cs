@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -97,6 +98,7 @@ namespace Microsoft.Build.Graph
                 globalPropertyDictionary);
             EntryProjectNode = _allParsedProjects[new ConfigurationMetadata(entryProjectFile, globalPropertyDictionary)];
             ProjectNodes = _allParsedProjects.Values;
+            DetectCyclesInGraph();
         }
 
         /// <summary>
@@ -260,6 +262,84 @@ namespace Microsoft.Build.Graph
 
                 parentNode?.AddProjectReference(parsedProject);
             }
+        }
+
+        // Using Tarjan's algorithm for detecting strongly connected components in a directed graph
+        // Reference: https://en.wikipedia.org/wiki/Strongly_connected_component
+        private int _index = 0;
+        private void DetectCyclesInGraph()
+        {
+            var indices = new Dictionary<ProjectGraphNode, int>();
+            var lowlinks = new Dictionary<ProjectGraphNode, int>();
+            var stack = new Stack<ProjectGraphNode>();
+            var existsOnStack = new HashSet<ProjectGraphNode>();
+            foreach (var projectNode in ProjectNodes)
+            {
+                if (!indices.ContainsKey(projectNode))
+                {
+                    if (IsStronglyConnected(projectNode, indices, lowlinks, stack, existsOnStack, out string scc))
+                    {
+                        throw new CircularDependencyException($"Exception occurred while creating depenendency graph: There is a circular dependency involving the following projects: {scc}");
+                    }
+                }
+            }
+        }
+
+        // indices stores the depth at which a node was found
+        // lowlink stores the smallest index of any node reachable from a node 
+        private bool IsStronglyConnected(
+            ProjectGraphNode projectNode,
+            Dictionary<ProjectGraphNode, int> indices,
+            Dictionary<ProjectGraphNode, int> lowlink,
+            Stack<ProjectGraphNode> stack,
+            HashSet<ProjectGraphNode> existsOnStack,
+            out string projectsInCycle
+            )
+        {
+            indices[projectNode] = _index;
+            lowlink[projectNode] = _index;
+            _index++;
+            stack.Push(projectNode);
+            existsOnStack.Add(projectNode);
+
+            foreach (var projectReference in projectNode.ProjectReferences)
+            {
+                if (!indices.ContainsKey(projectReference))
+                {
+                    if (IsStronglyConnected(projectReference, indices, lowlink, stack, existsOnStack, out projectsInCycle))
+                    {
+                        return true;
+                    }
+                    lowlink[projectNode] = Math.Min(lowlink[projectNode], lowlink[projectReference]);
+                }
+                else if (existsOnStack.Contains(projectReference))
+                {
+                    lowlink[projectNode] = Math.Min(lowlink[projectNode], indices[projectReference]);
+                }
+            }
+
+            if (lowlink[projectNode] == indices[projectNode])
+            {
+                var projectsInCycleStringBuilder = new StringBuilder(500);
+                ProjectGraphNode nextNode;
+                int countOfProjectsInCycle = 0;
+                do
+                {
+                    nextNode = stack.Pop();
+                    existsOnStack.Remove(nextNode);
+                    projectsInCycleStringBuilder.Append(nextNode.Project.FullPath).AppendLine();
+                    countOfProjectsInCycle++;
+                } while (projectNode != nextNode);
+                // a strongly connected component with more than 1 node is a cycle
+                if (countOfProjectsInCycle > 1)
+                {
+                    projectsInCycle = projectsInCycleStringBuilder.ToString();
+                    return true;
+                }
+            }
+
+            projectsInCycle = null;
+            return false;
         }
 
         private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)
