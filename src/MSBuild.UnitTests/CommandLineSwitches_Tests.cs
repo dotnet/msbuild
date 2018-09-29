@@ -775,6 +775,49 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void GraphBuildSwitchIdentificationTests()
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("graph", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("GRAPH", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("graphbuild", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+
+            Assert.True(CommandLineSwitches.IsParameterizedSwitch("graphBuild", out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed));
+            Assert.Equal(CommandLineSwitches.ParameterizedSwitch.GraphBuild, parameterizedSwitch);
+            Assert.Null(duplicateSwitchErrorMessage);
+            Assert.False(multipleParametersAllowed);
+            Assert.Null(missingParametersErrorMessage);
+            Assert.True(unquoteParameters);
+            Assert.False(emptyParametersAllowed);
+        }
+
+        [Fact]
         public void SetParameterlessSwitchTests()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -1173,7 +1216,8 @@ namespace Microsoft.Build.UnitTests
                                         profilerLogger: null,
                                         enableProfiler: false,
                                         interactive: false,
-                                        isolateProjects: false);
+                                        isolateProjects: false,
+                                        graphBuild: false);
                 }
                 finally
                 {

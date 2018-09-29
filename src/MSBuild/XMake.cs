@@ -558,6 +558,7 @@ namespace Microsoft.Build.CommandLine
                 bool enableProfiler = false;
                 bool interactive = false;
                 bool isolateProjects = false;
+                bool graphBuild = false;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -589,6 +590,7 @@ namespace Microsoft.Build.CommandLine
                         ref enableProfiler,
                         ref restoreProperties,
                         ref isolateProjects,
+                        ref graphBuild,
                         recursing: false
                         ))
                 {
@@ -625,7 +627,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects))
+                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects, graphBuild))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -926,7 +928,8 @@ namespace Microsoft.Build.CommandLine
             ProfilerLogger profilerLogger,
             bool enableProfiler,
             bool interactive,
-            bool isolateProjects
+            bool isolateProjects,
+            bool graphBuild
         )
         {
             if (String.Equals(Path.GetExtension(projectFile), ".vcproj", StringComparison.OrdinalIgnoreCase) ||
@@ -1143,7 +1146,7 @@ namespace Microsoft.Build.CommandLine
 
                             if (!restoreOnly)
                             {
-                                if (isolateProjects)
+                                if (graphBuild)
                                 {
                                     results = ExecuteGraphBuild(projectFile, targets, buildManager, projectCollection, globalProperties);
                                 }
@@ -1995,6 +1998,7 @@ namespace Microsoft.Build.CommandLine
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
             ref bool isolateProjects,
+            ref bool graphBuild,
             bool recursing
         )
         {
@@ -2107,6 +2111,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref enableProfiler,
                                                                ref restoreProperties,
                                                                ref isolateProjects,
+                                                               ref graphBuild,
                                                                recursing: true
                                                              );
                         }
@@ -2157,6 +2162,11 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
                     {
                         isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
+                    {
+                        graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
                     }
 
                     // figure out which loggers are going to listen to build events
@@ -3601,6 +3611,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));
