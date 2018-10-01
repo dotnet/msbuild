@@ -277,7 +277,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <!--
     ============================================================
                                         _CreateAppHost
-    If we found a restored apphost, create the modified destiniation apphost
+    If we found a restored apphost, create the modified destination apphost
     with options from the project.
     ============================================================
      -->
@@ -286,13 +286,13 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="_GetAppHostPaths;CoreCompile"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
     <PropertyGroup>
-      <UseWindowsGraphicalUserInterface Condition="$(RuntimeIdentifier.StartsWith('win')) and '$(OutputType)'=='WinExe'">true</UseWindowsGraphicalUserInterface>
+      <_UseWindowsGraphicalUserInterface Condition="$(RuntimeIdentifier.StartsWith('win')) and '$(OutputType)'=='WinExe'">true</_UseWindowsGraphicalUserInterface>
     </PropertyGroup>
     <CreateAppHost AppHostSourcePath="@(NativeRestoredAppHostNETCore)"
                    AppHostDestinationPath="@(NativeAppHostNETCore)"
                    AppBinaryName="$(AssemblyName)$(TargetExt)"
                    IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
-                   WindowsGraphicalUserInterface="$(UseWindowsGraphicalUserInterface)"
+                   WindowsGraphicalUserInterface="$(_UseWindowsGraphicalUserInterface)"
                    Condition="'@(NativeRestoredAppHostNETCore)' != '' " />
   </Target>
 
