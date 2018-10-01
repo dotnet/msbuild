@@ -103,7 +103,19 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
-        // graph with a cycle between 2->3->6->7->2
+        public void ConstructWithSelfLoop()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                CreateProject(env, 2, new[] { 2 });
+                CreateProject(env, 3);
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
+            }
+        }
+
+        [Fact]
+        // graph with a cycle between 2->6->7->3->2
         public void ConstructBigGraphWithCycle()
         {
             using (var env = TestEnvironment.Create())
@@ -112,11 +124,16 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProject(env, 2, new[] {5, 6});
                 CreateProject(env, 3, new[] {2, 8});
                 CreateProject(env, 4);
-                CreateProject(env, 5);
-                CreateProject(env, 6, new[] { 7});
-                CreateProject(env, 7, new[] { 3 });
+                CreateProject(env, 5, new []{9, 10});
+                var proj6 = CreateProject(env, 6, new[] { 7});
+                var proj7 = CreateProject(env, 7, new[] { 3 });
                 CreateProject(env, 8);
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
+                CreateProject(env, 9);
+                CreateProject(env, 10);
+                string projects = proj6.Path + Environment.NewLine + proj7.Path;
+                // the error message can contain a cycle from 2->3->6->7 or 3->6->7->2
+                // the error message should always contain 6.proj and 7.proj
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(projects);
             }
         }
 

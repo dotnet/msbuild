@@ -38,6 +38,11 @@
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: Exception occurred while creating depenendency graph: There is a circular dependency involving the following projects: {0}</source>
+        <target state="new">MSB4251: Exception occurred while creating depenendency graph: There is a circular dependency involving the following projects: {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">已生成元项目“{0}”。</target>
