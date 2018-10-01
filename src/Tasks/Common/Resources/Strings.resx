@@ -414,7 +414,7 @@ The following are names of parameters or literal values and should not be transl
     <comment>{StrBegin="NETSDK1073: "}</comment>
   </data>
   <data name="AppHostCustomizationRequiresWindowsHostWarning" xml:space="preserve">
-    <value>NETSDK1074: Unable to add resources to the application host executable because it's not being built on Windows.</value>
+    <value>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows.</value>
     <comment>{StrBegin="NETSDK1074: "}</comment>
   </data>
   <data name="InvalidResourceUpdate" xml:space="preserve">
