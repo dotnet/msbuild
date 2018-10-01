@@ -283,6 +283,8 @@ Copyright (c) .NET Foundation. All rights reserved.
      -->
   <UsingTask TaskName="CreateAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_CreateAppHost"
+          Inputs="@(IntermediateAssembly)"
+          Outputs="@(NativeAppHostNETCore)"
           DependsOnTargets="_GetAppHostPaths;CoreCompile"
           Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
     <PropertyGroup>

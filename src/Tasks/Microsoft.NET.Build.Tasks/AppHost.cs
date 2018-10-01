@@ -26,7 +26,6 @@ namespace Microsoft.NET.Build.Tasks
         /// <param name="appHostSourceFilePath">The path of Apphost template, which has the place holder</param>
         /// <param name="appHostDestinationFilePath">The destination path for desired location to place, including the file name</param>
         /// <param name="appBinaryFilePath">Full path to app binary or relative path to the result apphost file</param>
-        /// <param name="overwriteExisting">If override the file existed in <paramref name="appHostDestinationFilePath"/></param>
         /// <param name="windowsGraphicalUserInterface">Specify whether to set the subsystem to GUI. Only valid for PE apphosts.</param>
         /// <param name="intermediateAssembly">Path to the intermediate assembly, used for copying resources to PE apphosts.</param>
         /// <param name="log">Specify the logger used to log warnings and messages. If null, no logging is done.</param>
@@ -34,7 +33,6 @@ namespace Microsoft.NET.Build.Tasks
             string appHostSourceFilePath,
             string appHostDestinationFilePath,
             string appBinaryFilePath,
-            bool overwriteExisting = false,
             bool windowsGraphicalUserInterface = false,
             string intermediateAssembly = null,
             Logger log = null)
@@ -55,7 +53,7 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             // Copy AppHostSourcePath to ModifiedAppHostPath so it inherits the same attributes\permissions.
-            File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwriteExisting);
+            File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwrite: true);
 
             // Re-write ModifiedAppHostPath with the proper contents.
             bool appHostIsPEImage = false;

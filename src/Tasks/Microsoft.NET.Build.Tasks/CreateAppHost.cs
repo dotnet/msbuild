@@ -31,16 +31,13 @@ namespace Microsoft.NET.Build.Tasks
             var hostExtension = Path.GetExtension(AppHostSourcePath);
             var appbaseName = Path.GetFileNameWithoutExtension(AppBinaryName);
 
-            if (!File.Exists(AppHostDestinationPath))
-            {
-                AppHost.Create(
-                    AppHostSourcePath,
-                    AppHostDestinationPath,
-                    AppBinaryName,
-                    windowsGraphicalUserInterface : WindowsGraphicalUserInterface,
-                    intermediateAssembly: IntermediateAssembly,
-                    log: Log);
-            }
+            AppHost.Create(
+                AppHostSourcePath,
+                AppHostDestinationPath,
+                AppBinaryName,
+                windowsGraphicalUserInterface : WindowsGraphicalUserInterface,
+                intermediateAssembly: IntermediateAssembly,
+                log: Log);
         }
     }
 }
