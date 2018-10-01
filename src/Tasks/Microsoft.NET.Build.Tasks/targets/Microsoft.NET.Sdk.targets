@@ -311,17 +311,13 @@ Copyright (c) .NET Foundation. All rights reserved.
                                     Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
     </ItemGroup>
 
-    <PropertyGroup Condition="'@(NativeRestoredAppHostNETCore)' != '' ">
-      <AppHostDestinationDirectoryPath>$(BaseIntermediateOutputPath)\$(TargetFramework)\$(RuntimeIdentifier)\host</AppHostDestinationDirectoryPath>
-    </PropertyGroup>
-
     <NETSdkError Condition="'@(NativeRestoredAppHostNETCore->Count())' &gt; 1"
                  ResourceName="MultipleFilesResolved"
                  FormatArguments="$(_DotNetAppHostExecutableName)" />
 
     <ItemGroup>
       <NativeAppHostNETCore Condition="'@(NativeRestoredAppHostNETCore)' != ''"
-                            Include="@(NativeRestoredAppHostNETCore->'$(AppHostDestinationDirectoryPath)\$(AssemblyName)%(Extension)')" />
+                            Include="@(NativeRestoredAppHostNETCore->'$(IntermediateOutputPath)\$(AssemblyName)%(Extension)')" />
     </ItemGroup>
   </Target>
 
