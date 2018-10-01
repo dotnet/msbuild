@@ -197,7 +197,9 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition=" '$(GenerateRuntimeConfigurationFiles)' == 'true'"
           BeforeTargets="BuiltProjectOutputGroup">
     <ItemGroup>
-      <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)" FinalOutputPath="$(ProjectRuntimeConfigFilePath)" />
+      <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)" 
+                                     TargetPath="$(ProjectRuntimeConfigFileName)"
+                                     FinalOutputPath="$(ProjectRuntimeConfigFilePath)" />
     </ItemGroup>
   </Target>
 
