@@ -28,8 +28,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 AppHost.Create(
                     sourceAppHostMock,
                     destinationFilePath,
-                    appBinaryFilePath,
-                    overwriteExisting: false);
+                    appBinaryFilePath);
 
                 byte[] binaryPathBlob = Encoding.UTF8.GetBytes(appBinaryFilePath);
                 byte[] result = File.ReadAllBytes(destinationFilePath);
@@ -63,8 +62,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     AppHost.Create(
                         sourceAppHostMock,
                         destinationFilePath,
-                        appBinaryFilePath,
-                        overwriteExisting: false))
+                        appBinaryFilePath))
                     .Message
                     .Should()
                     .Contain(sourceAppHostMock)
@@ -86,8 +84,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     AppHost.Create(
                         sourceAppHostMock,
                         destinationFilePath,
-                        appBinaryFilePath,
-                        overwriteExisting: false))
+                        appBinaryFilePath))
                     .Message
                     .Should()
                     .Contain(appBinaryFilePath);
@@ -107,7 +104,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                     sourceAppHostMock,
                     destinationFilePath,
                     appBinaryFilePath,
-                    overwriteExisting: false,
                     windowsGraphicalUserInterface: true);
 
                 BitConverter
@@ -136,7 +132,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         sourceAppHostMock,
                         destinationFilePath,
                         appBinaryFilePath,
-                        overwriteExisting: false,
                         windowsGraphicalUserInterface: true))
                     .Message
                     .Should()
@@ -162,7 +157,6 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                         sourceAppHostMock,
                         destinationFilePath,
                         appBinaryFilePath,
-                        overwriteExisting: false,
                         windowsGraphicalUserInterface: true))
                     .Message
                     .Should()
