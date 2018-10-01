@@ -39,9 +39,11 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="CircularDependencyInProjectGraph">
-        <source>MSB4251: Exception occurred while creating depenendency graph: There is a circular dependency involving the following projects: {0}</source>
-        <target state="new">MSB4251: Exception occurred while creating depenendency graph: There is a circular dependency involving the following projects: {0}</target>
-        <note />
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="new">MSB4251: There is a circular dependency involving the following projects: {0}</target>
+        <note>
+      LOCALIZATION:  Do not localize the following words: circular dependency.
+    </note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>

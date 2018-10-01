@@ -93,7 +93,7 @@ namespace Microsoft.Build.Graph
 
             var entryProjectConfigurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryProjectFile), globalPropertyDictionary);
             var nodeStates = new Dictionary<ConfigurationMetadata, NodeState>();
-            LoadGraph(entryProjectConfigurationMetadata, nodeStates, projectCollection, globalPropertyDictionary);
+            ProcessNode(entryProjectConfigurationMetadata, nodeStates, projectCollection, globalPropertyDictionary);
             EntryProjectNode = _allParsedProjects[entryProjectConfigurationMetadata];
             ProjectNodes = _allParsedProjects.Values;
         }
@@ -231,15 +231,14 @@ namespace Microsoft.Build.Graph
         /// Maintain the state of each node (InProcess and Processed) to detect cycles
         /// returns false if loading the graph is not successful
         /// </summary>
-        private (bool success, List<string> projectsInCycle) LoadGraph(ConfigurationMetadata projectToEvaluate,
+        private (bool success, List<string> projectsInCycle) ProcessNode(ConfigurationMetadata projectToEvaluate,
             Dictionary<ConfigurationMetadata, NodeState> nodeState,
             ProjectCollection projectCollection,
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             nodeState[projectToEvaluate] = NodeState.InProcess;
             ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection);
-            IEnumerable<ProjectItemInstance> projectReferenceItems =
-                parsedProject.Project.GetItems(ProjectReferenceItemName);
+            IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.Project.GetItems(ProjectReferenceItemName);
             foreach (var projectReferenceToParse in projectReferenceItems)
             {
                 if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
@@ -254,16 +253,14 @@ namespace Microsoft.Build.Graph
 
                 string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
 
-                PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties =
-                    GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
-                var projectReferenceConfigurationMetadata =
-                    new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
+                PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
+                var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
                 if (nodeState.TryGetValue(projectReferenceConfigurationMetadata, out NodeState projectReferenceNodeState))
                 {
                     // a project reference can be in "Processed" state. If it is "InProcess" state, it is an ancestor and there is a circular dependency
                     if (projectReferenceNodeState == NodeState.InProcess)
                     {
-                        if (projectToEvaluate.ProjectFullPath.Equals(projectReferenceConfigurationMetadata.ProjectFullPath))
+                        if (projectToEvaluate.Equals(projectReferenceConfigurationMetadata))
                         {
                             // the project being evaluated has a reference on itself
                             throw new CircularDependencyException(string.Format(
@@ -282,7 +279,7 @@ namespace Microsoft.Build.Graph
                 else
                 {
                     // a new project that has to be evaluated
-                    var loadReference = LoadGraph(projectReferenceConfigurationMetadata, nodeState, projectCollection,
+                    var loadReference = ProcessNode(projectReferenceConfigurationMetadata, nodeState, projectCollection,
                         globalProperties);
                     if (!loadReference.success)
                     {
@@ -290,12 +287,8 @@ namespace Microsoft.Build.Graph
                         {
                             // we have reached the nth project in the cycle, form error message and throw
                             loadReference.projectsInCycle.Add(projectReferenceConfigurationMetadata.ProjectFullPath);
-                            var errorMessage = new StringBuilder(500);
-                            for (int i = loadReference.projectsInCycle.Count-1; i >= 0; i--)
-                            {
-                                errorMessage.Append(loadReference.projectsInCycle[i]).AppendLine();
-                            }
-
+                            loadReference.projectsInCycle.Add(parsedProject.Project.FullPath);
+                            var errorMessage = FormatCircularDependencyError(loadReference.projectsInCycle);
                             throw new CircularDependencyException(string.Format(
                                 ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
                                 errorMessage));
@@ -313,6 +306,25 @@ namespace Microsoft.Build.Graph
 
             nodeState[projectToEvaluate] = NodeState.Processed;
             return (true, null);
+        }
+
+        internal static string FormatCircularDependencyError(List<string> projectsInCycle)
+        {
+            var errorMessage = new StringBuilder(500);
+            errorMessage.AppendLine();
+            for (int i = projectsInCycle.Count - 1; i >= 0; i--)
+            {
+                if (i != 0)
+                {
+                    errorMessage.Append(projectsInCycle[i]).Append(" ->").AppendLine();
+                }
+                else
+                {
+                    errorMessage.Append(projectsInCycle[i]);
+                }
+            }
+
+            return errorMessage.ToString();
         }
 
         private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)

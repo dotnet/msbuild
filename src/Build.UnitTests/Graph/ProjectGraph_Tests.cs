@@ -96,9 +96,11 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
-                CreateProject(env, 2, new[] { 3 });
-                CreateProject(env, 3, new[] { 1 });
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
+                var proj2 = CreateProject(env, 2, new[] { 3 });
+                var proj3 = CreateProject(env, 3, new[] { 1 });
+                var projectsInCycle = new List<string>() {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
+                string expectedErrorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
             }
         }
 
@@ -121,8 +123,8 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 TransientTestFile entryProject = CreateProject(env, 1, new[] {2,3,4});
-                CreateProject(env, 2, new[] {5, 6});
-                CreateProject(env, 3, new[] {2, 8});
+                var proj2 = CreateProject(env, 2, new[] {5, 6});
+                var proj3 = CreateProject(env, 3, new[] {2, 8});
                 CreateProject(env, 4);
                 CreateProject(env, 5, new []{9, 10});
                 var proj6 = CreateProject(env, 6, new[] { 7});
@@ -130,10 +132,9 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProject(env, 8);
                 CreateProject(env, 9);
                 CreateProject(env, 10);
-                string projects = proj6.Path + Environment.NewLine + proj7.Path;
-                // the error message can contain a cycle from 2->3->6->7 or 3->6->7->2
-                // the error message should always contain 6.proj and 7.proj
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(projects);
+                var projectsInCycle = new List<string>(){proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
+                var errorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
             }
         }
 
