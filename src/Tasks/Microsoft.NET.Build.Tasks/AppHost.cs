@@ -5,13 +5,14 @@ using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
     /// Embeds the App Name into the AppHost.exe
     /// </summary>
-    public static class AppHost
+    internal static class AppHost
     {
         /// <summary>
         /// hash value embedded in default apphost executable in a place where the path to the app binary should be stored.
@@ -25,14 +26,16 @@ namespace Microsoft.NET.Build.Tasks
         /// <param name="appHostSourceFilePath">The path of Apphost template, which has the place holder</param>
         /// <param name="appHostDestinationFilePath">The destination path for desired location to place, including the file name</param>
         /// <param name="appBinaryFilePath">Full path to app binary or relative path to the result apphost file</param>
-        /// <param name="overwriteExisting">If override the file existed in <paramref name="appHostDestinationFilePath"/></param>
-        /// <param name="options">Options to customize the created apphost</param>
+        /// <param name="windowsGraphicalUserInterface">Specify whether to set the subsystem to GUI. Only valid for PE apphosts.</param>
+        /// <param name="intermediateAssembly">Path to the intermediate assembly, used for copying resources to PE apphosts.</param>
+        /// <param name="log">Specify the logger used to log warnings and messages. If null, no logging is done.</param>
         public static void Create(
             string appHostSourceFilePath,
             string appHostDestinationFilePath,
             string appBinaryFilePath,
-            bool overwriteExisting = false,
-            AppHostOptions options = null)
+            bool windowsGraphicalUserInterface = false,
+            string intermediateAssembly = null,
+            Logger log = null)
         {
             var hostExtension = Path.GetExtension(appHostSourceFilePath);
             var appbaseName = Path.GetFileNameWithoutExtension(appBinaryFilePath);
@@ -50,22 +53,42 @@ namespace Microsoft.NET.Build.Tasks
             }
 
             // Copy AppHostSourcePath to ModifiedAppHostPath so it inherits the same attributes\permissions.
-            File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwriteExisting);
+            File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwrite: true);
 
             // Re-write ModifiedAppHostPath with the proper contents.
+            bool appHostIsPEImage = false;
             using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
             {
                 using (MemoryMappedViewAccessor accessor = memoryMappedFile.CreateViewAccessor())
                 {
                     SearchAndReplace(accessor, AppBinaryPathPlaceholderSearchValue, bytesToWrite, appHostSourceFilePath);
 
-                    if (options != null)
+                    appHostIsPEImage = IsPEImage(accessor);
+
+                    if (windowsGraphicalUserInterface)
                     {
-                        if (options.WindowsGraphicalUserInterface)
+                        if (!appHostIsPEImage)
                         {
-                            SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
+                            throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourceFilePath);
                         }
+
+                        SetWindowsGraphicalUserInterfaceBit(accessor, appHostSourceFilePath);
                     }
+                }
+            }
+
+            if (intermediateAssembly != null && appHostIsPEImage)
+            {
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Copy resources from managed dll to the apphost
+                    new ResourceUpdater(appHostDestinationFilePath)
+                        .AddResourcesFromPEImage(intermediateAssembly)
+                        .Update();
+                }
+                else if (log != null)
+                {
+                    log.LogWarning(Strings.AppHostCustomizationRequiresWindowsHostWarning);
                 }
             }
 
@@ -217,8 +240,38 @@ namespace Microsoft.NET.Build.Tasks
         private const UInt16 WindowsCUISubsystem = 0x3;
 
         /// <summary>
-        /// If the apphost file is a windows PE file (checked by looking at the first few bytes)
-        /// this method will set its subsystem to GUI.
+        /// Check whether the apphost file is a windows PE image by looking at the first few bytes.
+        /// </summary>
+        /// <param name="accessor">The memory accessor which has the apphost file opened.</param>
+        /// <returns>true if the accessor represents a PE image, false otherwise.</returns>
+        private static unsafe bool IsPEImage(MemoryMappedViewAccessor accessor)
+        {
+            byte* pointer = null;
+
+            try
+            {
+                accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref pointer);
+                byte* bytes = pointer + accessor.PointerOffset;
+
+                // https://en.wikipedia.org/wiki/Portable_Executable
+                // Validate that we're looking at Windows PE file
+                if (((UInt16*)bytes)[0] != PEFileSignature || accessor.Capacity < PEHeaderPointerOffset + sizeof(UInt32))
+                {
+                    return false;
+                }
+                return true;
+            }
+            finally
+            {
+                if (pointer != null)
+                {
+                    accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+                }
+            }
+        }
+
+        /// <summary>
+        /// This method will attempt to set the subsistem to GUI. The apphost file should be a windows PE file.
         /// </summary>
         /// <param name="accessor">The memory accessor which has the apphost file opened.</param>
         /// <param name="appHostSourcePath">The path to the source apphost.</param>
@@ -234,12 +287,6 @@ namespace Microsoft.NET.Build.Tasks
                 byte* bytes = pointer + accessor.PointerOffset;
 
                 // https://en.wikipedia.org/wiki/Portable_Executable
-                // Validate that we're looking at Windows PE file
-                if (((UInt16*)bytes)[0] != PEFileSignature || accessor.Capacity < PEHeaderPointerOffset + sizeof(UInt32))
-                {
-                    throw new BuildErrorException(Strings.AppHostNotWindows, appHostSourcePath);
-                }
-
                 UInt32 peHeaderOffset = ((UInt32*)(bytes + PEHeaderPointerOffset))[0];
 
                 if (accessor.Capacity < peHeaderOffset + SubsystemOffset + sizeof(UInt16))
