@@ -269,7 +269,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <CompileDependsOn>
-      $(CompileDependsOn)
+      $(CompileDependsOn);
       _CreateAppHost;
     </CompileDependsOn>
   </PropertyGroup>
