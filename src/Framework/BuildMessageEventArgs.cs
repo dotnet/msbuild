@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Event args for any build event.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
 using System.Runtime.Serialization;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -264,51 +261,14 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
+
             writer.Write((Int32)importance);
-            #region SubCategory
-            if (subcategory == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(subcategory);
-            }
-            #endregion
-            #region Code
-            if (code == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(code);
-            }
-            #endregion
-            #region File
-            if (file == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(file);
-            }
-            #endregion
-            #region ProjectFile
-            if (projectFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(projectFile);
-            }
-            #endregion
+
+            writer.WriteOptionalString(subcategory);
+            writer.WriteOptionalString(code);
+            writer.WriteOptionalString(file);
+            writer.WriteOptionalString(projectFile);
+
             writer.Write((Int32)lineNumber);
             writer.Write((Int32)columnNumber);
             writer.Write((Int32)endLineNumber);
@@ -328,46 +288,11 @@ namespace Microsoft.Build.Framework
             //The data in the stream beyond this point are new to 4.0
             if (version > 20)
             {
-                #region SubCategory
-                if (reader.ReadByte() == 0)
-                {
-                    subcategory = null;
-                }
-                else
-                {
-                    subcategory = reader.ReadString();
-                }
-                #endregion
-                #region Code
-                if (reader.ReadByte() == 0)
-                {
-                    code = null;
-                }
-                else
-                {
-                    code = reader.ReadString();
-                }
-                #endregion
-                #region File
-                if (reader.ReadByte() == 0)
-                {
-                    file = null;
-                }
-                else
-                {
-                    file = reader.ReadString();
-                }
-                #endregion
-                #region ProjectFile
-                if (reader.ReadByte() == 0)
-                {
-                    projectFile = null;
-                }
-                else
-                {
-                    projectFile = reader.ReadString();
-                }
-                #endregion
+                subcategory = reader.ReadByte() == 0 ? null : reader.ReadString();
+                code = reader.ReadByte() == 0 ? null : reader.ReadString();
+                file = reader.ReadByte() == 0 ? null : reader.ReadString();
+                projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+
                 lineNumber = reader.ReadInt32();
                 columnNumber = reader.ReadInt32();
                 endLineNumber = reader.ReadInt32();
@@ -379,105 +304,50 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Importance of the message
         /// </summary>
-        public MessageImportance Importance
-        {
-            get
-            {
-                return importance;
-            }
-        }
+        public MessageImportance Importance => importance;
 
         /// <summary>
         /// The custom sub-type of the event.
         /// </summary>
-        public string Subcategory
-        {
-            get
-            {
-                return subcategory;
-            }
-        }
+        public string Subcategory => subcategory;
 
         /// <summary>
         /// Code associated with event. 
         /// </summary>
-        public string Code
-        {
-            get
-            {
-                return code;
-            }
-        }
+        public string Code => code;
 
         /// <summary>
         /// File associated with event.
         /// </summary>
-        public string File
-        {
-            get
-            {
-                return file;
-            }
-        }
+        public string File => file;
 
         /// <summary>
         /// Line number of interest in associated file. 
         /// </summary>
-        public int LineNumber
-        {
-            get
-            {
-                return lineNumber;
-            }
-        }
+        public int LineNumber => lineNumber;
 
         /// <summary>
         /// Column number of interest in associated file. 
         /// </summary>
-        public int ColumnNumber
-        {
-            get
-            {
-                return columnNumber;
-            }
-        }
+        public int ColumnNumber => columnNumber;
 
         /// <summary>
         /// Ending line number of interest in associated file. 
         /// </summary>
-        public int EndLineNumber
-        {
-            get
-            {
-                return endLineNumber;
-            }
-        }
+        public int EndLineNumber => endLineNumber;
 
         /// <summary>
         /// Ending column number of interest in associated file. 
         /// </summary>
-        public int EndColumnNumber
-        {
-            get
-            {
-                return endColumnNumber;
-            }
-        }
+        public int EndColumnNumber => endColumnNumber;
 
         /// <summary>
         /// The project which was building when the message was issued.
         /// </summary>
         public string ProjectFile
         {
-            get
-            {
-                return projectFile;
-            }
-
-            set
-            {
-                projectFile = value;
-            }
+            get => projectFile;
+            set => projectFile = value;
         }
     }
 }

@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Class that provides helper methods to abstract the loading of tasks.</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using Microsoft.Build.Framework;
+using System.Linq;
 using System.Reflection;
+
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
@@ -16,11 +14,13 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class TaskLoader
     {
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// For saving the assembly that was loaded by the TypeLoader
         /// We only use this when the assembly failed to load properly into the appdomain
         /// </summary>
         private static LoadedType s_resolverLoadedType;
+#endif
 
         /// <summary>
         /// Delegate for logging task loading errors. 
@@ -30,28 +30,44 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Checks if the given type is a task factory.
         /// </summary>
-        /// <remarks>This method is used as a TypeFilter delegate.</remarks>
+        /// <remarks>This method is used as a type filter delegate.</remarks>
         /// <returns>true, if specified type is a task</returns>
         internal static bool IsTaskClass(Type type, object unused)
         {
-            return (type.IsClass && !type.IsAbstract && (type.GetInterface("Microsoft.Build.Framework.ITask") != null));
+            return (type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
+#if FEATURE_TYPE_GETINTERFACE
+                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null));
+#else
+                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask")));
+#endif
         }
 
         /// <summary>
         /// Creates an ITask instance and returns it.  
         /// </summary>
-        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError, AppDomainSetup appDomainSetup, bool isOutOfProc, out AppDomain taskAppDomain)
+        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError
+#if FEATURE_APPDOMAIN
+            , AppDomainSetup appDomainSetup
+#endif
+            , bool isOutOfProc
+#if FEATURE_APPDOMAIN
+            , out AppDomain taskAppDomain
+#endif
+            )
         {
+#if FEATURE_APPDOMAIN
             bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute();
             s_resolverLoadedType = null;
             taskAppDomain = null;
             ITask taskInstanceInOtherAppDomain = null;
+#endif
 
             try
             {
+#if FEATURE_APPDOMAIN
                 if (separateAppDomain)
                 {
-                    if (!loadedType.Type.IsMarshalByRef)
+                    if (!loadedType.Type.GetTypeInfo().IsMarshalByRef)
                     {
                         logError
                         (
@@ -97,17 +113,21 @@ namespace Microsoft.Build.Shared
                             taskAppDomain.Load(loadedType.LoadedAssembly.GetName());
                         }
 
+#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
                         // Hook up last minute dumping of any exceptions 
                         taskAppDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
+#endif
                     }
                 }
                 else
+#endif
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
                     return (ITask)Activator.CreateInstance(loadedType.Type);
                 }
 
+#if FEATURE_APPDOMAIN
                 if (loadedType.Assembly.AssemblyFile != null)
                 {
                     taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(loadedType.Assembly.AssemblyFile, loadedType.Type.FullName);
@@ -127,7 +147,7 @@ namespace Microsoft.Build.Shared
                         taskColumn,
                         "ConflictingTaskAssembly",
                         loadedType.Assembly.AssemblyFile,
-                        loadedType.Type.Assembly.Location
+                        loadedType.Type.GetTypeInfo().Assembly.Location
                         );
 
                         taskInstanceInOtherAppDomain = null;
@@ -135,22 +155,26 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.Assembly.FullName, loadedType.Type.FullName);
+                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
                 }
 
                 return taskInstanceInOtherAppDomain;
+#endif
             }
             finally
             {
+#if FEATURE_APPDOMAIN
                 // Don't leave appdomains open
                 if (taskAppDomain != null && taskInstanceInOtherAppDomain == null)
                 {
                     AppDomain.Unload(taskAppDomain);
                     RemoveAssemblyResolver();
                 }
+#endif
             }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// This is a resolver to help created AppDomains when they are unable to load an assembly into their domain we will help
         /// them succeed by providing the already loaded one in the currentdomain so that they can derive AssemblyName info from it
@@ -180,5 +204,6 @@ namespace Microsoft.Build.Shared
                 s_resolverLoadedType = null;
             }
         }
+#endif
     }
 }

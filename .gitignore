@@ -67,6 +67,8 @@ artifacts/
 *.tmp
 *.tmp_proj
 *.log
+*.binlog
+*.ProjectImports.zip
 *.vspscc
 *.vssscc
 .builds
@@ -141,7 +143,7 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings 
+# TODO: Comment the next line if you want to checkin your web deploy settings
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
@@ -223,9 +225,12 @@ _Pvt_Extensions
 # Project-specific
 ApiPort/
 *.xlsx
-ref/
 Differences.txt
 Tools/
+Samples/MultiprocessBuild/PortableTask.dll
 
 # Visual Studio Code
 .vscode/
+
+# Rider
+.idea/

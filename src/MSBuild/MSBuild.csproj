@@ -1,0 +1,309 @@
+﻿<Project Sdk="RoslynTools.RepoToolset">
+
+  <Import Project="..\Shared\FileSystemSources.proj" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+
+    <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
+         This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
+         versions of this project -->
+    <RuntimeIdentifiers>win7-x86;win7-x64</RuntimeIdentifiers>
+
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>MSBuild</AssemblyName>
+    <RootNamespace>Microsoft.Build.CommandLine</RootNamespace>
+    <ApplicationIcon>MSBuild.ico</ApplicationIcon>
+    <LargeAddressAware>true</LargeAddressAware>
+
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ApplicationManifest>MSBuild.exe.manifest</ApplicationManifest>
+    <AppConfig>app.config</AppConfig>
+    <!-- Temporary solution for
+         https://github.com/Microsoft/msbuild/issues/834 Long term
+         two files should be generated from a single source. -->
+    <AppConfig Condition="'$(Platform)' == 'x64'">app.amd64.config</AppConfig>
+    <IsPackable>true</IsPackable>
+    <ContentTargetFolders>contentFiles</ContentTargetFolders>
+    <BuildOutputTargetFolder>contentFiles\any\</BuildOutputTargetFolder>
+    <PackageId>Microsoft.Build.Runtime</PackageId>
+    <Description>This package delivers a complete executable copy of MSBuild. Reference this package only if your application needs to load projects or execute in-process builds without requiring installation of MSBuild. Successfully evaluating projects using this package requires aggregating additional components (like the compilers) into an application directory.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MonoBuild)' == 'true'">
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyNameComparer.cs">
+      <Link>AssemblyNameComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\CollectionHelpers.cs" />
+    <Compile Include="..\Shared\Constants.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileDelegates.cs">
+      <Link>FileDelegates.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.cs">
+      <Link>FileUtilities.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
+      <Link>FileUtilitiesRegex.cs</Link>
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <Link>IConstrainedEqualityComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\QuotingUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
+      <Link>RegisteredTaskObjectCacheBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ResourceUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\EscapingUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\Modifiers.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\BufferedReadStream.cs" />
+    <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
+    <Compile Include="..\Shared\IKeyed.cs" />
+    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
+    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
+    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
+    <Compile Include="..\Shared\NativeMethodsShared.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ExceptionHandling.cs" />
+    <Compile Include="..\Shared\InternalErrorException.cs" />
+    <Compile Include="..\Shared\EventArgsFormatting.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\TempFileUtilities.cs">
+      <Link>TempFileUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\XMakeAttributes.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\INodeEndpoint.cs" />
+    <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\INodePacket.cs" />
+    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
+    <Compile Include="..\Shared\INodePacketFactory.cs" />
+    <Compile Include="..\Shared\NodePacketFactory.cs" />
+    <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\INodePacketTranslatable.cs" />
+    <Compile Include="..\Shared\INodePacketTranslator.cs" />
+    <Compile Include="..\Shared\NodePacketTranslator.cs" />
+    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\Shared\OpportunisticIntern.cs" />
+    <Compile Include="..\Shared\TaskHostConfiguration.cs" />
+    <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
+    <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
+    <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
+    <Compile Include="..\Shared\TaskLoader.cs" />
+    <Compile Include="..\Shared\TypeLoader.cs" />
+    <Compile Include="..\Shared\LoadedType.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyLoadInfo.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\NodeBuildComplete.cs" />
+    <Compile Include="..\Shared\NodeShutdown.cs" />
+    <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
+    <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>SharedTraits.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyNameExtension.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
+    <Compile Include="..\Shared\StringBuilderCache.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyInfo.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="AssemblyResources.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CommandLineSwitches.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CommandLineSwitchException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <Compile Include="DistributedLoggerRecord.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="FxCopExclusions\MsBuild.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="InitializationException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
+    <Compile Include="LogMessagePacket.cs" />
+    <Compile Include="ProjectSchemaValidationHandler.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="OutOfProcTaskHostNode.cs" />
+    <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
+    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
+    <Compile Include="XMake.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <None Include="project.json" />
+    <!-- This is to enable CodeMarkers in MSBuild.exe -->
+    <!-- Win32 RC Files -->
+    <RCResourceFile Include="native.rc" />
+    <!-- Resource Files -->
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <!-- Content Files -->
+    <Content Include="MSBuild.ico" Pack="false" />
+    <Content Include="MSBuild.rsp" Pack="false">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Microsoft.Build.CommonTypes.xsd">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Microsoft.Build.Core.xsd">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <!-- File for Assemblies we depend on -->
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
+    <PackageReference Include="Microsoft.Win32.Registry" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+  </ItemGroup>
+
+  <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects
+       that reference this one. -->
+  <Target Name="AddRuntimeDependenciesToContent" Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp'" BeforeTargets="GetCopyToOutputDirectoryItems">
+    <ItemGroup>
+      <ContentWithTargetPath Include="$(ProjectDepsFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectDepsFileName)" />
+
+      <ContentWithTargetPath Include="$(ProjectRuntimeConfigFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$(ProjectRuntimeConfigFileName)" />
+      <ContentWithTargetPath Include="$(ProjectRuntimeConfigDevFilePath)" CopyToOutputDirectory="PreserveNewest" TargetPath="$([System.IO.Path]::GetFileName('$(ProjectRuntimeConfigDevFilePath)'))" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="GetCustomPackageFiles" BeforeTargets="_GetPackageFiles" DependsOnTargets="RemoveSatelliteDllsFromBuildOutputInPackage">
+
+    <ItemGroup>
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\MSBuild.exe.config" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Data.Entity.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.ServiceModel.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WinFx.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.WorkflowBuildExtensions.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Xaml.targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Workflow.VisualBasic.Targets" TargetFramework="%(_TargetFrameworks.Identity)" Condition=" '%(_TargetFrameworks.Identity)' == 'net46' " />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.overridetasks" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="15.0\" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.Common.tasks" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.CSharp.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.CurrentVersion.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.NETFramework.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v11.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v12.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v14.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
+      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\ref\**" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="ref\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_PackageFiles Include="@(_OurFiles)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\%(_OurFiles.TargetFramework)\%(_OurFiles.Subdirectory)%(RecursiveDir)%(Filename)%(Extension)" />
+      
+      <!-- Always include the 'standalone' NuGetSdkResolver manifest in our Runtime NuGet package. -->
+      <_PackageFiles Include="SdkResolvers\Standalone\Microsoft.Build.NuGetSdkResolver.xml" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\%(_BuildOutputInPackage.TargetFramework)\SdkResolvers\Microsoft.Build.NuGetSdkResolver\Microsoft.Build.NuGetSdkResolver.xml" />
+
+      <!--
+        The items in @(_BuildOutputInPackage) are passed to the Pack task as a separate parameter that does not accept metadata like BuildAction.  So we either
+        need to replicate the target that gets build output or just copy the items to _PackageFiles ourselves while setting the metadata.
+      -->
+      <_PackageFiles Include="@(_BuildOutputInPackage)" BuildAction="Content" PackageCopyToOutput="true" PackageFlatten="false" PackagePath="contentFiles\any\%(_BuildOutputInPackage.TargetFramework)\%(RecursiveDir)%(Filename)%(Extension)" />
+
+      <!--
+        The build output was copied to _PackageFiles and must be cleared or we'll get package analysis warnings about duplicate files
+      -->
+      <_BuildOutputInPackage Remove="@(_BuildOutputInPackage)" />
+
+      <!--
+        Clear _TargetPathsToSymbols so that pdbs don't end up in the package
+      -->
+      <_TargetPathsToSymbols Remove="@(_TargetPathsToSymbols)" />
+    </ItemGroup>
+
+  </Target>
+
+</Project>

@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="tr" original="../Strings.resx" build-num="-1694517493">
+    <header>
+      <count-group name="BlackBox wordcount">
+        <count count-type="x-wordCount">231</count>
+        <count count-type="x-adjWordCount">107.05</count>
+        <count count-type="x-curAdjWordCount">107.05</count>
+        <count count-type="x-repeatAdjWordCount">0</count>
+        <count count-type="x-termWordCount">0</count>
+      </count-group>
+      <count-group name="BlackBox wordcount analysis">
+        <count count-type="x-match102%">0</count>
+        <count count-type="x-match101%">26</count>
+        <count count-type="x-match100%">112</count>
+        <count count-type="x-match99-90%">0</count>
+        <count count-type="x-match89-75%">0</count>
+        <count count-type="x-mt">93</count>
+        <count count-type="repetition">0</count>
+      </count-group>
+    </header>
+    <body>
+      <trans-unit id="CouldNotFindCompleteSolutionFile">
+        <source>MSB2013: The project-to-project reference with GUID {0} could not be converted because a valid .SLN file containing all projects could not be found.</source>
+        <target state="translated">MSB2013: Tüm projeleri içeren geçerli bir .SLN dosyası bulunamadığından, GUID değeri {0} olan projeden projeye başvuru dönüştürülemedi.</target>
+        <note>{StrBegin="MSB2013: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2013: Tüm projeleri içeren geçerli bir .SLN dosyası bulunamadığından, GUID değeri {0} olan projeden projeye başvuru dönüştürülemedi.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="EmptyResxRemoved">
+        <source>MSB2016: Found an empty .RESX file in the project ({0}).  Removing it from the converted project.</source>
+        <target state="translated">MSB2016: Projede boş bir .RESX dosyası bulundu ({0}). Bu dosya dönüştürülen projeden kaldırılıyor.</target>
+        <note>{StrBegin="MSB2016: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2016: Projede boş bir .RESX dosyası bulundu ({0}). Bu dosya dönüştürülen projeden kaldırılıyor.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="ExcludeFoundInProject">
+        <source>MSB2015: Found an &lt;Exclude&gt; element in the original project file.  This cannot be converted to Visual Studio .NET and is being ignored.</source>
+        <target state="translated">MSB2015: Özgün proje dosyasında &lt;Exclude&gt; öğesi bulundu. Bu, Visual Studio .NET'e dönüştürülemez; yoksayılıyor.</target>
+        <note>{StrBegin="MSB2015: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2015: özgün proje dosyasında &lt; dışlama &gt; öğesi bulundu.  Bu, Visual Studio .NET programlama ortamına dönüştürülemez ve gözardı ediliyor.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="23" adjWordcount="19.55" curWordcount="19.55"</note>
+      </trans-unit>
+      <trans-unit id="MissingAttribute">
+        <source>MSB2001: Element &lt;{0}&gt; does not contain the required attribute "{1}".</source>
+        <target state="translated">MSB2001: &lt;{0}&gt; öğesi gereken "{1}" özniteliğini içermiyor.</target>
+        <note>{StrBegin="MSB2001: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2001: Öğe &lt;{0}&gt; gerekli öznitelik içermiyor "{1}".</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
+      </trans-unit>
+      <trans-unit id="MissingNewProjectFile">
+        <source>MSB2002: The file name of the new project must be specified.</source>
+        <target state="translated">MSB2002: Yeni projenin dosya adı belirtilmelidir.</target>
+        <note>{StrBegin="MSB2002: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2002: Yeni projenin dosya adı belirtilmelidir.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="MissingOldProjectFile">
+        <source>MSB2003: The file name of the old project must be specified.</source>
+        <target state="translated">MSB2003: Eski projenin dosya adı belirtilmelidir.</target>
+        <note>{StrBegin="MSB2003: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2003: Eski projenin dosya adı belirtilmelidir.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="MultipleLanguageNodesNotAllowed">
+        <source>MSB2004: Element &lt;{0}&gt; cannot contain more than one language node.</source>
+        <target state="translated">MSB2004: &lt;{0}&gt; öğesi birden çok dil düğümü içeremez.</target>
+        <note>{StrBegin="MSB2004: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.  The {0} in this case is going to be "VisualStudioProject".</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2004: Öğe &lt;{0}&gt; birden fazla dil düğüm içeremez.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
+      </trans-unit>
+      <trans-unit id="NoAttributesExpected">
+        <source>MSB2005: Element &lt;{0}&gt; cannot contain attributes.</source>
+        <target state="translated">MSB2005: &lt;{0}&gt; öğesi öznitelik içeremez.</target>
+        <note>{StrBegin="MSB2005: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2005: Öğe &lt;{0}&gt; öznitelikler içeremez.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
+      </trans-unit>
+      <trans-unit id="NoRootProjectElement">
+        <source>MSB2006: The project file does not contain the root element &lt;{0}&gt;.</source>
+        <target state="translated">MSB2006: Proje dosyası &lt;{0}&gt; kök öğesini içermiyor.</target>
+        <note>{StrBegin="MSB2006: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2006: Proje dosyasının kök öğesi içermiyor &lt;{0}&gt;.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
+      </trans-unit>
+      <trans-unit id="ProjectFileNotFound">
+        <source>MSB2007: Visual Studio cannot find the project file "{0}".</source>
+        <target state="translated">MSB2007: Visual Studio "{0}" proje dosyasını bulamıyor.</target>
+        <note>{StrBegin="MSB2007: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2007: Visual Studio "{0}" proje dosyasını bulamıyor.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="ProjectNotListingInSolutionFile">
+        <source>MSB2014: The project-to-project reference with GUID {0} cannot be converted because it is not listed in the file '{1}'.</source>
+        <target state="translated">MSB2014: GUID değeri {0} olan projeden projeye başvuru '{1}' dosyasında listelenmediğinden dönüştürülemiyor.</target>
+        <note>{StrBegin="MSB2014: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2014: GUID değeri {0} olan projeden projeye başvuru '{1}' dosyasında listelenmediğinden dönüştürülemiyor.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="ProjectTypeCannotBeConverted">
+        <source>MSB2008: This Visual Studio project system cannot convert "{0}" projects.  It can only be used to convert C#, VB, and VJ# client projects.</source>
+        <target state="translated">MSB2008: Bu Visual Studio proje sistemi "{0}" projelerini dönüştüremez. Bu yalnızca C#, VB ve VJ# istemci projelerini dönüştürmek için kullanılabilir.</target>
+        <note>{StrBegin="MSB2008: "}It appears we've been asked to convert a project that either wasn't created by the Visual Studio managed client project system (C#, VB, J#), or that has been hand-modified or corrupted.  You would get this error if this conversion utility was invoked on a VC++ project (.VCPROJ) for example.  In this case, the {0} would be replaced with "Visual C++".</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2008: Bu Visual Studio proje sistemi "{0}" projelerini dönüştüremez. Bu yalnızca C#, VB ve VJ# istemci projelerini dönüştürmek için kullanılabilir.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedAttribute">
+        <source>MSB2009: Attribute "{0}" of element &lt;{1}&gt; is not valid.</source>
+        <target state="translated">MSB2009: &lt;{1}&gt; öğesinin "{0}" özniteliği geçerli değil.</target>
+        <note>{StrBegin="MSB2009: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2009: Öznitelik "{0}" öğesinin &lt;{1}&gt; geçerli değil.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedChildElement">
+        <source>MSB2010: Child element &lt;{0}&gt; of element &lt;{1}&gt; is not valid.</source>
+        <target state="translated">MSB2010: &lt;{1}&gt; öğesinin &lt;{0}&gt; alt öğesi geçerli değil.</target>
+        <note>{StrBegin="MSB2010: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2010: Alt öğe &lt;{0}&gt; öğesinin &lt;{1}&gt; geçerli değil.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedElement">
+        <source>MSB2011: Element &lt;{0}&gt; is not valid.</source>
+        <target state="translated">MSB2011: &lt;{0}&gt; öğesi geçerli değil.</target>
+        <note>{StrBegin="MSB2011: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2011: Öğe &lt;{0}&gt; geçerli değil.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectToProjectWebReference">
+        <source>MSB2012: Project-to-project references to web projects are no longer supported and therefore cannot be converted.  Please remove the reference to project {0} and add it again.</source>
+        <target state="translated">MSB2012: Web projelerine yönelik projeden projeye yapılan başvurular artık desteklenmiyor ve bu nedenle dönüştürülemez. Lütfen {0} projesine yönelik başvuruyu kaldırın ve sonra yeniden ekleyin.</target>
+        <note>{StrBegin="MSB2012: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="leveraged-tm">MSB2012: Web projelerine yönelik projeden projeye yapılan başvurular artık desteklenmiyor ve bu nedenle dönüştürülemez. Lütfen {0} projesine yönelik başvuruyu kaldırın ve sonra yeniden ekleyin.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

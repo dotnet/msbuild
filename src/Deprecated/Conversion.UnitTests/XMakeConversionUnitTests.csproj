@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="dogfood" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="BuildProps">
+    <BuildPropsFile>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Build.props))\Build.props</BuildPropsFile>
+  </PropertyGroup>
+  <Import Project="$(BuildPropsFile)" Condition="'$(BuildProps_Imported)'!='True' AND Exists('$(BuildPropsFile)') AND '$(VisualStudioDir)'==''" />
+  <Import Project="..\..\Microsoft.Xmake.props" />
+  <Import Project="$(ToolsPath)\Microsoft.DevDiv.TextTemplating.Settings.targets" />
+  <PropertyGroup Label="Dependencies">
+    <UsingPartitionUnitTest>true</UsingPartitionUnitTest>
+    <UsingProjectUnitTestUnitTestFramework>true</UsingProjectUnitTestUnitTestFramework>
+  </PropertyGroup>
+  <ImportGroup Label="Dependencies">
+    <Import Project="$(PartitionExports)" />
+  </ImportGroup>
+  <PropertyGroup>
+    <OutputPath>$(SuiteBinPath)</OutputPath>
+    <OutputType>library</OutputType>
+    <AssemblyName>Microsoft.Build.Conversion.Unittest</AssemblyName>
+    <Nonshipping>true</Nonshipping>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <BuildArchitecturesAllowed>$(BuildArchitecturesAllowed);amd64;arm</BuildArchitecturesAllowed>
+  </PropertyGroup>
+  <!-- IDE specific Information -->
+  <PropertyGroup>
+    <ProjectGuid>{9BDEE040-06EC-48F1-81A6-CDA7AA98CADA}</ProjectGuid>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <!-- ProjectFileConverter.Convert(ProjectLoadSettings) has been obsoleted in favor of a different overload -->
+    <NoWarn>$(NoWarn);0618</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Source Files -->
+    <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\..\shared\unittests\MockLogger.cs" />
+    <Compile Include="..\..\shared\unittests\ObjectModelHelpers.cs" />
+    <Compile Include="OldVSProjectFileReader_Tests.cs" />
+    <Compile Include="ProjectFileConverter_Tests.cs" />
+    <!-- Assemblies Files we depend on -->
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj">
+      <Project>{3F1F7307-EE89-4110-B636-BDE1E45358C4}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>XMakeBuildEngine</Name>
+      <Comment>Needs 'microsoft.build.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OrcasEngine\OrcasEngine.csproj">
+      <Project>{D21C4Bf9-E131-4ACB-8960-794797f19A39}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>OrcasEngine</Name>
+      <Comment>Needs 'microsoft.build.engine.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj">
+      <Project>{653E79B4-118B-4E0A-9E34-8EB30E5E0881}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>Utilities %28components\xmake\Framework\Utilities%29</Name>
+      <Comment>Needs 'microsoft.build.utilities.v12.0.dll'</Comment>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj">
+      <Project>{784BF121-CE8F-4314-AA55-E86AB61670FE}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>Framework %28components\xmake\Framework\Framework%29</Name>
+      <Comment>Needs 'microsoft.build.framework.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+    <ProjectReference Include="..\XMakeConversion.csproj">
+      <Project>{5274C277-F122-4a44-B7A0-00A1B3F39803}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>XMakeConversion</Name>
+      <Comment>Needs 'microsoft.build.conversion.v12.0.dll'</Comment>
+    </ProjectReference>
+    <!-- This config file has the binding redirect nunit needs to host MSBuild - it is automatically generated from a template -->
+    <Template Include="..\..\Shared\UnitTests\App.config.tt">
+      <OutputItemName>Content</OutputItemName>
+    </Template>
+  </ItemGroup>
+  <Import Project="..\..\Microsoft.Xmake.targets" />
+  <Import Project="$(ToolsPath)\Microsoft.DevDiv.TextTemplating.targets" />
+  <PropertyGroup>
+    <GenerateAssemblyAttribute>true</GenerateAssemblyAttribute>
+  </PropertyGroup>
+  <!-- IDE specific Information -->
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+</Project>

@@ -23,7 +23,9 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// Construct.
         /// </summary>
+        /// <param name="configFile">The path to the config file.</param>
         /// <param name="targetRuntimeVersion">The runtime version property from the project file.</param>
+        /// <param name="targetArchitecture">The <see cref="ProcessorArchitecture"/> to target.</param>
         internal AssemblyFoldersFromConfig(string configFile, string targetRuntimeVersion, ProcessorArchitecture targetArchitecture)
         {
             ErrorUtilities.VerifyThrowArgumentNull(configFile, nameof(configFile));
@@ -38,7 +40,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             // Platform-agnostic folders first.
             FindDirectories(assemblyTargets, target => string.IsNullOrEmpty(target.Platform));
 
-            if (Environment.Is64BitOperatingSystem)
+            if (EnvironmentUtilities.Is64BitOperatingSystem)
             {
                 if (targeting64Bit)
                 {

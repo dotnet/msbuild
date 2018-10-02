@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A utility class that mediates access to a shared string builder.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Concurrent;
@@ -31,6 +27,12 @@ namespace Microsoft.Build.Shared
         private StringBuilder _borrowedBuilder;
 
         /// <summary>
+        /// Profiling showed that the hot code path for large string builder calls first IsOrdinalEqualToStringOfSameLength followed by ExpensiveConvertToString
+        /// when IsOrdinalEqualToStringOfSameLength did return true. We can therefore reduce the costs for large strings by over a factor two. 
+        /// </summary>
+        private string _cachedString;
+
+        /// <summary>
         /// Capacity to initialize the builder with.
         /// </summary>
         private int _capacity;
@@ -51,6 +53,11 @@ namespace Microsoft.Build.Shared
         public int Length
         {
             get { return ((_borrowedBuilder == null) ? 0 : _borrowedBuilder.Length); }
+            set
+            {
+                LazyPrepare();
+                _borrowedBuilder.Length = value;
+            }
         }
 
         /// <summary>
@@ -70,10 +77,21 @@ namespace Microsoft.Build.Shared
         /// </summary>
         string OpportunisticIntern.IInternable.ExpensiveConvertToString()
         {
+            if( _cachedString == null)
             {
-                return ((ReuseableStringBuilder)this).ToString();
+                _cachedString = ((ReuseableStringBuilder)this).ToString();
             }
+            return _cachedString;
+
         }
+
+        /// <summary>
+        /// The number here is arbitrary. For a StringBuilder we have a chunk length of 8000 characters which corresponds to
+        /// 5 StringBuilder chunks which need to be walked before the next character can be fetched (see MaxChunkSize of StringBuilder).
+        /// That should be a good compromise to not allocate to much but still make use of the intern cache. The actual cutoff where it is cheaper
+        /// to allocate a temp string might be well below that limit but that depends on many other factors such as GC Heap size and other allocating threads. 
+        /// </summary>
+        const int MaxByCharCompareLength = 40 * 1000;
 
         /// <summary>
         /// Compare target to string. 
@@ -83,6 +101,10 @@ namespace Microsoft.Build.Shared
 #if DEBUG
             ErrorUtilities.VerifyThrow(other.Length == _borrowedBuilder.Length, "should be same length");
 #endif
+            if (other.Length > MaxByCharCompareLength)
+            {
+                return String.Equals( ((OpportunisticIntern.IInternable) this).ExpensiveConvertToString(), other, StringComparison.Ordinal);
+            }
             // Backwards because the end of the string is (by observation of Australian Government build) more likely to be different earlier in the loop.
             // For example, C:\project1, C:\project2
             for (int i = _borrowedBuilder.Length - 1; i >= 0; --i)
@@ -125,6 +147,7 @@ namespace Microsoft.Build.Shared
             if (_borrowedBuilder != null)
             {
                 ReuseableStringBuilderFactory.Release(_borrowedBuilder);
+                _cachedString = null;
                 _borrowedBuilder = null;
                 _capacity = -1;
             }
@@ -136,6 +159,7 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(char value)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Append(value);
             return this;
         }
@@ -146,6 +170,7 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(string value)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Append(value);
             return this;
         }
@@ -156,7 +181,38 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Append(string value, int startIndex, int count)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Append(value, startIndex, count);
+            return this;
+        }
+
+        public ReuseableStringBuilder AppendSeparated(char separator, ICollection<string> strings)
+        {
+            LazyPrepare();
+            _cachedString = null;
+
+            var separatorsRemaining = strings.Count - 1;
+
+            foreach (var s in strings)
+            {
+                _borrowedBuilder.Append(s);
+
+                if (separatorsRemaining > 0)
+                {
+                    _borrowedBuilder.Append(separator);
+                }
+
+                separatorsRemaining--;
+            }
+
+            return this;
+        }
+
+        public ReuseableStringBuilder Clear()
+        {
+            LazyPrepare();
+            _cachedString = null;
+            _borrowedBuilder.Clear();
             return this;
         }
 
@@ -166,6 +222,7 @@ namespace Microsoft.Build.Shared
         internal ReuseableStringBuilder Remove(int startIndex, int length)
         {
             LazyPrepare();
+            _cachedString = null;
             _borrowedBuilder.Remove(startIndex, length);
             return this;
         }
@@ -295,9 +352,6 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal static void Release(StringBuilder returningBuilder)
             {
-                // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
-                returningBuilder.Clear(); // This is free: it just sets length to zero internally
-
                 // It's possible for someone to cause the builder to
                 // enlarge to such an extent that this static field
                 // would be a leak. To avoid that, only accept
@@ -309,6 +363,9 @@ namespace Microsoft.Build.Shared
                 // So the shared builder will be "replaced".
                 if (returningBuilder.Capacity < MaxBuilderSize)
                 {
+                    // ErrorUtilities.VerifyThrow(handouts.TryRemove(returningBuilder, out dummy), "returned but not loaned");
+                    returningBuilder.Clear(); // Clear before pooling
+
                     Interlocked.Exchange(ref s_sharedBuilder, returningBuilder);
 #if DEBUG
                     Interlocked.Increment(ref s_accepts);

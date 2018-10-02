@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+    Microsoft ResX Schema
+
+    Version 2.0
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
+    associated with the data types.
+
+    Example:
+
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1">this is my long string</data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        [base64 mime encoded serialized .NET Framework object]
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        [base64 mime encoded string representing a byte array form of the .NET Framework object]
+    </data>
+
+    There are any number of "resheader" rows that contain simple
+    name/value pairs.
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
+    mimetype set.
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
+    extensible. For a given mimetype the value must be set accordingly:
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
+    read any of the formats listed below.
+
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with
+            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="UESanitized" type="xsd:boolean" msdata:Ordinal="3" />
+              <xsd:attribute name="Visibility" type="Visibility_Type" msdata:Ordinal="4" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="5" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="6" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:simpleType name="Visibility_Type">
+      <xsd:restriction base="xsd:string">
+        <xsd:enumeration value="Public" />
+        <xsd:enumeration value="Obsolete" />
+        <xsd:enumeration value="Private_OM" />
+      </xsd:restriction>
+    </xsd:simpleType>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CouldNotFindCompleteSolutionFile" UESanitized="false" Visibility="Public">
+    <value>MSB2013: The project-to-project reference with GUID {0} could not be converted because a valid .SLN file containing all projects could not be found.</value>
+    <comment>{StrBegin="MSB2013: "}</comment>
+  </data>
+  <data name="EmptyResxRemoved" UESanitized="false" Visibility="Public">
+    <value>MSB2016: Found an empty .RESX file in the project ({0}).  Removing it from the converted project.</value>
+    <comment>{StrBegin="MSB2016: "}</comment>
+  </data>
+  <data name="ExcludeFoundInProject" UESanitized="false" Visibility="Public">
+    <value>MSB2015: Found an &lt;Exclude&gt; element in the original project file.  This cannot be converted to Visual Studio .NET and is being ignored.</value>
+    <comment>{StrBegin="MSB2015: "}</comment>
+  </data>
+  <data name="MissingAttribute" UESanitized="true" Visibility="Public">
+    <value>MSB2001: Element &lt;{0}&gt; does not contain the required attribute "{1}".</value>
+    <comment>{StrBegin="MSB2001: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</comment>
+  </data>
+  <data name="MissingNewProjectFile" UESanitized="true" Visibility="Public">
+    <value>MSB2002: The file name of the new project must be specified.</value>
+    <comment>{StrBegin="MSB2002: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</comment>
+  </data>
+  <data name="MissingOldProjectFile" UESanitized="true" Visibility="Public">
+    <value>MSB2003: The file name of the old project must be specified.</value>
+    <comment>{StrBegin="MSB2003: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</comment>
+  </data>
+  <data name="MultipleLanguageNodesNotAllowed" UESanitized="true" Visibility="Public">
+    <value>MSB2004: Element &lt;{0}&gt; cannot contain more than one language node.</value>
+    <comment>{StrBegin="MSB2004: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.  The {0} in this case is going to be "VisualStudioProject".</comment>
+  </data>
+  <data name="NoAttributesExpected" UESanitized="true" Visibility="Public">
+    <value>MSB2005: Element &lt;{0}&gt; cannot contain attributes.</value>
+    <comment>{StrBegin="MSB2005: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</comment>
+  </data>
+  <data name="NoRootProjectElement" UESanitized="true" Visibility="Public">
+    <value>MSB2006: The project file does not contain the root element &lt;{0}&gt;.</value>
+    <comment>{StrBegin="MSB2006: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</comment>
+  </data>
+  <data name="ProjectFileNotFound" UESanitized="false" Visibility="Public">
+    <value>MSB2007: Visual Studio cannot find the project file "{0}".</value>
+    <comment>{StrBegin="MSB2007: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</comment>
+  </data>
+  <data name="ProjectNotListingInSolutionFile" UESanitized="false" Visibility="Public">
+    <value>MSB2014: The project-to-project reference with GUID {0} cannot be converted because it is not listed in the file '{1}'.</value>
+    <comment>{StrBegin="MSB2014: "}</comment>
+  </data>
+  <data name="ProjectTypeCannotBeConverted" UESanitized="false" Visibility="Public">
+    <value>MSB2008: This Visual Studio project system cannot convert "{0}" projects.  It can only be used to convert C#, VB, and VJ# client projects.</value>
+    <comment>{StrBegin="MSB2008: "}It appears we've been asked to convert a project that either wasn't created by the Visual Studio managed client project system (C#, VB, J#), or that has been hand-modified or corrupted.  You would get this error if this conversion utility was invoked on a VC++ project (.VCPROJ) for example.  In this case, the {0} would be replaced with "Visual C++".</comment>
+  </data>
+  <data name="UnrecognizedAttribute" UESanitized="true" Visibility="Public">
+    <value>MSB2009: Attribute "{0}" of element &lt;{1}&gt; is not valid.</value>
+    <comment>{StrBegin="MSB2009: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</comment>
+  </data>
+  <data name="UnrecognizedChildElement" UESanitized="true" Visibility="Public">
+    <value>MSB2010: Child element &lt;{0}&gt; of element &lt;{1}&gt; is not valid.</value>
+    <comment>{StrBegin="MSB2010: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</comment>
+  </data>
+  <data name="UnrecognizedElement" UESanitized="true" Visibility="Public">
+    <value>MSB2011: Element &lt;{0}&gt; is not valid.</value>
+    <comment>{StrBegin="MSB2011: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</comment>
+  </data>
+  <data name="UnsupportedProjectToProjectWebReference" UESanitized="false" Visibility="Public">
+    <value>MSB2012: Project-to-project references to web projects are no longer supported and therefore cannot be converted.  Please remove the reference to project {0} and add it again.</value>
+    <comment>{StrBegin="MSB2012: "}</comment>
+  </data>
+  <!--
+        The conversion message bucket is: MSB2001 - MSB2999
+
+        Next error code should be MSB2017.
+
+        Don't forget to update this comment after using the new code.
+  -->
+</root>

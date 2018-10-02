@@ -1,0 +1,15 @@
+﻿<Project Sdk="RoslynTools.RepoToolset">
+  <PropertyGroup>
+    <TargetFramework Condition="$(MonoBuild) != 'true'">netcoreapp2.1</TargetFramework>
+    <TargetFramework Condition="$(MonoBuild) == 'true'">net461</TargetFramework>
+    <NuspecFile>Microsoft.Build.Localization.nuspec</NuspecFile>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\NuspecProject.targets" />
+  
+</Project>

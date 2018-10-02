@@ -1,255 +1,194 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="RoslynTools.RepoToolset">
+
+  <Import Project="..\Shared\FileSystemSources.proj" />
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{828566EE-6F6A-4EF4-98B0-513F7DF9C628}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <RootNamespace>Microsoft.Build.Utilities</RootNamespace>
     <AssemblyName>Microsoft.Build.Utilities.Core</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDocumentationFile>true</EnableDocumentationFile>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <!-- <CreateTlb>true</CreateTlb> --><!-- This was created in VS but not published, so I don't think it's needed -->
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which is used to implement custom MSBuild tasks.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
+
   <ItemGroup>
-    <!-- Source Files -->
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="System.Text.Encoding.CodePages" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
+    <PackageReference Include="Microsoft.Win32.Registry" />
+  </ItemGroup>
+
+  <ItemGroup Label="Shared Code">
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
-      <Link>AssemblyFolders\AssemblyFoldersEx.cs</Link>
+      <Link>Shared\AssemblyFolders\AssemblyFoldersEx.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
-      <Link>AssemblyFolders\AssemblyFoldersFromConfig.cs</Link>
+      <Link>Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
-      <Link>AssemblyFolders\Serialization\AssemblyFolderCollection.cs</Link>
+      <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
-      <Link>AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
+      <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EnvironmentUtilities.cs">
+      <Link>Shared\EnvironmentUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>BuildEnvironmentHelper.cs</Link>
+      <Link>Shared\BuildEnvironmentHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
-      <Link>CanonicalError.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\CanonicalError.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs">
-      <Link>Constants.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\Constants.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
-      <Link>ExtensionFoldersRegistryKey.cs</Link>
+      <Link>Shared\ExtensionFoldersRegistryKey.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>FileDelegates.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\FileDelegates.cs</Link>
     </Compile>
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
-      <Link>Collections\CopyOnWriteDictionary.cs</Link>
+      <Link>Shared\CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EncodingUtilities.cs">
-      <Link>EncodingUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\EncodingUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>ErrorUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>EscapingUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\EscapingUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EventArgsFormatting.cs">
-      <Link>EventArgsFormatting.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\EventArgsFormatting.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>ExceptionHandling.cs</Link>
+      <Link>Shared\ExceptionHandling.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EscapingStringExtensions\EscapingStringExtensions.cs">
+      <Link>Shared\EscapingStringExtensions\EscapingStringExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\FileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
-      <Link>FileMatcher.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\FileMatcher.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>FileUtilitiesRegex.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\FileUtilitiesRegex.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
-      <Link>FrameworkLocationHelper.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\FrameworkLocationHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\HybridDictionary.cs">
-      <Link>Collections\HybridDictionary.cs</Link>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <Link>Shared\IConstrainedEqualityComparer.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InternalErrorException.cs">
-      <Link>InternalErrorException.cs</Link>
+      <Link>Shared\InternalErrorException.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IKeyed.cs" />
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
+    <Compile Include="..\Shared\IKeyed.cs">
+      <Link>Shared\IKeyed.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs">
+      <Link>Shared\MSBuildNameIgnoreCaseComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\Modifiers.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\Modifiers.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NativeMethodsShared.cs">
-      <Link>NativeMethodsShared.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\NativeMethodsShared.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyUtilities.cs">
+      <Link>Shared\AssemblyUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
-      <Link>InprocTrackingNativeMethods.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\InprocTrackingNativeMethods.cs</Link>
     </Compile>
     <Compile Include="..\Shared\OpportunisticIntern.cs">
-      <Link>OpportunisticIntern.cs</Link>
+      <Link>Shared\OpportunisticIntern.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
-      <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
+      <Link>Shared\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
-      <Link>Collections\ReadOnlyEmptyDictionary.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyList.cs">
-      <Link>Collections\ReadOnlyEmptyList.cs</Link>
+      <Link>Shared\Collections\ReadOnlyEmptyDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
-      <Link>RegistryDelegates.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\RegistryDelegates.cs</Link>
     </Compile>
     <Compile Include="..\Shared\RegistryHelper.cs">
-      <Link>RegistryHelper.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\RegistryHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
-      <Link>ResourceUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\ResourceUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
+      <Link>Shared\ReuseableStringBuilder.cs</Link>
     </Compile>
     <Compile Include="..\Shared\StringBuilderCache.cs">
-      <Link>StringBuilderCache.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
-      <Link>TaskLoggingHelper.cs</Link>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+      <Link>Shared\TaskLoggingHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\Tracing.cs" />
+    <Compile Include="..\Shared\TempFileUtilities.cs">
+      <Link>Shared\TempFileUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\Tracing.cs">
+      <Link>Shared\Tracing.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\VersionUtilities.cs">
-      <Link>VersionUtilities.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\VersionUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ToolsetElement.cs">
-      <Link>ToolsetElement.cs</Link>
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>Shared\ToolsetElement.cs</Link>
     </Compile>
     <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
-      <Link>VisualStudioLocationHelper.cs</Link>
+      <Link>Shared\VisualStudioLocationHelper.cs</Link>
     </Compile>
-    <Compile Include="ApiContract.cs" />
-    <Compile Include="AppDomainIsolatedTask.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>Shared\Traits.cs</Link>
     </Compile>
-    <Compile Include="AssemblyFolders\AssemblyFoldersExInfo.cs" />
-    <Compile Include="AssemblyFolders\AssemblyFoldersFromConfigInfo.cs" />
-    <Compile Include="AssemblyInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="AssemblyResources.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CommandLineBuilder.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FxCopExclusions\Microsoft.Build.Utilities.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="Logger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="MuxLogger.cs" />
-    <Compile Include="ProcessorArchitecture.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="SDKType.cs" />
-    <Compile Include="TargetPlatformSDK.cs" />
-    <Compile Include="ExtensionSDK.cs" />
-    <Compile Include="SDKManifest.cs" />
-    <Compile Include="PlatformManifest.cs" />
-    <Compile Include="Task.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TaskItem.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ToolLocationHelper.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ToolTask.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <!-- FileTracker Managed Libraries -->
-    <Compile Include="TrackedDependencies\CanonicalTrackedInputFiles.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TrackedDependencies\DependencyTableCache.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TrackedDependencies\FlatTrackingData.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TrackedDependencies\FileTracker.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TrackedDependencies\CanonicalTrackedOutputFiles.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TrackedDependencies\TrackedDependencies.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TrackedDependencies\CanonicalTrackedFilesHelper.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
-    <!-- Resource Files -->
-    <EmbeddedResource Include="Resources\Strings.resx">
+
+    <EmbeddedResource Update="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
+      <Generator></Generator>
     </EmbeddedResource>
+
     <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
       <Link>Resources\Strings.shared.resx</Link>
       <SubType>Designer</SubType>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
-    <!-- Assemblies Files we depend on -->
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.XML" />
-    <Reference Include="System.Configuration" />
-    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj">
-      <Project>{571F09DB-A81A-4444-945C-6F7B530054CD}</Project>
-      <Name>Microsoft.Build.Framework</Name>
-    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <FilesToSign Include="$(OutDir)\$(AssemblyName)$(TargetExt)">
-      <Authenticode>Microsoft</Authenticode>
-      <StrongName>StrongName</StrongName>
-    </FilesToSign>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

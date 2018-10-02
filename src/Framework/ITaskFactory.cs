@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Task factory Instance which will instantiate and execute tasks</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -23,7 +19,7 @@ namespace Microsoft.Build.Framework
         string FactoryName { get; }
 
         /// <summary>
-        /// Gets the type of the task this factory will instantiate.
+        /// Gets the type of the task this factory will instantiate.  Implementations must return a value for this property.
         /// </summary>
         Type TaskType { get; }
 

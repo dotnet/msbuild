@@ -1,0 +1,169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ru" original="../Strings.resx" build-num="-1643982134">
+    <header>
+      <count-group name="BlackBox wordcount">
+        <count count-type="x-wordCount">231</count>
+        <count count-type="x-adjWordCount">107.05</count>
+        <count count-type="x-curAdjWordCount">107.05</count>
+        <count count-type="x-repeatAdjWordCount">0</count>
+        <count count-type="x-termWordCount">0</count>
+      </count-group>
+      <count-group name="BlackBox wordcount analysis">
+        <count count-type="x-match102%">0</count>
+        <count count-type="x-match101%">26</count>
+        <count count-type="x-match100%">112</count>
+        <count count-type="x-match99-90%">0</count>
+        <count count-type="x-match89-75%">0</count>
+        <count count-type="x-mt">93</count>
+        <count count-type="repetition">0</count>
+      </count-group>
+    </header>
+    <body>
+      <trans-unit id="CouldNotFindCompleteSolutionFile">
+        <source>MSB2013: The project-to-project reference with GUID {0} could not be converted because a valid .SLN file containing all projects could not be found.</source>
+        <target state="translated">MSB2013: не удалось преобразовать ссылку с проекта на проект с GUID {0}, поскольку не удалось найти допустимый файл .SLN, содержащий все проекты.</target>
+        <note>{StrBegin="MSB2013: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2013: не удалось преобразовать ссылку с проекта на проект с GUID {0}, поскольку не удалось найти допустимый файл .SLN, содержащий все проекты.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="EmptyResxRemoved">
+        <source>MSB2016: Found an empty .RESX file in the project ({0}).  Removing it from the converted project.</source>
+        <target state="translated">MSB2016: в проекте ({0}) обнаружен пустой файл .RESX.  Идет его удаление из преобразованного проекта.</target>
+        <note>{StrBegin="MSB2016: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2016: в проекте ({0}) обнаружен пустой файл .RESX.  Идет его удаление из преобразованного проекта.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="16" adjWordcount="4" curWordcount="4" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="ExcludeFoundInProject">
+        <source>MSB2015: Found an &lt;Exclude&gt; element in the original project file.  This cannot be converted to Visual Studio .NET and is being ignored.</source>
+        <target state="translated">MSB2015: обнаружен элемент &lt;Exclude&gt; в исходном файле проекта.  Не удается выполнить преобразование в формат Visual Studio .NET.</target>
+        <note>{StrBegin="MSB2015: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2015: В исходном файле проекта найден элемент &lt; исключить &gt;.  Это не может быть преобразован в Visual Studio .NET и будет проигнорирован.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="23" adjWordcount="19.55" curWordcount="19.55"</note>
+      </trans-unit>
+      <trans-unit id="MissingAttribute">
+        <source>MSB2001: Element &lt;{0}&gt; does not contain the required attribute "{1}".</source>
+        <target state="translated">MSB2001: элемент &lt;{0}&gt; не содержит обязательного атрибута "{1}".</target>
+        <note>{StrBegin="MSB2001: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2001: Элемент &lt;{0}&gt; отсутствует необходимый атрибут "{1}«.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
+      </trans-unit>
+      <trans-unit id="MissingNewProjectFile">
+        <source>MSB2002: The file name of the new project must be specified.</source>
+        <target state="translated">MSB2002: необходимо указать имя файла нового проекта.</target>
+        <note>{StrBegin="MSB2002: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2002: необходимо указать имя файла нового проекта.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="MissingOldProjectFile">
+        <source>MSB2003: The file name of the old project must be specified.</source>
+        <target state="translated">MSB2003: необходимо указать имя файла старого проекта.</target>
+        <note>{StrBegin="MSB2003: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2003: необходимо указать имя файла старого проекта.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="11" adjWordcount="2.75" curWordcount="2.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="MultipleLanguageNodesNotAllowed">
+        <source>MSB2004: Element &lt;{0}&gt; cannot contain more than one language node.</source>
+        <target state="translated">MSB2004: элемент &lt;{0}&gt; не может содержать более одного узла language.</target>
+        <note>{StrBegin="MSB2004: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.  The {0} in this case is going to be "VisualStudioProject".</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2004: Элемент &lt;{0}&gt; не может содержать более одного узла языка.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="11" adjWordcount="9.35" curWordcount="9.35"</note>
+      </trans-unit>
+      <trans-unit id="NoAttributesExpected">
+        <source>MSB2005: Element &lt;{0}&gt; cannot contain attributes.</source>
+        <target state="translated">MSB2005: элемент &lt;{0}&gt; не может содержать атрибуты.</target>
+        <note>{StrBegin="MSB2005: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2005: Элемент &lt;{0}&gt; не может содержать атрибуты.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
+      </trans-unit>
+      <trans-unit id="NoRootProjectElement">
+        <source>MSB2006: The project file does not contain the root element &lt;{0}&gt;.</source>
+        <target state="translated">MSB2006: файл проекта не содержит корневой элемент &lt;{0}&gt;.</target>
+        <note>{StrBegin="MSB2006: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2006: Файл проекта не содержит корневой элемент &lt;{0}&gt;.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
+      </trans-unit>
+      <trans-unit id="ProjectFileNotFound">
+        <source>MSB2007: Visual Studio cannot find the project file "{0}".</source>
+        <target state="translated">MSB2007: Visual Studio не удалось найти файл проекта "{0}".</target>
+        <note>{StrBegin="MSB2007: "}This error shouldn't be possible when converting through Visual Studio, but we have it just in case.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2007: Visual Studio не удалось найти файл проекта "{0}".</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="9" adjWordcount="2.25" curWordcount="2.25" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="ProjectNotListingInSolutionFile">
+        <source>MSB2014: The project-to-project reference with GUID {0} cannot be converted because it is not listed in the file '{1}'.</source>
+        <target state="translated">MSB2014: нельзя преобразовать ссылку одного проекта на другой с GUID {0}, поскольку она отсутствует в файле "{1}".</target>
+        <note>{StrBegin="MSB2014: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2014: нельзя преобразовать ссылку одного проекта на другой с GUID {0}, поскольку она отсутствует в файле "{1}".</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="19" adjWordcount="4.75" curWordcount="4.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="ProjectTypeCannotBeConverted">
+        <source>MSB2008: This Visual Studio project system cannot convert "{0}" projects.  It can only be used to convert C#, VB, and VJ# client projects.</source>
+        <target state="translated">MSB2008: эта система проектов Visual Studio не может выполнять преобразование проектов "{0}".  Она может использоваться только для преобразования клиентских проектов C#, VB и VJ#.</target>
+        <note>{StrBegin="MSB2008: "}It appears we've been asked to convert a project that either wasn't created by the Visual Studio managed client project system (C#, VB, J#), or that has been hand-modified or corrupted.  You would get this error if this conversion utility was invoked on a VC++ project (.VCPROJ) for example.  In this case, the {0} would be replaced with "Visual C++".</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="tm-suggestion">MSB2008: эта система проектов Visual Studio не может выполнять преобразование проектов "{0}".  Она может использоваться только для преобразования клиентских проектов C#, VB и VJ#.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="100" wordcount="23" adjWordcount="5.75" curWordcount="5.75" tmLabel="N''"</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedAttribute">
+        <source>MSB2009: Attribute "{0}" of element &lt;{1}&gt; is not valid.</source>
+        <target state="translated">MSB2009: недопустимый атрибут "{0}" для элемента "{1}".</target>
+        <note>{StrBegin="MSB2009: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2009: Атрибут "{0}" элемента &lt;{1}&gt; не является допустимым.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="10" adjWordcount="8.5" curWordcount="8.5"</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedChildElement">
+        <source>MSB2010: Child element &lt;{0}&gt; of element &lt;{1}&gt; is not valid.</source>
+        <target state="translated">MSB2010: недопустимый дочерний элемент &lt;{0}&gt; элемента &lt;{1}&gt;.</target>
+        <note>{StrBegin="MSB2010: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2010: Дочерний элемент &lt;{0}&gt; элемента &lt;{1}&gt; не является допустимым.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="12" adjWordcount="10.2" curWordcount="10.2"</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedElement">
+        <source>MSB2011: Element &lt;{0}&gt; is not valid.</source>
+        <target state="translated">MSB2011: недопустимый элемент &lt;{0}&gt;.</target>
+        <note>{StrBegin="MSB2011: "}It appears we've been asked to convert a project that either wasn't created by Visual Studio, or that has been hand-modified or corrupted.</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="mt-suggestion">MSB2011: Элемент &lt;{0}&gt; не является допустимым.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="15" wordcount="7" adjWordcount="5.95" curWordcount="5.95"</note>
+      </trans-unit>
+      <trans-unit id="UnsupportedProjectToProjectWebReference">
+        <source>MSB2012: Project-to-project references to web projects are no longer supported and therefore cannot be converted.  Please remove the reference to project {0} and add it again.</source>
+        <target state="translated">MSB2012: ссылки одного проекта на другой в веб-проектах больше не поддерживаются, и таким образом, не могут быть преобразованы.  Удалите ссылку на проект {0} и добавьте ее повторно.</target>
+        <note>{StrBegin="MSB2012: "}</note>
+        <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
+          <target state-qualifier="leveraged-tm">MSB2012: ссылки одного проекта на другой в веб-проектах больше не поддерживаются, и таким образом, не могут быть преобразованы.  Удалите ссылку на проект {0} и добавьте ее повторно.</target>
+        </alt-trans>
+        <note from="bb-metadata">fuzzyMatch="101" wordcount="26" adjWordcount="0" curWordcount="0" tmLabel="N''"</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

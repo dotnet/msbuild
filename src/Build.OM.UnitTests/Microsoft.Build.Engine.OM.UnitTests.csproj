@@ -1,0 +1,117 @@
+<Project Sdk="RoslynTools.RepoToolset">
+
+  <Import Project="..\Shared\FileSystemSources.proj" />
+
+  <PropertyGroup>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    
+    <IsPackable>false</IsPackable>
+
+    <AssemblyName>Microsoft.Build.Engine.OM.UnitTests</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Shouldly" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
+    <PackageReference Include="Microsoft.Win32.Registry" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Constants.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\EncodingStringWriter.cs">
+      <Link>EncodingStringWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\EncodingUtilities.cs">
+      <Link>EncodingUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileDelegates.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\ResourceUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\Traits.cs">
+      <Link>SharedTraits.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
+      <Link>EngineTestEnvironment.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
+      <Link>TestEnvironment.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\VisualStudioLocationHelper.cs">
+      <Link>VisualStudioLocationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\InternalErrorException.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\NativeMethodsShared.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\AssemblyUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\TempFileUtilities.cs" />
+    <Compile Include="..\Shared\FileUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\EscapingUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\StringBuilderCache.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\OpportunisticIntern.cs" />
+    <Compile Include="..\Shared\ExceptionHandling.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
+      <Link>TestData\GlobbingTestData.cs</Link>
+    </Compile>
+
+    <None Include="..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+</Project>

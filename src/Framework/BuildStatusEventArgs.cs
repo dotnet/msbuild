@@ -74,6 +74,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param> 
         /// <param name="senderName">name of event sender</param> 
         /// <param name="eventTimestamp">Timestamp when event was created</param>
+        /// <param name="messageArgs">Optional arguments for formatting the message string.</param>
         protected BuildStatusEventArgs
         (
             string message,

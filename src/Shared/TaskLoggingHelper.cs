@@ -2,15 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
+#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
+#endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -32,7 +33,10 @@ namespace Microsoft.Build.Utilities
 #else
     public
 #endif
- class TaskLoggingHelper : MarshalByRefObject
+ class TaskLoggingHelper
+#if FEATURE_APPDOMAIN
+        : MarshalByRefObject
+#endif
     {
         #region Constructors
 
@@ -42,20 +46,19 @@ namespace Microsoft.Build.Utilities
         /// <param name="taskInstance">task containing an instance of this class</param>
         public TaskLoggingHelper(ITask taskInstance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskInstance, "taskInstance");
+            ErrorUtilities.VerifyThrowArgumentNull(taskInstance, nameof(taskInstance));
             _taskInstance = taskInstance;
-            _taskName = taskInstance.GetType().Name;
+            TaskName = taskInstance.GetType().Name;
         }
 
         /// <summary>
         /// Public constructor which can be used by task factories to assist them in logging messages.
         /// </summary>
-        /// <param name="taskInstance">task containing an instance of this class</param>
         public TaskLoggingHelper(IBuildEngine buildEngine, string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildEngine, "buildEngine");
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, "taskName");
-            _taskName = taskName;
+            ErrorUtilities.VerifyThrowArgumentNull(buildEngine, nameof(buildEngine));
+            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+            TaskName = taskName;
             _buildEngine = buildEngine;
         }
 
@@ -63,36 +66,29 @@ namespace Microsoft.Build.Utilities
 
         #region Properties
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// A client sponsor is a class
         /// which will respond to a lease renewal request and will
         /// increase the lease time allowing the object to stay in memory
         /// </summary>
         private ClientSponsor _sponsor;
+#endif
 
         // We have to pass an instance of ITask to BuildEngine, and since we call into the engine from this class we
         // need to store the actual task instance.
-        private ITask _taskInstance;
+        private readonly ITask _taskInstance;
 
         /// <summary>
         /// Object to make this class thread-safe.
         /// </summary>
-        private Object _locker = new Object();
+        private readonly Object _locker = new Object();
 
         /// <summary>
         /// Gets the name of the parent task.
         /// </summary>
         /// <value>Task name string.</value>
-        protected string TaskName
-        {
-            get
-            {
-                return _taskName;
-            }
-        }
-
-        // the name of the parent task
-        private string _taskName;
+        protected string TaskName { get; }
 
         /// <summary>
         /// Gets the upper-case version of the parent task's name.
@@ -105,7 +101,7 @@ namespace Microsoft.Build.Utilities
                 if (_taskNameUpperCase == null)
                 {
                     // NOTE: use the current thread culture, because this string will be displayed to the user
-                    _taskNameUpperCase = TaskName.ToUpper(CultureInfo.CurrentCulture);
+                    _taskNameUpperCase = TaskName.ToUpper();
                 }
 
                 return _taskNameUpperCase;
@@ -118,7 +114,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// The build engine we are going to log against
         /// </summary>
-        private IBuildEngine _buildEngine;
+        private readonly IBuildEngine _buildEngine;
 
         /// <summary>
         /// Shortcut property for getting our build engine - we retrieve it from the task instance
@@ -143,55 +139,20 @@ namespace Microsoft.Build.Utilities
         /// Used to load culture-specific resources. Derived classes should register their resources either during construction, or
         /// via this property, if they have localized strings.
         /// </summary>
-        public ResourceManager TaskResources
-        {
-            get
-            {
-                return _taskResources;
-            }
-
-            set
-            {
-                _taskResources = value;
-            }
-        }
+        public ResourceManager TaskResources { get; set; }
 
         // UI resources (including strings) used by the logging methods
-        private ResourceManager _taskResources;
 
         /// <summary>
         /// Gets or sets the prefix used to compose help keywords from string resource names.
         /// </summary>
         /// <value>The help keyword prefix string.</value>
-        public string HelpKeywordPrefix
-        {
-            get
-            {
-                return _helpKeywordPrefix;
-            }
-
-            set
-            {
-                _helpKeywordPrefix = value;
-            }
-        }
-
-        // the prefix for composing help keywords
-        private string _helpKeywordPrefix;
+        public string HelpKeywordPrefix { get; set; }
 
         /// <summary>
         /// Has the task logged any errors through this logging helper object?
         /// </summary>
-        public bool HasLoggedErrors
-        {
-            get
-            {
-                return _hasLoggedErrors;
-            }
-        }
-
-        // Has the task logged any errors through this logging helper object?
-        private bool _hasLoggedErrors = false;
+        public bool HasLoggedErrors { get; private set; }
 
         #endregion
 
@@ -212,10 +173,9 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>message</c> is null.</exception>
         public string ExtractMessageCode(string message, out string messageWithoutCodePrefix)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
-            string code;
-            messageWithoutCodePrefix = ResourceUtilities.ExtractMessageCode(false /* any code */, message, out code);
+            messageWithoutCodePrefix = ResourceUtilities.ExtractMessageCode(false /* any code */, message, out string code);
 
             return code;
         }
@@ -235,9 +195,9 @@ namespace Microsoft.Build.Utilities
         /// <exception cref="ArgumentNullException">Thrown when <c>resourceName</c> is null.</exception>
         /// <exception cref="ArgumentException">Thrown when the string resource indicated by <c>resourceName</c> does not exist.</exception>
         /// <exception cref="InvalidOperationException">Thrown when the <c>TaskResources</c> property of the owner task is not set.</exception>
-        virtual public string FormatResourceString(string resourceName, params object[] args)
+        public virtual string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName, "resourceName");
+            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
             ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
 
             string resourceString = TaskResources.GetString(resourceName, CultureInfo.CurrentUICulture);
@@ -255,9 +215,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="args">Arguments for formatting.</param>
         /// <returns>The formatted string.</returns>
         /// <exception cref="ArgumentNullException">Thrown when <c>unformatted</c> is null.</exception>
-        virtual public string FormatString(string unformatted, params object[] args)
+        public virtual string FormatString(string unformatted, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unformatted, "unformatted");
+            ErrorUtilities.VerifyThrowArgumentNull(unformatted, nameof(unformatted));
 
             return ResourceUtilities.FormatString(unformatted, args);
         }
@@ -268,7 +228,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="resourceName">The resource name.</param>
         /// <returns>The message from resource.</returns>
-        virtual public string GetResourceMessage(string resourceName)
+        public virtual string GetResourceMessage(string resourceName)
         {
             string resourceString = FormatResourceString(resourceName, null);
             return resourceString;
@@ -309,7 +269,7 @@ namespace Microsoft.Build.Utilities
         public void LogMessage(MessageImportance importance, string message, params object[] messageArgs)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
             BuildMessageEventArgs e = new BuildMessageEventArgs
                 (
@@ -372,7 +332,7 @@ namespace Microsoft.Build.Utilities
         )
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -383,7 +343,7 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            BuildMessageEventArgs e = new BuildMessageEventArgs
+            var e = new BuildMessageEventArgs
                 (
                     subcategory,
                     code,
@@ -433,7 +393,7 @@ namespace Microsoft.Build.Utilities
         )
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -444,7 +404,7 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            CriticalBuildMessageEventArgs e = new CriticalBuildMessageEventArgs
+            var e = new CriticalBuildMessageEventArgs
                 (
                     subcategory,
                     code,
@@ -499,7 +459,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, "messageResourceName");
+            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
             LogMessage(importance, FormatResourceString(messageResourceName, messageArgs));
 #if _DEBUG
@@ -532,7 +492,7 @@ namespace Microsoft.Build.Utilities
         )
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ExternalProjectStartedEventArgs eps = new ExternalProjectStartedEventArgs(message, helpKeyword, TaskName, projectFile, targetNames);
+            var eps = new ExternalProjectStartedEventArgs(message, helpKeyword, TaskName, projectFile, targetNames);
             BuildEngine.LogCustomEvent(eps);
         }
 
@@ -553,7 +513,7 @@ namespace Microsoft.Build.Utilities
         )
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ExternalProjectFinishedEventArgs epf = new ExternalProjectFinishedEventArgs(message, helpKeyword, TaskName, projectFile, succeeded);
+            var epf = new ExternalProjectFinishedEventArgs(message, helpKeyword, TaskName, projectFile, succeeded);
             BuildEngine.LogCustomEvent(epf);
         }
 
@@ -581,9 +541,9 @@ namespace Microsoft.Build.Utilities
         public void LogCommandLine(MessageImportance importance, string commandLine)
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(commandLine, "commandLine");
+            ErrorUtilities.VerifyThrowArgumentNull(commandLine, nameof(commandLine));
 
-            TaskCommandLineEventArgs e = new TaskCommandLineEventArgs(commandLine, TaskName, importance);
+            var e = new TaskCommandLineEventArgs(commandLine, TaskName, importance);
 
             // If BuildEngine is null, the task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all we can do is throw.
@@ -643,7 +603,7 @@ namespace Microsoft.Build.Utilities
         )
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -662,7 +622,7 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            BuildErrorEventArgs e = new BuildErrorEventArgs
+            var e = new BuildErrorEventArgs
                 (
                     subcategory,
                     errorCode,
@@ -679,7 +639,7 @@ namespace Microsoft.Build.Utilities
                 );
             BuildEngine.LogErrorEvent(e);
 
-            _hasLoggedErrors = true;
+            HasLoggedErrors = true;
         }
 
         /// <summary>
@@ -725,7 +685,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, "messageResourceName");
+            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
             string subcategory = null;
 
@@ -811,7 +771,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, "messageResourceName");
+            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
             string subcategory = null;
 
@@ -820,8 +780,7 @@ namespace Microsoft.Build.Utilities
                 subcategory = FormatResourceString(subcategoryResourceName);
             }
 
-            string errorCode;
-            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, FormatResourceString(messageResourceName, messageArgs), out errorCode);
+            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, FormatResourceString(messageResourceName, messageArgs), out string errorCode);
 
             string helpKeyword = null;
 
@@ -882,9 +841,9 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as the logging methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(exception, "exception");
+            ErrorUtilities.VerifyThrowArgumentNull(exception, nameof(exception));
 
-            string message = null;
+            string message;
 
             if (!showDetail && (Environment.GetEnvironmentVariable("MSBUILDDIAGNOSTICS") == null)) // This env var is also used in ToolTask
             {
@@ -899,7 +858,7 @@ namespace Microsoft.Build.Utilities
             {
                 // The more comprehensive output, showing exception types
                 // and inner exceptions
-                StringBuilder builder = new StringBuilder(200);
+                var builder = new StringBuilder(200);
                 do
                 {
                     builder.Append(exception.GetType().Name);
@@ -964,7 +923,7 @@ namespace Microsoft.Build.Utilities
         )
         {
             // No lock needed, as BuildEngine methods from v4.5 onwards are thread safe.
-            ErrorUtilities.VerifyThrowArgumentNull(message, "message");
+            ErrorUtilities.VerifyThrowArgumentNull(message, nameof(message));
 
             // If BuildEngine is null, task attempted to log before it was set on it,
             // presumably in its constructor. This is not allowed, and all
@@ -983,7 +942,7 @@ namespace Microsoft.Build.Utilities
             // that gives the user something.
             bool fillInLocation = (String.IsNullOrEmpty(file) && (lineNumber == 0) && (columnNumber == 0));
 
-            BuildWarningEventArgs e = new BuildWarningEventArgs
+            var e = new BuildWarningEventArgs
                 (
                     subcategory,
                     warningCode,
@@ -1045,7 +1004,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, "messageResourceName");
+            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
             string subcategory = null;
 
@@ -1059,9 +1018,8 @@ namespace Microsoft.Build.Utilities
             // should have been called instead, so that the errorCode field gets populated.
             // Check this only in debug, to avoid the cost of attempting to extract a
             // message code when there probably isn't one.
-            string messageCode;
-            string throwAwayMessageBody = ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out messageCode);
-            Debug.Assert(messageCode == null || messageCode.Length == 0, "Called LogWarningFromResources instead of LogWarningWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
+            string throwAwayMessageBody = ResourceUtilities.ExtractMessageCode(true /* only msbuild codes */, FormatResourceString(messageResourceName, messageArgs), out string messageCode);
+            Debug.Assert(string.IsNullOrEmpty(messageCode), "Called LogWarningFromResources instead of LogWarningWithCodeFromResources, but message '" + throwAwayMessageBody + "' does have an error code '" + messageCode + "'");
 #endif
 
             LogWarning
@@ -1131,7 +1089,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, "messageResourceName");
+            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
 
             string subcategory = null;
 
@@ -1140,8 +1098,7 @@ namespace Microsoft.Build.Utilities
                 subcategory = FormatResourceString(subcategoryResourceName);
             }
 
-            string warningCode;
-            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, FormatResourceString(messageResourceName, messageArgs), out warningCode);
+            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, FormatResourceString(messageResourceName, messageArgs), out string warningCode);
 
             string helpKeyword = null;
 
@@ -1186,7 +1143,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(exception, "exception");
+            ErrorUtilities.VerifyThrowArgumentNull(exception, nameof(exception));
 
             string message = exception.Message;
 
@@ -1228,13 +1185,13 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(fileName, "fileName");
+            ErrorUtilities.VerifyThrowArgumentNull(fileName, nameof(fileName));
 
-            bool errorsFound = false;
+            bool errorsFound;
 
             // Command-line tools are generally going to emit their output using the current 
             // codepage, so that it displays correctly in the console window.  
-            using (StreamReader fileStream = new StreamReader(fileName, System.Text.Encoding.Default)) // HIGHCHAR: Use ANSI for logging messages.
+            using (StreamReader fileStream = FileUtilities.OpenRead(fileName, Encoding.GetEncoding(0))) // HIGHCHAR: Use ANSI for logging messages.
             {
                 errorsFound = LogMessagesFromStream(fileStream, messageImportance);
             }
@@ -1255,7 +1212,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(stream, "stream");
+            ErrorUtilities.VerifyThrowArgumentNull(stream, nameof(stream));
 
             bool errorsFound = false;
             string lineOfText;
@@ -1283,7 +1240,7 @@ namespace Microsoft.Build.Utilities
         {
             // No lock needed, as log methods are thread safe and the rest does not modify
             // global state.
-            ErrorUtilities.VerifyThrowArgumentNull(lineOfText, "lineOfText");
+            ErrorUtilities.VerifyThrowArgumentNull(lineOfText, nameof(lineOfText));
 
             bool isError = false;
             CanonicalError.Parts messageParts = CanonicalError.Parse(lineOfText);
@@ -1355,6 +1312,21 @@ namespace Microsoft.Build.Utilities
 
         #endregion
 
+        #region Telemetry logging methods
+
+        /// <summary>
+        /// Logs telemetry with the specified event name and properties.
+        /// </summary>
+        /// <param name="eventName">The event name.</param>
+        /// <param name="properties">The list of properties associated with the event.</param>
+        public void LogTelemetry(string eventName, IDictionary<string, string> properties)
+        {
+            (BuildEngine as IBuildEngine5)?.LogTelemetry(eventName, properties);
+        }
+
+        #endregion
+
+#if FEATURE_APPDOMAIN
         #region AppDomain Code
 
         /// <summary>
@@ -1381,8 +1353,7 @@ namespace Microsoft.Build.Utilities
 
                 if (!String.IsNullOrEmpty(initialLeaseTimeFromEnvironment))
                 {
-                    int leaseTimeFromEnvironment;
-                    if (int.TryParse(initialLeaseTimeFromEnvironment, out leaseTimeFromEnvironment) && leaseTimeFromEnvironment > 0)
+                    if (int.TryParse(initialLeaseTimeFromEnvironment, out int leaseTimeFromEnvironment) && leaseTimeFromEnvironment > 0)
                     {
                         initialLeaseTime = leaseTimeFromEnvironment;
                     }
@@ -1401,8 +1372,7 @@ namespace Microsoft.Build.Utilities
                 string leaseExtensionTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTASKLOGGINGHELPERLEASEEXTENSIONTIME");
                 if (!String.IsNullOrEmpty(leaseExtensionTimeFromEnvironment))
                 {
-                    int leaseExtensionFromEnvironment;
-                    if (int.TryParse(leaseExtensionTimeFromEnvironment, out leaseExtensionFromEnvironment) && leaseExtensionFromEnvironment > 0)
+                    if (int.TryParse(leaseExtensionTimeFromEnvironment, out int leaseExtensionFromEnvironment) && leaseExtensionFromEnvironment > 0)
                     {
                         leaseExtensionTime = leaseExtensionFromEnvironment;
                     }
@@ -1435,10 +1405,7 @@ namespace Microsoft.Build.Utilities
                 {
                     ILease lease = (ILease)RemotingServices.GetLifetimeService(this);
 
-                    if (lease != null)
-                    {
-                        lease.Unregister(_sponsor);
-                    }
+                    lease?.Unregister(_sponsor);
 
                     _sponsor.Close();
                     _sponsor = null;
@@ -1447,5 +1414,6 @@ namespace Microsoft.Build.Utilities
         }
 
         #endregion
+#endif
     }
 }

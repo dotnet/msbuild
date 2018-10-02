@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface for node endpoints.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -66,7 +62,7 @@ namespace Microsoft.Build
                 MemoryStream memoryStream = this.BaseStream as MemoryStream;
 
                 int currPos = 0;
-                int n;
+                int n = 0;
                 int stringLength;
                 int readLength;
                 int charsRead;
@@ -90,8 +86,8 @@ namespace Microsoft.Build
                 {
                     readLength = ((stringLength - currPos) > MaxCharsBuffer) ? MaxCharsBuffer : (stringLength - currPos);
 
-                    byte[] rawBuffer;
-                    int rawPosition;
+                    byte[] rawBuffer = null;
+                    int rawPosition = 0;
 
                     if (memoryStream != null)
                     {
@@ -111,7 +107,8 @@ namespace Microsoft.Build
                             ErrorUtilities.ThrowInternalError("From calculating based on the memorystream, about to read n = {0}. length = {1}, rawPosition = {2}, readLength = {3}, stringLength = {4}, currPos = {5}.", n, length, rawPosition, readLength, stringLength, currPos);
                         }
                     }
-                    else
+
+                    if (rawBuffer == null)
                     {
                         rawBuffer = _buffer.ByteBuffer;
                         rawPosition = 0;

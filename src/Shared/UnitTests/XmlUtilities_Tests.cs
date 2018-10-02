@@ -1,8 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 
 using Microsoft.Build.Shared;
 using Xunit;
@@ -45,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="badChar"></param>
         private void InvalidNameErrorLocationHelper(string name, string badChar)
         {
-            string expected = ResourceUtilities.FormatResourceString("OM_NameInvalid", name, badChar);
+            string expected = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OM_NameInvalid", name, badChar);
             string actual = String.Empty;
 
             try

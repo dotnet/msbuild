@@ -1,0 +1,19 @@
+﻿<Project Sdk="RoslynTools.RepoToolset">
+  <PropertyGroup>
+    <UseProductOutputPath>true</UseProductOutputPath>
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="TaskWithDependencyTest.proj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Dependency\Dependency.csproj" />
+  </ItemGroup>
+</Project>

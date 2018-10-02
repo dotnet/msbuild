@@ -3,7 +3,9 @@
 
 using System;
 using System.Runtime.Serialization;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions; // for SecurityPermissionAttribute
+#endif
 
 namespace Microsoft.Build.Framework
 {
@@ -91,7 +93,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="info">Serialization info</param>
         /// <param name="context">Streaming context</param>
+#if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
         override public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

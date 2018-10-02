@@ -111,6 +111,7 @@ namespace Microsoft.Build.Shared
         /// <param name="condition">The condition to check.</param>
         /// <param name="errorSubCategoryResourceName">The resource string for the error sub-category (can be null).</param>
         /// <param name="projectFile">The invalid project file.</param>
+        /// <param name="innerException">The inner <see cref="Exception"/>.</param>
         /// <param name="resourceName">The resource string for the error message.</param>
         /// <param name="args">Extra arguments for formatting the error message.</param>
         internal static void VerifyThrowInvalidProjectFile
@@ -144,7 +145,7 @@ namespace Microsoft.Build.Shared
 
                 string errorCode;
                 string helpKeyword;
-                string message = ResourceUtilities.FormatResourceString(out errorCode, out helpKeyword, resourceName, args);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, args);
 
                 throw new InvalidProjectFileException(projectFile.File, projectFile.Line, projectFile.Column, projectFile.EndLine, projectFile.EndColumn, message, errorSubCategory, errorCode, helpKeyword, innerException);
             }

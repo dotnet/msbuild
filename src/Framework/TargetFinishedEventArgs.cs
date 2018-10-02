@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System;
 using System.IO;
 using System.Collections;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -90,6 +91,7 @@ namespace Microsoft.Build.Framework
         /// <param name="targetFile">file in which the target is defined</param>
         /// <param name="succeeded">true if target built successfully</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
+        /// <param name="targetOutputs">An <see cref="IEnumerable"/> containing the outputs of the target.</param>
         public TargetFinishedEventArgs
         (
             string message,
@@ -124,39 +126,11 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            #region ProjectFile
-            if (projectFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(projectFile);
-            }
-            #endregion
-            #region TargetFile
-            if (targetFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(targetFile);
-            }
-            #endregion TargetFile
-            #region TargetName
-            if (targetName == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(targetName);
-            }
-            #endregion
+
+            writer.WriteOptionalString(projectFile);
+            writer.WriteOptionalString(targetFile);
+            writer.WriteOptionalString(targetName);
+
             writer.Write(succeeded);
         }
 
@@ -168,36 +142,11 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            #region ProjectFile
-            if (reader.ReadByte() == 0)
-            {
-                projectFile = null;
-            }
-            else
-            {
-                projectFile = reader.ReadString();
-            }
-            #endregion
-            #region TargetFile
-            if (reader.ReadByte() == 0)
-            {
-                targetFile = null;
-            }
-            else
-            {
-                targetFile = reader.ReadString();
-            }
-            #endregion
-            #region TargetName
-            if (reader.ReadByte() == 0)
-            {
-                targetName = null;
-            }
-            else
-            {
-                targetName = reader.ReadString();
-            }
-            #endregion
+
+            projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+            targetFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+            targetName = reader.ReadByte() == 0 ? null : reader.ReadString();
+
             succeeded = reader.ReadBoolean();
         }
         #endregion
@@ -205,61 +154,30 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Target name
         /// </summary>
-        public string TargetName
-        {
-            get
-            {
-                return targetName;
-            }
-        }
+        public string TargetName => targetName;
 
         /// <summary>
         /// True if target built successfully, false otherwise
         /// </summary>
-        public bool Succeeded
-        {
-            get
-            {
-                return succeeded;
-            }
-        }
+        public bool Succeeded => succeeded;
 
         /// <summary>
         /// Project file associated with event.   
         /// </summary>
-        public string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        public string ProjectFile => projectFile;
 
         /// <summary>
         /// File where this target was declared.
         /// </summary>
-        public string TargetFile
-        {
-            get
-            {
-                return targetFile;
-            }
-        }
+        public string TargetFile => targetFile;
 
         /// <summary>
         /// Target outputs
         /// </summary>
         public IEnumerable TargetOutputs
         {
-            get
-            {
-                return targetOutputs;
-            }
-
-            set
-            {
-                targetOutputs = value;
-            }
+            get => targetOutputs;
+            set => targetOutputs = value;
         }
     }
 }

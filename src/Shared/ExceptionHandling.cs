@@ -1,29 +1,26 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Utility methods for classifying and handling exceptions.</summary>
-//-----------------------------------------------------------------------
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
-
-
 #else
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Security;
+using System.Text;
 using System.Threading;
 using System.Xml;
+using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_VARIOUS_EXCEPTIONS
 using System.Xml.Schema;
-
+using System.Runtime.Serialization;
+#endif
 
 namespace Microsoft.Build.Shared
 #endif
@@ -33,6 +30,30 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
+        private static readonly string s_debugDumpPath;
+
+        static ExceptionHandling()
+        {
+            s_debugDumpPath = GetDebugDumpPath();
+        }
+
+        /// <summary>
+        /// Gets the location of the directory used for diagnostic log files.
+        /// </summary>
+        /// <returns></returns>
+        private static string GetDebugDumpPath()
+        {
+            string debugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            return !string.IsNullOrEmpty(debugPath)
+                    ? debugPath
+                    : Path.GetTempPath();
+        }
+
+        /// <summary>
+        /// The directory used for diagnostic log files.
+        /// </summary>
+        internal static string DebugDumpPath => s_debugDumpPath;
+
 #if !BUILDINGAPPXTASKS
         /// <summary>
         /// The filename that exceptions will be dumped to
@@ -48,14 +69,17 @@ namespace Microsoft.Build.Shared
         /// <returns> True if exception is critical. </returns>
         internal static bool IsCriticalException(Exception e)
         {
-            if (e is StackOverflowException
-             || e is OutOfMemoryException
+            if (e is OutOfMemoryException
+#if FEATURE_VARIOUS_EXCEPTIONS
+             || e is StackOverflowException
              || e is ThreadAbortException
              || e is ThreadInterruptedException
+             || e is AccessViolationException
+#endif
 #if !BUILDINGAPPXTASKS
              || e is InternalErrorException
 #endif
-             || e is AccessViolationException)
+             )
             {
                 // Ideally we would include NullReferenceException, because it should only ever be thrown by CLR (use ArgumentNullException for arguments)
                 // but we should handle it if tasks and loggers throw it.
@@ -64,7 +88,7 @@ namespace Microsoft.Build.Shared
                 return true;
             }
 
-#if !CLR2COMPATIBILITY            
+#if !CLR2COMPATIBILITY
             // Check if any critical exceptions
             var aggregateException = e as AggregateException;
 
@@ -119,9 +143,11 @@ namespace Microsoft.Build.Shared
         /// <returns> True if exception is related to XML parsing. </returns>
         internal static bool IsXmlException(Exception e)
         {
-            return e is XmlSyntaxException
-                || e is XmlException
+            return e is XmlException
+#if FEATURE_VARIOUS_EXCEPTIONS
+                || e is XmlSyntaxException
                 || e is XmlSchemaException
+#endif
                 || e is UriFormatException; // XmlTextReader for example uses this under the covers
         }
 
@@ -142,12 +168,14 @@ namespace Microsoft.Build.Shared
             }
             else
             {
+#if FEATURE_VARIOUS_EXCEPTIONS
                 var schemaException = e as XmlSchemaException;
                 if (schemaException != null)
                 {
                     line = schemaException.LineNumber;
                     column = schemaException.LinePosition;
                 }
+#endif
             }
 
             return new LineAndColumn
@@ -196,13 +224,15 @@ namespace Microsoft.Build.Shared
                 || e is MemberAccessException           // thrown when a class member is not found or access to the member is not permitted
                 || e is BadImageFormatException         // thrown when the file image of a DLL or an executable program is invalid
                 || e is ReflectionTypeLoadException     // thrown by the Module.GetTypes method if any of the classes in a module cannot be loaded
-                || e is CustomAttributeFormatException  // thrown if a custom attribute on a data type is formatted incorrectly
                 || e is TargetParameterCountException   // thrown when the number of parameters for an invocation does not match the number expected
                 || e is InvalidCastException
                 || e is AmbiguousMatchException         // thrown when binding to a member results in more than one member matching the binding criteria
+#if FEATURE_VARIOUS_EXCEPTIONS
+                || e is CustomAttributeFormatException  // thrown if a custom attribute on a data type is formatted incorrectly
                 || e is InvalidFilterCriteriaException  // thrown in FindMembers when the filter criteria is not valid for the type of filter you are using
-                || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not 
+                || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not
                                                         //     have access to the member, or because the target does not define the member, and so on.
+#endif
                 || e is MissingFieldException           // thrown when code in a dependent assembly attempts to access a missing field in an assembly that was modified.
                 || !NotExpectedException(e)             // Reflection can throw IO exceptions if the assembly cannot be opened
 
@@ -223,8 +253,10 @@ namespace Microsoft.Build.Shared
         {
             if
             (
-                e is SerializationException
-                || !NotExpectedReflectionException(e)
+#if FEATURE_VARIOUS_EXCEPTIONS
+                e is SerializationException ||
+#endif
+                !NotExpectedReflectionException(e)
             )
             {
                 return false;
@@ -267,6 +299,7 @@ namespace Microsoft.Build.Shared
             return true;
         }
 
+#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
         /// <summary>
         /// Dump any unhandled exceptions to a file so they can be diagnosed
         /// </summary>
@@ -276,43 +309,75 @@ namespace Microsoft.Build.Shared
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
         }
+#endif
 
         /// <summary>
         /// Dump the exception information to a file
         /// </summary>
-        [MethodImpl(MethodImplOptions.Synchronized)]
         internal static void DumpExceptionToFile(Exception ex)
         {
-            if (s_dumpFileName == null)
+            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+            //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
+            //  applied to a static method.
+            lock (typeof(ExceptionHandling))
             {
-                Guid guid = Guid.NewGuid();
-                string tempPath = Path.GetTempPath();
-
-                // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
-                // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                if (!Directory.Exists(tempPath))
+                if (s_dumpFileName == null)
                 {
-                    // If this throws, no sense catching it, we can't log it now, and we're here
-                    // because we're a child node with no console to log to, so die
-                    Directory.CreateDirectory(tempPath);
+                    Guid guid = Guid.NewGuid();
+
+                    // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
+                    // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
+                    if (!FileSystems.Default.DirectoryExists(DebugDumpPath))
+                    {
+                        // If this throws, no sense catching it, we can't log it now, and we're here
+                        // because we're a child node with no console to log to, so die
+                        Directory.CreateDirectory(DebugDumpPath);
+                    }
+
+                    var pid = Process.GetCurrentProcess().Id;
+                    // This naming pattern is assumed in ReadAnyExceptionFromFile
+                    s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
+
+                    using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
+                    {
+                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
+                        writer.WriteLine("=====================");
+                    }
                 }
 
-                s_dumpFileName = Path.Combine(tempPath, "MSBuild_" + guid.ToString() + ".failure.txt");
-
-                using (StreamWriter writer = new StreamWriter(s_dumpFileName, true /*append*/))
+                using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
                 {
-                    writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", Process.GetCurrentProcess().Id);
-                    writer.WriteLine("=====================");
+                    // "G" format is, e.g., 6/15/2008 9:15:07 PM
+                    writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
+                    writer.WriteLine(ex.ToString());
+                    writer.WriteLine("===================");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the content of any exception dump files modified
+        /// since the provided time, otherwise returns an empty string.
+        /// </summary>
+        internal static string ReadAnyExceptionFromFile(DateTime fromTimeUtc)
+        {
+            var builder = new StringBuilder();
+            IEnumerable<string> files = FileSystems.Default.EnumerateFiles(DebugDumpPath, "MSBuild*failure.txt");
+
+            foreach (string file in files)
+            {
+                if (File.GetLastWriteTimeUtc(file) >= fromTimeUtc)
+                {
+                    builder.Append(Environment.NewLine);
+                    builder.Append(file);
+                    builder.Append(":");
+                    builder.Append(Environment.NewLine);
+                    builder.Append(File.ReadAllText(file));
+                    builder.Append(Environment.NewLine);
                 }
             }
 
-            using (StreamWriter writer = new StreamWriter(s_dumpFileName, true /*append*/))
-            {
-                // "G" format is, e.g., 6/15/2008 9:15:07 PM
-                writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
-                writer.WriteLine(ex.ToString());
-                writer.WriteLine("===================");
-            }
+            return builder.ToString();
         }
 #endif
 

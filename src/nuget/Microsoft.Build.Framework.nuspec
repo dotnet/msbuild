@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata minClientVersion="2.8.1">
     <id>Microsoft.Build.Framework</id>
@@ -13,10 +13,25 @@
     <summary>MSBuild APIs</summary>
     <description>
       This package includes APIs that support writing MSBuild tasks.
+      NOTE: This package is deprecated.  Please move to the 15.1.X packages available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
     </description>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <releaseNotes>
+      This package is deprecated.  Please move to the 15.1.X packages available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
+    </releaseNotes>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <dependencies>
+      <group targetFramework="netstandard1.3">
+        <dependency id="System.Collections" version="4.0.11" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.11" />
+        <dependency id="System.Globalization" version="4.0.11" />
+        <dependency id="System.Runtime" version="4.1.0" />
+        <dependency id="System.Runtime.InteropServices" version="4.1.0" />
+        <dependency id="System.Threading" version="4.0.11" />
+        <dependency id="System.Threading.Thread" version="4.0.0" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
-    <file src="Microsoft.Build.Framework.dll" target="lib\net46" />
+    <file src="Microsoft.Build.Framework.dll" target="lib\netstandard1.3" />
   </files>
 </package>

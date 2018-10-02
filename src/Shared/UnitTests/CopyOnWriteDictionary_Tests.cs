@@ -1,18 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Tests for the copy on write dictionary class</summary>
-//-----------------------------------------------------------------------
 
 using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;

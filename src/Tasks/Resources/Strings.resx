@@ -1,0 +1,2875 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!--
+
+   See bottom of this file for information about message buckets.
+
+   Please keep this file sorted.
+
+  -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="UESanitized" type="xsd:boolean" msdata:Ordinal="3" />
+              <xsd:attribute name="Visibility" type="Visibility_Type" msdata:Ordinal="4" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="5" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="6" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+    <xsd:simpleType name="Visibility_Type">
+      <xsd:restriction base="xsd:string">
+        <xsd:enumeration value="Public" />
+        <xsd:enumeration value="Obsolete" />
+        <xsd:enumeration value="Private_OM" />
+      </xsd:restriction>
+    </xsd:simpleType>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!--
+        The Al message bucket is: MSB3011 - MSB3020
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <!-- MSB3011 has already been used, and removed; do not reuse it for another message -->
+  <!--
+        The AppConfig group of messages does not have a message code bucket.
+
+        If a message in this group needs a code, pls. contact 'vsppbdev'.
+  -->
+  <data name="AppConfig.BindingRedirectMissingOldVersion">
+    <value>BindingRedirect is missing required field 'oldVersion'.</value>
+  </data>
+  <data name="AppConfig.BindingRedirectMissingNewVersion">
+    <value>BindingRedirect is missing required field 'newVersion'.</value>
+  </data>
+  <data name="AppConfig.InvalidAssemblyIdentityFields">
+    <value>Some attributes of the assemblyIdentity element are incorrect.</value>
+  </data>
+  <data name="AppConfig.InvalidOldVersionAttribute">
+    <value>There was a problem parsing the oldVersion attribute. {0}</value>
+  </data>
+  <data name="AppConfig.InvalidNewVersionAttribute">
+    <value>There was a problem parsing the newVersion attribute. {0}</value>
+  </data>
+  <!--
+        The AssignProjectConfiguration message bucket is: MSB3601 - MSB3610
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="AssignProjectConfiguration.IllegalMappingString">
+    <value>The platform mapping "{0}" in the platform mapping list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "foo=bar;foo2=bar2".</value>
+  </data>
+  <data name="AssignProjectConfiguration.ProjectConfigurationUnresolved">
+    <value>Project reference "{0}" has not been resolved.</value>
+    <comment>
+      UE and LOCALIZATION:
+      This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
+      processing in the .targets file.
+    </comment>
+  </data>
+  <data name="AssignProjectConfiguration.ProjectConfigurationResolutionSuccess">
+    <value>Project reference "{0}" has been assigned the "{1}" configuration.</value>
+  </data>
+  <!--
+        The AspNetCompiler message bucket is: MSB3461 - MSB3470.
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="AspNetCompiler.CannotCombineMetabaseAndVirtualPathOrPhysicalPath">
+    <value>MSB3461: The MetabasePath parameter cannot be combined with VirtualPath or PhysicalPath.</value>
+    <comment>{StrBegin="MSB3461: "}</comment>
+  </data>
+  <data name="AspNetCompiler.MissingMetabasePathAndVirtualPath">
+    <value>MSB3462: Either MetabasePath or VirtualPath must be specified.</value>
+    <comment>{StrBegin="MSB3462: "}</comment>
+  </data>
+  <data name="AspNetCompiler.MissingTargetPathForUpdatableApplication">
+    <value>MSB3463: The TargetPath parameter must be specified if the application is updatable.</value>
+    <comment>{StrBegin="MSB3463: "}</comment>
+  </data>
+  <data name="AspNetCompiler.MissingTargetPathForOverwrittenApplication">
+    <value>MSB3464: The TargetPath parameter must be specified if the target directory needs to be overwritten.</value>
+    <comment>{StrBegin="MSB3464: "}</comment>
+  </data>
+  <!--
+        The AssignCulture message bucket is: MSB3001 - MSB3010.
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="AssignCulture.CannotExtractCulture">
+    <value>MSB3001: Cannot extract culture information from file name "{0}". {1}</value>
+    <comment>{StrBegin="MSB3001: "}</comment>
+  </data>
+  <data name="AssignCulture.Comment">
+    <value>Culture of "{0}" was assigned to file "{1}".</value>
+  </data>
+  <!--
+        The AxImp message bucket is: MSB3656 - MSB3660.
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="AxImp.NoInputFileSpecified">
+    <value>MSB3656: No input file has been passed to the task, exiting.</value>
+    <comment>{StrBegin="MSB3656: "}</comment>
+  </data>
+  <!--
+        The AxTlbBaseTask message bucket is: MSB3646 - MSB3655.
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="AxTlbBaseTask.CannotSpecifyBothKeyFileAndKeyContainer">
+    <value>MSB3646: Cannot specify values for both KeyFile and KeyContainer.</value>
+    <comment>{StrBegin="MSB3646: "}</comment>
+  </data>
+  <data name="AxTlbBaseTask.CannotSpecifyDelaySignWithoutEitherKeyFileOrKeyContainer">
+    <value>MSB3647: DelaySign parameter is true, but no KeyFile or KeyContainer was specified.</value>
+    <comment>{StrBegin="MSB3647: "}</comment>
+  </data>
+  <data name="AxTlbBaseTask.InvalidKeyFileSpecified">
+    <value>MSB3649: The KeyFile path '{0}' is invalid. KeyFile must point to an existing file.</value>
+    <comment>{StrBegin="MSB3649: "}</comment>
+  </data>
+  <data name="AxTlbBaseTask.SdkOrToolPathNotSpecifiedOrInvalid">
+    <value>MSB3650: Neither SDKToolsPath '{0}' nor ToolPath '{1}' is a valid directory.  One of these must be set.</value>
+    <comment>{StrBegin="MSB3650: "}</comment>
+  </data>
+  <data name="AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer">
+    <value>MSB3651: The key container '{0}' does not contain a public/private key pair.</value>
+    <comment>{StrBegin="MSB3651: "}</comment>
+  </data>
+  <data name="AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile">
+    <value>MSB3652: The key file '{0}' does not contain a public/private key pair.</value>
+    <comment>{StrBegin="MSB3652: "}</comment>
+  </data>
+  <data name="AxTlbBaseTask.ToolNameMustBeSet">
+    <value>MSB3653: AxTlbBaseTask is not an executable task. If deriving from it, please ensure the ToolName property was set.</value>
+    <comment>{StrBegin="MSB3653: "}</comment>
+  </data>
+  <data name="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
+    <value>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</value>
+    <comment>{StrBegin="MSB3654: "}</comment>
+  </data>
+  <!--
+        Compiler error messages added.
+       The Compiler message bucket is: MSB3881- MSB3890.
+  -->
+  <data name="Compiler.FatalArguments">
+    <value>MSB3881: Fatal Error: more than {0} command line arguments.</value>
+    <comment>{StrBegin="MSB3881: "}</comment>
+  </data>
+  <data name="Compiler.FatalNoResponse">
+    <value>MSB3882: Fatal Error: No response from server.</value>
+    <comment>{StrBegin="MSB3882: "}</comment>
+  </data>
+  <data name="Compiler.UnexpectedException">
+    <value>MSB3883: Unexpected exception: </value>
+    <comment>{StrBegin="MSB3883: "}</comment>
+  </data>
+  <data name="Compiler.UnableToFindRuleSet">
+    <value>MSB3884: Could not find rule set file "{0}".</value>
+  <comment>{StrBegin="MSB3884: "}</comment>
+  </data>
+
+  <!--
+        The Copy message bucket is: MSB3021 - MSB3030
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Copy.CreatesDirectory">
+    <value>Creating directory "{0}".</value>
+  </data>
+  <data name="Copy.DestinationIsDirectory">
+    <value>MSB3024: Could not copy the file "{0}" to the destination file "{1}", because the destination is a folder instead of a file. To copy the source file into a folder, consider using the DestinationFolder parameter instead of DestinationFiles.</value>
+    <comment>{StrBegin="MSB3024: "}</comment>
+  </data>
+  <data name="Copy.DidNotCopyBecauseOfFileMatch">
+    <value>Did not copy from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
+  </data>
+  <data name="Copy.Error">
+    <value>MSB3021: Unable to copy file "{0}" to "{1}". {2}</value>
+    <comment>{StrBegin="MSB3021: "}</comment>
+  </data>
+  <data name="Copy.ExactlyOneTypeOfDestination">
+    <value>MSB3022: Both "{0}" and "{1}" were specified as input parameters in the project file. Please choose one or the other.</value>
+    <comment>{StrBegin="MSB3022: "}</comment>
+  </data>
+  <data name="Copy.FileComment">
+    <value>Copying file from "{0}" to "{1}".</value>
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>
+  </data>
+  <data name="Copy.HardLinkComment">
+    <value>Creating hard link to copy "{0}" to "{1}".</value>
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>
+  </data>
+  <data name="Copy.RetryingAsFileCopy">
+    <value>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</value>
+    <comment>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</comment>
+  </data>
+  <data name="Copy.NeedsDestination">
+    <value>MSB3023: No destination specified for Copy. Please supply either "{0}" or "{1}".</value>
+    <comment>{StrBegin="MSB3023: "}</comment>
+  </data>
+  <data name="Copy.RemovingReadOnlyAttribute">
+    <value>Removing read-only attribute from "{0}".</value>
+  </data>
+  <data name="Copy.SourceIsDirectory">
+    <value>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</value>
+    <comment>{StrBegin="MSB3025: "}</comment>
+  </data>
+  <data name="Copy.SymbolicLinkComment">
+    <value>Creating symbolic link to copy "{0}" to "{1}".</value>
+    <comment>LOCALIZATION: {0} and {1} are paths.</comment>
+  </data>
+  <data name="Copy.Retrying">
+    <value>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</value>
+    <comment>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</comment>
+  </data>
+  <data name="Copy.ExceededRetries">
+    <value>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</value>
+    <comment>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</comment>
+  </data>
+  <data name="Copy.InvalidRetryCount">
+    <value>MSB3028: {0} is an invalid retry count. Value must not be negative.</value>
+    <comment>{StrBegin="MSB3028: "} LOCALIZATION: {0} is a number.</comment>
+  </data>
+  <data name="Copy.InvalidRetryDelay">
+    <value>MSB3029: {0} is an invalid retry delay. Value must not be negative.</value>
+    <comment>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</comment>
+  </data>
+  <data name="Copy.SourceFileNotFound">
+    <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
+    <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
+  </data>
+  <data name="Copy.FileLocked">
+    <value>The file is locked by: "{0}"</value>
+  </data>
+
+  <!--
+        The CreateItem message bucket is: MSB3031 - MSB3040
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="CreateItem.AdditionalMetadataError" UESanitized="false">
+    <value>MSB3031: Could not set additional metadata. "{0}" is a reserved metadata name and cannot be modified.</value>
+    <comment>{StrBegin="MSB3031: "} UE: Tasks and OM users are not allowed to remove or change the value of the built-in meta-data on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
+  </data>
+
+  <!--
+        The CreateManifestResourceName message bucket is: MSB3041 - MSB3050
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="CreateManifestResourceName.AssignedName">
+    <value>Resource file '{0}' gets manifest resource name '{1}'.</value>
+  </data>
+  <data name="CreateManifestResourceName.DefinitionFoundWithinConditionalDirective">
+    <value>MSB3042: A namespace or class definition was found within a conditional compilation directive in the file "{0}".  This may lead to an incorrect choice for the manifest resource name for resource "{1}".</value>
+    <comment>{StrBegin="MSB3042: "}</comment>
+  </data>
+  <data name="CreateManifestResourceName.DependsUpon">
+    <value>Resource file '{0}' depends on '{1}'.</value>
+  </data>
+  <data name="CreateManifestResourceName.DependsUponNothing">
+    <value>Resource file '{0}' doesn't depend on any other file.</value>
+  </data>
+  <data name="CreateManifestResourceName.Error">
+    <value>MSB3041: Unable to create a manifest resource name for "{0}". {1}</value>
+    <comment>{StrBegin="MSB3041: "}</comment>
+  </data>
+  <data name="CreateManifestResourceName.NoRootNamespace">
+    <value>Root namespace is empty.</value>
+  </data>
+  <data name="CreateManifestResourceName.RootNamespace">
+    <value>Root namespace is '{0}'.</value>
+  </data>
+  <!--
+        The CreateTemporaryVCProject message bucket is: MSB3611 - MSB3620
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <!--
+        The Csc message bucket is: MSB3051 - MSB3060
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Csc.AssemblyAliasContainsIllegalCharacters">
+    <value>MSB3053: The assembly alias "{1}" on reference "{0}" contains illegal characters.</value>
+    <comment>{StrBegin="MSB3053: "}</comment>
+  </data>
+  <data name="Csc.InvalidParameter">
+    <value>MSB3051: The parameter to the compiler is invalid.  {0}</value>
+    <comment>{StrBegin="MSB3051: "}</comment>
+  </data>
+  <data name="Csc.InvalidParameterWarning">
+    <value>MSB3052: The parameter to the compiler is invalid, '{0}{1}' will be ignored.</value>
+    <comment>{StrBegin="MSB3052: "}</comment>
+  </data>
+  <!--
+        The Delete message bucket is: MSB3061 - MSB3070
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Delete.DeletingFile">
+    <value>Deleting file "{0}".</value>
+  </data>
+  <data name="Delete.Error">
+    <value>MSB3061: Unable to delete file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3061: "}</comment>
+  </data>
+  <data name="Delete.SkippingNonexistentFile">
+    <value>File "{0}" doesn't exist. Skipping.</value>
+  </data>
+  <!--
+        The Exec message bucket is: MSB3071 - MSB3080
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Exec.AllDriveLettersMappedError">
+    <value>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</value>
+    <comment>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</comment>
+  </data>
+  <data name="Exec.CommandFailed">
+    <value>MSB3073: The command "{0}" exited with code {1}.</value>
+    <comment>{StrBegin="MSB3073: "}</comment>
+  </data>
+  <data name="Exec.CommandFailedAccessDenied">
+    <value>MSB3075: The command "{0}" exited with code {1}. Please verify that you have sufficient rights to run this command.</value>
+    <comment>{StrBegin="MSB3075: "}</comment>
+  </data>
+  <data name="Exec.CommandFailedNoErrorCode">
+    <value>The command "{0}" exited with code {1}.</value>
+  </data>
+  <data name="Exec.InvalidRegex">
+    <value>MSB3076: The regular expression "{0}" that was supplied is invalid. {1}</value>
+    <comment>{StrBegin="MSB3076: "}</comment>
+  </data>
+  <data name="Exec.MissingCommandError">
+    <value>MSB3072: The "Exec" task needs a command to execute.</value>
+    <comment>{StrBegin="MSB3072: "}LOCALIZATION: "Exec" should not be localized.</comment>
+  </data>
+  <data name="Exec.InvalidWorkingDirectory">
+    <value>The working directory "{0}" does not exist.</value>
+    <comment>No error code because an error will be prefixed.</comment>
+  </data>
+  <!--
+        The FindInList message bucket is: none currently
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="FindInList.Found">
+    <value>Found "{0}".</value>
+  </data>
+  <data name="FindInList.InvalidPath">
+    <value>"{0}" is not a valid file name. {1}</value>
+  </data>
+
+
+  <!--
+        The FindUnderPath message bucket is: MSB3541 - MSB3550
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="FindUnderPath.ComparisonPath">
+    <value>Comparison path is "{0}".</value>
+  </data>
+  <data name="FindUnderPath.InvalidParameter">
+    <value>MSB3541: {0} has invalid value "{1}". {2}</value>
+    <comment>{StrBegin="MSB3541: "}</comment>
+  </data>
+  <!--
+        The General message bucket is:
+        MSB3081 - MSB3109
+        MSB3666 - MSB3675   Task: General
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="General.CouldNotDeleteStateFile">
+    <value>MSB3102: Could not delete state file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3102: "}</comment>
+  </data>
+  <data name="General.CouldNotLocateAssembly">
+    <value>Could not locate the assembly "{0}". Check to make sure the assembly exists on disk.</value>
+  </data>
+  <data name="General.CouldNotReadStateFile">
+    <value>MSB3088: Could not read state file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3088: "}</comment>
+  </data>
+  <data name="General.CouldNotReadStateFileMessage">
+    <value>Could not read state file "{0}". {1}</value>
+  </data>
+  <data name="General.CouldNotSetHostObjectParameter">
+    <value>MSB3081: A problem occurred while trying to set the "{0}" parameter for the IDE's in-process compiler. {1}</value>
+    <comment>{StrBegin="MSB3081: "}</comment>
+  </data>
+  <data name="General.CouldNotWriteStateFile">
+    <value>MSB3101: Could not write state file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3101: "}</comment>
+  </data>
+  <data name="General.DuplicateItemsNotSupported">
+    <value>MSB3105: The item "{0}" was specified more than once in the "{1}" parameter.  Duplicate items are not supported by the "{1}" parameter.</value>
+    <comment>{StrBegin="MSB3105: "}</comment>
+  </data>
+  <data name="General.DuplicateItemsNotSupportedWithMetadata">
+    <value>MSB3083: The item "{0}" was specified more than once in the "{1}" parameter and both items had the same value "{2}" for the "{3}" metadata.  Duplicate items are not supported by the "{1}" parameter unless they have different values for the "{3}" metadata.</value>
+    <comment>{StrBegin="MSB3083: "}</comment>
+  </data>
+  <data name="General.ErrorExecutingTask">
+    <value>MSB3108: Error executing the {0} task. {1}</value>
+    <comment>{StrBegin="MSB3108: "}</comment>
+  </data>
+  <data name="General.ExpectedFileGotDirectory">
+    <value>Expected a file but got directory "{0}".</value>
+  </data>
+  <data name="General.ExpectedFileMissing">
+    <value>Expected file "{0}" does not exist.</value>
+  </data>
+  <data name="General.FrameworksFileNotFound">
+    <value>MSB3082: Task failed because "{0}" was not found, or the .NET Framework {1} is not installed.  Please install the .NET Framework {1}.</value>
+    <comment>{StrBegin="MSB3082: "}</comment>
+  </data>
+  <data name="General.IncorrectHostObject">
+    <value>MSB3087: An incompatible host object was passed into the "{0}" task.  The host object for this task must implement the "{1}" interface.</value>
+    <comment>{StrBegin="MSB3087: "}</comment>
+  </data>
+  <data name="General.IncompatibleStateFileType">
+    <value>The format of this state file is not valid.</value>
+  </data>
+  <data name="General.InvalidAttributeMetadata">
+    <value>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</value>
+  </data>
+  <data name="General.InvalidArgument">
+    <value>MSB3095: Invalid argument. {0}</value>
+    <comment>{StrBegin="MSB3095: "}</comment>
+  </data>
+  <data name="General.InvalidAssembly">
+    <value>MSB3097: File "{0}" is not a valid assembly.</value>
+    <comment>{StrBegin="MSB3097: "}</comment>
+  </data>
+  <data name="General.InvalidValue">
+    <value>MSB3098: "{1}" task received an invalid value for the "{0}" parameter.</value>
+    <comment>{StrBegin="MSB3098: "}</comment>
+  </data>
+  <data name="General.InvalidAssemblyName" UESanitized="false" Visibility="Public">
+    <value>MSB3099: Invalid assembly name "{0}". {1}</value>
+    <comment>{StrBegin="MSB3099: "}UE: This message is shown when RegisterAssembly or UnregisterAssembly is passed an assembly with an invalid filename. "{0}" is the name of the file, and "{1}" is a message explaining the problem. LOCALIZATION: "{1}" is a localized message.</comment>
+  </data>
+  <data name="General.InvalidPropertyError" UESanitized="false" Visibility="Public">
+    <value>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</value>
+    <comment>{StrBegin="MSB3100: "}This error is shown if the user does any of the following:
+    Properties="foo"              (missing property value)
+    Properties="=4"               (missing property name)
+    The user must pass in an actual property name and value, as in Properties="Configuration=Debug".</comment>
+  </data>
+  <data name="General.GlobalProperties">
+    <value>Global Properties:</value>
+  </data>
+  <data name="General.UndefineProperties">
+    <value>Removing Properties:</value>
+  </data>
+  <data name="General.OverridingProperties">
+    <value>Overriding Global Properties for project "{0}" with:</value>
+  </data>
+  <data name="General.AdditionalProperties">
+    <value>Additional Properties for project "{0}":</value>
+  </data>
+  <data name="General.ProjectUndefineProperties">
+    <value>Removing Properties for project "{0}":</value>
+  </data>
+  <data name="General.InvalidResxFile">
+    <value>MSB3103: Invalid Resx file. {0}</value>
+    <comment>{StrBegin="MSB3103: "}</comment>
+  </data>
+  <data name="General.MalformedAssemblyName">
+    <value>MSB3106: Assembly strong name "{0}" is either a path which could not be found or it is a full assembly name which is badly formed. If it is a full assembly name it may contain characters that need to be escaped with backslash(\). Those characters are Equals(=), Comma(,), Quote("), Apostrophe('), Backslash(\).</value>
+    <comment>{StrBegin="MSB3106: "}</comment>
+  </data>
+  <data name="General.MissingOrUnknownProjectReferenceAttribute">
+    <value>MSB3107: The specified project reference metadata for the reference "{0}" is missing or has an invalid value: {1}</value>
+    <comment>{StrBegin="MSB3107: "}</comment>
+  </data>
+  <data name="General.ParameterUnsupportedOnHostCompiler">
+    <value>The IDE's in-process compiler does not support the specified values for the "{0}" parameter.  Therefore, this task will fallback to using the command-line compiler.</value>
+  </data>
+  <data name="General.PlatformSDKFileNotFound">
+    <value>MSB3091: Task failed because "{0}" was not found, or the correct Microsoft Windows SDK is not installed. The task is looking for "{0}" in the "bin" subdirectory beneath the location specified in the {1} value of the registry key {2}. You may be able to solve the problem by doing one of the following:  1) Install the Microsoft Windows SDK.  2) Install Visual Studio 2010.  3) Manually set the above registry key to the correct location.  4) Pass the correct location into the "ToolPath" parameter of the task.</value>
+    <comment>{StrBegin="MSB3091: "}</comment>
+  </data>
+  <data name="General.PlatformSDKFileNotFoundSdkToolsPath">
+    <value>MSB3084: Task attempted to find "{0}" in two locations. 1) Under the "{1}" processor specific directory which is generated based on SdkToolsPath 2) The x86 specific directory under "{2}" which is specified by the SDKToolsPath property. You may be able to solve the problem by doing one of the following:  1) Set the "SDKToolsPath" property to the location of the Microsoft Windows SDK.</value>
+    <comment>{StrBegin="MSB3084: "}</comment>
+  </data>
+  <data name="General.SdkToolsPathNotSpecifiedOrToolDoesNotExist">
+    <value>Task attempted to find "{0}" using the SdkToolsPath value "{1}". Make sure the SdkToolsPath is set to the correct value and the tool exists in the correct processor specific location below it.</value>
+  </data>
+  <data name="General.SdkToolsPathToolDoesNotExist">
+    <value>MSB3086: Task could not find "{0}" using the SdkToolsPath "{1}" or the registry key "{2}". Make sure the SdkToolsPath is set and the tool exists in the correct processor specific location under the SdkToolsPath and that the Microsoft Windows SDK is installed</value>
+    <comment>{StrBegin="MSB3086: "}</comment>
+  </data>
+  <data name="General.SdkToolsPathError">
+    <value>MSB3666: The SDK tool "{0}" could not be found. {1}</value>
+    <comment>{StrBegin="MSB3666: "} The {1} will be the exception message</comment>
+  </data>
+  <data name="General.ReferenceDoesNotExist">
+    <value>MSB3104: The referenced assembly "{0}" was not found. If this assembly is produced by another one of your projects, please make sure to build that project before building this one.</value>
+    <comment>{StrBegin="MSB3104: "}</comment>
+  </data>
+  <data name="General.ToolCommandFailed">
+    <value>MSB3093: The command exited with code {0}.</value>
+    <comment>{StrBegin="MSB3093: "}</comment>
+  </data>
+  <data name="General.TwoVectorsMustHaveSameLength">
+    <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
+    <comment>{StrBegin="MSB3094: "}</comment>
+  </data>
+  <!--
+        The GenerateBindingRedirects message bucket is: MSB3831 - MSB3840
+
+        If this bucket overflows, pls. contact 'corefxdev'.
+  -->
+  <data name="GenerateBindingRedirects.MissingConfigurationNode">
+    <value>MSB3831: The application configuration file must have root configuration element.</value>
+    <comment>{StrBegin="MSB3831: "}</comment>
+  </data>
+  <data name="GenerateBindingRedirects.MalformedVersionNumber">
+    <value>MSB3832: The version number "{0}" is invalid.</value>
+    <comment>{StrBegin="MSB3832: "}</comment>
+  </data>
+  <data name="GenerateBindingRedirects.MalformedAssemblyName">
+    <value>MSB3833: The assembly name "{0}" contained in the suggested binding redirect is invalid.</value>
+    <comment>{StrBegin="MSB3833: "}</comment>
+  </data>
+  <data name="GenerateBindingRedirects.NoSuggestedRedirects">
+    <value>No suggested binding redirects from ResolveAssemblyReferences.</value>
+  </data>
+  <data name="GenerateBindingRedirects.MissingNode">
+    <value>MSB3835: The "{0}" node is missing from the "{1}" node. Skipping.</value>
+    <comment>{StrBegin="MSB3835: "}</comment>
+  </data>
+  <data name="GenerateBindingRedirects.OverlappingBindingRedirect">
+    <value>MSB3836: The explicit binding redirect on "{0}" conflicts with an autogenerated binding redirect. Consider removing it from the application configuration file or disabling autogenerated binding redirects. The build will replace it with: "{1}".</value>
+    <comment>{StrBegin="MSB3836: "}</comment>
+  </data>
+  <data name="GenerateBindingRedirects.ProcessingSuggestedRedirect">
+    <value>Processing suggested binding redirect on "{0}" with MaxVersion "{1}".</value>
+  </data>
+  <!--
+        The GenerateBootstrapper message bucket is: MSB3141 - MSB3170
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="GenerateBootstrapper.CircularDependency">
+    <value>MSB3161: A circular dependency was detected between the following built packages: {0}.</value>
+    <comment>{StrBegin="MSB3161: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.CopyError">
+    <value>MSB3142: An error occurred trying to copy '{0}' to '{1}': {2}</value>
+    <comment>{StrBegin="MSB3142: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.CopyPackageError">
+    <value>MSB3143: An error occurred trying to copy '{0}' for item '{1}': {2}</value>
+    <comment>{StrBegin="MSB3143: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.DependencyNotFound">
+    <value>MSB3162: The '{0}' item selected requires '{1}'. Select the missing prerequisite in the Prerequisites Dialog Box or create a bootstrapper package for the missing prerequisite.</value>
+    <comment>{StrBegin="MSB3162: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.DifferingPublicKeys">
+    <value>MSB3165: The value of the '{0}' attribute in '{1}' does not match that of file '{2}'.</value>
+    <comment>{StrBegin="MSB3165: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.DuplicateItems">
+    <value>MSB3168: Duplicate item '{0}' will be ignored.</value>
+    <comment>{StrBegin="MSB3168: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.General">
+    <value>MSB3169: An error occurred generating a bootstrapper: {0}</value>
+    <comment>{StrBegin="MSB3169: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.IncludedProductIncluded">
+    <value>MSB3151: Item '{0}' already includes '{1}'.</value>
+    <comment>{StrBegin="MSB3151: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.InvalidComponentsLocation">
+    <value>MSB3163: Build input parameter 'ComponentsLocation={0}' is not valid. The value must be one of 'HomeSite', 'Relative', or 'Absolute'. Defaulting to 'HomeSite'.</value>
+    <comment>{StrBegin="MSB3163: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.InvalidInput">
+    <value>MSB3144: Not enough data was provided to generate a bootstrapper. Please provide a value for at least one of the parameters: 'ApplicationFile' or 'BootstrapperItems'.</value>
+    <comment>{StrBegin="MSB3144: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.InvalidUrl">
+    <value>MSB3145: Build input parameter '{0}={1}' is not a web url or UNC share.</value>
+    <comment>{StrBegin="MSB3145: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.MissingDependency">
+    <value>MSB3146: Item '{0}' is required by '{1}', but was not included.</value>
+    <comment>{StrBegin="MSB3146: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.MissingDependencyMultiple">
+    <value>MSB3696: One of the following items '{0}' is required by '{1}', but none were included.</value>
+    <comment>{StrBegin="MSB3696: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.MissingSetupBin">
+    <value>MSB3147: Could not find required file '{0}' in '{1}'.</value>
+    <comment>{StrBegin="MSB3147: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.MissingVerificationInformation">
+    <value>MSB3141: No 'PublicKey' or 'Hash' attribute specified for file '{0}' in item '{1}'.</value>
+    <comment>{StrBegin="MSB3141: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.MultipleDependeciesNotFound">
+    <value>MSB3170: Item '{0}' could not find any of dependent items '{1}'.</value>
+    <comment>{StrBegin="MSB3170: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.NoOutputPath">
+    <value>MSB3148: No output path specified in build settings.</value>
+    <comment>{StrBegin="MSB3148: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.NoResources">
+    <value>MSB3149: No resources available for building a bootstrapper.</value>
+    <comment>{StrBegin="MSB3149: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.NoStringsForCulture">
+    <value>MSB3150: No string resources available for building a bootstrapper with culture '{0}'.</value>
+    <comment>{StrBegin="MSB3150: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.PackageFileNotFound">
+    <value>MSB3152: To enable 'Download prerequisites from the same location as my application' in the Prerequisites dialog box, you must download file '{0}' for item '{1}' to your local machine. For more information, see http://go.microsoft.com/fwlink/?LinkId=616018.</value>
+    <comment>{StrBegin="MSB3152: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.PackageResourceFileNotFound">
+    <value>MSB3166: Could not find required file '{0}' for item '{1}'.</value>
+    <comment>{StrBegin="MSB3166: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.PackageHomeSiteMissing">
+    <value>MSB3164: No 'HomeSite' attribute has been provided for '{0}', so the package will be published to the same location as the bootstrapper.</value>
+    <comment>{StrBegin="MSB3164: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.PackageValidation">
+    <value>MSB3153: Xml validation did not pass for item '{0}' located at '{1}'.</value>
+    <comment>{StrBegin="MSB3153: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.ProductCultureNotFound">
+    <value>MSB3154: Could not find string resources for item '{0}'.</value>
+    <comment>{StrBegin="MSB3154: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.ProductNotFound">
+    <value>MSB3155: Item '{0}' could not be located in '{1}'.</value>
+    <comment>{StrBegin="MSB3155: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.ProductValidation">
+    <value>MSB3156: Xml validation did not pass for item '{0}' located at '{1}'.</value>
+    <comment>{StrBegin="MSB3156: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.UsingProductCulture">
+    <value>MSB3157: Could not match culture '{0}' for item '{1}'. Using culture '{2}' instead.</value>
+    <comment>{StrBegin="MSB3157: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.UsingResourcesCulture">
+    <value>MSB3158: Could not find resources for culture '{0}'. Using culture '{1}' instead.</value>
+    <comment>{StrBegin="MSB3158: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.ValidationError">
+    <value>MSB3159: Xml Validation error in file '{0}': {1}</value>
+    <comment>{StrBegin="MSB3159: "}</comment>
+  </data>
+  <data name="GenerateBootstrapper.ValidationWarning">
+    <value>MSB3160: Xml Validation warning in file '{0}': {1}</value>
+    <comment>{StrBegin="MSB3160: "}</comment>
+  </data>
+  <!--
+        The GenerateManifest message bucket is:
+            MSB3171 - MSB3190
+            MSB3110 - MSB3130
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="GenerateManifest.AllowPartiallyTrustedCallers">
+    <value>MSB3177: Reference '{0}' does not allow partially trusted callers.</value>
+    <comment>{StrBegin="MSB3177: "}</comment>
+  </data>
+  <data name="GenerateManifest.AssemblyAsFile">
+    <value>MSB3178: Assembly '{0}' is incorrectly specified as a file.</value>
+    <comment>{StrBegin="MSB3178: "}</comment>
+  </data>
+  <data name="GenerateManifest.ComImport">
+    <value>MSB3179: Problem isolating COM reference '{0}': {1}</value>
+    <comment>{StrBegin="MSB3179: "}</comment>
+  </data>
+  <data name="GenerateManifest.ConfigBindingRedirectsWithPartialTrust">
+    <value>MSB3111: Use of app.config binding redirects requires full trust.</value>
+    <comment>{StrBegin="MSB3111: "}</comment>
+  </data>
+  <data name="GenerateManifest.DuplicateAssemblyIdentity">
+    <value>MSB3112: Two or more assemblies have the same identity '{0}'.</value>
+    <comment>{StrBegin="MSB3112: "}</comment>
+  </data>
+  <data name="GenerateManifest.DuplicateComDefinition">
+    <value>MSB3180: COM component '{1}' is defined in both '{3}' and '{4}', {0}="{2}".</value>
+    <comment>{StrBegin="MSB3180: "}</comment>
+  </data>
+  <data name="GenerateManifest.DuplicateTargetPath">
+    <value>MSB3181: Two or more files have the same target path '{0}'.</value>
+    <comment>{StrBegin="MSB3181: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationDefaultIconNotInstalled">
+    <value>MSB3127: The default icon {0} could not be found in the current file references or is not part of the required download group. The default icon file name is case sensitive so the file name referenced in the application manifest must exactly match the icon's file name.</value>
+    <comment>{StrBegin="MSB3127: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationExtensionMissingLeadDot">
+    <value>MSB3119: File association extensions must start with a period character (.).</value>
+    <comment>{StrBegin="MSB3119: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationExtensionTooLong">
+    <value>MSB3120: File association extension '{0}' exceeds the maximum allowed length of {1}.</value>
+    <comment>{StrBegin="MSB3120: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationMissingAttribute">
+    <value>MSB3121: The file association element in the application manifest is missing one or more of the following required attributes: extension, description, progid, or default icon.</value>
+    <comment>{StrBegin="MSB3121: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationsApplicationNotFullTrust">
+    <value>MSB3122: Use of file associations requires full trust.</value>
+    <comment>{StrBegin="MSB3122: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationsCountExceedsMaximum">
+    <value>MSB3123: The number of file associations exceeds the limit of {0}.</value>
+    <comment>{StrBegin="MSB3123: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationsDuplicateExtensions">
+    <value>MSB3124: A file association has already been created for extension '{0}'.</value>
+    <comment>{StrBegin="MSB3124: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationsNoEntryPoint">
+    <value>MSB3125: The application is using file associations but has no EntryPoint build parameter.</value>
+    <comment>{StrBegin="MSB3125: "}</comment>
+  </data>
+  <data name="GenerateManifest.FileAssociationsNotInstalled">
+    <value>MSB3126: The application is using file associations but is not marked for installation. File associations cannot be used for applications that are not installed such as applications hosted in a web browser.</value>
+    <comment>{StrBegin="MSB3126: "}</comment>
+  </data>
+  <data name="GenerateManifest.General">
+    <value>MSB3171: Problem generating manifest. {0}</value>
+    <comment>{StrBegin="MSB3171: "}</comment>
+  </data>
+  <data name="GenerateManifest.GreaterMinimumRequiredVersion">
+    <value>MSB3176: Specified minimum required version is greater than the current publish version. Please specify a version less than or equal to the current publish version.</value>
+    <comment>{StrBegin="MSB3176: "}</comment>
+  </data>
+  <data name="GenerateManifest.HostInBrowserInvalidFrameworkVersion">
+    <value>MSB3117: Application is set to host in browser but the TargetFrameworkVersion is set to v2.0.</value>
+  </data>
+  <data name="GenerateManifest.HostInBrowserNotOnlineOnly">
+    <value>MSB3116: Application is marked to host in browser but is also marked for online and offline use. Please change your application to online only.</value>
+  </data>
+  <data name="GenerateManifest.IdentityFileNameMismatch">
+    <value>MSB3110: Assembly '{0}' has mismatched identity '{1}', expected file name: '{2}'.</value>
+    <comment>{StrBegin="MSB3110: "}</comment>
+  </data>
+  <data name="GenerateManifest.InvalidEntryPoint">
+    <value>MSB3115: File '{0}' is not a valid entry point.</value>
+    <comment>{StrBegin="MSB3115: "}</comment>
+  </data>
+  <data name="GenerateManifest.InvalidInputManifest">
+    <value>MSB3184: Input manifest is invalid.</value>
+    <comment>{StrBegin="MSB3184: "}</comment>
+  </data>
+  <data name="GenerateManifest.ExcludedPermissionsNotSupported">
+    <value>MSB3133: The ExcludePermissions property is deprecated. The permission set requested by the application has been set to the permissions defined in Internet or Local Intranet zone. To continue using a custom Permission Set, define your custom permission set in the Security Page of the Project Designer.</value>
+    <comment>{StrBegin="MSB3133: "}</comment>
+  </data>
+  <data name="GenerateManifest.KnownTargetZoneCannotHaveAdditionalPermissionType">
+    <value>MSB3134: The permission set requested by the application exceeded the permissions allowed by the Internet or Intranet zones. Select Full Trust or to continue using partial trust, define your custom permission set in the Security Page of the Project Designer.</value>
+    <comment>{StrBegin="MSB3134: "}</comment>
+  </data>
+  <data name="GenerateManifest.NoPermissionSetForTargetZone">
+    <value>MSB3135: The PermissionSet for the target zone has not been defined for the following version of the .NET Framework: {0}.</value>
+    <comment>{StrBegin="MSB3135: "}</comment>
+  </data>
+  <data name="GenerateManifest.InvalidItemValue">
+    <value>MSB3175: Invalid value for '{0}' of item '{1}'.</value>
+    <comment>{StrBegin="MSB3175: "}</comment>
+  </data>
+  <data name="GenerateManifest.InvalidValue">
+    <value>MSB3174: Invalid value for '{0}'.</value>
+    <comment>{StrBegin="MSB3174: "}</comment>
+  </data>
+  <data name="GenerateManifest.InvalidDeploymentProvider">
+    <value>MSB3189: The update location for this application is a local path.</value>
+    <comment>{StrBegin="MSB3189: "}</comment>
+  </data>
+  <data name="GenerateManifest.NoEntryPoint">
+    <value>MSB3185: EntryPoint not specified for manifest.</value>
+    <comment>{StrBegin="MSB3185: "}</comment>
+  </data>
+  <data name="GenerateManifest.NoIdentity">
+    <value>MSB3186: Unable to infer an assembly identity for generated manifest from task input parameters.</value>
+    <comment>{StrBegin="MSB3186: "}</comment>
+  </data>
+  <data name="GenerateManifest.PlatformMismatch">
+    <value>MSB3187: Referenced assembly '{0}' targets a different processor than the application.</value>
+    <comment>{StrBegin="MSB3187: "}</comment>
+  </data>
+  <data name="GenerateManifest.PrerequisiteNotSigned">
+    <value>MSB3188: Assembly '{0}' must be strong signed in order to be marked as a prerequisite.</value>
+    <comment>{StrBegin="MSB3188: "}</comment>
+  </data>
+  <data name="GenerateManifest.ReadInputManifestFailed">
+    <value>MSB3172: Unable to read manifest '{0}'. {1}</value>
+    <comment>{StrBegin="MSB3172: "}</comment>
+  </data>
+  <data name="GenerateManifest.ResolveFailedInReadOnlyMode">
+    <value>MSB3114: Could not find file '{0}' referenced by assembly '{1}'.</value>
+    <comment>{StrBegin="MSB3114: "}</comment>
+  </data>
+  <data name="GenerateManifest.ResolveFailedInReadWriteMode">
+    <value>MSB3113: Could not find file '{0}'.</value>
+    <comment>{StrBegin="MSB3113: "}</comment>
+  </data>
+  <data name="GenerateManifest.ManifestsSignedHashExcluded">
+    <value>MSB3128: The ClickOnce manifests cannot be signed because they contain one or more references that are not hashed.</value>
+    <comment>{StrBegin="MSB3128: "}</comment>
+  </data>
+  <data name="GenerateManifest.TargetPathTooLong">
+    <value>MSB3182: File name '{0}' exceeds {1} characters.</value>
+    <comment>{StrBegin="MSB3182: "}</comment>
+  </data>
+  <data name="GenerateManifest.UnmanagedCodePermission">
+    <value>MSB3183: Reference '{0}' is an interop assembly requiring full trust.</value>
+    <comment>{StrBegin="MSB3183: "}</comment>
+  </data>
+  <data name="GenerateManifest.WriteOutputManifestFailed">
+    <value>MSB3173: Unable to write manifest '{0}'. {1}</value>
+    <comment>{StrBegin="MSB3173: "}</comment>
+  </data>
+  <data name="GenerateManifest.InvalidRequestedExecutionLevel">
+    <value>MSB3190: ClickOnce does not support the request execution level '{0}'.</value>
+    <comment>{StrBegin="MSB3190: "}</comment>
+  </data>
+  <!--
+        The GenerateResource message bucket is: MSB3551 - MSB3580, MSB3811 - MSB3830
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="GenerateResource.ResourceNotFound">
+    <value>MSB3552: Resource file "{0}" cannot be found.</value>
+    <comment>{StrBegin="MSB3552: "}</comment>
+  </data>
+  <data name="GenerateResource.InvalidFilename">
+    <value>MSB3553: Resource file "{0}" has an invalid name. {1}</value>
+    <comment>{StrBegin="MSB3553: "}Appears if the input file name is so invalid we can't change the file extension on it.</comment>
+  </data>
+  <data name="GenerateResource.CannotWriteOutput">
+    <value>MSB3554: Cannot write to the output file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3554: "}</comment>
+  </data>
+  <data name="GenerateResource.CorruptOutput">
+    <value>MSB3555: Output file "{0}" is possibly corrupt.</value>
+    <comment>{StrBegin="MSB3555: "}</comment>
+  </data>
+  <data name="GenerateResource.OnlyStringsSupported">
+    <value>MSB3556: Only strings can be written to a .txt file, resource "{0}" is type {1}.</value>
+    <comment>{StrBegin="MSB3556: "}</comment>
+  </data>
+  <data name="GenerateResource.ErrorFromCodeDom">
+    <value>MSB3557: Error(s) generating strongly typed resources for file "{0}".</value>
+    <comment>{StrBegin="MSB3557: "}</comment>
+  </data>
+  <data name="GenerateResource.UnknownFileExtension">
+    <value>MSB3558: Unsupported file extension "{0}" on file "{1}".</value>
+    <comment>{StrBegin="MSB3558: "}</comment>
+  </data>
+  <data name="GenerateResource.STRCodeDomProviderFailed">
+    <value>MSB3559: The code DOM provider for the "{0}" language failed. {1}</value>
+    <comment>{StrBegin="MSB3559: "}</comment>
+  </data>
+  <data name="GenerateResource.DeleteCorruptOutputFailed">
+    <value>MSB3560: Could not delete the possibly corrupt output file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3560: "}</comment>
+  </data>
+  <data name="GenerateResource.ObsoleteStringsTag">
+    <value>MSB3562: The "[strings]" tag is no longer necessary in text resources; please remove it.</value>
+    <comment>{StrBegin="MSB3562: "}</comment>
+  </data>
+  <data name="GenerateResource.UnexpectedInfBracket">
+    <value>MSB3563: Unsupported square bracket keyword, "{0}".</value>
+    <comment>{StrBegin="MSB3563: "}</comment>
+  </data>
+  <data name="GenerateResource.NoEqualsInLine">
+    <value>MSB3564: Resource line without an equals sign, "{0}".</value>
+    <comment>{StrBegin="MSB3564: "}</comment>
+  </data>
+  <data name="GenerateResource.NoNameInLine">
+    <value>MSB3565: Resource line without a name.</value>
+    <comment>{StrBegin="MSB3565: "}</comment>
+  </data>
+  <data name="GenerateResource.InvalidEscape">
+    <value>MSB3566: Unsupported or invalid escape character in resource "{0}", char '{1}'.</value>
+    <comment>{StrBegin="MSB3566: "}</comment>
+  </data>
+  <data name="GenerateResource.CodeDomError">
+    <value>MSB3567: Could not generate property on class "{0}".</value>
+    <comment>{StrBegin="MSB3567: "}</comment>
+  </data>
+  <data name="GenerateResource.CouldNotLoadType">
+    <value>Could not load type {0} which is used in the .RESX file.  Ensure that the necessary references have been added to your project.</value>
+  </data>
+  <data name="GenerateResource.DuplicateResourceName">
+    <value>MSB3568: Duplicate resource name "{0}" is not allowed, ignored.</value>
+    <comment>{StrBegin="MSB3568: "}</comment>
+  </data>
+  <data name="GenerateResource.InvalidHexEscapeValue">
+    <value>MSB3569: Invalid hex value after '\u' in resource "{0}", value '{1}'.</value>
+    <comment>{StrBegin="MSB3569: "}</comment>
+  </data>
+  <data name="GenerateResource.CannotWriteSTRFile">
+    <value>MSB3570: Cannot write to the Strongly Typed Resource class file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3570: "}</comment>
+  </data>
+  <data name="GenerateResource.STRClassNamespaceOrFilenameWithoutLanguage">
+    <value>MSB3572: StronglyTypedClassName, StronglyTypedNamespace, and/or StronglyTypedFileName parameters were passed in, but no StronglyTypedLanguage. If you want to create a strongly typed resource class, please specify a language. Otherwise remove all class, file name, and namespace parameters.</value>
+    <comment>{StrBegin="MSB3572: "}</comment>
+  </data>
+  <data name="GenerateResource.STRLanguageButNotExactlyOneSourceFile">
+    <value>MSB3573: The language for a strongly typed resource class was specified, but more than one source file was passed in. Please pass in only one source file at a time if you want to generate strongly typed resource classes.</value>
+    <comment>{StrBegin="MSB3573: "}</comment>
+  </data>
+  <data name="GenerateResource.MessageTunnel">
+    <value>{0}</value>
+  </data>
+  <data name="GenerateResource.ProcessingFile">
+    <value>Processing resource file "{0}" into "{1}".</value>
+  </data>
+  <data name="GenerateResource.ExtractingResWFiles">
+    <value>Extracting .ResW files from assembly "{0}" into "{1}".</value>
+  </data>
+  <data name="GenerateResource.SkippingExtractingFromNonSupportedFramework">
+    <value>Skipping extracting .ResW files from assembly "{0}" because it declares non-supported framework "{1}".</value>
+  </data>
+  <data name="GenerateResource.ReadResourceMessage">
+    <value>Processing {0} resources from file "{1}".</value>
+  </data>
+  <data name="GenerateResource.CreatingSTR">
+    <value>Creating strongly typed resources class "{0}".</value>
+  </data>
+  <data name="GenerateResource.NoSources">
+    <value>No resources specified in "Sources". Skipping resource generation.</value>
+    <comment>
+            LOCALIZATION: Please don't localize "Sources" this is an item meta-data name.
+    </comment>
+  </data>
+  <data name="GenerateResource.NothingOutOfDate">
+    <value>No resources are out of date with respect to their source files. Skipping resource generation.</value>
+  </data>
+  <data name="GenerateResource.AdditionalInputNewerThanTLog">
+    <value>Additional input "{0}" has been updated since the last build.  Forcing regeneration of all resources.</value>
+  </data>
+  <data name="GenerateResource.SeparateAppDomainBecauseNeverLockTypeAssembliesTrue">
+    <value>Creating a separate AppDomain because "NeverLockTypeAssemblies" evaluated to 'true'.</value>
+  </data>
+  <data name="GenerateResource.SeparateAppDomainBecauseOfErrorDeserializingLineNumber">
+    <value>Creating a separate AppDomain because while parsing "{0}" the serialized type "{1}" on line {2} could not be loaded. {3}</value>
+  </data>
+  <data name="GenerateResource.SeparateAppDomainBecauseOfException">
+    <value>Creating a separate AppDomain because of error parsing "{0}". {1}</value>
+  </data>
+  <data name="GenerateResource.SeparateAppDomainBecauseOfExceptionLineNumber">
+    <value>Creating a separate AppDomain because of error parsing "{0}" on line {1}. {2}</value>
+  </data>
+  <data name="GenerateResource.SeparateAppDomainBecauseOfMimeType">
+    <value>Creating a separate AppDomain because of resource "{0}" representing a serialized type "{1}" in "{2}" on line {3}.</value>
+  </data>
+  <data name="GenerateResource.SeparateAppDomainBecauseOfType">
+    <value>Creating a separate AppDomain because of resource "{0}" of type "{1}" in "{2}" on line {3}.</value>
+  </data>
+  <data name="GenerateResource.BadImageFormat">
+    <value>MSB3574: Did not recognize "{0}" as a managed assembly.</value>
+    <comment>{StrBegin="MSB3574: "}</comment>
+  </data>
+  <data name="GenerateResource.CannotWriteAssembly">
+    <value>MSB3575: GenerateResource cannot write assemblies, only read from them. Cannot create assembly "{0}".</value>
+    <comment>{StrBegin="MSB3575: "}</comment>
+  </data>
+  <data name="GenerateResource.CreatingCultureInfoFailed">
+    <value>MSB3576: Creating the CultureInfo failed for assembly "{2}". Note the set of cultures supported is Operating System-dependent, and the Operating System has removed some cultures from time to time (ie, some Serbian cultures are split up in Windows 7).  The culture may be a user-defined custom culture that we can't currently load on this machine.  Exception info: {0}: {1}</value>
+    <comment>{StrBegin="MSB3576: "}</comment>
+  </data>
+  <data name="GenerateResource.DuplicateOutputFilenames">
+    <value>MSB3577: Two output file names resolved to the same output path: "{0}"</value>
+    <comment>{StrBegin="MSB3577: "}</comment>
+  </data>
+  <data name="GenerateResource.NeutralityOfCultureNotPreserved">
+    <value>MSB3578: This assembly contains neutral resources corresponding to the culture "{0}". These resources will not be considered neutral in the output format as we are unable to preserve this information. The resources will continue to correspond to "{0}" in the output format.</value>
+    <comment>{StrBegin="MSB3578: "}</comment>
+  </data>
+  <data name="GenerateResource.NoResourcesFileInAssembly">
+    <value>MSB3579: Couldn't find the linked resources file "{0}" listed in the assembly manifest.</value>
+    <comment>{StrBegin="MSB3579: "}</comment>
+  </data>
+  <data name="GenerateResource.SatelliteOrMalformedAssembly">
+    <value>MSB3580: The assembly in file "{0}" has an assembly culture, indicating it is a satellite assembly for culture "{1}".  But satellite assembly simple names must end in ".resources", while this one's simple name is "{2}".  This is either a main assembly with the culture incorrectly set, or a satellite assembly with an incorrect simple name.</value>
+    <comment>{StrBegin="MSB3580: "}</comment>
+  </data>
+  <data name="GenerateResource.SatelliteAssemblyContainsCode">
+    <value>MSB3811: The assembly "{0}" says it is a satellite assembly, but it contains code. Main assemblies shouldn't specify the assembly culture in their manifest, and satellites should not contain code.  This is almost certainly an error in your build process.</value>
+    <comment>{StrBegin="MSB3811: "}</comment>
+  </data>
+  <data name="GenerateResource.SatelliteAssemblyContainsNoResourcesFile">
+    <value>MSB3812: This assembly claims to be a satellite assembly, but doesn't contain any properly named .resources files as manifest resources. The name of the files should end in {0}.resources.  There is probably a build-related problem with this assembly.</value>
+    <comment>{StrBegin="MSB3812: "}</comment>
+  </data>
+  <data name="GenerateResource.UnrecognizedUltimateResourceFallbackLocation">
+    <value>MSB3813: Invalid or unrecognized UltimateResourceFallbackLocation value in the NeutralResourcesLanguageAttribute for assembly "{1}". Location: "{0}"</value>
+    <comment>{StrBegin="MSB3813: "}</comment>
+  </data>
+  <data name="GenerateResource.ImproperlyBuiltMainAssembly">
+    <value>MSB3814: Main assembly "{1}" was built improperly. The manifest resource "{0}" ends in .en-US.resources, when it should end in .resources. Either rename it to something like foo.resources (and consider using the NeutralResourcesLanguageAttribute on the main assembly), or move it to a US English satellite assembly.</value>
+    <comment>{StrBegin="MSB3814: "}</comment>
+  </data>
+  <data name="GenerateResource.ImproperlyBuiltSatelliteAssembly">
+    <value>MSB3815: Satellite assembly "{2}" was built improperly. The manifest resource "{0}" will not be found by the ResourceManager.  It must end in "{1}".</value>
+    <comment>{StrBegin="MSB3815: "}</comment>
+  </data>
+  <data name="GenerateResource.CannotLoadAssemblyLoadFromFailed">
+    <value>MSB3816: Loading assembly "{0}" failed. {1}</value>
+    <comment>{StrBegin="MSB3816: "}</comment>
+  </data>
+  <data name="GenerateResource.MainAssemblyMissingNeutralResourcesLanguage">
+    <value>MSB3817: The assembly "{0}" does not have a NeutralResourcesLanguageAttribute on it. To be used in an app package, portable libraries must define a NeutralResourcesLanguageAttribute on their main assembly (ie, the one containing code, not a satellite assembly).</value>
+    <comment>{StrBegin="MSB3817: "}</comment>
+  </data>
+  <data name="GenerateResource.ExecuteAsToolAndExtractResWNotSupported">
+    <value>MSB3818: The GenerateResource task doesn't currently support simultaneously running as an external tool and extracting ResW files from assemblies.</value>
+    <comment>{StrBegin="MSB3818: "}</comment>
+  </data>
+  <data name="GenerateResource.MissingFile">
+    <value>MSB3819: Cannot find assembly "{0}", which may contain managed resources that need to be included in this app package.  Please ensure that this assembly exists.</value>
+    <comment>{StrBegin="MSB3819: "}</comment>
+  </data>
+  <data name="GenerateResource.PathTooLong">
+    <value>MSB3820: The path needed to store build-related temporary files is too long.  Try your project in a shorter directory, or rename some of your resources.  The full path was "{0}".</value>
+    <comment>{StrBegin="MSB3820: "}</comment>
+  </data>
+  <data name="GenerateResource.MOTW">
+    <value>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</value>
+    <comment>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</comment>
+  </data>
+
+
+
+  <!--
+        The GetAssemblyIdentity message bucket is: MSB3441 - MSB3450
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="GetAssemblyIdentity.CouldNotGetAssemblyName" UESanitized="false" Visibility="Public">
+    <value>MSB3441: Cannot get assembly name for "{0}". {1}</value>
+    <comment>{StrBegin="MSB3441: "}</comment>
+  </data>
+  <!--
+        The GetFrameworkSdkPath group of messages does not have a message code bucket.
+
+        If a message in this group needs a code, pls. contact 'vsppbdev'.
+  -->
+  <data name="GetFrameworkSdkPath.CouldNotFindSDK">
+    <value>Could not locate the expected version of the Microsoft Windows SDK. Looked for a location specified in the "{0}" value of the registry key "{1}". If your build process does not need the SDK then this can be ignored. Otherwise you can solve the problem by doing one of the following:  1) Install the Microsoft Windows SDK.  2) Install Visual Studio 2010.  3) Manually set the above registry key to the correct location.</value>
+  </data>
+  <data name="GetFrameworkSdkPath.FoundSDK">
+    <value>Found the Microsoft Windows SDK installed at "{0}".</value>
+  </data>
+  <!--
+        The GetRedistListPath message bucket is: MSB3131 - MSB3140
+
+        If a message in this group needs a code, pls. contact 'vsppbdev'.
+  -->
+  <!--
+        The MakeDir message bucket is: MSB3191 - MSB3200
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="MakeDir.Comment">
+    <value>Creating directory "{0}".</value>
+  </data>
+  <data name="MakeDir.Error">
+    <value>MSB3191: Unable to create directory "{0}". {1}</value>
+    <comment>{StrBegin="MSB3191: "}</comment>
+  </data>
+  <!--
+        The Message task message bucket is: MSB3511 - MSB3520
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Message.InvalidImportance" UESanitized="false" Visibility="Public">
+    <value>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</value>
+    <comment>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
+            The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
+            LOCALIZATION: "Importance" should not be localized.
+            High should not be localized.
+            Normal should not be localized.
+            Low should not be localized.</comment>
+  </data>
+  <!--
+        The Move task message bucket is: MSB3676 - MSB3685
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Move.CreatesDirectory">
+    <value>Creating directory "{0}".</value>
+  </data>
+  <data name="Move.DestinationIsDirectory">
+    <value>MSB3676: Could not move the file "{0}" to the destination file "{1}", because the destination is a folder instead of a file. To move the source file into a folder, consider using the DestinationFolder parameter instead of DestinationFiles.</value>
+    <comment>{StrBegin="MSB3676: "}</comment>
+  </data>
+  <data name="Move.Error">
+    <value>MSB3677: Unable to move file "{0}" to "{1}". {2}</value>
+    <comment>{StrBegin="MSB3677: "}</comment>
+  </data>
+  <data name="Move.ExactlyOneTypeOfDestination">
+    <value>MSB3678: Both "{0}" and "{1}" were specified as input parameters in the project file. Only one must be provided.</value>
+    <comment>{StrBegin="MSB3678: "}</comment>
+  </data>
+  <data name="Move.FileComment">
+    <value>Moving file from "{0}" to "{1}".</value>
+  </data>
+  <data name="Move.NeedsDestination">
+    <value>MSB3679: No destination specified for Move. Please supply either "{0}" or "{1}".</value>
+    <comment>{StrBegin="MSB3679: "}</comment>
+  </data>
+  <data name="Move.SourceDoesNotExist">
+    <value>MSB3680: The source file "{0}" does not exist.</value>
+    <comment>{StrBegin="MSB3680: "}</comment>
+  </data>
+  <data name="Move.SourceIsDirectory">
+    <value>MSB3681: The source file "{0}" is a directory. The "Move" task does not support moving directories.</value>
+    <comment>{StrBegin="MSB3681: "}</comment>
+  </data>
+  <!--
+        The MSBuild message bucket is: MSB3201 - MSB3210
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="MSBuild.CannotRebaseOutputItemPath" UESanitized="false" Visibility="Public">
+    <value>MSB3203: The output path "{0}" cannot be rebased. {1}</value>
+    <comment>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</comment>
+  </data>
+  <data name="MSBuild.ProjectFileNotFound" UESanitized="false" Visibility="Public">
+    <value>MSB3202: The project file "{0}" was not found.</value>
+    <comment>{StrBegin="MSB3202: "}UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter.
+             and they have not specified the SkipNonexistentProjects parameter, or it is set to false.</comment>
+  </data>
+  <data name="MSBuild.ProjectFileNotFoundMessage" UESanitized="false" Visibility="Public">
+    <value>Skipping project "{0}" because it was not found.</value>
+    <comment>UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter, and they have specified the SkipNonexistentProjects parameter.</comment>
+  </data>
+  <data name="MSBuild.ProjectUpgradeNeededToVcxProj">
+    <value>MSB3204: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</value>
+    <comment>{StrBegin="MSB3204: "} LOC: ".vcproj" should not be localized</comment>
+  </data>
+  <data name="MSBuild.InvalidSkipNonexistentProjectValue">
+    <value>MSB3205: SkipNonexistentProject can only accept values of "True", "False" and "Build".</value>
+    <comment>{StrBegin="MSB3205: "} LOC: "SkipNonexistentProject", "True", "False" and "Build" should not be localized</comment>
+  </data>
+  <data name="MSBuild.SkippingRemainingProjects">
+    <value>The MSBuild task is skipping the remaining projects because the StopOnFirstFailure parameter was set to true.</value>
+    <comment>LOCALIZATION:  Do not localize the words "MSBuild" or "StopOnFirstFailure".</comment>
+  </data>
+  <data name="MSBuild.SkippingRemainingTargets">
+    <value>The MSBuild task is skipping the remaining targets because the StopOnFirstFailure parameter was set to true.</value>
+    <comment>LOCALIZATION:  Do not localize the words "MSBuild" or "StopOnFirstFailure".</comment>
+  </data>
+  <data name="MSBuild.NotBuildingInParallel">
+    <value>Overriding the BuildingInParallel property by setting it to false. This is due to the system being run in single process mode with StopOnFirstFailure set to true.</value>
+    <comment>LOCALIZATION:  Do not localize the words "MSBuild", "BuildingInParallel", or "StopOnFirstFailure".</comment>
+  </data>
+  <data name="MSBuild.NoStopOnFirstFailure">
+    <value>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</value>
+    <comment>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</comment>
+  </data>
+  <!--
+        The ReadLinesFromFile message bucket is: MSB3501 - MSB3510.
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ReadLinesFromFile.ErrorOrWarning">
+    <value>MSB3501: Could not read lines from file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3501: "}</comment>
+  </data>
+  <!--
+        The RegisterAssembly message bucket is: MSB3211 - MSB3230
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="RegisterAssembly.AssemblyNotRegisteredForComInterop">
+    <value>MSB3211: The assembly '{0}' is not registered for COM Interop. Please register it with regasm.exe /tlb.</value>
+    <comment>{StrBegin="MSB3211: "}</comment>
+  </data>
+  <data name="RegisterAssembly.CantExportTypeLib">
+    <value>MSB3212: The assembly "{0}" could not be converted to a type library. {1}</value>
+    <comment>{StrBegin="MSB3212: "}</comment>
+  </data>
+  <data name="RegisterAssembly.CantRegisterAssembly">
+    <value>MSB3217: Cannot register assembly "{0}". {1}</value>
+    <comment>{StrBegin="MSB3217: "}</comment>
+  </data>
+  <data name="RegisterAssembly.CantRegisterTypeLib">
+    <value>MSB3213: Cannot register type library "{0}". {1}</value>
+    <comment>{StrBegin="MSB3213: "}</comment>
+  </data>
+  <data name="RegisterAssembly.NoValidTypes">
+    <value>MSB3214: "{0}" does not contain any types that can be registered for COM Interop.</value>
+    <comment>{StrBegin="MSB3214: "}</comment>
+  </data>
+  <data name="RegisterAssembly.RegisterAsmFileDoesNotExist">
+    <value>MSB3215: Cannot register assembly "{0}" - file doesn't exist.</value>
+    <comment>{StrBegin="MSB3215: "}</comment>
+  </data>
+  <data name="RegisterAssembly.RegisteringAssembly">
+    <value>Registering assembly "{0}" for COM Interop.</value>
+  </data>
+  <data name="RegisterAssembly.RegisteringTypeLib">
+    <value>Exporting and registering type library "{0}".</value>
+  </data>
+  <data name="RegisterAssembly.TypeLibUpToDate">
+    <value>Type library "{0}" is up to date, skipping regeneration.</value>
+  </data>
+  <data name="RegisterAssembly.UnauthorizedAccess">
+    <value>MSB3216: Cannot register assembly "{0}" - access denied. Please make sure you're running the application as administrator. {1}</value>
+    <comment>{StrBegin="MSB3216: "}</comment>
+  </data>
+  <!--
+        The RemoveDir message bucket is: MSB3231 - MSB3240
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="RemoveDir.Error">
+    <value>MSB3231: Unable to remove directory "{0}". {1}</value>
+    <comment>{StrBegin="MSB3231: "}</comment>
+  </data>
+  <data name="RemoveDir.Removing">
+    <value>Removing directory "{0}".</value>
+  </data>
+  <data name="RemoveDir.SkippingNonexistentDirectory">
+    <value>Directory "{0}" doesn't exist. Skipping.</value>
+  </data>
+  <!--
+        The ResGen message bucket is: MSB3451 - MSB3460
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ResGen.NoInputFiles">
+    <value>No resources specified in "InputFiles". Skipping resource generation.</value>
+  </data>
+  <data name="ResGen.SdkOrToolPathNotSpecifiedOrInvalid">
+    <value>MSB3451: Neither SDKToolsPath '{0}' nor ToolPath '{1}' is a valid directory.  One of these must be set.</value>
+    <comment>{StrBegin="MSB3451: "}</comment>
+  </data>
+  <data name="ResGen.STRClassNamespaceOrFilenameWithoutLanguage">
+    <value>MSB3452: StronglyTypedClassName, StronglyTypedNamespace, and/or StronglyTypedFileName parameters were passed in, but no StronglyTypedLanguage. If you want to create a strongly typed resource class, please specify a language. Otherwise remove all class, file name, and namespace parameters.</value>
+    <comment>{StrBegin="MSB3452: "}</comment>
+  </data>
+  <data name="ResGen.STRLanguageButNotExactlyOneSourceFile">
+    <value>MSB3453: The language for a strongly typed resource class was specified, but more than one source file was passed in. Please pass in only one source file at a time if you want to generate strongly typed resource classes.</value>
+    <comment>{StrBegin="MSB3453: "}</comment>
+  </data>
+  <data name="ResGen.TrackerNotFound">
+    <value>MSB3454: Tracker.exe is required to correctly incrementally generate resources in some circumstances, such as when building on a 64-bit OS using 32-bit MSBuild. This build requires Tracker.exe, but it could not be found.  The task is looking for Tracker.exe beneath the {0} value of the registry key {1}.  To solve the problem, either: 1) Install the Microsoft Windows SDK v7.0A or later. 2) Install Microsoft Visual Studio 2010. 3) Manually set the above registry key to the correct location. Alternatively, you can turn off incremental resource generation by setting the "TrackFileAccess" property to "false".</value>
+    <comment>{StrBegin="MSB3454: "}</comment>
+  </data>
+  <data name="ResGen.CommandTooLong">
+    <value>MSB3455: ResGen.exe may not run because the command line is {0} characters long, which exceeds the maximum length of the command. To fix this problem, please either (1) remove unnecessary assembly references, or (2) make the paths to those references shorter.</value>
+    <comment>{StrBegin="MSB3455: "}</comment>
+  </data>
+  <!--
+        The ResolveAssemblyReference message bucket is: MSB3241 - MSB3280
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ResolveAssemblyReference.AssemblyFoldersExSearchLocations">
+    <value>AssemblyFoldersEx location: "{0}"</value>
+  </data>
+  <data name="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
+    <value>Considered AssemblyFoldersEx locations.</value>
+  </data>
+    <data name="ResolveAssemblyReference.ConflictFound">
+    <value>There was a conflict between "{0}" and "{1}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConflictHigherVersionChosen">
+    <value>"{0}" was chosen because it had a higher version.</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConflictPrimaryChosen">
+    <value>"{0}" was chosen because it was primary and "{1}" was not.</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConflictRedirectSuggestion">
+    <value>Consider app.config remapping of assembly "{0}" from Version "{1}" [{2}] to Version "{3}" [{4}] to solve conflict and get rid of warning.</value>
+    <comment>
+            UE and LOCALIZATION:
+        {1} and {3} are version numbers like 1.0.0.0
+                {2} and {4} are file names correspending to {1} and {3} respectively
+                {0} is an assembly name with no version number like 'D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa'
+    </comment>
+  </data>
+  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch">
+    <value>Considered "{0}",
+			but its name "{1}"
+			didn't match the expected name "{2}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile">
+    <value>Considered "{0}", but it didn't exist.</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk">
+    <value>Considered treating "{0}" as a file name, but it didn't exist.</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac">
+    <value>Considered "{0}", which was not found in the GAC.</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
+    <value>Considered "{0}", which existed but didn't have a valid identity. This may not be an assembly.</value>
+  </data>
+  <data name="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
+    <value>Considered "{0}", which existed but had a processor architecture "{1}" which does not match the targeted processor architecture "{2}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.Dependency">
+    <value>Dependency "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.EightSpaceIndent">
+    <value>        {0}</value>
+  </data>
+  <data name="ResolveAssemblyReference.TenSpaceIndent">
+    <value>          {0}</value>
+  </data>
+  <data name="ResolveAssemblyReference.TwelveSpaceIndent">
+    <value>            {0}</value>
+  </data>
+  <data name="ResolveAssemblyReference.FoundRelatedFile">
+    <value>Found related file "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.FoundSatelliteFile">
+    <value>Found satellite file "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.FoundScatterFile">
+    <value>Found embedded scatter file "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.FourSpaceIndent">
+    <value>    {0}</value>
+  </data>
+  <data name="ResolveAssemblyReference.IgnoringBecauseNonEmptySubtype">
+    <value>Ignoring "{0}" because it has a non-empty subtype "{1}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.BadTargetFrameworkFormat">
+    <value>Ignoring invalid Target Framework value "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.ConflictBetweenAppConfigAndAutoUnify">
+    <value>MSB3242: Conflict between mutually exclusive parameters. AutoUnify was 'true' and AppConfigFile was set.</value>
+    <comment>{StrBegin="MSB3242: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.ConflictUnsolvable">
+    <value>MSB3243: No way to resolve conflict between "{0}" and "{1}". Choosing "{0}" arbitrarily.</value>
+    <comment>{StrBegin="MSB3243: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.FailedToFindDependentFiles">
+    <value>MSB3244: Could not find dependent files. {0}</value>
+    <comment>{StrBegin="MSB3244: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.FailedToResolveReference">
+    <value>MSB3245: Could not resolve this reference. {0} If this reference is required by your code, you may get compilation errors.</value>
+    <comment>{StrBegin="MSB3245: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.FailedWithException">
+    <value>MSB3246: Resolved file has a bad image, no metadata, or is otherwise inaccessible. {0}</value>
+    <comment>{StrBegin="MSB3246: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.SuggestedRedirects">
+    <value>MSB3247: Found conflicts between different versions of the same dependent assembly. In Visual Studio, double-click this warning (or select it and press Enter) to fix the conflicts; otherwise, add the following binding redirects to the "runtime" node in the application configuration file: {0}</value>
+    <comment>{StrBegin="MSB3247: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.InvalidParameter">
+    <value>MSB3248: Parameter "{0}" has invalid value "{1}". {2}</value>
+    <comment>{StrBegin="MSB3248: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.InvalidAppConfig">
+    <value>MSB3249: Application Configuration file "{0}" is invalid. {1}</value>
+    <comment>{StrBegin="MSB3249: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.InvalidInstalledAssemblyTablesFile">
+    <value>MSB3250: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblyTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</value>
+    <comment>{StrBegin="MSB3250: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.FailedToResolveReferenceBecauseHigherTargetFramework">
+    <value>MSB3251: Could not resolve assembly {0}. The target framework required by this assembly ({1}) is higher than the project target framework. If this reference is required by your code, you may get compilation errors.</value>
+  </data>
+  <data name="ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList">
+    <value>MSB3252: The currently targeted framework "{1}" does not include the referenced assembly "{0}". To fix this, either (1) change the targeted framework for this project or (2) remove the referenced assembly from the project.</value>
+    <comment>{StrBegin="MSB3252: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList">
+    <value>MSB3253: The currently targeted framework "{2}" does not include "{1}" which the referenced assembly "{0}" depends on. This caused the referenced assembly to not resolve. To fix this, either (1) change the targeted framework for this project, or (2) remove the referenced assembly from the project.</value>
+    <comment>{StrBegin="MSB3253: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.InvalidInstalledAssemblySubsetTablesFile">
+    <value>MSB3254: The file "{0}" will be ignored because it cannot be read. This file was either passed in to InstalledAssemblySubsetTables or was found by searching the {1} folder in the TargetFrameworkDirectories. {2}</value>
+    <comment>{StrBegin="MSB3254: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.NoSubsetsFound">
+    <value>MSB3255: Could not find any Target Framework Subset files in the Target Framework Directories or at the locations specified in the InstalledAssemblySubsetTables.</value>
+    <comment>{StrBegin="MSB3255: "}</comment>
+  </data>
+    <data name="ResolveAssemblyReference.NoRedistAssembliesToGenerateExclusionList">
+    <value>MSB3256: No assemblies were read in from the redist lists. A TargetFramework profile exclusion list could not be generated. </value>
+    <comment>{StrBegin="MSB3256: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.PrimaryReferenceOutsideOfFramework">
+    <value>MSB3257: The primary reference "{0}" could not be resolved because it has a higher version "{1}" than exists in the current target framework. The version found in the current target framework is "{2}".</value>
+    <comment>{StrBegin="MSB3257: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.DependencyReferenceOutsideOfFramework">
+    <value>MSB3258: The primary reference "{0}" could not be resolved because it has an indirect dependency on the .NET Framework assembly "{1}" which has a higher version "{2}" than the version "{3}" in the current target framework.</value>
+    <comment>{StrBegin="MSB3258: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.CannotSetProfileAndSubSet">
+    <value>MSB3259: Invalid parameter combination. Can only set either subset or profile parameters. Cannot set one or more subset parameters ("TargetFrameworkSubsets", "InstalledAssemblySubsetTables") and one or more profile parameters ("ProfileName", "FullFrameworkFolders", "FullFrameworkAssemblyTables") at the same time. </value>
+    <comment>{StrBegin="MSB3259: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.NoProfilesFound">
+    <value>MSB3260: Could not find any target framework profile redist files in the FullFrameworkFolders locations.</value>
+    <comment>{StrBegin="MSB3260: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.FrameworkDirectoryOnProfiles">
+    <value>MSB3261: The FrameworkDirectory metadata must be set on all items passed to the FullFrameworkAssemblyTables parameter. The item "{0}" did not have the metadata set.</value>
+    <comment>{StrBegin="MSB3261: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.MustSetProfileNameAndFolderLocations">
+    <value>MSB3262: When targeting a profile the ProfileName parameter and one of FullFrameworkFolders or FullFrameworkAssemblyTables must be set.</value>
+    <comment>{StrBegin="MSB3262: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.InvalidProfileRedistLocation">
+    <value>MSB3263: The file "{0}" will be ignored because it cannot be read. This file was either passed in to FullFrameworkAssemblyTables or was found by searching the "{1}" folder in the FullFrameworkFolders. {2}</value>
+    <comment>{StrBegin="MSB3263: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.PrimaryReferenceInAnotherFramework">
+    <value>MSB3267: The primary reference "{0}", which is a framework assembly, could not be resolved in the currently targeted framework. "{1}". To resolve this problem, either remove the reference "{0}" or retarget your application to a framework version which contains "{0}".</value>
+    <comment>{StrBegin="MSB3267: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.DependencyReferenceInAnotherFramework">
+    <value>MSB3268: The primary reference "{0}" could not be resolved because it has an indirect dependency on the framework assembly "{1}" which could not be resolved in the currently targeted framework. "{2}". To resolve this problem, either remove the reference "{0}" or retarget your application to a framework version which contains "{1}".</value>
+    <comment>{StrBegin="MSB3268: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.ProblemDeterminingFrameworkMembership">
+    <value>MSB3269: Could not determine if resolved references are part of the targeted framework because of an error. "{0}"</value>
+    <comment>{StrBegin="MSB3269: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArch">
+    <value>MSB3270: There was a mismatch between the processor architecture of the project being built "{0}" and the processor architecture of the reference "{1}", "{2}". This mismatch may cause runtime failures. Please consider changing the targeted processor architecture of your project through the Configuration Manager so as to align the processor architectures between your project and references, or take a dependency on references with a processor architecture that matches the targeted processor architecture of your project.</value>
+    <comment>{StrBegin="MSB3270: "}</comment>
+  </data>
+    <data name="ResolveAssemblyReference.MismatchBetweenTargetedAndReferencedArchOfImplementation">
+    <value>MSB3271: There was a mismatch between the processor architecture of the project being built "{0}" and the processor architecture, "{1}", of the implementation file "{2}" for "{3}". This mismatch may cause runtime failures. Please consider changing the targeted processor architecture of your project through the Configuration Manager so as to align the processor architectures between your project and implementation file, or choose a winmd file with an implementation file that has a processor architecture which matches the targeted processor architecture of your project.</value>
+    <comment>{StrBegin="MSB3271: "}</comment>
+  </data>
+    <data name="ResolveAssemblyReference.ProblemReadingImplementationDll">
+    <value>MSB3272: There was a problem reading the implementation file "{0}". "{1}"</value>
+    <comment>{StrBegin="MSB3272: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.ImplementationDllHasInvalidPEHeader">
+    <value>Invalid PE header found. The implementation file will not used.</value>
+    <comment>This message can be used as the {1} in MSB3272</comment>
+  </data>
+    <data name="ResolveAssemblyReference.UnknownProcessorArchitecture">
+    <value>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</value>
+    <comment>{StrBegin="MSB3273: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.PrimaryReferenceOutsideOfFrameworkUsingAttribute">
+    <value>MSB3274: The primary reference "{0}" could not be resolved because it was built against the "{1}" framework. This is a higher version than the currently targeted framework "{2}".</value>
+    <comment>{StrBegin="MSB3274: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.DependencyReferenceOutsideOfFrameworkUsingAttribute">
+    <value>MSB3275: The primary reference "{0}" could not be resolved because it has an indirect dependency on the assembly "{1}" which was built against the "{2}" framework. This is a higher version than the currently targeted framework "{3}".</value>
+    <comment>{StrBegin="MSB3275: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.TurnOnAutoGenerateBindingRedirects">
+    <value>MSB3276: Found conflicts between different versions of the same dependent assembly. Please set the "AutoGenerateBindingRedirects" property to true in the project file. For more information, see http://go.microsoft.com/fwlink/?LinkId=294190.</value>
+    <comment>{StrBegin="MSB3276: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.FoundConflicts">
+    <value>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.  These reference conflicts are listed in the build log when log verbosity is set to detailed.</value>
+    <comment>{StrBegin="MSB3277: "}</comment>
+  </data>
+  <data name="ResolveAssemblyReference.LogAttributeFormat">
+    <value>{0} = '{1}'</value>
+  </data>
+  <data name="ResolveAssemblyReference.LogTaskPropertyFormat">
+    <value>{0}:</value>
+  </data>
+  <data name="ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim">
+    <value>This reference is not "CopyLocal" because it conflicted with another reference with the same name and lost the conflict.</value>
+    <comment>
+        LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+   </comment>
+  </data>
+  <data name="ResolveAssemblyReference.ImageRuntimeVersion">
+    <value>The ImageRuntimeVersion for this reference is "{0}".</value>
+    <comment>
+      LOCALIZATION: Please don't localize "ImageRuntimeVersion" this is an item meta-data name.
+    </comment>
+  </data>
+  <data name="ResolveAssemblyReference.IsAWinMdFile">
+    <value>This reference is a WinMDFile.</value>
+    <comment>
+      LOCALIZATION: Please don't localize "WinMDFile" this is an item meta-data name.
+    </comment>
+  </data>
+  <data name="ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac">
+    <value>This reference is not "CopyLocal" because the CopyLocalDependenciesWhenParentReferenceInGac property is set to false and all the parent references for this reference are found in the GAC.</value>
+    <comment>
+        LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name. "CopyLocalDependenciesWhenParentReferenceInGac" is a property name.
+   </comment>
+  </data>
+  <data name="ResolveAssemblyReference.NotCopyLocalBecauseEmbedded">
+    <value>This reference is not "CopyLocal" because its types will be embedded into the target assembly.</value>
+    <comment>
+        LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+   </comment>
+  </data>
+  <data name="ResolveAssemblyReference.NotCopyLocalBecauseFrameworksFiles">
+    <value>This reference is not "CopyLocal" because it's in a Frameworks directory.</value>
+    <comment>
+            LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+   </comment>
+  </data>
+  <data name="ResolveAssemblyReference.NotCopyLocalBecauseIncomingItemAttributeOverrode">
+    <value>This reference is not "CopyLocal" because at least one source item had "Private" set to "false" and no source items had "Private" set to "true".</value>
+    <comment>
+            LOCALIZATION: Please don't localize "CopyLocal", "Private", "false", "true".
+        </comment>
+  </data>
+  <data name="ResolveAssemblyReference.NotCopyLocalBecausePrerequisite">
+    <value>This reference is not "CopyLocal" because it's a prerequisite file.</value>
+    <comment>
+            LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+        </comment>
+  </data>
+  <data name="ResolveAssemblyReference.NotCopyLocalBecauseReferenceFoundInGAC">
+    <value>This reference is not "CopyLocal" because it's registered in the GAC.</value>
+    <comment>
+            LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+        </comment>
+  </data>
+  <data name="ResolveAssemblyReference.PrimaryReference">
+    <value>Primary reference "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.RequiredBy">
+    <value>Required by "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.ReferenceDependsOn">
+    <value>References which depend on "{0}" [{1}].</value>
+    <comment> This will look like references which depend on "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</comment>
+  </data>
+  <data name="ResolveAssemblyReference.UnResolvedPrimaryItemSpec">
+    <value>Unresolved primary reference with an item include of "{0}".</value>
+    <comment> This messages is for a reference which could not be resolved, however we have its item spec and will display that. {0} will be somethign like  System or A, Version=xxx</comment>
+  </data>
+  <data name="ResolveAssemblyReference.PrimarySourceItemsForReference">
+    <value>Project file item includes which caused reference "{0}".</value>
+    <comment> This will look like, Project file item includes which caused reference "a.dll".</comment>
+  </data>
+   <data name="ResolveAssemblyReference.Resolved">
+    <value>Resolved file path is "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.ResolvedFrom">
+    <value>Reference found at search path location "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.SearchPath">
+    <value>For SearchPath "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.UnificationByAppConfig">
+    <value>Using this version instead of original version "{0}" in "{2}" because of a binding redirect entry in the file "{1}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.UnificationByAutoUnify">
+    <value>Using this version instead of original version "{0}" in "{1}" because AutoUnify is 'true'.</value>
+  </data>
+  <data name="ResolveAssemblyReference.RemappedReference">
+    <value>Due to a remapping entry in the currently targeted framework redist list, reference "{0}" was remapped to "{1}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.UnificationByFrameworkRetarget">
+    <value>Using this version instead of original version "{0}" in "{1}" because there is a more recent version of this framework file.</value>
+  </data>
+  <data name="ResolveAssemblyReference.UnifiedDependency">
+    <value>Unified Dependency "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.UnifiedPrimaryReference">
+    <value>Unified primary reference "{0}".</value>
+  </data>
+  <data name="ResolveAssemblyReference.ProblemFindingSatelliteAssemblies">
+    <value>Could not find satellite assemblies for reference "{0}". {1}</value>
+  </data>
+  <data name="ResolveAssemblyReference.UsingExclusionList">
+    <value>A TargetFramework profile exclusion list will be generated. The exclusion list is a list of assemblies not in the profile.</value>
+  </data>
+  <data name="ResolveAssemblyReference.NoExclusionListBecauseofFullClientName">
+    <value>A TargetFramework profile exclusion list will not be generated. A full client name "{0}" was found in the TargetFrameworkSubsetNames list.</value>
+  </data>
+  <data name="ResolveAssemblyReference.NoExclusionListBecauseIgnoreSubsetsAndNoAdditionalOnesProvided">
+    <value>No TargetFramework subset exclusion list will be generated. IgnoreDefaultInstalledAssemblySubsetTables is true and no additional profile files were passed in to InstalledAssemblySubsetTables.</value>
+  </data>
+  <data name="ResolveAssemblyReference.ProfileExclusionListWillBeGenerated">
+    <value>A TargetFramework profile exclusion list will be generated.</value>
+  </data>
+  <data name="ResolveAssemblyReference.NoExclusionListBecauseNoSubsetsPassedIn">
+    <value>No TargetFramework profile exclusion list will be generated. No TargetFrameworkSubsets were provided and no additional profile files were passed in to InstalledAssemblySubsetTables.</value>
+  </data>
+  <data name="ResolveAssemblyReference.TargetFrameworkSubsetLogHeader">
+    <value>TargetFramework Profile List Information:</value>
+  </data>
+  <data name="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+    <value>TargetFramework Profile List Paths:</value>
+  </data>
+  <data name="ResolveAssemblyReference.TargetFrameworkRedistLogHeader">
+    <value>Redist List File Paths:</value>
+  </data>
+  <data name="ResolveAssemblyReference.TargetFrameworkExclusionListLogHeader">
+    <value>Computed TargetFramework profile exclusion list assembly full names:</value>
+  </data>
+  <data name="ResolveAssemblyReference.FormattedAssemblyInfo">
+    <value>Path: "{0}"</value>
+  </data>
+  <data name="ResolveAssemblyReference.NoSubSetRedistListName">
+    <value>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</value>
+    <comment></comment>
+  </data>
+  <data name="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
+    <value>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</value>
+    <comment></comment>
+  </data>
+  <data name="ResolveAssemblyReference.AssemblyDoesNotContainPEMetadata">
+    <value>Assembly file '{0}' could not be opened -- PE image doesn't contain managed metadata.</value>
+    <comment></comment>
+  </data>
+  <!--
+        The ResolveComReference message bucket is: MSB3281 - MSB3320
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
+    <value>COM Reference '{0}' is the interop assembly for ActiveX control '{1}' but was marked to be linked by the compiler with the /link flag. This COM reference will be treated as a reference and will not be linked.</value>
+  </data>
+  <data name="ResolveComReference.AddingMissingTlbReference">
+    <value>Adding a matching tlbimp reference for the aximp reference "{0}".</value>
+  </data>
+  <data name="ResolveComReference.UsingCacheFile">
+    <value>Using cache file at "{0}".</value>
+  </data>
+  <data name="ResolveComReference.NotUsingCacheFile">
+    <value>Creating new cache file at "{0}".</value>
+  </data>
+  <data name="ResolveComReference.BadAssemblyImage">
+    <value>MSB3281: The assembly "{0}" is not a valid assembly file.</value>
+    <comment>{StrBegin="MSB3281: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotAccessTypeLibName">
+    <value>MSB3282: Cannot access type library name for library "{0}". {1}</value>
+    <comment>{StrBegin="MSB3282: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotFindWrapperForTypeLib">
+    <value>MSB3283: Cannot find wrapper assembly for type library "{0}". Verify that (1) the COM component is registered correctly and (2) your target platform is the same as the bitness of the COM component. For example, if the COM component is 32-bit, your target platform must not be 64-bit.</value>
+    <comment>{StrBegin="MSB3283: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotGetPathForTypeLib">
+    <value>MSB3284: Cannot get the file path for type library "{0}" version {1}.{2}. {3}</value>
+    <comment>{StrBegin="MSB3284: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotGetTypeLibAttrForTypeLib">
+    <value>MSB3285: Cannot get type library attributes for a dependent type library!</value>
+    <comment>{StrBegin="MSB3285: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotLoadTypeLib">
+    <value>MSB3286: Cannot load type library "{0}" version {1}.{2}. {3}</value>
+    <comment>{StrBegin="MSB3286: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotLoadTypeLibItemSpec">
+    <value>MSB3287: Cannot load type library for reference "{0}". {1}</value>
+    <comment>{StrBegin="MSB3287: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotRetrieveTypeInformation">
+    <value>MSB3302: Cannot retrieve information about a dependent type.</value>
+    <comment>{StrBegin="MSB3302: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotSpecifyBothKeyFileAndKeyContainer">
+    <value>MSB3300: Cannot specify values for both KeyFile and KeyContainer.</value>
+    <comment>{StrBegin="MSB3300: "}</comment>
+  </data>
+  <data name="ResolveComReference.CannotSpecifyDelaySignWithoutEitherKeyFileOrKeyContainer">
+    <value>MSB3301: DelaySign parameter is true, but no KeyFile or KeyContainer was specified.</value>
+    <comment>{StrBegin="MSB3301: "}</comment>
+  </data>
+  <data name="ResolveComReference.ConflictingReferences">
+    <value>MSB3288: COM reference "{0}" conflicts with reference "{1}" - the project references different type libraries with the same type library names. Ignoring reference "{0}".</value>
+    <comment>{StrBegin="MSB3288: "}</comment>
+  </data>
+  <data name="ResolveComReference.ErrorCreatingWrapperAssembly">
+    <value>MSB3290: Failed to create the wrapper assembly for type library "{0}". {1}</value>
+    <comment>{StrBegin="MSB3290: "}</comment>
+  </data>
+  <data name="ResolveComReference.FailedToFindDependentNetAssembly">
+    <value>MSB3291: Could not resolve dependent .NET assembly "{0}". Please make sure this assembly is included in the references section of the project file.</value>
+    <comment>{StrBegin="MSB3291: "}</comment>
+  </data>
+  <data name="ResolveComReference.FailedToRemapAdoTypeLib">
+    <value>MSB3292: Failed to remap ADO reference version {0}.{1} to version 2.7 - "{2}".</value>
+    <comment>{StrBegin="MSB3292: "}</comment>
+  </data>
+  <data name="ResolveComReference.FailedToResolveComReference">
+    <value>MSB3303: Could not resolve COM reference "{0}" version {1}.{2}. {3}</value>
+    <comment>{StrBegin="MSB3303: "}</comment>
+  </data>
+  <data name="ResolveComReference.FailedToResolveDependentComReference">
+    <value>MSB3293: Could not resolve dependent COM reference "{0}" version {1}.{2}.</value>
+    <comment>{StrBegin="MSB3293: "}</comment>
+  </data>
+  <data name="ResolveComReference.FailedToResolveDependentComReferenceByAssemblyName">
+    <value>MSB3294: Could not resolve dependent COM reference "{0}".</value>
+    <comment>{StrBegin="MSB3294: "}</comment>
+  </data>
+  <data name="ResolveComReference.FailedToScanDependencies">
+    <value>MSB3304: Could not determine the dependencies of the COM reference "{0}". {1}</value>
+    <comment>{StrBegin="MSB3304: "}</comment>
+  </data>
+  <data name="ResolveComReference.ResolutionWarning">
+    <value>MSB3305: Processing COM reference "{0}" from path "{1}". {2}</value>
+    <comment>{StrBegin="MSB3305: "}</comment>
+  </data>
+  <data name="ResolveComReference.ResolutionMessage">
+    <value>Processing COM reference "{0}" from path "{1}". {2}</value>
+  </data>
+  <data name="ResolveComReference.LoadingDelaySignedAssemblyWithStrongNameVerificationEnabled">
+    <value>MSB3295: Failed to load an assembly. Please make sure you have disabled strong name verification for your public key if you want to generate delay signed wrappers. {0}</value>
+    <comment>{StrBegin="MSB3295: "}</comment>
+  </data>
+  <data name="ResolveComReference.MissingOrUnknownComReferenceAttribute">
+    <value>MSB3296: The specified COM reference meta-data for the reference "{1}" is missing or has an invalid value: "{0}".</value>
+    <comment>{StrBegin="MSB3296: "}</comment>
+  </data>
+  <data name="ResolveComReference.NoComReferencesSpecified">
+    <value>MSB3297: No COM references have been passed into the task, exiting.</value>
+    <comment>{StrBegin="MSB3297: "}</comment>
+  </data>
+  <data name="ResolveComReference.RemappingAdoTypeLib">
+    <value>Remapping ADO reference version {0}.{1} to version 2.7.</value>
+  </data>
+  <data name="ResolveComReference.ResolvedDependentComReference">
+    <value>Resolved COM reference dependency "{0}" version {1}.{2}: "{3}"</value>
+  </data>
+  <data name="ResolveComReference.ResolvedDependentComReferenceByAssemblyName">
+    <value>Resolved COM reference dependency "{0}": "{1}"</value>
+  </data>
+  <data name="ResolveComReference.ResolvedReference">
+    <value>Resolved COM reference for item "{0}": "{1}".</value>
+  </data>
+  <data name="ResolveComReference.Resolving">
+    <value>Resolving COM reference for item "{0}" with a wrapper "{1}".</value>
+  </data>
+  <data name="ResolveComReference.ResolvingDependency">
+    <value>Resolving COM reference dependency "{0}" version {1}.{2}.</value>
+  </data>
+  <data name="ResolveComReference.ScanningDependencies">
+    <value>Determining dependencies of the COM reference "{0}".</value>
+  </data>
+  <data name="ResolveComReference.StrongNameUtils.NoKeyPairInContainer">
+    <value>MSB3298: The key container '{0}' does not contain a public/private key pair.</value>
+    <comment>{StrBegin="MSB3298: "}</comment>
+  </data>
+  <data name="ResolveComReference.StrongNameUtils.NoKeyPairInFile">
+    <value>MSB3299: The key file '{0}' does not contain a public/private key pair.</value>
+    <comment>{StrBegin="MSB3299: "}</comment>
+  </data>
+  <data name="ResolveComReference.TypeLibAttrId">
+    <value>{0} {1}.{2}</value>
+  </data>
+  <!--
+        The ResolveKeySource message bucket is: MSB3321 - MSB3330
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ResolveKeySource.KeyImportError">
+    <value>MSB3321: Importing key file "{0}" was canceled.</value>
+    <comment>{StrBegin="MSB3321: "}</comment>
+  </data>
+  <data name="ResolveKeySource.KeyMD5SumError">
+    <value>MSB3322: Unable to get MD5 checksum for the key file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3322: "}</comment>
+  </data>
+  <data name="ResolveKeySource.MsgBoxTitleImportKeyError">
+    <value>Error importing key</value>
+  </data>
+  <data name="ResolveKeySource.CertificateNotInStore">
+    <value>MSB3323: Unable to find manifest signing certificate in the certificate store.</value>
+    <comment>{StrBegin="MSB3323: "}</comment>
+  </data>
+  <data name="ResolveKeySource.InvalidKeyName">
+    <value>MSB3324: Invalid key file name "{0}". {1}</value>
+    <comment>{StrBegin="MSB3324: "}</comment>
+  </data>
+  <data name="ResolveKeySource.KeyFileForSignAssemblyNotImported">
+    <value>MSB3325: Cannot import the following key file: {0}. The key file may be password protected. To correct this, try to import the certificate again or manually install the certificate to the Strong Name CSP with the following key container name: {1}</value>
+    <comment>{StrBegin="MSB3325: "}</comment>
+  </data>
+  <data name="ResolveKeySource.KeyFileForManifestNotImported">
+    <value>MSB3326: Cannot import the following key file: {0}. The key file may be password protected. To correct this, try to import the certificate again or import the certificate manually into the current user’s personal certificate store.</value>
+    <comment>{StrBegin="MSB3326: "}</comment>
+  </data>
+  <data name="ResolveKeySource.ResolvedThumbprintEmpty">
+    <value>MSB3327: Unable to find code signing certificate in the current user’s Windows certificate store. To correct this, either disable signing of the ClickOnce manifest or install the certificate into the certificate store.</value>
+    <comment>{StrBegin="MSB3327: "}</comment>
+  </data>
+  <!--
+        The ResolveManifestFiles message bucket is: MSB3331 - MSB3340
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ResolveManifestFiles.PublishFileNotFound">
+    <value>MSB3331: Unable to apply publish properties for item "{0}".</value>
+    <comment>{StrBegin="MSB3331: "}</comment>
+  </data>
+  <!--
+        The ResolveNativeReference message bucket is: MSB3341 - MSB3350
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ResolveNativeReference.Comment">
+    <value>Processing manifest file "{0}".</value>
+  </data>
+  <data name="ResolveNativeReference.ResolveReference">
+    <value>Attempting to resolve reference "{0}" on path(s):</value>
+  </data>
+  <data name="ResolveNativeReference.FailedToResolveReference">
+    <value>MSB3341: Could not resolve reference "{0}". If this reference is required by your code, you may get compilation errors.</value>
+    <comment>{StrBegin="MSB3341: "}</comment>
+  </data>
+  <!--
+        The ResolveNonMSBuildProjectOutput message bucket is: MSB3581 - MSB3600
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ResolveNonMSBuildProjectOutput.ProjectReferenceResolutionFailure">
+    <value>MSB3582: Could not resolve project reference "{0}".</value>
+    <comment>{StrBegin="MSB3582: "}</comment>
+  </data>
+  <data name="ResolveNonMSBuildProjectOutput.ProjectReferenceUnresolved">
+    <value>Project reference "{0}" has not been resolved.</value>
+    <comment>
+      UE and LOCALIZATION:
+      This is not an error - we pass unresolved references to UnresolvedProjectReferences for further
+      processing in the .targets file.
+    </comment>
+  </data>
+  <data name="ResolveNonMSBuildProjectOutput.ProjectReferenceResolutionStarting">
+    <value>Resolving project reference "{0}".</value>
+  </data>
+  <data name="ResolveNonMSBuildProjectOutput.ProjectReferenceResolutionSuccess">
+    <value>Project reference "{0}" resolved as "{1}".</value>
+  </data>
+  <!--
+        The ResolveVCProjectOutput message bucket is: MSB3421 - MSB3440
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <!--
+        The SGen message bucket is: MSB3471 - MSB3480
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="SGen.ResourceNotFound">
+    <value>MSB3471: Non-existent reference "{0}" passed to the SGen task.</value>
+    <comment>{StrBegin="MSB3471: "}</comment>
+  </data>
+  <data name="SGen.CouldNotDeleteSerializer">
+    <value>MSB3472: We were unable to delete the existing serializer "{0}" before creating a new one: {1}  </value>
+    <comment>{StrBegin="MSB3472: "}</comment>
+  </data>
+  <data name="SGen.InvalidPath">
+    <value>MSB3473: Path for "{0}" is invalid. {1}</value>
+    <comment>{StrBegin="MSB3473: "}</comment>
+  </data>
+  <!--
+        The SignFile message bucket is: MSB3481 - MSB3490
+
+        If this bucked overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="SignFile.CertNotInStore">
+    <value>MSB3481: The signing certificate could not be located. Ensure that it is in the current user's personal store.</value>
+    <comment>{StrBegin="MSB3481: "}</comment>
+  </data>
+  <data name="SignFile.SignToolError">
+    <value>MSB3482: An error occurred while signing: {0}</value>
+    <comment>{StrBegin="MSB3482: "}</comment>
+  </data>
+  <data name="SignFile.SignToolWarning">
+    <value>MSB3483: A warning occurred while signing: {0}</value>
+    <comment>{StrBegin="MSB3483: "}</comment>
+  </data>
+  <data name="SignFile.TargetFileNotFound">
+    <value>MSB3484: Signing target '{0}' could not be found.</value>
+    <comment>{StrBegin="MSB3484: "}</comment>
+  </data>
+  <data name="SignFile.CertMissingPrivateKey">
+    <value>MSB3487: The signing certificate does not include private key information.</value>
+    <comment>{StrBegin="MSB3487: "}</comment>
+  </data>
+  <!--
+        The StrongNameUtils message bucket is: MSB3351 - MSB3360
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="StrongNameUtils.BadKeyContainer">
+    <value>MSB3351: Unable to create a strong name key pair from key container '{0}'.</value>
+    <comment>{StrBegin="MSB3351: "}</comment>
+  </data>
+  <data name="StrongNameUtils.KeyFileReadFailure">
+    <value>MSB3352: The specified key file '{0}' could not be read.</value>
+    <comment>{StrBegin="MSB3352: "}</comment>
+  </data>
+  <data name="StrongNameUtils.NoPublicKeySpecified">
+    <value>MSB3353: Public key necessary for delay signing was not specified.</value>
+    <comment>{StrBegin="MSB3353: "}</comment>
+  </data>
+  <!--
+        The TlbImp message bucket is: MSB3661 - MSB3665
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="TlbImp.InvalidTransformParameter">
+    <value>MSB3661: Invalid value '{0}' passed to the Transform property.</value>
+    <comment>{StrBegin="MSB3661: "}</comment>
+  </data>
+  <data name="TlbImp.NoInputFileSpecified">
+    <value>MSB3662: No input file has been passed to the task, exiting.</value>
+    <comment>{StrBegin="MSB3662: "}</comment>
+  </data>
+  <!--
+        The Touch message bucket is: MSB3371 - MSB3390
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Touch.CannotCreateFile">
+    <value>MSB3371: The file "{0}" cannot be created. {1}</value>
+    <comment>{StrBegin="MSB3371: "}</comment>
+  </data>
+  <data name="Touch.CannotMakeFileWritable">
+    <value>MSB3372: The file "{0}" cannot be made writable. {1}</value>
+    <comment>{StrBegin="MSB3372: "}</comment>
+  </data>
+  <data name="Touch.CannotRestoreAttributes">
+    <value>MSB3373: The attributes on file "{0}" cannot be restored to their original value. {1}</value>
+    <comment>{StrBegin="MSB3373: "}</comment>
+  </data>
+  <data name="Touch.CannotTouch">
+    <value>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</value>
+    <comment>{StrBegin="MSB3374: "}</comment>
+  </data>
+  <data name="Touch.CreatingFile">
+    <value>Creating "{0}" because "{1}" was specified.</value>
+  </data>
+  <data name="Touch.FileDoesNotExist">
+    <value>MSB3375: The file "{0}" does not exist.</value>
+    <comment>{StrBegin="MSB3375: "}</comment>
+  </data>
+  <data name="Touch.TimeSyntaxIncorrect">
+    <value>MSB3376: The syntax of the Time parameter is incorrect. {0}</value>
+    <comment>{StrBegin="MSB3376: "}</comment>
+  </data>
+  <data name="Touch.Touching">
+    <value>Touching "{0}".</value>
+  </data>
+  <!--
+        The UnregisterAssembly message bucket is: MSB3391 - MSB3400
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="UnregisterAssembly.AssemblyPathOrStateFileIsRequired">
+    <value>MSB3396: The "{0}" task needs either an assembly path or state file path.</value>
+    <comment>{StrBegin="MSB3396: "}</comment>
+  </data>
+  <data name="UnregisterAssembly.CantUnregisterAssembly">
+    <value>MSB3395: Cannot unregister assembly "{0}". {1}</value>
+    <comment>{StrBegin="MSB3395: "}</comment>
+  </data>
+  <data name="UnregisterAssembly.NoValidTypes">
+    <value>MSB3391: "{0}" does not contain any types that can be unregistered for COM Interop.</value>
+    <comment>{StrBegin="MSB3391: "}</comment>
+  </data>
+  <data name="UnregisterAssembly.UnauthorizedAccess">
+    <value>MSB3392: Cannot unregister assembly "{0}" - access denied. Please make sure you're running the application as administrator. {1}</value>
+    <comment>{StrBegin="MSB3392: "}</comment>
+  </data>
+  <data name="UnregisterAssembly.UnregisterAsmFileDoesNotExist">
+    <value>MSB3393: Cannot unregister assembly "{0}" - file doesn't exist.</value>
+    <comment>{StrBegin="MSB3393: "}</comment>
+  </data>
+  <data name="UnregisterAssembly.UnregisteringAssembly">
+    <value>Unregistering assembly "{0}" for COM Interop.</value>
+  </data>
+  <data name="UnregisterAssembly.UnregisteringTypeLib">
+    <value>Unregistering type library "{0}".</value>
+  </data>
+  <data name="UnregisterAssembly.UnregisterTlbCantLoadFile">
+    <value>MSB3397: Cannot unregister type library "{0}" - cannot load file, check to make sure it's a valid type library.</value>
+    <comment>{StrBegin="MSB3397: "}</comment>
+  </data>
+  <data name="UnregisterAssembly.UnregisterTlbFileDoesNotExist">
+    <value>Cannot unregister type library "{0}" - file doesn't exist.</value>
+  </data>
+  <data name="UnregisterAssembly.UnregisterTlbFileNotRegistered">
+    <value>MSB3394: Type library "{0}" is not registered, cannot unregister.</value>
+    <comment>{StrBegin="MSB3394: "}</comment>
+  </data>
+  <!--
+        The Vbc message bucket is: MSB3401 - MSB3410
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Vbc.EnumParameterHasInvalidValue">
+    <value>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</value>
+    <comment>{StrBegin="MSB3401: "}</comment>
+  </data>
+  <data name="VBC.RenamePDB">
+    <value>MSB3402: There was an error creating the pdb file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3402: "}</comment>
+  </data>
+  <data name="Vbc.ParameterHasInvalidValue">
+    <value>"{1}" is an invalid value for the "{0}" parameter.</value>
+  </data>
+  <!--
+        The VCBuild message bucket is: MSB3411 - MSB3420
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <!--
+        The WriteLinesToFile message bucket is: MSB3491 - MSB3500.
+
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="WriteLinesToFile.ErrorOrWarning">
+    <value>MSB3491: Could not write lines to file "{0}". {1}</value>
+    <comment>{StrBegin="MSB3491: "}</comment>
+  </data>
+  <data name="WriteLinesToFile.ErrorReadingFile">
+    <value>MSB3492: Could not read existing file "{0}" to determine whether its contents are up to date. Overwriting it.</value>
+    <comment>{StrBegin="MSB3491: "}</comment>
+  </data>
+  <data name="WriteLinesToFile.SkippingUnchangedFile">
+    <value>MSB3493: Skipping write to file "{0}" because content would not change.</value>
+    <comment>{StrBegin="MSB3493: "}</comment>
+  </data>
+  <!--
+        The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
+    <value>MSB3642: The Target Framework Moniker "{0}" is invalid. "{1}"</value>
+    <comment>{StrBegin="MSB3642: "}</comment>
+  </data>
+  <data name="GetReferenceAssemblyPaths.ProblemGeneratingReferencePaths">
+    <value>MSB3643: There was an error generating reference assembly paths based on the TargetFrameworkMoniker "{0}". {1}</value>
+    <comment>{StrBegin="MSB3643: "}</comment>
+  </data>
+  <data name="GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound">
+    <value>MSB3644: The reference assemblies for framework "{0}" were not found. To resolve this, install the SDK or Targeting Pack for this framework version or retarget your application to a version of the framework for which you have the SDK or Targeting Pack installed. Note that assemblies will be resolved from the Global Assembly Cache (GAC) and will be used in place of reference assemblies. Therefore your assembly may not be correctly targeted for the framework you intend.</value>
+    <comment>{StrBegin="MSB3644: "}</comment>
+  </data>
+  <data name="GetReferenceAssemblyPaths.NETFX35SP1NotIntstalled">
+    <value>MSB3645: .NET Framework v3.5 Service Pack 1 was not found. In order to target "{0}", .NET Framework v3.5 Service Pack 1 or later must be installed.</value>
+    <comment>{StrBegin="MSB3645: "}</comment>
+  </data>
+
+
+  <!--
+        The WinMDExp task has the error buckets of MSB3762 - MSB3772
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="WinMDExp.MustPassReferences">
+    <value>MSB3762: No references were passed to the task. References to at least mscorlib and Windows.Foundation are required.</value>
+    <comment>{StrBegin="MSB3762: "}</comment>
+  </data>
+
+  <!--
+        The XamlTaskFactory message bucket is: MSB3686 - MSB3695 and MSB3721 - MSB3730.
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Xaml.TaskCreationFailed" xml:space="preserve">
+    <value>MSB3686: Unable to create Xaml task.  Compilation failed.  {0}</value>
+    <comment>{StrBegin="MSB3686: "}</comment>
+  </data>
+  <data name="Xaml.RuleParseFailed" xml:space="preserve">
+    <value>MSB3687: Unable to parse Xaml rule.  {0}</value>
+    <comment>{StrBegin="MSB3687: "}</comment>
+  </data>
+  <data name="Xaml.RuleFileNotFound" xml:space="preserve">
+    <value>MSB3688: Unable to create Xaml task.  File not found: {0}.</value>
+    <comment>{StrBegin="MSB3688: "}</comment>
+  </data>
+  <data name="Xaml.RuleMissingToolName" xml:space="preserve">
+    <value>MSB3689: Unable to execute Xaml task.  If the CommandLineTemplate task parameter is not specified, then the ToolName attribute must be specified in the Rule or the ToolExe task parameter must be set.</value>
+    <comment>{StrBegin="MSB3689: "}</comment>
+  </data>
+  <data name="Xaml.RuleNotFound" xml:space="preserve">
+      <value>MSB3690: Unable to create Xaml task.  The Rule "{0}" was not found.</value>
+    <comment>{StrBegin="MSB3690: "}</comment>
+  </data>
+  <data name="Xaml.InvalidRootObject" xml:space="preserve">
+      <value>MSB3691: Unable to create Xaml task.  The root object was not of type ProjectSchemaDefinitions.</value>
+    <comment>{StrBegin="MSB3691: "}</comment>
+  </data>
+  <data name="Xaml.MissingTaskBody" xml:space="preserve">
+      <value>MSB3692: Unable to create Xaml task.  The &lt;UsingTask&gt; does not contain a &lt;Task&gt; definition.</value>
+    <comment>{StrBegin="MSB3692: "}</comment>
+  </data>
+  <data name="Xaml.ArgumentOutOfRange" xml:space="preserve">
+      <value>MSB3693: Unable to execute Xaml task.  The value "{1}" specified for task parameter "{0}" is not valid.</value>
+    <comment>{StrBegin="MSB3693: "}</comment>
+  </data>
+  <data name="Xaml.MissingSwitchValue" xml:space="preserve">
+      <value>MSB3694: Unable to create Xaml task.  The EnumValue "{1}" on EnumProperty "{0}" is missing the SwitchValue attribute.</value>
+    <comment>{StrBegin="MSB3694: "}</comment>
+  </data>
+  <!-- 3695 belongs to this task but was skipped so that the two "CommandFailed" error codes could be side-by-side.  Please consider
+       using this error code first before jumping to 3723. -->
+  <data name="Xaml.CommandFailed">
+    <value>MSB3721: The command "{0}" exited with code {1}.</value>
+    <comment>{StrBegin="MSB3721: "}</comment>
+  </data>
+  <data name="Xaml.CommandFailedAccessDenied">
+    <value>MSB3722: The command "{0}" exited with code {1}. Please verify that you have sufficient rights to run this command.</value>
+    <comment>{StrBegin="MSB3722: "}</comment>
+  </data>
+  <data name="Xaml.MissingRequiredArgument">
+    <value>MSB3723: The parameter "{0}" requires missing parameter "{1}" to be set.</value>
+    <comment>{StrBegin="MSB3723: "}</comment>
+  </data>
+
+  <!--
+        The XslTransformation message bucket is: MSB3701-3710.
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="XslTransform.ArgumentError" xml:space="preserve">
+    <value>MSB3701: Unable to load arguments for the XslTransformation task. {0}</value>
+    <comment>{StrBegin="MSB3701: "}</comment>
+  </data>
+  <data name="XslTransform.XsltArgumentsError" xml:space="preserve">
+    <value>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</value>
+    <comment>{StrBegin="MSB3702: "}</comment>
+  </data>
+  <data name="XslTransform.TransformError" xml:space="preserve">
+    <value>MSB3703: Unable to execute transformation. {0}</value>
+    <comment>{StrBegin="MSB3703: "}</comment>
+  </data>
+  <data name="XslTransform.XmlInput.TooMany" xml:space="preserve">
+    <value>Only one of XmlContent or XmlInputPaths arguments can be set.</value>
+  </data>
+  <data name="XslTransform.XmlInput.TooFew" xml:space="preserve">
+    <value>One of XmlContent or XmlInputPaths arguments must be set.</value>
+  </data>
+  <data name="XslTransform.XsltInput.TooMany" xml:space="preserve">
+    <value>Only one of XslContent, XslInputPath or XslCompiledDllPath arguments can be set.</value>
+  </data>
+  <data name="XslTransform.XsltInput.TooFew" xml:space="preserve">
+    <value>One of XslContent, XslInputPath and XslCompiledDllPath arguments must be set.</value>
+  </data>
+  <data name="XslTransform.XsltLoadError" xml:space="preserve">
+    <value>MSB3704: Unable to load the specified Xslt. {0}</value>
+    <comment>{StrBegin="MSB3704: "}</comment>
+  </data>
+  <data name="XslTransform.MustSpecifyType" xml:space="preserve">
+    <value>When specifying assembly "{0}", you must specify the type as well.</value>
+  </data>
+  <data name="XslTransform.XsltParameterNoAttribute" xml:space="preserve">
+    <value>The specified Xslt Parameter doesn't have attribute "{0}".</value>
+  </data>
+  <data name="XslTransform.XsltParameterNotWellFormed" xml:space="preserve">
+    <value>The specified Xslt Parameter attribute is not a well-formed XML fragment.</value>
+  </data>
+  <data name="XslTransform.UseTrustedSettings" xml:space="preserve">
+    <value>The usage of the document() method and embedded scripts is prohibited by default, due to risks of foreign code execution.  If "{0}" is a trusted source that requires those constructs, please set the "UseTrustedSettings" parameter to "true" to allow their execution.</value>
+  </data>
+
+
+  <!--
+        The XmlPoke message bucket is: MSB3731-3740.
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="XmlPoke.NamespacesError" xml:space="preserve">
+    <value>MSB3731: Unable to process the Namespaces argument for the XmlPoke task. {0}</value>
+    <comment>{StrBegin="MSB3731: "}</comment>
+  </data>
+  <data name="XmlPoke.NamespacesParameterNoAttribute" xml:space="preserve">
+    <value>The specified Namespaces attribute doesn't have attribute "{0}".</value>
+  </data>
+  <data name="XmlPoke.NamespacesParameterNotWellFormed" xml:space="preserve">
+    <value>The specified Namespaces attribute is not a well-formed XML fragment.</value>
+  </data>
+  <data name="XmlPoke.Replaced" xml:space="preserve">
+    <value>Replaced "{0}" with "{1}".</value>
+  </data>
+  <data name="XmlPoke.Count" xml:space="preserve">
+    <value>Made {0} replacement(s).</value>
+  </data>
+  <data name="XmlPoke.XPathContextError" xml:space="preserve">
+    <value>MSB3732: Unable to set XPath expression's Context. {0}</value>
+    <comment>{StrBegin="MSB3732: "}</comment>
+  </data>
+  <data name="XmlPeekPoke.InputFileError" xml:space="preserve">
+    <value>MSB3733: Input file "{0}" cannot be opened. {1}</value>
+    <comment>{StrBegin="MSB3733: "}</comment>
+  </data>
+  <data name="XmlPeekPoke.XPathError" xml:space="preserve">
+    <value>MSB3734: XPath Query "{0}" cannot be loaded. {1}</value>
+    <comment>{StrBegin="MSB3734: "}</comment>
+  </data>
+  <data name="XmlPoke.PokeError" xml:space="preserve">
+    <value>MSB3735: Error while executing poke operation with the Value parameter "{0}". {1}</value>
+    <comment>{StrBegin="MSB3735: "}</comment>
+  </data>
+  <!--
+        The XmlPeek message bucket is: MSB3741-3750.
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="XmlPeek.ArgumentError" xml:space="preserve">
+    <value>MSB3741: Unable to load arguments for the XmlPeek task. {0}</value>
+    <comment>{StrBegin="MSB3741: "}</comment>
+  </data>
+  <data name="XmlPeek.NamespacesError" xml:space="preserve">
+    <value>MSB3742: Unable to process the Namespaces argument for the XmlPeek task. {0}</value>
+    <comment>{StrBegin="MSB3742: "}</comment>
+  </data>
+  <data name="XmlPeek.XPathContextError" xml:space="preserve">
+    <value>MSB3743: Unable to set XPath expression's Context. {0}</value>
+    <comment>{StrBegin="MSB3743: "}</comment>
+  </data>
+  <data name="XmlPeek.XmlInput.TooMany" xml:space="preserve">
+    <value>Only one of XmlContent or XmlInputPath arguments can be set.</value>
+  </data>
+  <data name="XmlPeek.XmlInput.TooFew" xml:space="preserve">
+    <value>One of XmlContent or XmlInputPath arguments must be set.</value>
+  </data>
+  <data name="XmlPeek.NamespacesParameterNoAttribute" xml:space="preserve">
+    <value>The specified Namespaces attribute does not have attribute "{0}".</value>
+  </data>
+  <data name="XmlPeek.NamespacesParameterNotWellFormed" xml:space="preserve">
+    <value>The specified Namespaces attribute is not a well-formed XML fragment.</value>
+  </data>
+  <data name="XmlPeek.Found" xml:space="preserve">
+    <value>Found "{0}".</value>
+  </data>
+  <data name="XmlPeek.NotFound" xml:space="preserve">
+    <value>The specified XPath query did not capture any nodes.</value>
+  </data>
+    <!--
+          The WriteCodeFragment message bucket is: MSB3711-3720.
+          If this bucket overflows, pls. contact 'vsppbdev'.
+    -->
+    <data name="WriteCodeFragment.MustSpecifyLocation" xml:space="preserve">
+      <value>MSB3711: At least one of OutputFile or OutputDirectory must be provided.</value>
+      <comment>{StrBegin="MSB3711: "}</comment>
+    </data>
+    <data name="WriteCodeFragment.CouldNotCreateProvider" xml:space="preserve">
+      <value>MSB3712: Code for the language "{0}" could not be generated. {1}</value>
+      <comment>{StrBegin="MSB3712: "}</comment>
+    </data>
+    <data name="WriteCodeFragment.CouldNotWriteOutput" xml:space="preserve">
+      <value>MSB3713: The file "{0}" could not be created. {1}</value>
+      <comment>{StrBegin="MSB3713: "}</comment>
+    </data>
+    <data name="WriteCodeFragment.SkippedNumberedParameter" xml:space="preserve">
+      <value>MSB3714: The parameter "{0}" was supplied, but not all previously numbered parameters.</value>
+      <comment>{StrBegin="MSB3714: "}</comment>
+    </data>
+    <data name="WriteCodeFragment.NoWorkToDo" xml:space="preserve">
+      <value>No output file was written because no code was specified to create.</value>
+    </data>
+    <data name="WriteCodeFragment.GeneratedFile" xml:space="preserve">
+      <value>Emitted specified code into "{0}".</value>
+    </data>
+    <data name="WriteCodeFragment.Comment" xml:space="preserve">
+      <value>Generated by the MSBuild WriteCodeFragment class.</value>
+    </data>
+
+
+ <!--
+        MSB3751 - MSB3761   Task: CodeTaskFactory
+        MSB3911 - MSB3920   Task: CodeTaskFactory
+        CodeTaskFactory Exception messagse
+        If this bucket overflows, pls. contact 'vsppbdev'.
+ -->
+  <data name="CodeTaskFactory.CodeElementIsMissing" xml:space="preserve">
+    <value>MSB3751: The &lt;Code&gt; element is missing for the "{0}" task. This element is required.</value>
+    <comment>{StrBegin="MSB3751: "} &lt;Code&gt; should not be localized it is the name of an xml element</comment>
+  </data>
+  <data name="CodeTaskFactory.AttributeEmpty" xml:space="preserve">
+    <value>MSB3752: The "{0}" attribute has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
+    <comment>{StrBegin="MSB3752: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.AttributeEmptyWithElement" xml:space="preserve">
+    <value>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
+    <comment>{StrBegin="MSB3752: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.NeedsITaskInterface" xml:space="preserve">
+    <value>MSB3753: The task could not be instantiated because it does not implement the ITask interface. Make sure the task implements the Microsoft.Build.Framework.ITask interface.</value>
+    <comment>{StrBegin="MSB3753: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.ReferenceAssemblyIsInvalid" xml:space="preserve">
+    <value>MSB3754: The reference assembly "{0}" is invalid. "{1}"</value>
+    <comment>{StrBegin="MSB3754: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.CouldNotFindReferenceAssembly" xml:space="preserve">
+    <value>MSB3755: Could not find reference "{0}". If this reference is required by your code, you may get compilation errors.</value>
+    <comment>{StrBegin="MSB3755: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.InvalidElementLocation" xml:space="preserve">
+    <value>MSB3756: The element &lt;{0}&gt; is not a valid child of the &lt;{1}&gt; element.  Valid child elements are &lt;Code&gt;, &lt;Reference&gt;, and &lt;Using&gt;.</value>
+    <comment>{StrBegin="MSB3756: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.MultipleCodeNodes" xml:space="preserve">
+    <value>MSB3757: Only one &lt;Code&gt; element can be specified.</value>
+    <comment>{StrBegin="MSB3757: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.CompilerError" xml:space="preserve">
+    <value>MSB3758: An error has occurred during compilation. {0}</value>
+    <comment>{StrBegin="MSB3758: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.CouldNotFindTaskInAssembly" xml:space="preserve">
+    <value>The task name "{0}" could not be found.</value>
+  </data>
+  <data name="CodeTaskFactory.FindSourceFileAt" xml:space="preserve">
+    <value>The source file for this compilation can be found at: "{0}"</value>
+  </data>
+  <data name="CodeTaskFactory.HaveReflectionOnlyAssembly" xml:space="preserve">
+    <value>The reference assembly "{0}" is a metadata only assembly.</value>
+  </data>
+  <data name="CodeTaskFactory.InvalidCodeType" xml:space="preserve">
+    <value>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</value>
+    <comment>{StrBegin="MSB3759: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.InvalidCodeLanguage" xml:space="preserve">
+    <value>MSB3759: The specified code language "{0}" is invalid.  The supported code languages are "{1}".</value>
+    <comment>{StrBegin="MSB3759: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.NoSourceCode" xml:space="preserve">
+    <value>MSB3760: You must specify source code within the Code element or a path to a file containing source code.</value>
+    <comment>{StrBegin="MSB3760: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.CompilingAssembly" xml:space="preserve">
+    <value>Compiling task source code</value>
+  </data>
+  <data name="CodeTaskFactory.InvalidTaskXml" xml:space="preserve">
+    <value>MSB3761: The specified task XML is invalid.  {0}</value>
+    <comment>{StrBegin="MSB3761: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.InvalidCodeElementAttribute" xml:space="preserve">
+    <value>MSB3756: The attribute "{0}" is not valid for the &lt;Code&gt; element.  Valid attributes are "Language", "Source", and "Type".</value>
+    <comment>{StrBegin="MSB3756: "}</comment>
+  </data>
+  <!--
+        MSB3773 - MSB3783   Task: ResolveSDKReference
+        MSB3841 - MSB3850
+        ResolveSDKReference Exception messages
+        If this bucket overflows, pls. contact 'vsppbdev'.
+ -->
+  <data name="ResolveSDKReference.SearchingForSDK" xml:space="preserve">
+    <value>Searching for SDK "{0}": </value>
+  </data>
+  <data name="ResolveSDKReference.FoundSDK" xml:space="preserve">
+    <value>Found at search location "{0}".</value>
+  </data>
+  <data name="ResolveSDKReference.ErrorReadingManifest" xml:space="preserve">
+    <value>There was a problem reading the SDK manifest file "{0}". {1}</value>
+   </data>
+  <data name="ResolveSDKReference.ReadingSDKManifestFile" xml:space="preserve">
+    <value>Reading SDK manifest file "{0}".</value>
+   </data>
+  <data name="ResolveSDKReference.TargetedConfigAndArchitecture" xml:space="preserve">
+    <value>Targeted configuration and architecture "{0}|{1}"</value>
+   </data>
+  <data name="ResolveSDKReference.PlatformSDK" xml:space="preserve">
+    <value>Has a platform identity of "{0}".</value>
+   </data>
+  <data name="ResolveSDKReference.CouldNotFindFrameworkIdentity" xml:space="preserve">
+    <value>Could not find "FrameworkIdentity" attribute "{0}" in the SDK manifest. </value>
+   </data>
+  <data name="ResolveSDKReference.NoFrameworkIdentitiesFound" xml:space="preserve">
+    <value>No FrameworkIdentity attributes were found in the SDK manifest, treating this SDK as a non-framework SDK.</value>
+   </data>
+  <data name="ResolveSDKReference.NoAppxLocationsFound" xml:space="preserve">
+    <value>No "APPX" attributes indicating app package locations were found in the SDK manifest. If an app package is required at runtime the project may not run.</value>
+   </data>
+  <data name="ResolveSDKReference.FoundFrameworkIdentity" xml:space="preserve">
+    <value>Found "FrameworkIdentity" attribute "{0}" in the SDK manifest.</value>
+   </data>
+  <data name="ResolveSDKReference.FoundAppxLocation" xml:space="preserve">
+    <value>Found "APPX" location attribute "{0}" in the SDK manifest.</value>
+   </data>
+  <data name="ResolveSDKReference.ReplaceAppxLocation" xml:space="preserve">
+    <value>Updating the "{0}" architecture "APPX" location from "{1}" to "{2}". </value>
+   </data>
+  <data name="ResolveSDKReference.NoSDKLocationsSpecified" xml:space="preserve">
+    <value>Cannot resolve "SDKReference" items because no installed SDK locations were passed into the property "InstalledSdks".</value>
+    <comment>"SDKReference" and "InstalledSDKs" are property names on the task and should not be localized</comment>
+   </data>
+  <data name="ResolveSDKReference.CannotReferenceTwoSDKsSameFamily" xml:space="preserve">
+    <value>MSB3773: The SDK "{0}" cannot be referenced alongside SDK(s) {1}, as they all belong to the same SDK product Family "{2}". Please consider removing references to other SDKs of the same product family.</value>
+    <comment>{StrBegin="MSB3773: "}</comment>
+   </data>
+  <data name="ResolveSDKReference.CouldNotResolveSDK" xml:space="preserve">
+    <value>MSB3774: Could not find SDK "{0}".</value>
+    <comment>{StrBegin="MSB3774: "}</comment>
+   </data>
+  <data name="ResolveSDKReference.ErrorResolvingSDK" xml:space="preserve">
+    <value>MSB3775: There was an error resolving the SDK "{0}". {1}</value>
+    <comment>{StrBegin="MSB3775: "} "{0}" will be the root location which could not be searched. Ie (c:\program files\sdks\..) </comment>
+   </data>
+    <data name="ResolveSDKReference.SDKReferenceIncorrectFormat" xml:space="preserve">
+    <value>MSB3776: The SDK Reference "{0}" is incorrectly formatted. It must be in the following format "&lt;SDKName&gt;, Version=&lt;SDKVersion&gt;. For example: "MySDK, Version=2.0"</value>
+    <comment>{StrBegin="MSB3776: "}</comment>
+   </data>
+  <data name="ResolveSDKReference.NoMatchingFrameworkIdentity" xml:space="preserve">
+    <value>MSB3777: "FrameworkIdentity" attributes were found in the SDK manifest file "{0}", however none of the attributes matched the targeted configuration and architecture "{1} | {2}" and no "FrameworkIdentity" attribute without configuration and architecture could be found. If this project is to be packaged, packaging will fail.</value>
+    <comment>{StrBegin="MSB3777: "}</comment>
+   </data>
+  <data name="ResolveSDKReference.NoMatchingAppxLocation" xml:space="preserve">
+    <value>MSB3778: "APPX" attributes were found in the SDK manifest file "{0}" however none of the attributes matched the targeted configuration and architecture "{1} | {2}" and no "APPX" attribute without configuration and architecture could be found. If an app package is required then the project will fail at runtime.</value>
+    <comment>{StrBegin="MSB3778: "}</comment>
+   </data>
+   <data name="ResolveSDKReference.TargetArchitectureNotSupported" xml:space="preserve">
+    <value>MSB3779: The processor architecture of the project being built "{0}" is not supported by the referenced SDK "{1}". Please consider changing the targeted processor architecture of your project (in Visual Studio this can be done through the Configuration Manager) to one of the architectures supported by the SDK: "{2}".</value>
+    <comment>{StrBegin="MSB3779: "}</comment>
+   </data>
+  <data name="ResolveSDKReference.CannotReferenceTwoSDKsSameName" xml:space="preserve">
+    <value>MSB3780: The SDK "{0}" cannot be referenced alongside SDK(s) {1}, because only one version of the SDK can be referenced from a project. Please consider removing references to the other SDKs.</value>
+    <comment>{StrBegin="MSB3780: "}</comment>
+   </data>
+    <data name="ResolveSDKReference.SDKMissingDependency" xml:space="preserve">
+    <value>MSB3781: The SDK "{0}" depends on the following SDK(s) {1}, which have not been added to the project or were not found. Please ensure that you add these dependencies to your project or you may experience runtime issues. You can add dependencies to your project through the Reference Manager.</value>
+    <comment>{StrBegin="MSB3781: "}</comment>
+   </data>
+    <data name="ResolveSDKReference.Prefer32BitNotSupportedWithNeutralProject" xml:space="preserve">
+    <value>MSB3782: The "{0}" SDK does not support targeting a neutral architecture with "Prefer 32-Bit" enabled for the project. Please go to the project properties (Build tab for C# and Compile tab for VB) and disable the "Prefer 32-bit" option, or change your project to target a non-neutral architecture.</value>
+    <comment>{StrBegin="MSB3782: "} Also, please localize "Prefer 32-Bit" in the same way that it is localized in wizard\vbdesigner\designer\proppages\buildproppage.resx</comment>
+   </data>
+    <data name="ResolveSDKReference.MaxPlatformVersionLessThanTargetPlatformVersion" xml:space="preserve">
+    <value>MSB3783: Project "{0}" depends upon SDK "{1} v{2}" which was released originally for apps targeting "{3} {4}". To verify whether "{1} v{2}" is compatible with "{5} {6}", contact the SDK author or see http://go.microsoft.com/fwlink/?LinkID=309181.</value>
+    <comment>{StrBegin="MSB3783: "}</comment>
+   </data>
+   <data name="ResolveSDKReference.InvalidDependencyInPlatform" xml:space="preserve">
+    <value>MSB3841: The SDK "{0}" depends on the SDK "{1}", which is not compatible with "{2} {3}". Please reference a version of SDK "{0}" which supports "{2} {3}".</value>
+    <comment>{StrBegin="MSB3841: "}</comment>
+   </data>
+   <data name="ResolveSDKReference.MaxPlatformVersionNotSpecified" xml:space="preserve">
+    <value>MSB3842: Project "{0}" depends upon SDK "{1} v{2}" which supports apps targeting "{3} {4}". To verify whether "{1} v{2}" is compatible with "{5} {6}", contact the SDK author or see http://go.microsoft.com/fwlink/?LinkID=309181.</value>
+    <comment>{StrBegin="MSB3842: "}</comment>
+   </data>
+   <data name="ResolveSDKReference.TargetPlatformIdentifierDoesNotMatch" xml:space="preserve">
+    <value>MSB3843: Project "{0}" targets platform "{3}", but references SDK "{1} v{2}" which targets platform "{4}".</value>
+    <comment>{StrBegin="MSB3843: "}</comment>
+   </data>
+   <data name="ResolveSDKReference.PlatformVersionIsLessThanMinVersion" xml:space="preserve">
+    <value>MSB3844: Project "{0}" targets platform version "{3}", but references SDK "{1} v{2}" which requires platform version "{4}" or higher.</value>
+    <comment>{StrBegin="MSB3844: "}</comment>
+   </data>
+    <!--
+        MSB3784 - MSB3794   Task: GetInstalledSDKs
+        GetInstalledSDKs Exception messagse
+        If this bucket overflows, pls. contact 'vsppbdev'.
+ -->
+  <data name="GetInstalledSDKs.ListInstalledSDKs" xml:space="preserve">
+    <value>Installed SDKs:</value>
+  </data>
+  <data name="GetInstalledSDKs.SDKNameAndLocation" xml:space="preserve">
+    <value>SDK "{0}" is installed at "{1}"</value>
+  </data>
+  <data name="GetInstalledSDKs.FoundSDKs" xml:space="preserve">
+    <value>Found "{0}" SDKs.</value>
+  </data>
+  <data name="GetInstalledSDKs.SearchingForSDKs" xml:space="preserve">
+    <value>Searching for SDKs targeting "{0}, {1}".</value>
+    <comment>{0} will be the platform identifier, "Windows" and {1} will be a version number</comment>
+  </data>
+  <data name="GetInstalledSDKs.TargetPlatformInformationMissing" xml:space="preserve">
+    <value>MSB3784: "TargetPlatformVersion" and "TargetPlatformIdentifier" cannot be empty.</value>
+    <comment>{StrBegin="MSB3784: "} TargetPlatformVersion and TargetPlatformIdentifier root are property names and should not be localized</comment>
+   </data>
+  <data name="GetInstalledSDKs.NoSDksFound" xml:space="preserve">
+    <value>MSB3785: No SDKs were found for TargetPlatform = {0} v{1}. SDKReference items will not be resolved. If your application requires these references there may be compilation errors.</value>
+    <comment>{StrBegin="MSB3785: "} "SDKReference" refers to SDKReference items in the project file and should not be localized.</comment>
+   </data>
+  <data name="GetInstalledSDKs.CouldNotGetSDKList" xml:space="preserve">
+    <value>MSB3786: There was a problem retrieving the installed SDKs on the machine. {0}</value>
+    <comment>{StrBegin="MSB3786: "}</comment>
+   </data>
+
+  <!--
+        MSB3795 - MSB3810   Task: GetSDKReferenceFiles
+        GetInstalledSDKs Exception messagse
+        If this bucket overflows, pls. contact 'vsppbdev'.
+ -->
+  <data name="GetSDKReferenceFiles.GetSDKReferences" xml:space="preserve">
+    <value>Enumerating SDK Reference "{0}" from "{1}".</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ExpandReferencesFrom" xml:space="preserve">
+    <value>Looking for references under "{0}".</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ExpandRedistFrom" xml:space="preserve">
+    <value>Looking for redist files under "{0}".</value>
+  </data>
+  <data name="GetSDKReferenceFiles.NotExpanding" xml:space="preserve">
+    <value>Not enumerating SDK Reference "{0}" because the "ExpandReferences" metadata is not true on the reference.</value>
+  </data>
+  <data name="GetSDKReferenceFiles.AddingReference" xml:space="preserve">
+    <value>Adding reference "{0}".</value>
+  </data>
+  <data name="GetSDKReferenceFiles.AddingRedistFile" xml:space="preserve">
+    <value>Adding file "{0}" from redist folder with target path "{1}".</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ConflictRedistSameSDK" xml:space="preserve">
+    <value>There was a conflict between two redist files going to the same target path "{0}" within the "{1}" SDK. Choosing "{2}" over "{3}" because it was resolved first.</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ConflictRedistDifferentSDK" xml:space="preserve">
+    <value>There was a conflict between two files from the redist folder files going to the same target path "{0}" between the "{1}" and "{2}" SDKs. Choosing "{3}" over "{4}" because it was resolved first.</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ConflictReferenceSameSDK" xml:space="preserve">
+    <value>There was a conflict between two references with the same file name resolved within the "{0}" SDK. Choosing "{1}" over "{2}" because it was resolved first.</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ConflictReferenceDifferentSDK" xml:space="preserve">
+    <value>There was a conflict between two references with the same file name between the "{0}" and "{1}" SDKs. Choosing "{2}" over "{3}" because it was resolved first.</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ProblemReadingCacheFile" xml:space="preserve">
+    <value>There was a problem reading the cache file "{0}". "{1}"</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ProblemDeletingCacheFile" xml:space="preserve">
+    <value>There was a problem deleting the cache file "{0}". "{1}"</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ProblemGeneratingHash" xml:space="preserve">
+    <value>There was a problem getting the time stamp of the current assembly "{0}". "{1}"</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ProblemGettingAssemblyMetadata" xml:space="preserve">
+    <value>There was a problem getting the assembly metadata for "{0}". "{1}"</value>
+  </data>
+  <data name="GetSDKReferenceFiles.ProblemWritingCacheFile" xml:space="preserve">
+    <value>There was a problem writing the cache file "{0}". "{1}"</value>
+  </data>
+  <data name="GetSDKReferenceFiles.NoOriginalItemSpec" xml:space="preserve">
+    <value>The "OriginalItemSpec" metadata for the resolved SDK with path "{0}" was empty. The "OriginalItemSpec" metadata must be set."</value>
+  </data>
+  <data name="GetSDKReferenceFiles.CouldNotGetSDKReferenceFiles" xml:space="preserve">
+    <value>MSB3795: There was a problem in the GetSDKReferenceFiles task. {0}</value>
+    <comment>{StrBegin="MSB3795: "}</comment>
+  </data>
+    <data name="GetSDKReferenceFiles.ConflictBetweenFiles" xml:space="preserve">
+    <value>MSB3796: There was a conflict between two files. {0}</value>
+    <comment>{StrBegin="MSB3796: "}</comment>
+  </data>
+  <data name="GetSDKReferenceFiles.CannotHaveEmptyTargetConfiguration" xml:space="preserve">
+    <value>MSB3797: The targeted configuration for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted configuration.</value>
+    <comment>{StrBegin="MSB3797: "}</comment>
+  </data>
+  <data name="GetSDKReferenceFiles.CannotHaveEmptyTargetArchitecture" xml:space="preserve">
+    <value>MSB3798: The targeted architecture for the resolved sdk reference "{0}" was empty. Cannot find reference or redist files without a targeted architecture.</value>
+    <comment>{StrBegin="MSB3798: "}</comment>
+  </data>
+
+ <!--
+        MSB3851 - MSB3860   Task: FindInvalidProjectReferences
+        If this bucket overflows, pls. contact 'vsppbdev'.
+ -->
+  <data name="FindInvalidProjectReferences.WarnWhenVersionIsIncompatible" xml:space="preserve">
+    <value>MSB3851: This project targets "{0}, Version={1}", but it is attempting to reference "{2}" targeting "{3}", which is invalid.</value>
+    <comment>{StrBegin="MSB3851: "}</comment>
+  </data>
+
+  <!--
+        MSB3861 - MSB3870   Task: ErrorFromResources
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ErrorFromResources.LogErrorFailure">
+    <value>MSB3861: Failed to log an error using resource string "{0}".  {1}</value>
+    <comment>{StrBegin="MSB3861: "}</comment>
+  </data>
+
+  <!--
+        MSB3871 - MSB3880   Targets: Code sharing
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="CodeSharing.CannotBuildSharedProject">
+    <value>MSB3871: Shared projects cannot be built on their own.  Please either build a project that references this project, or build the entire solution.</value>
+    <comment>{StrBegin="MSB3871: "}</comment>
+  </data>
+
+  <!--
+        MSB3891 - MSB3900   Targets: Copy Overflow
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Copy.ExactlyOneTypeOfLink">
+    <value>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</value>
+  </data>
+
+  <!--
+        MSB3901 - MSB3910   Task: Telemetry
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Telemetry.IllegalEventDataString">
+    <value>The property "{0}" in the telemetry event data property list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "Property1=Value1;Property2=Value2".</value>
+  </data>
+
+
+  <data name="ErrorAndWarning.EmptyMessage">
+    <!-- When a user did not specify a message to an <Error /> or <Warning /> task -->
+    <value>(No message specified)</value>
+  </data>
+
+  <!-- Engine errors for features not supported on .NET Core have the arbitrarily-chosen 48 prefix -->
+  <data name="TaskFactoryNotSupportedFailure" xml:space="preserve">
+    <value>MSB4801: The task factory "{0}" is not supported on the .NET Core version of MSBuild.</value>
+    <comment>{StrBegin="MSB4801: "}</comment>
+  </data>
+
+  <!--
+        MSB3921 - MSB3930   Task: DownloadFile
+  -->
+  <data name="DownloadFile.ErrorInvalidUrl" xml:space="preserve">
+    <value>MSB3921: The specified URL "{0}" is not valid.</value>
+    <comment>{StrBegin="MSB3921: "}</comment>
+  </data>
+  <data name="DownloadFile.ErrorUnknownFileName" xml:space="preserve">
+    <value>MSB3922: Failed to determine a file name from the URL "{0}".  Please specify a file name with the "{1}" parameter.</value>
+    <comment>{StrBegin="MSB3922: "}</comment>
+  </data>
+  <data name="DownloadFile.ErrorDownloading" xml:space="preserve">
+    <value>MSB3923: Failed to download file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB3923: "}</comment>
+  </data>
+  <data name="DownloadFile.Retrying" xml:space="preserve">
+    <value>MSB3924: Failed to download file "{0}". Beginning retry {1} in {2}ms. {3}</value>
+    <comment>{StrBegin="MSB3924: "}</comment>
+  </data>
+  <data name="DownloadFile.DidNotDownloadBecauseOfFileMatch">
+    <value>Did not download file from "{0}" to "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes match.</value>
+  </data>
+  <data name="DownloadFile.Downloading">
+    <value>Downloading from "{0}" to "{1}" ({2:N0} bytes).</value>
+  </data>
+
+  <!--
+        MSB3931 - MSB3940   Task: Unzip
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="Unzip.ErrorCouldNotCreateDestinationDirectory">
+    <value>MSB3931: Failed to unzip to directory "{0}" because it could not be created.  {1}</value>
+    <comment>{StrBegin="MSB3931: "}</comment>
+  </data>
+  <data name="Unzip.ErrorFileDoesNotExist">
+    <value>MSB3932: Failed to unzip file "{0}" because the file does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3932: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotOpenFile">
+    <value>MSB3933: Failed to open zip file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB3933: "}</comment>
+  </data>
+  <data name="Unzip.ErrorExtractingResultsInFilesOutsideDestination">
+    <value>MSB3934: Failed to open unzip file "{0}" to "{1}" because it is outside the destination directory.</value>
+    <comment>{StrBegin="MSB3934: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotMakeFileWriteable">
+    <value>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</value>
+    <comment>{StrBegin="MSB3935: "}</comment>
+  </data>
+  <data name="Unzip.ErrorCouldNotExtractFile">
+    <value>MSB3936: Failed to open unzip file "{0}" to "{1}".  {2}</value>
+    <comment>{StrBegin="MSB3936: "}</comment>
+  </data>
+  <data name="Unzip.DidNotUnzipBecauseOfFileMatch">
+    <value>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
+  </data>
+  <data name="Unzip.FileComment">
+    <value>Unzipping file "{0}" to "{1}".</value>
+  </data>
+
+  <!--
+        MSB3941 - MSB3950   Task: ZipDirectory
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="ZipDirectory.ErrorDirectoryDoesNotExist">
+    <value>MSB3941: Failed to zip directory "{0}" because it does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3941: "}</comment>
+  </data>
+  <data name="ZipDirectory.ErrorFileExists">
+    <value>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</value>
+    <comment>{StrBegin="MSB3942: "}</comment>
+  </data>
+  <data name="ZipDirectory.ErrorFailed">
+    <value>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</value>
+    <comment>{StrBegin="MSB3943: "}</comment>
+  </data>
+  <data name="ZipDirectory.Comment">
+    <value>Zipping directory "{0}" to "{1}".</value>
+  </data>
+
+  <!--
+        MSB3951 - MSB3960  Tasks: GetFileHash and VerifyFileHash
+        If this bucket overflows, pls. contact 'vsppbdev'.
+  -->
+  <data name="FileHash.UnrecognizedHashEncoding" xml:space="preserve">
+    <value>MSB3951: Unrecognized hash encoding '{0}'. Allowed encodings are 'hex' and 'base64'.</value>
+    <comment>{StrBegin="MSB3951: "}</comment>
+  </data>
+  <data name="VerifyFileHash.HashMismatch" xml:space="preserve">
+    <value>MSB3952: File hash mismatch. Expected {0} to have a {1} file hash of {2}, but it was {3}.</value>
+    <comment>{StrBegin="MSB3952: "}</comment>
+  </data>
+  <data name="FileHash.UnrecognizedHashAlgorithm" xml:space="preserve">
+    <value>MSB3953: Unrecognized hash algorithm name '{0}'. Allowed algorithms are 'SHA256', 'SHA384', and 'SHA512'.</value>
+    <comment>{StrBegin="MSB3953: "}</comment>
+  </data>
+  <data name="FileHash.FileNotFound" xml:space="preserve">
+    <value>MSB3954: Failed to compute hash for file '{0}' because it does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB3954: "}</comment>
+  </data>
+  <!--
+        The tasks message bucket is: MSB3001 - MSB3999
+
+        See the comments above each task's messages for individual task message buckets.
+
+        If you need a new bucket, please update the master bucket list below:
+            MSB3001 - MSB3010   Task: AssignCulture
+            MSB3011 - MSB3020   Task: AL
+            MSB3021 - MSB3030   Task: Copy
+            MSB3031 - MSB3040   Task: CreateItem
+            MSB3041 - MSB3050   Task: CreateManifestResourceName
+            MSB3051 - MSB3060   Task: Csc
+            MSB3061 - MSB3070   Task: Delete
+            MSB3071 - MSB3080   Task: Exec
+            MSB3081 - MSB3109   Task: General                 // MSB3109 not used but already shipped, do not reuse
+            MSB3110 - MSB3130   Task: GenerateManifest overflow
+            MSB3131 - MSB3140   Task: GetRedistListPaths      // DEAD DO NOT REUSE BLOCK
+            MSB3141 - MSB3170   Task: GenerateBootstrapper    // MSB3167 not used but already shipped, do not reuse
+            MSB3171 - MSB3190   Task: GenerateManifest
+            MSB3191 - MSB3200   Task: MakeDir
+            MSB3201 - MSB3210   Task: MSBuild
+            MSB3211 - MSB3230   Task: RegisterAssembly
+            MSB3231 - MSB3240   Task: RemoveDir
+            MSB3241 - MSB3280   Task: ResolveAssemblyReference
+            MSB3281 - MSB3320   Task: ResolveComReference
+            MSB3321 - MSB3330   Task: ResolveKeySource
+            MSB3331 - MSB3340   Task: ResolveManifestFiles
+            MSB3341 - MSB3350   Task: ResolveNativeReference
+            MSB3351 - MSB3360   Task: StrongNameUtils
+            MSB3361 - MSB3370   Task: ToolTask
+            MSB3371 - MSB3390   Task: Touch
+            MSB3391 - MSB3400   Task: UnregisterAssembly
+            MSB3401 - MSB3410   Task: Vbc
+            MSB3411 - MSB3420   Task: VCBuild                     // DEAD DO NOT REUSE BLOCK
+            MSB3421 - MSB3440   Task: ResolveVCProjectOutput      // DEAD DO NOT REUSE BLOCK
+            MSB3441 - MSB3450   Task: GetAssemblyIdentity
+            MSB3451 - MSB3460   Task: ResGen
+            MSB3461 - MSB3470   Task: AspNetCompiler
+            MSB3471 - MSB3480   Task: SGen
+            MSB3481 - MSB3490   Task: SignFile    // MSB3485 MSB3486 not used but already shipped, do not reuse
+            MSB3491 - MSB3500   Task: WriteLinesToFile
+            MSB3501 - MSB3510   Task: ReadLinesFromFile
+            MSB3511 - MSB3520   Task: Message
+            MSB3521 - MSB3530   Task: Warning
+            MSB3531 - MSB3540   Task: Error    // MSB3539, MSB3540 is used in Microsoft.Common.CurrentVersion.targets, do not reuse
+            MSB3541 - MSB3550   Task: FindUnderPath
+            MSB3551 - MSB3580   Task: GenerateResource     // MSB3561, MSB3571 not used but already shipped, do not reuse
+            MSB3581 - MSB3600   Task: ResolveNonMSBuildProjectOutput
+            MSB3601 - MSB3610   Task: ResolveProjectConfiguration
+            MSB3611 - MSB3620   Task: CreateTemporaryVCProject    // DEAD DO NOT REUSE BLOCK
+            MSB3621 - MSB3641   Task: General overflow
+            MSB3642 - MSB3646   Task: GetReferenceAssemblyPaths
+            MSB3646 - MSB3655   Task: AxTlbBaseTask
+            MSB3656 - MSB3660   Task: AxImp
+            MSB3661 - MSB3665   Task: TlbImp
+            MSB3666 - MSB3675   Task: General
+            MSB3676 - MSB3685   Task: Move
+            MSB3686 - MSB3695   Task: XamlTaskFactory
+            MSB3696 - MSB3700   Task: GenerateBootstrapper overflow
+            MSB3701 - MSB3710   Task: XslTransformation
+            MSB3711 - MSB3720   Task: WriteCodeFragment
+            MSB3721 - MSB3730   Task: XamlTaskFactory overflow
+            MSB3731 - MSB3740   Task: XmlPoke
+            MSB3741 - MSB3750   Task: XmlPeek
+            MSB3751 - MSB3761   Task: CodeTaskFactory
+            MSB3762 - MSB3772   Task: WinMDExp
+            MSB3773 - MSB3783   Task: ResolveSDKReference
+            MSB3784 - MSB3794   Task: GetInstalledSDKs
+            MSB3795 - MSB3810   Task: GetSDKReferenceFiles
+            MSB3811 - MSB3830   Task: GenerateResource
+            MSB3831 - MSB3840   Task: GenerateBindingRedirects
+            MSB3841 - MSB3850   Task: ResolveSDKReference (additional error messages)
+            MSB3851 - MSB3860   Task: FindInvalidProjectReferences
+            MSB3861 - MSB3870   Task: ErrorFromResources
+            MSB3871 - MSB3880   Targets: Code sharing
+            MSB3881 - MSB3890   Task: Compiler
+            MSB3891 - MSB3900   Overflow: Copy
+            MSB3901 - MSB3910   Task: Telemetry
+            MSB3911 - MSB3920   Task: CodeTaskFactory
+            MSB3921 - MSB3930   Task: DownloadFile
+            MSB3931 - MSB3940   Task: Unzip
+            MSB3941 - MSB3950   Task: ZipDirectory
+            MSB3951 - MSB3960   Task: VerifyFileHash
+
+            MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
+            MSB9000 - MSB9900   MSBuild targets files (C++)
+
+        The following codes are not longer used but have shipped so should not be reused:
+            MSB3109
+
+
+        The message spec is here:
+           http://msbuild/wiki/default.aspx/MSBuild.GenerateResourceTaskMessages
+
+        Codes only need to be applied to messages that are logged as errors/warnings. Messages thrown with exceptions do NOT need
+        error codes, because those exceptions should ideally be caught at a higher scope and logged with a wrapper message that
+        DOES have an error code.
+  -->
+</root>

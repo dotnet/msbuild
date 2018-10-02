@@ -1,0 +1,43 @@
+﻿<Project Sdk="RoslynTools.RepoToolset">
+  <PropertyGroup>
+    <RootNamespace>Microsoft.Build.Logging.StructuredLogger</RootNamespace>
+    <AssemblyName>XmlFileLogger</AssemblyName>
+    <UseProductOutputPath>true</UseProductOutputPath>
+    <CopyNuGetImplementations>false</CopyNuGetImplementations>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" /> -->
+  </ItemGroup>
+  <ItemGroup>
+    <!-- <Compile Include="ILogNode.cs" />
+    <Compile Include="ItemGroupParser.cs" />
+    <Compile Include="ObjectModel\Build.cs" />
+    <Compile Include="ObjectModel\InputParameter.cs" />
+    <Compile Include="ObjectModel\ItemGroup.cs" />
+    <Compile Include="LogProcessNode.cs" />
+    <Compile Include="ObjectModel\Item.cs" />
+    <Compile Include="ObjectModel\Message.cs" />
+    <Compile Include="ObjectModel\OutputItem.cs" />
+    <Compile Include="ObjectModel\OutputProperty.cs" />
+    <Compile Include="ObjectModel\Project.cs" />
+    <Compile Include="ObjectModel\Target.cs" />
+    <Compile Include="ObjectModel\Task.cs" />
+    <Compile Include="ObjectModel\TaskParameter.cs" />
+    <Compile Include="PropertyBag.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnknownTaskParameterPrefixException.cs" />
+    <Compile Include="XmlFileLogger.cs" /> -->
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="14.3.0" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="14.3.0" />
+    <PackageReference Include="Microsoft.Build" Version="14.3.0" />
+  </ItemGroup>
+  <!-- <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" /> -->
+</Project>

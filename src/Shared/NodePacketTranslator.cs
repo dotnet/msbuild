@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Implementation of INodePacketTranslator.</summary>
-//-----------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -16,8 +14,10 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.Globalization;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -32,7 +32,6 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns a read-only serializer.
         /// </summary>
-        /// <param name="stream">The stream containing data to deserialize.</param>
         /// <returns>The serializer.</returns>
         static internal INodePacketTranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
         {
@@ -67,7 +66,6 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
-            /// <param name="packetStream">The stream serving as the source or destination of data.</param>
             public NodePacketReadTranslator(Stream packetStream, SharedReadBuffer buffer)
             {
                 _packetStream = packetStream;
@@ -150,6 +148,24 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Translates a long.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref long value)
+            {
+                value = _reader.ReadInt64();
+            }
+
+            /// <summary>
+            /// Translates a double.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref double value)
+            {
+                value = _reader.ReadDouble();
+            }
+
+            /// <summary>
             /// Translates a string.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -205,6 +221,23 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            /// <inheritdoc />
+            public void Translate(ref HashSet<string> set)
+            {
+                if (!TranslateNullable(set))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                set = new HashSet<string>();
+
+                for (int i = 0; i < count; i++)
+                {
+                    set.Add(_reader.ReadString());
+                }
+            }
+
             /// <summary>
             /// Translates a list of strings
             /// </summary>
@@ -233,13 +266,20 @@ namespace Microsoft.Build.BackEnd
             /// <typeparam name="T">TaskItem type</typeparam>
             public void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable
             {
+                IList<T> listAsInterface = list;
+                Translate(ref listAsInterface, factory, count => new List<T>(count));
+                list = (List<T>) listAsInterface;
+            }
+
+            public void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>
+            {
                 if (!TranslateNullable(list))
                 {
                     return;
                 }
 
                 int count = _reader.ReadInt32();
-                list = new List<T>(count);
+                list = collectionFactory(count);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -266,6 +306,17 @@ namespace Microsoft.Build.BackEnd
                 value = new DateTime(_reader.ReadInt64(), kind);
             }
 
+            /// <summary>
+            /// Translates a TimeSpan.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref TimeSpan value)
+            {
+                long ticks = 0;
+                Translate(ref ticks);
+                value = new System.TimeSpan(ticks);
+            }
+
             // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.  
             // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to 
             // compile this method out of that assembly. 
@@ -288,6 +339,7 @@ namespace Microsoft.Build.BackEnd
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
                     _reader.ReadInt32(),
+                    _reader.ReadInt32(),
                     _reader.ReadInt32()
                     );
             }
@@ -301,8 +353,39 @@ namespace Microsoft.Build.BackEnd
             public void TranslateCulture(ref CultureInfo value)
             {
                 string cultureName = _reader.ReadString();
+
+#if CLR2COMPATIBILITY
+                // It may be that some culture codes are accepted on later .net framework versions
+                // but not on the older 3.5 or 2.0. Fallbacks are required in this case to prevent
+                // exceptions
+                value = LoadCultureWithFallback(cultureName);
+#else
                 value = new CultureInfo(cultureName);
+#endif
             }
+
+#if CLR2COMPATIBILITY
+            private static CultureInfo LoadCultureWithFallback(string cultureName)
+            {
+                CultureInfo cultureInfo;
+
+                return TryLoadCulture(cultureName, out cultureInfo) ? cultureInfo : CultureInfo.CurrentCulture;
+            }
+
+            private static bool TryLoadCulture(string cultureName, out CultureInfo cultureInfo)
+            {
+                try
+                {
+                    cultureInfo = new CultureInfo(cultureName);
+                    return true;
+                }
+                catch
+                {
+                    cultureInfo = null;
+                    return false;
+                }
+            }
+#endif
 
             /// <summary>
             /// Translates an enumeration.
@@ -337,6 +420,12 @@ namespace Microsoft.Build.BackEnd
                 BinaryFormatter formatter = new BinaryFormatter();
                 value = (T)formatter.Deserialize(_packetStream);
             }
+
+            public void TranslateException(ref Exception value)
+            {
+                TranslateDotNet<Exception>(ref value);
+            }
+
 
             /// <summary>
             /// Translates an object implementing INodePacketTranslatable.
@@ -426,13 +515,24 @@ namespace Microsoft.Build.BackEnd
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer)
             {
+                IDictionary<string, string> copy = dictionary;
+
+                TranslateDictionary(
+                    ref copy,
+                    count => new Dictionary<string, string>(count, comparer));
+
+                dictionary = (Dictionary<string, string>) copy;
+            }
+
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)
+            {
                 if (!TranslateNullable(dictionary))
                 {
                     return;
                 }
 
                 int count = _reader.ReadInt32();
-                dictionary = new Dictionary<string, string>(count, comparer);
+                dictionary = dictionaryCreator(count);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -440,6 +540,30 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref key);
                     string value = null;
                     Translate(ref value);
+                    dictionary[key] = value;
+                }
+            }
+
+            public void TranslateDictionary<K, V>(
+                ref IDictionary<K, V> dictionary,
+                Translator<K> keyTranslator,
+                Translator<V> valueTranslator,
+                NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator)
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                dictionary = dictionaryCreator(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    K key = default(K);
+                    keyTranslator.Invoke(ref key, this);
+                    V value = default(V);
+                    valueTranslator(ref value, this);
                     dictionary[key] = value;
                 }
             }
@@ -509,7 +633,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
             /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketDictionaryCreator<D> dictionaryCreator)
+            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
                 where T : class, INodePacketTranslatable
             {
@@ -644,6 +768,24 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Translates a long.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref long value)
+            {
+                _writer.Write(value);
+            }
+
+            /// <summary>
+            /// Translates a double.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref double value)
+            {
+                _writer.Write(value);
+            }
+
+            /// <summary>
             /// Translates a string.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -698,6 +840,23 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            /// <inheritdoc />
+            public void Translate(ref HashSet<string> set)
+            {
+                if (!TranslateNullable(set))
+                {
+                    return;
+                }
+
+                int count = set.Count;
+                _writer.Write(count);
+
+                foreach (var item in set)
+                {
+                    _writer.Write(item);
+                }
+            }
+
             /// <summary>
             /// Translates a list of T where T implements INodePacketTranslateable
             /// </summary>
@@ -705,6 +864,31 @@ namespace Microsoft.Build.BackEnd
             /// <param name="factory">factory to create type T</param>
             /// <typeparam name="T">A TaskItemType</typeparam>
             public void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable
+            {
+                if (!TranslateNullable(list))
+                {
+                    return;
+                }
+
+                int count = list.Count;
+                _writer.Write(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    T value = list[i];
+                    Translate<T>(ref value, factory);
+                }
+            }
+
+            /// <summary>
+            /// Translates a list of T where T implements INodePacketTranslateable
+            /// </summary>
+            /// <param name="list">The list to be translated.</param>
+            /// <param name="factory">factory to create type T</param>
+            /// <param name="collectionFactory">factory to create the IList</param>
+            /// <typeparam name="T">A TaskItemType</typeparam>
+            /// <typeparam name="L">IList subtype</typeparam>
+            public void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>
             {
                 if (!TranslateNullable(list))
                 {
@@ -732,6 +916,15 @@ namespace Microsoft.Build.BackEnd
                 _writer.Write(value.Ticks);
             }
 
+            /// <summary>
+            /// Translates a TimeSpan.
+            /// </summary>
+            /// <param name="value">The value to be translated.</param>
+            public void Translate(ref TimeSpan value)
+            {
+                _writer.Write(value.Ticks);
+            }
+
             // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.  
             // However, it also does not ever need to translate BuildEventContexts, so it should be perfectly safe to 
             // compile this method out of that assembly. 
@@ -749,6 +942,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _writer.Write(value.SubmissionId);
                 _writer.Write(value.NodeId);
+                _writer.Write(value.EvaluationId);
                 _writer.Write(value.ProjectInstanceId);
                 _writer.Write(value.ProjectContextId);
                 _writer.Write(value.TargetId);
@@ -780,7 +974,7 @@ namespace Microsoft.Build.BackEnd
             public void TranslateEnum<T>(ref T value, int numericValue)
             {
                 Type enumType = value.GetType();
-                ErrorUtilities.VerifyThrow(enumType.IsEnum, "Must pass an enum type.");
+                ErrorUtilities.VerifyThrow(enumType.GetTypeInfo().IsEnum, "Must pass an enum type.");
 
                 _writer.Write(numericValue);
             }
@@ -799,6 +993,11 @@ namespace Microsoft.Build.BackEnd
 
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(_packetStream, value);
+            }
+
+            public void TranslateException(ref Exception value)
+            {
+                TranslateDotNet<Exception>(ref value);
             }
 
             /// <summary>
@@ -906,6 +1105,12 @@ namespace Microsoft.Build.BackEnd
             /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
             public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer)
             {
+                IDictionary<string, string> copy = dictionary;
+                TranslateDictionary(ref copy, (NodePacketCollectionCreator<IDictionary<string, string>>)null);
+            }
+
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)
+            {
                 if (!TranslateNullable(dictionary))
                 {
                     return;
@@ -920,6 +1125,29 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref key);
                     string value = pair.Value;
                     Translate(ref value);
+                }
+            }
+
+            public void TranslateDictionary<K, V>(
+                ref IDictionary<K, V> dictionary,
+                Translator<K> keyTranslator,
+                Translator<V> valueTranslator,
+                NodePacketCollectionCreator<IDictionary<K, V>> collectionCreator)
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = dictionary.Count;
+                _writer.Write(count);
+
+                foreach (KeyValuePair<K, V> pair in dictionary)
+                {
+                    K key = pair.Key;
+                    keyTranslator.Invoke(ref key, this);
+                    V value = pair.Value;
+                    valueTranslator.Invoke(ref value, this);
                 }
             }
 
@@ -986,7 +1214,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="dictionary">The dictionary to be translated.</param>
             /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
             /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketDictionaryCreator<D> dictionaryCreator)
+            public void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
                 where T : class, INodePacketTranslatable
             {

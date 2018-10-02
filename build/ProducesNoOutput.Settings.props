@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+    <OutputType>Library</OutputType>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ResolvePackageDependenciesForBuild>false</ResolvePackageDependenciesForBuild>
+    <NonShipping>true</NonShipping>
+    <NoStdLib>true</NoStdLib>
+    <LanguageTargets>$(MSBuildThisFileDirectory)ProducesNoOutput.Imports.props</LanguageTargets>
+    <ProducesNoOutput>true</ProducesNoOutput>
+  </PropertyGroup>
+</Project>

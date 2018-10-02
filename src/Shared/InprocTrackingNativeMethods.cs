@@ -1,21 +1,22 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interop methods for the FileTracker.dll interop APIs.</summary>
-//-----------------------------------------------------------------------
+
+#if FEATURE_FILE_TRACKER
 
 using System;
-using System.Collections.Generic;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
+#if FEATURE_CONSTRAINED_EXECUTION
+using System.Runtime.ConstrainedExecution;
+#endif
 using System.Security;
+using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
+#endif
+#if FEATURE_RESOURCE_EXPOSURE
+using System.Runtime.Versioning;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -34,39 +35,57 @@ namespace Microsoft.Build.Shared
         #region Delegates for the tracking functions
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int StartTrackingContextDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string taskName);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int StartTrackingContextWithRootDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string taskName, [In, MarshalAs(UnmanagedType.LPWStr)] string rootMarker);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int EndTrackingContextDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int StopTrackingAndCleanupDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int SuspendTrackingDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int ResumeTrackingDelegate();
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int WriteAllTLogsDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string tlogRootName);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int WriteContextTLogsDelegate([In, MarshalAs(UnmanagedType.LPWStr)] string intermediateDirectory, [In, MarshalAs(UnmanagedType.LPWStr)] string tlogRootName);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+#if FEATURE_SECURITY_PERMISSIONS
         [SuppressUnmanagedCodeSecurity]
+#endif
         private delegate int SetThreadCountDelegate(int threadCount);
 
         #endregion // Delegates for the tracking functions
@@ -162,12 +181,16 @@ namespace Microsoft.Build.Shared
             #region Declarations of Windows API needed to load the native library
 
             [DllImport("kernel32.dll", CharSet = CharSet.Ansi, BestFitMapping = false)]
+#if FEATURE_RESOURCE_EXPOSURE
             [ResourceExposure(ResourceScope.Process)]
+#endif
             [SecurityCritical]
             private static extern IntPtr GetProcAddress(SafeHandle moduleHandle, String procName);
 
             [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+#if FEATURE_RESOURCE_EXPOSURE
             [ResourceExposure(ResourceScope.Machine)]
+#endif
             [SecurityCritical]
             private static extern SafeLibraryHandle LoadLibrary(String libPath);
 
@@ -185,7 +208,7 @@ namespace Microsoft.Build.Shared
                 string buildToolsPath = FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(MSBuildConstants.CurrentToolsVersion, DotNetFrameworkArchitecture.Current);
                 string fileTrackerPath = Path.Combine(buildToolsPath, fileTrackerDllName.Value);
 
-                if (!File.Exists(fileTrackerPath))
+                if (!FileSystems.Default.FileExists(fileTrackerPath))
                 {
                     throw new DllNotFoundException(fileTrackerDllName.Value);
                 }
@@ -266,8 +289,9 @@ namespace Microsoft.Build.Shared
                     get
                     { return IntPtr.Zero == handle; }
                 }
-
+#if FEATURE_CONSTRAINED_EXECUTION
                 [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+#endif
                 [SecurityCritical]
                 protected override bool ReleaseHandle()
                 {
@@ -279,3 +303,4 @@ namespace Microsoft.Build.Shared
         }
     }
 }
+#endif

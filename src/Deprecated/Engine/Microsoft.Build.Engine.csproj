@@ -1,0 +1,221 @@
+﻿<Project Sdk="RoslynTools.RepoToolset">
+  <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+    <NoWarn>$(NoWarn);618</NoWarn>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <CreateTlb>true</CreateTlb>
+    <AdditionalTlbExpAsmPaths>$(XMakeRefPath)</AdditionalTlbExpAsmPaths>
+    <PublishTlbPath>$(XMakeRefPath)</PublishTlbPath>
+    <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
+    <DefineConstants Condition="'$(MSBUILDENABLEVSPROFILING)' != ''">$(DefineConstants);MSBUILDENABLEVSPROFILING</DefineConstants>
+    <CopyToSuiteBin>true</CopyToSuiteBin>
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which contains the legacy compatibility shim for the MSBuild engine.  NOTE: This assembly is deprecated.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Shared\Constants.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Caching\BuildResultCacheEntry.cs" />
+    <Compile Include="Caching\CacheEntry.cs" />
+    <Compile Include="Caching\CacheEntryCustomSerializer.cs" />
+    <Compile Include="Caching\PropertyCacheEntry.cs" />
+    <Compile Include="Caching\BuildItemCacheEntry.cs" />
+    <Compile Include="Choose\Choose.cs" />
+    <Compile Include="Choose\GroupEnumeratorHelper.cs" />
+    <Compile Include="Choose\GroupingCollection.cs" />
+    <Compile Include="Choose\When.cs" />
+    <Compile Include="Collections\CopyOnWriteHashtable.cs" />
+    <Compile Include="Collections\DualQueue.cs" />
+    <Compile Include="Collections\HashTableUtility.cs" />
+    <Compile Include="Conditionals\AndExpressionNode.cs" />
+    <Compile Include="Conditionals\CharacterUtilities.cs" />
+    <Compile Include="Conditionals\EqualExpressionNode.cs" />
+    <Compile Include="Conditionals\ConditionEvaluationState.cs" />
+    <Compile Include="Conditionals\FunctionCallExpressionNode.cs" />
+    <Compile Include="Conditionals\GenericExpressionNode.cs" />
+    <Compile Include="Conditionals\GreaterThanExpressionNode.cs" />
+    <Compile Include="Conditionals\GreaterThanOrEqualExpressionNode.cs" />
+    <Compile Include="Conditionals\LessThanExpressionNode.cs" />
+    <Compile Include="Conditionals\LessThanOrEqualExpressionNode.cs" />
+    <Compile Include="Conditionals\MultipleComparisonExpressionNode.cs" />
+    <Compile Include="Conditionals\NotEqualExpressionNode.cs" />
+    <Compile Include="Conditionals\NotExpressionNode.cs" />
+    <Compile Include="Conditionals\NumericComparisonExpressionNode.cs" />
+    <Compile Include="Conditionals\NumericExpressionNode.cs" />
+    <Compile Include="Conditionals\OperandExpressionNode.cs" />
+    <Compile Include="Conditionals\OperatorExpressionNode.cs" />
+    <Compile Include="Conditionals\OrExpressionNode.cs" />
+    <Compile Include="Conditionals\Parser.cs" />
+    <Compile Include="Conditionals\Scanner.cs" />
+    <Compile Include="Conditionals\StringExpressionNode.cs" />
+    <Compile Include="Conditionals\Token.cs" />
+    <Compile Include="Engine\BatchingEngine.cs" />
+    <Compile Include="Engine\BuildRequest.cs" />
+    <Compile Include="Engine\BuildResult.cs" />
+    <Compile Include="Engine\BuildTask.cs" />
+    <Compile Include="Engine\CacheScope.cs" />
+    <Compile Include="Engine\CacheManager.cs" />
+    <Compile Include="Engine\EngineCommand.cs" />
+    <Compile Include="Engine\EventRedirector.cs" />
+    <Compile Include="Engine\ExecutionContext.cs" />
+    <Compile Include="Engine\Engine.cs" />
+    <Compile Include="Engine\EngineCallback.cs" />
+    <Compile Include="Engine\EngineLoggingServicesInProc.cs" />
+    <Compile Include="Engine\EngineLoggingServicesOutProc.cs" />
+    <Compile Include="Engine\EngineProxy.cs" />
+    <Compile Include="Engine\EventSource.cs" />
+    <Compile Include="Engine\Expander.cs" />
+    <Compile Include="Engine\EngineLoggingServices.cs" />
+    <Compile Include="Engine\IItemPropertyGrouping.cs" />
+    <Compile Include="Engine\Import.cs" />
+    <Compile Include="Engine\ImportCollection.cs" />
+    <Compile Include="Engine\ImportedProject.cs" />
+    <Compile Include="Engine\IEngineCallback.cs" />
+    <Compile Include="Engine\INodeDescription.cs" />
+    <Compile Include="Engine\INodeProvider.cs" />
+    <Compile Include="Engine\IntrinsicFunctions.cs" />
+    <Compile Include="Engine\ITaskRegistry.cs" />
+    <Compile Include="Engine\ItemBucket.cs" />
+    <Compile Include="Engine\Node.cs" />
+    <Compile Include="Engine\NodeManager.cs" />
+    <Compile Include="Engine\NodeRequestMapping.cs" />
+    <Compile Include="Engine\NodeLoggingEvent.cs" />
+    <Compile Include="Engine\Project.cs" />
+    <Compile Include="Engine\ProjectBuildState.cs" />
+    <Compile Include="Engine\ProjectManager.cs" />
+    <Compile Include="Engine\ProjectSchemaValidationHandler.cs" />
+    <Compile Include="Engine\RegistryKeyWrapper.cs" />
+    <Compile Include="Engine\RequestRoutingContext.cs" />
+    <Compile Include="Engine\Router.cs" />
+    <Compile Include="Engine\SchedulerRecord.cs" />
+    <Compile Include="Engine\Scheduler.cs" />
+    <Compile Include="Engine\Target.cs" />
+    <Compile Include="Engine\TargetExecutionWrapper.cs" />
+    <Compile Include="Engine\TargetCollection.cs" />
+    <Compile Include="Engine\TargetDependencyAnalyzer.cs" />
+    <Compile Include="Engine\TaskEngine.cs" />
+    <Compile Include="Engine\TaskEngineAssemblyResolver.cs" />
+    <Compile Include="Engine\TaskExecutionContext.cs" />
+    <Compile Include="Engine\TaskExecutionState.cs" />
+    <Compile Include="Engine\TaskExecutionModule.cs" />
+    <Compile Include="Engine\TaskOutput.cs" />
+    <Compile Include="Engine\TaskRegistry.cs" />
+    <Compile Include="Engine\TaskWorkerThread.cs" />
+    <Compile Include="Engine\Toolset.cs" />
+    <Compile Include="Engine\ToolsetConfigurationReader.cs" />
+    <Compile Include="Engine\ToolsetCollection.cs" />
+    <Compile Include="Engine\ToolsetReader.cs" />
+    <Compile Include="Engine\ToolsetRegistryReader.cs" />
+    <Compile Include="Engine\ToolsetState.cs" />
+    <Compile Include="Engine\UsingTask.cs" />
+    <Compile Include="Engine\UsingTaskCollection.cs" />
+    <Compile Include="Engine\Utilities.cs" />
+    <Compile Include="Engine\XmlSearcher.cs" />
+    <Compile Include="Errors\InternalLoggerException.cs" />
+    <Compile Include="Errors\InvalidProjectFileException.cs" />
+    <Compile Include="Errors\InvalidToolsetDefinitionException.cs" />
+    <Compile Include="Errors\RegistryException.cs" />
+    <Compile Include="Errors\RemoteErrorException.cs" />
+    <Compile Include="FxCopExclusions\Microsoft.Build.Engine.Suppressions.cs" />
+    <Compile Include="Introspector\Introspector.cs" />
+    <Compile Include="Introspector\NodeStatus.cs" />
+    <Compile Include="Introspector\TargetCycleDetector.cs" />
+    <Compile Include="Introspector\TargetInProgressState.cs" />
+    <Compile Include="ItemsAndProperties\ExpressionShredder.cs" />
+    <Compile Include="ItemsAndProperties\Lookup.cs" />
+    <Compile Include="Items\BuildItem.cs" />
+    <Compile Include="Items\BuildItemGroup.cs" />
+    <Compile Include="Items\BuildItemGroupCollection.cs" />
+    <Compile Include="Items\BuildItemGroupProxy.cs" />
+    <Compile Include="Items\ItemDefinitionLibrary.cs" />
+    <Compile Include="Items\ItemExpander.cs" />
+    <Compile Include="Items\TaskItem.cs" />
+    <Compile Include="LocalProvider\LocalCallDescriptor.cs" />
+    <Compile Include="LocalProvider\LocalNode.cs" />
+    <Compile Include="LocalProvider\LocalNodeCallback.cs" />
+    <Compile Include="LocalProvider\LocalNodeInfo.cs" />
+    <Compile Include="LocalProvider\LocalNodeProvider.cs" />
+    <Compile Include="LocalProvider\LocalNodeProviderGlobalNames.cs" />
+    <Compile Include="LocalProvider\NativeMethods.cs" />
+    <Compile Include="LocalProvider\SharedMemory.cs" />
+    <Compile Include="Logging\BaseConsoleLogger.cs" />
+    <Compile Include="Logging\ConsoleLogger.cs" />
+    <Compile Include="Logging\NullCentralLogger.cs" />
+    <Compile Include="Logging\DistributedLoggers\DistributedFileLogger.cs" />
+    <Compile Include="Logging\DistributedLoggers\ConfigurableForwardingLogger.cs" />
+    <Compile Include="Logging\LoggerDescription.cs" />
+    <Compile Include="Logging\ParallelLogger\ParallelLoggerHelpers.cs" />
+    <Compile Include="Logging\ParallelLogger\ParallelConsoleLogger.cs" />
+    <Compile Include="Logging\FileLogger.cs" />
+    <Compile Include="Logging\LogFormatter.cs" />
+    <Compile Include="Logging\SerialConsoleLogger.cs" />
+    <Compile Include="Properties\BuildProperty.cs" />
+    <Compile Include="Properties\BuildPropertyGroup.cs" />
+    <Compile Include="Properties\BuildPropertyGroupProxy.cs" />
+    <Compile Include="Properties\BuildPropertyGroupCollection.cs" />
+    <Compile Include="Resources\AssemblyResources.cs" />
+    <Compile Include="Resources\Constants.cs" />
+    <Compile Include="Solution\SolutionWrapperProject.cs" />
+    <Compile Include="Solution\VCProjectParser.cs" />
+    <Compile Include="Solution\VCWrapperProject.cs" />
+    <Compile Include="Tasks\IntrinsicTask.cs" />
+    <Compile Include="Utilities\EngineFileUtilities.cs" />
+    <Compile Include="Xml\BuildItemGroupChildXml.cs" />
+    <Compile Include="Xml\BuildItemGroupXml.cs" />
+    <Compile Include="Xml\ProjectXmlUtilities.cs" />
+    <Compile Include="Shared\AssemblyLoadInfo.cs" />
+    <Compile Include="Shared\AssemblyNameExtension.cs" />
+    <Compile Include="Shared\BuildEventFileInfo.cs" />
+    <Compile Include="Shared\ConfigurationInSolution.cs" />
+    <Compile Include="Shared\ConversionUtilities.cs" />
+    <Compile Include="Shared\Delegate.cs" />
+    <Compile Include="Shared\ErrorUtilities.cs" />
+    <Compile Include="Shared\EscapingUtilities.cs" />
+    <Compile Include="Shared\EventArgsFormatting.cs" />
+    <Compile Include="Shared\ExceptionHandling.cs" />
+    <Compile Include="Shared\FileMatcher.cs" />
+    <Compile Include="Shared\FileUtilities.cs" />
+    <Compile Include="Shared\FileUtilitiesRegex.cs" />
+    <Compile Include="Shared\FrameworkLocationHelper.cs" />
+    <Compile Include="Shared\InternalErrorException.cs" />
+    <Compile Include="Shared\LoadedType.cs" />
+    <Compile Include="Shared\NativeMethodsShared.cs" />
+    <Compile Include="Shared\ProjectConfigurationInSolution.cs" />
+    <Compile Include="Shared\ProjectErrorUtilities.cs" />
+    <Compile Include="Shared\ProjectFileErrorUtilities.cs" />
+    <Compile Include="Shared\ProjectInSolution.cs" />
+    <Compile Include="Shared\ProjectWriter.cs" />
+    <Compile Include="Shared\ResourceUtilities.cs" />
+    <Compile Include="Shared\SolutionParser.cs" />
+    <Compile Include="Shared\TypeLoader.cs" />
+    <Compile Include="Shared\VisualStudioConstants.cs" />
+    <Compile Include="Shared\XMakeAttributes.cs" />
+    <Compile Include="Shared\XMakeElements.cs" />
+    <Compile Include="Shared\XmlUtilities.cs" />
+
+    <!-- Resource Files -->
+
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+</Project>

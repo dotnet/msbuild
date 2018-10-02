@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#if FEATURE_APPDOMAIN
 using System;
-using System.IO;
 using System.Resources;
 using System.Security;
-using System.Security.Permissions;
-using System.Runtime.InteropServices;
 
 using Microsoft.Build.Framework;
 
@@ -26,7 +24,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         protected AppDomainIsolatedTask()
         {
-            _log = new TaskLoggingHelper(this);
+            Log = new TaskLoggingHelper(this);
         }
 
         /// <summary>
@@ -36,7 +34,7 @@ namespace Microsoft.Build.Utilities
         protected AppDomainIsolatedTask(ResourceManager taskResources)
             : this()
         {
-            _log.TaskResources = taskResources;
+            Log.TaskResources = taskResources;
         }
 
         /// <summary>
@@ -50,7 +48,7 @@ namespace Microsoft.Build.Utilities
         protected AppDomainIsolatedTask(ResourceManager taskResources, string helpKeywordPrefix)
             : this(taskResources)
         {
-            _log.HelpKeywordPrefix = helpKeywordPrefix;
+            Log.HelpKeywordPrefix = helpKeywordPrefix;
         }
 
         #endregion
@@ -61,56 +59,19 @@ namespace Microsoft.Build.Utilities
         /// The build engine automatically sets this property to allow tasks to call back into it.
         /// </summary>
         /// <value>The build engine interface available to tasks.</value>
-        public IBuildEngine BuildEngine
-        {
-            get
-            {
-                return _buildEngine;
-            }
-
-            set
-            {
-                _buildEngine = value;
-            }
-        }
-
-        // callback interface on the build engine
-        private IBuildEngine _buildEngine;
+        public IBuildEngine BuildEngine { get; set; }
 
         /// <summary>
         /// The build engine sets this property if the host IDE has associated a host object with this particular task.
         /// </summary>
         /// <value>The host object instance (can be null).</value>
-        public ITaskHost HostObject
-        {
-            get
-            {
-                return _hostObject;
-            }
-
-            set
-            {
-                _hostObject = value;
-            }
-        }
-
-        // Optional host object that might be used by certain IDE-aware tasks.
-        private ITaskHost _hostObject;
+        public ITaskHost HostObject { get; set; }
 
         /// <summary>
         /// Gets an instance of a TaskLoggingHelper class containing task logging methods.
         /// </summary>
         /// <value>The logging helper object.</value>
-        public TaskLoggingHelper Log
-        {
-            get
-            {
-                return _log;
-            }
-        }
-
-        // the logging helper
-        private TaskLoggingHelper _log;
+        public TaskLoggingHelper Log { get; }
 
         /// <summary>
         /// Gets or sets the task's culture-specific resources. Derived classes should register their resources either during
@@ -119,15 +80,8 @@ namespace Microsoft.Build.Utilities
         /// <value>The task's resources (can be null).</value>
         protected ResourceManager TaskResources
         {
-            get
-            {
-                return Log.TaskResources;
-            }
-
-            set
-            {
-                Log.TaskResources = value;
-            }
+            get => Log.TaskResources;
+            set => Log.TaskResources = value;
         }
 
         /// <summary>
@@ -139,15 +93,8 @@ namespace Microsoft.Build.Utilities
         /// <value>The help keyword prefix string (can be null).</value>
         protected string HelpKeywordPrefix
         {
-            get
-            {
-                return Log.HelpKeywordPrefix;
-            }
-
-            set
-            {
-                Log.HelpKeywordPrefix = value;
-            }
+            get => Log.HelpKeywordPrefix;
+            set => Log.HelpKeywordPrefix = value;
         }
 
         #endregion
@@ -165,12 +112,9 @@ namespace Microsoft.Build.Utilities
         /// lease (5 minutes I think) and task instances can expire if they take long time processing.
         /// </summary>
         [SecurityCritical]
-        public override object InitializeLifetimeService()
-        {
-            // null means infinite lease time
-            return null;
-        }
+        public override object InitializeLifetimeService() => null; // null means infinite lease time
 
         #endregion
     }
 }
+#endif

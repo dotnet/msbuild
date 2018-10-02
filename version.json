@@ -1,6 +1,4 @@
 {
-  "version": "15.1-preview5",
-  "publicReleaseRefSpec": [
-    "^refs/heads/master$"
-  ]
+  "version": "16.0-preview",
+  "assemblyVersion": "15.1"
 }

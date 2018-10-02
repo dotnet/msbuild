@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../Strings.shared.resx">
     <body>
-      <group id="SHARED/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="BuildAborted">
         <source>MSB4188: Build was canceled.</source>
         <target state="translated">MSB4188: Derleme iptal edildi.</target>
@@ -59,6 +58,11 @@
       <trans-unit id="MissingProject">
         <source>MSBuild is expecting a valid "{0}" object.</source>
         <target state="translated">MSBuild, geçerli bir "{0}" nesnesi bekliyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">Yol: {0}, işletim sisteminin en yüksek yol sınırını aşıyor. Tam dosya adı en fazla {1} karakter olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
@@ -142,8 +146,8 @@
     </note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcess">
-        <source>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</source>
-        <target state="translated">MSB5002: Görev yürütülebilir dosyası, belirtilen {0} milisaniye sınırı içinde tamamlanmadı, sonlandırılıyor.</target>
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: "{0}" görev yürütülebilir dosyası belirtilen {1} milisaniye sınırı içinde tamamlanmadığından sonlandırılıyor.</target>
         <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotBeNull">
@@ -260,8 +264,8 @@
         <note>{StrBegin="MSB5020: "}</note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcessByCancellation">
-        <source>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</source>
-        <target state="translated">MSB5021: Oluşturma işlemini iptal etmek için "{0}" ve alt işlemleri sonlandırılıyor.</target>
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: Derleme iptal edildiğinden "{0}" görev yürütülebilir dosyası ve bunun alt öğeleri sonlandırılıyor.</target>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
       <trans-unit id="OM_NotSupportedReadOnlyCollection">
@@ -273,6 +277,16 @@
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
         <target state="translated">MSB5024: MSBuild için geçerli bir konum belirlenemedi. Bu işlemi Visual Studio için Geliştirici Komut İstemi’nde çalıştırmayı deneyin.</target>
         <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: Günlük dosyası okunurken bir özel durum oluştu: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">"{1}" değeri atanan "{0}" parametresinde geçersiz yol veya geçersiz dosya karakterleri bulunamaz.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

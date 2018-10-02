@@ -1,0 +1,24 @@
+﻿<Project>
+
+  <!-- Common logic for projects which create a NuGet package from a .nuspec -->
+  
+  <PropertyGroup>
+    <BeforePack>$(BeforePack);SetNuspecProperties</BeforePack>
+
+    <IsPackable>true</IsPackable>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+
+  </PropertyGroup>
+
+  <Target Name="SetNuspecProperties" DependsOnTargets="GetNuGetPackageVersionEx">
+    <PropertyGroup>
+      <NuspecProperties>$(NuspecProperties);version=$(PackageVersion)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);licenseUrl=$(PackageLicenseUrl)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);projectUrl=$(PackageProjectUrl)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);iconUrl=$(PackageIconUrl)</NuspecProperties>
+      <NuspecBasePath>$(OutDir)</NuspecBasePath>
+    </PropertyGroup>
+  </Target>
+
+
+</Project>

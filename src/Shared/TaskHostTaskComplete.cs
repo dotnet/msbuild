@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A packet which contains all the information the parent node 
-// needs from the task host on completion of task execution.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -215,7 +210,7 @@ namespace Microsoft.Build.BackEnd
         public void Translate(INodePacketTranslator translator)
         {
             translator.TranslateEnum(ref _taskResult, (int)_taskResult);
-            translator.TranslateDotNet(ref _taskException);
+            translator.TranslateException(ref _taskException);
             translator.Translate(ref _taskExceptionMessage);
             translator.Translate(ref _taskExceptionMessageArgs);
             translator.TranslateDictionary(ref _taskOutputParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);

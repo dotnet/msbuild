@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+#if FEATURE_WIN32_REGISTRY
 
 using System;
-using Microsoft.Win32;
 using System.Collections;
-using System.Globalization;
-using System.Diagnostics;
-using System.Reflection;
 using System.Collections.Generic;
 using Microsoft.Build.Utilities;
+using Microsoft.Win32;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 namespace Microsoft.Build.Shared
@@ -53,8 +51,12 @@ namespace Microsoft.Build.Shared
         /// <param name="registryKeyRoot">Like Software\Microsoft\[.NetFramework | .NetCompactFramework]</param>
         /// <param name="targetRuntimeVersion">The runtime version property from the project file.</param>
         /// <param name="registryKeySuffix">Like [ PocketPC | SmartPhone | WindowsCE]\AssemblyFoldersEx</param>
+        /// <param name="osVersion">Operating system version</param>
+        /// <param name="platform">Current platform</param>
         /// <param name="getRegistrySubKeyNames">Used to find registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to find registry key default values.</param>
+        /// <param name="targetProcessorArchitecture">Architecture to seek.</param>
+        /// <param name="openBaseKey">Key object to open.</param>
         internal AssemblyFoldersEx
         (
             string registryKeyRoot,
@@ -68,7 +70,13 @@ namespace Microsoft.Build.Shared
             OpenBaseKey openBaseKey
         )
         {
-            bool is64bitOS = Environment.Is64BitOperatingSystem;
+            // No extensions are supported, except on Windows
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+
+            bool is64bitOS = EnvironmentUtilities.Is64BitOperatingSystem;
             bool targeting64bit = targetProcessorArchitecture == ProcessorArchitecture.Amd64 || targetProcessorArchitecture == ProcessorArchitecture.IA64;
 
             // The registry lookup should be as follows:
@@ -113,12 +121,16 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Finds directories for a specific registry key.
         /// </summary>
-        /// <param name="baseKey">Base to look for directories under.</param>
+        /// <param name="view">The registry view to examine.</param>
+        /// <param name="hive">The registry hive to examine.</param>
         /// <param name="registryKeyRoot">Like Software\Microsoft\[.NetFramework | .NetCompactFramework]</param>
         /// <param name="targetRuntimeVersion">The runtime version property from the project file.</param>
         /// <param name="registryKeySuffix">Like [ PocketPC | SmartPhone | WindowsCE]\AssemblyFoldersEx</param>
+        /// <param name="osVersion">Operating system version</param>
+        /// <param name="platform">Current platform</param>
         /// <param name="getRegistrySubKeyNames">Used to find registry subkey names.</param>
         /// <param name="getRegistrySubKeyDefaultValue">Used to find registry key default values.</param>
+        /// <param name="openBaseKey">Key object to open.</param>
         private void FindDirectories
         (
             RegistryView view,
@@ -472,3 +484,4 @@ namespace Microsoft.Build.Shared
         }
     }
 }
+#endif

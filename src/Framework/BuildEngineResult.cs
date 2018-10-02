@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-// </copyright>
-// <summary>Structure which includes the success or failures of the IBuildEngine build and the target outputs.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;

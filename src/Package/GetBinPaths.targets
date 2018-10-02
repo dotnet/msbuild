@@ -1,0 +1,40 @@
+﻿<Project>
+
+  <ItemGroup>
+    <!-- Reference projects whose outputs are used in the package.  Use OutputItemType to get the path to the output assembly,
+         from which we will later derive the path to the output folder, which is passed as a variable to the .swr file. -->
+    <ProjectReference Include="..\..\MSBuild\MSBuild.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildResolvedProjectReferencePath"
+                      SetTargetFramework="TargetFramework=$(TargetFramework)"/>
+    <ProjectReference Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
+    <ProjectReference Include="..\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="MSBuildConversionResolvedProjectReferencePath" />
+
+    <!-- Set up items to build projects where the Platform is set to x64, when we need the x64 versions of the files.
+         We have to treat these separately from normal project references, as the AssignProjectConfiguration task would overwrite
+         the SetPlatform item metadata if they were ProjectReferences.
+    -->
+    <X64ProjectReference SetPlatform="Platform=x64" SetTargetFramework="TargetFramework=net46" Include="..\..\MSBuild\MSBuild.csproj" OutputItemType="MSBuildX64ResolvedProjectReferencePath" />
+    <X64ProjectReference SetPlatform="Platform=x64" Include="..\..\MSBuildTaskHost\MSBuildTaskHost.csproj" OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath" />
+
+  </ItemGroup>
+
+  <Target Name="SetBinPaths" DependsOnTargets="GetBuildVersion;ResolveProjectReferences">
+    <MSBuild
+        Projects="@(X64ProjectReference)"
+        BuildInParallel="$(BuildInParallel)"
+        Properties="Configuration=$(Configuration); %(X64ProjectReference.SetPlatform); %(X64ProjectReference.SetTargetFramework)"
+        RemoveProperties="%(X64ProjectReference.GlobalPropertiesToRemove)">
+
+      <Output TaskParameter="TargetOutputs" ItemName="%(X64ProjectReference.OutputItemType)" />
+    </MSBuild>
+    
+    <PropertyGroup>
+      <X86BinPath>@(MSBuildResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X86BinPath>
+      <X64BinPath>@(MSBuildX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X64BinPath>
+      <MSBuildTaskHostBinPath>@(MSBuildTaskHostResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostBinPath>
+      <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
+      <MSBuildConversionBinPath>@(MSBuildConversionResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildConversionBinPath>
+    </PropertyGroup>
+  </Target>
+
+
+</Project>

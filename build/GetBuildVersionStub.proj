@@ -1,0 +1,3 @@
+<Project>
+    <Target Name="GetBuildVersion" BeforeTargets="GenerateNuspec"/>
+</Project>

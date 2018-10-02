@@ -1,18 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Interface for objects which can Translate data for inter-node communication.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.IO;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd
@@ -25,10 +17,10 @@ namespace Microsoft.Build.BackEnd
     internal delegate T NodePacketValueFactory<T>(INodePacketTranslator translator);
 
     /// <summary>
-    /// This delegate is used to create arbitrary dictionary types for serialization.
+    /// This delegate is used to create arbitrary collection types for serialization.
     /// </summary>
     /// <typeparam name="T">The type of dictionary to be created.</typeparam>
-    internal delegate T NodePacketDictionaryCreator<T>(int capacity);
+    internal delegate T NodePacketCollectionCreator<T>(int capacity);
 
     /// <summary>
     /// The serialization mode.
@@ -128,10 +120,22 @@ namespace Microsoft.Build.BackEnd
         void Translate(ref int value);
 
         /// <summary>
+        /// Translates a long.
+        /// </summary>
+        /// <param name="value">The value to be translated.</param>
+        void Translate(ref long value);
+
+        /// <summary>
         /// Translates a string.
         /// </summary>
         /// <param name="value">The value to be translated.</param>
         void Translate(ref string value);
+
+        /// <summary>
+        /// Translates a double.
+        /// </summary>
+        /// <param name="value">The value to be translated.</param>
+        void Translate(ref double value);
 
         /// <summary>
         /// Translates a string array.
@@ -146,6 +150,12 @@ namespace Microsoft.Build.BackEnd
         void Translate(ref List<string> list);
 
         /// <summary>
+        /// Translates a set of strings
+        /// </summary>
+        /// <param name="set">The set to be translated.</param>
+        void Translate(ref HashSet<string> set);
+
+        /// <summary>
         /// Translates a list of T where T implements INodePacketTranslateable
         /// </summary>
         /// <param name="list">The list to be translated.</param>
@@ -154,10 +164,26 @@ namespace Microsoft.Build.BackEnd
         void Translate<T>(ref List<T> list, NodePacketValueFactory<T> factory) where T : INodePacketTranslatable;
 
         /// <summary>
+        /// Translates a list of T where T implements INodePacketTranslateable using a collection factory
+        /// </summary>
+        /// <param name="list">The list to be translated.</param>
+        /// <param name="factory">factory to create type T</param>
+        /// <typeparam name="T">An ITranslatable subtype</typeparam>
+        /// <typeparam name="L">An IList subtype</typeparam>
+        /// <param name="collectionFactory">factory to create a collection</param>
+        void Translate<T, L>(ref IList<T> list, NodePacketValueFactory<T> factory, NodePacketCollectionCreator<L> collectionFactory) where T : INodePacketTranslatable where L : IList<T>;
+
+        /// <summary>
         /// Translates a DateTime.
         /// </summary>
         /// <param name="value">The value to be translated.</param>
         void Translate(ref DateTime value);
+
+        /// <summary>
+        /// Translates a TimeSpan.
+        /// </summary>
+        /// <param name="value">The value to be translated.</param>
+        void Translate(ref TimeSpan value);
 
         // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext, 
         // which is what current implementations of this method use.  However, it also does not ever need to translate 
@@ -203,6 +229,8 @@ namespace Microsoft.Build.BackEnd
         /// methods.
         /// </remarks>
         void TranslateDotNet<T>(ref T value);
+
+        void TranslateException(ref Exception value);
 
         /// <summary>
         /// Translates an object implementing INodePacketTranslatable.
@@ -258,6 +286,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer);
 
+        void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
+
+        void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, Translator<K> keyTranslator, Translator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
+
         /// <summary>
         /// Translates a dictionary of { string, T }.  
         /// </summary>
@@ -286,7 +318,8 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="valueFactory">The factory used to instantiate values in the dictionary.</param>
-        void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketDictionaryCreator<D> dictionaryCreator)
+        /// <param name="collectionCreator">A factory used to create the dictionary.</param>
+        void TranslateDictionary<D, T>(ref D dictionary, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> collectionCreator)
             where D : IDictionary<string, T>
             where T : class, INodePacketTranslatable;
 

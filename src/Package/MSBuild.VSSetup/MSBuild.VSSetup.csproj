@@ -1,0 +1,53 @@
+﻿<Project>
+   <!-- AssemblyName must be set before importing Sdk.props to set the vsix file name. -->
+   <PropertyGroup>
+       <AssemblyName>Microsoft.Build</AssemblyName>
+       <ShouldSkipProject>false</ShouldSkipProject>
+       <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
+   </PropertyGroup>
+
+   <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.props" />
+
+   <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
+
+    <!-- The IBCMerge process tries to treat this project as
+         the real Microsoft.Build.dll, producing thousands
+         of avoidable warnings. The real output of this
+         project isn't a product DLL, so just disable PGO. -->
+    <MicroBuild_EnablePGO>false</MicroBuild_EnablePGO>
+
+    <!-- Not sure what the right ID is here -->
+    <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <SwrProperty Include="ThirdPartyNotice=$(ThirdPartyNotice)" />
+    <SwrProperty Include="SourceDir=$(RepoRoot)\src\" />
+
+  </ItemGroup>
+  <ItemGroup>
+     <SwrFile Include="*.swr" /> 
+  </ItemGroup>
+
+  <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
+  <Import Project="..\GetBinPaths.targets" Condition="!$(ShouldSkipProject)"/>
+
+  <Target Name="SetVsixProperties"
+    BeforeTargets="Build"
+    DependsOnTargets="SetBinPaths"
+    Condition="!$(ShouldSkipProject)">
+    <ItemGroup>
+      <SwrProperty Include="Version=$(BuildVersion)" />
+      <SwrProperty Include="X86BinPath=$(X86BinPath)" />
+      <SwrProperty Include="X64BinPath=$(X64BinPath)" />
+      <SwrProperty Include="TaskHostBinPath=$(MSBuildTaskHostBinPath)" />
+      <SwrProperty Include="TaskHostX64BinPath=$(MSBuildTaskHostX64BinPath)" />
+      <SwrProperty Include="MSBuildConversionBinPath=$(MSBuildConversionBinPath)" />
+    </ItemGroup>
+  </Target>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
+
+  <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.targets" />
+</Project>

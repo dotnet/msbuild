@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <ThirdPartyNotice Condition=" '$(ThirdPartyNotice)' == '' ">$(RepoRoot)THIRDPARTYNOTICES.txt</ThirdPartyNotice>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" Condition=" '$(IsPackable)' == 'true' " />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CentralPackagesFile>$(MSBuildThisFileDirectory)build/Packages.props</CentralPackagesFile>
+  </PropertyGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.Build.CentralPackageVersions" />
+</Project>

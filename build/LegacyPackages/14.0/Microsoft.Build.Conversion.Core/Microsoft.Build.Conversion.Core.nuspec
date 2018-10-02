@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$id$</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>This package contains the $id$ assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</description>
+    <tags>MSBuild</tags>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <dependencies>
+      <group targetFramework="net45">
+        <dependency id="Microsoft.Build" version="[$version$]" />
+        <dependency id="Microsoft.Build.Engine" version="[$version$]" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="lib\net45\$id$.dll" target="lib\net45\$id$.dll" />
+  </files>
+</package>

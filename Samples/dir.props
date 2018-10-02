@@ -1,9 +1,0 @@
-﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\dir.props" />
-
-  <PropertyGroup>
-    <!-- Explicitly set the OutDir as it is used by the packaging targets -->
-    <OutDir>$(BaseOutputPath)Samples\$(Configuration)\$(MSBuildProjectName)</OutDir>
-  </PropertyGroup>
-  
-</Project>

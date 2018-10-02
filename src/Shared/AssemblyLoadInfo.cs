@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Wraps location info for an assembly</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
@@ -19,7 +15,7 @@ namespace Microsoft.Build.Shared
     /// <remarks>
     /// Uses factory to instantiate correct private class to save space: only one field is ever used of the two.
     /// </remarks>
-    internal abstract class AssemblyLoadInfo : INodePacketTranslatable
+    internal abstract class AssemblyLoadInfo : INodePacketTranslatable, IEquatable<AssemblyLoadInfo>
     {
         /// <summary>
         /// This constructor initializes the assembly information.
@@ -72,6 +68,11 @@ namespace Microsoft.Build.Shared
         public override int GetHashCode()
         {
             return AssemblyLocation.GetHashCode();
+        }
+
+        public bool Equals(AssemblyLoadInfo other)
+        {
+            return Equals((object)other);
         }
 
         /// <summary>

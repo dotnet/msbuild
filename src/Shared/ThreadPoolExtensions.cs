@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Make an extension to the threadpool class to allow the setting of culture on queued work item.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Globalization;
@@ -25,18 +21,26 @@ namespace Microsoft.Build.Shared
               delegate (Object state)
               {
                   // Save the culture so at the end of the threadproc if something else reuses this thread then it will not have a culture which it was not expecting.
-                  CultureInfo originalThreadCulture = Thread.CurrentThread.CurrentCulture;
-                  CultureInfo originalThreadUICulture = Thread.CurrentThread.CurrentUICulture;
+                  CultureInfo originalThreadCulture = CultureInfo.CurrentCulture;
+                  CultureInfo originalThreadUICulture = CultureInfo.CurrentUICulture;
                   try
                   {
-                      if (Thread.CurrentThread.CurrentCulture != culture)
+                      if (CultureInfo.CurrentCulture != culture)
                       {
+#if FEATURE_THREAD_CULTURE
                           Thread.CurrentThread.CurrentCulture = culture;
+#else
+                          CultureInfo.CurrentCulture = culture;
+#endif
                       }
 
-                      if (Thread.CurrentThread.CurrentUICulture != uiCulture)
+                      if (CultureInfo.CurrentUICulture != uiCulture)
                       {
+#if FEATURE_THREAD_CULTURE
                           Thread.CurrentThread.CurrentUICulture = uiCulture;
+#else
+                          CultureInfo.CurrentCulture = uiCulture;
+#endif
                       }
 
                       callback(state);
@@ -44,14 +48,22 @@ namespace Microsoft.Build.Shared
                   finally
                   {
                       // Set the culture back to the original one so that if something else reuses this thread then it will not have a culture which it was not expecting.
-                      if (Thread.CurrentThread.CurrentCulture != originalThreadCulture)
+                      if (CultureInfo.CurrentCulture != originalThreadCulture)
                       {
+#if FEATURE_THREAD_CULTURE
                           Thread.CurrentThread.CurrentCulture = originalThreadCulture;
+#else
+                          CultureInfo.CurrentCulture = originalThreadCulture;
+#endif
                       }
 
-                      if (Thread.CurrentThread.CurrentUICulture != originalThreadUICulture)
+                      if (CultureInfo.CurrentUICulture != originalThreadUICulture)
                       {
+#if FEATURE_THREAD_CULTURE
                           Thread.CurrentThread.CurrentUICulture = originalThreadUICulture;
+#else
+                          CultureInfo.CurrentUICulture = originalThreadUICulture;
+#endif
                       }
                   }
               });

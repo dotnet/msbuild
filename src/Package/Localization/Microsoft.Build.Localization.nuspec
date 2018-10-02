@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Microsoft.Build.Localization</id>
+    <version>$version$</version>
+    <title>Microsoft.Build.Localization</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>This package contains the localized satellite assemblies for MSBuild. Reference this package only if you want msbuild output to be localized in cs;de;en;es;fr;it;ja;ko;pl;pt-BR;ru;tr;zh-Hans;zh-Hant.</description>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <tags>MSBuild</tags>
+    <contentFiles>
+      <files include="**" buildAction="None" copyToOutput="true" flatten="false" />
+    </contentFiles>
+  </metadata>
+  <files>
+
+    <!-- MSBuild.dll -->
+    <file src="cs\MSBuild.resources.dll" target="lib\netstandard1.3\cs\MSBuild.resources.dll"/>
+    <file src="de\MSBuild.resources.dll" target="lib\netstandard1.3\de\MSBuild.resources.dll"/>
+    <file src="en\MSBuild.resources.dll" target="lib\netstandard1.3\en\MSBuild.resources.dll"/>
+    <file src="es\MSBuild.resources.dll" target="lib\netstandard1.3\es\MSBuild.resources.dll"/>
+    <file src="fr\MSBuild.resources.dll" target="lib\netstandard1.3\fr\MSBuild.resources.dll"/>
+    <file src="it\MSBuild.resources.dll" target="lib\netstandard1.3\it\MSBuild.resources.dll"/>
+    <file src="ja\MSBuild.resources.dll" target="lib\netstandard1.3\ja\MSBuild.resources.dll"/>
+    <file src="ko\MSBuild.resources.dll" target="lib\netstandard1.3\ko\MSBuild.resources.dll"/>
+    <file src="pl\MSBuild.resources.dll" target="lib\netstandard1.3\pl\MSBuild.resources.dll"/>
+    <file src="pt-BR\MSBuild.resources.dll" target="lib\netstandard1.3\pt-BR\MSBuild.resources.dll"/>
+    <file src="ru\MSBuild.resources.dll" target="lib\netstandard1.3\ru\MSBuild.resources.dll"/>
+    <file src="tr\MSBuild.resources.dll" target="lib\netstandard1.3\tr\MSBuild.resources.dll"/>
+    <file src="zh-Hans\MSBuild.resources.dll" target="lib\netstandard1.3\zh-Hans\MSBuild.resources.dll"/>
+    <file src="zh-Hant\MSBuild.resources.dll" target="lib\netstandard1.3\zh-Hant\MSBuild.resources.dll"/>
+
+    <!-- Microsoft.Build.dll-->
+    <file src="cs\Microsoft.Build.resources.dll" target="lib\netstandard1.3\cs\Microsoft.Build.resources.dll" />
+    <file src="de\Microsoft.Build.resources.dll" target="lib\netstandard1.3\de\Microsoft.Build.resources.dll" />
+    <file src="en\Microsoft.Build.resources.dll" target="lib\netstandard1.3\en\Microsoft.Build.resources.dll" />
+    <file src="es\Microsoft.Build.resources.dll" target="lib\netstandard1.3\es\Microsoft.Build.resources.dll" />
+    <file src="fr\Microsoft.Build.resources.dll" target="lib\netstandard1.3\fr\Microsoft.Build.resources.dll" />
+    <file src="it\Microsoft.Build.resources.dll" target="lib\netstandard1.3\it\Microsoft.Build.resources.dll" />
+    <file src="ja\Microsoft.Build.resources.dll" target="lib\netstandard1.3\ja\Microsoft.Build.resources.dll" />
+    <file src="ko\Microsoft.Build.resources.dll" target="lib\netstandard1.3\ko\Microsoft.Build.resources.dll" />
+    <file src="pl\Microsoft.Build.resources.dll" target="lib\netstandard1.3\pl\Microsoft.Build.resources.dll" />
+    <file src="pt-BR\Microsoft.Build.resources.dll" target="lib\netstandard1.3\pt-BR\Microsoft.Build.resources.dll" />
+    <file src="ru\Microsoft.Build.resources.dll" target="lib\netstandard1.3\ru\Microsoft.Build.resources.dll" />
+    <file src="tr\Microsoft.Build.resources.dll" target="lib\netstandard1.3\tr\Microsoft.Build.resources.dll" />
+    <file src="zh-Hans\Microsoft.Build.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.resources.dll" />
+    <file src="zh-Hant\Microsoft.Build.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.resources.dll" />
+
+    <!-- Microsoft.Build.Tasks.Core.dll-->
+    <file src="cs\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\cs\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="de\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\de\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="en\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\en\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="es\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\es\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="fr\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\fr\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="it\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\it\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="ja\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\ja\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="ko\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\ko\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="pl\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\pl\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="pt-BR\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\pt-BR\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="ru\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\ru\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="tr\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\tr\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="zh-Hans\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.Tasks.Core.resources.dll" />
+    <file src="zh-Hant\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.Tasks.Core.resources.dll" />
+
+    <!-- Microsoft.Build.Utilities.Core.dll-->
+    <file src="cs\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\cs\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="de\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\de\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="en\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\en\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="es\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\es\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="fr\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\fr\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="it\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\it\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="ja\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\ja\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="ko\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\ko\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="pl\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\pl\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="pt-BR\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\pt-BR\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="ru\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\ru\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="tr\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\tr\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.Utilities.Core.resources.dll" />
+    <file src="zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.Utilities.Core.resources.dll" />
+  </files>
+</package>

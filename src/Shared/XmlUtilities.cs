@@ -167,64 +167,6 @@ namespace Microsoft.Build.Shared
             return -1;
         }
 
-        /// <summary>
-        /// Load the xml file using XMLTextReader and locate the element and attribute specified and then 
-        /// return the value. This is a quick way to peek at the xml file whithout having the go through 
-        /// the XMLDocument (MSDN article (Chapter 9 - Improving XML Performance)).
-        /// Does not throw for IO or XML issues.
-        /// Returns null if the attribute is not present.
-        /// </summary>
-        internal static string SniffAttributeValueFromXmlFile
-            (
-            string projectFileName,
-            string elementName,
-            string attributeName
-            )
-        {
-            string attributeValue = null;
-
-            try
-            {
-                using (XmlTextReader xmlReader = new XmlTextReader(projectFileName))
-                {
-                    xmlReader.DtdProcessing = DtdProcessing.Ignore;
-                    while (xmlReader.Read())
-                    {
-                        if (xmlReader.NodeType == XmlNodeType.Element)
-                        {
-                            if (String.Compare(xmlReader.Name, elementName, StringComparison.OrdinalIgnoreCase) == 0)
-                            {
-                                if (xmlReader.HasAttributes)
-                                {
-                                    for (int i = 0; i < xmlReader.AttributeCount; i++)
-                                    {
-                                        xmlReader.MoveToAttribute(i);
-                                        if (String.Compare(xmlReader.Name, attributeName, StringComparison.OrdinalIgnoreCase) == 0)
-                                        {
-                                            attributeValue = xmlReader.Value;
-                                            break;
-                                        }
-                                    }
-                                }
-                                // if we have already located the element then we are done
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Ignore any IO or XML exceptions as it will be caught later on
-                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                {
-                    throw;
-                }
-            }
-
-            return attributeValue;
-        }
-
         internal static bool IsValidInitialElementNameCharacter(char c)
         {
             return (c >= 'A' && c <= 'Z') ||

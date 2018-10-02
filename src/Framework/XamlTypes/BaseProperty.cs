@@ -1,16 +1,11 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary> Represents a Rule property. </summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Markup;
-using System.Xml;
 
 namespace Microsoft.Build.Framework.XamlTypes
 {

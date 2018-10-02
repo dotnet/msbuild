@@ -7,11 +7,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
-#if DEBUG
-using Microsoft.Build.Framework;
-#endif
 using System.Reflection;
 using System.Text;
+using System.ComponentModel;
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
@@ -166,12 +164,19 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceString(out string code, out string helpKeyword, string resourceName, params object[] args)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, string resourceName, params object[] args)
         {
             helpKeyword = GetHelpKeyword(resourceName);
 
             // NOTE: the AssemblyResources.GetString() method is thread-safe
             return ExtractMessageCode(true /* msbuildCodeOnly */, FormatString(GetResourceString(resourceName), args), out code);
+        }
+
+        [Obsolete("Use GetResourceString instead.", true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal static string FormatResourceString(string resourceName)
+        {   // Avoids an accidental dependency on FormatResourceString(string, params object[])
+            return null;
         }
 
         /// <summary>
@@ -185,12 +190,25 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceString(string resourceName, params object[] args)
+        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object[] args)
         {
             string code;
             string helpKeyword;
 
-            return FormatResourceString(out code, out helpKeyword, resourceName, args);
+            return FormatResourceStringStripCodeAndKeyword(out code, out helpKeyword, resourceName, args);
+        }
+
+        /// <summary>
+        /// Formats the resource string with the given arguments.
+        /// Ignores error codes and keywords
+        /// </summary>
+        /// <param name="resourceName"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params object[] args)
+        {
+            // NOTE: the AssemblyResources.GetString() method is thread-safe
+            return FormatString(GetResourceString(resourceName), args);
         }
 
         /// <summary>
@@ -296,17 +314,23 @@ namespace Microsoft.Build.Shared
             }
             catch (ArgumentException e)
             {
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
+#endif
                 ErrorUtilities.ThrowInternalError(e.Message);
             }
             catch (InvalidOperationException e)
             {
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
+#endif
                 ErrorUtilities.ThrowInternalError(e.Message);
             }
             catch (MissingManifestResourceException e)
             {
+#if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
+#endif
                 ErrorUtilities.ThrowInternalError(e.Message);
             }
 #endif

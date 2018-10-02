@@ -67,13 +67,20 @@ namespace Microsoft.Build.Shared
                 + "(?<SUBCATEGORY>(()|([^:]*? )))"
                     // Match 'error' or 'warning'.
                 + @"(?<CATEGORY>(error|warning))"
-                    // Match anything starting with a space that's not a colon/space, followed by a colon. 
+                    // Match anything starting with a space that's not a colon/space, followed by a colon.
                     // Error code is optional in which case "error"/"warning" can be followed immediately by a colon.
                 + @"( \s*(?<CODE>[^: ]*))?\s*:"
                     // Whatever's left on this line, including colons.
                 + "(?<TEXT>.*)$",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled
                 ));
+
+		private static readonly Lazy<Regex> s_originCategoryCodeTextExpression2 = new Lazy<Regex>(
+            () => new Regex
+                (
+                @"^\s*(?<ORIGIN>(?<FILENAME>.*):(?<LOCATION>(?<LINE>[0-9]*):(?<COLUMN>[0-9]*))):(?<CATEGORY> error| warning):(?<TEXT>.*)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled
+            ));
 
         // Matches and extracts filename and location from an 'origin' element.
         private static readonly Lazy<Regex> s_filenameLocationFromOrigin = new Lazy<Regex>(
@@ -273,7 +280,7 @@ namespace Microsoft.Build.Shared
         internal static Parts Parse(string message)
         {
             // An unusually long string causes pathologically slow Regex back-tracking.
-            // To avoid that, only scan the first 400 characters. That's enough for 
+            // To avoid that, only scan the first 400 characters. That's enough for
             // the longest possible prefix: MAX_PATH, plus a huge subcategory string, and an error location.
             // After the regex is done, we can append the overflow.
             string messageOverflow = String.Empty;
@@ -284,7 +291,7 @@ namespace Microsoft.Build.Shared
             }
 
             // If a tool has a large amount of output that isn't an error or warning (eg., "dir /s %hugetree%")
-            // the regex below is slow. It's faster to pre-scan for "warning" and "error" 
+            // the regex below is slow. It's faster to pre-scan for "warning" and "error"
             // and bail out if neither are present.
             if (message.IndexOf("warning", StringComparison.OrdinalIgnoreCase) == -1 &&
                 message.IndexOf("error", StringComparison.OrdinalIgnoreCase) == -1)
@@ -299,7 +306,7 @@ namespace Microsoft.Build.Shared
             //      Main.cs(17,20):Command line warning CS0168: The variable 'foo' is declared but never used
             //      -------------- ------------ ------- ------  ----------------------------------------------
             //      Origin         SubCategory  Cat.    Code    Text
-            // 
+            //
             // To accommodate absolute filenames in Origin, tolerate a colon in the second position
             // as long as its preceded by a letter.
             //
@@ -314,15 +321,54 @@ namespace Microsoft.Build.Shared
             //   AssemblyInfo.cpp : fatal error LNK1106: ???????????? ??????????????: 0x6580 ??????????
             //
             Match match = s_originCategoryCodeTextExpression.Value.Match(message);
-
+            string category;
             if (!match.Success)
             {
-                // If no match here, then this message is not an error or warning.
-                return null;
+                // try again with the Clang/GCC matcher
+                // Example,
+                //       err.cpp:6:3: error: use of undeclared identifier 'force_an_error'
+                //       -----------  -----  ---------------------------------------------
+                //       Origin       Cat.   Text
+                match = s_originCategoryCodeTextExpression2.Value.Match(message);
+                if (!match.Success)
+                {
+                    return null;
+                }
+
+                category = match.Groups["CATEGORY"].Value.Trim();
+                if (0 == String.Compare(category, "error", StringComparison.OrdinalIgnoreCase))
+                {
+                    parsedMessage.category = Parts.Category.Error;
+                }
+                else if (0 == String.Compare(category, "warning", StringComparison.OrdinalIgnoreCase))
+                {
+                    parsedMessage.category = Parts.Category.Warning;
+                }
+                else
+                {
+                    // Not an error\warning message.
+                    return null;
+                }
+                parsedMessage.line = ConvertToIntWithDefault(match.Groups["LINE"].Value.Trim());
+                parsedMessage.column = ConvertToIntWithDefault(match.Groups["COLUMN"].Value.Trim());
+                parsedMessage.text = (match.Groups["TEXT"].Value + messageOverflow).Trim();
+                parsedMessage.origin = match.Groups["FILENAME"].Value.Trim();
+
+                string[] explodedText = parsedMessage.text.Split(new char[] {'\''}, StringSplitOptions.RemoveEmptyEntries);
+                if (explodedText.Length > 0)
+                {
+                    parsedMessage.code = "G" + explodedText[0].GetHashCode().ToString("X8");
+                }
+                else
+                {
+                    parsedMessage.code = "G00000000";
+                }
+
+                return parsedMessage;
             }
 
             string origin = match.Groups["ORIGIN"].Value.Trim();
-            string category = match.Groups["CATEGORY"].Value.Trim();
+            category = match.Groups["CATEGORY"].Value.Trim();
             parsedMessage.code = match.Groups["CODE"].Value.Trim();
             parsedMessage.text = (match.Groups["TEXT"].Value + messageOverflow).Trim();
             parsedMessage.subcategory = match.Groups["SUBCATEGORY"].Value.Trim();

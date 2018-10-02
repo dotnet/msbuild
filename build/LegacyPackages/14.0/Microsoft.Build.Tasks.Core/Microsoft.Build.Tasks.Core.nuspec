@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$id$</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <iconUrl>$iconUrl$</iconUrl>
+    <description>This package contains the $id$ assembly which implements the commonly used tasks of MSBuild.</description>
+    <tags>MSBuild</tags>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <dependencies>
+      <group targetFramework="netstandard1.3">
+        <dependency id="Microsoft.Build.Framework" version="[$version$]" />
+        <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
+        <dependency id="System.Xml.XmlDocument" version="4.0.1" />
+      </group>
+      <group targetFramework="net45">
+        <dependency id="Microsoft.Build.Framework" version="[$version$]" />
+        <dependency id="Microsoft.Build.Utilities.Core" version="[$version$]" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="lib\net45\$id$.dll" target="lib\net45\$id$.dll" />
+    <file src="bin\$configuration$\net45\$id$.dll" target="ref\net45\$id$.dll" />
+    <file src="bin\$configuration$\netstandard1.3\$id$.dll" target="ref\netstandard1.3\$id$.dll" />
+  </files>
+</package>

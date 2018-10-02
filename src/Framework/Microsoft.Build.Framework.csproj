@@ -1,181 +1,38 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="RoslynTools.RepoToolset">
   <PropertyGroup>
-    <ProjectGuid>{571F09DB-A81A-4444-945C-6F7B530054CD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Build.Framework</RootNamespace>
-    <AssemblyName>Microsoft.Build.Framework</AssemblyName>
-    <DoNotLocalizeProject>true</DoNotLocalizeProject>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <CreateTlb>true</CreateTlb>
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which is a common assembly used by other MSBuild assemblies.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    <Compile Remove="BinaryWriterExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Runtime.Serialization.Primitives" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <PackageReference Include="System.Threading.Thread" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <Reference Include="System.Xaml" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Constants.cs">
+      <Link>Shared\Constants.cs</Link>
     </Compile>
-    <Compile Include="BuildEngineResult.cs" />
-    <Compile Include="BuildErrorEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs">
+      <Link>Shared\BinaryWriterExtensions.cs</Link>
     </Compile>
-    <Compile Include="BuildEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BuildFinishedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BuildMessageEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BuildStartedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BuildStatusEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BuildWarningEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="CriticalBuildMessageEventArgs.cs" />
-    <Compile Include="CustomBuildEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ExternalProjectFinishedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ExternalProjectStartedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="FxCopExclusions\Microsoft.Build.Framework.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IBuildEngine3.cs" />
-    <Compile Include="IBuildEngine4.cs" />
-    <Compile Include="IGeneratedTask.cs" />
-    <Compile Include="LazyFormattedBuildEventArgs.cs" />
-    <Compile Include="IBuildEngine.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IBuildEngine2.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IEventRedirector.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IEventSource.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="IForwardingLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ILogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="INodeLogger.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ITask.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ICancelableTask.cs" />
-    <Compile Include="ITaskFactory.cs" />
-    <Compile Include="ITaskFactory2.cs" />
-    <Compile Include="ITaskHost.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ITaskItem.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ITaskItem2.cs" />
-    <Compile Include="LoadInSeparateAppDomainAttribute.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="LoggerException.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="BuildEventContext.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="OutputAttribute.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ProjectFinishedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ProjectStartedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RequiredAttribute.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RequiredRuntimeAttribute.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="RunInMTAAttribute.cs" />
-    <Compile Include="RunInSTAAttribute.cs" />
-    <Compile Include="TargetFinishedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TargetStartedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TaskCommandLineEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TaskFinishedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="TaskPropertyInfo.cs" />
-    <Compile Include="TaskStartedEventArgs.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="XamlTypes\Argument.cs" />
-    <Compile Include="XamlTypes\BaseProperty.cs" />
-    <Compile Include="XamlTypes\BoolProperty.cs" />
-    <Compile Include="XamlTypes\Category.cs" />
-    <Compile Include="XamlTypes\CategorySchema.cs" />
-    <Compile Include="XamlTypes\ContentType.cs" />
-    <Compile Include="XamlTypes\DataSource.cs" />
-    <Compile Include="XamlTypes\DynamicEnumProperty.cs" />
-    <Compile Include="XamlTypes\EnumProperty.cs" />
-    <Compile Include="XamlTypes\EnumValue.cs" />
-    <Compile Include="XamlTypes\FileExtension.cs" />
-    <Compile Include="XamlTypes\IntProperty.cs" />
-    <Compile Include="XamlTypes\IProjectSchemaNode.cs" />
-    <Compile Include="XamlTypes\ItemType.cs" />
-    <Compile Include="XamlTypes\NameValuePair.cs" />
-    <Compile Include="XamlTypes\ProjectSchemaDefinitions.cs" />
-    <Compile Include="XamlTypes\Rule.cs" />
-    <Compile Include="XamlTypes\RuleBag.cs" />
-    <Compile Include="XamlTypes\RuleSchema.cs" />
-    <Compile Include="XamlTypes\StringListProperty.cs" />
-    <Compile Include="XamlTypes\StringProperty.cs" />
-    <Compile Include="XamlTypes\ValueEditor.cs" />
-    <None Include="Event args classes.cd" />
-    <!-- Win32 RC Files -->
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <Compile Remove="XamlTypes\**" />
+    <EmbeddedResource Remove="XamlTypes\**" />
+    <None Remove="XamlTypes\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <RCResourceFile Include="native.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <FilesToSign Include="$(OutDir)\$(AssemblyName)$(TargetExt)">
-      <Authenticode>Microsoft</Authenticode>
-      <StrongName>StrongName</StrongName>
-    </FilesToSign>
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

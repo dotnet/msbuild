@@ -1,9 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Runtime.InteropServices;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -16,52 +13,16 @@ namespace Microsoft.Build.Utilities
     public abstract class Logger : ILogger
     {
         /// <summary>
-        /// Default (family) constructor.
-        /// </summary>
-        protected Logger()
-        {
-            // do nothing
-        }
-
-        /// <summary>
         /// Gets or sets the level of detail to show in the event log.
         /// </summary>
         /// <value>The verbosity level.</value>
-        public virtual LoggerVerbosity Verbosity
-        {
-            get
-            {
-                return _verbosity;
-            }
-
-            set
-            {
-                _verbosity = value;
-            }
-        }
-
-        // level of detail for logging
-        private LoggerVerbosity _verbosity;
+        public virtual LoggerVerbosity Verbosity { get; set; }
 
         /// <summary>
         /// Gets or sets the user-specified parameters to the logger. Derived class can ignore if it doesn't take parameters.
         /// </summary>
         /// <value>The parameter string (can be null).</value>
-        public virtual string Parameters
-        {
-            get
-            {
-                return _parameters;
-            }
-
-            set
-            {
-                _parameters = value;
-            }
-        }
-
-        // logger parameters (can be null)
-        private string _parameters;
+        public virtual string Parameters { get; set; }
 
         /// <summary>
         /// Must be implemented by derived class to subscribe to build events.
@@ -82,20 +43,14 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="args">Error event arguments</param>
         /// <returns>Error message in canonical format</returns>
-        public virtual string FormatErrorEvent(BuildErrorEventArgs args)
-        {
-            return EventArgsFormatting.FormatEventMessage(args);
-        }
+        public virtual string FormatErrorEvent(BuildErrorEventArgs args) => EventArgsFormatting.FormatEventMessage(args);
 
         /// <summary>
         /// Generates a message in the default format from a BuildWarningEventArgs object.
         /// </summary>
         /// <param name="args">Warning event arguments</param>
         /// <returns>Warning message in canonical format</returns>
-        public virtual string FormatWarningEvent(BuildWarningEventArgs args)
-        {
-            return EventArgsFormatting.FormatEventMessage(args);
-        }
+        public virtual string FormatWarningEvent(BuildWarningEventArgs args) => EventArgsFormatting.FormatEventMessage(args);
 
         /// <summary>
         /// Determines whether the current verbosity setting is at least the value
@@ -103,9 +58,6 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="checkVerbosity"></param>
         /// <returns></returns>
-        public bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity)
-        {
-            return (_verbosity >= checkVerbosity);
-        }
+        public bool IsVerbosityAtLeast(LoggerVerbosity checkVerbosity) => Verbosity >= checkVerbosity;
     }
 }

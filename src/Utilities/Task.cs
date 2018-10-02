@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.IO;
 using System.Resources;
-using System.Runtime.InteropServices;
-using Microsoft.Build.Shared;
+
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Utilities
@@ -22,7 +19,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         protected Task()
         {
-            _log = new TaskLoggingHelper(this);
+            Log = new TaskLoggingHelper(this);
         }
 
         /// <summary>
@@ -32,7 +29,7 @@ namespace Microsoft.Build.Utilities
         protected Task(ResourceManager taskResources)
             : this()
         {
-            _log.TaskResources = taskResources;
+            Log.TaskResources = taskResources;
         }
 
         /// <summary>
@@ -46,7 +43,7 @@ namespace Microsoft.Build.Utilities
         protected Task(ResourceManager taskResources, string helpKeywordPrefix)
             : this(taskResources)
         {
-            _log.HelpKeywordPrefix = helpKeywordPrefix;
+            Log.HelpKeywordPrefix = helpKeywordPrefix;
         }
 
         #endregion
@@ -57,21 +54,12 @@ namespace Microsoft.Build.Utilities
         /// The build engine automatically sets this property to allow tasks to call back into it.
         /// </summary>
         /// <value>The build engine interface available to tasks.</value>
-        public IBuildEngine BuildEngine
-        {
-            get
-            {
-                return _buildEngine;
-            }
+        public IBuildEngine BuildEngine { get; set; }
 
-            set
-            {
-                _buildEngine = value;
-            }
-        }
-
-        // callback interface on the build engine
-        private IBuildEngine _buildEngine;
+        // The casts below are always possible because this class is built against the 
+        // Orcas Framework assembly or later, so the version of MSBuild that does not
+        // know about IBuildEngine2 will never load it.
+        // No setters needed; the Engine always sets through the BuildEngine setter
 
         /// <summary>
         /// The build engine automatically sets this property to allow tasks to call back into it.
@@ -79,59 +67,28 @@ namespace Microsoft.Build.Utilities
         /// have to cast the value from IBuildEngine to IBuildEngine2.
         /// </summary>
         /// <value>The build engine interface available to tasks.</value>
-        public IBuildEngine2 BuildEngine2
-        {
-            get
-            {
-                // This cast is always possible because this class is built against the 
-                // Orcas Framework assembly, or later, so the version of MSBuild that does not
-                // know about IBuildEngine2 will never load it.
-                return (IBuildEngine2)_buildEngine;
-            }
-            // No setter needed: the Engine always sets through the BuildEngine setter
-        }
+        public IBuildEngine2 BuildEngine2 => (IBuildEngine2)BuildEngine;
 
         /// <summary>
         /// Retrieves the IBuildEngine3 version of the build engine interface provided by the host.
         /// </summary>
-        public IBuildEngine3 BuildEngine3
-        {
-            get
-            {
-                return (IBuildEngine3)_buildEngine;
-            }
-        }
+        public IBuildEngine3 BuildEngine3 => (IBuildEngine3)BuildEngine;
 
         /// <summary>
         /// Retrieves the IBuildEngine4 version of the build engine interface provided by the host.
         /// </summary>
-        public IBuildEngine4 BuildEngine4
-        {
-            get
-            {
-                return (IBuildEngine4)_buildEngine;
-            }
-        }
+        public IBuildEngine4 BuildEngine4 => (IBuildEngine4)BuildEngine;
+
+        /// <summary>
+        /// Retrieves the IBuildEngine5 version of the build engine interface provided by the host.
+        /// </summary>
+        public IBuildEngine5 BuildEngine5 => (IBuildEngine5)BuildEngine;
 
         /// <summary>
         /// The build engine sets this property if the host IDE has associated a host object with this particular task.
         /// </summary>
         /// <value>The host object instance (can be null).</value>
-        public ITaskHost HostObject
-        {
-            get
-            {
-                return _hostObject;
-            }
-
-            set
-            {
-                _hostObject = value;
-            }
-        }
-
-        // Optional host object that might be used by certain IDE-aware tasks.
-        private ITaskHost _hostObject;
+        public ITaskHost HostObject { get; set; }
 
         /// <summary>
         /// Gets an instance of a TaskLoggingHelper class containing task logging methods.
@@ -140,16 +97,7 @@ namespace Microsoft.Build.Utilities
         /// the task execution and the MarkAsInactive method is not called this will result in a leak of the task instances in the appdomain the task was created within.
         /// </summary>
         /// <value>The logging helper object.</value>
-        public TaskLoggingHelper Log
-        {
-            get
-            {
-                return _log;
-            }
-        }
-
-        // the logging helper
-        private TaskLoggingHelper _log;
+        public TaskLoggingHelper Log { get; }
 
         /// <summary>
         /// Gets or sets the task's culture-specific resources. Derived classes should register their resources either during
@@ -158,15 +106,8 @@ namespace Microsoft.Build.Utilities
         /// <value>The task's resources (can be null).</value>
         protected ResourceManager TaskResources
         {
-            get
-            {
-                return Log.TaskResources;
-            }
-
-            set
-            {
-                Log.TaskResources = value;
-            }
+            get => Log.TaskResources;
+            set => Log.TaskResources = value;
         }
 
         /// <summary>
@@ -178,15 +119,8 @@ namespace Microsoft.Build.Utilities
         /// <value>The help keyword prefix string (can be null).</value>
         protected string HelpKeywordPrefix
         {
-            get
-            {
-                return Log.HelpKeywordPrefix;
-            }
-
-            set
-            {
-                Log.HelpKeywordPrefix = value;
-            }
+            get => Log.HelpKeywordPrefix;
+            set => Log.HelpKeywordPrefix = value;
         }
 
         #endregion

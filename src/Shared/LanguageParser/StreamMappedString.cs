@@ -111,7 +111,11 @@ namespace Microsoft.Build.Shared.LanguageParser
                 _reader = new StreamReader // HIGHCHAR: Falling back to ANSI for VB source files.
                     (
                     _binaryStream,
+#if FEATURE_ENCODING_DEFAULT
                     Encoding.Default,    // Default means ANSI. 
+#else
+                    Encoding.ASCII,
+#endif
                     false                // If the reader had been able to guess the encoding it would have done so already.
                     );
             }

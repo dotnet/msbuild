@@ -1,0 +1,142 @@
+<Project Sdk="RoslynTools.RepoToolset">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
+    
+    <IsPackable>false</IsPackable>
+    <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Concurrent" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
+
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+
+    <ProjectReference Include="..\Samples\TaskWithDependency\TaskWithDependency.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="TaskWithDependencyResolvedProjectReferencePath">
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=net46</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MonoBuild)' == 'true'">TargetFramework=net461</SetTargetFramework>
+      <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=netstandard2.0</SetTargetFramework>
+    </ProjectReference>
+    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="PortableTaskResolvedProjectReferencePath" SetTargetFramework="TargetFramework=netstandard1.3" />
+
+    <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    
+    <Compile Remove="Definition\ToolsetConfigurationReaderTestHelper.cs" />
+    <Compile Include="Definition\ToolsetConfigurationReaderTestHelper.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+
+    <Compile Include="..\Shared\UnitTests\BuildEventArgsExtension.cs">
+      <!-- Extension methods -->
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\FileUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\MockEngine.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs">
+      <Link>EngineTestEnvironment.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
+      <Link>TestEnvironment.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TypeLoader_Dependencies_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>XmakeAttributes_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\XmlUtilities_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+      <Link>AssemblyNameEx_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
+      <Link>TaskParameter_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
+    <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\TestData\GlobbingTestData.cs">
+      <Link>TestData\GlobbingTestData.cs</Link>
+    </Compile>
+
+    <None Include="..\Shared\UnitTests\App.config">
+      <Link>App.config</Link>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyTestProjects" AfterTargets="ResolveProjectReferences">
+    <!-- In TypeLoader, the following logic is used for loading assemblies on .NET Core:
+            - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded, indifferent of the user specified path
+            - otherwise, the assembly from the user specified path is loaded, if it exists.
+            
+          So the custom tasks we are testing can't be in test output folder, because on .NET Core that would affect the loading behavior.  So this
+          target puts them in subfolders of the test output folder instead.    
+    -->
+
+    <Error Condition="'@(PortableTaskResolvedProjectReferencePath)' == ''" Text="Couldn't find PortableTaskResolvedProjectReferencePath item for PortableTask" />
+    <Error Condition="'@(TaskWithDependencyResolvedProjectReferencePath)' == ''" Text="Couldn't find TaskWithDependencyResolvedProjectReferencePath item for TaskWithDependency" />
+    
+    <PropertyGroup>
+      <PortableTaskOutputPath>@(PortableTaskResolvedProjectReferencePath->'%(RootDir)%(Directory)')</PortableTaskOutputPath>
+      <TaskWithDependencyOutputPath>@(TaskWithDependencyResolvedProjectReferencePath->'%(RootDir)%(Directory)')</TaskWithDependencyOutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <PortableTaskContent Include="$(PortableTaskOutputPath)*.*" />
+      <Content Include="@(PortableTaskContent)" Link="PortableTask\%(PortableTaskContent.Filename)%(PortableTaskContent.Extension)" CopyToOutputDirectory="PreserveNewest" />
+
+      <TaskWithDependencyContentContent Include="$(TaskWithDependencyOutputPath)*.*" />
+      <Content Include="@(TaskWithDependencyContentContent)" Link="TaskWithDependency\%(TaskWithDependencyContentContent.Filename)%(TaskWithDependencyContentContent.Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    
+  </Target>
+  
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+</Project>

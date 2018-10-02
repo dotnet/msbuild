@@ -1,0 +1,24 @@
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>VS.ExternalAPIs.MSBuild</id>
+    <summary>CoreXT package containing MSBuild binaries for the VS build.</summary>
+    <description>CoreXT package containing MSBuild binaries for the VS build. Produced from the MSBuild $branchname$ branch.</description>
+    <authors>MSBuild</authors>
+    <version>0.0</version>
+  </metadata>
+  <files>
+    <file src="Microsoft.Build.dll" target="lib\net46" />
+    <file src="Microsoft.Build.Framework.dll" target="lib\net46" />
+    <file src="Microsoft.Build.Tasks.Core.dll" target="lib\net46" />
+    <file src="Microsoft.Build.Utilities.Core.dll" target="lib\net46" />
+
+    <!-- Obsolete but still referenced in the VS repo -->
+    <file src="Microsoft.Build.Engine.dll" target="lib\net46" />
+    <file src="Microsoft.Build.Conversion.Core.dll" target="lib\net46" />
+
+    <file src="Microsoft.Build.tlb" target="lib\net46" />
+    <file src="Microsoft.Build.Framework.tlb" target="lib\net46" />
+    <file src="Microsoft.Build.Tasks.Core.tlb" target="lib\net46" />
+  </files>
+</package>

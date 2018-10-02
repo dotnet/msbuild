@@ -1,12 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Event args for task started event.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -92,39 +89,10 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            #region TaskName
-            if (taskName == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(taskName);
-            }
-            #endregion
-            #region ProjectFile
-            if (projectFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(projectFile);
-            }
-            #endregion
-            #region TaskFile
-            if (taskFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(taskFile);
-            }
-            #endregion
+
+            writer.WriteOptionalString(taskName);
+            writer.WriteOptionalString(projectFile);
+            writer.WriteOptionalString(taskFile);
         }
 
         /// <summary>
@@ -135,70 +103,26 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            #region TaskName
-            if (reader.ReadByte() == 0)
-            {
-                taskName = null;
-            }
-            else
-            {
-                taskName = reader.ReadString();
-            }
-            #endregion
-            #region ProjectFile
-            if (reader.ReadByte() == 0)
-            {
-                projectFile = null;
-            }
-            else
-            {
-                projectFile = reader.ReadString();
-            }
-            #endregion
-            #region TaskFile
-            if (reader.ReadByte() == 0)
-            {
-                taskFile = null;
-            }
-            else
-            {
-                taskFile = reader.ReadString();
-            }
-            #endregion
+
+            taskName = reader.ReadByte() == 0 ? null : reader.ReadString();
+            projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+            taskFile = reader.ReadByte() == 0 ? null : reader.ReadString();
         }
         #endregion
 
         /// <summary>
         /// Task name.
         /// </summary>
-        public string TaskName
-        {
-            get
-            {
-                return taskName;
-            }
-        }
+        public string TaskName => taskName;
 
         /// <summary>
         /// Project file associated with event.   
         /// </summary>
-        public string ProjectFile
-        {
-            get
-            {
-                return projectFile;
-            }
-        }
+        public string ProjectFile => projectFile;
 
         /// <summary>
         /// MSBuild file where this task was defined.   
         /// </summary>
-        public string TaskFile
-        {
-            get
-            {
-                return taskFile;
-            }
-        }
+        public string TaskFile => taskFile;
     }
 }

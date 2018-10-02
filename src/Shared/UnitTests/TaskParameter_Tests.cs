@@ -1,10 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Unit Tests for TaskParameter class, specifically focusing on 
-// testing its serialization.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -19,13 +14,13 @@ using Xunit;
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
-    /// Class to specifically test the TaskParameter class, particularly its serialization 
-    /// of various types of parameters.  
+    /// Class to specifically test the TaskParameter class, particularly its serialization
+    /// of various types of parameters.
     /// </summary>
     public class TaskParameter_Tests
     {
         /// <summary>
-        /// Verifies that construction and serialization with a null parameter is OK. 
+        /// Verifies that construction and serialization with a null parameter is OK.
         /// </summary>
         [Fact]
         public void NullParameter()
@@ -43,7 +38,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a string parameter is OK. 
+        /// Verifies that construction and serialization with a string parameter is OK.
         /// </summary>
         [Fact]
         public void StringParameter()
@@ -61,7 +56,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a string array parameter is OK. 
+        /// Verifies that construction and serialization with a string array parameter is OK.
         /// </summary>
         [Fact]
         public void StringArrayParameter()
@@ -89,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a value type (integer) parameter is OK. 
+        /// Verifies that construction and serialization with a value type (integer) parameter is OK.
         /// </summary>
         [Fact]
         public void ValueTypeParameter()
@@ -107,7 +102,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK. 
+        /// Verifies that construction and serialization with a parameter that is an array of value types (ints) is OK.
         /// </summary>
         [Fact]
         public void ValueTypeArrayParameter()
@@ -135,7 +130,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with an ITaskItem parameter is OK. 
+        /// Verifies that construction and serialization with an ITaskItem parameter is OK.
         /// </summary>
         [Fact]
         public void ITaskItemParameter()
@@ -159,7 +154,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with an ITaskItem parameter that has custom metadata is OK. 
+        /// Verifies that construction and serialization with an ITaskItem parameter that has custom metadata is OK.
         /// </summary>
         [Fact]
         public void ITaskItemParameterWithMetadata()
@@ -191,7 +186,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an array of ITaskItems is OK. 
+        /// Verifies that construction and serialization with a parameter that is an array of ITaskItems is OK.
         /// </summary>
         [Fact]
         public void ITaskItemArrayParameter()
@@ -219,8 +214,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an ITaskItem with an 
-        /// itemspec containing escapable characters translates the escaping correctly. 
+        /// Verifies that construction and serialization with a parameter that is an ITaskItem with an
+        /// itemspec containing escapable characters translates the escaping correctly.
         /// </summary>
         [Fact]
         public void ITaskItemParameter_EscapedItemSpec()
@@ -244,8 +239,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an ITaskItem with an 
-        /// itemspec containing doubly-escaped characters translates the escaping correctly. 
+        /// Verifies that construction and serialization with a parameter that is an ITaskItem with an
+        /// itemspec containing doubly-escaped characters translates the escaping correctly.
         /// </summary>
         [Fact]
         public void ITaskItemParameter_DoubleEscapedItemSpec()
@@ -280,8 +275,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that construction and serialization with a parameter that is an ITaskItem with an 
-        /// itemspec containing the non-escaped forms of escapable characters translates the escaping correctly. 
+        /// Verifies that construction and serialization with a parameter that is an ITaskItem with an
+        /// itemspec containing the non-escaped forms of escapable characters translates the escaping correctly.
         /// </summary>
         [Fact]
         public void ITaskItemParameter_EscapableNotEscapedItemSpec()
@@ -308,7 +303,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with
-        /// metadata containing escapable characters translates the escaping correctly. 
+        /// metadata containing escapable characters translates the escaping correctly.
         /// </summary>
         [Fact]
         public void ITaskItemParameter_EscapedMetadata()
@@ -341,7 +336,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with
-        /// metadata containing doubly-escapabed characters translates the escaping correctly. 
+        /// metadata containing doubly-escaped characters translates the escaping correctly.
         /// </summary>
         [Fact]
         public void ITaskItemParameter_DoubleEscapedMetadata()
@@ -387,8 +382,8 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with
-        /// metadata containing the non-escaped versions of escapable characters translates the 
-        /// escaping correctly. 
+        /// metadata containing the non-escaped versions of escapable characters translates the
+        /// escaping correctly.
         /// </summary>
         [Fact]
         public void ITaskItemParameter_EscapableNotEscapedMetadata()

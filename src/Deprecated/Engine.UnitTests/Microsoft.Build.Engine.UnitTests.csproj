@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="dogfood" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="BuildProps">
+    <BuildPropsFile>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), Build.props))\Build.props</BuildPropsFile>
+  </PropertyGroup>
+  <Import Project="$(BuildPropsFile)" Condition="'$(BuildProps_Imported)'!='True' AND Exists('$(BuildPropsFile)') AND '$(VisualStudioDir)'==''" />
+  <Import Project="..\..\Microsoft.Xmake.props" />
+  <Import Project="$(_NTDRIVE)$(_NTROOT)\tools\Microsoft.DevDiv.TextTemplating.Settings.targets" />
+  <PropertyGroup>
+    <OutputPath>$(SuiteBinPath)</OutputPath>
+    <OutputType>library</OutputType>
+    <AssemblyName>Microsoft.Build.Engine.Unittest</AssemblyName>
+    <Nonshipping>true</Nonshipping>
+    <BuildArchitecturesAllowed>$(BuildArchitecturesAllowed);amd64;arm</BuildArchitecturesAllowed>
+  </PropertyGroup>
+  <!-- IDE specific Information -->
+  <PropertyGroup>
+    <!-- NUnit 2.0 syntax is flagged as obsolete -->
+    <NoWarn>$(NoWarn);0618</NoWarn>
+    <ProjectGuid>{91781F04-64B3-4E65-882D-C8613484F850}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Source Files -->
+    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
+    <Compile Include="..\shared\unittests\FileUtilities_Tests.cs" />
+    <Compile Include="..\shared\unittests\FileMatcher_Tests.cs" />
+    <Compile Include="..\shared\unittests\ObjectModelHelpers.cs" />
+    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
+    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\shared\unittests\ResourceUtilities_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\SolutionParser_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs" />
+    <Compile Include="..\shared\unittests\TypeLoader_Tests.cs" />
+    <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
+      <Link>XmakeAttributes_Tests.cs</Link>
+    </Compile>
+    <Compile Include="..\shared\unittests\XmlUtilities_Tests.cs" />
+    <Compile Include="BatchingEngine_Tests.cs" />
+    <Compile Include="BuildItemDefinitionGroupXml_Tests.cs" />
+    <Compile Include="BuildItemGroupProxy_Tests.cs" />
+    <Compile Include="BuildItemGroup_Tests.cs" />
+    <Compile Include="BuildItemGroupChildXml_Tests.cs" />
+    <Compile Include="BuildPropertyGroupProxy_Tests.cs" />
+    <Compile Include="BuildRequest_Tests.cs" />
+    <Compile Include="BuildResult_Tests.cs" />
+    <Compile Include="BuildTask_Tests.cs" />
+    <Compile Include="CacheEntry_Tests.cs" />
+    <Compile Include="CacheManager_Tests.cs" />
+    <Compile Include="CacheScope_Tests.cs" />
+    <Compile Include="Choose_Tests.cs" />
+    <Compile Include="BuildItem_Tests.cs" />
+    <Compile Include="ConfigureableForwardingLogger_Tests.cs" />
+    <Compile Include="ConsoleLogger_Tests.cs" />
+    <Compile Include="CopyOnWriteHashtable_Tests.cs" />
+    <Compile Include="DualQueue_Tests.cs" />
+    <Compile Include="enginehelpers.cs" />
+    <Compile Include="EngineLoggingServices_Tests.cs" />
+    <Compile Include="EngineProxy_Tests.cs" />
+    <Compile Include="Engine_Tests.cs" />
+    <Compile Include="EscapingInProjects_Tests.cs" />
+    <Compile Include="EventArgsFormatting_Tests.cs" />
+    <Compile Include="Expander_Tests.cs" />
+    <Compile Include="ExpressionShredder_Tests.cs" />
+    <Compile Include="ExpressionTree_Tests.cs" />
+    <Compile Include="FileLogger_Tests.cs" />
+    <Compile Include="GroupingCollection_Tests.cs" />
+    <Compile Include="HashTableUtility_Tests.cs" />
+    <Compile Include="ImportCollection_Tests.cs" />
+    <Compile Include="IntrinsicTask_Tests.cs" />
+    <Compile Include="InvalidProjectFileException_Tests.cs" />
+    <Compile Include="ItemBucket_Tests.cs" />
+    <Compile Include="ItemDefinitionLibrary_Tests.cs" />
+    <Compile Include="Item_Tests.cs" />
+    <Compile Include="ItemExpander_Tests.cs" />
+    <Compile Include="LocalNode_Tests.cs" />
+    <Compile Include="LogFormatter_Tests.cs" />
+    <Compile Include="LoggerDescription_Tests.cs" />
+    <Compile Include="LoggerException_Tests.cs" />
+    <Compile Include="Lookup_Tests.cs" />
+    <Compile Include="MockNode.cs" />
+    <Compile Include="MockProjectStartedLogger.cs" />
+    <Compile Include="MockTask.cs" />
+    <Compile Include="ProjectIdLogger.cs" />
+    <Compile Include="TargetInProgressState_Tests.cs" />
+    <Compile Include="ToolsetConfigurationReader_Tests.cs" />
+    <Compile Include="NodeLoggingEventTests.cs" />
+    <Compile Include="NodeManager_Tests.cs" />
+    <Compile Include="NodeRequestMapping_Tests.cs" />
+    <Compile Include="NodeStatus_Tests.cs" />
+    <Compile Include="TaskWorkerThread_Tests.cs" />
+    <Compile Include="OnError_Tests.cs" />
+    <Compile Include="Parser_Tests.cs" />
+    <Compile Include="Project_Tests.cs" />
+    <Compile Include="ProjectManager_Tests.cs" />
+    <Compile Include="projectschemavalidationhandler_tests.cs" />
+    <Compile Include="Property_Tests.cs" />
+    <Compile Include="PropertyGroup_Tests.cs" />
+    <Compile Include="Scanner_Tests.cs" />
+    <Compile Include="SharedMemory_Test.cs" />
+    <Compile Include="SolutionWrapperProject_Tests.cs" />
+    <Compile Include="TargetCollection_Tests.cs" />
+    <Compile Include="TargetDependencyAnalyzer_Tests.cs" />
+    <Compile Include="TaskEngine_Tests.cs" />
+    <Compile Include="TaskExecutionContext_Tests.cs" />
+    <Compile Include="TaskExecutionState_Test.cs" />
+    <Compile Include="TaskItem_Tests.cs" />
+    <Compile Include="TaskRegistry_Tests.cs" />
+    <Compile Include="ToolsetConfigurationReaderTestHelper.cs" />
+    <Compile Include="ToolsetRegistryReader_Tests.cs" />
+    <Compile Include="ToolsetReader_Tests.cs" />
+    <Compile Include="Toolset_Tests.cs" />
+    <Compile Include="ToolsVersion_Tests.cs" />
+    <Compile Include="UsingTaskCollection_Tests.cs" />
+    <Compile Include="Utilities_Tests.cs" />
+    <Compile Include="XmlSearcher_Tests.cs" />
+    <Compile Include="XmlTestUtilities.cs" />
+    <!-- Compatibility tests -->
+    <Compile Include="Compatibility\BuildItemGroupCollection_Tests.cs" />
+    <Compile Include="Compatibility\BuildItemGroup_Tests.cs" />
+    <Compile Include="Compatibility\BuildItem_Tests.cs" />
+    <Compile Include="Compatibility\AddNewImport_Tests.cs" />
+    <Compile Include="Compatibility\Engine_Tests.cs" />
+    <Compile Include="Compatibility\InvalidToolsetDefinitionException_Tests.cs" />
+    <Compile Include="Compatibility\InvalidProjectfileException_Tests.cs" />
+    <Compile Include="Compatibility\CompatibilityTestData.cs" />
+    <Compile Include="Compatibility\BuildPropertyGroupCollection_Tests.cs" />
+    <Compile Include="Compatibility\BuildPropertyGroup_Tests.cs" />
+    <Compile Include="Compatibility\BuildProperty_Tests.cs" />
+    <Compile Include="Compatibility\BuildTask_Tests.cs" />
+    <Compile Include="Compatibility\CompatibilityTestHelpers.cs" />
+    <Compile Include="Compatibility\ImportCollection_Tests.cs" />
+    <Compile Include="Compatibility\Import_Tests.cs" />
+    <Compile Include="Compatibility\Project_Tests.cs" />
+    <Compile Include="Compatibility\TargetCollection_Tests.cs" />
+    <Compile Include="Compatibility\Target_Tests.cs" />
+    <Compile Include="Compatibility\ToolsetCollection_Tests.cs" />
+    <Compile Include="Compatibility\Toolset_Tests.cs" />
+    <Compile Include="Compatibility\UsingTaskCollection_Tests.cs" />
+    <Compile Include="Compatibility\UsingTask_Tests.cs" />
+    <Compile Include="Compatibility\EngineFileUtilities_Tests.cs" />
+  </ItemGroup>
+  <!-- Assemblies Files we depend on -->
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="$(NUnitRefPath)\NUnit.Framework.dll" />
+    <ProjectReference Include="..\..\Framework\Framework.csproj">
+      <Project>{784BF121-CE8F-4314-AA55-E86AB61670FE}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>Framework</Name>
+      <Comment>Needs 'microsoft.build.framework.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Utilities\Utilities.csproj">
+      <Project>{653E79B4-118B-4E0A-9E34-8EB30E5E0881}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Name>Utilities %28Utilities\Utilities%29</Name>
+      <Comment>Needs 'microsoft.build.utilities.v12.0.dll'</Comment>
+    </ProjectReference>
+    <ProjectReference Include="..\OrcasEngine.csproj">
+      <Project>{3F1F7307-EE89-4110-B636-BDE1E45358C4}</Project>
+      <Name>XMakeBuildEngine</Name>
+      <Comment>Needs 'microsoft.build.engine.dll'</Comment>
+      <SpecificVersion>true</SpecificVersion>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- This config file has the binding redirect nunit needs to host MSBuild - it is automatically generated from a template -->
+    <Template Include="App.config.tt">
+      <OutputItemName>Content</OutputItemName>
+    </Template>
+  </ItemGroup>
+  <Import Project="..\..\Microsoft.Xmake.targets" />
+  <Import Project="$(ToolsPath)\Microsoft.DevDiv.TextTemplating.targets" />
+  <PropertyGroup>
+    <GenerateAssemblyAttribute>true</GenerateAssemblyAttribute>
+  </PropertyGroup>
+  <!-- IDE specific Information -->
+  <ItemGroup>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\XMakeCommandLine\Microsoft.Build.Core.xsd">
+      <Link>Microsoft.Build.Core.xsd</Link>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\XMakeCommandLine\Microsoft.Build.CommonTypes.xsd">
+      <Link>Microsoft.Build.CommonTypes.xsd</Link>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\XMakeCommandLine\Microsoft.Build.xsd">
+      <Link>Microsoft.Build.xsd</Link>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+</Project>

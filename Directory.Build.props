@@ -1,0 +1,83 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Configurations>Debug;Release;Debug-MONO;Release-MONO</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('windows'))">windows</OsEnvironment>
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('linux'))">linux</OsEnvironment>
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('osx'))">osx</OsEnvironment>
+    <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
+    <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">bsd</OsEnvironment>
+
+    <OsUnixLike>false</OsUnixLike>
+    <OsUnixLike Condition="$([MSBuild]::IsOsUnixLike())">true</OsUnixLike>
+
+    <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)'==''">$(OS)</TargetPlatformIdentifier>
+  </PropertyGroup>
+
+  <Import Project="build\NuGet.props"/>
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
+    <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
+
+    <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\</DOTNET_INSTALL_DIR>
+
+    <!-- Repository and project URLs (used in nuget packages) -->
+    <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
+    <PackageProjectUrl>http://go.microsoft.com/fwlink/?LinkId=624683</PackageProjectUrl>
+    <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
+    <PackageTags>MSBuild</PackageTags>
+
+    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+    <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
+
+    <!-- NU1603: Microsoft.xunit.netcore.extensions package has dependencies to versions which aren't published, so ignore those warnings
+         NU5105: we're explicitly opting in to semver2, as is most of .NET Core
+        CS1701 and CS1702 are by default ignored by Microsoft.NET.Sdk, but if you define the NoWarn property in Directory.Build.props,
+        you don't get those defaults.
+    -->
+
+    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">false</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+    <MonoBuild>true</MonoBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release-MONO'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">embedded</DebugType>
+    <MonoBuild>true</MonoBuild>
+  </PropertyGroup>
+  <!-- Configuration MSBuild for portable (xcopy-install) toolsets: works on WinNT and linux/mac via Mono, isolates from machine environment:
+    uses only tools installed with it, ignores Registry and GAC and Visual Studio installations to provide the same build experience on all machines -->
+  <PropertyGroup Condition="'$(Configuration)' == 'MachineIndependent'">
+    <DebugSymbols Condition="'$(DebugSymbols)' == ''">true</DebugSymbols>
+    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+    <DebugType Condition="'$(DebugType)' == ''">none</DebugType>
+    <MachineIndependentBuild>true</MachineIndependentBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);*.log</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

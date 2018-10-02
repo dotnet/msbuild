@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A packet which contains information needed for the task host to 
-// configure itself for to execute a particular task.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +10,7 @@ using System.Threading;
 using System.Text;
 
 using Microsoft.Build.Shared;
+using System.Reflection;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -42,17 +38,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The culture
         /// </summary>
-        private CultureInfo _culture = Thread.CurrentThread.CurrentCulture;
+        private CultureInfo _culture = CultureInfo.CurrentCulture;
 
         /// <summary>
         /// The UI culture.
         /// </summary>
-        private CultureInfo _uiCulture = Thread.CurrentThread.CurrentUICulture;
+        private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks. 
         /// </summary>
         private AppDomainSetup _appDomainSetup;
+#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined. 
@@ -112,7 +110,9 @@ namespace Microsoft.Build.BackEnd
                 IDictionary<string, string> buildProcessEnvironment,
                 CultureInfo culture,
                 CultureInfo uiCulture,
+#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
+#endif
                 int lineNumberOfTask,
                 int columnNumberOfTask,
                 string projectFileOfTask,
@@ -140,7 +140,9 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
+#if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
+#endif
             _lineNumberOfTask = lineNumberOfTask;
             _columnNumberOfTask = columnNumberOfTask;
             _projectFileOfTask = projectFileOfTask;
@@ -216,6 +218,7 @@ namespace Microsoft.Build.BackEnd
             { return _uiCulture; }
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomain configuration bytes that we may want to use to initialize
         /// AppDomainIsolated tasks. 
@@ -226,6 +229,7 @@ namespace Microsoft.Build.BackEnd
             get
             { return _appDomainSetup; }
         }
+#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined. 
@@ -318,7 +322,9 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
+#if FEATURE_APPDOMAIN
             translator.TranslateDotNet(ref _appDomainSetup);
+#endif
             translator.Translate(ref _lineNumberOfTask);
             translator.Translate(ref _columnNumberOfTask);
             translator.Translate(ref _projectFileOfTask);

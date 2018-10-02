@@ -1,0 +1,8 @@
+# This API is marked obsolete and has been removed from the reference assembly
+MembersMustExist : Member 'Microsoft.Build.Utilities.ToolTask.EnvironmentOverride.get()' does not exist in the implementation but it does exist in the contract.
+#These changes will appear in Update 1; They represent added support for Framework 4.6.1 SDK.
+MembersMustExist : Member 'Microsoft.Build.Tasks.GetFrameworkPath.FrameworkVersion461Path.get()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'Microsoft.Build.Utilities.TargetDotNetFrameworkVersion Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.Version461' does not exist in the implementation but it does exist in the contract.
+EnumValuesMustMatch : Enum value 'Microsoft.Build.Utilities.TargetDotNetFrameworkVersion Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.VersionLatest' is (System.Int32)7 in the implementation but (System.Int32)8 in the contract.
+MembersMustExist : Member 'Microsoft.Build.Utilities.ToolLocationHelper.GetPathToDotNetFrameworkSdk()' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'Microsoft.Build.Utilities.ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(System.String)' does not exist in the implementation but it does exist in the contract.

@@ -1,0 +1,3 @@
+﻿<Project>
+  <!-- Empty file to stop tests from using Directory.Build files at repo root -->
+</Project>

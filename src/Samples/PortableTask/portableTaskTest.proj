@@ -1,0 +1,18 @@
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <AssemblyPath Condition="'$(AssemblyPath)' == ''">PortableTask.dll</AssemblyPath>
+  </PropertyGroup>
+  
+  <UsingTask TaskName="ShowItems" AssemblyFile="$(AssemblyPath)"/>
+  <ItemGroup>
+    <TestItems Include="$(MSBuildBinPath)\**\Microsoft.Build.*.dll"/>
+  </ItemGroup>
+  <Target Name="Build">
+    <Message Text="Assemblies collected from : $(MSBuildBinPath)" Importance="high"/>
+    <Message Text="Loading task from: $(AssemblyPath)" Importance="high"/>
+    <ShowItems Items="@(TestItems)"/>
+    <Error Message="No files found in $(MSBuildBinPath)"
+           Condition="'@(TestItems)' == ''" />
+  </Target>
+</Project>

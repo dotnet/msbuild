@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Packet describing why a node shut down..</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -110,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         public void Translate(INodePacketTranslator translator)
         {
             translator.TranslateEnum(ref _reason, (int)_reason);
-            translator.TranslateDotNet(ref _exception);
+            translator.TranslateException(ref _exception);
         }
 
         /// <summary>

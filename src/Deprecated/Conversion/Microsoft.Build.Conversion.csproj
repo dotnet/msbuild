@@ -1,0 +1,42 @@
+﻿<Project Sdk="RoslynTools.RepoToolset">
+  <PropertyGroup>
+    <AssemblyName>Microsoft.Build.Conversion.Core</AssemblyName>
+    <TargetFramework>net46</TargetFramework>
+    <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <IsPackable>true</IsPackable>
+    <Description>This package contains the $(MSBuildProjectName) assembly which contains logic for converting projects.  NOTE: This assembly is deprecated.</Description>
+    <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Source Files -->
+    <Compile Include="AdditionalOptionsParser.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AssemblyResources.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="FxCopExclusions\Microsoft.Build.Conversion.Suppressions.cs" />
+    <Compile Include="OldVSProjectFileReader.cs" />
+    <Compile Include="ProjectFileConverter.cs" />
+
+    <!-- Resource Files -->
+    
+    <EmbeddedResource Include="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="..\..\Shared\Resources\Strings.shared.resx">
+      <Link>Resources\Strings.shared.resx</Link>
+      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    
+    <!-- Assemblies Files we depend on -->
+    <Reference Include="System.Configuration" />
+    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Engine\Microsoft.Build.Engine.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="'$(OsEnvironment)'!='windows'" />
+</Project>

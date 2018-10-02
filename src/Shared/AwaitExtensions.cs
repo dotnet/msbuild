@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Helper methods for dealing with 'await'able objects.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Concurrent;
@@ -187,7 +183,9 @@ namespace Microsoft.Build.Shared
                 });
 
                 Thread thread = new Thread(threadStart);
+#if FEATURE_APARTMENT_STATE
                 thread.SetApartmentState(ApartmentState.STA);
+#endif
                 thread.Start(task);
             }
 

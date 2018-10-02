@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
+#endif
 using System.IO;
 using System.Text;
 using System.Globalization;
@@ -13,6 +15,8 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
 {
+#if FEATURE_SYSTEM_CONFIGURATION
+
     /// <summary>
     /// Helper class for reading toolsets out of the configuration file.
     /// </summary>
@@ -72,33 +76,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             return configurationSection;
-        }
-
-        /// <summary>
-        /// Creating a ToolsetConfigurationReader, and also reading toolsets from the 
-        /// configuration file, are a little expensive. To try to avoid this cost if it's 
-        /// not necessary, we'll check if the file exists first. If it exists, we'll scan for 
-        /// the string "toolsVersion" to see if it might actually have any tools versions
-        /// defined in it.
-        /// </summary>
-        /// <returns>True if there may be toolset definitions, otherwise false</returns>
-        internal static bool ConfigurationFileMayHaveToolsets()
-        {
-            bool result;
-
-            try
-            {
-                var configFile = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
-                result = File.Exists(configFile) && File.ReadAllText(configFile).Contains("toolsVersion");
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                // There was some problem reading the config file: let the configuration reader
-                // encounter it
-                result = true;
-            }
-
-            return result;
         }
     }
 
@@ -280,7 +257,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
 
-                    string message = ResourceUtilities.FormatResourceString("MultipleDefinitionsForSameExtensionsPathOS", os, locationString);
+                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MultipleDefinitionsForSameExtensionsPathOS", os, locationString);
 
                     throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
                 }
@@ -450,7 +427,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (_previouslySeenPropertyNames.ContainsKey(propertyName))
                 {
-                    string message = ResourceUtilities.FormatResourceString("MultipleDefinitionsForSameProperty", propertyName);
+                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MultipleDefinitionsForSameProperty", propertyName);
 
                     throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
                 }
@@ -621,7 +598,7 @@ namespace Microsoft.Build.Evaluation
 
             if (_previouslySeenToolsVersions.ContainsKey(toolsVersion))
             {
-                string message = ResourceUtilities.FormatResourceString("MultipleDefinitionsForSameToolset", toolsVersion);
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MultipleDefinitionsForSameToolset", toolsVersion);
 
                 throw new ConfigurationErrorsException(message, element.ElementInformation.Source, element.ElementInformation.LineNumber);
             }
@@ -734,4 +711,5 @@ namespace Microsoft.Build.Evaluation
             }
         }
     }
+#endif
 }

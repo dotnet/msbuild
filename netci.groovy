@@ -1,91 +1,89 @@
 // Import the utility functionality.
-import jobs.generation.Utilities;
+import jobs.generation.*;
 
-// Defines a the new of the repo, used elsewhere in the file
-def project = GithubProject
+// The input project name
+project = GithubProject
 
-// Generate the builds for branches: xplat, master and PRs (which aren't branch specific)
-['*/master', '*/xplat', 'pr'].each { branch ->
-    ['Windows_NT', 'OSX', 'Ubuntu14.04', 'Ubuntu16.04'].each {osName ->
-        def runtimes = ['CoreCLR']
+// The input branch name (e.g. master)
+branch = GithubBranchName
 
-        if (osName == 'Windows_NT') {
-            runtimes.add('Desktop')
+// What this repo is using for its machine images at the current time
+imageVersionMap = ['RHEL7.2' : 'latest']
+
+def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, shouldSkipTestsWhenResultsNotFound = false, isSourceBuild = false) {
+    def newJobName = Utilities.getFullJobName("innerloop_${osName}_${runtime}${isSourceBuild ? '_SourceBuild_' : ''}", isPR)
+
+    // Create a new job with the specified name.  The brace opens a new closure
+    // and calls made within that closure apply to the newly created job.
+    def newJob = job(newJobName) {
+        description('')
+    }
+
+    newJob.with{
+        steps{
+            if(osName.contains("Windows") || osName.contains("windows")) {
+                batchFile(script)
+            } else {
+                shell(script)
+            }
         }
 
-        // TODO: Mono
+        skipTestsWhenResultsNotFound = shouldSkipTestsWhenResultsNotFound
+    }
 
-        runtimes.each { runtime ->
-            def isPR = false
-            def newJobName = ''
-            def skipTestsWhenResultsNotFound = true
+    // Add xunit result archiving. Skip if no results found.
+    Utilities.addXUnitDotNETResults(newJob, 'artifacts/**/TestResults/*.xml', skipTestsWhenResultsNotFound)
 
-            if (branch == 'pr') {
-                isPR = true
-                newJobName = Utilities.getFullJobName(project, "_${osName}_${runtime}", isPR)
-            } else {
-                newJobName = Utilities.getFullJobName(project, "innerloop_${branch.substring(2)}_${osName}_${runtime}", isPR)
-            }
+    if (machineAffinityOverride == null) {
+        def imageVersion = imageVersionMap[osName];
+        Utilities.setMachineAffinity(newJob, osName, imageVersion)
+    }
+    else {
+        Utilities.setMachineAffinity(newJob, machineAffinityOverride)
+    }
 
-            // Create a new job with the specified name.  The brace opens a new closure
-            // and calls made within that closure apply to the newly created job.
-            def newJob = job(newJobName) {
-                description('')
-            }
+    Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
+    // Add archiving of logs (even if the build failed)
+    Utilities.addArchival(newJob,
+                        'artifacts/**/log/*.binlog,artifacts/**/log/*.log,artifacts/**/TestResults/*,artifacts/**/MSBuild_*.failure.txt', /* filesToArchive */
+                        '', /* filesToExclude */
+                        false, /* doNotFailIfNothingArchived */
+                        false, /* archiveOnlyIfSuccessful */)
+    // Add trigger
+    if (isPR) {
+        TriggerBuilder prTrigger = TriggerBuilder.triggerOnPullRequest()
 
-            // Define job.
-            switch(osName) {
-                case 'Windows_NT':
-                    newJob.with{
-                        steps{
-                            def windowsScript = "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" && cibuild.cmd --target ${runtime}"
+        if (runtime == "MonoTest") {
+            // Until they're passing reliably, require opt in
+            // for Mono tests
+            prTrigger.setCustomTriggerPhrase("(?i).*test\\W+mono.*")
+            prTrigger.triggerOnlyOnComment()
+        }
 
-                            // only Desktop support localized builds 
-                            if (runtime == "Desktop") {
-                                windowsScript += " --localized-build"
-                            }
-
-                            batchFile(windowsScript)
-                        }
-
-                        skipTestsWhenResultsNotFound = false
-                    }
-
-                    break;
-                case 'OSX':
-                    newJob.with{
-                        steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
-                        }
-                    }
-
-                    break;
-                case { it.startsWith('Ubuntu') }:
-                    newJob.with{
-                        steps{
-                            shell("./cibuild.sh --scope Test --target ${runtime}")
-                        }
-                    }
-
-                    break;
-            }
-
-            // Add xunit result archiving. Skip if no results found.
-            Utilities.addXUnitDotNETResults(newJob, 'bin/**/*_TestResults.xml', skipTestsWhenResultsNotFound)
-            Utilities.setMachineAffinity(newJob, osName, 'latest-or-auto')
-            Utilities.standardJobSetup(newJob, project, isPR, branch)
-            // Add archiving of logs (even if the build failed)
-            Utilities.addArchival(newJob,
-                                  'init-tools.log,msbuild*.log,**/Microsoft.*.UnitTests.dll_*', /* filesToArchive */
-                                  '', /* filesToExclude */
-                                  false, /* doNotFailIfNothingArchived */
-                                  false, /* archiveOnlyIfSuccessful */)
-            // Add trigger
-            if (isPR) {
-                Utilities.addGithubPRTrigger(newJob, "${osName} Build for ${runtime}")
-            } else {
-                Utilities.addGithubPushTrigger(newJob)
-            }
+        prTrigger.triggerForBranch(branch)
+        // Set up what shows up in Github:
+        prTrigger.setGithubContext("${osName} Build for ${runtime}")
+        prTrigger.emitTrigger(newJob)
+    } else {
+        if (runtime != "Mono") {
+            Utilities.addGithubPushTrigger(newJob)
         }
     }
 }
+
+// sourcebuild simulation
+CreateJob(
+    "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
+    "CoreCLR",
+    "RHEL7.2",
+    true,
+    null,
+    true,
+    true)
+
+JobReport.Report.generateJobReport(out)
+
+// Make the call to generate the help job
+Utilities.createHelperJob(this, project, branch,
+    "Welcome to the ${project} Repository",  // This is prepended to the help message
+    "Have a nice day!")  // This is appended to the help message.  You might put known issues here.

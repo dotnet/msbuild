@@ -1,0 +1,32 @@
+<Project>
+  <PropertyGroup>
+    <MSBuildTargetsFilePath>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildTargetsFilePath>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildTargetsFilePath)" />
+
+  <!-- Remove items which light up build logic which could generate warnings / errors -->
+  <ItemGroup>
+    <EmbeddedResource Remove="@(EmbeddedResource)" />
+    <Reference Remove="@(Reference)" />
+    <PackageReference Remove="@(PackageReference)" />
+    <ProjectReference Remove="@(ProjectReference)" />
+    <SwrFile Remove="@(SwrFile)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetPath></TargetPath>    <!-- Prevent projects referencing this from trying to pass us to the compiler -->
+  </PropertyGroup>
+
+  <Target Name="CoreCompile" />                               <!-- Prevent Csc from being called -->
+  <Target Name="GenerateTargetFrameworkMonikerAttribute" />   <!-- Don't generate TFM attribute -->
+  <Target Name="RuntimeImplementationProjectOutputGroup" />   <!-- Group always attempts resolve runtime, regardless of <CopyNuGetImplementations>-->
+  <Target Name="GetReferenceAssemblyPaths" />                 <!-- Don't go looking for framewoek reference assemblies-->
+  <Target Name="GetFrameworkPaths"  />                        <!-- ^ -->
+
+  <Target Name="GetBuildVersion" />                           <!-- For Packages projects, which use GetNuGetPackageVersionEx which depends on GetBuildVersion -->
+  <Target Name="Pack" />
+
+</Project>

@@ -4,6 +4,7 @@
 using System.Runtime.InteropServices;
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -151,50 +152,12 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            #region SubCategory
-            if (subcategory == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(subcategory);
-            }
-            #endregion
-            #region Code
-            if (code == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(code);
-            }
-            #endregion
-            #region File
-            if (file == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(file);
-            }
-            #endregion
-            #region ProjectFile
-            if (projectFile == null)
-            {
-                writer.Write((byte)0);
-            }
-            else
-            {
-                writer.Write((byte)1);
-                writer.Write(projectFile);
-            }
-            #endregion
+
+            writer.WriteOptionalString(subcategory);
+            writer.WriteOptionalString(code);
+            writer.WriteOptionalString(file);
+            writer.WriteOptionalString(projectFile);
+
             writer.Write((Int32)lineNumber);
             writer.Write((Int32)columnNumber);
             writer.Write((Int32)endLineNumber);
@@ -209,146 +172,65 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
-            #region SubCategory
-            if (reader.ReadByte() == 0)
-            {
-                subcategory = null;
-            }
-            else
-            {
-                subcategory = reader.ReadString();
-            }
-            #endregion
-            #region Code
-            if (reader.ReadByte() == 0)
-            {
-                code = null;
-            }
-            else
-            {
-                code = reader.ReadString();
-            }
-            #endregion
-            #region File
-            if (reader.ReadByte() == 0)
-            {
-                file = null;
-            }
-            else
-            {
-                file = reader.ReadString();
-            }
-            #endregion
-            #region ProjectFile
+
+            subcategory = reader.ReadByte() == 0 ? null : reader.ReadString();
+            code = reader.ReadByte() == 0 ? null : reader.ReadString();
+            file = reader.ReadByte() == 0 ? null : reader.ReadString();
+
             if (version > 20)
             {
-                if (reader.ReadByte() == 0)
-                {
-                    projectFile = null;
-                }
-                else
-                {
-                    projectFile = reader.ReadString();
-                }
+                projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
             }
-            #endregion
+
             lineNumber = reader.ReadInt32();
             columnNumber = reader.ReadInt32();
             endLineNumber = reader.ReadInt32();
             endColumnNumber = reader.ReadInt32();
         }
         #endregion
+
         /// <summary>
         /// The custom sub-type of the event.         
         /// </summary>
-        public string Subcategory
-        {
-            get
-            {
-                return subcategory;
-            }
-        }
+        public string Subcategory => subcategory;
 
         /// <summary>
         /// Code associated with event. 
         /// </summary>
-        public string Code
-        {
-            get
-            {
-                return code;
-            }
-        }
+        public string Code => code;
 
         /// <summary>
         /// File associated with event.   
         /// </summary>
-        public string File
-        {
-            get
-            {
-                return file;
-            }
-        }
+        public string File => file;
 
         /// <summary>
         /// Line number of interest in associated file. 
         /// </summary>
-        public int LineNumber
-        {
-            get
-            {
-                return lineNumber;
-            }
-        }
+        public int LineNumber => lineNumber;
 
         /// <summary>
         /// Column number of interest in associated file. 
         /// </summary>
-        public int ColumnNumber
-        {
-            get
-            {
-                return columnNumber;
-            }
-        }
+        public int ColumnNumber => columnNumber;
 
         /// <summary>
         /// Ending line number of interest in associated file. 
         /// </summary>
-        public int EndLineNumber
-        {
-            get
-            {
-                return endLineNumber;
-            }
-        }
+        public int EndLineNumber => endLineNumber;
 
         /// <summary>
         /// Ending column number of interest in associated file. 
         /// </summary>
-        public int EndColumnNumber
-        {
-            get
-            {
-                return endColumnNumber;
-            }
-        }
+        public int EndColumnNumber => endColumnNumber;
 
         /// <summary>
         /// The project which was building when the message was issued.
         /// </summary>
         public string ProjectFile
         {
-            get
-            {
-                return projectFile;
-            }
-
-            set
-            {
-                projectFile = value;
-            }
+            get => projectFile;
+            set => projectFile = value;
         }
     }
 }

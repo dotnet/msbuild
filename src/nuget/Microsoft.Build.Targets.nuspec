@@ -13,10 +13,14 @@
     <summary>MSBuild APIs</summary>
     <description>
       This package includes APIs that support writing MSBuild tasks.
+      NOTE: This package is deprecated.  Please move to the Microsoft.Build.Runtime 15.1.X package available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
     </description>
-    <copyright>Copyright © Microsoft Corporation</copyright>
+    <releaseNotes>
+      NOTE: This package is deprecated.  Please move to the Microsoft.Build.Runtime 15.1.X package available on https://dotnet.myget.org/F/msbuild/api/v3/index.json.
+    </releaseNotes>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework="netstandard1.3">
         <dependency id="Microsoft.Build.Framework" version="$version$" />
         <dependency id="Microsoft.Build" version="$version$" />
         <dependency id="Microsoft.Build.Utilities.Core" version="$version$" />
@@ -29,7 +33,10 @@
     </contentFiles>
   </metadata>
   <files>
-    <!--<file src="_._" target="lib\net46" />-->
+    <file src="_._" target="lib\netstandard1.3" />
+    <file src="Microsoft.Common.CrossTargeting.targets" target="runtimes\any\native" />
+    <file src="Microsoft.CSharp.CrossTargeting.targets" target="runtimes\any\native" />
+    <file src="Microsoft.VisualBasic.CrossTargeting.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.targets" target="runtimes\any\native" />
     <file src="Microsoft.CSharp.CurrentVersion.targets" target="runtimes\any\native" />
@@ -39,7 +46,7 @@
     <file src="Microsoft.VisualBasic.CurrentVersion.targets" target="runtimes\any\native" />
     <file src="Microsoft.VisualBasic.targets" target="runtimes\any\native" />
     <file src="Microsoft.Common.overridetasks" target="runtimes\any\native" />
-    <!--<file src="Extensions\14.1\Microsoft.Common.props" target="contentFiles\any\any\14.1" />-->
+    <file src="Microsoft.Common.props" target="contentFiles\any\any\Extensions\$targetmsbuildtoolsversion$\" />
     <file src="Microsoft.Common.tasks" target="runtimes\any\native" />
     <file src="Microsoft.NETFramework.CurrentVersion.props" target="runtimes\any\native" />
     <file src="Microsoft.NETFramework.props" target="runtimes\any\native" />

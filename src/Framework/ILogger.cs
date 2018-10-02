@@ -66,24 +66,14 @@ namespace Microsoft.Build.Framework
         /// important that the guidelines for each level be followed, for a good user experience.
         /// </summary>
         /// <value>The verbosity level.</value>
-        LoggerVerbosity Verbosity
-        {
-            get;
-
-            set;
-        }
+        LoggerVerbosity Verbosity { get; set; }
 
         /// <summary>
         /// This property holds the user-specified parameters to the logger. If parameters are not provided, a logger should revert
         /// to defaults. If a logger does not take parameters, it can ignore this property.
         /// </summary>
         /// <value>The parameter string (can be null).</value>
-        string Parameters
-        {
-            get;
-
-            set;
-        }
+        string Parameters { get; set; }
 
         /// <summary>
         /// Called by the build engine to allow loggers to subscribe to the events they desire.

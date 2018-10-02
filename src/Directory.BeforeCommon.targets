@@ -1,0 +1,156 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>$(OutputPath)$(TargetFramework.ToLowerInvariant())\</OutputPath>
+    <PublishDir>$(OutputPath)$(TargetFramework.ToLowerInvariant())\publish</PublishDir>
+    <IntermediateOutputPath>$(IntermediateOutputPath)$(TargetFramework.ToLowerInvariant())\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);STANDALONEBUILD</DefineConstants>
+    <DefineConstants Condition="'$(DisableNerdbankVersioning)' != 'true'">$(DefineConstants);THISASSEMBLY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) Or $(TargetFramework.StartsWith('net3'))">
+    <DefineConstants>$(DefineConstants);FEATURE_64BIT_ENVIRONMENT_QUERY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
+    <FeatureAppDomain>true</FeatureAppDomain>
+    <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASPNET_COMPILER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOADFROM</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_LOCATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLY_GETENTRYASSEMBLY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYNAME_CLONE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETCONSTRUCTOR</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_COM_INTEROP</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CONSOLE_BUFFERWIDTH</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CHARSET_AUTO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CODEDOM</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CODETASKFACTORY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_CONSOLE_FALLBACK</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTUREINFO</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTURES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_DOTNETVERSION</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_FUSION_COMPAREASSEMBLYIDENTITY</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_GAC</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_GET_COMMANDLINE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HANDLE_SAFEWAITHANDLE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HANDLEREF</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_HTTP_LISTENER</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
+    <!-- Directory.GetCurrentDirectory The pre .Net 4.6.2 implementation of Directory.GetCurrentDirectory is slow and creates strings in its work. -->
+    <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETCURRENTDIRECTORY</DefineConstants>
+    <!-- Path.GetFullPath The pre .Net 4.6.2 implementation of Path.GetFullPath is slow and creates strings in its work. -->
+    <DefineConstants>$(DefineConstants);FEATURE_LEGACY_GETFULLPATH</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPES_FULL_DUPLEX</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_OSVERSION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PERFORMANCE_COUNTERS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PIPE_SECURITY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PFX_SIGNING</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_REGISTRY_TOOLSETS</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_REGISTRY_SDKS</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RESGEN</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RESGENCACHE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
+    <!-- System.Resources.ResourceManager.GetResourceSet() method is currently only in full framework -->
+    <DefineConstants>$(DefineConstants);FEATURE_RESOURCEMANAGER_GETRESOURCESET</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RESX_RESOURCE_READER</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_RTLMOVEMEMORY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUN_EXE_IN_TESTS</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' == 'true'">$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PRINCIPAL_WINDOWS</DefineConstants>
+    <FeatureSpecialFolders>true</FeatureSpecialFolders>
+    <DefineConstants>$(DefineConstants);FEATURE_STRING_INTERN</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_STRONG_NAMES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SYSTEMPAGESIZE</DefineConstants>
+    <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
+    <DefineConstants>$(DefineConstants);FEATURE_TASK_GENERATERESOURCES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TASKHOST</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_THREAD_PRIORITY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TYPE_INVOKEMEMBER</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_TYPE_GETINTERFACE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_USERINTERACTIVE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_USERDOMAINNAME</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_VARIOUS_EXCEPTIONS</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XAMLTASKFACTORY</DefineConstants>
+    <FeatureXamlTypes>true</FeatureXamlTypes>
+    <DefineConstants>$(DefineConstants);FEATURE_XML_SOURCE_URI</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_XML_LOADPATH</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_DEBUGGER</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true'">$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_WORKINGSET</DefineConstants>
+    <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="'$(MonoBuild)'=='true'">$(DefineConstants);MONO</DefineConstants>
+
+    <!-- Useful for tests that need OS information as a constant -->
+    <DefineConstants Condition="'$(OsEnvironment)'=='windows'">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcore'))">
+    <NetCoreBuild>true</NetCoreBuild>
+    <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(NetCoreBuild)'=='true'">
+    <CompilerToolsDir>$([System.IO.Path]::Combine($(ToolPackagesDir)Microsoft.Net.Compilers, $(CompilerToolsVersion), "tools"))$([System.IO.Path]::DirectorySeparatorChar)</CompilerToolsDir>
+    <DefineConstants>$(DefineConstants);FEATURE_PROCESSSTARTINFO_ENVIRONMENT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
+    <DefineConstants>$(DefineConstants);WORKAROUND_COREFX_19110</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
+    <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPES_FULL_DUPLEX</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
+    <DefineConstants Condition="'$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SPAN</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IBCMergeSubPath>x86/MSBuild</IBCMergeSubPath>
+    <IBCMergeBranch>lab/ml</IBCMergeBranch>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GenerateReferenceAssemblySources)' != 'true'">
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DocumentationFile/>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+      For some reason at the moment our $(DocumentationFile) property does not contain the TFM.  I can't figure out why...
+      Resetting it here corrects it because $(IntermediateOutputPath) includes the TFM at this point
+    -->
+    <DocumentationFile Condition=" '$(GenerateDocumentationFile)' == 'true' ">$(IntermediateOutputPath)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>

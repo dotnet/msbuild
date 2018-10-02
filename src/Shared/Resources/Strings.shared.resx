@@ -89,6 +89,10 @@
     <value>MSB4103: "{0}" is not a valid logger verbosity level.</value>
     <comment>{StrBegin="MSB4103: "}</comment>
   </data>
+  <data name="InvalidLogFileFormat" UESanitized="false" Visibility="Public">
+    <value>MSB4233: There was an exception while reading the log file: {0}</value>
+    <comment>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</comment>
+  </data>
   <data name="MissingProject" UESanitized="false" Visibility="Private_OM">
     <value>MSBuild is expecting a valid "{0}" object.</value>
   </data>
@@ -154,11 +158,14 @@
     </comment>
   </data>
   <data name="Shared.KillingProcess">
-    <value>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</value>
+    <value>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</value>
     <comment>{StrBegin="MSB5002: "}</comment>
   </data>
   <data name="Shared.ParameterCannotBeNull" UESanitized="false" Visibility="Public">
     <value>Parameter "{0}" cannot be null.</value>
+  </data>
+  <data name="Shared.ParameterCannotHaveInvalidPathChars" UESanitized="false" Visibility="Public">
+    <value>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</value>
   </data>
   <data name="Shared.ParameterCannotHaveZeroLength" UESanitized="false" Visibility="Public">
     <value>Parameter "{0}" cannot have zero length.</value>
@@ -244,12 +251,16 @@
     <comment>{StrBegin="MSB5020: "}</comment>
   </data>
   <data name="Shared.KillingProcessByCancellation">
-    <value>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</value>
+    <value>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</value>
     <comment>{StrBegin="MSB5021: "}</comment>
   </data>
   <data name="Shared.CanNotFindValidMSBuildLocation">
     <value>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</value>
     <comment>{StrBegin="MSB5021: "}</comment>
+  </data>
+  <data name="Shared.PathTooLong">
+    <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
+    <comment></comment>
   </data>
   <!--
         The shared message bucket is: MSB5001 - MSB5999

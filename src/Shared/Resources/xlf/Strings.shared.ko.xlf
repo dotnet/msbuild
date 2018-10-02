@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.shared.resx">
     <body>
-      <group id="SHARED/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="BuildAborted">
         <source>MSB4188: Build was canceled.</source>
         <target state="translated">MSB4188: 빌드가 취소되었습니다.</target>
@@ -59,6 +58,11 @@
       <trans-unit id="MissingProject">
         <source>MSBuild is expecting a valid "{0}" object.</source>
         <target state="translated">MSBuild에 올바른 "{0}" 개체가 필요합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">경로: {0}은(는) OS 최대 경로 제한을 초과합니다. 정규화된 파일 이름은 {1}자 이하여야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
@@ -142,8 +146,8 @@
     </note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcess">
-        <source>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</source>
-        <target state="translated">MSB5002: 작업 실행 파일이 지정한 제한 시간인 {0}밀리초 안에 완료되지 않았으므로 종료합니다.</target>
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: 작업 실행 파일 "{0}"이(가) 지정한 제한 시간인 {1}밀리초 안에 완료되지 않았으므로 종료합니다.</target>
         <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotBeNull">
@@ -260,8 +264,8 @@
         <note>{StrBegin="MSB5020: "}</note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcessByCancellation">
-        <source>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</source>
-        <target state="translated">MSB5021: 빌드를 취소하기 위해 "{0}" 및 자식 프로세스가 종료되고 있습니다.</target>
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: 빌드가 취소되었으므로 작업 실행 파일 "{0}" 및 자식 프로세스를 종료합니다.</target>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
       <trans-unit id="OM_NotSupportedReadOnlyCollection">
@@ -273,6 +277,16 @@
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
         <target state="translated">MSB5024: 유효한 MSBuild 위치를 확인할 수 없습니다. Visual Studio용 개발자 명령 프롬프트에서 프로세스를 실행해 보세요.</target>
         <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: 로그 파일을 읽는 동안 예외가 발생했습니다. {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">"{1}" 값이 할당된 "{0}" 매개 변수는 유효하지 않은 경로 또는 파일 문자를 포함할 수 없습니다.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

@@ -1,14 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-using System.Text;
 
 using Microsoft.Build.Shared;
 using Xunit;
+
+
 
 namespace Microsoft.Build.UnitTests
 {
@@ -24,67 +25,17 @@ namespace Microsoft.Build.UnitTests
         #region Tests
 
         /// <summary>
-        /// Confirms we can find a file on the system path.
-        /// </summary>
-        [Fact]
-        public void FindFileOnPath()
-        {
-            string expectedCmdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe");
-            string cmdPath = NativeMethodsShared.FindOnPath("cmd.exe");
-
-            Assert.NotNull(cmdPath);
-
-            // for the NUnit "Standard Out" tab
-            Console.WriteLine("Expected location of \"cmd.exe\": " + expectedCmdPath);
-            Console.WriteLine("Found \"cmd.exe\" here: " + cmdPath);
-
-            Assert.Equal(0, String.Compare(cmdPath, expectedCmdPath, StringComparison.OrdinalIgnoreCase));
-        }
-
-        /// <summary>
-        /// Confirms we can find a file on the system path even if the path
-        /// to the file is very long.
-        /// </summary>
-        [Fact]
-        public void FindFileOnPathAfterResizingBuffer()
-        {
-            int savedMaxPath = NativeMethodsShared.MAX_PATH;
-
-            try
-            {
-                // make the default buffer size very small -- intentionally don't use
-                // zero, otherwise StringBuilder will use some default larger capacity
-                NativeMethodsShared.MAX_PATH = 1;
-
-                FindFileOnPath();
-            }
-            finally
-            {
-                NativeMethodsShared.MAX_PATH = savedMaxPath;
-            }
-        }
-        /// <summary>
-        /// Confirms we cannot find a bogus file on the system path.
-        /// </summary>
-        [Fact]
-        public void DoNotFindFileOnPath()
-        {
-            string bogusFile = Path.ChangeExtension(Guid.NewGuid().ToString(), ".txt");
-            // for the NUnit "Standard Out" tab
-            Console.WriteLine("The bogus file name is: " + bogusFile);
-
-            string bogusFilePath = NativeMethodsShared.FindOnPath(bogusFile);
-
-            Assert.Null(bogusFilePath);
-        }
-
-        /// <summary>
         /// Verify that getProcAddress works, bug previously was due to a bug in the attributes used to pinvoke the method
         /// when that bug was in play this test would fail.
         /// </summary>
         [Fact]
         public void TestGetProcAddress()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return; // "No Kernel32.dll except on Windows"
+            }
+
             IntPtr kernel32Dll = NativeMethodsShared.LoadLibrary("kernel32.dll");
             try
             {
@@ -102,7 +53,7 @@ namespace Microsoft.Build.UnitTests
                 Assert.NotEqual(processHandle, NativeMethodsShared.NullIntPtr);
 
                 //Actually call the method
-                GetProcessIdDelegate processIdDelegate = (GetProcessIdDelegate)Marshal.GetDelegateForFunctionPointer(processHandle, typeof(GetProcessIdDelegate));
+                GetProcessIdDelegate processIdDelegate = Marshal.GetDelegateForFunctionPointer<GetProcessIdDelegate>(processHandle);
                 uint processId = processIdDelegate();
 
                 //Make sure the return value is the same as retrieved from the .net methods to make sure everything works
@@ -140,14 +91,14 @@ namespace Microsoft.Build.UnitTests
         public void SetCurrentDirectoryDoesNotSetNonexistentFolder()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            string nonexistentDirectory = currentDirectory + @"foo\bar\baz";
+            string nonexistentDirectory = Path.Combine(currentDirectory, "foo", "bar", "baz");
 
             // Make really sure the nonexistent directory doesn't actually exist
             if (Directory.Exists(nonexistentDirectory))
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    nonexistentDirectory = currentDirectory + @"foo\bar\baz" + Guid.NewGuid();
+                    nonexistentDirectory = Path.Combine(currentDirectory, "foo", "bar", "baz") + Guid.NewGuid();
 
                     if (!Directory.Exists(nonexistentDirectory))
                     {

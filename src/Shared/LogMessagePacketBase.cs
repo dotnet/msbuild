@@ -1,10 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Base class for the packets which are used for passing logged 
-// messages across nodes.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -14,7 +9,9 @@ using System.Reflection;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
+#if FEATURE_APPDOMAIN
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -105,10 +102,21 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal abstract class LogMessagePacketBase : INodePacket
     {
+#if FEATURE_DOTNETVERSION
         /// <summary>
         /// The packet version, which is based on the CLR version. Cached because querying Environment.Version each time becomes an allocation bottleneck.
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
+#else
+        private static readonly int s_defaultPacketVersion = GetDefaultPacketVersion();
+
+        private static int GetDefaultPacketVersion()
+        {
+            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
+            Version coreAssemblyVersion = coreAssembly.GetName().Version;
+            return 1000 + coreAssemblyVersion.Major * 10 + coreAssemblyVersion.Minor;
+        }
+#endif
 
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
@@ -125,10 +133,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static HashSet<string> s_customEventsLoaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// The resolver used to load custom event types.
         /// </summary>
         private static TaskEngineAssemblyResolver s_resolver;
+#endif
 
         /// <summary>
         /// The object used to synchronize access to shared data.
@@ -271,7 +281,7 @@ namespace Microsoft.Build.Shared
                     if (!s_writeMethodCache.TryGetValue(_eventType, out methodInfo))
                     {
                         Type eventDerivedType = _buildEvent.GetType();
-                        methodInfo = eventDerivedType.GetMethod("WriteToStream", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
+                        methodInfo = eventDerivedType.GetMethod("WriteToStream", BindingFlags.NonPublic | BindingFlags.Instance);
                         s_writeMethodCache.Add(_eventType, methodInfo);
                     }
                 }
@@ -302,8 +312,13 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                string assemblyLocation = _buildEvent.GetType().Assembly.Location;
+#if FEATURE_ASSEMBLY_LOCATION
+                string assemblyLocation = _buildEvent.GetType().GetTypeInfo().Assembly.Location;
                 translator.Translate(ref assemblyLocation);
+#else
+                string assemblyName = _buildEvent.GetType().GetTypeInfo().Assembly.FullName;
+                translator.Translate(ref assemblyName);
+#endif
                 translator.TranslateDotNet(ref _buildEvent);
             }
         }
@@ -333,7 +348,7 @@ namespace Microsoft.Build.Shared
                         if (!s_readMethodCache.TryGetValue(_eventType, out methodInfo))
                         {
                             Type eventDerivedType = _buildEvent.GetType();
-                            methodInfo = eventDerivedType.GetMethod("CreateFromStream", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod);
+                            methodInfo = eventDerivedType.GetMethod("CreateFromStream", BindingFlags.NonPublic | BindingFlags.Instance);
                             s_readMethodCache.Add(_eventType, methodInfo);
                         }
                     }
@@ -371,12 +386,14 @@ namespace Microsoft.Build.Shared
                     }
                 }
 
+#if FEATURE_APPDOMAIN
                 if (resolveAssembly)
                 {
                     s_resolver = new TaskEngineAssemblyResolver();
                     s_resolver.InstallHandler();
                     s_resolver.Initialize(fileLocation);
                 }
+#endif
 
                 try
                 {
@@ -384,11 +401,13 @@ namespace Microsoft.Build.Shared
                 }
                 finally
                 {
+#if FEATURE_APPDOMAIN
                     if (resolveAssembly)
                     {
                         s_resolver.RemoveHandler();
                         s_resolver = null;
                     }
+#endif
                 }
             }
 
@@ -413,7 +432,11 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
+#if CLR2COMPATIBILITY
                     delegateMethod = Delegate.CreateDelegate(type, firstArgument, methodInfo);
+#else
+                    delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
+#endif
                 }
                 catch (FileLoadException)
                 {

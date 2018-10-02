@@ -2,7 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.shared.resx">
     <body>
-      <group id="SHARED/RESOURCES/STRINGS.RESX" datatype="resx" />
       <trans-unit id="BuildAborted">
         <source>MSB4188: Build was canceled.</source>
         <target state="translated">MSB4188: Compilação cancelada.</target>
@@ -59,6 +58,11 @@
       <trans-unit id="MissingProject">
         <source>MSBuild is expecting a valid "{0}" object.</source>
         <target state="translated">O MSBuild está esperando um objeto "{0}" válido.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">Caminho: {0} excede o limite máximo do caminho do SO. O nome do arquivo totalmente qualificado deve ter menos de {1} caracteres.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
@@ -142,8 +146,8 @@
     </note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcess">
-        <source>MSB5002: The task executable has not completed within the specified limit of {0} milliseconds, terminating.</source>
-        <target state="translated">MSB5002: A tarefa executável não foi concluída dentro do limite especificado de {0} milissegundos; encerrando.</target>
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: encerrando a tarefa executável "{0}" porque ela não foi concluída dentro do limite especificado de {1} milissegundos.</target>
         <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotBeNull">
@@ -260,8 +264,8 @@
         <note>{StrBegin="MSB5020: "}</note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcessByCancellation">
-        <source>MSB5021: "{0}" and its child processes are being terminated in order to cancel the build.</source>
-        <target state="translated">MSB5021: "{0}" e seus processos filhos estão sendo encerrados para cancelar a compilação.</target>
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: Encerrando a tarefa executável "{0}" e seus processos filho porque o build foi cancelado.</target>
         <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
       <trans-unit id="OM_NotSupportedReadOnlyCollection">
@@ -273,6 +277,16 @@
         <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
         <target state="translated">MSB5024: não foi possível determinar um local válido para o MSBuild. Tente executar esse processo no Prompt de Comando do Desenvolvedor para o Visual Studio.</target>
         <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: houve uma exceção durante a leitura do arquivo de log: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">O parâmetro "{0}" com o valor "{1}" atribuído não pode ter um caminho inválido ou caracteres de arquivo inválidos.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

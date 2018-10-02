@@ -1,18 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
-using System.Reflection;
-using System.Globalization;
-using System.Resources;
-using System.Text.RegularExpressions;
-using Microsoft.Win32;
-using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
+using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.UnitTests
@@ -326,27 +323,36 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CreateAssemblyNameExtensionWithNoSimpleName()
         {
-            Assert.Throws<FileLoadException>(() =>
+            // Mono does not throw on this string
+            if (!NativeMethodsShared.IsMono)
             {
-                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
+                Assert.Throws<FileLoadException>(() =>
+                {
+                    AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
+                }
+               );
             }
-           );
         }
+
         /// <summary>
         /// Verify an exception is thrown when the simple name is not in the itemspec.
-        /// 
         /// </summary>
         [Fact]
         public void CreateAssemblyNameExtensionWithNoSimpleName2()
         {
-            Assert.Throws<FileLoadException>(() =>
+            // Mono does not throw on this string
+            if (!NativeMethodsShared.IsMono)
             {
-                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-                AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-                extension2.PartialNameCompare(extension);
+                Assert.Throws<FileLoadException>(() =>
+                {
+                    AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                    AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                    extension2.PartialNameCompare(extension);
+                }
+                                                 );
             }
-           );
         }
+
         /// <summary>
         /// Create an assembly name extension providing the name, version, culture, and public key. Also test cases
         /// where the public key is the only item specified
@@ -357,7 +363,7 @@ namespace Microsoft.Build.UnitTests
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
             Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
 
             extension = new AssemblyNameExtension("A, Version=2.0.0.0, PublicKeyToken=b03f5f7f11d50a3a");
@@ -369,7 +375,7 @@ namespace Microsoft.Build.UnitTests
             extension = new AssemblyNameExtension("A, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
             Assert.True(Object.ReferenceEquals(extension.Version, null));
-            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
             Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
 
             extension = new AssemblyNameExtension("A, PublicKeyToken=b03f5f7f11d50a3a");
@@ -393,7 +399,7 @@ namespace Microsoft.Build.UnitTests
             AssemblyNameExtension extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, ProcessorArchitecture=MSIL");
             Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
             Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
             Assert.True(extension.FullName.Contains("MSIL"));
             Assert.True(extension.HasProcessorArchitectureInFusionName);
@@ -401,7 +407,7 @@ namespace Microsoft.Build.UnitTests
             extension = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
             Assert.True(extension.Name.Equals("A", StringComparison.OrdinalIgnoreCase));
             Assert.True(extension.Version.Equals(new Version("2.0.0.0")));
-            Assert.True(extension.CultureInfo.Equals(CultureInfo.GetCultureInfo("en")));
+            Assert.True(extension.CultureInfo.Equals(new CultureInfo("en")));
             Assert.True(extension.FullName.Contains("b03f5f7f11d50a3a"));
             Assert.False(extension.HasProcessorArchitectureInFusionName);
         }
@@ -672,6 +678,69 @@ namespace Microsoft.Build.UnitTests
             Assert.True(assemblies[0].Equals(x));
             Assert.True(assemblies[1].Equals(z));
             Assert.True(assemblies[2].Equals(y));
+        }
+
+        [Theory]
+        [InlineData("System.Xml")]
+        [InlineData("System.XML, Version=2.0.0.0")]
+        [InlineData("System.Xml, Culture=de-DE")]
+        [InlineData("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes")]
+        [InlineData("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+        public void VerifyAssemblyNameExSerialization(string assemblyName)
+        {
+            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension(assemblyName);
+            AssemblyNameExtension assemblyNameDeserialized;
+
+            byte[] bytes;
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(ms, assemblyNameOriginal);
+
+                bytes = ms.ToArray();
+            }
+
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                assemblyNameDeserialized = (AssemblyNameExtension) formatter.Deserialize(ms);
+            }
+
+            assemblyNameDeserialized.ShouldBe(assemblyNameOriginal);
+        }
+
+        [Fact]
+        public void VerifyAssemblyNameExSerializationWithRemappedFrom()
+        {
+            
+            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+            AssemblyNameExtension assemblyRemappedFrom = new AssemblyNameExtension("System.Xml, Version=9.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+            assemblyRemappedFrom.MarkImmutable();
+            assemblyNameOriginal.AddRemappedAssemblyName(assemblyRemappedFrom);
+            assemblyNameOriginal.RemappedFromEnumerator.Count().ShouldBe(1);
+
+            AssemblyNameExtension assemblyNameDeserialized;
+
+            byte[] bytes;
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(ms, assemblyNameOriginal);
+
+                bytes = ms.ToArray();
+            }
+
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                assemblyNameDeserialized = (AssemblyNameExtension)formatter.Deserialize(ms);
+            }
+
+            assemblyNameDeserialized.Equals(assemblyNameOriginal).ShouldBeTrue();
+            assemblyNameDeserialized.RemappedFromEnumerator.Count().ShouldBe(1);
+            assemblyNameDeserialized.RemappedFromEnumerator.First().ShouldBe(assemblyRemappedFrom);
         }
     }
 }

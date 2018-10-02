@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Implements a cache for registered task objects.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Concurrent;
@@ -33,6 +29,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private Lazy<ConcurrentDictionary<object, object>> _buildLifetimeObjects = new Lazy<ConcurrentDictionary<object, object>>();
 
+#if FEATURE_APPDOMAIN
         /// <summary>
         /// Static constructor which registers a callback to dispose of AppDomain-lifetime cache objects.
         /// </summary>
@@ -43,6 +40,7 @@ namespace Microsoft.Build.Shared
                 DisposeObjects(s_appDomainLifetimeObjects);
             });
         }
+#endif
 
         #region IRegisteredTaskObjectCache
 

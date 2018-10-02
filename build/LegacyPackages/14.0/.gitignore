@@ -1,0 +1,2 @@
+﻿# Ignore anything placed in the lib folder since it's just copied from the build locally
+lib/

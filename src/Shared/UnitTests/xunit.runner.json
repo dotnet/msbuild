@@ -1,0 +1,7 @@
+﻿{
+    "shadowCopy": false,
+    "appDomain": "required",
+    "maxParallelThreads": 1,
+    "parallelizeTestCollections": false,
+    "diagnosticMessages":  true
+}

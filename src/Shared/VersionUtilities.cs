@@ -1,9 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>Deal with converting strings to .net versions</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using Microsoft.Win32;
@@ -67,6 +63,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         ///  Convert a version number like 0.0.0.0 to a Version instance.
         /// </summary>
+        /// <param name="version"></param>
         /// <param name="throwException">Should we use Parse to TryParse (parse means we throw an exception, tryparse means we will not).</param>
         internal static Version ConvertToVersion(string version, bool throwException)
         {

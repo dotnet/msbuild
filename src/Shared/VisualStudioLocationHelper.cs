@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+#if FEATURE_VISUALSTUDIOSETUP
 using Microsoft.VisualStudio.Setup.Configuration;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -25,6 +27,7 @@ namespace Microsoft.Build.Shared
         {
             var validInstances = new List<VisualStudioInstance>();
 
+#if FEATURE_VISUALSTUDIOSETUP
             try
             {
                 // This code is not obvious. See the sample (link above) for reference.
@@ -68,10 +71,11 @@ namespace Microsoft.Build.Shared
             { 
                 // This is OK, VS "15" or greater likely not installed.
             }
-
+#endif
             return validInstances;
         }
 
+#if FEATURE_VISUALSTUDIOSETUP
         private static ISetupConfiguration GetQuery()
         {
             try
@@ -99,6 +103,7 @@ namespace Microsoft.Build.Shared
         private static extern int GetSetupConfiguration(
             [MarshalAs(UnmanagedType.Interface), Out] out ISetupConfiguration configuration,
             IntPtr reserved);
+#endif
     }
 
     /// <summary>

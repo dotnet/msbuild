@@ -1,16 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary> Exception to be thrown whenever an assumption we have made 
-//           in the code turns out to be false.</summary>
-//-----------------------------------------------------------------------
 
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security.Permissions; // for SecurityPermissionAttribute
 using System.Runtime.Serialization;
 
 namespace Microsoft.Build.Shared
@@ -108,65 +102,40 @@ namespace Microsoft.Build.Shared
 
             if (Environment.GetEnvironmentVariable("MSBUILDLAUNCHDEBUGGER") != null)
             {
-                Debug.Fail(message, innerMessage);
-                Debugger.Launch();
+                LaunchDebugger(message, innerMessage);
                 return;
             }
 
-#if DEBUG   
-            if (Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null)
+#if DEBUG
+            if (!RunningTests() && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
+                && Environment.GetEnvironmentVariable("_NTROOT") == null)
             {
-                if (!RunningTests())
-                {
-                    if (Environment.GetEnvironmentVariable("_NTROOT") == null)
-                    {
-                        Debug.Fail(message, innerMessage);
-                        Debugger.Launch();
-                        return;
-                    }
-                }
+                LaunchDebugger(message, innerMessage);
+                return;
+            }
+#endif
+        }
+
+        private static void LaunchDebugger(string message, string innerMessage)
+        {
+#if FEATURE_DEBUG_LAUNCH
+            Debug.Fail(message, innerMessage);
+            Debugger.Launch();
+#else
+            Console.WriteLine("MSBuild Failure: " + message);    
+            if (!string.IsNullOrEmpty(innerMessage))
+            {
+                Console.WriteLine(innerMessage);
+            }
+            Console.WriteLine("Waiting for debugger to attach to process: " + Process.GetCurrentProcess().Id);
+            while (!Debugger.IsAttached)
+            {
+                System.Threading.Thread.Sleep(100);
             }
 #endif
         }
         #endregion
 
-        private static bool RunningTests()
-        {
-            // Copied logic from BuildEnvironmentHelper. Removed reference for single use due
-            // to additional dependencies. Update both if needed.
-            string[] testRunners =
-            {
-                "XUNIT", "NUNIT", "MSTEST", "VSTEST", "TASKRUNNER", "VSTESTHOST", "QTAGENT32",
-                "CONCURRENT", "RESHARPER", "MDHOST", "TE.PROCESSHOST"
-            };
-
-            string[] testAssemblies =
-            {
-                "Microsoft.Build.Tasks.UnitTests", "Microsoft.Build.Engine.UnitTests",
-                "Microsoft.Build.Utilities.UnitTests", "Microsoft.Build.CommandLine.UnitTests",
-                "Microsoft.Build.Engine.OM.UnitTests", "Microsoft.Build.Framework.UnitTests"
-            };
-            var processNameCommandLine = Environment.GetCommandLineArgs()[0];
-            var processNameCurrentProcess = Process.GetCurrentProcess().MainModule.FileName;
-
-            // First check if we're running in a known test runner.
-            if (IsProcessInList(processNameCommandLine, testRunners) ||
-                IsProcessInList(processNameCurrentProcess, testRunners))
-            {
-                // If we are, then ensure we're running MSBuild's tests by seeing if any of our assemblies are loaded.
-                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    if (testAssemblies.Any(item => item.Equals(assembly.GetName().Name, StringComparison.InvariantCultureIgnoreCase)))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IsProcessInList(string processName, string[] processList)
-        {
-            return processList.Any(s => Path.GetFileNameWithoutExtension(processName)?.IndexOf(s, StringComparison.InvariantCultureIgnoreCase) >= 0);
-        }
+        private static bool RunningTests() => BuildEnvironmentHelper.Instance.RunningTests;
     }
 }
