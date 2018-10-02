@@ -3461,7 +3461,6 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-#if FEATURE_RESX_RESOURCE_READER
         /// <summary>
         /// Read resources from an XML or binary format file
         /// </summary>
@@ -3480,7 +3479,6 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Read resources from a text format file
@@ -3663,11 +3661,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks>Closes writer automatically</remarks>
         /// <param name="writer">Appropriate IResourceWriter</param>
         private void WriteResources(ReaderInfo reader,
-#if FEATURE_RESX_RESOURCE_READER
             IResourceWriter writer)
-#else
-            ResourceWriter writer)
-#endif
         {
             Exception capturedException = null;
             try
@@ -3676,11 +3670,7 @@ namespace Microsoft.Build.Tasks
                 {
                     string key = entry.name;
                     object value = entry.value;
-#if FEATURE_RESX_RESOURCE_READER
                     writer.AddResource(key, value);
-#else
-                    writer.AddResource(key, (string) value);
-#endif
                 }
             }
             catch (Exception e)
