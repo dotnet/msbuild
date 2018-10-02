@@ -80,13 +80,25 @@ namespace Microsoft.Build.Tasks
         // Save the strings for better doc comments.
         internal sealed class ResourceData
         {
+            internal ResourceData(string typeName, string valueAsString)
+            {
+                TypeName = typeName;
+                ValueAsString = valueAsString;
+
+                if (typeName.Contains(","))
+                {
+                    string[] parts = typeName.Split(',');
+                    TypeName = parts[0]; // strip off the assembly specification or alias
+                }
+            }
+
             internal ResourceData(Type type, String valueAsString)
             {
-                Type = type;
+                TypeName = type.FullName;
                 ValueAsString = valueAsString;
             }
 
-            internal Type Type { get; }
+            internal String TypeName { get; }
 
             internal String ValueAsString { get; }
         }
@@ -132,7 +144,9 @@ namespace Microsoft.Build.Tasks
                 }
                 resourceTypes.Add((String)de.Key, data);
 #else
-                throw new NotImplementedException();
+                Type type = de.Value?.GetType() ?? typeof(object);
+                ResourceData data = new ResourceData(type, de.Value?.ToString());
+                resourceTypes.Add((string)de.Key, data);
 #endif
             }
 
@@ -505,34 +519,18 @@ namespace Microsoft.Build.Tasks
                 HasSet = false
             };
 
-            Type type = data.Type;
-            if (type == null)
+            string typeName = data.TypeName;
+            if (typeName == null)
             {
                 return false;
             }
 
-            if (type == typeof(MemoryStream))
+            if (typeName == typeof(MemoryStream).FullName)
             {
-                type = typeof(UnmanagedMemoryStream);
+                typeName = typeof(UnmanagedMemoryStream).FullName;
             }
 
-            // Ensure type is internalally visible.  This is necessary to ensure
-            // users can access classes via a base type.  Imagine a class like
-            // Image or Stream as a internalally available base class, then an 
-            // internal type like MyBitmap or __UnmanagedMemoryStream as an 
-            // internal implementation for that base class.  For internalally 
-            // available strongly typed resource classes, we must return the 
-            // internal type.  For simplicity, we'll do that for internal strongly 
-            // typed resource classes as well.  Ideally we'd also like to check
-            // for interfaces like IList, but I don't know how to do that without
-            // special casing collection interfaces & ignoring serialization 
-            // interfaces or IDisposable.
-            while (!type.IsPublic)
-            {
-                type = type.BaseType;
-            }
-
-            var valueType = new CodeTypeReference(type);
+            var valueType = new CodeTypeReference(typeName);
             prop.Type = valueType;
             if (internalClass)
                 prop.Attributes = MemberAttributes.Assembly;
@@ -552,17 +550,11 @@ namespace Microsoft.Build.Tasks
             var resMgr = new CodePropertyReferenceExpression(null, "ResourceManager");
             var resCultureField = new CodeFieldReferenceExpression((useStatic) ? null : new CodeThisReferenceExpression(), CultureInfoFieldName);
 
-            bool isString = type == typeof(String);
-            bool isStream = type == typeof(UnmanagedMemoryStream) || type == typeof(MemoryStream);
+            bool isString = typeName == typeof(String).FullName;
+            bool isStream = typeName == typeof(UnmanagedMemoryStream).FullName || typeName == typeof(MemoryStream).FullName;
             String getMethodName;
             String text;
             String valueAsString = TruncateAndFormatCommentStringForOutput(data.ValueAsString);
-            String typeName = String.Empty;
-
-            if (!isString) // Stream or Object
-            {
-                typeName = TruncateAndFormatCommentStringForOutput(type.ToString());
-            }
 
             if (isString)
                 getMethodName = "GetString";
@@ -666,7 +658,7 @@ namespace Microsoft.Build.Tasks
                 // Also disallow resource values of type Void.
                 if (String.Equals(key, ResMgrPropertyName) ||
                     String.Equals(key, CultureInfoPropertyName) ||
-                    typeof(void) == entry.Value.Type)
+                    typeof(void).FullName == entry.Value.TypeName)
                 {
                     errors.Add(key);
                     continue;
