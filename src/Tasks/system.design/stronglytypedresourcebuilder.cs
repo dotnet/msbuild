@@ -106,6 +106,7 @@ namespace Microsoft.Build.Tasks
             var resourceTypes = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
             foreach (DictionaryEntry de in resourceList)
             {
+#if FEATURE_WINFORMS_RESX
                 var node = de.Value as ResXDataNode;
                 ResourceData data;
                 if (node != null)
@@ -130,6 +131,9 @@ namespace Microsoft.Build.Tasks
                     data = new ResourceData(type, de.Value?.ToString());
                 }
                 resourceTypes.Add((String)de.Key, data);
+#else
+                throw new NotImplementedException();
+#endif
             }
 
             // Note we still need to verify the resource names are valid language
@@ -278,6 +282,7 @@ namespace Microsoft.Build.Tasks
 
             // Read the resources from a ResX file into a dictionary - name & type name
             Dictionary<String, ResourceData> resourceList = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
+#if FEATURE_WINFORMS_RESX
             using (ResXResourceReader rr = new ResXResourceReader(resxFile))
             {
                 rr.UseResXDataNodes = true;
@@ -296,6 +301,9 @@ namespace Microsoft.Build.Tasks
             // keywords, etc.  So there's no point to duplicating the code above.
 
             return InternalCreate(resourceList, baseName, generatedCodeNamespace, resourcesNamespace, codeProvider, internalClass, out unmatchable);
+#else
+            throw new NotImplementedException();
+#endif
         }
 
         private static void AddGeneratedCodeAttributeforMember(CodeTypeMember typeMember)

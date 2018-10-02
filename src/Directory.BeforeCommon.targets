@@ -106,6 +106,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_WORKINGSET</DefineConstants>
     <DefineConstants Condition="'$(MonoBuild)' != 'true' and '$(MachineIndependentBuild)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_WINFORMS_RESX</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -118,6 +119,7 @@
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcore'))">
     <NetCoreBuild>true</NetCoreBuild>
     <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_CODEDOM</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)'=='true'">
