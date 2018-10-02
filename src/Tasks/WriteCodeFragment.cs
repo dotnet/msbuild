@@ -139,11 +139,13 @@ namespace Microsoft.Build.Tasks
             {
                 provider = CodeDomProvider.CreateProvider(Language);
             }
+#if FEATURE_WINFORMS_RESX
             catch (System.Configuration.ConfigurationException ex)
             {
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, ex.Message);
                 return null;
             }
+#endif
             catch (SecurityException ex)
             {
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, ex.Message);
@@ -252,13 +254,13 @@ namespace Microsoft.Build.Tasks
         }
 #endif
 
-        /// <summary>
-        /// Generates the code into a string.
-        /// If it fails, logs an error and returns null.
-        /// If no meaningful code is generated, returns empty string.
-        /// Returns the default language extension as an out parameter.
-        /// </summary>
-        private string GenerateCodeCoreClr(out string extension)
+            /// <summary>
+            /// Generates the code into a string.
+            /// If it fails, logs an error and returns null.
+            /// If no meaningful code is generated, returns empty string.
+            /// Returns the default language extension as an out parameter.
+            /// </summary>
+            private string GenerateCodeCoreClr(out string extension)
         {
             extension = null;
             bool haveGeneratedContent = false;
