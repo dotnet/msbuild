@@ -56,6 +56,20 @@ namespace Microsoft.Build.Tasks
 {
     internal static class StronglyTypedResourceBuilder
     {
+#if !FEATURE_WINFORMS_RESX
+        internal class TypedStringResourceEntry
+        {
+            public string Name;
+            public string Type;
+            public object Value;
+
+            public override string ToString()
+            {
+                return Value.ToString();
+            }
+        }
+#endif
+
         // Note - if you add a new property to the class, add logic to reject
         // keys of that name in VerifyResourceNames.
         private const String ResMgrFieldName = "resourceMan";
@@ -144,8 +158,13 @@ namespace Microsoft.Build.Tasks
                 }
                 resourceTypes.Add((String)de.Key, data);
 #else
-                Type type = de.Value?.GetType() ?? typeof(object);
-                ResourceData data = new ResourceData(type, de.Value?.ToString());
+                string typeName = de.Value?.GetType().FullName ?? "System.Object";
+                if (de.Value is TypedStringResourceEntry entry)
+                {
+                    typeName = entry.Type;
+                }
+
+                ResourceData data = new ResourceData(typeName, de.Value?.ToString());
                 resourceTypes.Add((string)de.Key, data);
 #endif
             }
@@ -530,7 +549,7 @@ namespace Microsoft.Build.Tasks
                 typeName = typeof(UnmanagedMemoryStream).FullName;
             }
 
-            var valueType = new CodeTypeReference(typeName);
+            var valueType = new CodeTypeReference(typeName, CodeTypeReferenceOptions.GlobalReference);
             prop.Type = valueType;
             if (internalClass)
                 prop.Attributes = MemberAttributes.Assembly;

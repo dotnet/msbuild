@@ -3054,8 +3054,15 @@ namespace Microsoft.Build.Tasks
                             foreach (XElement dataElem in doc.Element("root").Elements("data"))
                             {
                                 string name = dataElem.Attribute("name").Value;
+                                string typeName = dataElem.Attribute("type")?.Value;
                                 string value = dataElem.Element("value").Value;
-                                AddResource(reader, name, value, filename);
+
+                                if (typeName != null && typeName.Contains(","))
+                                {
+                                    string[] parts = typeName.Split(',');
+                                    typeName = parts[0]; // strip off the assembly name or alias, if any
+                                }
+                                AddResource(reader, name, value, filename, typeName);
                             }
                         }
                         break;
@@ -3737,7 +3744,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="inputFileName">Input file for messages</param>
         /// <param name="lineNumber">Line number for messages</param>
         /// <param name="linePosition">Column number for messages</param>
-        private void AddResource(ReaderInfo reader, string name, object value, String inputFileName, int lineNumber, int linePosition)
+        /// <param name="customTypeName">Type name for custom object type</param>
+        private void AddResource(ReaderInfo reader, string name, object value, String inputFileName, int lineNumber, int linePosition, string customTypeName = null)
         {
             Entry entry = new Entry(name, value);
 
@@ -3748,7 +3756,17 @@ namespace Microsoft.Build.Tasks
             }
 
             reader.resources.Add(entry);
+#if FEATURE_WINFORMS_RESX
             reader.resourcesHashTable.Add(name, value);
+#else
+            if (customTypeName == null) customTypeName = value.GetType().FullName;
+            reader.resourcesHashTable.Add(name, new StronglyTypedResourceBuilder.TypedStringResourceEntry
+            {
+                Name = name,
+                Type = customTypeName,
+                Value = value
+            });
+#endif
         }
 
         /// <summary>
@@ -3757,9 +3775,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="name">Resource name</param>
         /// <param name="value">Resource value</param>
         /// <param name="inputFileName">Input file for messages</param>
-        private void AddResource(ReaderInfo reader, string name, object value, String inputFileName)
+        private void AddResource(ReaderInfo reader, string name, object value, String inputFileName, string customTypeName = null)
         {
-            AddResource(reader, name, value, inputFileName, 0, 0);
+            AddResource(reader, name, value, inputFileName, 0, 0, customTypeName);
         }
 
         internal sealed class ReaderInfo
