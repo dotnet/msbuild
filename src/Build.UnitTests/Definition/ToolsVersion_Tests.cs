@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
-                Toolset source = p.GetToolset("15.0");
+                Toolset source = p.GetToolset("Current");
                 Toolset potato = new Toolset("potato", source.ToolsPath, ProjectCollection.GlobalProjectCollection, source.ToolsPath);
                 p.AddToolset(potato);
 

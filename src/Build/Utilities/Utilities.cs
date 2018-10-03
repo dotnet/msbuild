@@ -345,14 +345,12 @@ namespace Microsoft.Build.Internal
             {
                 if (s_shouldTreatHigherToolsVersionsAsCurrent)
                 {
-                    Version toolsVersionAsVersion;
-
-                    if (Version.TryParse(toolsVersionFromProject, out toolsVersionAsVersion))
+                    if (Version.TryParse(toolsVersionFromProject, out var toolsVersionAsVersion))
                     {
-                        // This is higher than the current toolsversion
-                        // Therefore we need to enter best effort mode
-                        // and present the current one. 
-                        if (toolsVersionAsVersion > MSBuildConstants.CurrentToolsVersionAsVersion)
+                        // This is higher than the 'legacy' toolsversion values.
+                        // Therefore we need to enter best effort mode and
+                        // present the current one.
+                        if (toolsVersionAsVersion > new Version(15,0))
                         {
                             toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
                         }
