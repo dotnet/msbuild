@@ -138,7 +138,7 @@
   <data name="CommandsColumn" xml:space="preserve">
     <value>Commands</value>
   </data>
-    <data name="CommandsMismatch" xml:space="preserve">
+  <data name="CommandsMismatch" xml:space="preserve">
     <value>Package Id {0} has command {1}, but expect {2} in the manifest file.</value>
   </data>
   <data name="InvalidToolPathOption" xml:space="preserve">
@@ -174,10 +174,16 @@
   <data name="PackagesCommandNameCollision" xml:space="preserve">
     <value>Packages {0} have a command with the same name {1} regardless of the casing.</value>
   </data>
+  <data name="RestoreSuccessful" xml:space="preserve">
+    <value>Tool '{0}' (version '{1}') was restored. Available commands: {2}</value>
+  </data>
   <data name="RestorePartiallySuccessful" xml:space="preserve">
     <value>Restore Partially Successful.</value>
   </data>
   <data name="RestoreFailed" xml:space="preserve">
     <value>Restore Failed.</value>
+  </data>
+  <data name="LocalToolsRestoreWasSuccessful" xml:space="preserve">
+    <value>Local tools restore was successful.</value>
   </data>
 </root>

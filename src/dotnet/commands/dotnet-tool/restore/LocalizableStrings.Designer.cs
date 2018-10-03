@@ -160,6 +160,12 @@ namespace Microsoft.DotNet.Cli.commands.restore {
             }
         }
         
+        public static string RestoreSuccessful {
+            get {
+                return ResourceManager.GetString("RestoreSuccessful", resourceCulture);
+            }
+        }
+        
         public static string RestorePartiallySuccessful {
             get {
                 return ResourceManager.GetString("RestorePartiallySuccessful", resourceCulture);

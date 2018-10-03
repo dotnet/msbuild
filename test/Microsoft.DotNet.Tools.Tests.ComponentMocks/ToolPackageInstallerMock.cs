@@ -121,6 +121,8 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             string targetFramework = null,
             string verbosity = null)
         {
+            _installCallback?.Invoke();
+
             var packageDirectory = new DirectoryPath(NuGetGlobalPackagesFolder.GetLocation()).WithSubDirectories(packageId.ToString());
             _fileSystem.Directory.CreateDirectory(packageDirectory.Value);
             var executable = packageDirectory.WithFile("exe");

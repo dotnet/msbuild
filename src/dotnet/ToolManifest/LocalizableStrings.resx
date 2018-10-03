@@ -121,21 +121,29 @@
     <value>Cannot find any manifests file. Searched {0}</value>
   </data>
   <data name="FieldCommandsIsMissing" xml:space="preserve">
-    <value>field commands is missing.</value>
+    <value>Field commands is missing.</value>
   </data>
   <data name="InvalidManifestFilePrefix" xml:space="preserve">
-    <value>Invalid manifest file.</value>
+    <value>Invalid manifest file.
+{0}</value>
   </data>
-  <data name="MissingVersion" xml:space="preserve">
-    <value>field version is missing.</value>
+  <data name="ManifestVersion0" xml:space="preserve">
+    <value>Manifest version 0 is not supported. Manifest file path:  {0}</value>
+  </data>
+  <data name="ManifestVersionHigherThanSupported" xml:space="preserve">
+    <value>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}. Manifest file path:  {2}</value>
   </data>
   <data name="InPackage" xml:space="preserve">
-    <value>In package {0}:</value>
+    <value>In package {0}:
+{1}</value>
   </data>
   <data name="TargetFrameworkIsUnsupported" xml:space="preserve">
     <value>TargetFramework {0} is unsupported.</value>
   </data>
   <data name="VersionIsInvalid" xml:space="preserve">
-    <value>version {0} is invalid.</value>
+    <value>Version {0} is invalid.</value>
+  </data>
+  <data name="ToolMissingVersion" xml:space="preserve">
+    <value>Field version is missing.</value>
   </data>
 </root>

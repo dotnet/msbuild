@@ -64,6 +64,18 @@ namespace Microsoft.DotNet.Cli.ToolManifest {
             }
         }
         
+        public static string ManifestMissionVersion {
+            get {
+                return ResourceManager.GetString("ManifestMissionVersion", resourceCulture);
+            }
+        }
+        
+        public static string ManifestVersionHigherThanSupported {
+            get {
+                return ResourceManager.GetString("ManifestVersionHigherThanSupported", resourceCulture);
+            }
+        }
+        
         public static string MissingVersion {
             get {
                 return ResourceManager.GetString("MissingVersion", resourceCulture);
