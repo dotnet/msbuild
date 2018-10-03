@@ -4,12 +4,13 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
 namespace Microsoft.DotNet.Cli.Build
 {
-    public class DownloadFile : Task
+    public class DownloadFile : Microsoft.Build.Utilities.Task
     {
         [Required]
         public string Uri { get; set; }
@@ -21,11 +22,26 @@ namespace Microsoft.DotNet.Cli.Build
 
         public override bool Execute()
         {
+
+            ExponentialRetry.ExecuteWithRetry(
+                  action: DownloadFileToDestination,
+                  isSuccess: s => s == "",
+                  maxRetryCount: 3,
+                  timer: () => ExponentialRetry.Timer(ExponentialRetry.Intervals),
+                  taskDescription: $"Download file from {Uri} to {DestinationPath}")
+                .ConfigureAwait(false).GetAwaiter().GetResult();
+
+            return true;
+
+        }
+
+        private async Task<string> DownloadFileToDestination()
+        {
             FS.Mkdirp(Path.GetDirectoryName(DestinationPath));
 
             if (File.Exists(DestinationPath) && !Overwrite)
             {
-                return true;
+                return string.Empty;
             }
 
             const string FileUriProtocol = "file://";
@@ -42,24 +58,26 @@ namespace Microsoft.DotNet.Cli.Build
 
                 using (var httpClient = new HttpClient())
                 {
-                    var getTask = httpClient.GetStreamAsync(Uri);
+                    var getTask = httpClient.GetStreamAsync(Uri).ConfigureAwait(false);
 
                     try
                     {
                         using (var outStream = File.Create(DestinationPath))
                         {
-                            getTask.Result.CopyTo(outStream);
+                            Stream stream = await getTask;
+                            stream.CopyTo(outStream);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
                         File.Delete(DestinationPath);
-                        throw;
+                        return e.ToString();
                     }
                 }
+
             }
 
-            return true;
+            return string.Empty;
         }
     }
 }
