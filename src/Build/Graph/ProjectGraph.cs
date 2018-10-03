@@ -220,17 +220,17 @@ namespace Microsoft.Build.Graph
 
         private enum NodeState
         {
-            // the project has been evaluated and it's project references are being processed
+            // the project has been evaluated and its project references are being processed
             InProcess,
             // all project references of this project have been processed
             Processed
         }
 
-        /// <summary>
+        /// <remarks>
         /// Load a graph with root node at entryProjectFile
         /// Maintain the state of each node (InProcess and Processed) to detect cycles
         /// returns false if loading the graph is not successful
-        /// </summary>
+        /// </remarks>
         private (bool success, List<string> projectsInCycle) ProcessNode(ConfigurationMetadata projectToEvaluate,
             Dictionary<ConfigurationMetadata, NodeState> nodeState,
             ProjectCollection projectCollection,
@@ -257,15 +257,17 @@ namespace Microsoft.Build.Graph
                 var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
                 if (nodeState.TryGetValue(projectReferenceConfigurationMetadata, out NodeState projectReferenceNodeState))
                 {
-                    // a project reference can be in "Processed" state. If it is "InProcess" state, it is an ancestor and there is a circular dependency
+                    // Because this is a depth-first search, we should only encounter new nodes or nodes whose subgraph has been completely processed.
+                    // If we encounter a node that is currently being processed(InProcess state), it must be one of the ancestors in a circular dependency.
                     if (projectReferenceNodeState == NodeState.InProcess)
                     {
                         if (projectToEvaluate.Equals(projectReferenceConfigurationMetadata))
                         {
-                            // the project being evaluated has a reference on itself
+                            // the project being evaluated has a reference to itself
+                            var selfReferencingProjectString = FormatCircularDependencyError(new List<string> { projectToEvaluate.ProjectFullPath, projectToEvaluate.ProjectFullPath });
                             throw new CircularDependencyException(string.Format(
                                 ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
-                                projectToEvaluate.ProjectFullPath));
+                                selfReferencingProjectString));
                         }
                         else
                         {
@@ -278,7 +280,7 @@ namespace Microsoft.Build.Graph
                 }
                 else
                 {
-                    // a new project that has to be evaluated
+                    // recursively process newly discovered references
                     var loadReference = ProcessNode(projectReferenceConfigurationMetadata, nodeState, projectCollection,
                         globalProperties);
                     if (!loadReference.success)
@@ -295,6 +297,8 @@ namespace Microsoft.Build.Graph
                         }
                         else
                         {
+                            // this is one of the projects in the circular dependency
+                            // update the list of projects in cycle and return the list to the caller
                             loadReference.projectsInCycle.Add(projectReferenceConfigurationMetadata.ProjectFullPath);
                             return (false, loadReference.projectsInCycle);
                         }
@@ -310,7 +314,8 @@ namespace Microsoft.Build.Graph
 
         internal static string FormatCircularDependencyError(List<string> projectsInCycle)
         {
-            var errorMessage = new StringBuilder(500);
+            const int MAX_PATH = 260;
+            var errorMessage = new StringBuilder(projectsInCycle.Count*MAX_PATH);
             errorMessage.AppendLine();
             for (int i = projectsInCycle.Count - 1; i >= 0; i--)
             {
