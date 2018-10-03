@@ -24,7 +24,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 TransientTestFile entryProject = CreateProject(env, 1);
                 var projectGraph = new ProjectGraph(entryProject.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
-                projectGraph.ProjectNodes.First().Project.FullPath.ShouldBe(entryProject.Path);
+                projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
             }
         }
 
@@ -130,9 +130,9 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 // Projects 2 and 3 both reference project 4, but with different properties, so they should not point to the same node.
                 GetNodeForProject(graph, 2).ProjectReferences.First().ShouldNotBe(GetNodeForProject(graph, 3).ProjectReferences.First());
-                GetNodeForProject(graph, 2).ProjectReferences.First().Project.FullPath.ShouldEndWith("4.proj");
+                GetNodeForProject(graph, 2).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
                 GetNodeForProject(graph, 2).ProjectReferences.First().GlobalProperties.ShouldBeEmpty();
-                GetNodeForProject(graph, 3).ProjectReferences.First().Project.FullPath.ShouldEndWith("4.proj");
+                GetNodeForProject(graph, 3).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("4.proj");
                 GetNodeForProject(graph, 3).ProjectReferences.First().GlobalProperties.ShouldNotBeEmpty();
             }
         }
@@ -240,12 +240,12 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 // Property names are case-insensitive, so projects 2 and 3 point to the same project 5 node.
                 GetNodeForProject(graph, 2).ProjectReferences.First().ShouldBe(GetNodeForProject(graph, 3).ProjectReferences.First());
-                GetNodeForProject(graph, 2).ProjectReferences.First().Project.FullPath.ShouldEndWith("5.proj");
+                GetNodeForProject(graph, 2).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("5.proj");
                 GetNodeForProject(graph, 2).ProjectReferences.First().GlobalProperties["FoO"].ShouldBe("bar");
 
                 // Property values are case-sensitive, so project 4 points to a different project 5 node than proejcts 2 and 3
                 GetNodeForProject(graph, 4).ProjectReferences.First().ShouldNotBe(GetNodeForProject(graph, 2).ProjectReferences.First());
-                GetNodeForProject(graph, 4).ProjectReferences.First().Project.FullPath.ShouldEndWith("5.proj");
+                GetNodeForProject(graph, 4).ProjectReferences.First().ProjectInstance.FullPath.ShouldEndWith("5.proj");
                 GetNodeForProject(graph, 4).ProjectReferences.First().GlobalProperties["FoO"].ShouldBe("BAR");
             }
         }
@@ -473,7 +473,7 @@ namespace Microsoft.Build.Graph.UnitTests
             return env.CreateFile(projectNumber + ".proj", sb.ToString());
         }
 
-        private static ProjectGraphNode GetNodeForProject(ProjectGraph graph, int projectNum) => graph.ProjectNodes.First(node => node.Project.FullPath.EndsWith(projectNum + ".proj"));
+        private static ProjectGraphNode GetNodeForProject(ProjectGraph graph, int projectNum) => graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.EndsWith(projectNum + ".proj"));
     }
 
 }

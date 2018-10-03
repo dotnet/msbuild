@@ -121,7 +121,7 @@ namespace Microsoft.Build.Graph
         public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(string[] entryProjectTargets)
         {
             ImmutableList<string> entryTargets = entryProjectTargets == null || entryProjectTargets.Length == 0
-                ? ImmutableList.CreateRange(EntryProjectNode.Project.DefaultTargets)
+                ? ImmutableList.CreateRange(EntryProjectNode.ProjectInstance.DefaultTargets)
                 : ImmutableList.CreateRange(entryProjectTargets);
 
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Graph
                 {
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
                         projectReference,
-                        ExpandDefaultTargets(projectReference.Project, targetsToPropagate));
+                        ExpandDefaultTargets(projectReference.ProjectInstance, targetsToPropagate));
                     if (encounteredEdges.Add(projectReferenceEdge))
                     {
                         edgesToVisit.Enqueue(projectReferenceEdge);
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Graph
                 if (!_allParsedProjects.TryGetValue(projectToEvaluate, out ProjectGraphNode parsedProject))
                 {
                     parsedProject = CreateNewNode(projectToEvaluate, projectCollection);
-                    IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.Project.GetItems(ProjectReferenceItemName);
+                    IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ProjectReferenceItemName);
                     foreach (var projectReferenceToParse in projectReferenceItems)
                     {
                         if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Graph
                                 CultureInfo.InvariantCulture,
                                 ResourceUtilities.GetResourceString("ProjectGraphDoesNotSupportProjectReferenceWithToolset"),
                                 projectReferenceToParse.EvaluatedInclude,
-                                parsedProject.Project.FullPath));
+                                parsedProject.ProjectInstance.FullPath));
                         }
 
                         string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
@@ -265,7 +265,7 @@ namespace Microsoft.Build.Graph
         private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)
         {
             var targetsToPropagate = ImmutableList<string>.Empty;
-            ICollection<ProjectItemInstance> projectReferenceTargets = node.Project.GetItems(ProjectReferenceTargetsItemType);
+            ICollection<ProjectItemInstance> projectReferenceTargets = node.ProjectInstance.GetItems(ProjectReferenceTargetsItemType);
             foreach (var entryTarget in entryTargets)
             {
                 foreach (var projectReferenceTarget in projectReferenceTargets)
