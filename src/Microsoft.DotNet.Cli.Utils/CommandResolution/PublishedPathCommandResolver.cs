@@ -61,7 +61,6 @@ namespace Microsoft.DotNet.Cli.Utils
             return _commandSpecFactory.CreateCommandSpecFromPublishFolder(
                     commandPath,
                     commandResolverArguments.CommandArguments.OrEmptyIfNull(),
-                    CommandResolutionStrategy.OutputPath,
                     depsFilePath,
                     runtimeConfigPath);
         }

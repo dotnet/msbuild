@@ -11,7 +11,6 @@ namespace Microsoft.DotNet.Cli.Utils
            string commandName,
            IEnumerable<string> args,
            string commandPath,
-           CommandResolutionStrategy resolutionStrategy,
            IEnvironmentProvider environment);
     }
 }

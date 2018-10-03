@@ -10,12 +10,10 @@ namespace Microsoft.DotNet.Cli.Utils
         public CommandSpec(
             string path,
             string args,
-            CommandResolutionStrategy resolutionStrategy,
             Dictionary<string, string> environmentVariables = null)
         {
             Path = path;
             Args = args;
-            ResolutionStrategy = resolutionStrategy;
             EnvironmentVariables = environmentVariables ?? new Dictionary<string, string>();
         }
 
@@ -24,8 +22,6 @@ namespace Microsoft.DotNet.Cli.Utils
         public string Args { get; }
 
         public Dictionary<string, string> EnvironmentVariables { get; }
-
-        public CommandResolutionStrategy ResolutionStrategy { get; }
 
         internal void AddEnvironmentVariablesFromProject(IProject project)
         {

@@ -47,14 +47,12 @@ namespace Microsoft.DotNet.Cli.Utils
 
             return CreatePackageCommandSpecUsingMuxer(
                     dll.FullName,
-                    arguments.CommandArguments,
-                    CommandResolutionStrategy.DotnetToolsPackage);
+                    arguments.CommandArguments);
         }
 
         private CommandSpec CreatePackageCommandSpecUsingMuxer(
             string commandPath,
-            IEnumerable<string> commandArguments,
-            CommandResolutionStrategy commandResolutionStrategy)
+            IEnumerable<string> commandArguments)
         {
             var arguments = new List<string>();
 
@@ -73,17 +71,16 @@ namespace Microsoft.DotNet.Cli.Utils
                 arguments.AddRange(commandArguments);
             }
 
-            return CreateCommandSpec(host, arguments, commandResolutionStrategy);
+            return CreateCommandSpec(host, arguments);
         }
 
         private CommandSpec CreateCommandSpec(
             string commandPath,
-            IEnumerable<string> commandArguments,
-            CommandResolutionStrategy commandResolutionStrategy)
+            IEnumerable<string> commandArguments)
         {
             var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(commandArguments);
 
-            return new CommandSpec(commandPath, escapedArgs, commandResolutionStrategy);
+            return new CommandSpec(commandPath, escapedArgs);
         }
     }
 }

@@ -16,10 +16,5 @@ namespace Microsoft.DotNet.Cli.Utils
                 ApplicationEnvironment.ApplicationBasePath,
                 commandResolverArguments.CommandName);
         }
-
-        internal override CommandResolutionStrategy GetCommandResolutionStrategy()
-        {
-            return CommandResolutionStrategy.BaseDirectory;
-        }
     }
 }

@@ -14,7 +14,6 @@ namespace Microsoft.DotNet.Cli.Utils
            string commandName,
            IEnumerable<string> args,
            string commandPath,
-           CommandResolutionStrategy resolutionStrategy,
            IEnvironmentProvider environment)
         {
             var useCmdWrapper = false;
@@ -34,23 +33,21 @@ namespace Microsoft.DotNet.Cli.Utils
             }
 
             return useCmdWrapper
-                ? CreateCommandSpecWrappedWithCmd(commandPath, args, resolutionStrategy)
-                : CreateCommandSpecFromExecutable(commandPath, args, resolutionStrategy);
+                ? CreateCommandSpecWrappedWithCmd(commandPath, args)
+                : CreateCommandSpecFromExecutable(commandPath, args);
         }
 
         private CommandSpec CreateCommandSpecFromExecutable(
             string command,
-            IEnumerable<string> args,
-            CommandResolutionStrategy resolutionStrategy)
+            IEnumerable<string> args)
         {
             var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args);
-            return new CommandSpec(command, escapedArgs, resolutionStrategy);
+            return new CommandSpec(command, escapedArgs);
         }
 
         private CommandSpec CreateCommandSpecWrappedWithCmd(
             string command,
-            IEnumerable<string> args,
-            CommandResolutionStrategy resolutionStrategy)
+            IEnumerable<string> args)
         {
             var comSpec = Environment.GetEnvironmentVariable("ComSpec") ?? "cmd.exe";
 
@@ -71,7 +68,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var escapedArgString = $"/s /c \"{command} {cmdEscapedArgs}\"";
 
-            return new CommandSpec(comSpec, escapedArgString, resolutionStrategy);
+            return new CommandSpec(comSpec, escapedArgString);
         }
     }
 }

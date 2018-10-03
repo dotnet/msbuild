@@ -12,10 +12,5 @@ namespace Microsoft.DotNet.Cli.Utils
         {
             return _environment.GetCommandPath(commandResolverArguments.CommandName);
         }
-
-        internal override CommandResolutionStrategy GetCommandResolutionStrategy()
-        {
-            return CommandResolutionStrategy.Path;
-        }
     }
 }

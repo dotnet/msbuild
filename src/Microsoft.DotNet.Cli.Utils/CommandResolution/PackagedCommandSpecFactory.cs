@@ -28,7 +28,6 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> commandArguments,
             IEnumerable<string> allowedExtensions,
             LockFile lockFile,
-            CommandResolutionStrategy commandResolutionStrategy,
             string depsFilePath,
             string runtimeConfigPath)
         {
@@ -67,7 +66,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 commandPath,
                 commandArguments,
                 depsFilePath,
-                commandResolutionStrategy,
                 lockFile.GetNormalizedPackageFolders(),
                 runtimeConfigPath);
         }
@@ -97,7 +95,6 @@ namespace Microsoft.DotNet.Cli.Utils
             string commandPath,
             IEnumerable<string> commandArguments,
             string depsFilePath,
-            CommandResolutionStrategy commandResolutionStrategy,
             IEnumerable<string> packageFolders,
             string runtimeConfigPath)
         {
@@ -109,19 +106,17 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandPath,
                     commandArguments,
                     depsFilePath,
-                    commandResolutionStrategy,
                     packageFolders,
                     runtimeConfigPath);
             }
 
-            return CreateCommandSpec(commandPath, commandArguments, commandResolutionStrategy);
+            return CreateCommandSpec(commandPath, commandArguments);
         }
 
         private CommandSpec CreatePackageCommandSpecUsingMuxer(
             string commandPath,
             IEnumerable<string> commandArguments,
             string depsFilePath,
-            CommandResolutionStrategy commandResolutionStrategy,
             IEnumerable<string> packageFolders,
             string runtimeConfigPath)
         {
@@ -164,17 +159,16 @@ namespace Microsoft.DotNet.Cli.Utils
             arguments.Add(commandPath);
             arguments.AddRange(commandArguments);
 
-            return CreateCommandSpec(host, arguments, commandResolutionStrategy);
+            return CreateCommandSpec(host, arguments);
         }
 
         private CommandSpec CreateCommandSpec(
             string commandPath,
-            IEnumerable<string> commandArguments,
-            CommandResolutionStrategy commandResolutionStrategy)
+            IEnumerable<string> commandArguments)
         {
             var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(commandArguments);
 
-            return new CommandSpec(commandPath, escapedArgs, commandResolutionStrategy);
+            return new CommandSpec(commandPath, escapedArgs);
         }
     }
 }

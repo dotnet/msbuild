@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(
                     commandResolverArguments.CommandArguments.OrEmptyIfNull());
 
-                return new CommandSpec(commandResolverArguments.CommandName, escapedArgs, CommandResolutionStrategy.RootedPath);
+                return new CommandSpec(commandResolverArguments.CommandName, escapedArgs);
             }
 
             return null;

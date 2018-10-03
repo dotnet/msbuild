@@ -44,11 +44,9 @@ namespace Microsoft.DotNet.Cli.Utils
                     commandResolverArguments.CommandName,
                     commandResolverArguments.CommandArguments.OrEmptyIfNull(),
                     commandPath,
-                    GetCommandResolutionStrategy(),
                     _environment);
         }
 
         internal abstract string ResolveCommandPath(CommandResolverArguments commandResolverArguments);
-        internal abstract CommandResolutionStrategy GetCommandResolutionStrategy();
     }
 }

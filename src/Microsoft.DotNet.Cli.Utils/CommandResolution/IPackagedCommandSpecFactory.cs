@@ -14,7 +14,6 @@ namespace Microsoft.DotNet.Cli.Utils
             IEnumerable<string> commandArguments,
             IEnumerable<string> allowedExtensions,
             LockFile lockFile,
-            CommandResolutionStrategy commandResolutionStrategy,
             string depsFilePath,
             string runtimeConfigPath);
     }

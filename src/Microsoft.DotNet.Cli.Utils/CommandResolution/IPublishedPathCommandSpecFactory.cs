@@ -10,7 +10,6 @@ namespace Microsoft.DotNet.Cli.Utils
         CommandSpec CreateCommandSpecFromPublishFolder(
             string commandPath,
             IEnumerable<string> commandArguments,
-            CommandResolutionStrategy commandResolutionStrategy,
             string depsFilePath,
             string runtimeConfigPath);
     }

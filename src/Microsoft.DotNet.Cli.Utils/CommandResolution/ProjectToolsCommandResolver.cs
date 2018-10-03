@@ -21,9 +21,6 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         private const string ProjectToolsCommandResolverName = "projecttoolscommandresolver";
 
-        private static readonly CommandResolutionStrategy s_commandResolutionStrategy =
-            CommandResolutionStrategy.ProjectToolsPackage;
-
         private List<string> _allowedCommandExtensions;
         private IPackagedCommandSpecFactory _packagedCommandSpecFactory;
 
@@ -206,7 +203,6 @@ namespace Microsoft.DotNet.Cli.Utils
                     args,
                     _allowedCommandExtensions,
                     toolLockFile,
-                    s_commandResolutionStrategy,
                     depsFilePath,
                     null);
 

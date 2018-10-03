@@ -20,10 +20,5 @@ namespace Microsoft.DotNet.Cli.Utils
                 commandResolverArguments.CommandName,
                 commandResolverArguments.InferredExtensions.OrEmptyIfNull());
         }
-
-        internal override CommandResolutionStrategy GetCommandResolutionStrategy()
-        {
-            return CommandResolutionStrategy.ProjectLocal;
-        }
     }
 }

@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.Cli.Utils.Tests
             var mockResolver1 = new Mock<ICommandResolver>();
             mockResolver1.Setup(r => r
                 .Resolve(It.IsAny<CommandResolverArguments>()))
-                .Returns(new CommandSpec(null, null, default(CommandResolutionStrategy)))
+                .Returns(new CommandSpec(null, null))
                 .Callback(() => resolverCalls.Add(1));
 
             var mockResolver2 = new Mock<ICommandResolver>();

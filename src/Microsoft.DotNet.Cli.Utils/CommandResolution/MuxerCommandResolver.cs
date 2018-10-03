@@ -12,7 +12,7 @@ namespace Microsoft.DotNet.Cli.Utils
                 var muxer = new Muxer();
                 var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(
                     commandResolverArguments.CommandArguments.OrEmptyIfNull());
-                return new CommandSpec(muxer.MuxerPath, escapedArgs, CommandResolutionStrategy.RootedPath);
+                return new CommandSpec(muxer.MuxerPath, escapedArgs);
             }
             return null;
         }

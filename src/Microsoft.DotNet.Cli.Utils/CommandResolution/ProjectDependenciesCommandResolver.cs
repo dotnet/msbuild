@@ -15,9 +15,6 @@ namespace Microsoft.DotNet.Cli.Utils
     {
         private const string ProjectDependenciesCommandResolverName = "projectdependenciescommandresolver";
 
-        private static readonly CommandResolutionStrategy s_commandResolutionStrategy =
-            CommandResolutionStrategy.ProjectDependenciesPackage;
-
         private readonly IEnvironmentProvider _environment;
         private readonly IPackagedCommandSpecFactory _packagedCommandSpecFactory;
 
@@ -127,7 +124,6 @@ namespace Microsoft.DotNet.Cli.Utils
                         commandArguments,
                         allowedExtensions,
                         lockFile,
-                        s_commandResolutionStrategy,
                         depsFilePath,
                         runtimeConfigPath);
 

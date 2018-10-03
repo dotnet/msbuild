@@ -44,8 +44,6 @@ namespace Microsoft.DotNet.Cli.Utils
             {
                 StartInfo = psi
             };
-
-            ResolutionStrategy = commandSpec.ResolutionStrategy;
         }
 
         public static Command CreateDotNet(
@@ -273,8 +271,6 @@ namespace Microsoft.DotNet.Cli.Utils
             _stdErr.ForwardTo(writeLine: handler);
             return this;
         }
-
-        public CommandResolutionStrategy ResolutionStrategy { get; }
 
         public string CommandName => _process.StartInfo.FileName;
 

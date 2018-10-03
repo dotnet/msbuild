@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Tools.Run
                 runArguments += " " + ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(Args);
             }
 
-            CommandSpec commandSpec = new CommandSpec(runProgram, runArguments, CommandResolutionStrategy.None);
+            CommandSpec commandSpec = new CommandSpec(runProgram, runArguments);
 
             return Command.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);

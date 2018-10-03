@@ -26,8 +26,7 @@ namespace Microsoft.DotNet.Cli.Utils
                         .Concat(commandResolverArguments.CommandArguments.OrEmptyIfNull()));
                     return new CommandSpec(
                         new Muxer().MuxerPath,
-                        escapedArgs,
-                        CommandResolutionStrategy.RootedPath);
+                        escapedArgs);
                 }
             }
             return null;

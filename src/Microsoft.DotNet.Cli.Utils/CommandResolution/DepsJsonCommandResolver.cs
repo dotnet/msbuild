@@ -62,7 +62,6 @@ namespace Microsoft.DotNet.Cli.Utils
                 commandPath,
                 commandArgs,
                 depsJsonFile,
-                CommandResolutionStrategy.DepsFile,
                 _nugetPackageRoot,
                 IsPortableApp(commandPath));
         }
@@ -185,7 +184,6 @@ namespace Microsoft.DotNet.Cli.Utils
             string commandPath,
             IEnumerable<string> commandArgs,
             string depsJsonFile,
-            CommandResolutionStrategy commandResolutionStrategy,
             string nugetPackagesRoot,
             bool isPortable)
         {
@@ -201,7 +199,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
             var escapedArgString = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(muxerArgs);
 
-            return new CommandSpec(_muxer.MuxerPath, escapedArgString, commandResolutionStrategy);
+            return new CommandSpec(_muxer.MuxerPath, escapedArgString);
         }
 
         private bool IsPortableApp(string commandPath)
