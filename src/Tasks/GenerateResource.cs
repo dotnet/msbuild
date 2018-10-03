@@ -3062,6 +3062,17 @@ namespace Microsoft.Build.Tasks
                                     string[] parts = typeName.Split(',');
                                     typeName = parts[0]; // strip off the assembly name or alias, if any
                                 }
+
+                                if (typeName == "System.Resources.ResXFileRef")
+                                {
+                                    // The "real" type of a ResXFileRef is embedded in the value.
+                                    string[] parts = value.Split(';');
+                                    typeName = parts[1];
+
+                                    parts = typeName.Split(',');
+                                    typeName = parts[0];
+                                }
+
                                 AddResource(reader, name, value, filename, typeName);
                             }
                         }
