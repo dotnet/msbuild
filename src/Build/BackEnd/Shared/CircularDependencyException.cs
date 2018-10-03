@@ -23,6 +23,11 @@ namespace Microsoft.Build.BackEnd
         {
         }
 
+        internal CircularDependencyException(string message)
+            : base(message)
+        {
+        }
+
         /// <summary>
         /// Constructor for deserialization.
         /// </summary>

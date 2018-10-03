@@ -38,6 +38,14 @@
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="new">MSB4251: There is a circular dependency involving the following projects: {0}</target>
+        <note>
+      {StrBegin="MSB4251:" This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
+      </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Das Metaprojekt "{0}" wurde generiert.</target>

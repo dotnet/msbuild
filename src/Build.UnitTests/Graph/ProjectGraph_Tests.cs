@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.UnitTests;
@@ -95,12 +96,45 @@ namespace Microsoft.Build.Graph.UnitTests
             using (var env = TestEnvironment.Create())
             {
                 TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
-                CreateProject(env, 2, new[] { 3 });
-                CreateProject(env, 3, new[] { 1 });
+                var proj2 = CreateProject(env, 2, new[] { 3 });
+                var proj3 = CreateProject(env, 3, new[] { 1 });
+                var projectsInCycle = new List<string>() {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
+                string expectedErrorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
+            }
+        }
 
-                // TODO: This should eventually throw, but for now not infinite-looping is sufficient.
-                ProjectGraph graph = new ProjectGraph(entryProject.Path);
-                graph.ProjectNodes.Count.ShouldBe(3);
+        [Fact]
+        public void ConstructWithSelfLoop()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
+                CreateProject(env, 2, new[] { 2 });
+                CreateProject(env, 3);
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
+            }
+        }
+
+        [Fact]
+        // graph with a cycle between 2->6->7->3->2
+        public void ConstructBigGraphWithCycle()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] {2,3,4});
+                var proj2 = CreateProject(env, 2, new[] {5, 6});
+                var proj3 = CreateProject(env, 3, new[] {2, 8});
+                CreateProject(env, 4);
+                CreateProject(env, 5, new []{9, 10});
+                var proj6 = CreateProject(env, 6, new[] { 7});
+                var proj7 = CreateProject(env, 7, new[] { 3 });
+                CreateProject(env, 8);
+                CreateProject(env, 9);
+                CreateProject(env, 10);
+                var projectsInCycle = new List<string>(){proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
+                var errorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
             }
         }
 

@@ -1707,13 +1707,20 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </comment>
   </data>
+  <data name="CircularDependencyInProjectGraph" UESanitized="false" Visibility="Public">
+    <value>MSB4251: There is a circular dependency involving the following projects: {0}</value>
+    <comment>
+      {StrBegin="MSB4251:" This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </comment>
+  </data>
   <!--
         The engine message bucket is: MSB4001 - MSB4999
 
         MSB4128 is being used in FileLogger.cs (can't be added here yet as strings are currently frozen)
         MSB4129 is used by Shared\XmlUtilities.cs (can't be added here yet as strings are currently frozen)
 
-        Next message code should be MSB4251.
+        Next message code should be MSB4252.
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>
