@@ -3,15 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
-
-using Constants = Microsoft.Build.Internal.Constants;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -31,7 +26,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public ToolsetProvider(string defaultToolsVersion, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations toolsetDefinitionLocations)
         {
-            InitializeToolsetCollection(defaultToolsVersion, environmentProperties, globalProperties, toolsetDefinitionLocations);
+            InitializeToolsetCollection(environmentProperties, globalProperties, toolsetDefinitionLocations);
         }
 
         /// <summary>
@@ -62,10 +57,7 @@ namespace Microsoft.Build.Evaluation
         /// <comments>
         /// ValueCollection is already read-only. 
         /// </comments>
-        public ICollection<Toolset> Toolsets
-        {
-            get { return _toolsets.Values; }
-        }
+        public ICollection<Toolset> Toolsets => _toolsets.Values;
 
         /// <summary>
         /// Gets the specified toolset.
@@ -73,9 +65,7 @@ namespace Microsoft.Build.Evaluation
         public Toolset GetToolset(string toolsVersion)
         {
             ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, "toolsVersion");
-
-            Toolset toolset;
-            _toolsets.TryGetValue(toolsVersion, out toolset);
+            _toolsets.TryGetValue(toolsVersion, out var toolset);
 
             return toolset;
         }
@@ -95,7 +85,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        static internal ToolsetProvider FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ToolsetProvider FactoryForDeserialization(INodePacketTranslator translator)
         {
             ToolsetProvider provider = new ToolsetProvider(translator);
             return provider;
@@ -107,11 +97,11 @@ namespace Microsoft.Build.Evaluation
         /// Populate Toolsets with a dictionary of (toolset version, Toolset) 
         /// using information from the registry and config file, if any.  
         /// </summary>
-        private void InitializeToolsetCollection(string defaultToolsVersion, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations toolsetDefinitionLocations)
+        private void InitializeToolsetCollection(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations toolsetDefinitionLocations)
         {
             _toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            defaultToolsVersion = ToolsetReader.ReadAllToolsets(_toolsets, environmentProperties, globalProperties, toolsetDefinitionLocations);
+            ToolsetReader.ReadAllToolsets(_toolsets, environmentProperties, globalProperties, toolsetDefinitionLocations);
         }
     }
 }
