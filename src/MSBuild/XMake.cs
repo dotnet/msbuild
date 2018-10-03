@@ -1290,7 +1290,7 @@ namespace Microsoft.Build.CommandLine
                             continue;
                         }
 
-                        var request = new BuildRequestData(node.Project, targetList.ToArray());
+                        var request = new BuildRequestData(node.ProjectInstance, targetList.ToArray());
                         var buildSubmission = buildManager.PendBuildRequest(request);
                         buildingNodes.Add(buildSubmission, node);
                         blockedNodes.Remove(node);
