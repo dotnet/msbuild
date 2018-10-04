@@ -8,6 +8,7 @@ using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions;
 using Microsoft.DotNet.CommandFactory;
+using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tests
 {

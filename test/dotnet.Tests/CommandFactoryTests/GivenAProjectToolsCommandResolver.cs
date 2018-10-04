@@ -14,6 +14,7 @@ using NuGet.Versioning;
 using Xunit;
 using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.DotNet.CommandFactory;
+using LocalizableStrings = Microsoft.DotNet.CommandFactory.LocalizableStrings;
 
 namespace Microsoft.DotNet.Tests
 {
