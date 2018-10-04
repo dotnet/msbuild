@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -251,7 +252,7 @@ namespace Microsoft.DotNet.TestFramework
 
             Console.WriteLine($"TestAsset Build '{TestAssetInfo.AssetName}'");
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, args)
+            var commandResult = CreateCommand(TestAssetInfo.DotnetExeFile.FullName, args)
                                     .WorkingDirectory(Root.FullName)
                                     .CaptureStdOut()
                                     .CaptureStdErr()
@@ -280,7 +281,7 @@ namespace Microsoft.DotNet.TestFramework
         {
             var restoreArgs = new string[] { "restore", projectFile.FullName };
 
-            var commandResult = Command.Create(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
+            var commandResult = CreateCommand(TestAssetInfo.DotnetExeFile.FullName, restoreArgs)
                                 .CaptureStdOut()
                                 .CaptureStdErr()
                                 .Execute();
@@ -308,5 +309,24 @@ namespace Microsoft.DotNet.TestFramework
                 Restore(projFile);
             }
         }
+
+        private static Command CreateCommand(string path, IEnumerable<string> args)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = path,
+                Arguments = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(args),
+                UseShellExecute = false
+            };
+
+
+            var _process = new Process
+            {
+                StartInfo = psi
+            };
+
+            return new Command(_process);
+        }
+
     }
 }

@@ -1,7 +1,5 @@
 ﻿<Project>
 
-  <!-- This test asset needs to import the general dir.props in order to get the SdkNugetVersion property.
-      This is why it also needs to explicitly set DisableImplicitFrameworkReferences to false. -->
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
@@ -13,13 +11,9 @@
     <DisableImplicitFrameworkReferences>false</DisableImplicitFrameworkReferences>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <SdkNugetVersion Condition=" '$(SdkNugetVersion)' == ''">$(CliVersionPrefix)-*</SdkNugetVersion>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="NuGet.Frameworks" Version="$(NuGetFrameworksPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="$(SdkNugetVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Cli.Utils" Version="2.0.0" />
     <PackageReference Include="Microsoft.DotNet.Cli.CommandLine" Version="$(MicrosoftDotNetCliCommandLinePackageVersion)" />
     <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
