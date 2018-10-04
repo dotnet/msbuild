@@ -1395,7 +1395,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>Returns folders in VS installs in VS version descending order</returns>
         public static IEnumerable<string> GetFoldersInVSInstalls(Version minVersion = null, Version maxVersion = null, string subFolder = null)
         {
-            string versionRange = string.Format("{0};{1}", minVersion == null ? String.Empty : minVersion.ToString(), maxVersion == null ? String.Empty : maxVersion.ToString());
+            string versionRange = $"{minVersion?.ToString() ?? string.Empty};{maxVersion?.ToString() ?? string.Empty}";
             string[] vsInstallFolders;
 
             lock (s_locker)
@@ -1425,7 +1425,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        ///  Returns folders in VS installs of specifid range of versions (starting with 15.0) separated by ';'.
+        ///  Returns folders in VS installs of specified range of versions (starting with 15.0) separated by ';'.
         /// </summary>
         /// <param name="minVersionString">Optional. If specified, only VS instances with this or bigger version will be included.</param>
         /// <param name="maxVersionString">Optional. If specified, only VS instances with smaller versions will be included. For instance, 16.0 means that only 15.* versions will be included.</param>
