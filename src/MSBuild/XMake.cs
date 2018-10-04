@@ -1262,6 +1262,7 @@ namespace Microsoft.Build.CommandLine
             // s_activeBuild is supposed to be the active build, but we may have multiple going at once.
             // This may be solved once better integration with the scheduler (#3774) is done.
             var projectGraph = new ProjectGraph(projectFile, globalProperties, projectCollection);
+            var entryNode = projectGraph.EntryPointNodes.First();
             var targetLists = projectGraph.GetTargetLists(targets);
 
             var waitHandle = new AutoResetEvent(true);
@@ -1306,7 +1307,7 @@ namespace Microsoft.Build.CommandLine
                                 buildingNodes.Remove(finishedBuildSubmission);
                             }
 
-                            if (finishedNode == projectGraph.EntryProjectNode)
+                            if (finishedNode == entryNode)
                             {
                                 entryProjectResult = finishedBuildSubmission.BuildResult;
                             }

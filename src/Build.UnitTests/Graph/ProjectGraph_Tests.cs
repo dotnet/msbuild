@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -299,6 +298,98 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProject(env, 3);
 
                 Should.Throw<InvalidProjectFileException>(() => new ProjectGraph(entryProject.Path));
+            }
+        }
+
+        [Fact]
+        public void ConstructWithMultipleEntryPoints()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject1 = CreateProject(env, 1, new[] { 3 });
+                TransientTestFile entryProject2 = CreateProject(env, 2, new[] { 3 });
+                CreateProject(env, 3);
+                var projectGraph = new ProjectGraph(new [] { entryProject1.Path, entryProject2.Path });
+                projectGraph.ProjectNodes.Count.ShouldBe(3);
+
+                var node1 = GetNodeForProject(projectGraph, 1);
+                var node2 = GetNodeForProject(projectGraph, 2);
+                var node3 = GetNodeForProject(projectGraph, 3);
+                node1.ProjectReferences.Count.ShouldBe(1);
+                node1.ProjectReferences.First().ShouldBe(node3);
+                node2.ProjectReferences.Count.ShouldBe(1);
+                node2.ProjectReferences.First().ShouldBe(node3);
+            }
+        }
+
+        [Fact]
+        public void ConstructWithMultipleEntryPointsWithDifferentGlobalProperties()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1, new[] { 2 });
+                CreateProject(env, 2);
+                var entryPoint1 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x86" } });
+                var entryPoint2 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x64" } });
+
+                var projectGraph = new ProjectGraph(new[] { entryPoint1, entryPoint2 });
+                projectGraph.ProjectNodes.Count.ShouldBe(4);
+
+                projectGraph.EntryPointNodes.Count.ShouldBe(2);
+
+                var entryPointNode1 = projectGraph.EntryPointNodes.First();
+                var entryPointNode2 = projectGraph.EntryPointNodes.Last();
+
+                // The entrypoints should not be the same node, but should point to the same project
+                entryPointNode1.ShouldNotBe(entryPointNode2);
+                entryPointNode1.Project.FullPath.ShouldBe(entryPointNode2.Project.FullPath);
+                entryPointNode1.GlobalProperties["Platform"].ShouldBe("x86");
+                entryPointNode2.GlobalProperties["Platform"].ShouldBe("x64");
+
+                // The entrypoints should not not have the same project reference, but should point to the same project reference file
+                entryPointNode1.ProjectReferences.Count.ShouldBe(1);
+                entryPointNode2.ProjectReferences.Count.ShouldBe(1);
+                entryPointNode1.ProjectReferences.First().ShouldNotBe(entryPointNode2.ProjectReferences.First());
+                entryPointNode1.ProjectReferences.First().Project.FullPath.ShouldBe(entryPointNode2.ProjectReferences.First().Project.FullPath);
+                entryPointNode1.ProjectReferences.First().GlobalProperties["Platform"].ShouldBe("x86");
+                entryPointNode2.ProjectReferences.First().GlobalProperties["Platform"].ShouldBe("x64");
+            }
+        }
+
+        [Fact]
+        public void ConstructWithMultipleEntryPointsWithDifferentGlobalPropertiesConverging()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = env.CreateFile("1.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""2.proj"" GlobalPropertiesToRemove=""Platform"" />
+  </ItemGroup>
+</Project>");
+                CreateProject(env, 2);
+                var entryPoint1 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x86" } });
+                var entryPoint2 = new ProjectGraphEntryPoint(entryProject.Path, new Dictionary<string, string> { { "Platform", "x64" } });
+
+                var projectGraph = new ProjectGraph(new[] { entryPoint1, entryPoint2 });
+                projectGraph.ProjectNodes.Count.ShouldBe(3);
+
+                projectGraph.EntryPointNodes.Count.ShouldBe(2);
+
+                var entryPointNode1 = projectGraph.EntryPointNodes.First();
+                var entryPointNode2 = projectGraph.EntryPointNodes.Last();
+
+                // The entrypoints should not be the same node, but should point to the same project
+                entryPointNode1.ShouldNotBe(entryPointNode2);
+                entryPointNode1.Project.FullPath.ShouldBe(entryPointNode2.Project.FullPath);
+                entryPointNode1.GlobalProperties["Platform"].ShouldBe("x86");
+                entryPointNode2.GlobalProperties["Platform"].ShouldBe("x64");
+
+                // The entrypoints should have the same project reference since it's platform-agnostic
+                entryPointNode1.ProjectReferences.Count.ShouldBe(1);
+                entryPointNode2.ProjectReferences.Count.ShouldBe(1);
+                entryPointNode1.ProjectReferences.First().ShouldBe(entryPointNode2.ProjectReferences.First());
+                entryPointNode1.ProjectReferences.First().GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
             }
         }
 

@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'"/>
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
 
     <Reference Include="System.Configuration" />
@@ -283,6 +283,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
+    <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
     <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />
