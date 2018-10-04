@@ -3957,11 +3957,22 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_SGenDllsRelatedToCurrentDll Include="@(SerializationAssembly->'%(FullPath)')" Condition="'%(Extension)' == '.dll'"/>
     </ItemGroup>
 
+    <ItemGroup Condition="!exists('$(ProjectLockFile)')">
+      <_CopyLocalFalseRefPaths Include="@(ReferencePath)" Condition="'%(CopyLocal)' == 'false'" />
+      <_CopyLocalFalseRefPathsWithExclusion Include="@(_CopyLocalFalseRefPaths)"
+                                            Exclude="@(ReferenceCopyLocalPaths);@(_NETStandardLibraryNETFrameworkLib)" />
+    </ItemGroup>
+
     <!-- Flag primary dependencies-certain warnings emitted during application manifest generation apply only to them. -->
     <ItemGroup>
-      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
+      <_SatelliteAssemblies Include="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)" />
+      <_DeploymentReferencePaths Include="@(ReferenceCopyLocalPaths)" 
+                                 Condition="'%(Extension)' == '.dll' Or '%(Extension)' == '.exe'">
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
+      <_DeploymentReferencePaths Include="@(_DeploymentReferencePaths);@(_CopyLocalFalseRefPathsWithExclusion)" />
+      <_ManifestManagedReferences Include="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly)"
+                               Exclude="@(_SatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
     </ItemGroup>
 
     <!-- Copy the application executable from Obj folder to app.publish folder.
@@ -3988,10 +3999,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         EntryPoint="@(_DeploymentClickOnceApplicationExecutable)"
         ExtraFiles="@(_DebugSymbolsIntermediatePath);$(IntermediateOutputPath)$(TargetName).xml;@(_ReferenceRelatedPaths)"
         Files="@(ContentWithTargetPath);@(_DeploymentManifestIconFile);@(AppConfigWithTargetPath)"
-        ManagedAssemblies="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly)"
+        ManagedAssemblies="@(_ManifestManagedReferences)"
         NativeAssemblies="@(NativeReferenceFile);@(_DeploymentNativePrerequisite)"
         PublishFiles="@(PublishFile)"
-        SatelliteAssemblies="@(IntermediateSatelliteAssembliesWithTargetPath);@(ReferenceSatellitePaths)"
+        SatelliteAssemblies="@(_SatelliteAssemblies)"
         TargetCulture="$(TargetCulture)">
 
       <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependencies"/>
