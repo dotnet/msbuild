@@ -1,4 +1,5 @@
 {
   "version": "16.0-preview",
-  "assemblyVersion": "15.1"
+  "assemblyVersion": "15.1",
+  "buildNumberOffset": "7"
 }

@@ -1,9 +1,9 @@
 # Getting Started
 
  * Building Testing and Debugging
-   * [Full Framework MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild)
-   * [.Net Core MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild)
-   * [Mono MSBuild](https://github.com/Microsoft/msbuild/wiki/Building-Testing-and-Debugging-on-Mono-MSBuild)
+   * [Full Framework MSBuild](Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
+   * [.Net Core MSBuild](Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
+   * [Mono MSBuild](Building-Testing-and-Debugging-on-Mono-MSBuild.md)
  * [Contributing Code](Contributing-Code.md)
  * [MSBuild Roadmap](Roadmap.md)
  * [MSBuild Resources](MSBuild-Resources.md)
