@@ -118,13 +118,7 @@
         Glob="$(SdkPkgScriptFile)"
         Mode="ugo+x" />
 
-      <Exec Command="pkgbuild
-                     --root '$(SdkLayoutOutputDirectory)'
-                     --identifier '$(SdkComponentId)'
-                     --version '$(SdkVersion)'
-                     --install-location '$(PkgInstallDirectory)'
-                     --scripts '$(SdkPkgDestinationScriptsDirectory)'
-                     '$(SdkInstallerFile)'" />
+      <Exec Command="pkgbuild --root '$(SdkLayoutOutputDirectory)' --identifier '$(SdkComponentId)' --version '$(SdkVersion)' --install-location '$(PkgInstallDirectory)' --scripts '$(SdkPkgDestinationScriptsDirectory)' '$(SdkInstallerFile)'" />
     </Target>
 
     <Target Name="GenerateSdkProductArchive"
@@ -153,13 +147,7 @@
         ReplacementPatterns="@(DistributionTemplateReplacement -> '%(Identity)')"
         ReplacementStrings="@(DistributionTemplateReplacement -> '%(ReplacementString)')" />
 
-      <Exec Command="productbuild
-                     --version '$(SdkVersion)'
-                     --identifier '$(SdkProductArchiveId)'
-                     --package-path '$(PkgIntermediateDirectory)'
-                     --resources '$(SdkProductArchiveResourcesDirectory)'
-                     --distribution '$(SdkProductArchiveDistributionFile)'
-                     '$(CombinedFrameworkSdkHostInstallerFile)'" />
+      <Exec Command="productbuild --version '$(SdkVersion)' --identifier '$(SdkProductArchiveId)' --package-path '$(PkgIntermediateDirectory)' --resources '$(SdkProductArchiveResourcesDirectory)' --distribution '$(SdkProductArchiveDistributionFile)' '$(CombinedFrameworkSdkHostInstallerFile)'" />
     </Target>
 
     <Target Name="GeneratePkgs"
