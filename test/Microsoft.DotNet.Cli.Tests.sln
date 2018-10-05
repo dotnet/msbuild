@@ -93,6 +93,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-install-tool.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.Tools.Tests.Utilities.Tests", "Microsoft.DotNet.Tools.Tests.Utilities.Tests\Microsoft.DotNet.Tools.Tests.Utilities.Tests.csproj", "{EE42E211-8ABA-4735-810F-5C67BBA66E96}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.CommandFactory.Tests", "Microsoft.DotNet.CommandFactory.Tests\Microsoft.DotNet.CommandFactory.Tests.csproj", "{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -607,6 +609,18 @@ Global
 		{EE42E211-8ABA-4735-810F-5C67BBA66E96}.Release|x64.Build.0 = Release|Any CPU
 		{EE42E211-8ABA-4735-810F-5C67BBA66E96}.Release|x86.ActiveCfg = Release|Any CPU
 		{EE42E211-8ABA-4735-810F-5C67BBA66E96}.Release|x86.Build.0 = Release|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Debug|x64.Build.0 = Debug|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Debug|x86.Build.0 = Debug|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Release|x64.ActiveCfg = Release|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Release|x64.Build.0 = Release|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Release|x86.ActiveCfg = Release|Any CPU
+		{B2AA2F5A-43DF-41B2-BE4F-46DFA12C7BD7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
