@@ -53,13 +53,13 @@ namespace Microsoft.DotNet.Cli.Utils
 
         public static ToolCommandName[] Convert(string[] toolCommandNameStringArray)
         {
-            var toolCommadNames = new ToolCommandName[toolCommandNameStringArray.Length];
+            var toolCommandNames = new ToolCommandName[toolCommandNameStringArray.Length];
             for (int i = 0; i < toolCommandNameStringArray.Length; i++)
             {
-                toolCommadNames[i] = new ToolCommandName(toolCommandNameStringArray[i]);
+                toolCommandNames[i] = new ToolCommandName(toolCommandNameStringArray[i]);
             }
 
-            return toolCommadNames;
+            return toolCommandNames;
         }
     }
 }

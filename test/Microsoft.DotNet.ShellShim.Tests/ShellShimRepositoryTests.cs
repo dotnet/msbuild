@@ -365,7 +365,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         }
 
         [Fact]
-        public void WhenMutipleSameNamePackagedShimProvidedItThrows()
+        public void WhenMultipleSameNamePackagedShimProvidedItThrows()
         {
             const string tokenToIdentifyCopiedShim = "packagedShim";
 

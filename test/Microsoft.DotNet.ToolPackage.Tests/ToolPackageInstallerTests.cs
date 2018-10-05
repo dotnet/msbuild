@@ -599,7 +599,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         }
 
         [Fact]
-        public void GivenARootWithNonAsciiCharactorInstallSucceeds()
+        public void GivenARootWithNonAsciiCharacterInstallSucceeds()
         {
             var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
 

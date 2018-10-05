@@ -604,9 +604,9 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             IFileSystem fileSystem = SetupSubjectFileSystem(testMockBehaviorIsInSync);
             string tempDirectory = fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
             string testDirectoryPath = Path.Combine(tempDirectory, Path.GetRandomFileName());
-            string testDirectorysFilePath = Path.Combine(testDirectoryPath, Path.GetRandomFileName());
+            string testDirectoryFilePath = Path.Combine(testDirectoryPath, Path.GetRandomFileName());
             fileSystem.Directory.CreateDirectory(testDirectoryPath);
-            fileSystem.File.CreateEmptyFile(testDirectorysFilePath);
+            fileSystem.File.CreateEmptyFile(testDirectoryFilePath);
 
             Action action = () => fileSystem.Directory.Delete(testDirectoryPath, false);
             // On Windows: The directory is not empty
@@ -623,9 +623,9 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             IFileSystem fileSystem = SetupSubjectFileSystem(testMockBehaviorIsInSync);
             string tempDirectory = fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
             string testDirectoryPath = Path.Combine(tempDirectory, Path.GetRandomFileName());
-            string testDirectorysFilePath = Path.Combine(testDirectoryPath, Path.GetRandomFileName());
+            string testDirectoryFilePath = Path.Combine(testDirectoryPath, Path.GetRandomFileName());
             fileSystem.Directory.CreateDirectory(testDirectoryPath);
-            fileSystem.File.CreateEmptyFile(testDirectorysFilePath);
+            fileSystem.File.CreateEmptyFile(testDirectoryFilePath);
 
             fileSystem.Directory.Delete(testDirectoryPath, true);
             fileSystem.Directory.Exists(testDirectoryPath).Should().BeFalse();
@@ -641,15 +641,15 @@ namespace Microsoft.DotNet.Tools.Tests.Utilities.Tests
             string tempDirectory = fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
             string testSourceDirectoryPath = Path.Combine(tempDirectory, Path.GetRandomFileName());
             string nestedFilePath = Path.GetRandomFileName();
-            string testDirectorysFilePath = Path.Combine(testSourceDirectoryPath, nestedFilePath);
+            string testDirectoryFilePath = Path.Combine(testSourceDirectoryPath, nestedFilePath);
             fileSystem.Directory.CreateDirectory(testSourceDirectoryPath);
-            fileSystem.File.CreateEmptyFile(testDirectorysFilePath);
+            fileSystem.File.CreateEmptyFile(testDirectoryFilePath);
 
             string testDestinationDirectoryPath = Path.Combine(tempDirectory, Path.GetRandomFileName());
 
             fileSystem.Directory.Move(testSourceDirectoryPath, testDestinationDirectoryPath);
             fileSystem.Directory.Exists(testSourceDirectoryPath).Should().BeFalse();
-            fileSystem.Directory.Exists(testDirectorysFilePath).Should().BeFalse();
+            fileSystem.Directory.Exists(testDirectoryFilePath).Should().BeFalse();
             fileSystem.Directory.Exists(testDestinationDirectoryPath).Should().BeTrue();
             fileSystem.File.Exists(Path.Combine(testDestinationDirectoryPath, nestedFilePath)).Should().BeTrue();
         }

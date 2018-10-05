@@ -94,7 +94,7 @@ namespace Microsoft.DotNet.Cli
                   CommonOptions.NoRestoreOption(),
                   CommonOptions.VerbosityOption());
 
-        private static string GetSemiColonEsacpedstring(string arg)
+        private static string GetSemiColonEscapedstring(string arg)
         {
             if (arg.IndexOf(";") != -1)
             {
@@ -111,7 +111,7 @@ namespace Microsoft.DotNet.Cli
 
             foreach (string arg in args)
             {
-                array[counter++] = GetSemiColonEsacpedstring(arg);
+                array[counter++] = GetSemiColonEscapedstring(arg);
             }
 
             return array;
