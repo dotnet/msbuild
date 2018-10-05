@@ -9,7 +9,7 @@
   
   <PropertyGroup>
     <Product>Microsoft® Build Tools®</Product>
-    <Configurations>Debug;Release;Debug-MONO;Release-MONO</Configurations>
+    <Configurations>Debug;Release;Debug-MONO;Release-MONO;MachineIndependent</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
