@@ -352,7 +352,7 @@ function AddLogCmd([string] $logName, [string[]] $extraArgs)
 
   if ($ci -or $log) {
     Create-Directory $LogDir
-    $extraArgs = $extraArgs + ("/bl:" + (Join-Path $LogDir "$logName.binlog"))
+    $extraArgs = $extraArgs + ("/bl:`"" + (Join-Path $LogDir "$logName.binlog") + "`"")
 
     # When running under CI, also create a text error log,
     # so it can be emitted to VSTS.
