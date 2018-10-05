@@ -60,7 +60,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             result.ExitCode.Should().Be(1);
         }
 
-        [Fact]
+        [Fact(Skip="https://github.com/Microsoft/vstest/issues/1775")]
         public void ItDoesNotImplicitlyRestoreAProjectWhenTestingWithTheNoRestoreOption()
         {
             string testAppName = "VSTestCore";
