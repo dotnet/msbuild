@@ -7,8 +7,8 @@ using System.IO;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Creates the AppHost.exe to be used by the published app.
-    /// This embeds the app dll path into the AppHost.exe and performs additional customizations as requested.
+    /// Creates the runtime host to be used for an application.
+    /// This embeds the application DLL path into the apphost and performs additional customizations as requested.
     /// </summary>
     public class CreateAppHost : TaskBase
     {
@@ -28,9 +28,6 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            var hostExtension = Path.GetExtension(AppHostSourcePath);
-            var appbaseName = Path.GetFileNameWithoutExtension(AppBinaryName);
-
             AppHost.Create(
                 AppHostSourcePath,
                 AppHostDestinationPath,

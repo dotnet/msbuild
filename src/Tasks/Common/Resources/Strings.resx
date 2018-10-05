@@ -381,10 +381,6 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</value>
     <comment>{StrBegin="NETSDK1065: "}</comment>
   </data>
-  <data name="CannotUseAppHostWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</value>
-    <comment>{StrBegin="NETSDK1066: "}</comment>
-  </data>
   <data name="CannotUseSelfContainedWithoutAppHost" xml:space="preserve">
     <value>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</value>
     <comment>{StrBegin="NETSDK1067: "}</comment>

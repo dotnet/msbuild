@@ -42,11 +42,6 @@
         <target state="translated">NETSDK1001: 必须指定至少一个可能的目标框架。</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
-      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
-        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="translated">NETSDK1066: 必须指定一个 RuntimeIdentifier，以通过应用程序主机发布框架依赖型应用程序。</target>
-        <note>{StrBegin="NETSDK1066: "}</note>
-      </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
         <target state="translated">NETSDK1067: 需要自包含应用程序才能使用应用程序主机。将 SelfContained 设置为 false，或者将 UseAppHost 设置为 true。</target>

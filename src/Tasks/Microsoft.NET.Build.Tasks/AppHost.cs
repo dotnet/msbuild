@@ -37,25 +37,22 @@ namespace Microsoft.NET.Build.Tasks
             string intermediateAssembly = null,
             Logger log = null)
         {
-            var hostExtension = Path.GetExtension(appHostSourceFilePath);
-            var appbaseName = Path.GetFileNameWithoutExtension(appBinaryFilePath);
             var bytesToWrite = Encoding.UTF8.GetBytes(appBinaryFilePath);
-            var destinationDirectory = new FileInfo(appHostDestinationFilePath).Directory.FullName;
-
             if (bytesToWrite.Length > 1024)
             {
                 throw new BuildErrorException(Strings.FileNameIsTooLong, appBinaryFilePath);
             }
 
+            var destinationDirectory = new FileInfo(appHostDestinationFilePath).Directory.FullName;
             if (!Directory.Exists(destinationDirectory))
             {
                 Directory.CreateDirectory(destinationDirectory);
             }
 
-            // Copy AppHostSourcePath to ModifiedAppHostPath so it inherits the same attributes\permissions.
+            // Copy apphost to destination path so it inherits the same attributes/permissions.
             File.Copy(appHostSourceFilePath, appHostDestinationFilePath, overwrite: true);
 
-            // Re-write ModifiedAppHostPath with the proper contents.
+            // Re-write the destination apphost with the proper contents.
             bool appHostIsPEImage = false;
             using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(appHostDestinationFilePath))
             {

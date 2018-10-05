@@ -42,11 +42,6 @@
         <target state="translated">NETSDK1001: 가능한 대상 프레임워크를 하나 이상 지정해야 합니다.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
-      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
-        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="translated">NETSDK1066: 응용 프로그램 호스트와 함께 프레임워크 종속 응용 프로그램을 게시하려면 RuntimeIdentifier를 지정해야 합니다.</target>
-        <note>{StrBegin="NETSDK1066: "}</note>
-      </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
         <target state="translated">NETSDK1067: 응용 프로그램 호스트를 사용하려면 자체 포함 응용 프로그램이 필요합니다. SelfContained를 false로 설정하거나 UseAppHost를 true로 설정하세요.</target>

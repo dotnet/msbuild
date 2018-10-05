@@ -18,7 +18,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_GetChildProjectCopyToPublishDirectoryItems Condition="'$(_GetChildProjectCopyToPublishDirectoryItems)' == ''">true</_GetChildProjectCopyToPublishDirectoryItems>
 
     <!-- publishing with the apphost should publish the native host as $(AssemblyName).exe -->
-    <DeployAppHost Condition="'$(DeployAppHost)' == '' and '$(_IsExecutable)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(UseAppHost)' == 'true'">true</DeployAppHost>
+    <DeployAppHost Condition="'$(DeployAppHost)' == '' and '$(_IsExecutable)' == 'true' and '$(UseAppHost)' == 'true'">true</DeployAppHost>
   
     <IsPublishable Condition="'$(IsPublishable)'==''">true</IsPublishable>
   </PropertyGroup>
@@ -625,7 +625,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     ============================================================
                                         DeployAppHost
 
-    Deploys the host to run the stand alone app and ensures it matches the app name
+    Deploys the host to run the app and ensures it matches the app name.
     ============================================================
     -->
 
@@ -640,10 +640,9 @@ Copyright (c) .NET Foundation. All rights reserved.
       <ResolvedFileToRemove  Include ="%(ResolvedFileToPublish.Identity)" Condition="'%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetHostExecutableName)' Or '%(ResolvedFileToPublish.RelativePath)' == '$(_DotNetAppHostExecutableName)'"/>
       <ResolvedFileToPublish Remove ="%(ResolvedFileToRemove.Identity)"/>
 
-      <ResolvedFileToPublish Include="%(NativeAppHostNETCore.Identity)">
+      <ResolvedFileToPublish Include="%(_NativeAppHostNETCore.Identity)">
         <RelativePath>$(AssemblyName)$(_NativeExecutableExtension)</RelativePath>
       </ResolvedFileToPublish>
-
 
     </ItemGroup>
 
