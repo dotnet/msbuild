@@ -12,6 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*" />
+    <DotNetCliToolReference Include="dotnet-hello" Version="1.0.0-*" />
   </ItemGroup>
 </Project>
