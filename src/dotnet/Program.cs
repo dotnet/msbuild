@@ -220,7 +220,7 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
-                CommandResult result = CommandUsingResolver.Create(
+                CommandResult result = CommandFactoryUsingResolver.Create(
                         "dotnet-" + topLevelCommandParserResult.Command,
                         appArgs,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15)

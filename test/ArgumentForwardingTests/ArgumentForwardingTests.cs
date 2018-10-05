@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <returns></returns>
         private string[] EscapeAndEvaluateArgumentString(string[] rawEvaluatedArgument)
         {
-            var commandResult = CommandUsingResolver.Create("dotnet", new[] { ReflectorPath }.Concat(rawEvaluatedArgument))
+            var commandResult = CommandFactoryUsingResolver.Create("dotnet", new[] { ReflectorPath }.Concat(rawEvaluatedArgument))
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute();
@@ -192,7 +192,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <returns></returns>
         private string[] EscapeAndEvaluateArgumentStringCmd(string[] rawEvaluatedArgument)
         {
-            var cmd = CommandUsingResolver.Create(s_reflectorCmdName, rawEvaluatedArgument);
+            var cmd = CommandFactoryUsingResolver.Create(s_reflectorCmdName, rawEvaluatedArgument);
             var commandResult = cmd
                 .CaptureStdErr()
                 .CaptureStdOut()

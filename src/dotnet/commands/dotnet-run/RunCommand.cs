@@ -205,7 +205,7 @@ namespace Microsoft.DotNet.Tools.Run
 
             CommandSpec commandSpec = new CommandSpec(runProgram, runArguments);
 
-            return CommandUsingResolver.Create(commandSpec)
+            return CommandFactoryUsingResolver.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);
         }
 
