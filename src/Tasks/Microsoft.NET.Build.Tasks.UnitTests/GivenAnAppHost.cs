@@ -146,7 +146,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
             {
                 string sourceAppHostMock = PrepareAppHostMockFile(testDirectory, content =>
                 {
-                    // Corrupt the value of the subsytem (the default should be 3)
+                    // Corrupt the value of the subsystem (the default should be 3)
                     content[SubsystemOffset] = 42;
                 });
                 string destinationFilePath = Path.Combine(testDirectory.Path, "DestinationAppHost.exe.mock");

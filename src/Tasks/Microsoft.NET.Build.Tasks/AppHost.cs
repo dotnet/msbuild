@@ -271,7 +271,7 @@ namespace Microsoft.NET.Build.Tasks
         }
 
         /// <summary>
-        /// This method will attempt to set the subsistem to GUI. The apphost file should be a windows PE file.
+        /// This method will attempt to set the subsystem to GUI. The apphost file should be a windows PE file.
         /// </summary>
         /// <param name="accessor">The memory accessor which has the apphost file opened.</param>
         /// <param name="appHostSourcePath">The path to the source apphost.</param>
