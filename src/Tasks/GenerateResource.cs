@@ -3767,17 +3767,14 @@ namespace Microsoft.Build.Tasks
             }
 
             reader.resources.Add(entry);
-#if FEATURE_WINFORMS_RESX
-            reader.resourcesHashTable.Add(name, value);
-#else
-            if (customTypeName == null) customTypeName = value.GetType().FullName;
-            reader.resourcesHashTable.Add(name, new StronglyTypedResourceBuilder.TypedStringResourceEntry
+            if (customTypeName != null)
             {
-                Name = name,
-                Type = customTypeName,
-                Value = value
-            });
-#endif
+                reader.resourcesHashTable.Add(name, new StronglyTypedResourceBuilder.ResourceData(customTypeName, value));
+            }
+            else
+            {
+                reader.resourcesHashTable.Add(name, new StronglyTypedResourceBuilder.ResourceData(value.GetType(), value));
+            }
         }
 
         /// <summary>

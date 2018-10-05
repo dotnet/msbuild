@@ -56,20 +56,6 @@ namespace Microsoft.Build.Tasks
 {
     internal static class StronglyTypedResourceBuilder
     {
-#if !FEATURE_WINFORMS_RESX
-        internal class TypedStringResourceEntry
-        {
-            public string Name;
-            public string Type;
-            public object Value;
-
-            public override string ToString()
-            {
-                return Value.ToString();
-            }
-        }
-#endif
-
         // Note - if you add a new property to the class, add logic to reject
         // keys of that name in VerifyResourceNames.
         private const String ResMgrFieldName = "resourceMan";
@@ -94,10 +80,11 @@ namespace Microsoft.Build.Tasks
         // Save the strings for better doc comments.
         internal sealed class ResourceData
         {
-            internal ResourceData(string typeName, string valueAsString)
+            internal ResourceData(string typeName, object value)
             {
+                Type = null;
                 TypeName = typeName;
-                ValueAsString = valueAsString;
+                Value = value;
 
                 if (typeName.Contains(","))
                 {
@@ -106,15 +93,17 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            internal ResourceData(Type type, String valueAsString)
+            internal ResourceData(Type type, object value)
             {
+                Type = type;
                 TypeName = type.FullName;
-                ValueAsString = valueAsString;
+                Value = value;
             }
 
             internal String TypeName { get; }
-
-            internal String ValueAsString { get; }
+            internal Type Type { get; }
+            internal object Value { get; }
+            internal string ValueAsString => Value.ToString();
         }
 
         internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
@@ -132,9 +121,15 @@ namespace Microsoft.Build.Tasks
             var resourceTypes = new Dictionary<String, ResourceData>(StringComparer.InvariantCultureIgnoreCase);
             foreach (DictionaryEntry de in resourceList)
             {
+                ResourceData data = de.Value as ResourceData;
+                if (data != null)
+                {
+                    resourceTypes.Add((string)de.Key, data);
+                    continue;
+                }
+
 #if FEATURE_WINFORMS_RESX
                 var node = de.Value as ResXDataNode;
-                ResourceData data;
                 if (node != null)
                 {
                     string keyname = (string)de.Key;
@@ -145,8 +140,8 @@ namespace Microsoft.Build.Tasks
 
                     String typeName = node.GetValueTypeName((AssemblyName[])null);
                     Type type = Type.GetType(typeName);
-                    String valueAsString = node.GetValue((AssemblyName[])null).ToString();
-                    data = new ResourceData(type, valueAsString);
+                    object value = node.GetValue((AssemblyName[])null);
+                    data = new ResourceData(type, value);
                 }
                 else
                 {
@@ -154,19 +149,10 @@ namespace Microsoft.Build.Tasks
                     // type.  Use Object.  This will be rare after WinForms gets away
                     // from their resource pull model in Whidbey M3.
                     Type type = de.Value?.GetType() ?? typeof(Object);
-                    data = new ResourceData(type, de.Value?.ToString());
+                    data = new ResourceData(type, de.Value);
                 }
-                resourceTypes.Add((String)de.Key, data);
-#else
-                string typeName = de.Value?.GetType().FullName ?? "System.Object";
-                if (de.Value is TypedStringResourceEntry entry)
-                {
-                    typeName = entry.Type;
-                }
-
-                ResourceData data = new ResourceData(typeName, de.Value?.ToString());
-                resourceTypes.Add((string)de.Key, data);
 #endif
+                resourceTypes.Add((String)de.Key, data);
             }
 
             // Note we still need to verify the resource names are valid language
@@ -538,17 +524,32 @@ namespace Microsoft.Build.Tasks
                 HasSet = false
             };
 
-            string typeName = data.TypeName;
-            if (typeName == null)
+            Type type = data.Type;
+            if (type != null)
             {
-                return false;
+                if (type == typeof(MemoryStream))
+                {
+                    type = typeof(UnmanagedMemoryStream);
+                }
+
+                // Ensure type is internalally visible.  This is necessary to ensure 
+                // users can access classes via a base type.  Imagine a class like 
+                // Image or Stream as a internalally available base class, then an  
+                // internal type like MyBitmap or __UnmanagedMemoryStream as an  
+                // internal implementation for that base class.  For internalally  
+                // available strongly typed resource classes, we must return the  
+                // internal type.  For simplicity, we'll do that for internal strongly  
+                // typed resource classes as well.  Ideally we'd also like to check 
+                // for interfaces like IList, but I don't know how to do that without 
+                // special casing collection interfaces & ignoring serialization  
+                // interfaces or IDisposable. 
+                while (!type.IsPublic)
+                {
+                    type = type.BaseType;
+                }
             }
 
-            if (typeName == typeof(MemoryStream).FullName)
-            {
-                typeName = typeof(UnmanagedMemoryStream).FullName;
-            }
-
+            string typeName = type?.FullName ?? data.TypeName;
             var valueType = new CodeTypeReference(typeName, CodeTypeReferenceOptions.GlobalReference);
             prop.Type = valueType;
             if (internalClass)
