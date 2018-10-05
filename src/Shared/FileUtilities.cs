@@ -959,6 +959,11 @@ namespace Microsoft.Build.Shared
             return HasExtension(filename, ".vcproj");
         }
 
+        internal static bool IsDspFilename(string filename)
+        {
+            return HasExtension(filename, ".dsp");
+        }
+
         /// <summary>
         /// Returns true if the specified filename is a metaproject file (.metaproj), otherwise false.
         /// </summary>
