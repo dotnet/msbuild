@@ -138,7 +138,7 @@ function InstallRepoToolset {
     $msbuildArgs = AddLogCmd "Toolset" $msbuildArgs
     # Piping to Out-Null is important here, as otherwise the MSBuild output will be included in the return value
     # of the function (Powershell handles return values a bit... weirdly)
-    CallMSBuild $ToolsetProj @msbuildArgs | Out-Null
+    CallMSBuild "`"$ToolsetProj`"" @msbuildArgs | Out-Null
 
     if($LASTEXITCODE -ne 0) {
       throw "Failed to build $ToolsetProj"
