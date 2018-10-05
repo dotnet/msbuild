@@ -1,5 +1,5 @@
 {
-  "version": "15.9-preview",
+  "version": "15.9",
   "assemblyVersion": "15.1",
   "cloudBuild": {
     "buildNumber": {
