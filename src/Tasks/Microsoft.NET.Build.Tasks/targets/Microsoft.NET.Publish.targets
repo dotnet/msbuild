@@ -666,7 +666,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     </ItemGroup>
 
     <GetEmbeddedApphostPaths
-      PackagedShimOutputDirectory="$(OutDir)/shims/$(TargetFramework)"
+      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       ToolCommandName="$(ToolCommandName)"
       >

@@ -37,7 +37,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
-            packCommand.Execute();
+            packCommand.Execute().Should().Pass();
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);
 
             return packCommand.GetNuGetPackage();
@@ -148,7 +148,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
-            packCommand.Execute();
+            packCommand.Execute().Should().Pass();
 
             string windowShimPath = Path.Combine(shimoutputPath, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
@@ -167,7 +167,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
             var outputDirectory = packCommand.GetOutputDirectory("netcoreapp2.1");
-            packCommand.Execute();
+            packCommand.Execute().Should().Pass();
 
             string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
             File.Exists(windowShimPath).Should().BeTrue($"Shim {windowShimPath} should exist");
@@ -206,10 +206,10 @@ namespace Microsoft.NET.ToolPack.Tests
             _testRoot = helloWorldAsset.TestRoot;
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
-            packCommand.Execute();
+            packCommand.Execute().Should().Pass();
 
             var cleanCommand = new CleanCommand(Log, helloWorldAsset.TestRoot);
-            cleanCommand.Execute();
+            cleanCommand.Execute().Should().Pass();
 
             var outputDirectory = packCommand.GetOutputDirectory("netcoreapp2.1");
             string windowShimPath = Path.Combine(outputDirectory.FullName, $"shims/netcoreapp2.1/win-x64/{_customToolCommandName}.exe");
@@ -250,11 +250,11 @@ namespace Microsoft.NET.ToolPack.Tests
             var testAsset = CreateTestAsset(multiTarget, "shim_with_no_build" + multiTarget);
 
             var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
-            buildCommand.Execute();
+            buildCommand.Execute().Should().Pass();
 
             var packCommand = new PackCommand(Log, testAsset.TestRoot);
 
-            packCommand.Execute("/p:NoBuild=true");
+            packCommand.Execute("/p:NoBuild=true").Should().Pass();
             var nugetPackage = packCommand.GetNuGetPackage();
 
             using (var nupkgReader = new PackageArchiveReader(nugetPackage))
@@ -311,7 +311,7 @@ namespace Microsoft.NET.ToolPack.Tests
 
             var packCommand = new PackCommand(Log, helloWorldAsset.TestRoot);
 
-            packCommand.Execute();
+            packCommand.Execute().Should().Pass();
             var nugetPackage = packCommand.GetNuGetPackage();
 
             _packageId = Path.GetFileNameWithoutExtension(packCommand.ProjectFile);

@@ -16,6 +16,7 @@ namespace Microsoft.NET.Build.Tasks
         public const string PackageVersion = "PackageVersion";
         public const string IsImplicitlyDefined = "IsImplicitlyDefined";
         public const string IsTopLevelDependency = "IsTopLevelDependency";
+        public const string AllowExplicitVersion = "AllowExplicitVersion";
 
         // Target Metadata
         public const string RuntimeIdentifier = "RuntimeIdentifier";
@@ -81,8 +82,5 @@ namespace Microsoft.NET.Build.Tasks
         // Resource assemblies
         public const string Culture = "Culture";
         public const string DestinationSubDirectory = "DestinationSubDirectory";
-
-        // Expected platform packages
-        public const string ExpectedVersion = "ExpectedVersion";
     }
 }
