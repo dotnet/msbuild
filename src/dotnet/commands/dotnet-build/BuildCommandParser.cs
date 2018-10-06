@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.Cli
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--no-incremental",
-                    LocalizableStrings.NoIncrementialOptionDescription),
+                    LocalizableStrings.NoIncrementalOptionDescription),
                 Create.Option(
                     "--no-dependencies",
                     LocalizableStrings.NoDependenciesOptionDescription,

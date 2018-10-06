@@ -17,7 +17,7 @@
         <target state="translated">Ne générez pas les références de projet à projet, et générez uniquement le projet spécifié.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoIncrementialOptionDescription">
+      <trans-unit id="NoIncrementalOptionDescription">
         <source>Do not use incremental building.</source>
         <target state="translated">N'utilisez pas de génération incrémentielle.</target>
         <note />

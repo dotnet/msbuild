@@ -17,7 +17,7 @@
         <target state="translated">Не выполнять сборку для ссылок между проектами и выполнить сборку только для указанного проекта.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoIncrementialOptionDescription">
+      <trans-unit id="NoIncrementalOptionDescription">
         <source>Do not use incremental building.</source>
         <target state="translated">Не использовать инкрементную сборку.</target>
         <note />
