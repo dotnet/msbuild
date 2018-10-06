@@ -25,9 +25,7 @@ using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Xml;
 using System.Runtime.InteropServices;
-#if FEATURE_SYSTEM_CONFIGURATION
 using System.Configuration;
-#endif
 using System.Security;
 #if FEATURE_RESX_RESOURCE_READER
 using System.ComponentModel.Design;
@@ -3462,13 +3460,11 @@ namespace Microsoft.Build.Tasks
             {
                 provider = CodeDomProvider.CreateProvider(stronglyTypedLanguage);
             }
-#if FEATURE_SYSTEM_CONFIGURATION
             catch (ConfigurationException e)
             {
                 logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);
                 return false;
             }
-#endif
             catch (SecurityException e)
             {
                 logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);
