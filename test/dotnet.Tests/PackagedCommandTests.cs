@@ -202,31 +202,6 @@ namespace Microsoft.DotNet.Tests
                      .And.Pass();
         }
 
-        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
-        public void CanInvokeToolFromDirectDependenciesIfPackageNameDifferentFromToolName()
-        {
-            var testInstance = TestAssets.Get("AppWithDirectDepWithOutputName")
-                .CreateInstance()
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            string framework = Tools.Tests.Utilities.NuGetFrameworks.NetCoreApp30.DotNetFrameworkName;
-
-            new BuildCommand()
-                .WithProjectDirectory(testInstance.Root)
-                .WithConfiguration("Debug")
-                .Execute()
-                .Should().Pass();
-
-            new DependencyToolInvokerCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .WithEnvironmentVariable(CommandContext.Variables.Verbose, "true")
-                .ExecuteWithCapturedOutput($"tool-with-output-name", framework, "")
-                .Should().HaveStdOutContaining("Tool with output name!")
-                     .And.NotHaveStdErr()
-                     .And.Pass();
-        }
-
         [Fact]
         public void ItShowsErrorWhenToolIsNotRestored()
         {
@@ -284,52 +259,6 @@ namespace Microsoft.DotNet.Tests
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello World from tool!")
                 .And.NotHaveStdErr();
-        }
-
-        [WindowsOnlyTheory(Skip="https://github.com/dotnet/cli/issues/4514")]
-        [MemberData("DependencyToolArguments")]
-        public void TestFrameworkSpecificDependencyToolsCanBeInvoked(string identifier, string framework, string expectedDependencyToolPath)
-        {
-            var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "AppWithProjTool2Fx")
-                .CreateInstance(identifier: identifier)
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            new BuildCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .WithConfiguration("Debug")
-                .Execute()
-                .Should().Pass();
-
-            new DependencyToolInvokerCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput($"desktop-and-portable {framework} {identifier}")
-                .Should().HaveStdOutContaining(framework)
-                    .And.HaveStdOutContaining(identifier)
-                    .And.HaveStdOutContaining(expectedDependencyToolPath)
-                    .And.NotHaveStdErr()
-                    .And.Pass();
-        }
-
-        [WindowsOnlyTheory]
-        [MemberData("LibraryDependencyToolArguments")]
-        public void TestFrameworkSpecificLibraryDependencyToolsCannotBeInvoked(string identifier, string framework, string expectedDependencyToolPath)
-        {
-            var testInstance = TestAssets.Get(TestAssetKinds.DesktopTestProjects, "LibWithProjTool2Fx")
-                .CreateInstance(identifier: identifier)
-                .WithSourceFiles()
-                .WithRestoreFiles();
-
-            new BuildCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .WithConfiguration("Debug")
-                .Execute()
-                .Should().Pass();
-
-            new DependencyToolInvokerCommand()
-                .WithWorkingDirectory(testInstance.Root)
-                .ExecuteWithCapturedOutput($"desktop-and-portable {framework} {identifier}")
-                .Should().Fail();
         }
 
         [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]

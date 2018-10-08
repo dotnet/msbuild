@@ -19,6 +19,7 @@
     <EmbeddedResource Update="**\*.resx" GenerateSource="true" />
     <EmbeddedResource Update="*.resx" Namespace="Microsoft.DotNet.Tools" />
     <EmbeddedResource Update="BuildServer\*.resx" Namespace="Microsoft.DotNet.BuildServer" />
+    <EmbeddedResource Update="CommandFactory\*.resx" Namespace="Microsoft.DotNet.CommandFactory" />
     <EmbeddedResource Update="**\dotnet-add-package\*.resx" Namespace="Microsoft.DotNet.Tools.Add.PackageReference" />
     <EmbeddedResource Update="**\dotnet-add-reference\*.resx" Namespace="Microsoft.DotNet.Tools.Add.ProjectToProjectReference" />
     <EmbeddedResource Update="**\dotnet-add\*.resx" Namespace="Microsoft.DotNet.Tools.Add" />

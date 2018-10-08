@@ -70,15 +70,6 @@
         <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>True</Clean>
       </BaseTestPackageProject>
-      <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-tool-invoker">
-        <Name>dotnet-dependency-tool-invoker</Name>
-        <ProjectName>dotnet-dependency-tool-invoker.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
-        <Clean>True</Clean>
-      </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable"
                               Condition=" '$(IsDesktopAvailable)' == 'True' " >
         <Name>dotnet-desktop-and-portable</Name>

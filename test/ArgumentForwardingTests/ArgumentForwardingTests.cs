@@ -12,6 +12,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using System.Diagnostics;
 using FluentAssertions;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Tests.ArgumentForwarding
 {
@@ -160,20 +161,20 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <summary>
         /// EscapeAndEvaluateArgumentString returns a representation of string[] args
         /// when rawEvaluatedArgument is passed as an argument to a process using
-        /// Command.Create(). Ideally this should escape the argument such that
+        /// CommandUsingResolver.Create(). Ideally this should escape the argument such that
         /// the output is == rawEvaluatedArgument.
         /// </summary>
         /// <param name="rawEvaluatedArgument">A string[] representing string[] args as already evaluated by a process</param>
         /// <returns></returns>
         private string[] EscapeAndEvaluateArgumentString(string[] rawEvaluatedArgument)
         {
-            var commandResult = Command.Create("dotnet", new[] { ReflectorPath }.Concat(rawEvaluatedArgument))
+            var commandResult = CommandFactoryUsingResolver.Create("dotnet", new[] { ReflectorPath }.Concat(rawEvaluatedArgument))
                 .CaptureStdErr()
                 .CaptureStdOut()
                 .Execute();
 
             Console.WriteLine($"STDOUT: {commandResult.StdOut}");
-            
+
             Console.WriteLine($"STDERR: {commandResult.StdErr}");
 
             commandResult.ExitCode.Should().Be(0);
@@ -191,7 +192,7 @@ namespace Microsoft.DotNet.Tests.ArgumentForwarding
         /// <returns></returns>
         private string[] EscapeAndEvaluateArgumentStringCmd(string[] rawEvaluatedArgument)
         {
-            var cmd = Command.Create(s_reflectorCmdName, rawEvaluatedArgument);
+            var cmd = CommandFactoryUsingResolver.Create(s_reflectorCmdName, rawEvaluatedArgument);
             var commandResult = cmd
                 .CaptureStdErr()
                 .CaptureStdOut()

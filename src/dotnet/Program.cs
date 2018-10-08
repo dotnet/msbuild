@@ -19,6 +19,7 @@ using NuGet.Frameworks;
 using Command = Microsoft.DotNet.Cli.Utils.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -219,7 +220,7 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
-                CommandResult result = Command.Create(
+                CommandResult result = CommandFactoryUsingResolver.Create(
                         "dotnet-" + topLevelCommandParserResult.Command,
                         appArgs,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15)

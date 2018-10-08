@@ -11,6 +11,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.MSBuild;
 using Microsoft.DotNet.Tools.Run.LaunchSettings;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Tools.Run
 {
@@ -204,7 +205,7 @@ namespace Microsoft.DotNet.Tools.Run
 
             CommandSpec commandSpec = new CommandSpec(runProgram, runArguments);
 
-            return Command.Create(commandSpec)
+            return CommandFactoryUsingResolver.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);
         }
 
