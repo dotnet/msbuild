@@ -214,7 +214,7 @@ namespace Microsoft.Build.Graph
             foreach (var entryPointNode in EntryPointNodes)
             {
                 ImmutableList<string> entryTargets = entryProjectTargets == null || entryProjectTargets.Length == 0
-                    ? ImmutableList.CreateRange(entryPointNode.Project.DefaultTargets)
+                    ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
                     : ImmutableList.CreateRange(entryProjectTargets);
                 var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
                 encounteredEdges.Add(entryEdge);
@@ -244,7 +244,7 @@ namespace Microsoft.Build.Graph
                 {
                     var projectReferenceEdge = new ProjectGraphBuildRequest(
                         projectReference,
-                        ExpandDefaultTargets(projectReference.Project, targetsToPropagate));
+                        ExpandDefaultTargets(projectReference.ProjectInstance, targetsToPropagate));
                     if (encounteredEdges.Add(projectReferenceEdge))
                     {
                         edgesToVisit.Enqueue(projectReferenceEdge);
@@ -294,13 +294,13 @@ namespace Microsoft.Build.Graph
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
-            var project = new ProjectInstance(
+            var projectInstance = new ProjectInstance(
                 configurationMetadata.ProjectFullPath,
                 globalProperties,
                 configurationMetadata.ToolsVersion,
                 projectCollection);
             var graphNode = new ProjectGraphNode(
-                project,
+                projectInstance,
                 globalProperties);
             _allParsedProjects.Add(configurationMetadata, graphNode);
             return graphNode;
@@ -326,7 +326,7 @@ namespace Microsoft.Build.Graph
         {
             nodeState[projectToEvaluate] = NodeState.InProcess;
             ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection);
-            IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.Project.GetItems(ProjectReferenceItemName);
+            IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ProjectReferenceItemName);
             foreach (var projectReferenceToParse in projectReferenceItems)
             {
                 if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
@@ -336,7 +336,7 @@ namespace Microsoft.Build.Graph
                         ResourceUtilities.GetResourceString(
                             "ProjectGraphDoesNotSupportProjectReferenceWithToolset"),
                         projectReferenceToParse.EvaluatedInclude,
-                        parsedProject.Project.FullPath));
+                        parsedProject.ProjectInstance.FullPath));
                 }
 
                 string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
@@ -373,11 +373,11 @@ namespace Microsoft.Build.Graph
                         globalProperties);
                     if (!loadReference.success)
                     {
-                        if (loadReference.projectsInCycle[0].Equals(parsedProject.Project.FullPath))
+                        if (loadReference.projectsInCycle[0].Equals(parsedProject.ProjectInstance.FullPath))
                         {
                             // we have reached the nth project in the cycle, form error message and throw
                             loadReference.projectsInCycle.Add(projectReferenceConfigurationMetadata.ProjectFullPath);
-                            loadReference.projectsInCycle.Add(parsedProject.Project.FullPath);
+                            loadReference.projectsInCycle.Add(parsedProject.ProjectInstance.FullPath);
                             var errorMessage = FormatCircularDependencyError(loadReference.projectsInCycle);
                             throw new CircularDependencyException(string.Format(
                                 ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
@@ -423,7 +423,7 @@ namespace Microsoft.Build.Graph
         private static ImmutableList<string> DetermineTargetsToPropagate(ProjectGraphNode node, ImmutableList<string> entryTargets)
         {
             var targetsToPropagate = ImmutableList<string>.Empty;
-            ICollection<ProjectItemInstance> projectReferenceTargets = node.Project.GetItems(ProjectReferenceTargetsItemType);
+            ICollection<ProjectItemInstance> projectReferenceTargets = node.ProjectInstance.GetItems(ProjectReferenceTargetsItemType);
             foreach (var entryTarget in entryTargets)
             {
                 foreach (var projectReferenceTarget in projectReferenceTargets)
