@@ -1,20 +1,18 @@
 - [Static Graph](#static-graph)
   - [Overview](#overview)
     - [Motivations](#motivations)
-    - [M1 - MVP](#m1---mvp)
-    - [M1 non-goals](#m1-non-goals)
-    - [M2 - Single Project Enforcement](#m2---single-project-enforcement)
-    - [M3 - Dependency Tracking](#m3---dependency-tracking)
-    - [M4 - Ready for Caching/Distribution](#m4---ready-for-cachingdistribution)
-    - [M5 - Performance](#m5---performance)
   - [Project Graph](#project-graph)
+    - [Build dimensions](#build-dimensions)
     - [Building a project graph](#building-a-project-graph)
+    - [Inferring which targets to run for a project within the graph](#inferring-which-targets-to-run-for-a-project-within-the-graph)
+    - [Underspecified graphs](#underspecified-graphs)
     - [Public API](#public-api)
-  - [Inferring which targets to run for a project within the graph](#inferring-which-targets-to-run-for-a-project-within-the-graph)
-  - [Building a single project](#building-a-single-project)
-    - [Entry targets](#entry-targets)
-    - [Caching](#caching)
+  - [Isolated builds](#isolated-builds)
+    - [Isolated graph builds](#isolated-graph-builds)
+    - [Single project isolated builds](#single-project-builds)
   - [Distribution](#distribution)
+    - [Serialization](#serialization)
+    - [Deserialization](#deserialization)
   - [I/O Tracking](#io-tracking)
 
 # Static Graph
@@ -29,137 +27,55 @@
 - Increase perf of interaction between MSBuild and higher-order build engines (eg. MS internal build engines) - reuse evaluation and MSBuild nodes
 - **Existing functionality must still work. This new behavior is opt-in only.**
 
-### M1 - MVP
-- [ ] Add new project graph discovery
-  - [ ] Evaluation and statically follow ProjectReference.
-  - [ ] Graph and fully-evaluated instances returned
-  - [ ] Nodes in the graph:
-    - [ ] List of edges
-    - [ ] Instances of evaluated project
-
-- [ ] BuildSingleProject API:
-  - [ ] Build a project/target with /p:BuildProjectReferences=false
-  - [ ] Warn on MSBuild invocation in this mode
-- [ ] Simple BuildGraph API added
-- [ ] Gather data on migration costs and how far off we are from a usable solution
-
-### M1 non-goals
-- Caching
-- Distribution
-- Input/Output tracking or validation
-- Incremental build
-- Perf (no multi-core, evaluation re-use, etc)
-- Blocking "bad" P2P calls
-
-### M2 - Single Project Enforcement
-- [ ] BuildSingleProject
-  - [ ] New syntax to allow a project to export state to consuming projects
-  - [ ] Modify common targets to, by default, export state for P2P protocol data (probably non-Core first)
-  - [ ] Error on MSBuild invocations not exported by target Project
-
-### M3 - Dependency Tracking
-- [ ] BuildSingleProject
-  - [ ] Add Tracker to record input/outputs read for each project built
-  - [ ] Some sort of content store for this data?
-
-### M4 - Ready for Caching/Distribution
-- [ ] BuildGraph API
-  - [ ] Validate project outputs read as inputs are declared by a ProjectReference
-  - [ ] Other BuildCop stuff?
-- [ ] API to import/export tracker data and exported project state
-- [ ] Ability to distribute and cache from QB
-
-### M5 - Performance
-- [ ] Optimized graph scheduling
-- [ ] Evaluation re-use
-- [ ] Scoped evaluation (parse only what we need)
-
 ## Project Graph
 
-Calculating the project graph will be very similar to the MS internal build engine's existing Traversal logic. For a given evaluated project, all project references will be identified and recursively evaluated (with deduping). 
+Calculating the project graph will be very similar to the MS internal build engine's existing Traversal logic. For a given evaluated project, all project references will be identified and recursively evaluated (with deduping).
 
-A node in the graph is a tuple of the project file and global properties. Each (project, global props) combo can be evaluated in parallel.
+A node in the graph is a tuple of the project file and global properties. Each (project, global properties) combo can be evaluated in parallel.
 
-For cross-targeting projects, the project will be seen just as 1 uber project. Behaviorally this is the same as what happens when building a cross-targeting project directly today; the outer build ends up calling the MSBuild task for every target framework.
+### Build dimensions
 
-For example if project A cross targets net471 and netcoreapp2.0, then the graph will have just 1 node: project A + no global properties.
+Build dimensions can be thought of as different ways to build a particular project. For example, a project can be built Debug or Retail, x86 or x64, for .NET Framework 4.7.1 or .NET Core 2.0.
 
-For project references to projects which cross-target, it is non-trivial to figure out which target framework to build without running NuGet targets, so as a simplification the dependency will be on the cross-targeting node in the graph (ie. "all target frameworks"), rather than the individual target framework which is actually needed. Note that this may lead to over-building.
+For multitargeting projects (.NET projects which have multiple `TargetFrameworks`), the graph node will be just as 1 uber node. Behaviorally this is the same as what happens when building a multitargeting project directly today; the outer build ends up calling the MSBuild task for every target framework.
 
-For example if project B had a project reference to the example project A above, then project B would depend on project A (without global properties).
+For example if project A multitargets `net471` and `netcoreapp2.0`, then the graph will have just 1 node: project A + no global properties.
 
-Because we are using ProjectReferences to determine the graph, we will need to duplicate the mapping of ProjectReference metadata to global properties given to the MSBuild task. This means that we need to couple the engine to the concept of cross-targeting and how it's done. Which means that whenever we change the cross-targeting MSBuild code we need to update the project graph construction code.
+For project references to projects which multitarget, it is non-trivial to figure out which target framework to build without running NuGet targets, so as a simplification the dependency will be on the multitargeting node in the graph (ie. "all target frameworks"), rather than the individual target framework which is actually needed. Note that this may lead to over-building when building an entire graph. However, Visual Studio also exhibits this same behavior today.
 
-**OPEN ISSUE:** Are there other "build dimensions" similar to cross-targeting? Cross-targeting has a well-known pattern, but there may be others. Like runtime id (e.g. win10, win8, osx, linux14, linux16, etc), which give TFM x RID combinations. We wouldn't want to teach the engine how to handle each type of build dimension. Even if we have to hardcode details about certain build dimensions (to avoid having a ton of sdk writers to change), should we bother designing a way in which sdk writers can declare how new build dimensions affect the graph? To avoid adding more and more coupling to build logic?
+For example if project B targeted `net471` and had a project reference to the example project A above, then project B would depend on project A (without global properties). However in reality when building project B, project A would only build its `net471` (project A + global properties of `TargetFramework=net471`) variant, and the `netcoreapp2.0` variant would not actually be built.
 
-**OPEN ISSUE:** What about MSBuild calls which pass in global properties not on the ProjectReference? Worse, if the global properties are computed at runtime? The sfproj SDK does this with PublishDir, which tells the project where to put its outputs so the referencing sfproj can consume them. We may need to work with sfproj folks and other SDK owners, which may not be necessarily a bad thing since already the sfproj SDK requires 2 complete builds of dependencies (ProjectReference + this PublishDir thing) and can be optimized. A possible short term fix: Add nodes to graph to special case these kinds of SDKs.
+Because we are using ProjectReferences to determine the graph, we will need to duplicate the mapping of ProjectReference metadata to global properties given to the MSBuild task. This means that we need to couple the engine to the common MSBuild targets, which means that whenever we change those targets we need to update the project graph construction code as well.
+
+The graph also supports multiple entry points, so this enables scenarios where projects build with different platforms in one build. For example, one entry point could be a project with global properties of `Platform=x64` and another entry point might be that same project with `Platform=x86`. Because the project graph understands the metadata on project references as well, including `GlobalPropertiesToRemove`, this also enables the notion of "platform agnostic projects" which should only build once regardless of the platform.
+
+For example, if project A had a project reference to project B with `GlobalPropertiesToRemove=Platform`, and we wanted to build project A for x86 and x64 so used both as entry points, the graph would consist of 3 nodes: project A with `Platform=x86`, project A with `Platform=x64`, and project B with no global properties set.
+
+To summarize, there are two main patterns for build dimensions which are handled:
+1. The project builds itself multiple times like multitargeting. This will be seen as a single graph node
+2. A different set of global properties are used to choose the dimension like with Configuration or Platform. The project graph supports this via multiple entry points.
+
+Note that multiple entry points will not useable from the command-line due to the inability to express it properly, and so programatic access must be used in that case.
+
+**OPEN ISSUE:** What about MSBuild calls which pass in global properties not on the ProjectReference? Worse, if the global properties are computed at runtime? The sfproj SDK does this with PublishDir, which tells the project where to put its outputs so the referencing sfproj can consume them. We may need to work with sfproj folks and other SDK owners, which may not be necessarily a bad thing since already the sfproj SDK requires 2 complete builds of dependencies (normal ProjectReference build + this PublishDir thing) and can be optimized. A possible short term fix: Add nodes to graph to special case these kinds of SDKs. This is only really a problem for isolated builds.
 
 Note that graph cycles are disallowed, even if they're using disconnected targets. This is a breaking change, as today you can have two projects where each project depends on a target from the other project, but that target doesn't depend the default target or anything in its target graph.
 
 ### Building a project graph
-There are conceptually two options when building a project graph: building the entire graph or building a single project in the graph. There is one other scenario, which is building a part of the graph (a project and everything it needs), but that's effectively just rooting the graph at that project and building that whole new graph.
+When building a graph, project references should be built before the projects that reference them, as opposed to the classical msbuild scheduler which builds projects just in time.
 
-When building a whole graph, we can think of it as just building the root project recursively. So really the two scenarios break down to just building the root project recursively or not, which is actually very similar to how "msbuild" vs "msbuild /p:BuildProjectReferences=false" works today.
+For example if project A depends on project B, then project B should build first, then project A. Classical msbuild scheduling would start building project A, reach an MSBuild task for project B, pause project A, build project B, then resume project A once unblocked.
 
-Additionally, since building a graph is effectively just building a project recursively, then invoking MSBuild with a target list should behave similarly to how to behaves today. The top-level project will be invoked with those targets, and project references won't be affected by that target list. However, targets like "Clean" and "Rebuild" will need to be special-cased, as they recursively call those targets on their project references.
+Building in this way should make better use of parallelism as all CPU cores can be saturated immediately, rather than waiting for projects to get to the phase in their execution where they build their project references. More subtly, less execution state needs to be held in memory at any given time as there are no paused builds waiting to be unblocked. Strange scheduling conditions like a long project chain being scheduled on one MSBuild node while the other are all idle can also be avoided.
 
-Short-term (M1/MVP), building a graph is the same behaviorally as building the root project (no export target enforcement). The main difference will be in scheduling. Instead of dependency projects being evaluated and executed just in time, MSBuild will schedule dependencies before projects which depend on them. In most cases when building a graph in this order, all MSBuild task executions will come from the MSBuild result cache, which leads fairly cleanly into export targets, which would effectively be the enforcement of that.
+### Inferring which targets to run for a project within the graph
+In the classic traversal, the referencing project chooses which targets to call on the referenced projects and may call into a project multiple times with different target lists and global properties (examples in [project reference protocol](https://github.com/Microsoft/msbuild/blob/master/documentation/ProjectReference-Protocol.md)). When building a graph, where projects are built before the projects that reference them, we have to determine the target list to execute on each project statically.
 
-**OPEN ISSUE:** What do we do about properties provided by the SLN? Under the hood, this is effectively different sets of global properties provided to each MSBuild invocation (or ProjectReference?) in the metaproj.
+To do this, we need to explicitly describe the project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project. These protocols typically consist of recursively calling the same target on all referenced projects (e.g. build, clean, rebuild), but for generality each project may define its own calling pattern.
 
-### Public API ###
-This is a proposal for what the public API may look like:
+Each project specifies the project reference protocol targets it supports, in the form of a target mapping: `target -> targetList`. The `target` represents the project reference entry target, and the `targetList` represents the list of targets that `target` ends up calling on each referenced project.
 
-    namespace Microsoft.Build.Graph
-    {
-        public class ProjectGraph
-        {
-            // Creates a graph starting at the given project file.
-            public ProjectGraph(string projectFile) { }
-
-            // Creates a graph starting at the given project files, for example all projects in a solution.
-            public ProjectGraph(IEnumerable<string> projectFiles) { }
-
-            // All project nodes in the graph.
-            IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; }
-
-            // Build the graph with the given target, if any
-            BuildResult Build(string target = null);
-        }
-
-        public class ProjectGraphNode
-        {
-            // No public creation.
-            internal ProjectGraphNode() { }
-
-            // Projects which this project references.
-            IReadOnlyCollection<ProjectGraphNode> ReferencedProjects { get; }
-
-            // Projects which reference this project.
-            IReadOnlyCollection<ProjectGraphNode> ReferencingProjects { get; }
-
-            // The evaluated project
-            Project Project { get; }
-        }
-    }
-
-## Inferring which targets to run for a project within the graph
-
-One property of the static build graph is that a project (project, globalproperties, toolsversion) is executed only once when the project graph is executed. This is in conflict with current P2P patterns (project-to-project) where a project may be called multiple times with different targets and global properties (examples in [p2p protocol](https://github.com/Microsoft/msbuild/blob/master/documentation/ProjectReference-Protocol.md)).
-
-During a static graph based build projects are built before the projects that reference them, whereas the classical msbuild scheduler builds projects just in time. In the classic traversal, the referencing project chooses which targets to call on the referenced projects. But in the static graph traversal, we don't know the entry targets for a reference because we visit the references before the referencing projects.
-
-We need to represent project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project. These protocols apply to an entire graph and consist of recursively calling the same target on all referenced projects (e.g. build, clean, rebuild). As a complication, individual projects can change the protocol (e.g. a project file reimplements Clean by calling Clean2 on referenced projects).
-
-Some project reference protocols require multiple calls (MSBuild task calls) between the referencing project and referenced project. Therefore we need to not only specify the entry targets, but also the helper targets.
-
-Therefore the project reference protocols will need to be explicitly described. Each project specifies the project reference protocol targets it supports, in the form of a target mapping:
-
-*target -> targetList*
-
-*target* represents the project reference entry target, and *targetList* represents the list of targets that `target` ends up calling on each referenced project.
-
-For example, a simple recursive rule would be *A -> A*, which says that a project called with target `A` will call target `A` on its referenced projects. Here's an example execution with two nodes:
+For example, a simple recursive rule would be `A -> A`, which says that a project called with target `A` will call target `A` on its referenced projects. Here's an example execution with two nodes:
 
 ```
 Execute target A+-->Proj1   A->A
@@ -171,12 +87,12 @@ Execute target A+-->Proj1   A->A
                     Proj2   A->A
 ```
 
-Proj1 depends on Proj2, and we want to build the graph with target `A`. Proj1 gets inspected for the project reference protocol for target `A` (represented to the right of Proj1). The protocol says the referenced projects will be called with `A`. Therefore Proj2 gets called with target `A`. After Proj2 builds, Proj1 then also builds with `A` (because Proj1 is the root of the graph).
+Proj1 depends on Proj2, and we want to build the graph with target `A`. Proj1 gets inspected for the project reference protocol for target `A` (represented to the right of Proj1). The protocol says the referenced projects will be called with `A`. Therefore Proj2 gets called with target `A`. After Proj2 builds, Proj1 then also builds with `A` because Proj1 is an entry point and `A` is what was requested by the user.
 
-A project reference protocol could contain multiple targets, for example `A -> B, A`. This means that building `A` on the referencing project will lead to `B` and `A` getting called on the referenced projects. If all nodes in the graph repeat the same rule, then the rule is repeated recursively on all nodes. However, a node can choose to implement the protocol differently. In the following example, the entry targets are:
-- Proj4 is called with targets `B, A, C, D`. On multiple references, the incoming targets get concatenated. The order does not matter, as MSBuild has non-deterministic p2p ordering.
+A project reference protocol may contain multiple targets, for example `A -> B, A`. This means that building `A` on the referencing project will lead to `B` and `A` getting called on the referenced projects. If all nodes in the graph repeat the same rule, then the rule is repeated recursively on all nodes. However, a project can choose to implement the protocol differently. In the following example, the entry targets are:
+- Proj4 is called with targets `B, A, C, D`. On multiple references, the incoming targets get concatenated. The order of these target lists does not matter, as MSBuild has non-deterministic p2p ordering, however the order within the target lists does. IE. `B, A, C, D` and `C, D, B, A` are valid, while `A, B, C, D` is not.
 - Proj3 and Proj2 get called with `B, A`, as specified by the rule in Proj1.
-- Proj1 builds with A, because it's the root of the graph.
+- Proj1 builds with `A`, because it's the root of the graph.
 
 ```
             A+-->Proj1   A->B, A
@@ -203,20 +119,18 @@ The default target (represented in this spec's pseudo protocol representation as
 
 `Clean -> GetTargetFrameworks, Clean`
 
-`Rebuild -> Clean, Build`
+`Rebuild -> GetTargetFrameworks, Clean, <default>, GetNativeManifest, GetCopyToOutputDirectoryItems`
 
-`Rebuild` maps to two referenced protocols. `Clean` and `Build` get substituted with the contents of the `Clean` and `Build` protocols.
+`Rebuild` actually calls `Clean` and `Build`, which in turn uses the concatenation of the `Clean` and `Build` mappings. `GetTargetFrameworks` is repeated so gets deduped.
 
 Restore is a composition of two rules:
 - `Restore -> _IsProjectRestoreSupported, _GenerateRestoreProjectPathWalk, _GenerateRestoreGraphProjectEntry`
-
 - `_GenerateRestoreProjectPathWalk -> _IsProjectRestoreSupported, _GenerateRestoreProjectPathWalk, _GenerateRestoreGraphProjectEntry`
 
 **Open Issue:** Restore is a bit complicated, and we may need new concepts to represent it. The root project calls the recursive `_GenerateRestoreProjectPathWalk` on itself to collect the referenced projects closure, and then after the recursion call returns (after having walked the graph), it calls the other targets on each returned referenced project in a non-recursive manner. So the above protocol is not a truthful representation of what happens, but it correctly captures all targets called on each node in the graph.
 
-**Open Issue:** How do we differentiate between targets called on the outer build project and targets called on the inner build projects?
+We'll represent the project reference protocols as `ProjectReferenceTargets` items in MSBuild. For extensibility, the target list for the core mappings will be stored as properties so that users can append to it, but the `ProjectReferenceTargets` item ultimately is what will actually be read by the ProjectGraph.
 
-We'll represent the project reference protocols as items in MSBuild. The target list will be stored as properties for ease of extensibility.
 ```xml
 <PropertyGroup>
   <ProjectReferenceTargetsForClean>GetTargetFrameworks;Clean</ProjectReferenceTargetsForClean>
@@ -227,34 +141,109 @@ We'll represent the project reference protocols as items in MSBuild. The target 
 </ItemGroup>
 ```
 
-## Building a single project
-The project graph is required to build the projects in the correct order. An individual project will be built using `/p:BuildProjectReferences=false` to avoid recursive builds inside a project.
+### Underspecified graphs
+The intention is that the project graph and the target lists for each node be exactly correct, however MSBuild is quite flexible and particular projects or project types may not adequately decribe these for the project graph.
 
-**OPEN ISSUE:** Can we get away with not setting `/p:BuildProjectReferences=false`?
+If a project calls into another project which either isn't represented in the graph or with a target list which isn't represented by the graph, it will fall back to classical MSBuild behavior and execute that target on the project reference just-in-time. This has the consequence of still requiring all project state be kept in memory in case any arbitrary project wants to execute targets on any other arbitrary project.
 
-### Entry targets
-When building a project, run the initial targets and the entry targets as computed by the [project reference protocol](#inferring-which-targets-to-run-for-a-project-within-the-graph).
+To enable further optimizations (and strictness), graph builds can run [isolated](#isolated-builds) which enforces that the graph be entirely accurate.
 
-### Caching
-After execution, the results of the entry targets will be cached in the BuildManager and the project can be disposed. Note that this gives project execution a concrete start and end. In classical msbuild execution projects needed to remain active just in case any other project needed to execute a target on it.
+### Public API
+This is a proposal for what the public API for ProjectGraph may look like:
 
-**Open Issue:** With this approach initial targets will also get included due to how the RequestBuilder composes entry targets and how TargetBuilder reports build results. Is this an issue? Is it just a perf optimization to take them out from the cache?
+```csharp
+namespace Microsoft.Build.Graph
+{
+    public class ProjectGraph
+    {
+        // Creates a graph starting at the given project file.
+        public ProjectGraph(string projectFile) { }
+        public ProjectGraph(string entryProjectFile, IDictionary<string, string> globalProperties) { }
 
-For projects which depend on other projects, the MSBuild task will look up the target result in the cache. If the target is missing from the cache, an error will be logged and the build will fail. If the project is calling into itself either via `CallTarget` or via `MSBuild` with a different set of global properties, this will be always allowed (support for cross-targeting).
+        // Creates a graph starting at the given project files.
+        public ProjectGraph(IEnumerable<string> projectFiles) { }
+        public ProjectGraph(IEnumerable<string> entryProjectFiles, IDictionary<string, string> globalProperties) { }
+
+        // Creates a graph starting at the given entry point(s). An entry point is a (project file, global properties) pair.
+        public ProjectGraph(ProjectGraphEntryPoint entryPoint) { }
+        public ProjectGraph(IEnumerable<ProjectGraphEntryPoint> entryPoints) { }
+
+        /* Also various constructor overloads which take a ProjectCollection */
+
+        // Nodes for the provided entry points
+        IReadOnlyCollection<ProjectGraphNode> EntryPointNodes { get; }
+
+        // All project nodes in the graph.
+        IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; }
+    }
+
+    public struct ProjectGraphEntryPoint
+    {
+        public ProjectGraphEntryPoint(string projectFile) { }
+
+        public ProjectGraphEntryPoint(string projectFile, IDictionary<string, string> globalProperties) { }
+
+        // The project file to use for this entry point
+        public string ProjectFile { get; }
+
+        // The global properties to use for this entry point
+        public IDictionary<string, string> GlobalProperties { get; }
+    }
+
+    public class ProjectGraphNode
+    {
+        // No public creation.
+        internal ProjectGraphNode() { }
+
+        // Projects which this project references.
+        IReadOnlyCollection<ProjectGraphNode> ProjectReferences { get; }
+
+        // Projects which reference this project.
+        IReadOnlyCollection<ProjectGraphNode> ReferencingProjects { get; }
+
+        // The evaluated project
+        Project Project { get; }
+    }
+}
+```
+
+## Isolated builds
+Building a project in isolation means that any build results for project references must be pre-computed and provided as input.
+
+If a project uses the MSBuild task, the build result must be in MSBuild's build result cache instead of just-in-time executing targets on that referenced project. If it is not in the build result cache, an error will be logged and the build will fail. If the project is calling into itself either via `CallTarget` or the MSBuild task with a different set of global properties, this will be allowed to support multitargeting and other build dimensions implemented in a similar way.
 
 Because referenced projects and their entry targets are guaranteed to be in the cache, they will not build again. Therefore we do not need to set `/p:BuildProjectReferences=false` or any other gesture that tells SDKs to not do recursive operations.
 
-Initially this result cache will just be in-memory, similar to the existing MSBuild target result cache, but eventually could persist across builds so that an incremental build of a particular project in the project graph would not require re-evaluation or any target execution in that project's dependencies. This may have significant performance improvements for incremental builds.
+**Open Issue:** With this approach initial targets will also get included due to how the `RequestBuilder` composes entry targets and how `TargetBuilder` reports build results. Is this an issue? Is it just a perf optimization to take them out from the cache? It seems like target mapping incompleteness at the very least, since if the project changes its initial targets, the cache hit from the referencing project would suddenly be a miss.
 
-Note that because projects have a concrete start and end time, this allows for easy integration with Tracker to observe all inputs and outputs for a project. Note however that export target I/O would be attributed to the dependency (project doing the exporting), not the dependent project (project with the project reference). This differs from today's behavior, but seems like a desirable difference anyway.
+**Open Issue:** How do we differentiate between targets called on the outer build project and targets called on the inner build projects? For multitargeting builds, a project will actually reach into the inner build, but the graph expresses a dependency on the outer build.
+
+### Isolated graph builds
+When building a graph in insolated mode, the graph is used to traverse and build the projects in the right order, but each individual project is built in isolation. The build result cache will just be in memory exactly as it is today, but on cache miss it will error. This enforces that both the graph and target mappings are complete and correct.
+
+Furthermore, running in this mode enforces that each (project, global properties) pair is executed only once and must execute all targets needed by all projects which reference that node. This gives it a concrete start and end time, which leads to some perf optimizations, like garbage collecting all project state (except the build results) once it finishes building. This can greatly reduce the memory overhead for large builds.
+
+This discrete start and end time also allows for easy integration with [I/O Tracking](#io-tracking) to observe all inputs and outputs for a project. Note however that I/O during target execution, particular target execution which may not normally happen as part of a project's individual build execution, would be attributed to the project reference project rather the project with the project reference. This differs from today's behavior, but seems like a desirable difference anyway.
+
+### Single project isolated builds
+When building a single project in isolation, all project references' build results must be provided to the project externally. Specifically, the results will need to be [deserialized](#deserialization) from files and loaded into the build result cache in memory.
+
+Because of this, single project isolated builds is quite restrictive and is not intended to be used directly by end-users. Instead the scenario is intended for higher-order build engines which support caching and [distribution](#distribution).
+
+There is also the possibility for these higher-order build engines and even Visual Studio to enable extremely fast incremental builds for a project. For example, when all project references' build results are provided (and validated as up to date by that higher-order build engine), there is no need to evaluate or execute any targets on any other project.
+
+These incremental builds can even be extended to multiple projects by keeping a project graph in memory as well as the last build result for each node and whether that build result is valid. The higher-order build engine can then itself traverse the graph and do single project isolated builds for projects which are not currently up to date.
 
 ## Distribution
-To support distribution with export targets (eg. for the MS internal build engine), we need a solution for a project and a dependency building on different machines.
-- Option 1 (easier): Run export targets only for dependencies, no build.
-  - Requires re-evaluation of the dependency, but no big MSBuild support beyond allowing the no-Build mode for dependencies.
-- Option 2 (better): Serialize the export target state
-  - Best for performance, but requires a serialization protocol and a way to specify how to import the state
-  - Possibly same mechanism as the persistent cross-build cache described above.
+To support distribution for isolated builds (eg. for the MS internal build engine), we need a solution for a project and a dependency building on different machines. To facilitate this, we need to serialize the build result cache to disk on the source machine which built the project reference, and deserialize it on the destination machine which is about to build the project referencing the project reference.
+
+In fact, this same mechanism can be used for non-distributed builds as well, for example for incremental builds. The caller would still need to ensure that the build result cache was valid (ie. the project reference project was not changed since the build result cache for it was produced), but the benefit would be that only the current project being built would need to be evaluated and only targets on that project would need to execute.
+
+### Serialization
+**WIP**
+
+### Deserialization
+**WIP**
 
 ## I/O Tracking
 **WIP**
