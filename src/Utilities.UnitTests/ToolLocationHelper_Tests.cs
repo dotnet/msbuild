@@ -4184,6 +4184,53 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Verify that the list of platforms is empty if we ask for an sdk that is not installed.
+        /// </summary>
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void VerifyGetFoldersInVSInstalls_Unix()
+        {
+            ToolLocationHelper.GetFoldersInVSInstalls(null, null, "relativePath").Count().ShouldBe(0);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void VerifyFindRootFolderWhereAllFilesExist()
+        {
+            // create directories and files in them
+
+            //  root1
+            //     subdir
+            //         file1.txt
+            //     file1.txt
+            //  root2
+            //     subdir
+            //         file2.txt
+            //     file1.txt
+
+            string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyFindRootFolderWhereAllFilesExist");
+            string[] rootDirectories = new string[] { Path.Combine(testDirectoryRoot, "Root1"), Path.Combine(testDirectoryRoot, "Root2") };
+            
+            for(int i = 0; i < rootDirectories.Count(); i++)
+            {
+                // create directory
+                string subdir = Path.Combine(rootDirectories[i], "Subdir");
+                Directory.CreateDirectory(subdir);
+                var fileInSubDir = string.Format("file{0}.txt", i+1);
+                File.Create(Path.Combine(rootDirectories[i], "file1.txt")).Close();
+                File.Create(Path.Combine(subdir, fileInSubDir)).Close();
+            }
+
+            string roots = string.Join(";", rootDirectories);
+
+            ToolLocationHelper.FindRootFolderWhereAllFilesExist(roots, "file1.txt").ShouldBe(rootDirectories[0]);
+            ToolLocationHelper.FindRootFolderWhereAllFilesExist(roots, @"file1.txt;subdir\file2.txt").ShouldBe(rootDirectories[1]);
+            ToolLocationHelper.FindRootFolderWhereAllFilesExist(roots, @"file1.txt;subdir\file3.txt").ShouldBe(String.Empty);
+            ToolLocationHelper.FindRootFolderWhereAllFilesExist(@"c:<>;" + roots, "file1.txt").ShouldBe(rootDirectories[0]); // should ignore invalid dir
+        }
+
+
 #if FEATURE_REGISTRY_SDKS
         /// <summary>
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for pre-OneCore SDKs during evaluation time as a msbuild function.
