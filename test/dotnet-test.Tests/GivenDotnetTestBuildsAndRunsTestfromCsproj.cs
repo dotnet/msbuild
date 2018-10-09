@@ -91,7 +91,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                 .WithWorkingDirectory(testProjectDirectory)
                 .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore")
                 .Should().Pass()
-                .And.HaveStdOutContaining("To run tests with dotnet test add <IsTestProject>true</IsTestProject> property to project file.");
+                .And.HaveStdOutContaining("Skipping running test for project");
         }
 
         [Fact]
