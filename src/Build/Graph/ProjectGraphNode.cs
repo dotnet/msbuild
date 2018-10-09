@@ -15,10 +15,10 @@ namespace Microsoft.Build.Graph
 
         // No public creation.
         internal ProjectGraphNode(
-            ProjectInstance project,
+            ProjectInstance projectInstance,
             IReadOnlyDictionary<string, string> globalProperties)
         {
-            Project = project;
+            ProjectInstance = projectInstance;
             GlobalProperties = globalProperties;
         }
 
@@ -28,9 +28,9 @@ namespace Microsoft.Build.Graph
         public IReadOnlyCollection<ProjectGraphNode> ProjectReferences => _projectReferences;
 
         /// <summary>
-        /// Gets the evaluated project represented by this node in the graph.
+        /// Gets the evaluated project instance represented by this node in the graph.
         /// </summary>
-        public ProjectInstance Project { get; }
+        public ProjectInstance ProjectInstance { get; }
 
         /// <summary>
         /// Gets the global properties which should be used to evaluate and execute this node in the graph.
