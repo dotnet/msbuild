@@ -175,12 +175,25 @@ namespace Microsoft.Build.Graph
             {
                 PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary = CreatePropertyDictionary(entryPoint.GlobalProperties);
                 var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
-                ProcessNode(configurationMetadata, nodeStates, projectCollection, globalPropertyDictionary);
+                if(!nodeStates.TryGetValue(configurationMetadata, out NodeState nodeState))
+                {
+                    ProcessNode(configurationMetadata, nodeStates, projectCollection, globalPropertyDictionary);
+                }
                 entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
+            }
+
+            var graphRoots = new List<ProjectGraphNode>();
+            foreach(var entryPointNode in entryPointNodes)
+            {
+                if (entryPointNode.ReferencingProjects.Count == 0)
+                {
+                    graphRoots.Add(entryPointNode);
+                }
             }
 
             EntryPointNodes = entryPointNodes.AsReadOnly();
             ProjectNodes = _allParsedProjects.Values;
+            GraphRoots = graphRoots.AsReadOnly();
         }
 
         /// <summary>
@@ -192,6 +205,8 @@ namespace Microsoft.Build.Graph
         /// Get an unordered collection of all project nodes in the graph.
         /// </summary>
         public IReadOnlyCollection<ProjectGraphNode> ProjectNodes { get; }
+
+        public IReadOnlyCollection<ProjectGraphNode> GraphRoots { get; }
 
         /// <summary>
         /// Gets the target list to be executed for every project in the graph, given a particular target list for the entry project.
@@ -393,7 +408,9 @@ namespace Microsoft.Build.Graph
                     }
                 }
 
-                parsedProject.AddProjectReference(_allParsedProjects[projectReferenceConfigurationMetadata]);
+                ProjectGraphNode parsedProjectReference = _allParsedProjects[projectReferenceConfigurationMetadata];
+                parsedProject.AddProjectReference(parsedProjectReference);
+                parsedProjectReference.AddReferencingProject(parsedProject);
             }
 
             nodeState[projectToEvaluate] = NodeState.Processed;
