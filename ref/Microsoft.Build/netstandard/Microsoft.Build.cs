@@ -1417,6 +1417,7 @@ namespace Microsoft.Build.Graph
         public ProjectGraph(string entryProjectFile, System.Collections.Generic.IDictionary<string, string> globalProperties) { }
         public ProjectGraph(string entryProjectFile, System.Collections.Generic.IDictionary<string, string> globalProperties, Microsoft.Build.Evaluation.ProjectCollection projectCollection) { }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> EntryPointNodes { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> GraphRoots { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectNodes { get { throw null; } }
         public System.Collections.Generic.IReadOnlyDictionary<Microsoft.Build.Graph.ProjectGraphNode, System.Collections.Immutable.ImmutableList<string>> GetTargetLists(string[] entryProjectTargets) { throw null; }
     }
@@ -1434,6 +1435,7 @@ namespace Microsoft.Build.Graph
         public System.Collections.Generic.IReadOnlyDictionary<string, string> GlobalProperties { get { throw null; } }
         public Microsoft.Build.Execution.ProjectInstance ProjectInstance { get { throw null; } }
         public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ProjectReferences { get { throw null; } }
+        public System.Collections.Generic.IReadOnlyCollection<Microsoft.Build.Graph.ProjectGraphNode> ReferencingProjects { get { throw null; } }
     }
 }
 namespace Microsoft.Build.Logging

@@ -12,6 +12,7 @@ namespace Microsoft.Build.Graph
     public sealed class ProjectGraphNode
     {
         private readonly List<ProjectGraphNode> _projectReferences = new List<ProjectGraphNode>();
+        private readonly List<ProjectGraphNode> _referencingProjects = new List<ProjectGraphNode>();
 
         // No public creation.
         internal ProjectGraphNode(
@@ -28,6 +29,11 @@ namespace Microsoft.Build.Graph
         public IReadOnlyCollection<ProjectGraphNode> ProjectReferences => _projectReferences;
 
         /// <summary>
+        /// Gets a list of graph nodes for projects that have a project reference for this project
+        /// </summary>
+        public IReadOnlyCollection<ProjectGraphNode> ReferencingProjects => _referencingProjects;
+
+        /// <summary>
         /// Gets the evaluated project instance represented by this node in the graph.
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
@@ -38,5 +44,7 @@ namespace Microsoft.Build.Graph
         public IReadOnlyDictionary<string, string> GlobalProperties { get; }
 
         internal void AddProjectReference(ProjectGraphNode projectGraphNode) => _projectReferences.Add(projectGraphNode);
+
+        internal void AddReferencingProject(ProjectGraphNode projectGraphNode) => _referencingProjects.Add(projectGraphNode);
     }
 }

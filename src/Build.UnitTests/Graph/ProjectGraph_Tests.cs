@@ -73,19 +73,41 @@ namespace Microsoft.Build.Graph.UnitTests
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
 
                 graph.ProjectNodes.Count.ShouldBe(7);
-                GetNodeForProject(graph, 1).ProjectReferences.Count.ShouldBe(2);
-                GetNodeForProject(graph, 2).ProjectReferences.Count.ShouldBe(3);
-                GetNodeForProject(graph, 3).ProjectReferences.Count.ShouldBe(0);
-                GetNodeForProject(graph, 4).ProjectReferences.Count.ShouldBe(0);
-                GetNodeForProject(graph, 5).ProjectReferences.Count.ShouldBe(1);
-                GetNodeForProject(graph, 6).ProjectReferences.Count.ShouldBe(1);
-                GetNodeForProject(graph, 7).ProjectReferences.Count.ShouldBe(0);
+                ProjectGraphNode node1 = GetNodeForProject(graph, 1);
+                ProjectGraphNode node2 = GetNodeForProject(graph, 2);
+                ProjectGraphNode node3 = GetNodeForProject(graph, 3);
+                ProjectGraphNode node4 = GetNodeForProject(graph, 4);
+                ProjectGraphNode node5 = GetNodeForProject(graph, 5);
+                ProjectGraphNode node6 = GetNodeForProject(graph, 6);
+                ProjectGraphNode node7 = GetNodeForProject(graph, 7);
+
+                node1.ProjectReferences.Count.ShouldBe(2);
+                node2.ProjectReferences.Count.ShouldBe(3);
+                node3.ProjectReferences.Count.ShouldBe(0);
+                node4.ProjectReferences.Count.ShouldBe(0);
+                node5.ProjectReferences.Count.ShouldBe(1);
+                node6.ProjectReferences.Count.ShouldBe(1);
+                node7.ProjectReferences.Count.ShouldBe(0);
+
+                node1.ReferencingProjects.Count.ShouldBe(1);
+                node2.ReferencingProjects.Count.ShouldBe(0);
+                node3.ReferencingProjects.Count.ShouldBe(1);
+                node4.ReferencingProjects.Count.ShouldBe(1);
+                node5.ReferencingProjects.Count.ShouldBe(2);
+                node6.ReferencingProjects.Count.ShouldBe(1);
+                node7.ReferencingProjects.Count.ShouldBe(1);
 
                 // confirm that there is a path from 2 -> 6 -> 1 -> 5 -> 7
-                GetNodeForProject(graph, 2).ProjectReferences.ShouldContain(GetNodeForProject(graph, 6));
-                GetNodeForProject(graph, 6).ProjectReferences.ShouldContain(GetNodeForProject(graph, 1));
-                GetNodeForProject(graph, 1).ProjectReferences.ShouldContain(GetNodeForProject(graph, 5));
-                GetNodeForProject(graph, 5).ProjectReferences.ShouldContain(GetNodeForProject(graph, 7));
+                node2.ProjectReferences.ShouldContain(node6);
+                node6.ProjectReferences.ShouldContain(node1);
+                node1.ProjectReferences.ShouldContain(node5);
+                node5.ProjectReferences.ShouldContain(node7);
+
+                // confirm that there is a path from 7 -> 5 -> 1 -> 6 -> 2 using ReferencingProjects
+                node7.ReferencingProjects.ShouldContain(node5);
+                node5.ReferencingProjects.ShouldContain(node1);
+                node1.ReferencingProjects.ShouldContain(node6);
+                node6.ReferencingProjects.ShouldContain(node2);
             }
         }
 
@@ -390,6 +412,24 @@ namespace Microsoft.Build.Graph.UnitTests
                 entryPointNode2.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode1.ProjectReferences.First().ShouldBe(entryPointNode2.ProjectReferences.First());
                 entryPointNode1.ProjectReferences.First().GlobalProperties.ContainsKey("Platform").ShouldBeFalse();
+            }
+        }
+
+        [Fact]
+        public void ConstructGraphWithDifferentEntryPointsAndGraphRoots()
+        {
+            using(var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject1 = CreateProject(env, 1, new[] { 4 });
+                TransientTestFile entryProject2 = CreateProject(env, 2, new[] { 4, 5 });
+                TransientTestFile entryProject3 = CreateProject(env, 3, new[] { 2, 6 });
+                CreateProject(env, 4);
+                CreateProject(env, 5);
+                CreateProject(env, 6);
+                var projectGraph = new ProjectGraph(new[] { entryProject1.Path, entryProject2.Path, entryProject3.Path });
+                projectGraph.EntryPointNodes.Count.ShouldBe(3);
+                projectGraph.GraphRoots.Count.ShouldBe(2);
+                projectGraph.GraphRoots.ShouldNotContain(GetNodeForProject(projectGraph, 2));
             }
         }
 
