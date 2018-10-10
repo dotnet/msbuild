@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="NetListCommand">
-        <source>List references of a .NET project.</source>
-        <target state="translated">列出 .NET 專案的參考。</target>
+        <source>List references or packages of a .NET project.</source>
+        <target state="needs-review-translation">列出 .NET 專案的參考。</target>
         <note />
       </trans-unit>
     </body>
