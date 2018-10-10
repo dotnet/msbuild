@@ -75,17 +75,27 @@ namespace Microsoft.Build.Graph.UnitTests
                 graph.ProjectNodes.Count.ShouldBe(7);
                 ProjectGraphNode node1 = GetNodeForProject(graph, 1);
                 ProjectGraphNode node2 = GetNodeForProject(graph, 2);
+                ProjectGraphNode node3 = GetNodeForProject(graph, 3);
+                ProjectGraphNode node4 = GetNodeForProject(graph, 4);
                 ProjectGraphNode node5 = GetNodeForProject(graph, 5);
                 ProjectGraphNode node6 = GetNodeForProject(graph, 6);
                 ProjectGraphNode node7 = GetNodeForProject(graph, 7);
 
                 node1.ProjectReferences.Count.ShouldBe(2);
                 node2.ProjectReferences.Count.ShouldBe(3);
-                GetNodeForProject(graph, 3).ProjectReferences.Count.ShouldBe(0);
-                GetNodeForProject(graph, 4).ProjectReferences.Count.ShouldBe(0);
+                node3.ProjectReferences.Count.ShouldBe(0);
+                node4.ProjectReferences.Count.ShouldBe(0);
                 node5.ProjectReferences.Count.ShouldBe(1);
                 node6.ProjectReferences.Count.ShouldBe(1);
                 node7.ProjectReferences.Count.ShouldBe(0);
+
+                node1.ReferencingProjects.Count.ShouldBe(1);
+                node2.ReferencingProjects.Count.ShouldBe(0);
+                node3.ReferencingProjects.Count.ShouldBe(1);
+                node4.ReferencingProjects.Count.ShouldBe(1);
+                node5.ReferencingProjects.Count.ShouldBe(2);
+                node6.ReferencingProjects.Count.ShouldBe(1);
+                node7.ReferencingProjects.Count.ShouldBe(1);
 
                 // confirm that there is a path from 2 -> 6 -> 1 -> 5 -> 7
                 node2.ProjectReferences.ShouldContain(node6);

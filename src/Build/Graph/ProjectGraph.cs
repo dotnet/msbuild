@@ -182,7 +182,7 @@ namespace Microsoft.Build.Graph
                 entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
             }
 
-            var graphRoots = new List<ProjectGraphNode>();
+            var graphRoots = new List<ProjectGraphNode>(entryPointNodes.Count);
             foreach(var entryPointNode in entryPointNodes)
             {
                 if (entryPointNode.ReferencingProjects.Count == 0)

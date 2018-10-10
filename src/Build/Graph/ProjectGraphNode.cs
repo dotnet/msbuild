@@ -34,7 +34,7 @@ namespace Microsoft.Build.Graph
         public IReadOnlyCollection<ProjectGraphNode> ReferencingProjects => _referencingProjects;
 
         /// <summary>
-        /// Gets the evaluated project represented by this node in the graph.
+        /// Gets the evaluated project instance represented by this node in the graph.
         /// </summary>
         public ProjectInstance ProjectInstance { get; }
 
