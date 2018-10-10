@@ -35,6 +35,12 @@ phases:
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts\Debug\log'
+      ArtifactName: logs
+    condition: succeededOrFailed()
 
 - phase: CoreOnWindows
   displayName: "Build and test on Windows using .NET Core MSBuild"
@@ -68,6 +74,12 @@ phases:
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts\Debug\log'
+      ArtifactName: logs
+    condition: succeededOrFailed()
 
 - phase: CoreOnLinux
   displayName: "Build and test on Linux using .NET Core MSBuild"
@@ -84,7 +96,12 @@ phases:
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
-
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/Debug/log'
+      ArtifactName: logs
+    condition: succeededOrFailed()
 
 - phase: CoreOnMac
   displayName: "Build and test on macOS using .NET Core MSBuild"
@@ -101,3 +118,10 @@ phases:
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/Debug/log'
+      ArtifactName: logs
+    condition: succeededOrFailed()
+
