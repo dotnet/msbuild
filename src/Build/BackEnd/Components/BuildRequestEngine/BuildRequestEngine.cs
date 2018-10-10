@@ -1357,6 +1357,8 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (this)
                 {
+                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
                     using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, stuff);

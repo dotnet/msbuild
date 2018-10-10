@@ -2213,6 +2213,8 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
+                FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
                 StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
                 file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
                 file.WriteLine(format, stuff);
@@ -2230,6 +2232,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
+                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
                     using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
                     {
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
