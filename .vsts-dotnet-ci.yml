@@ -39,7 +39,7 @@ phases:
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts\Debug\log'
-      ArtifactName: logs
+      ArtifactName: 'FullOnWindows logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnWindows
@@ -78,7 +78,7 @@ phases:
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts\Debug\log'
-      ArtifactName: logs
+      ArtifactName: 'CoreOnWindows logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnLinux
@@ -100,7 +100,7 @@ phases:
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/Debug/log'
-      ArtifactName: logs
+      ArtifactName: 'CoreOnLinux logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnMac
@@ -122,6 +122,6 @@ phases:
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/Debug/log'
-      ArtifactName: logs
+      ArtifactName: 'CoreOnMac logs'
     condition: succeededOrFailed()
 
