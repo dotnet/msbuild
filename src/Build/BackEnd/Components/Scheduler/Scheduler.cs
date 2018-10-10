@@ -2231,7 +2231,18 @@ namespace Microsoft.Build.BackEnd
 
                         foreach (int nodeId in _availableNodes.Keys)
                         {
-                            file.WriteLine("Node {0} {1} ({2} assigned requests, {3} configurations)", nodeId, _schedulingData.IsNodeWorking(nodeId) ? String.Format(CultureInfo.InvariantCulture, "Active ({0} executing)", _schedulingData.GetExecutingRequestByNode(nodeId).BuildRequest.GlobalRequestId) : "Idle", _schedulingData.GetScheduledRequestsCountByNode(nodeId), _schedulingData.GetConfigurationsCountByNode(nodeId, false, null));
+                            file.WriteLine(
+                                "Node {0} {1} ({2} assigned requests, {3} configurations)",
+                                nodeId,
+                                _schedulingData.IsNodeWorking(nodeId)
+                                    ? string.Format(
+                                        CultureInfo.InvariantCulture,
+                                        "Active ({0} executing)",
+                                        _schedulingData.GetExecutingRequestByNode(nodeId)
+                                            .BuildRequest.GlobalRequestId)
+                                    : "Idle",
+                                _schedulingData.GetScheduledRequestsCountByNode(nodeId),
+                                _schedulingData.GetConfigurationsCountByNode(nodeId, false, null));
 
                             List<SchedulableRequest> scheduledRequestsByNode = new List<SchedulableRequest>(_schedulingData.GetScheduledRequestsByNode(nodeId));
 
@@ -2407,7 +2418,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void DumpRequestSpec(StreamWriter file, SchedulableRequest request, int indent, string prefix)
         {
-            file.WriteLine("{0}{1}{2}: [{3}] {4}{5} ({6}){7} ({8})", new String(' ', indent * 2), (prefix == null) ? "" : prefix, request.BuildRequest.GlobalRequestId, _schedulingData.GetAssignedNodeForRequestConfiguration(request.BuildRequest.ConfigurationId), _schedulingData.IsRequestScheduled(request) ? "RUNNING " : "", request.State, request.BuildRequest.ConfigurationId, _configCache[request.BuildRequest.ConfigurationId].ProjectFullPath, String.Join(", ", request.BuildRequest.Targets.ToArray()));
+            var buildRequest = request.BuildRequest;
+
+            file.WriteLine(
+                "{0}{1}{2}: [{3}] {4}{5} ({6}){7} ({8})",
+                new string(' ', indent * 2),
+                prefix ?? "",
+                buildRequest.GlobalRequestId,
+                _schedulingData.GetAssignedNodeForRequestConfiguration(buildRequest.ConfigurationId),
+                _schedulingData.IsRequestScheduled(request)
+                    ? "RUNNING "
+                    : "",
+                request.State,
+                buildRequest.ConfigurationId,
+                _configCache[buildRequest.ConfigurationId].ProjectFullPath,
+                string.Join(", ", buildRequest.Targets.ToArray()));
         }
 
         /// <summary>
