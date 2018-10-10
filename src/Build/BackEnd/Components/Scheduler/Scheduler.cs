@@ -1812,6 +1812,12 @@ namespace Microsoft.Build.BackEnd
             int nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
             NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, nodeId, true);
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
+
+            TraceScheduler(
+                "Request {0} (node request {1}) with targets ({2}) satisfied from cache",
+                request.GlobalRequestId,
+                request.NodeRequestId,
+                string.Join(";", request.Targets));
         }
 
         /// <summary>
