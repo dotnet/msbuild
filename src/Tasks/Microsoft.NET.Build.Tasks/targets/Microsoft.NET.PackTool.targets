@@ -91,6 +91,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_ShimInputCacheFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_ShimInputCacheFile)))</_ShimInputCacheFile>
     <_ShimCreatedSentinelFile Condition="'$(_ShimCreatedSentinelFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectName).shimcreated.sentinel</_ShimCreatedSentinelFile>
     <_ShimCreatedSentinelFile>$([MSBuild]::NormalizePath($(MSBuildProjectDirectory), $(_ShimCreatedSentinelFile)))</_ShimCreatedSentinelFile>
+    <PackagedShimOutputRootDirectory Condition=" '$(PackagedShimOutputRootDirectory)' == '' ">$(OutDir)</PackagedShimOutputRootDirectory>
   </PropertyGroup>
 
   <Target Name="GenerateShimsAssets"
@@ -99,10 +100,6 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(PackAsTool)' == 'true'"
           Inputs="@(_GenerateShimsAssetsInput)"
           Outputs="$(_ShimCreatedSentinelFile)">
-
-    <PropertyGroup>
-      <PackagedShimOutputRootDirectory Condition=" '$(PackagedShimOutputRootDirectory)' == '' ">$(OutDir)</PackagedShimOutputRootDirectory>
-    </PropertyGroup>
 
     <GenerateShims
       ApphostsForShimRuntimeIdentifiers="@(_ApphostsForShimRuntimeIdentifiers)"
@@ -135,7 +132,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_ComputeExpectedEmbeddedApphostPaths">
     <GetEmbeddedApphostPaths
-      PackagedShimOutputDirectory="$(OutDir)/shims/$(TargetFramework)"
+      PackagedShimOutputDirectory="$(PackagedShimOutputRootDirectory)/shims/$(TargetFramework)"
       ShimRuntimeIdentifiers="@(_PackAsToolShimRuntimeIdentifiers)"
       ToolCommandName="$(ToolCommandName)">
 

@@ -60,7 +60,10 @@ namespace Microsoft.NET.Build.Tests
             string maximumVersion = getMaximumVersion.GetValues().Single();
             List<string> supportedFrameworks = getSupportedFrameworks.GetValues();
 
-            supportedFrameworks.Should().Contain($"{targetFrameworkIdentifier},Version=v{maximumVersion}");
+            string expectedTFM = $"{targetFrameworkIdentifier},Version=v{maximumVersion}";
+
+            supportedFrameworks.Should().Contain(expectedTFM,
+                because: $"Microsoft.NET.SupportedTargetFrameworks.targets should include an entry for {expectedTFM}");
         }
     }
 }

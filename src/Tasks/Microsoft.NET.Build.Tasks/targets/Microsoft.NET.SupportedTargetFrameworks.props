@@ -24,6 +24,7 @@ Copyright (c) .NET Foundation. All rights reserved.
         <SupportedTargetFramework Include=".NETCoreApp,Version=v2.0" DisplayName=".NET Core 2.0" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v2.1" DisplayName=".NET Core 2.1" />
         <SupportedTargetFramework Include=".NETCoreApp,Version=v2.2" DisplayName=".NET Core 2.2" />
+        <SupportedTargetFramework Include=".NETCoreApp,Version=v3.0" DisplayName=".NET Core 3.0" />
     </ItemGroup>
 
     <!-- .NET Standard -->

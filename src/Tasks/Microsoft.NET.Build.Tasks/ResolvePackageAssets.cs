@@ -341,7 +341,7 @@ namespace Microsoft.NET.Build.Tasks
                         foreach (var implicitPackage in ExpectedPlatformPackages)
                         {
                             writer.Write(implicitPackage.ItemSpec ?? "");
-                            writer.Write(implicitPackage.GetMetadata(MetadataKeys.ExpectedVersion) ?? "");
+                            writer.Write(implicitPackage.GetMetadata(MetadataKeys.Version) ?? "");
                         }
                     }
                     writer.Write(ProjectAssetsCacheFile);
@@ -852,7 +852,7 @@ namespace Microsoft.NET.Build.Tasks
                     foreach (var implicitPackage in _task.ExpectedPlatformPackages)
                     {
                         var packageName = implicitPackage.ItemSpec;
-                        var expectedVersion = implicitPackage.GetMetadata(MetadataKeys.ExpectedVersion);
+                        var expectedVersion = implicitPackage.GetMetadata(MetadataKeys.Version);
 
                         if (string.IsNullOrEmpty(packageName) ||
                             string.IsNullOrEmpty(expectedVersion) ||
