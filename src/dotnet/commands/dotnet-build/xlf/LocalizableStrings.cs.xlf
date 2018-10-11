@@ -17,7 +17,7 @@
         <target state="translated">Nesestaví odkazy mezi projekty a sestaví jen určený projekt.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NoIncrementialOptionDescription">
+      <trans-unit id="NoIncrementalOptionDescription">
         <source>Do not use incremental building.</source>
         <target state="translated">Nepoužije se přírůstkové sestavení.</target>
         <note />
