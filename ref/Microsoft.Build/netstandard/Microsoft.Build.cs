@@ -1461,6 +1461,11 @@ namespace Microsoft.Build.Logging
         public void Replay(string sourceFilePath) { }
         public void Replay(string sourceFilePath, System.Threading.CancellationToken cancellationToken) { }
     }
+    public partial class BuildEventArgsReader
+    {
+        public BuildEventArgsReader(System.IO.BinaryReader binaryReader, int fileFormatVersion) { }
+        public Microsoft.Build.Framework.BuildEventArgs Read() { throw null; }
+    }
     public delegate void ColorResetter();
     public delegate void ColorSetter(System.ConsoleColor color);
     public partial class ConfigurableForwardingLogger : Microsoft.Build.Framework.IForwardingLogger, Microsoft.Build.Framework.ILogger, Microsoft.Build.Framework.INodeLogger

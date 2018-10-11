@@ -3976,7 +3976,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsPrimary>true</IsPrimary>
       </_DeploymentReferencePaths>
       <_DeploymentReferencePaths Include="@(_DeploymentReferencePaths);@(_CopyLocalFalseRefPathsWithExclusion)" />
-      <_ManifestManagedReferences Include="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly)"
+      <_ManifestManagedReferences Include="@(_DeploymentReferencePaths);@(ReferenceDependencyPaths);@(_SGenDllsRelatedToCurrentDll);@(SerializationAssembly);@(ReferenceCOMWrappersToCopyLocal)"
                                Exclude="@(_SatelliteAssemblies);@(_ReferenceScatterPaths);@(_ExcludedAssembliesFromManifestGeneration)" />
     </ItemGroup>
 
@@ -4010,11 +4010,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         SatelliteAssemblies="@(_SatelliteAssemblies)"
         TargetCulture="$(TargetCulture)">
 
-      <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependencies"/>
+      <Output TaskParameter="OutputAssemblies" ItemName="_DeploymentManifestDependenciesUnfiltered"/>
       <Output TaskParameter="OutputFiles" ItemName="_DeploymentManifestFiles"/>
       <Output TaskParameter="OutputEntryPoint" ItemName="_DeploymentResolvedManifestEntryPoint"/>
 
     </ResolveManifestFiles>
+
+    <!-- We have to filter items out of the dependencies that have neither CopyLocal set to true, -->
+    <!-- nor the dependency type manually set to 'Install'.                                       -->
+    <ItemGroup>
+      <_DeploymentManifestDependencies Include="@(_DeploymentManifestDependenciesUnfiltered)" 
+          Condition="!('%(_DeploymentManifestDependenciesUnfiltered.CopyLocal)' == 'false' And '%(_DeploymentManifestDependenciesUnfiltered.DependencyType)' != 'Install')" />
+    </ItemGroup>
 
     <PropertyGroup>
       <_DeploymentManifestType>ClickOnce</_DeploymentManifestType>
