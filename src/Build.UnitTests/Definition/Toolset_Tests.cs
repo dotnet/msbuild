@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Toolset t = new Toolset("4.0", "c:\\bar", buildProperties, environmentProperties, globalProperties,
                 subToolsets, "c:\\foo", "4.0", new Dictionary<string, ProjectImportPathMatch>
                 {
-                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", @"c:\foo")
+                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> {@"c:\foo"})
                 });
 
             ((INodePacketTranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.NotNull(t2.ImportPropertySearchPathsTable);
             Assert.Equal(1, t2.ImportPropertySearchPathsTable.Count);
-            Assert.Equal(@"c:\foo", t2.ImportPropertySearchPathsTable["MSBuildExtensionsPath"].GetExpandedSearchPaths(p => p)[0]);
+            Assert.Equal(@"c:\foo", t2.ImportPropertySearchPathsTable["MSBuildExtensionsPath"].SearchPaths[0]);
         }
 
         [Fact]

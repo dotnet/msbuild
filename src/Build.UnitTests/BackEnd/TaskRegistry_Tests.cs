@@ -1897,8 +1897,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     "dotv",
                     new Dictionary<string, ProjectImportPathMatch>
                     {
-                        {"a", new ProjectImportPathMatch("a", "b;c")},
-                        {"d", new ProjectImportPathMatch("d", "e;f")}
+                        {"a", new ProjectImportPathMatch("a", new List<string> {"b", "c"})},
+                        {"d", new ProjectImportPathMatch("d", new List<string> {"e", "f"})}
                     }
                 );
 

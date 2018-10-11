@@ -526,7 +526,7 @@ namespace Microsoft.Build.UnitTests.Definition
                             <property name=""MSBuildExtensionsPath64"" value=""c:\foo64;c:\bar64""/>
                          </searchPaths>
                          <searchPaths os=""osx"">
-                            <property name=""MSBuildExtensionsPath"" value=""/tmp/foo;$(FallbackPaths)""/>
+                            <property name=""MSBuildExtensionsPath"" value=""/tmp/foo""/>
                             <property name=""MSBuildExtensionsPath32"" value=""/tmp/foo32;/tmp/bar32""/>
                          </searchPaths>
                          <searchPaths os=""unix"">
@@ -557,7 +557,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Equal(allPaths.GetElement(1).OS, "osx");
             Assert.Equal(allPaths.GetElement(1).PropertyElements.Count, 2);
-            Assert.Equal(allPaths.GetElement(1).PropertyElements.GetElement("MSBuildExtensionsPath").Value, @"/tmp/foo;$(FallbackPaths)");
+            Assert.Equal(allPaths.GetElement(1).PropertyElements.GetElement("MSBuildExtensionsPath").Value, @"/tmp/foo");
             Assert.Equal(allPaths.GetElement(1).PropertyElements.GetElement("MSBuildExtensionsPath32").Value, @"/tmp/foo32;/tmp/bar32");
 
             Assert.Equal(allPaths.GetElement(2).OS, "unix");
@@ -578,7 +578,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
             else if (NativeMethodsShared.IsOSX)
             {
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/foo", "$(FallbackPaths)"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/foo"});
                 CheckPathsTable(pathsTable, "MSBuildExtensionsPath32", new string[] {"/tmp/foo32", "/tmp/bar32"});
             }
             else
@@ -591,16 +591,11 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Assert.True(pathsTable.ContainsKey(kind));
             var paths = pathsTable[kind];
+            Assert.Equal(paths.SearchPaths.Count, expectedPaths.Length);
 
-            // Property expansion would be done in the context of an
-            // actual project. So, without that, pathsTable would
-            // have the unexpanded strings.
-            var searchPaths = paths.GetExpandedSearchPaths(p => p);
-            Assert.Equal(searchPaths.Count, expectedPaths.Length);
-
-            for (int i = 0; i < searchPaths.Count; i ++)
+            for (int i = 0; i < paths.SearchPaths.Count; i ++)
             {
-                Assert.Equal(searchPaths[i], expectedPaths[i]);
+                Assert.Equal(paths.SearchPaths[i], expectedPaths[i]);
             }
         }
 
