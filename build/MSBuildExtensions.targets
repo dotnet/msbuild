@@ -146,11 +146,11 @@
       <ImplicitPackageVariable Include="Microsoft.NETCore.App"
                                TargetFrameworkVersion="1.0"
                                DefaultVersion="1.0.5"
-                               LatestVersion="1.0.12" />
+                               LatestVersion="1.0.13" />
       <ImplicitPackageVariable Include="Microsoft.NETCore.App"
                                TargetFrameworkVersion="1.1"
                                DefaultVersion="1.1.2"
-                               LatestVersion="1.1.9" />
+                               LatestVersion="1.1.10" />
       <ImplicitPackageVariable Include="Microsoft.NETCore.App"
                                TargetFrameworkVersion="2.0"
                                DefaultVersion="2.0.0"
