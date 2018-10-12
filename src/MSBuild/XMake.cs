@@ -1288,6 +1288,9 @@ namespace Microsoft.Build.CommandLine
                             // An empty target list here means "no targets" instead of "default targets", so don't even build it.
                             finishedNodes.Add(node);
                             blockedNodes.Remove(node);
+
+                            waitHandle.Set();
+
                             continue;
                         }
 
