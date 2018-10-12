@@ -42,11 +42,6 @@
         <target state="translated">NETSDK1001: Vous devez spécifier au moins un framework cible.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
-      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
-        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="translated">NETSDK1066: Un RuntimeIdentifier doit être spécifié pour publier une application dépendante du framework avec un hôte d'application.</target>
-        <note>{StrBegin="NETSDK1066: "}</note>
-      </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
         <target state="translated">NETSDK1067: Des applications autonomes sont obligatoires pour utiliser l'hôte d'application. Définissez SelfContained avec la valeur false ou UseAppHost avec la valeur true.</target>

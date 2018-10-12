@@ -98,25 +98,6 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         [Fact]
-        public void It_errors_when_using_app_host_without_rid()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName)
-                .WithSource();
-
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
-            publishCommand
-                .Execute(
-                    "/p:SelfContained=false",
-                    "/p:UseAppHost=true",
-                    "/p:TargetFramework=netcoreapp2.2")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotUseAppHostWithoutRuntimeIdentifier);
-        }
-
-        [Fact]
         public void It_errors_when_using_app_host_with_older_target_framework()
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();

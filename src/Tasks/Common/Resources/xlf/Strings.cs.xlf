@@ -42,11 +42,6 @@
         <target state="translated">NETSDK1001: Je potřeba zadat alespoň jednu možnou cílovou architekturu.</target>
         <note>{StrBegin="NETSDK1001: "}</note>
       </trans-unit>
-      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
-        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="translated">NETSDK1066: RuntimeIdentifier musí být zadaný, aby se mohla publikovat aplikace závislá na architektuře s hostitelem aplikace.</target>
-        <note>{StrBegin="NETSDK1066: "}</note>
-      </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
         <target state="translated">NETSDK1067: K používání hostitele aplikace se vyžadují samostatné (nezávislé) aplikace. Nastavte možnost SelfContained na false nebo nastavte UseAppHost na true.</target>
