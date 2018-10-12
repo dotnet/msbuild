@@ -9,6 +9,7 @@ using System.Text;
 using System.Xml;
 
 using Microsoft.Build.Construction;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Xunit;
 
@@ -96,8 +97,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             string content = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
                         <ItemDefinitionGroup>
-                            <i1>
-                                <m1>v1</m1>
+                            <i1 m1='v1'>
                                 <m2 Condition='c'>v2</m2>
                                 <m1>v3</m1>
                             </i1>
@@ -119,6 +119,82 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal("c", metadata[1].Condition);
             Assert.Equal("m1", metadata[2].Name);
             Assert.Equal("v3", metadata[2].Value);
+        }
+
+        /// <summary>
+        /// Reads metadata as attributes that wouldn't be
+        /// metadata on items
+        /// </summary>
+        [Theory]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i Include='inc' />
+                        </ItemDefinitionGroup> 
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i Update='upd' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i Remove='rem' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i Exclude='excl' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i KeepMetadata='true' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i RemoveMetadata='true' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i KeepDuplicates='true' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i cOndiTion='true' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        [InlineData(@"
+                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                        <ItemDefinitionGroup>
+                            <i LabeL='text' />
+                        </ItemDefinitionGroup>
+                    </Project>
+                ")]
+        public void DoNotReadInvalidMetadataAttributesOrAttributesValidOnItems(string content)
+        {
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            });
         }
 
         /// <summary>

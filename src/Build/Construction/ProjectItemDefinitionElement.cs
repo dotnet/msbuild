@@ -49,11 +49,31 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue)
         {
+            return AddMetadata(name, unevaluatedValue, false);
+        }
+
+        /// <summary>
+        /// Convenience method to add a piece of metadata to this item definition.
+        /// Adds after any existing metadata. Does not modify any existing metadata.
+        /// </summary>
+        /// <param name="name">The name of the metadata to add</param>
+        /// <param name="unevaluatedValue">The value of the metadata to add</param>
+        /// <param name="expressAsAttribute">If true, then the metadata will be expressed as an attribute instead of a child element, for example
+        /// &lt;Content CopyToOutputDirectory="PreserveNewest" /&gt;
+        /// </param>
+        public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
             ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
 
+            if (expressAsAttribute)
+            {
+                ProjectMetadataElement.ValidateValidMetadataAsAttributeName(name, ElementName, Location);
+            }
+
             ProjectMetadataElement metadata = ContainingProject.CreateMetadataElement(name);
             metadata.Value = unevaluatedValue;
+            metadata.ExpressedAsAttribute = expressAsAttribute;
 
             AppendChild(metadata);
 
@@ -91,5 +111,10 @@ namespace Microsoft.Build.Construction
         {
             return owner.CreateItemDefinitionElement(ItemType);
         }
+
+        /// <summary>
+        /// Do not clone attributes which can be metadata. The corresponding expressed as attribute project elements are responsible for adding their attribute
+        /// </summary>
+        protected override bool ShouldCloneXmlAttribute(XmlAttribute attribute) => !ProjectMetadataElement.AttributeNameIsValidMetadataName(attribute.LocalName);
     }
 }
