@@ -6,14 +6,8 @@
         <source>Welcome to .NET Core!
 ---------------------
 Learn more about .NET Core: https://aka.ms/dotnet-docs
-Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs
-
-Telemetry
----------
-The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
-
-Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
-        <target state="translated">.NET Core へようこそ!
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli-docs</source>
+        <target state="needs-review-translation">.NET Core へようこそ!
 ---------------------
 .NET Core についての詳細情報: https://aka.ms/dotnet-docs
 'dotnet --help' を使用して利用可能なコマンドを確認するか、次にアクセスしてください: https://aka.ms/dotnet-cli-docs
@@ -67,14 +61,30 @@ HTTPS を構成する方法の詳細については、https://go.microsoft.com/f
 ---------------------
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
-HTTPS: https://aka.ms/aspnet-core-https
-Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+HTTPS: https://aka.ms/aspnet-core-https</source>
         <target state="new">Welcome to .NET Core!
 ---------------------
 GitHub: https://github.com/dotnet/core
 Docs: https://aka.ms/dotnet-docs
-HTTPS: https://aka.ms/aspnet-core-https
-Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
+HTTPS: https://aka.ms/aspnet-core-https</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TelemetryMessage">
+        <source>Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Telemetry
+---------
+The .NET Core tools collect usage data in order to help us improve your experience. The data is anonymous and doesn't include command-line arguments. The data is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ShortTelemetryMessage">
+        <source>Telemetry statement: https://aka.ms/dotnet-cli-telemetry</source>
+        <target state="new">Telemetry statement: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
     </body>

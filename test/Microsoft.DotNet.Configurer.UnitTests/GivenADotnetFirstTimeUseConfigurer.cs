@@ -45,8 +45,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -71,34 +71,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: true
-                ),
-                _reporterMock.Object,
-                CliFallbackFolderPath,
-                _pathAdderMock.Object);
-
-            dotnetFirstTimeUseConfigurer.Configure();
-
-            _reporterMock.Verify(r => r.WriteLine(It.Is<string>(str => str == LocalizableStrings.FirstTimeWelcomeMessage)), Times.Never);
-            _reporterMock.Verify(r => r.Write(It.IsAny<string>()), Times.Never);
-        }
-
-        [Fact]
-        public void It_does_not_print_the_first_time_use_notice_when_the_user_has_set_the_DOTNET_PRINT_TELEMETRY_MESSAGE_environment_variable()
-        {
-            _firstTimeUseNoticeSentinelMock.Setup(n => n.Exists()).Returns(false);
-
-            var dotnetFirstTimeUseConfigurer = new DotnetFirstTimeUseConfigurer(
-                _firstTimeUseNoticeSentinelMock.Object,
-                _aspNetCertificateSentinelMock.Object,
-                _aspNetCoreCertificateGeneratorMock.Object,
-                _toolPathSentinelMock.Object,
-                new DotnetFirstRunConfiguration
-                (
-                    generateAspNetCertificate: true,
-                    printTelemetryMessage: false,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: true,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -123,8 +97,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -149,8 +123,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -175,8 +149,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -201,8 +175,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -227,8 +201,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: true
+                    skipFirstRunExperience: true,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -253,8 +227,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: false,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -279,8 +253,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -304,8 +278,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: false
+                    skipFirstRunExperience: false,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,
@@ -327,8 +301,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 new DotnetFirstRunConfiguration
                 (
                     generateAspNetCertificate: true,
-                    printTelemetryMessage: true,
-                    skipFirstRunExperience: true
+                    skipFirstRunExperience: true,
+                    telemetryOptout: false
                 ),
                 _reporterMock.Object,
                 CliFallbackFolderPath,

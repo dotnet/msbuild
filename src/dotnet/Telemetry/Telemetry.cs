@@ -29,7 +29,8 @@ namespace Microsoft.DotNet.Cli.Telemetry
 
         public Telemetry(IFirstTimeUseNoticeSentinel sentinel) : this(sentinel, null) { }
 
-        public Telemetry(IFirstTimeUseNoticeSentinel sentinel,
+        public Telemetry(
+            IFirstTimeUseNoticeSentinel sentinel,
             string sessionId,
             bool blockThreadInitialization = false,
             IEnvironmentProvider environmentProvider = null)

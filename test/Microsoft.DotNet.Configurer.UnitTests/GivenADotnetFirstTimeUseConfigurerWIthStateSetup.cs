@@ -2,14 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.DotNet.Cli.Telemetry;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
-using Microsoft.DotNet.Tools.Test;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.Extensions.DependencyModel.Tests;
 using Moq;
 using Xunit;
 using Xunit.Abstractions;
@@ -35,7 +32,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         {
             ResetObjectState();
 
-            this._output = output;
+            _output = output;
         }
 
         private void ResetObjectState()
@@ -50,42 +47,25 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         }
 
         [Theory]
-        [InlineData(false, false, false, false, false, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, false, false, false, FirstRun, Never, Never, FirstRun, false, false)]
-        [InlineData(false, true, false, false, false, Never, FirstRun, Never, Never, true, true)]
-        [InlineData(true, true, false, false, false, FirstRun, FirstRun, Never, FirstRun, true, true)]
-        [InlineData(false, false, true, false, false, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, true, false, false, Never, Never, Never, Never, false, false)]
-        [InlineData(false, true, true, false, false, Never, Never, FirstRun, Never, true, true)]
-        [InlineData(true, true, true, false, false, Never, Never, FirstRun, Never, true, true)]
-        [InlineData(false, false, false, true, false, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, false, true, false, FirstRun, Never, Never, FirstRun, false, false)]
-        [InlineData(false, true, false, true, false, Never, FirstRun, Never, Never, false, false)]
-        [InlineData(true, true, false, true, false, FirstRun, FirstRun, Never, FirstRun, false, false)]
-        [InlineData(false, false, true, true, false, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, true, true, false, Never, Never, Never, Never, false, false)]
-        [InlineData(false, true, true, true, false, Never, Never, FirstRun, Never, false, false)]
-        [InlineData(true, true, true, true, false, Never, Never, FirstRun, Never, false, false)]
-        [InlineData(false, false, false, false, true, Never, Never, Never, Never, true, false)]
-        [InlineData(true, false, false, false, true, SecondRun, Never, Never, SecondRun, true, false)]
-        [InlineData(false, true, false, false, true, Never, SecondRun, Never, Never, true, true)]
-        [InlineData(true, true, false, false, true, SecondRun, SecondRun, Never, SecondRun, true, true)]
-        [InlineData(false, false, true, false, true, Never, Never, Never, Never, true, false)]
-        [InlineData(true, false, true, false, true, Never, Never, Never, Never, true, false)]
-        [InlineData(false, true, true, false, true, Never, Never, SecondRun, Never, true, true)]
-        [InlineData(true, true, true, false, true, Never, Never, SecondRun, Never, true, true)]
-        [InlineData(false, false, false, true, true, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, false, true, true, SecondRun, Never, Never, SecondRun, false, false)]
-        [InlineData(false, true, false, true, true, Never, SecondRun, Never, Never, false, false)]
-        [InlineData(true, true, false, true, true, SecondRun, SecondRun, Never, SecondRun, false, false)]
-        [InlineData(false, false, true, true, true, Never, Never, Never, Never, false, false)]
-        [InlineData(true, false, true, true, true, Never, Never, Never, Never, false, false)]
-        [InlineData(false, true, true, true, true, Never, Never, SecondRun, Never, false, false)]
-        [InlineData(true, true, true, true, true, Never, Never, SecondRun, Never, false, false)]
+        [InlineData(false, false, false, false, Never, FirstRun, Never, FirstRun, Never, Never, true, true)]
+        [InlineData(true, false, false, false, FirstRun, FirstRun, Never, FirstRun, Never, FirstRun, true, true)]
+        [InlineData(false, true, false, false, Never, Never, FirstRun, Never, FirstRun, Never, true, true)]
+        [InlineData(true, true, false, false, Never, Never, FirstRun, Never, FirstRun, Never, true, true)]
+        [InlineData(false, false, true, false, Never, FirstRun, Never, Never, Never, Never, false, false)]
+        [InlineData(true, false, true, false, FirstRun, FirstRun, Never, Never, Never, FirstRun, false, false)]
+        [InlineData(false, true, true, false, Never, Never, FirstRun, Never, FirstRun, Never, false, false)]
+        [InlineData(true, true, true, false, Never, Never, FirstRun, Never, FirstRun, Never, false, false)]
+        [InlineData(false, false, false, true, Never, SecondRun, Never, SecondRun, Never, Never, true, true)]
+        [InlineData(true, false, false, true, SecondRun, SecondRun, Never, SecondRun, Never, SecondRun, true, true)]
+        [InlineData(false, true, false, true, Never, Never, SecondRun, Never, SecondRun, Never, true, true)]
+        [InlineData(true, true, false, true, Never, Never, SecondRun, Never, SecondRun, Never, true, true)]
+        [InlineData(false, false, true, true, Never, SecondRun, Never, Never, Never, Never, false, false)]
+        [InlineData(true, false, true, true, SecondRun, SecondRun, Never, Never, Never, SecondRun, false, false)]
+        [InlineData(false, true, true, true, Never, Never, SecondRun, Never, SecondRun, Never, false, false)]
+        [InlineData(true, true, true, true, Never, Never, SecondRun, Never, SecondRun, Never, false, false)]
         public void FlagsCombinationAndAction(
             // Inputs
             bool DOTNET_GENERATE_ASPNET_CERTIFICATE,
-            bool DOTNET_PRINT_TELEMETRY_MESSAGE,
             bool DOTNET_SKIP_FIRST_TIME_EXPERIENCE,
             bool DOTNET_CLI_TELEMETRY_OPTOUT,
             //   true to simulate install via installer. The first run is during installer,
@@ -96,6 +76,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             ActionCalledTime aspnetCertInstalledTimeShouldBeCalledAt,
             ActionCalledTime printFirstTimeWelcomeMessageShouldBeCalledAt,
             ActionCalledTime printShortFirstTimeWelcomeMessageShouldBeCalledAt,
+            ActionCalledTime printTelemetryMessageShouldBeCalledAt,
+            ActionCalledTime printShortTelemetryMessageShouldBeCalledAt,
             ActionCalledTime printAspNetCertificateInstalledMessageShouldBeCalledAt,
             bool telemetryFirstRunShouldBeEnabled,
             bool telemetrySecondRunShouldBeEnabled
@@ -107,64 +89,117 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", It.IsAny<bool>()))
             .Returns(DOTNET_GENERATE_ASPNET_CERTIFICATE);
             _environmentProvider
-                .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_PRINT_TELEMETRY_MESSAGE", It.IsAny<bool>()))
-                .Returns(DOTNET_PRINT_TELEMETRY_MESSAGE);
-            _environmentProvider
                 .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", It.IsAny<bool>()))
                 .Returns(DOTNET_SKIP_FIRST_TIME_EXPERIENCE);
             _environmentProvider
                 .Setup(p => p.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", It.IsAny<bool>()))
                 .Returns(DOTNET_CLI_TELEMETRY_OPTOUT);
             _pathAdderMock.Setup(p => p.AddPackageExecutablePathToUserPath()).Verifiable();
-            bool generateAspNetCoreDevelopmentCertificateCalled = false;
+            // box a bool so it will be captured by reference in closure
+            object generateAspNetCoreDevelopmentCertificateCalled = false;
             _aspNetCoreCertificateGeneratorMock
                 .Setup(_ => _.GenerateAspNetCoreDevelopmentCertificate())
                 .Callback(() => generateAspNetCoreDevelopmentCertificateCalled = true).Verifiable();
 
-            var aspnetCertInstalledTime = Never;
-            var printFirstTimeWelcomeMessage = Never;
-            var printShortFirstTimeWelcomeMessage = Never;
-            var printAspNetCertificateInstalledMessage = Never;
+            var aspnetCertInstalledTime
+                = new FirstRunExperienceAction(
+                    () => (bool)generateAspNetCoreDevelopmentCertificateCalled,
+                    "aspnetCertInstalledTime");
+            var printFirstTimeWelcomeMessage
+                = new FirstRunExperienceAction(
+                    () => _reporterMock.Lines.Contains(LocalizableStrings.FirstTimeWelcomeMessage),
+                    "printFirstTimeWelcomeMessage");
+            var printShortFirstTimeWelcomeMessage
+                = new FirstRunExperienceAction(
+                    () => _reporterMock.Lines.Contains(LocalizableStrings.ShortFirstTimeWelcomeMessage),
+                    "printShortFirstTimeWelcomeMessage");
+            var printTelemetryMessage
+                = new FirstRunExperienceAction(
+                    () => _reporterMock.Lines.Contains(LocalizableStrings.TelemetryMessage),
+                    "printTelemetryMessage");
+            var printShortTelemetryMessage
+                = new FirstRunExperienceAction(
+                    () => _reporterMock.Lines.Contains(LocalizableStrings.ShortFirstTimeWelcomeMessage),
+                    "printShortTelemetryMessage");
+            var printAspNetCertificateInstalledMessage
+                = new FirstRunExperienceAction(
+                    () => _reporterMock.Lines.Contains(LocalizableStrings.AspNetCertificateInstalled),
+                    "printAspNetCertificateInstalledMessage");
+
+            List<FirstRunExperienceAction> firstRunExperienceActions
+                = new List<FirstRunExperienceAction>() {
+                    aspnetCertInstalledTime,
+                    printFirstTimeWelcomeMessage,
+                    printShortFirstTimeWelcomeMessage,
+                    printTelemetryMessage,
+                    printShortTelemetryMessage,
+                    printAspNetCertificateInstalledMessage };
 
             // First run
             var telemetryFirstRun = RunConfigUsingMocks(isFirstRunInstallerRun);
 
-            if (generateAspNetCoreDevelopmentCertificateCalled)
-            {
-                aspnetCertInstalledTime = FirstRun;
-            }
-
-            if (_reporterMock.Lines.Contains(LocalizableStrings.FirstTimeWelcomeMessage))
-            {
-                printFirstTimeWelcomeMessage = FirstRun;
-            }
-
-            if (_reporterMock.Lines.Contains(LocalizableStrings.ShortFirstTimeWelcomeMessage))
-            {
-                printShortFirstTimeWelcomeMessage = FirstRun;
-            }
-
-            if (_reporterMock.Lines.Contains(LocalizableStrings.AspNetCertificateInstalled))
-            {
-                printAspNetCertificateInstalledMessage = FirstRun;
-            }
+            firstRunExperienceActions.ForEach(a => a.EvaulateAfterFirstRun());
 
             // Second run
             var telemetrySecondRun = RunConfigUsingMocks(false);
 
-            aspnetCertInstalledTime = GetCalledTime(generateAspNetCoreDevelopmentCertificateCalled, aspnetCertInstalledTime);
-            printFirstTimeWelcomeMessage = GetCalledTime(_reporterMock.Lines.Contains(LocalizableStrings.FirstTimeWelcomeMessage), printFirstTimeWelcomeMessage);
-            printShortFirstTimeWelcomeMessage = GetCalledTime(_reporterMock.Lines.Contains(LocalizableStrings.ShortFirstTimeWelcomeMessage), printShortFirstTimeWelcomeMessage);
-            printAspNetCertificateInstalledMessage = GetCalledTime(_reporterMock.Lines.Contains(LocalizableStrings.AspNetCertificateInstalled), printAspNetCertificateInstalledMessage);
+            firstRunExperienceActions.ForEach(a => a.EvaulateAfterSecondRun());
 
             // Assertion
-            aspnetCertInstalledTime.Should().Be(aspnetCertInstalledTimeShouldBeCalledAt);
-            printFirstTimeWelcomeMessage.Should().Be(printFirstTimeWelcomeMessageShouldBeCalledAt);
-            printShortFirstTimeWelcomeMessage.Should().Be(printShortFirstTimeWelcomeMessageShouldBeCalledAt);
-            printAspNetCertificateInstalledMessage.Should().Be(printAspNetCertificateInstalledMessageShouldBeCalledAt);
+            aspnetCertInstalledTime.Assert(aspnetCertInstalledTimeShouldBeCalledAt);
+            printFirstTimeWelcomeMessage.Assert(printFirstTimeWelcomeMessageShouldBeCalledAt);
+            printShortFirstTimeWelcomeMessage.Assert(printShortFirstTimeWelcomeMessageShouldBeCalledAt);
+            printTelemetryMessage.Assert(printTelemetryMessageShouldBeCalledAt);
+            printShortTelemetryMessage.Assert(printShortTelemetryMessageShouldBeCalledAt);
+            printAspNetCertificateInstalledMessage.Assert(printAspNetCertificateInstalledMessageShouldBeCalledAt);
             telemetryFirstRun.Enabled.Should().Be(telemetryFirstRunShouldBeEnabled);
             telemetrySecondRun.Enabled.Should().Be(telemetrySecondRunShouldBeEnabled);
+        }
 
+        private class FirstRunExperienceAction
+        {
+            public ActionCalledTime ActionCalledTime { get; private set; }
+            public string Name { get; }
+
+            private readonly Func<bool> _tellTheActionIsRun;
+
+            public FirstRunExperienceAction(Func<bool> tellTheActionIsRun, string name)
+            {
+                if (string.IsNullOrWhiteSpace(name))
+                {
+                    throw new ArgumentException("message", nameof(name));
+                }
+
+                _tellTheActionIsRun
+                    = tellTheActionIsRun ?? throw new ArgumentNullException(nameof(tellTheActionIsRun));
+                Name = name;
+                ActionCalledTime = Never;
+            }
+
+            public void EvaulateAfterFirstRun()
+            {
+                if (_tellTheActionIsRun())
+                {
+                    ActionCalledTime = FirstRun;
+                }
+            }
+
+            public void EvaulateAfterSecondRun()
+            {
+                if (ActionCalledTime != ActionCalledTime.FirstRun && _tellTheActionIsRun())
+                {
+                    this.ActionCalledTime = ActionCalledTime.SecondRun;
+                }
+            }
+
+            public void Assert(ActionCalledTime expectedActionCalledTime)
+            {
+                ActionCalledTime
+                    .Should()
+                    .Be(expectedActionCalledTime,
+                        $"{Name} should be called at {expectedActionCalledTime.ToString("g")} " +
+                        $"but find {ActionCalledTime.ToString("g")}");
+            }
         }
 
         private static ActionCalledTime GetCalledTime(bool predicate, ActionCalledTime actionCalledTime)
@@ -184,11 +219,6 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             SecondRun
         }
 
-        private static bool GetOffSet(int i, int offset)
-        {
-            return ((i >> offset) % 2) == 1;
-        }
-
         private Telemetry RunConfigUsingMocks(bool isInstallerRun)
         {
             // Assume the following objects set up are in sync with production behavior.
@@ -197,10 +227,10 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             var _environmentProviderObject = _environmentProvider.Object;
             bool generateAspNetCertificate =
                  _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
-            bool printTelemetryMessage =
-                _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_PRINT_TELEMETRY_MESSAGE", true);
             bool skipFirstRunExperience =
                 _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
+            bool telemetryOptout =
+                _environmentProviderObject.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", false);
 
             IAspNetCertificateSentinel aspNetCertificateSentinel;
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel;
@@ -231,8 +261,8 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                  dotnetFirstRunConfiguration: new DotnetFirstRunConfiguration
                  (
                      generateAspNetCertificate: generateAspNetCertificate,
-                     printTelemetryMessage: printTelemetryMessage,
-                     skipFirstRunExperience: skipFirstRunExperience
+                     skipFirstRunExperience: skipFirstRunExperience,
+                     telemetryOptout: telemetryOptout
                  ),
                  reporter: _reporterMock,
                  cliFallbackFolderPath: CliFallbackFolderPath,
@@ -240,7 +270,9 @@ namespace Microsoft.DotNet.Configurer.UnitTests
 
             configurer.Configure();
 
-            return new Telemetry(firstTimeUseNoticeSentinel, "test", environmentProvider: _environmentProviderObject);
+            return new Telemetry(firstTimeUseNoticeSentinel,
+                "test",
+                environmentProvider: _environmentProviderObject);
         }
 
         private class MockBasicSentinel : IFileSentinel, IFirstTimeUseNoticeSentinel, IAspNetCertificateSentinel

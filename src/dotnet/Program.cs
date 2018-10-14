@@ -144,10 +144,10 @@ namespace Microsoft.DotNet.Cli
 
                         bool generateAspNetCertificate =
                             environmentProvider.GetEnvironmentVariableAsBool("DOTNET_GENERATE_ASPNET_CERTIFICATE", true);
-                        bool printTelemetryMessage =
-                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_PRINT_TELEMETRY_MESSAGE", true);
                         bool skipFirstRunExperience =
                             environmentProvider.GetEnvironmentVariableAsBool("DOTNET_SKIP_FIRST_TIME_EXPERIENCE", false);
+                        bool telemetryOptout =
+                            environmentProvider.GetEnvironmentVariableAsBool("DOTNET_CLI_TELEMETRY_OPTOUT", false);
 
                         ReportDotnetHomeUsage(environmentProvider);
 
@@ -166,9 +166,9 @@ namespace Microsoft.DotNet.Cli
                         }
 
                         var dotnetFirstRunConfiguration = new DotnetFirstRunConfiguration(
-                            generateAspNetCertificate,
-                            printTelemetryMessage,
-                            skipFirstRunExperience);
+                            generateAspNetCertificate: generateAspNetCertificate,
+                            skipFirstRunExperience: skipFirstRunExperience,
+                            telemetryOptout: telemetryOptout);
 
                         ConfigureDotNetForFirstTimeUse(
                             firstTimeUseNoticeSentinel,
