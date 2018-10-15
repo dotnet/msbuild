@@ -14,6 +14,9 @@
     - [Serialization](#serialization)
     - [Deserialization](#deserialization)
   - [I/O Tracking](#io-tracking)
+    - [Detours](#detours)
+    - [Isolation requirement](#isolation-requirement)
+    - [Tool servers](#tool-servers)
 
 # Static Graph
 
@@ -246,4 +249,35 @@ In fact, this same mechanism can be used for non-distributed builds as well, for
 **WIP**
 
 ## I/O Tracking
-**WIP**
+To help facilitate caching of build outputs by a higher-order build engine, MSBuild needs to track all I/O that happens as part of a build.
+
+**OPEN ISSUE:** This isn't actually true in most scenarios. Today the MS internal build engine can wrap any arbitrary process to track the I/O that happens as part of its execution as well as its children. That's sufficient for all scenarios except compiler servers or an MSBuild server (see below). Additionally, if the MS internal build engine supports any other build type besides MSBuild (or older versions of MSBuild), it will still need to be able to detour the process itself anyway.
+
+**NOTE**: Based on the complexity and challenges involved, the feature of I/O tracking in MSBuild is currently on hold and not scheduled to be implemented. This section intends to describe these challenges and be a dump of the current thinking on the subject.
+
+### Detours
+[Detours](https://github.com/microsoft/detours) will be used to intercept Windows API calls to track I/O. This is the same technology that [FileTracker](../../src/Utilities/TrackedDependencies/FileTracker.cs) and [FullTracking](../../src/Build/BackEnd/Components/RequestBuilder/FullTracking.cs) use as well as what the MS internal build engine ("BuildXL Tracker") uses to track I/O.
+
+Today FileTracker and FullTracking are currently a bit specific to generating tlogs, and do not collect all the I/O operations we would want to collect like directory enumerations and probes. Additionally, the BuildXL Tracker implementation does not currently have the ability to attach to the currently running process.
+
+Either existing implementation would require some work to fit this scenario. Because FileTracker/FullTracking aren't actively being improved unlike BuildXL Tracker, we will likely be adding the necessary functionality to BuildXL Tracker.
+
+Elsewhere in this spec the final Detours-based file tracking implementation will simply be referred to as "Tracker".
+
+### Isolation requirement
+I/O Tracking will only be available when running isolated builds, as the current implementation of project yielding in MSBuild makes it exceedingly difficult to attribute any observed I/O to the correct project. Isolated builds make this feasible since each MSBuild node will be building exactly one project configuration at any given moment and each project configuration has a concrete start and stop time. This allows us to turn on I/O tracking for the MSBuild process and start and stop tracking with the project start and stop.
+
+**OPEN ISSUE:** For graph-based isolated builds, project evaluation happens in parallel on the main node. Any I/O that happens as part of evaluation should be reported for that specific project, but there's no good way to do that here.
+
+### Tool servers
+Tool servers are long-lived processes which can be reused multiple times across builds. This causes problems for Tracker, as that long-lived process is not a child process of MSBuild, so many I/O operations would be missed.
+
+For example, when `SharedCompilation=true`, the Roslyn compiler (csc.exe) will launch in server mode. This causes the `Csc` task to connect to any existing csc.exe process and pass the compilation request over a named pipe.
+
+To support this scenario, a new MSBuild Task API could be introduced which allows build tasks which interact with tool servers to manually report I/O. In the Roslyn example above, it would report reads to all assemblies passed via `/reference` parameters, all source files, analyzers passed by `/analyzer`, and report writes to the assembly output file, pdb, and xml, and any other reads and writes which can happen as part of the tool. Effectively, the task will be responsible for reporting what file operations the tool server may perform for the reqest it makes to it. Note that the tool server may cache file reads internally, but the task should still report the I/O as if the internal cache was empty.
+
+**OPEN ISSUE:** Analyzers are just arbitrary C# code, so there's no guarantees as to what I/O it may do, leading to possibly incorrect tracking.
+
+Similarly for a theoretical server mode for MSBuild, MSBuild would need to report its own I/O rather than the higher-order build engine detouring the process externally. For example, if the higher-order build engine connected to an existing running MSBuild process to make build requests, it could not detour that process and so MSBuild would need to report all I/O done as part of a particular build request.
+
+**OPEN ISSUE:** As described above in an open issue, tool servers are the only scenario which would not be supportable by just externally detouring the MSBuild process. The amount of investment required to enable tool servers is quite high and spans across multiple codebases: MSBuild needs to detour itself, MSBuild need to expose a new Tasks API, the `Csc` task needs to opt into that API, and the higher-order build engine needs to opt-in to MSBuild reporting its own I/O, as well as detecting that the feature is supported in the version of MSBuild it's using. Tool servers may add substantial performance gain, but the investment is also substantial.
