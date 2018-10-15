@@ -35,43 +35,5 @@ namespace Microsoft.DotNet.New.Tests
 
             result.Should().Fail();
         }
-
-        [Fact]
-        public void RestoreDoesNotUseAnyCliProducedPackagesOnItsTemplates()
-        {
-            string[] cSharpTemplates = new[] { "console", "classlib", "mstest", "xunit", "web", "mvc", "webapi" };
-
-            var rootPath = TestAssets.CreateTestDirectory().FullName;
-            var packagesDirectory = Path.Combine(rootPath, "packages");
-
-            var configFile = Path.Combine(RepoDirectoriesProvider.RepoRoot, "NuGet.Config");
-
-            foreach (string cSharpTemplate in cSharpTemplates)
-            {
-                var projectFolder = Path.Combine(rootPath, cSharpTemplate + "1");
-                Directory.CreateDirectory(projectFolder);
-                CreateAndRestoreNewProject(cSharpTemplate, projectFolder, packagesDirectory, configFile);
-            }
-
-            Directory.EnumerateFiles(packagesDirectory, $"*.nupkg", SearchOption.AllDirectories)
-                .Should().NotContain(p => p.Contains("Microsoft.DotNet.Cli.Utils"));
-        }
-
-        private void CreateAndRestoreNewProject(
-            string projectType,
-            string projectFolder,
-            string packagesDirectory,
-            string configFile)
-        {
-            new NewCommand()
-                .WithWorkingDirectory(projectFolder)
-                .Execute($"{projectType} --debug:ephemeral-hive --no-restore")
-                .Should().Pass();
-
-            new RestoreCommand()
-                .WithWorkingDirectory(projectFolder)
-                .Execute($"--configfile {configFile} --packages {packagesDirectory}")
-                .Should().Pass();
-        }
     }
 }
