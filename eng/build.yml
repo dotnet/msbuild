@@ -50,7 +50,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: eng\common\CIBuild.cmd
-                  -configuration %BuildConfig%
+                  -configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
@@ -62,8 +62,8 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
       - script: eng\common\CIBuild.cmd 
-                  -configuration %BuildConfig%
-                  -fullMSBuild
+                  -configuration $(_BuildConfig)
+                  -msbuildEngine vs
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
@@ -75,7 +75,7 @@ phases:
 
     - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework') }}:
       - script: eng/common/cibuild.sh 
-                  --configuration $BuildConfig
+                  --configuration $(_BuildConfig)
                   $(_PublishArgs)
                   $(_SignArgs)
                   $(_OfficialBuildIdArgs)
@@ -93,7 +93,7 @@ phases:
         testRunTitle: 'Unit Test Results'
         platform: '$(BuildPlatform)'
         configuration: '$(_BuildConfig)'
-      condition: and(succeededOrFailed(), ne(variables['PB_SkipTests'], 'true'))
+      condition: not(succeeded())
 
     - task: CopyFiles@2
       displayName: Gather Logs
@@ -104,7 +104,7 @@ phases:
          artifacts/TestResults/$(_BuildConfig)/**/*
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
       continueOnError: true
-      condition: always()
+      condition: not(succeeded())
 
     - task: PublishBuildArtifacts@1
       displayName: Publish Logs to VSTS
@@ -113,4 +113,4 @@ phases:
         ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'
         publishLocation: Container
       continueOnError: true
-      condition: always()
+      condition: not(succeeded())
