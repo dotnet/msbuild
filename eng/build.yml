@@ -31,7 +31,7 @@ phases:
           DropSuffix: $(_DropSuffix)
 
     - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
-      - script: build.sh
+      - script: ./build.sh
                   --skip-prereqs
                   --configuration $(BuildConfig)
         displayName: Build

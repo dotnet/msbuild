@@ -6,7 +6,7 @@
     <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">alpha1</ReleaseSuffix>
 
     <!-- When running on VSO (for official builds) use a real number. -->
-    <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">$([System.String]::Copy('$(BUILD_BUILDNUMBER)').Replace('.' ,'-'))</BuildNumber>
     <BuildNumber Condition="'$(BuildNumber)' == ''">00000001-01</BuildNumber>
 
     <CliVersionPrefix>$(VersionMajor).$(VersionMinor).$(VersionPatch)-$(ReleaseSuffix)</CliVersionPrefix>
