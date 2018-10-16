@@ -3,16 +3,16 @@
   <PropertyGroup>
     <DotNetCoreSdkLKGVersion>3.0.100-alpha1-009452</DotNetCoreSdkLKGVersion>
     <DotnetCliInternalVersion>3.0.100-alpha1-20180915-1</DotnetCliInternalVersion>
-    <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview1-34355</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0-preview2-35157</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreMvcPackageVersion>2.2.0-preview2-35157</MicrosoftAspNetCoreMvcPackageVersion>
-    <DotnetEfPackageVersion>2.2.0-preview2-35157</DotnetEfPackageVersion>
-    <DotnetDevCertsPackageVersion>2.2.0-preview2-35157</DotnetDevCertsPackageVersion>
-    <DotnetSqlCachePackageVersion>2.2.0-preview2-35157</DotnetSqlCachePackageVersion>
-    <DotnetUserSecretsPackageVersion>2.2.0-preview2-35157</DotnetUserSecretsPackageVersion>
-    <DotnetWatchPackageVersion>2.2.0-preview2-35157</DotnetWatchPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.2.0-preview1-26620-03</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreMvcPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreMvcPackageVersion>
+    <DotnetEfPackageVersion>2.2.0-preview3-35497</DotnetEfPackageVersion>
+    <DotnetDevCertsPackageVersion>2.2.0-preview3-35497</DotnetDevCertsPackageVersion>
+    <DotnetSqlCachePackageVersion>2.2.0-preview3-35497</DotnetSqlCachePackageVersion>
+    <DotnetUserSecretsPackageVersion>2.2.0-preview3-35497</DotnetUserSecretsPackageVersion>
+    <DotnetWatchPackageVersion>2.2.0-preview3-35497</DotnetWatchPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.2.0-preview3-27014-02</MicrosoftNETCoreAppPackageVersion>
     <!-- https://github.com/dotnet/cli/issues/9851  -->
     <MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>3.0.0-preview1-26816-04</MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>
     <MicrosoftBuildPackageVersion>15.9.0-preview-000008</MicrosoftBuildPackageVersion>
@@ -28,15 +28,15 @@
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
     <MicrosoftNETSdkPackageVersion>3.0.100-preview1-63223-01</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>2.1.1</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkWebPackageVersion>2.1.400-preview1-20180705-1834985</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>2.2.0-preview3-35497</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>2.2.100-preview3-20181013-2115910</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftNETSdkWpfPackageVersion>3.0.0-alpha-26828-2</MicrosoftNETSdkWpfPackageVersion>
-    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta4-20180803-1918431</MicrosoftDotNetCommonItemTemplatesPackageVersion>
+    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta4-20181013-2115911</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates22PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates22PackageVersion>
     <MicrosoftDotNetTestProjectTemplates22PackageVersion>1.0.2-beta4-20180821-1966911</MicrosoftDotNetTestProjectTemplates22PackageVersion>
-    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta3</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta4-20181013-2115911</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
