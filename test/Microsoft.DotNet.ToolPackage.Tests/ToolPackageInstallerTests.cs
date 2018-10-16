@@ -688,10 +688,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 CultureInfo.CurrentCulture = new CultureInfo("en-US-POSIX");
                 IToolPackage package = null;
                 Action action = () => package = installer.InstallPackage(
+                    new PackageLocation(
+                        nugetConfig: nugetConfigPath,
+                        additionalFeeds: new[] { emptySource }),
                     packageId: packageId,
                     versionRange: VersionRange.Parse(packageVersion),
-                    targetFramework: _testTargetframework,
-                    nugetConfig: nugetConfigPath, additionalFeeds: new[] { emptySource });
+                    targetFramework: _testTargetframework);
 
                 action.ShouldNotThrow<ToolConfigurationException>();
 
