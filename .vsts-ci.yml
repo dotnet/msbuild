@@ -1,0 +1,44 @@
+trigger:
+- master
+
+variables:
+  teamName: Roslyn-Project-System
+
+phases:
+- template: /eng/build.yml
+  parameters:
+    agentOs: Windows_NT
+    queue:
+      name: Hosted VS2017
+      parallel: 2
+      matrix:
+        Build_Debug_x86:
+          _BuildConfig: Debug
+          _BuildArchitecture: x86
+          _DOTNET_CLI_UI_LANGUAGE: ''
+          _DropSuffix: ''
+        Build_Release_x64:
+          _BuildConfig: Release
+          _BuildArchitecture: x64
+          _DOTNET_CLI_UI_LANGUAGE: ''
+          _DropSuffix: ''
+        Build_ES_Debug_x64:
+          _BuildConfig: Debug
+          _BuildArchitecture: x64
+          _DOTNET_CLI_UI_LANGUAGE: es
+          _DropSuffix: ''
+        Build_DropSuffix_Release_x64:
+          _BuildConfig: Release
+          _BuildArchitecture: x64
+          _DOTNET_CLI_UI_LANGUAGE: ''
+          _DropSuffix: true
+
+- template: /eng/build.yml
+  parameters:
+    agentOs: Darwin
+    queue: 
+      name: Hosted macOS
+      parallel: 2
+      matrix:
+        Build_Release:
+          _BuildConfig: Release
