@@ -37,6 +37,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
         private readonly bool _global;
         private readonly string _verbosity;
         private readonly string _toolPath;
+        private readonly IEnumerable<string> _forwardRestoreArguments;
 
         public ToolUpdateCommand(AppliedOption appliedCommand,
             ParseResult parseResult,
@@ -57,6 +58,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _global = appliedCommand.ValueOrDefault<bool>("global");
             _verbosity = appliedCommand.SingleArgumentOrDefault("verbosity");
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
+            _forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
 
             _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??
                                                   ToolPackageFactory.CreateToolPackageStoresAndInstallerAndUninstaller;
@@ -81,7 +83,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             (IToolPackageStore toolPackageStore,
              IToolPackageStoreQuery toolPackageStoreQuery,
              IToolPackageInstaller toolPackageInstaller,
-             IToolPackageUninstaller toolPackageUninstaller) = _createToolPackageStoreInstallerUninstaller(toolPath);
+             IToolPackageUninstaller toolPackageUninstaller) = _createToolPackageStoreInstallerUninstaller(toolPath, _forwardRestoreArguments);
 
             IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
