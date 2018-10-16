@@ -14,7 +14,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <VSTestTaskAssemblyFile Condition="$(VSTestTaskAssemblyFile) == ''">$(MSBuildExtensionsPath)\Microsoft.TestPlatform.Build.dll</VSTestTaskAssemblyFile>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
-  <UsingTask TaskName="Microsoft.TestPlatform.Build.Tasks.BuildLogTask" AssemblyFile="$(VSTestTaskAssemblyFile)" />
+  <UsingTask TaskName="Microsoft.TestPlatform.Build.Tasks.VSTestLogsTask" AssemblyFile="$(VSTestTaskAssemblyFile)" />
   <!--
   ===================================================================================
                DispatchToInnerBuildsWithVSTestTarget
@@ -71,9 +71,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   </Target>
 
   <Target Name="BuildProject">
-    <Microsoft.TestPlatform.Build.Tasks.BuildLogTask BuildStarted="True" />
+    <Microsoft.TestPlatform.Build.Tasks.VSTestLogsTask LogType="BuildStarted" />
     <CallTarget Targets="Build" />
-    <Microsoft.TestPlatform.Build.Tasks.BuildLogTask />
+    <Microsoft.TestPlatform.Build.Tasks.VSTestLogsTask LogType="BuildCompleted" />
   </Target>
 
   <Target Name="SetVSTestInnerTarget" Returns="@(InnerOutput)">
