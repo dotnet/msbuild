@@ -162,11 +162,11 @@ namespace Microsoft.DotNet.Cli.List.Package.Tests
 
         [Theory]
         [InlineData("", "[net451]", null)]
-        [InlineData("", "[netcoreapp2.2]", null)]
-        [InlineData("--framework netcoreapp2.2 --framework net451", "[net451]", null)]
-        [InlineData("--framework netcoreapp2.2 --framework net451", "[netcoreapp2.2]", null)]
-        [InlineData("--framework netcoreapp2.2", "[netcoreapp2.2]", "[net451]")]
-        [InlineData("--framework net451", "[net451]", "[netcoreapp2.2]")]
+        [InlineData("", "[netcoreapp3.0]", null)]
+        [InlineData("--framework netcoreapp3.0 --framework net451", "[net451]", null)]
+        [InlineData("--framework netcoreapp3.0 --framework net451", "[netcoreapp3.0]", null)]
+        [InlineData("--framework netcoreapp3.0", "[netcoreapp3.0]", "[net451]")]
+        [InlineData("--framework net451", "[net451]", "[netcoreapp3.0]")]
         public void ItListsValidFrameworks(string args, string shouldInclude, string shouldntInclude)
         {
             var testAsset = "MSBuildAppWithMultipleFrameworks";
