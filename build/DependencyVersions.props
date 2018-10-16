@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview3-35364</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
-    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0-preview3-35364</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
-    <MicrosoftAspNetCoreMvcPackageVersion>2.2.0-preview3-35364</MicrosoftAspNetCoreMvcPackageVersion>
-    <DotnetEfPackageVersion>2.2.0-preview3-35364</DotnetEfPackageVersion>
-    <DotnetDevCertsPackageVersion>2.2.0-preview3-35364</DotnetDevCertsPackageVersion>
-    <DotnetSqlCachePackageVersion>2.2.0-preview3-35364</DotnetSqlCachePackageVersion>
-    <DotnetUserSecretsPackageVersion>2.2.0-preview3-35364</DotnetUserSecretsPackageVersion>
-    <DotnetWatchPackageVersion>2.2.0-preview3-35364</DotnetWatchPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.2.0-preview3-27001-02</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+    <MicrosoftAspNetCoreMvcPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreMvcPackageVersion>
+    <DotnetEfPackageVersion>2.2.0-preview3-35497</DotnetEfPackageVersion>
+    <DotnetDevCertsPackageVersion>2.2.0-preview3-35497</DotnetDevCertsPackageVersion>
+    <DotnetSqlCachePackageVersion>2.2.0-preview3-35497</DotnetSqlCachePackageVersion>
+    <DotnetUserSecretsPackageVersion>2.2.0-preview3-35497</DotnetUserSecretsPackageVersion>
+    <DotnetWatchPackageVersion>2.2.0-preview3-35497</DotnetWatchPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.2.0-preview3-27014-02</MicrosoftNETCoreAppPackageVersion>
 
     <!-- https://github.com/dotnet/cli/issues/9851  -->
     <MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>3.0.0-preview1-26816-04</MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>
@@ -26,16 +26,16 @@
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
-    <MicrosoftNETSdkPackageVersion>2.2.100-preview3-63401-01</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>2.2.100-preview3-63414-02</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
-    <MicrosoftNETSdkRazorPackageVersion>2.2.0-preview3-35364</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkWebPackageVersion>2.2.100-preview3-20180930-2076033</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkRazorPackageVersion>2.2.0-preview3-35497</MicrosoftNETSdkRazorPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>2.2.100-preview3-20181013-2115910</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
-    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta4-20180930-2076037</MicrosoftDotNetCommonItemTemplatesPackageVersion>
+    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta4-20181013-2115911</MicrosoftDotNetCommonItemTemplatesPackageVersion>
     <MicrosoftDotNetCommonProjectTemplates22PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates22PackageVersion>
     <MicrosoftDotNetTestProjectTemplates22PackageVersion>1.0.2-beta4-20180821-1966911</MicrosoftDotNetTestProjectTemplates22PackageVersion>
-    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta4-20180930-2076037</MicrosoftTemplateEngineCliPackageVersion>
+    <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta4-20181013-2115911</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
     <MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineOrchestratorRunnableProjectsPackageVersion>
