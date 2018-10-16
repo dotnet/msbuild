@@ -197,7 +197,7 @@ namespace Microsoft.Build.Graph
             }
 
             EntryPointNodes = entryPointNodes.AsReadOnly();
-            ProjectNodes = _allParsedProjects.Values.ToArray();
+            ProjectNodes = _allParsedProjects.Values.ToList();
             GraphRoots = graphRoots.AsReadOnly();
         }
 
@@ -365,12 +365,11 @@ namespace Microsoft.Build.Graph
                                 if (!tasksInProgress.TryGetValue(projectReferenceConfigurationMetadata, out Task taskInProgress))
                                 {
                                     projectsToEvalute.Enqueue(projectReferenceConfigurationMetadata);
-                                    waitHandle.Set();
                                 }
                             }
-
                         }
                     });
+
                     if (tasksInProgress.TryAdd(projectToEvaluate, task))
                     {
                         task.ContinueWith(t =>
@@ -380,7 +379,6 @@ namespace Microsoft.Build.Graph
                         });
                         task.Start();
                     }
-
                 }
                 else
                 {
@@ -397,6 +395,11 @@ namespace Microsoft.Build.Graph
             Processed
         }
 
+        /// <remarks>
+        /// Traverse an evaluated graph
+        /// Maintain the state of each node (InProcess and Processed) to detect cycles
+        /// returns false if loading the graph is not successful
+        /// </remarks>
         private (bool success, List<string> projectsInCycle) DetectCycles(ProjectGraphNode node,
             Dictionary<ProjectGraphNode, NodeState> nodeState,
             ProjectCollection projectCollection,
@@ -466,12 +469,6 @@ namespace Microsoft.Build.Graph
             nodeState[node] = NodeState.Processed;
             return (true, null);
         }
-
-        /// <remarks>
-        /// Load a graph with root node at entryProjectFile
-        /// Maintain the state of each node (InProcess and Processed) to detect cycles
-        /// returns false if loading the graph is not successful
-        /// </remarks>
 
         internal static string FormatCircularDependencyError(List<string> projectsInCycle)
         {
