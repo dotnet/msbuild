@@ -19,6 +19,9 @@ phases:
       BuildConfig: $(_BuildConfig)
       BuildArchitecture: $(_BuildArchitecture)
       _HelixSource: pr/dotnet/cli/$(Build.SourceBranch)
+      DockerParameter: $(_DockerParameter)
+      LinuxPortable: $(_LinuxPortable)
+      RuntimeId: $(_RuntimeIdentifier)
 
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
@@ -30,7 +33,19 @@ phases:
           DOTNET_CLI_UI_LANGUAGE: $(_DOTNET_CLI_UI_LANGUAGE)
           DropSuffix: $(_DropSuffix)
 
-    - ${{ if ne(parameters.agentOs, 'Windows_NT') }}:
+    - ${{ if eq(parameters.agentOs, 'Linux') }}:
+      - script: ./build.sh
+                  --skip-prereqs
+                  --configuration $(BuildConfig)
+                  $(DockerParameter)
+                  --architecture $(BuildArchitecture)
+                  $(LinuxPortable)
+                  $(RuntimeId)
+        displayName: Build
+        env:
+          DropSuffix: $(_DropSuffix)
+
+    - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
                   --skip-prereqs
                   --configuration $(BuildConfig)
@@ -39,7 +54,7 @@ phases:
     - task: PublishTestResults@1
       displayName: Publish Test Results
       inputs:
-        testRunner: XUnit
+        testRunner: VSTest
         testResultsFiles: '**/*.trx'
         testRunTitle: 'Unit Test Results'
         platform: '$(BuildPlatform)'

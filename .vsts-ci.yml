@@ -35,10 +35,121 @@ phases:
 
 - template: /eng/build.yml
   parameters:
+    agentOs: Linux
+    queue:
+      name: Hosted Ubuntu 1604
+      matrix:
+        Build_Ubuntu_14_04_Release_x64:
+          _BuildConfig: Release
+          _DockerParameter: '--docker ubuntu.14.04'
+          _LinuxPortable: ''
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_Ubuntu_16_04_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker ubuntu.16.04'
+          _LinuxPortable: ''
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_Ubuntu_18_04_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker ubuntu.18.04'
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_Fedora_27_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker fedora.27'
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_OpenSUSE_42_3_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker opensuse.42.3'
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_CentOS_7_1_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker centos'
+          _LinuxPortable: ''
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_Debian_8_2_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker debian'
+          _LinuxPortable: ''
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_Rhel_7_2_Release_x64:
+          _BuildConfig: Release
+          _DockerParameter: '--docker rhel'
+          _LinuxPortable: ''
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_Rhel_6_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker rhel.6'
+          _LinuxPortable: ''
+          _RuntimeIdentifier: '--runtime-id rhel.6-x64'
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_Arm_Debug:
+          _BuildConfig: Debug
+          _DockerParameter: ''
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'arm'
+          _DropSuffix: ''
+        Build_Arm64_Debug:
+          _BuildConfig: Debug
+          _DockerParameter: ''
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'arm64'
+          _DropSuffix: ''
+        Build_Linux_musl_Debug_x64:
+          _BuildConfig: Debug
+          _DockerParameter: '--docker alpine.3.6'
+          _LinuxPortable: ''
+          _RuntimeIdentifier: '--runtime-id linux-musl-x64'
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_LinuxPortable_Release_x64:
+          _BuildConfig: Release
+          _DockerParameter: ''
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: ''
+        Build_LinuxPortable_NoSuffix_Release_x64:
+          _BuildConfig: Release
+          _DockerParameter: ''
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'x64'
+          _DropSuffix: true
+        Build_Arm_NoSuffix_Release:
+          _BuildConfig: Release
+          _DockerParameter: ''
+          _LinuxPortable: '--linux-portable'
+          _RuntimeIdentifier: ''
+          _BuildArchitecture: 'arm'
+          _DropSuffix: true
+
+- template: /eng/build.yml
+  parameters:
     agentOs: Darwin
     queue: 
       name: Hosted macOS
-      parallel: 2
       matrix:
         Build_Release:
           _BuildConfig: Release
