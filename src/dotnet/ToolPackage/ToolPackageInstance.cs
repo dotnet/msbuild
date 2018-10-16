@@ -255,7 +255,7 @@ namespace Microsoft.DotNet.ToolPackage
             return lockFile
                 ?.Targets?.SingleOrDefault(t => t.RuntimeIdentifier != null)
                 ?.Libraries?.SingleOrDefault(l =>
-                    string.Compare(l.Name, Id.ToString(), StringComparison.CurrentCultureIgnoreCase) == 0);
+                    string.Compare(l.Name, Id.ToString(), StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         private static LockFileItem FindItemInTargetLibrary(LockFileTargetLibrary library, string targetRelativeFilePath)

@@ -233,8 +233,8 @@ Copyright (c) .NET Foundation. All rights reserved.
     <DefaultPatchVersionForAspNetCoreApp2_1>$(_DefaultPatchVersionForAspNetCoreApp2_1)</DefaultPatchVersionForAspNetCoreApp2_1>
 
     <!-- Latest patch versions for each minor version of .NET Core -->
-    <LatestPatchVersionForNetCore1_0 Condition="'%24(LatestPatchVersionForNetCore1_0)' == ''">1.0.12</LatestPatchVersionForNetCore1_0>
-    <LatestPatchVersionForNetCore1_1 Condition="'%24(LatestPatchVersionForNetCore1_1)' == ''">1.1.9</LatestPatchVersionForNetCore1_1>
+    <LatestPatchVersionForNetCore1_0 Condition="'%24(LatestPatchVersionForNetCore1_0)' == ''">1.0.13</LatestPatchVersionForNetCore1_0>
+    <LatestPatchVersionForNetCore1_1 Condition="'%24(LatestPatchVersionForNetCore1_1)' == ''">1.1.10</LatestPatchVersionForNetCore1_1>
     <LatestPatchVersionForNetCore2_0 Condition="'%24(LatestPatchVersionForNetCore2_0)' == ''">2.0.9</LatestPatchVersionForNetCore2_0>
     <LatestPatchVersionForNetCore2_1 Condition="'%24(LatestPatchVersionForNetCore2_1)' == ''">2.1.2</LatestPatchVersionForNetCore2_1>
   </PropertyGroup>
