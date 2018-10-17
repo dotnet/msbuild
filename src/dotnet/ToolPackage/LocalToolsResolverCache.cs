@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Newtonsoft.Json;
 using NuGet.Frameworks;
@@ -17,11 +18,16 @@ namespace Microsoft.DotNet.ToolPackage
     {
         private readonly DirectoryPath _cacheVersionedDirectory;
         private readonly IFileSystem _fileSystem;
+        private const int LocalToolResolverCacheVersion = 1;
 
-        public LocalToolsResolverCache(IFileSystem fileSystem, DirectoryPath cacheDirectory, int version)
+        public LocalToolsResolverCache(IFileSystem fileSystem = null,
+            DirectoryPath? cacheDirectory = null,
+            int version = LocalToolResolverCacheVersion)
         {
-            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _cacheVersionedDirectory = cacheDirectory.WithSubDirectories(version.ToString());
+            _fileSystem = fileSystem ?? new FileSystemWrapper();
+            DirectoryPath appliedCacheDirectory =
+                cacheDirectory ?? new DirectoryPath(Path.Combine(CliFolderPathCalculator.ToolsResolverCachePath));
+            _cacheVersionedDirectory = appliedCacheDirectory.WithSubDirectories(version.ToString());
         }
 
         public void Save(

@@ -193,6 +193,129 @@ namespace Microsoft.DotNet.Tests.Commands
                             99, 1));
         }
 
+        [Fact]
+        public void GivenManifestFileOnSameDirectoryWhenFindByCommandNameItGetContent()
+        {
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContent);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            toolManifest.TryFind(new ToolCommandName("dotnetsay"), out var result).Should().BeTrue();
+
+            result.ShouldBeEquivalentTo(new ToolManifestPackage(
+                new PackageId("dotnetsay"),
+                NuGetVersion.Parse("2.1.4"),
+                new[] {new ToolCommandName("dotnetsay")}));
+        }
+
+        [Fact]
+        public void GivenManifestFileOnSameDirectoryWhenFindByCommandNameWithDifferentCasingItGetContent()
+        {
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContent);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            toolManifest.TryFind(new ToolCommandName("dotnetSay"), out var result).Should().BeTrue();
+
+            result.ShouldBeEquivalentTo(new ToolManifestPackage(
+                new PackageId("dotnetsay"),
+                NuGetVersion.Parse("2.1.4"),
+                new[] {new ToolCommandName("dotnetsay")}));
+        }
+
+        [Fact]
+        public void GivenManifestFileOnParentDirectoryWhenFindByCommandNameItGetContent()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContent);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(subdirectoryOfTestRoot), _fileSystem);
+            toolManifest.TryFind(new ToolCommandName("dotnetsay"), out var result).Should().BeTrue();
+
+            result.ShouldBeEquivalentTo(new ToolManifestPackage(
+                new PackageId("dotnetsay"),
+                NuGetVersion.Parse("2.1.4"),
+                new[] {new ToolCommandName("dotnetsay")}));
+        }
+
+        [Fact]
+        public void GivenNoManifestFileWhenFindByCommandNameItReturnFalse()
+        {
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            toolManifest.TryFind(new ToolCommandName("dotnetSay"), out var result).Should().BeFalse();
+        }
+
+        [Fact]
+        public void GivenMissingFieldManifestFileWhenFindByCommandNameItThrows()
+        {
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonWithMissingField);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+
+            Action a = () => toolManifest.TryFind(new ToolCommandName("dotnetSay"), out var result);
+            a.ShouldThrow<ToolManifestException>();
+        }
+
+        [Fact]
+        public void GivenInvalidFieldsManifestFileWhenFindByCommandNameItThrows()
+        {
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonWithInvalidField);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+
+            Action a = () => toolManifest.TryFind(new ToolCommandName("dotnetSay"), out var result);
+            a.ShouldThrow<ToolManifestException>();
+        }
+
+        [Fact]
+        public void GivenInvalidJsonManifestFileWhenFindByCommandNameItThrows()
+        {
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContentInvalidJson);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+
+            Action a = () => toolManifest.TryFind(new ToolCommandName("dotnetSay"), out var result);
+            a.ShouldThrow<ToolManifestException>();
+        }
+
+        [Fact]
+        public void GivenConflictedManifestFileInDifferentFieldsWhenFindByCommandNameItReturnMergedContent()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename),
+                _jsonContentInParentDirectory);
+            _fileSystem.File.WriteAllText(Path.Combine(subdirectoryOfTestRoot, _manifestFilename),
+                _jsonContentInCurrentDirectory);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(subdirectoryOfTestRoot), _fileSystem);
+
+            toolManifest.TryFind(new ToolCommandName("t-rex"), out var result).Should().BeTrue();
+
+            result.ShouldBeEquivalentTo(new ToolManifestPackage(
+                new PackageId("t-rex"),
+                NuGetVersion.Parse("1.0.49"),
+                new[] {new ToolCommandName("t-rex")}));
+        }
+
+        [Fact]
+        public void GivenConflictedManifestFileInDifferentFieldsWhenFindByCommandNameItOnlyConsiderTheFirstIsRoot()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename),
+                _jsonContentInParentDirectory);
+            _fileSystem.File.WriteAllText(Path.Combine(subdirectoryOfTestRoot, _manifestFilename),
+                _jsonContentInCurrentDirectoryIsRootTrue);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(subdirectoryOfTestRoot), _fileSystem);
+            var manifestResult = toolManifest.Find();
+
+            toolManifest.TryFind(new ToolCommandName("dotnetsay2"), out var result).Should().BeFalse();
+        }
+
+        [Fact]
+        public void DifferentVersionOfManifestFileItThrows()
+        {
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename),
+                _jsonContentHigherVersion);
+            BufferedReporter bufferedReporter = new BufferedReporter();
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+
+            Action a = () => toolManifest.TryFind(new ToolCommandName("dotnetsay"), out var result);
+            a.ShouldThrow<ToolManifestException>();
+        }
+
         private string _jsonContent =
             @"{
    ""version"":1,
@@ -324,6 +447,26 @@ namespace Microsoft.DotNet.Tests.Commands
    ""tools"":{
       ""t-rex"":{
          ""version"":""1.0.53"",
+         ""commands"":[
+            ""t-rex""
+         ]
+      },
+      ""dotnetsay"":{
+         ""version"":""2.1.4"",
+         ""commands"":[
+            ""dotnetsay""
+         ]
+      }
+   }
+}";
+
+        private string _jsonContentInvalidJson =
+            @"{
+   ""version"":1,
+   ""isRoot"":true,
+   ""tools"":{
+      ""t-rex"":{
+         ""version"":""1.0.53"",,
          ""commands"":[
             ""t-rex""
          ]

@@ -42,7 +42,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
             NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
-            string runtimeIdentifier = "any";
+            string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
@@ -83,7 +83,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
             NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
-            string runtimeIdentifier = "any";
+            string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
             NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
-            string runtimeIdentifier = "any";
+            string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
@@ -160,7 +160,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
             NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
-            string runtimeIdentifier = "any";
+            string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
 
             NuGetVersion previewNuGetVersion = NuGetVersion.Parse("0.0.2");
@@ -222,7 +222,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     new RestoredCommandIdentifierVersionRange(
                         new PackageId("my.toolBundle"),
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
-                        NuGetFramework.Parse("netcoreapp2.1"), "any", new ToolCommandName("tool1")),
+                        NuGetFramework.Parse("netcoreapp2.1"), Constants.AnyRid, new ToolCommandName("tool1")),
                     nuGetGlobalPackagesFolder, out _);
 
             loadSuccess.Should().BeFalse();
@@ -234,7 +234,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             (DirectoryPath nuGetGlobalPackagesFolder, LocalToolsResolverCache localToolsResolverCache) = Setup();
 
             NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
-            string runtimeIdentifier = "any";
+            string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
@@ -318,7 +318,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 new LocalToolsResolverCache(fileSystem, cacheDirectory, version);
 
             NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
-            string runtimeIdentifier = "any";
+            string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]
@@ -377,7 +377,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 new LocalToolsResolverCache(fileSystem, cacheDirectory, version);
 
             NuGetFramework targetFramework = NuGetFramework.Parse("netcoreapp2.1");
-            string runtimeIdentifier = "any";
+            string runtimeIdentifier = Constants.AnyRid;
             PackageId packageId = new PackageId("my.toolBundle");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("1.0.2");
             IReadOnlyList<RestoredCommand> restoredCommands = new[]

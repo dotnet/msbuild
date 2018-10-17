@@ -23,8 +23,8 @@ namespace Microsoft.DotNet.ToolManifest
             ToolCommandName[] toolCommandNames)
         {
             PackageId = packagePackageId;
-            Version = version;
-            CommandNames = toolCommandNames;
+            Version = version ?? throw new ArgumentNullException(nameof(version));
+            CommandNames = toolCommandNames ?? throw new ArgumentNullException(nameof(toolCommandNames));
         }
 
         public override bool Equals(object obj)
@@ -37,7 +37,23 @@ namespace Microsoft.DotNet.ToolManifest
         {
             return PackageId.Equals(other.PackageId) &&
                    EqualityComparer<NuGetVersion>.Default.Equals(Version, other.Version) &&
-                   CommandNames.SequenceEqual(other.CommandNames);
+                   CommandNamesEqual(other.CommandNames);
+        }
+
+        private bool CommandNamesEqual(ToolCommandName[] otherCommandNames)
+        {
+            if (CommandNames == null && otherCommandNames == null)
+            {
+                return true;
+            }
+            else if (otherCommandNames == null || CommandNames == null)
+            {
+                return false;
+            }
+            else
+            {
+                return CommandNames.SequenceEqual(otherCommandNames);
+            }
         }
 
         public override int GetHashCode()

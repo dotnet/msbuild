@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
                 packageVersion.ToLowerInvariant(),
                 "tools",
                 targetFramework,
-                "any");
+                Constants.AnyRid);
             var fakeExecutablePath = Path.Combine(fakeExecutableSubDirectory, FakeEntrypointName);
 
             _fileSystem.Directory.CreateDirectory(Path.Combine(assetJsonOutput.Value, fakeExecutableSubDirectory));

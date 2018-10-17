@@ -46,42 +46,9 @@ namespace Microsoft.DotNet.CommandFactory
                 .GetDirectories()[0] // RID
                 .GetFiles($"{arguments.CommandName}.dll")[0];
 
-            return CreatePackageCommandSpecUsingMuxer(
+            return MuxerCommandSpecMaker.CreatePackageCommandSpecUsingMuxer(
                     dll.FullName,
                     arguments.CommandArguments);
-        }
-
-        private CommandSpec CreatePackageCommandSpecUsingMuxer(
-            string commandPath,
-            IEnumerable<string> commandArguments)
-        {
-            var arguments = new List<string>();
-
-            var muxer = new Muxer();
-
-            var host = muxer.MuxerPath;
-            if (host == null)
-            {
-                throw new Exception(LocalizableStrings.UnableToLocateDotnetMultiplexer);
-            }
-
-            arguments.Add(commandPath);
-
-            if (commandArguments != null)
-            {
-                arguments.AddRange(commandArguments);
-            }
-
-            return CreateCommandSpec(host, arguments);
-        }
-
-        private CommandSpec CreateCommandSpec(
-            string commandPath,
-            IEnumerable<string> commandArguments)
-        {
-            var escapedArgs = ArgumentEscaper.EscapeAndConcatenateArgArrayForProcessStart(commandArguments);
-
-            return new CommandSpec(commandPath, escapedArgs);
         }
     }
 }

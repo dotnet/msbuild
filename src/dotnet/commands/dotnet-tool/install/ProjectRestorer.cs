@@ -15,7 +15,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 {
     internal class ProjectRestorer : IProjectRestorer
     {
-        private const string AnyRid = "any";
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private readonly bool _forceOutputRedirection;
@@ -46,7 +45,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             argsToPassToRestore.AddRange(new List<string>
             {
                 "--runtime",
-                AnyRid
+                Constants.AnyRid
             });
 
             argsToPassToRestore.Add($"-verbosity:{verbosity ?? "quiet"}");
