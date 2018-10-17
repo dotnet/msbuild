@@ -9,10 +9,4 @@
     <AssemblyName>dotnet-randompackage</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
-  </ItemGroup>
-
 </Project>
