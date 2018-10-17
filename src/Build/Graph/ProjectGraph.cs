@@ -174,16 +174,24 @@ namespace Microsoft.Build.Graph
 
             var nodeStates = new Dictionary<ProjectGraphNode, NodeState>();
             var entryPointNodes = new List<ProjectGraphNode>();
-            var tasksInProgress = new ConcurrentDictionary<ConfigurationMetadata, Task>();
+            var tasksInProgress = new ConcurrentDictionary<ConfigurationMetadata, object>();
+            var projectsToEvaluate = new ConcurrentQueue<ConfigurationMetadata>();
+            var entryPointConfigurationMetadata = new List<ConfigurationMetadata>();
             foreach (var entryPoint in entryPoints)
             {
                 PropertyDictionary<ProjectPropertyInstance> globalPropertyDictionary = CreatePropertyDictionary(entryPoint.GlobalProperties);
                 var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
-                LoadGraph(configurationMetadata, projectCollection, globalPropertyDictionary, tasksInProgress);
+                projectsToEvaluate.Enqueue(configurationMetadata);
+                entryPointConfigurationMetadata.Add(configurationMetadata);
+            }
+
+            LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress);
+            foreach(var configurationMetadata in entryPointConfigurationMetadata)
+            {
                 entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
-                if (!nodeStates.TryGetValue(_allParsedProjects[configurationMetadata], out NodeState nodeState))
+                if (!nodeStates.TryGetValue(_allParsedProjects[configurationMetadata], out var _))
                 {
-                    DetectCycles(_allParsedProjects[configurationMetadata], nodeStates, projectCollection, globalPropertyDictionary);
+                    DetectCycles(_allParsedProjects[configurationMetadata], nodeStates, projectCollection, configurationMetadata.GlobalProperties);
                 }
             }
 
@@ -322,7 +330,7 @@ namespace Microsoft.Build.Graph
             var graphNode = new ProjectGraphNode(
                 projectInstance,
                 globalProperties);
-            _allParsedProjects.TryAdd(configurationMetadata, graphNode);
+            _allParsedProjects[configurationMetadata] = graphNode;
             return graphNode;
         }
 
@@ -330,17 +338,15 @@ namespace Microsoft.Build.Graph
         /// Load a graph with root node at entryProjectFile
         /// Maintain a queue of projects to be processed and evaluate projects in parallel
         /// </summary>
-        private void LoadGraph(ConfigurationMetadata entryProject, ProjectCollection projectCollection, PropertyDictionary<ProjectPropertyInstance> globalProperties, ConcurrentDictionary<ConfigurationMetadata, Task> tasksInProgress)
+        private void LoadGraph(ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate, ProjectCollection projectCollection, ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress)
         {
             var waitHandle = new AutoResetEvent(false);
-            var projectsToEvalute = new ConcurrentQueue<ConfigurationMetadata>();
-            projectsToEvalute.Enqueue(entryProject);
-            while (projectsToEvalute.Count != 0 || tasksInProgress.Any())
+            while (projectsToEvaluate.Count != 0 || tasksInProgress.Count() != 0)
             {
                 ConfigurationMetadata projectToEvaluate;
-                if (projectsToEvalute.Count != 0)
+                if (projectsToEvaluate.Count != 0)
                 {
-                    projectToEvaluate = projectsToEvalute.Dequeue();
+                    projectToEvaluate = projectsToEvaluate.Dequeue();
                     var task = new Task(() =>
                     {
                         ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection);
@@ -358,23 +364,25 @@ namespace Microsoft.Build.Graph
                             }
 
                             string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
-                            PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
+                            PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, projectToEvaluate.GlobalProperties);
                             var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
-                            if (!_allParsedProjects.TryGetValue(projectReferenceConfigurationMetadata, out ProjectGraphNode parsedProjectReference))
+                            if (!_allParsedProjects.TryGetValue(projectReferenceConfigurationMetadata, out var _))
                             {
-                                if (!tasksInProgress.TryGetValue(projectReferenceConfigurationMetadata, out Task taskInProgress))
+                                if (!tasksInProgress.TryGetValue(projectReferenceConfigurationMetadata, out var _))
                                 {
-                                    projectsToEvalute.Enqueue(projectReferenceConfigurationMetadata);
+                                    projectsToEvaluate.Enqueue(projectReferenceConfigurationMetadata);
                                 }
                             }
                         }
                     });
 
-                    if (tasksInProgress.TryAdd(projectToEvaluate, task))
+                    if (tasksInProgress.TryAdd(projectToEvaluate, null))
                     {
+                        // once the task completes, remove it from tasksInProgress using a chained task
+                        // signal the wait handle to process new projects that have been discovered by this task or exit if all projects have been evaluated
                         task.ContinueWith(t =>
                         {
-                            tasksInProgress.TryRemove(projectToEvaluate, out Task parsedProjectReferenceTask);
+                            tasksInProgress.TryRemove(projectToEvaluate, out var _);
                             waitHandle.Set();
                         });
                         task.Start();
@@ -382,6 +390,8 @@ namespace Microsoft.Build.Graph
                 }
                 else
                 {
+                    // if projectsToEvaluate is empty but there are tasks in progress, there is nothing to do till a task completes and discovers new projects
+                    // wait till a task completes and sends a signal
                     waitHandle.WaitOne();
                 }
             }
@@ -412,14 +422,14 @@ namespace Microsoft.Build.Graph
                 string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
                 PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, globalProperties);
                 var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
-                ProjectGraphNode projectreference = _allParsedProjects[projectReferenceConfigurationMetadata];
-                if (nodeState.TryGetValue(projectreference, out NodeState projectReferenceNodeState))
+                ProjectGraphNode projectReference = _allParsedProjects[projectReferenceConfigurationMetadata];
+                if (nodeState.TryGetValue(projectReference, out NodeState projectReferenceNodeState))
                 {
                     // Because this is a depth-first search, we should only encounter new nodes or nodes whose subgraph has been completely processed.
                     // If we encounter a node that is currently being processed(InProcess state), it must be one of the ancestors in a circular dependency.
                     if (projectReferenceNodeState == NodeState.InProcess)
                     {
-                        if (node.Equals(projectreference))
+                        if (node.Equals(projectReference))
                         {
                             // the project being evaluated has a reference to itself
                             var selfReferencingProjectString = FormatCircularDependencyError(new List<string> { node.ProjectInstance.FullPath, node.ProjectInstance.FullPath });
@@ -439,7 +449,7 @@ namespace Microsoft.Build.Graph
                 else
                 {
                     // recursively process newly discovered references
-                    var loadReference = DetectCycles(projectreference, nodeState, projectCollection,
+                    var loadReference = DetectCycles(projectReference, nodeState, projectCollection,
                         globalProperties);
                     if (!loadReference.success)
                     {
