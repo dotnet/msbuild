@@ -8,10 +8,4 @@
     <PackageId>$(AssemblyName)</PackageId>
   </PropertyGroup>
 
-  <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
-  </ItemGroup>
-
 </Project>
