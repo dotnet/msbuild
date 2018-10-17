@@ -2,8 +2,8 @@
   <PropertyGroup>
     <VersionMajor>2</VersionMajor>
     <VersionMinor>1</VersionMinor>
-    <VersionPatch>404</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">servicing</ReleaseSuffix>
+    <VersionPatch>500</VersionPatch>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview</ReleaseSuffix>
 
     <MajorMinorVersion>$(VersionMajor).$(VersionMinor)</MajorMinorVersion>
     <CliVersionNoSuffix>$(VersionMajor).$(VersionMinor).$(VersionPatch)</CliVersionNoSuffix>

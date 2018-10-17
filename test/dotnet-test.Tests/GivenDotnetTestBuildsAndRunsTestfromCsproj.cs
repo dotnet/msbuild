@@ -72,9 +72,26 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore")
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore /p:IsTestProject=true")
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
+        }
+
+        [Fact]
+        public void ItDoesNotRunTestsIfThereIsNoIsTestProject()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new DotnetTestCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore")
+                .Should().Pass()
+                .And.HaveStdOutContaining("Skipping running test for project");
         }
 
         [Fact]
@@ -152,11 +169,14 @@ namespace Microsoft.DotNet.Cli.Test.Tests
                                        .ExecuteWithCapturedOutput("--logger \"trx;logfilename=custom.trx\" --logger console;verbosity=normal -- RunConfiguration.ResultsDirectory=" + trxLoggerDirectory);
 
             // Verify
-            var trxFilePath = Path.Combine(trxLoggerDirectory, "custom.trx");
-            Assert.True(File.Exists(trxFilePath));
-            result.StdOut.Should().Contain(trxFilePath);
-            result.StdOut.Should().Contain("Passed   VSTestPassTest");
-            result.StdOut.Should().Contain("Failed   VSTestFailTest");
+            if (!DotnetUnderTest.IsLocalized())
+            {
+                var trxFilePath = Path.Combine(trxLoggerDirectory, "custom.trx");
+                Assert.True(File.Exists(trxFilePath));
+                result.StdOut.Should().Contain(trxFilePath);
+                result.StdOut.Should().Contain("Passed   VSTestPassTest");
+                result.StdOut.Should().Contain("Failed   VSTestFailTest");
+            }
 
             // Cleanup trxLoggerDirectory if it exist
             if (Directory.Exists(trxLoggerDirectory))
