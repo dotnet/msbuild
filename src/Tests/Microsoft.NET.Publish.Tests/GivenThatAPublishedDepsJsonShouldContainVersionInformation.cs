@@ -145,11 +145,11 @@ namespace Microsoft.NET.Publish.Tests
         {
             void testProjectChanges(TestProject testProject)
             {
-                testProject.AdditionalProperties["IncludeRuntimeFileVersions"] = "false";
+                testProject.AdditionalProperties["IncludeFileVersionsInDependencyFile"] = "false";
             }
 
             var (coreDir, publishDir, immutableDir) = TestConflictResult(testProjectChanges);
-            immutableDir.Should().BeEquivalentTo(publishDir, "published immutable collections library from should win");
+            immutableDir.Should().BeEquivalentTo(coreDir, "inbox immutable collections library from should win");
         }
 
         [Fact]
