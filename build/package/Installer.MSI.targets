@@ -22,6 +22,9 @@
 
       <SdkInstallerNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).nuspec</SdkInstallerNuspecFile>
       <SdkInstallerNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).$(SuffixedNugetVersion).nupkg</SdkInstallerNupkgFile>
+      <SdkInstallerNuspec21File>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.$(Architecture).2.1.nuspec</SdkInstallerNuspec21File>
+      <SdkInstallerNupkg21File>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.$(Architecture).2.1.$(SuffixedNugetVersion).nupkg</SdkInstallerNupkg21File>
+
 
       <SdkMSBuildExtensionsNuspecFile>$(RepoRoot)/packaging/windows/clisdk/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.nuspec</SdkMSBuildExtensionsNuspecFile>
       <SdkMSBuildExtensionsNupkgFile>$(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(SuffixedNugetVersion).nupkg</SdkMSBuildExtensionsNupkgFile>
@@ -167,14 +170,22 @@
             Condition=" '$(OS)' == 'Windows_NT'"
             Inputs="$(CombinedFrameworkSdkHostInstallerFile);
                     $(SdkInstallerNuspecFile);
+                    $(SdkInstallerNuspec21File);
                     $(SdkGenerateNupkgPowershellScript)"
-            Outputs="$(SdkInstallerNupkgFile)">
+            Outputs="$(SdkInstallerNupkgFile);
+                     $(SdkInstallerNupkg21File)">
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
                       '$(CombinedFrameworkSdkHostInstallerFile)' ^
                       '$(FullNugetVersion)' ^
                       '$(SdkInstallerNuspecFile)' ^
                       '$(SdkInstallerNupkgFile)'" />
+
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
+                      '$(CombinedFrameworkSdkHostInstallerFile)'
+                      '$(SuffixedNugetVersion)'
+                      '$(SdkInstallerNuspec21File)'
+                      '$(SdkInstallerNupkg21File)'" />
     </Target>
 
     <Target Name="GenerateSdkMSBuildExtensionsNupkg"
