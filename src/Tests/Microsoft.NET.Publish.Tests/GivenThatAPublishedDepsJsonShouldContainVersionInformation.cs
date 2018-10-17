@@ -168,7 +168,9 @@ namespace Microsoft.NET.Publish.Tests
         }
 
         private (string coreDir, string publishDir, string immutableDir) TestConflictResult(
-            Action<TestProject> testProjectChanges = null, Action<string> publishFolderChanges = null)
+            Action<TestProject> testProjectChanges = null,
+            Action<string> publishFolderChanges = null,
+            [CallerMemberName] string callingMethod = "")
         {
             var testProject = GetTestProject();
 
@@ -190,7 +192,7 @@ static class Program
             }
 
 
-            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+            var testAsset = _testAssetsManager.CreateTestProject(testProject, callingMethod: callingMethod)
                 .Restore(Log, testProject.Name);
 
             var publishCommand = new PublishCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
