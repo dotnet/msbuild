@@ -1,0 +1,82 @@
+parameters:
+  agentOs: ''
+  queue: {}
+  variables: {}
+
+phases:
+- template: /eng/common/templates/phases/base.yml
+  parameters:
+    name: ${{ parameters.agentOs }}
+    enableTelemetry: true
+    publicBuildReasons: PullRequest
+    queue: ${{ parameters.queue }}
+    variables: 
+      ${{ insert }}: ${{ parameters.variables }}
+      _AgentOSName: ${{ parameters.agentOs }}
+      _HelixType: build/product
+      _HelixBuildConfig: $(_BuildConfig)
+      BuildConfig: $(_BuildConfig)
+      BuildArchitecture: $(_BuildArchitecture)
+      _HelixSource: pr/dotnet/toolset/$(Build.SourceBranch)
+      DockerParameter: $(_DockerParameter)
+      LinuxPortable: $(_LinuxPortable)
+      RuntimeId: $(_RuntimeIdentifier)
+
+    steps:
+    - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
+      - script: build.cmd
+                  -Configuration $(BuildConfig)
+                  -Architecture $(BuildArchitecture)
+        displayName: Build
+        env:
+          DOTNET_CLI_UI_LANGUAGE: $(_DOTNET_CLI_UI_LANGUAGE)
+          DropSuffix: $(_DropSuffix)
+
+    - ${{ if eq(parameters.agentOs, 'Linux') }}:
+      - script: ./build.sh
+                  --skip-prereqs
+                  --configuration $(BuildConfig)
+                  $(DockerParameter)
+                  --architecture $(BuildArchitecture)
+                  $(LinuxPortable)
+                  $(RuntimeId)
+        displayName: Build
+        env:
+          DropSuffix: $(_DropSuffix)
+
+    - ${{ if eq(parameters.agentOs, 'Darwin') }}:
+      - script: ./build.sh
+                  --skip-prereqs
+                  --configuration $(BuildConfig)
+        displayName: Build
+
+    - task: PublishTestResults@1
+      displayName: Publish Test Results
+      inputs:
+        testRunner: VSTest
+        testResultsFiles: '**/*.trx'
+        testRunTitle: 'Unit Test Results'
+        platform: '$(BuildPlatform)'
+        configuration: '$(_BuildConfig)'
+      condition: and(succeededOrFailed(), ne(variables['PB_SkipTests'], 'true'))
+
+    - task: CopyFiles@2
+      displayName: Gather Logs
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: |
+         msbuild.log
+         msbuild.mainbuild.binlog
+         msbuild.generatepropsfile.binlog
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      continueOnError: true
+      condition: always()
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Logs to VSTS
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'
+        publishLocation: Container
+      continueOnError: true
+      condition: always()
