@@ -4,13 +4,7 @@
 #
 
 # Dockerfile that creates a container suitable to build dotnet-cli
-FROM centos:7.1.1503
-
-# Swap the "fakesystemd" package with the real "systemd" package, because fakesystemd conflicts with openssl-devel.
-# The CentOS Docker image uses fakesystemd instead of systemd to reduce disk space.
-RUN yum -q -y swap -- remove fakesystemd -- install systemd systemd-libs
-
-RUN yum -q -y install tar git
+FROM microsoft/dotnet-buildtools-prereqs:centos-7-b46d863-20180719033416
 
 RUN yum -q -y install sudo
 
