@@ -11,6 +11,7 @@ namespace Microsoft.DotNet.Cli.Utils
         public const string DefaultConfiguration = "Debug";
 
         public static readonly string ProjectFileName = "project.json";
+        public static readonly string DotConfigDirectoryName = ".config";
         public static readonly string ExeSuffix = CurrentPlatform == Platform.Windows ? ".exe" : string.Empty;
 
         public static readonly string BinDirectoryName = "bin";

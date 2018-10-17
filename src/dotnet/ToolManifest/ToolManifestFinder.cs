@@ -20,7 +20,7 @@ namespace Microsoft.DotNet.ToolManifest
     {
         private readonly DirectoryPath _probStart;
         private readonly IFileSystem _fileSystem;
-        private const string _manifestFilenameConvention = "localtool.manifest.json";
+        private const string _manifestFilenameConvention = "dotnet-tools.json";
 
         // The supported tool manifest file version.
         private const int SupportedVersion = 1;
@@ -63,7 +63,7 @@ namespace Microsoft.DotNet.ToolManifest
                     }
                 }
 
-                if (deserializedManifest.isRoot)
+                if (deserializedManifest.isRoot.Value)
                 {
                     return result;
                 }
@@ -104,7 +104,7 @@ namespace Microsoft.DotNet.ToolManifest
                     }
                 }
 
-                if (deserializedManifest.isRoot)
+                if (deserializedManifest.isRoot.Value)
                 {
                     return false;
                 }
@@ -137,7 +137,7 @@ namespace Microsoft.DotNet.ToolManifest
 
             if (deserializedManifest.version == 0)
             {
-                errors.Add(string.Format(LocalizableStrings.ManifestVersion0, path.Value));
+                errors.Add(LocalizableStrings.ManifestVersion0);
             }
 
             if (deserializedManifest.version > SupportedVersion)
@@ -146,6 +146,11 @@ namespace Microsoft.DotNet.ToolManifest
                     string.Format(
                         LocalizableStrings.ManifestVersionHigherThanSupported,
                         deserializedManifest.version, SupportedVersion));
+            }
+
+            if (!deserializedManifest.isRoot.HasValue)
+            {
+                errors.Add(string.Format(LocalizableStrings.ManifestMissingIsRoot, path.Value));
             }
 
             foreach (KeyValuePair<string, SerializableLocalToolSinglePackage> tools in deserializedManifest.tools)
@@ -204,9 +209,11 @@ namespace Microsoft.DotNet.ToolManifest
         private IEnumerable<FilePath> EnumerateDefaultAllPossibleManifests()
         {
             DirectoryPath? currentSearchDirectory = _probStart;
-            while (currentSearchDirectory != null)
+            while (currentSearchDirectory.HasValue)
             {
+                var currentSearchDotConfigDirectory = currentSearchDirectory.Value.WithSubDirectories(Constants.DotConfigDirectoryName);
                 var tryManifest = currentSearchDirectory.Value.WithFile(_manifestFilenameConvention);
+                yield return currentSearchDotConfigDirectory.WithFile(_manifestFilenameConvention);
                 yield return tryManifest;
                 currentSearchDirectory = currentSearchDirectory.Value.GetParentPathNullable();
             }
@@ -218,9 +225,7 @@ namespace Microsoft.DotNet.ToolManifest
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
             public int version { get; set; }
 
-            [DefaultValue(false)]
-            [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public bool isRoot { get; set; }
+            public bool? isRoot { get; set; }
 
             [JsonProperty(Required = Required.Always)]
             // The dictionary's key is the package id

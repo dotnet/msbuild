@@ -129,7 +129,7 @@
 {1}</value>
   </data>
   <data name="ManifestVersion0" xml:space="preserve">
-    <value>Manifest version 0 is not supported. Manifest file path: {0}</value>
+    <value>Manifest version 0 is not supported.</value>
   </data>
   <data name="ManifestVersionHigherThanSupported" xml:space="preserve">
     <value>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</value>
@@ -146,5 +146,8 @@
   </data>
   <data name="JsonParsingError" xml:space="preserve">
     <value>Json parsing error in file {0} : {1}</value>
+  </data>
+  <data name="ManifestMissingIsRoot" xml:space="preserve">
+    <value>Missing 'isRoot' entry.</value>
   </data>
 </root>

@@ -62,6 +62,18 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
+        public void GivenManifestFileInDotConfigDirectoryItGetContent()
+        {
+            var dotnetconfigDirectory = Path.Combine(_testDirectoryRoot, ".config");
+            _fileSystem.Directory.CreateDirectory(dotnetconfigDirectory);
+            _fileSystem.File.WriteAllText(Path.Combine(dotnetconfigDirectory, _manifestFilename), _jsonContent);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            var manifestResult = toolManifest.Find();
+
+            manifestResult.ShouldBeEquivalentTo(_defaultExpectedResult);
+        }
+
+        [Fact]
         // https://github.com/JamesNK/Newtonsoft.Json/issues/931#issuecomment-224104005
         // Due to a limitation of newtonsoft json
         public void GivenManifestWithDuplicatedPackageIdItReturnsTheLastValue()
@@ -191,6 +203,17 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<ToolManifestException>().And.Message.Should().Contain(string.Format(
                             LocalizableStrings.ManifestVersionHigherThanSupported,
                             99, 1));
+        }
+
+        [Fact]
+        public void MissingIsRootInManifestFileItShouldThrow()
+        {
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContentIsRootMissing);
+            BufferedReporter bufferedReporter = new BufferedReporter();
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            Action a = () => toolManifest.Find();
+
+            a.ShouldThrow<ToolManifestException>().And.Message.Should().Contain(LocalizableStrings.ManifestMissingIsRoot);
         }
 
         [Fact]
@@ -384,6 +407,7 @@ namespace Microsoft.DotNet.Tests.Commands
         private string _jsonContentInCurrentDirectory =
             @"{
    ""version"":1,
+   ""isRoot"":true,
    ""tools"":{
       ""t-rex"":{
          ""version"":""1.0.49"",
@@ -459,6 +483,18 @@ namespace Microsoft.DotNet.Tests.Commands
       }
    }
 }";
+        private string _jsonContentIsRootMissing =
+    @"{
+   ""version"":1,
+   ""tools"":{
+      ""t-rex"":{
+         ""version"":""1.0.53"",
+         ""commands"":[
+            ""t-rex""
+         ]
+      }
+   }
+}";
 
         private string _jsonContentInvalidJson =
             @"{
@@ -482,6 +518,6 @@ namespace Microsoft.DotNet.Tests.Commands
 
         private readonly List<ToolManifestPackage> _defaultExpectedResult;
         private readonly string _testDirectoryRoot;
-        private const string _manifestFilename = "localtool.manifest.json";
+        private const string _manifestFilename = "dotnet-tools.json";
     }
 }

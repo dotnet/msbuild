@@ -39,8 +39,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ManifestVersion0">
-        <source>Manifest version 0 is not supported. Manifest file path: {0}</source>
-        <target state="new">Manifest version 0 is not supported. Manifest file path: {0}</target>
+        <source>Manifest version 0 is not supported.</source>
+        <target state="new">Manifest version 0 is not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolMissingVersion">
@@ -51,6 +51,11 @@
       <trans-unit id="JsonParsingError">
         <source>Json parsing error in file {0} : {1}</source>
         <target state="new">Json parsing error in file {0} : {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMissingIsRoot">
+        <source>Missing 'isRoot' entry.</source>
+        <target state="new">Missing 'isRoot' entry.</target>
         <note />
       </trans-unit>
     </body>

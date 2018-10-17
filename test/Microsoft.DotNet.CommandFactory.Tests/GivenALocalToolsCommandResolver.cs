@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tests
 {
     public class GivenALocalToolsCommandResolver : TestBase
     {
-        private const string ManifestFilename = "localtool.manifest.json";
+        private const string ManifestFilename = "dotnet-tools.json";
         private readonly string _testDirectoryRoot;
         private DirectoryPath _nugetGlobalPackagesFolder;
         private readonly LocalToolsResolverCache _localToolsResolverCache;
