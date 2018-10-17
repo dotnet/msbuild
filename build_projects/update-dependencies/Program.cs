@@ -94,6 +94,7 @@ namespace Microsoft.DotNet.Scripts
                 yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetSqlCachePackageVersion", "dotnet-sql-cache");
                 yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetUserSecretsPackageVersion", "dotnet-user-secrets");
                 yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetWatchPackageVersion", "dotnet-watch");
+                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETSdkRazorPackageVersion", "Microsoft.NET.Sdk.Razor");
             }
             if (s_config.HasVersionFragment("clicommandlineparser"))
             {
