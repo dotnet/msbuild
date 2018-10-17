@@ -380,7 +380,7 @@ namespace Microsoft.Build.Graph
                     {
                         // once the task completes, remove it from tasksInProgress using a chained task
                         // signal the wait handle to process new projects that have been discovered by this task or exit if all projects have been evaluated
-                        task.ContinueWith(t =>
+                        task.ContinueWith(_ =>
                         {
                             tasksInProgress.TryRemove(projectToEvaluate, out var _);
                             waitHandle.Set();
