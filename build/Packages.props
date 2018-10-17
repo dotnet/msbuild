@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Update="Bond.CSharp" Version="8.0.0" />
     <PackageReference Update="LargeAddressAware" Version="1.0.3" />
     <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="3.0.0-beta1-61516-01" />

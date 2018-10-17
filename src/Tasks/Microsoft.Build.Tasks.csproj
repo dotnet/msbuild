@@ -63,6 +63,11 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
+    <Compile Include="AssemblyDependency\Bond\InputBuffer.cs" />
+    <Compile Include="AssemblyDependency\Bond\InputStream.cs" />
+    <Compile Include="AssemblyDependency\Bond\IntegerHelper.cs" />
+    <Compile Include="AssemblyDependency\Bond\OutputBuffer.cs" />
+    <Compile Include="AssemblyDependency\Bond\OutputStream.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -956,6 +961,8 @@
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
   <ItemGroup>
+    <PackageReference Include="Bond.CSharp" />
+
     <!-- reference both when repotoolset is not adding compiler references -->
     <PackageReference Include="Microsoft.Net.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
     <PackageReference Include="Microsoft.NETCore.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
