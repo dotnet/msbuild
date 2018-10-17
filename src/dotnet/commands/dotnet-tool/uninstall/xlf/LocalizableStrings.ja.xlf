@@ -8,8 +8,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Uninstall a tool from the current development environment.</source>
-        <target state="translated">現在の開発環境からツールをアンインストールします。</target>
+        <source>Uninstall a global tool or local tool.</source>
+        <target state="needs-review-translation">現在の開発環境からツールをアンインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentName">

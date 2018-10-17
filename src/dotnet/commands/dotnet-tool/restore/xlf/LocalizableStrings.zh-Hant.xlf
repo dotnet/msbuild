@@ -3,23 +3,15 @@
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>restore tools to the current development environment.</source>
-        <target state="new">restore tools to the current development environment.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPathOptionName">
-        <source>PATH</source>
-        <target state="new">PATH</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="ToolPathOptionDescription">
-        <source>The directory containing the tools to list.</source>
-        <target state="new">The directory containing the tools to list.</target>
+        <source>Restore tools defined in the local tool manifest.</source>
+        <target state="new">Restore tools defined in the local tool manifest.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="new">Warning: tool package '{0}' is invalid: {1}</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="new">Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdColumn">
@@ -35,11 +27,6 @@
       <trans-unit id="CommandsColumn">
         <source>Commands</source>
         <target state="new">Commands</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidToolPathOption">
-        <source>Tool path '{0}' does not exist.</source>
-        <target state="new">Tool path '{0}' does not exist.</target>
         <note />
       </trans-unit>
       <trans-unit id="AddSourceOptionDescription">
@@ -77,24 +64,14 @@
         <target state="new">Package "{0}" failed to restore, due to {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="PackagesCommandNameCollision">
-        <source>Packages {0} have a command with the same name {1} regardless of the casing.</source>
-        <target state="new">Packages {0} have a command with the same name {1} regardless of the casing.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="RestorePartiallySuccessful">
-        <source>Restore Partially Successful.</source>
-        <target state="new">Restore Partially Successful.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="RestoreFailed">
-        <source>Restore Failed.</source>
-        <target state="new">Restore Failed.</target>
+        <source>Restore failed.</source>
+        <target state="new">Restore failed.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandsMismatch">
-        <source>Package Id {0} has command {1}, but expect {2} in the manifest file.</source>
-        <target state="new">Package Id {0} has command {1}, but expect {2} in the manifest file.</target>
+        <source>The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</source>
+        <target state="new">The command {0} specified in the tool manifest file is not contained in the package with Package Id {1}. The commands contained in the package are {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPathOptionName">
@@ -113,8 +90,24 @@
         <note />
       </trans-unit>
       <trans-unit id="LocalToolsRestoreWasSuccessful">
-        <source>Local tools restore was successful.</source>
-        <target state="new">Local tools restore was successful.</target>
+        <source>Restore was successful.</source>
+        <target state="new">Restore was successful.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionConclusion">
+        <source>Command names conflict. Command names are case insensitive.
+{0}</source>
+        <target state="new">Command names conflict. Command names are case insensitive.
+{0}</target>
+        <note />0 could be multiple PackagesCommandNameCollisionForOnePackage</trans-unit>
+      <trans-unit id="PackagesCommandNameCollisionForOnePackage">
+        <source>A command "{0}" in package "{1}"</source>
+        <target state="new">A command "{0}" in package "{1}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="RestorePartiallyFailed">
+        <source>Restore partially failed.</source>
+        <target state="new">Restore partially failed.</target>
         <note />
       </trans-unit>
     </body>

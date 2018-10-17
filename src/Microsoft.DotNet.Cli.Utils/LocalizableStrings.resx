@@ -130,7 +130,7 @@
     <value>The project may not have been restored or restore failed - run `dotnet restore`</value>
   </data>
   <data name="NoExecutableFoundMatchingCommand" xml:space="preserve">
-    <value>No executable found matching command "{0}"</value>
+    <value>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</value>
   </data>
   <data name="WaitingForDebuggerToAttach" xml:space="preserve">
     <value>Waiting for debugger to attach. Press ENTER to continue</value>

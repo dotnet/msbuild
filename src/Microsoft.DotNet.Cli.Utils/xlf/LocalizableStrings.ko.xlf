@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
-        <source>No executable found matching command "{0}"</source>
-        <target state="translated">"{0}" 명령과 일치하는 실행 파일을 찾을 수 없습니다.</target>
+        <source>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</source>
+        <target state="needs-review-translation">"{0}" 명령과 일치하는 실행 파일을 찾을 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">

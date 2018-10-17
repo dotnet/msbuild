@@ -75,11 +75,18 @@ namespace Microsoft.DotNet.ToolManifest
 
         private SerializableLocalToolsManifest DeserializeLocalToolsManifest(FilePath possibleManifest)
         {
-            return JsonConvert.DeserializeObject<SerializableLocalToolsManifest>(
-                _fileSystem.File.ReadAllText(possibleManifest.Value), new JsonSerializerSettings
-                {
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                });
+            try
+            {
+                return JsonConvert.DeserializeObject<SerializableLocalToolsManifest>(
+                    _fileSystem.File.ReadAllText(possibleManifest.Value), new JsonSerializerSettings
+                    {
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    });
+            }
+            catch (JsonReaderException e)
+            {
+                throw new ToolManifestException(string.Format(LocalizableStrings.JsonParsingError, possibleManifest.Value, e.Message));
+            }
         }
 
         private List<ToolManifestPackage> GetToolManifestPackageFromOneManifestFile(
@@ -98,7 +105,7 @@ namespace Microsoft.DotNet.ToolManifest
                 errors.Add(
                     string.Format(
                         LocalizableStrings.ManifestVersionHigherThanSupported,
-                        deserializedManifest.version, SupportedVersion, path.Value));
+                        deserializedManifest.version, SupportedVersion));
             }
 
             foreach (KeyValuePair<string, SerializableLocalToolSinglePackage> tools in deserializedManifest.tools)
@@ -118,21 +125,6 @@ namespace Microsoft.DotNet.ToolManifest
                     if (!NuGetVersion.TryParse(versionString, out version))
                     {
                         packageLevelErrors.Add(string.Format(LocalizableStrings.VersionIsInvalid, versionString));
-                    }
-                }
-
-                NuGetFramework targetFramework = null;
-                var targetFrameworkString = tools.Value.targetFramework;
-                if (targetFrameworkString != null)
-                {
-                    targetFramework = NuGetFramework.Parse(
-                        targetFrameworkString);
-
-                    if (targetFramework.IsUnsupported)
-                    {
-                        packageLevelErrors.Add(
-                            string.Format(LocalizableStrings.TargetFrameworkIsUnsupported,
-                                targetFrameworkString));
                     }
                 }
 
@@ -161,6 +153,7 @@ namespace Microsoft.DotNet.ToolManifest
             {
                 throw new ToolManifestException(
                     string.Format(LocalizableStrings.InvalidManifestFilePrefix,
+                        path.Value,
                         string.Join(Environment.NewLine, errors.Select(e => "\t" + e))));
             }
 
@@ -197,7 +190,6 @@ namespace Microsoft.DotNet.ToolManifest
         {
             public string version { get; set; }
             public string[] commands { get; set; }
-            public string targetFramework { get; set; }
         }
     }
 }

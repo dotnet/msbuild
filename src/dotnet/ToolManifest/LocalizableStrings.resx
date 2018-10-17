@@ -118,32 +118,33 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CannotFindAnyManifestsFileSearched" xml:space="preserve">
-    <value>Cannot find any manifests file. Searched {0}</value>
-  </data>
-  <data name="FieldCommandsIsMissing" xml:space="preserve">
-    <value>Field commands is missing.</value>
-  </data>
-  <data name="InvalidManifestFilePrefix" xml:space="preserve">
-    <value>Invalid manifest file.
+    <value>Cannot find any manifests file. Searched:
 {0}</value>
   </data>
+  <data name="FieldCommandsIsMissing" xml:space="preserve">
+    <value>Missing 'commands' entry.</value>
+  </data>
+  <data name="InvalidManifestFilePrefix" xml:space="preserve">
+    <value>Invalid manifest file. Path {0}:
+{1}</value>
+  </data>
   <data name="ManifestVersion0" xml:space="preserve">
-    <value>Manifest version 0 is not supported. Manifest file path:  {0}</value>
+    <value>Manifest version 0 is not supported. Manifest file path: {0}</value>
   </data>
   <data name="ManifestVersionHigherThanSupported" xml:space="preserve">
-    <value>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}. Manifest file path:  {2}</value>
+    <value>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</value>
   </data>
   <data name="InPackage" xml:space="preserve">
     <value>In package {0}:
 {1}</value>
   </data>
-  <data name="TargetFrameworkIsUnsupported" xml:space="preserve">
-    <value>TargetFramework {0} is unsupported.</value>
-  </data>
   <data name="VersionIsInvalid" xml:space="preserve">
     <value>Version {0} is invalid.</value>
   </data>
   <data name="ToolMissingVersion" xml:space="preserve">
-    <value>Field version is missing.</value>
+    <value>Missing 'version' entry.</value>
+  </data>
+  <data name="JsonParsingError" xml:space="preserve">
+    <value>Json parsing error in file {0} : {1}</value>
   </data>
 </root>

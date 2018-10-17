@@ -116,6 +116,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             a.ShouldThrow<ToolManifestException>().And.Message.Should().Contain(
                 string.Format(LocalizableStrings.InvalidManifestFilePrefix,
+                    Path.Combine(_testDirectoryRoot, _manifestFilename),
                     "\t" + string.Format(LocalizableStrings.InPackage, "t-rex",
                         ("\t\t" + LocalizableStrings.ToolMissingVersion + Environment.NewLine +
                         "\t\t" + LocalizableStrings.FieldCommandsIsMissing))));
@@ -189,7 +190,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             a.ShouldThrow<ToolManifestException>().And.Message.Should().Contain(string.Format(
                             LocalizableStrings.ManifestVersionHigherThanSupported,
-                            99, 1, ""));
+                            99, 1));
         }
 
         private string _jsonContent =

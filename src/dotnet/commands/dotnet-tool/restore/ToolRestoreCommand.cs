@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
@@ -15,7 +14,6 @@ using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
 using NuGet.Versioning;
-using Command = Microsoft.DotNet.Cli.Utils.Command;
 
 namespace Microsoft.DotNet.Tools.Tool.Restore
 {
@@ -85,7 +83,10 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             FilePath? customManifestFileLocation = GetCustomManifestFileLocation();
 
             FilePath? configFile = null;
-            if (_configFilePath != null) configFile = new FilePath(_configFilePath);
+            if (_configFilePath != null)
+            {
+                configFile = new FilePath(_configFilePath);
+            }
 
             IReadOnlyCollection<ToolManifestPackage> packagesFromManifest;
             try
@@ -133,9 +134,9 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                     {
                         errorMessages.Add(
                             string.Format(LocalizableStrings.CommandsMismatch,
+                                JoinBySpaceWithQuote(package.CommandNames.Select(c => c.Value.ToString())),
                                 package.PackageId,
-                                JoinBySpaceWithQuote(toolPackage.Commands.Select(c => c.Name.ToString())),
-                                JoinBySpaceWithQuote(package.CommandNames.Select(c => c.Value.ToString()))));
+                                JoinBySpaceWithQuote(toolPackage.Commands.Select(c => c.Name.ToString()))));
                     }
 
                     foreach (RestoredCommand command in toolPackage.Commands)
@@ -164,25 +165,40 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
             _localToolsResolverCache.Save(dictionary, _nugetGlobalPackagesFolder);
 
+            return PrintConclusionAndReturn(dictionary.Count() > 0, toolPackageExceptions, errorMessages, successMessages);
+        }
+
+        private int PrintConclusionAndReturn(
+            bool anySuccess,
+            Dictionary<PackageId, ToolPackageException> toolPackageExceptions,
+            List<string> errorMessages,
+            List<string> successMessages)
+        {
             if (toolPackageExceptions.Any() || errorMessages.Any())
             {
-                var partialOrTotalFailed = dictionary.Count() > 0
-                    ? LocalizableStrings.RestorePartiallySuccessful
-                    : LocalizableStrings.RestoreFailed;
+                _reporter.WriteLine(Environment.NewLine);
+                _errorReporter.WriteLine(string.Join(
+                                        Environment.NewLine,
+                                        CreateErrorMessage(toolPackageExceptions).Concat(errorMessages)).Red());
 
-                _errorReporter.WriteLine(partialOrTotalFailed +
-                                         Environment.NewLine +
-                                         string.Join(
-                                             Environment.NewLine,
-                                             CreateErrorMessage(toolPackageExceptions).Concat(errorMessages)));
+                _reporter.WriteLine(Environment.NewLine);
+
+                _reporter.WriteLine(string.Join(Environment.NewLine, successMessages));
+                _errorReporter.WriteLine(Environment.NewLine +
+                    (anySuccess
+                    ? LocalizableStrings.RestorePartiallyFailed
+                    : LocalizableStrings.RestoreFailed).Red());
 
                 return 1;
             }
+            else
+            {
+                _reporter.WriteLine(string.Join(Environment.NewLine, successMessages));
+                _reporter.WriteLine(Environment.NewLine);
+                _reporter.WriteLine(LocalizableStrings.LocalToolsRestoreWasSuccessful.Green());
 
-            _reporter.WriteLine(LocalizableStrings.LocalToolsRestoreWasSuccessful.Green());
-            _reporter.WriteLine(string.Join(Environment.NewLine, successMessages).Green());
-
-            return 0;
+                return 0;
+            }
         }
 
         private static IEnumerable<string> CreateErrorMessage(
@@ -262,9 +278,13 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                 .GroupBy(packageIdAndCommandName => packageIdAndCommandName.CommandName)
                 .Where(grouped => grouped.Count() > 1)
                 .Select(nonUniquePackageIdAndCommandNames =>
-                    string.Format(LocalizableStrings.PackagesCommandNameCollision,
-                        JoinBySpaceWithQuote(nonUniquePackageIdAndCommandNames.Select(a => a.PackageId.ToString())),
-                        JoinBySpaceWithQuote(nonUniquePackageIdAndCommandNames.Select(a => a.CommandName.ToString()))))
+                    string.Format(LocalizableStrings.PackagesCommandNameCollisionConclusion,
+                        string.Join(Environment.NewLine,
+                            nonUniquePackageIdAndCommandNames.Select(
+                                p => "\t" + string.Format(
+                                    LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
+                                    p.CommandName.Value,
+                                    p.PackageId.ToString())))))
                 .ToArray();
 
             if (errors.Any())

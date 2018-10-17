@@ -23,8 +23,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NoExecutableFoundMatchingCommand">
-        <source>No executable found matching command "{0}"</source>
-        <target state="translated">沒有與命令 "{0}" 相符的可執行檔</target>
+        <source>No executable found matching command "{0}". See https://aka.ms/missing-command for more information.</source>
+        <target state="needs-review-translation">沒有與命令 "{0}" 相符的可執行檔</target>
         <note />
       </trans-unit>
       <trans-unit id="WaitingForDebuggerToAttach">

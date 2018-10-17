@@ -2,21 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.ToolManifest
 {
-    internal class ToolManifestException : Exception
+    internal class ToolManifestException : GracefulException
     {
-        public ToolManifestException()
+        public ToolManifestException(string message) : base(new[] { message }, null, false)
         {
-        }
 
-        public ToolManifestException(string message) : base(message)
-        {
-        }
-
-        public ToolManifestException(string message, Exception innerException) : base(message, innerException)
-        {
         }
     }
 }

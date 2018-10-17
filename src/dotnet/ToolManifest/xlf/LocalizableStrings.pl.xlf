@@ -7,26 +7,23 @@
         <target state="new">Version {0} is invalid.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TargetFrameworkIsUnsupported">
-        <source>TargetFramework {0} is unsupported.</source>
-        <target state="new">TargetFramework {0} is unsupported.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="FieldCommandsIsMissing">
-        <source>Field commands is missing.</source>
-        <target state="new">Field commands is missing.</target>
+        <source>Missing 'commands' entry.</source>
+        <target state="new">Missing 'commands' entry.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidManifestFilePrefix">
-        <source>Invalid manifest file.
-{0}</source>
-        <target state="new">Invalid manifest file.
-{0}</target>
+        <source>Invalid manifest file. Path {0}:
+{1}</source>
+        <target state="new">Invalid manifest file. Path {0}:
+{1}</target>
         <note />
       </trans-unit>
       <trans-unit id="CannotFindAnyManifestsFileSearched">
-        <source>Cannot find any manifests file. Searched {0}</source>
-        <target state="new">Cannot find any manifests file. Searched {0}</target>
+        <source>Cannot find any manifests file. Searched:
+{0}</source>
+        <target state="new">Cannot find any manifests file. Searched:
+{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InPackage">
@@ -37,18 +34,23 @@
         <note />
       </trans-unit>
       <trans-unit id="ManifestVersionHigherThanSupported">
-        <source>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}. Manifest file path:  {2}</source>
-        <target state="new">Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}. Manifest file path:  {2}</target>
+        <source>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</source>
+        <target state="new">Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestVersion0">
-        <source>Manifest version 0 is not supported. Manifest file path:  {0}</source>
-        <target state="new">Manifest version 0 is not supported. Manifest file path:  {0}</target>
+        <source>Manifest version 0 is not supported. Manifest file path: {0}</source>
+        <target state="new">Manifest version 0 is not supported. Manifest file path: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolMissingVersion">
-        <source>Field version is missing.</source>
-        <target state="new">Field version is missing.</target>
+        <source>Missing 'version' entry.</source>
+        <target state="new">Missing 'version' entry.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="JsonParsingError">
+        <source>Json parsing error in file {0} : {1}</source>
+        <target state="new">Json parsing error in file {0} : {1}</target>
         <note />
       </trans-unit>
     </body>

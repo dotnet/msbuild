@@ -206,9 +206,15 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolRestoreCommand.Execute();
             a.ShouldThrow<ToolPackageException>()
                 .And.Message
-                .Should().Be(string.Format(LocalizableStrings.PackagesCommandNameCollision,
-                    "\"local.tool.console.a\" \"command.name.collision.with.package.a\"",
-                    "\"a\" \"A\""));
+                .Should().Be(string.Format(LocalizableStrings.PackagesCommandNameCollisionConclusion,
+                        string.Join(Environment.NewLine,
+                            new[] {
+                                 "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
+                                    _toolCommandNameA.Value,
+                                    _packageIdA.ToString()),
+                                "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
+                                    "A",
+                                    _packageIdWithCommandNameCollisionWithA.ToString())})));
         }
 
         [Fact]
@@ -234,12 +240,10 @@ namespace Microsoft.DotNet.Tests.Commands
 
             int executeResult = toolRestoreCommand.Execute();
             _reporter.Lines.Should()
-                .Contain(l => l.Contains(LocalizableStrings.RestorePartiallySuccessful +
-                                         Environment.NewLine +
-                                         string.Join(
-                                             Environment.NewLine,
-                                             string.Format(LocalizableStrings.PackageFailedToRestore,
-                                                 "non-exists", ""))));
+                .Contain(l => l.Contains(string.Format(LocalizableStrings.PackageFailedToRestore,
+                    "non-exists", "")));
+
+            _reporter.Lines.Should().Contain(l => l.Contains(LocalizableStrings.RestorePartiallyFailed));
 
             executeResult.Should().Be(1);
 
@@ -274,13 +278,12 @@ namespace Microsoft.DotNet.Tests.Commands
                 _reporter
             );
 
-               toolRestoreCommand.Execute().Should().Be(1);
+            toolRestoreCommand.Execute().Should().Be(1);
             _reporter.Lines.Should()
                 .Contain(l =>
                     l.Contains(
                         string.Format(LocalizableStrings.CommandsMismatch,
-                            _packageIdA,
-                            "\"a\"", "\"different-command-nameA\" \"different-command-nameB\"")));
+                            "\"different-command-nameA\" \"different-command-nameB\"", _packageIdA, "\"a\"")));
         }
 
         [Fact]
