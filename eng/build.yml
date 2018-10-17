@@ -8,7 +8,6 @@ phases:
   parameters:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true
-    enableMicrobuild: true
     publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 

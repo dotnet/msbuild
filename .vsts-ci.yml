@@ -10,7 +10,7 @@ phases:
     agentOs: Windows_NT
     queue:
       name: Hosted VS2017
-      parallel: 2
+      parallel: 99
       matrix:
         Build_Debug_x86:
           _BuildConfig: Debug
@@ -38,6 +38,7 @@ phases:
     agentOs: Linux
     queue:
       name: Hosted Ubuntu 1604
+      parallel: 99
       matrix:
         Build_Ubuntu_14_04_Release_x64:
           _BuildConfig: Release
