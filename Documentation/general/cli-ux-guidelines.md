@@ -1,7 +1,7 @@
 .NET Core Command-Line Tools UX Guidelines
 -------------------------------------------
 
-This document outlines the User Experience (UX) of the .NET Core command lline tools (CLI).These guideliens are intended for anyone that wants to add a new command to the CLI. 
+This document outlines the User Experience (UX) of the .NET Core command line tools (CLI). These guidelines are intended for anyone that wants to add a new command to the CLI. 
 
 The guidelines presented in this document have been adopted to provide a clear and concise 
 command line syntax that is easy to learn, remember and work with, and that has an added benefit 
