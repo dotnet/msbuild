@@ -3082,7 +3082,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Trait("Category", "mono-osx-failing")]
         public void Regress265010()
         {
-            string contents = CleanupFileContents(@"
+            try
+            {
+                EnvironmentWriter.OutputWriter = s => _output.WriteLine(s);
+
+                string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <PropertyGroup>
    <Prop>BaseValue</Prop>
@@ -3109,27 +3113,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            string fileName = _env.CreateFile(".proj").Path;
-            File.WriteAllText(fileName, contents);
-            _buildManager.BeginBuild(_parameters);
+                string fileName = _env.CreateFile(".proj").Path;
+                File.WriteAllText(fileName, contents);
+                _buildManager.BeginBuild(_parameters);
 
-            var services = new HostServices();
-            services.SetNodeAffinity(fileName, NodeAffinity.OutOfProc);
-            var data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "BaseTest" }, services);
-            _buildManager.PendBuildRequest(data).Execute();
-            _logger.AssertLogContains("[BaseValue]");
-            _logger.AssertLogContains("[BaseItem]");
-            _logger.ClearLog();
+                var services = new HostServices();
+                services.SetNodeAffinity(fileName, NodeAffinity.OutOfProc);
+                var data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "BaseTest" }, services);
+                _buildManager.PendBuildRequest(data).Execute();
+                _logger.AssertLogContains("[BaseValue]");
+                _logger.AssertLogContains("[BaseItem]");
+                _logger.ClearLog();
 
-            _parameters.ResetCaches = false;
-            services.SetNodeAffinity(fileName, NodeAffinity.InProc);
-            data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "MovedTest" }, services);
-            _buildManager.PendBuildRequest(data).Execute();
-            _logger.AssertLogContains("[NewValue]");
-            _logger.AssertLogContains("[BaseItem;NewItem]");
-            _logger.AssertLogDoesntContain("[BaseValue]");
+                _parameters.ResetCaches = false;
+                services.SetNodeAffinity(fileName, NodeAffinity.InProc);
+                data = new BuildRequestData(fileName, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "MovedTest" }, services);
+                _buildManager.PendBuildRequest(data).Execute();
+                _logger.AssertLogContains("[NewValue]");
+                _logger.AssertLogContains("[BaseItem;NewItem]");
+                _logger.AssertLogDoesntContain("[BaseValue]");
 
-            _buildManager.EndBuild();
+                _buildManager.EndBuild();
+            }
+            finally
+            {
+                EnvironmentWriter.OutputWriter = null;
+            }
         }
 
         /// <summary>

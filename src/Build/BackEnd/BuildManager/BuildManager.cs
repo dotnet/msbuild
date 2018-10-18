@@ -580,6 +580,8 @@ namespace Microsoft.Build.Execution
                 }
 
                 _buildManagerState = BuildManagerState.WaitingForBuildToComplete;
+
+                EnvironmentWriter.WriteEnvironmentVariables("EndBuild LKG");
             }
 
             ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
@@ -589,6 +591,8 @@ namespace Microsoft.Build.Execution
                 _noActiveSubmissionsEvent.WaitOne();
                 ShutdownConnectedNodesAsync(false /* normal termination */);
                 _noNodesActiveEvent.WaitOne();
+
+                EnvironmentWriter.WriteEnvironmentVariables("EndBuild after node shutdown");
 
                 // Wait for all of the actions in the work queue to drain.  Wait() could throw here if there was an unhandled exception
                 // in the work queue, but the top level exception handler there should catch everything and have forwarded it to the

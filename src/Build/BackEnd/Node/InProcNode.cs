@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -315,8 +316,8 @@ namespace Microsoft.Build.BackEnd
             if (_shutdownReason != NodeEngineShutdownReason.BuildCompleteReuse)
             {
                 // Dispose of any node registered objects.
-                ((IBuildComponent)objectCache).ShutdownComponent();
             }
+                ((IBuildComponent)objectCache).ShutdownComponent();
 
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
@@ -326,23 +327,41 @@ namespace Microsoft.Build.BackEnd
                 // Restore the original environment.
 				
 				var currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
-				
+                EnvironmentWriter.WriteEnvironmentVariables($"_savedEnvironment {_savedEnvironment.GetHashCode()} in InProcNode {this.GetHashCode()}", _savedEnvironment);
+                EnvironmentWriter.WriteEnvironmentVariables($"currentEnvironment from CommunicationUtilities in InProcNode {this.GetHashCode()}", currentEnvironment);
+                EnvironmentWriter.WriteEnvironmentVariables("before restoring environment");
+
+                EnvironmentWriter.Write($"Explicit Deletions:");
                 foreach (KeyValuePair<string, string> entry in currentEnvironment)
                 {
                     if (!_savedEnvironment.ContainsKey(entry.Key))
                     {
+                        EnvironmentWriter.Write($"\tSetting to null: {entry.Key} = [{entry.Value}]");
                         Environment.SetEnvironmentVariable(entry.Key, null);
                     }
                 }
 
+                EnvironmentWriter.Write($"Accidental Deletions:");
                 foreach (KeyValuePair<string, string> entry in _savedEnvironment)
                 {
+                    if (string.IsNullOrEmpty(entry.Value))
+                    {
+                        EnvironmentWriter.Write($"\t{entry.Key}");
+
+                        EnvironmentWriter.Write(
+                            entry.Value == null
+                                ? $"\t\tand it was null"
+                                : $"\t\tand it was empty");
+                    }
+					
                     if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
                     {
                         Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                     }
                 }
             }
+
+            EnvironmentWriter.WriteEnvironmentVariables("after restoring environment");
 
             exception = _shutdownException;
 

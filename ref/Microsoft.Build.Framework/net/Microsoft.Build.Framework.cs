@@ -143,6 +143,14 @@ namespace Microsoft.Build.Framework
         protected CustomBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
     }
     public delegate void CustomBuildEventHandler(object sender, Microsoft.Build.Framework.CustomBuildEventArgs e);
+    public partial class EnvironmentWriter
+    {
+        public static System.Action<string> OutputWriter;
+        public EnvironmentWriter() { }
+        public static System.Collections.Generic.Dictionary<string, string> GetEnvironmentVariables() { throw null; }
+        public static void Write(string message) { }
+        public static void WriteEnvironmentVariables(string message, System.Collections.Generic.IDictionary<string, string> environment=null, [System.Runtime.CompilerServices.CallerMemberNameAttribute]string memberName="", [System.Runtime.CompilerServices.CallerFilePathAttribute]string sourceFilePath="", [System.Runtime.CompilerServices.CallerLineNumberAttribute]int sourceLineNumber=0) { }
+    }
     public partial class ExternalProjectFinishedEventArgs : Microsoft.Build.Framework.CustomBuildEventArgs
     {
         protected ExternalProjectFinishedEventArgs() { }

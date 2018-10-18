@@ -8,6 +8,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
@@ -356,11 +357,14 @@ namespace Microsoft.Build.UnitTests
         public EnvironmentInvariant()
         {
             _initialEnvironment = Environment.GetEnvironmentVariables();
+            EnvironmentWriter.WriteEnvironmentVariables($"TestEnvironment reads variables in invariant {this.GetHashCode()}");
         }
 
         public override void AssertInvariant(ITestOutputHelper output)
         {
             var environment = Environment.GetEnvironmentVariables();
+
+            EnvironmentWriter.WriteEnvironmentVariables($"TestEnvironment verifies variables in invariant {this.GetHashCode()}");
 
             AssertDictionaryInclusion(_initialEnvironment, environment, "added");
             AssertDictionaryInclusion(environment, _initialEnvironment, "removed");

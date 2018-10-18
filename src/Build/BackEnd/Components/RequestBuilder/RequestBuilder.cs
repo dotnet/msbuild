@@ -1237,9 +1237,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment)
         {
+            EnvironmentWriter.WriteEnvironmentVariables("before restoring environment");
+
             IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
             ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
             UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
+
+            EnvironmentWriter.WriteEnvironmentVariables("after restoring environment");
         }
 
         /// <summary>
@@ -1247,10 +1251,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ClearVariablesNotInEnvironment(IDictionary<string, string> savedEnvironment, IDictionary<string, string> currentEnvironment)
         {
+            EnvironmentWriter.Write($"Explicit Deletions:");
             foreach (KeyValuePair<string, string> entry in currentEnvironment)
             {
                 if (!savedEnvironment.ContainsKey(entry.Key))
                 {
+                    EnvironmentWriter.Write($"\tSetting to null: {entry.Key} = [{entry.Value}]");
                     Environment.SetEnvironmentVariable(entry.Key, null);
                 }
             }
@@ -1261,8 +1267,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void UpdateEnvironmentVariables(IDictionary<string, string> savedEnvironment, IDictionary<string, string> currentEnvironment)
         {
+            EnvironmentWriter.Write($"Accidental Deletions:");
             foreach (KeyValuePair<string, string> entry in savedEnvironment)
             {
+                if (string.IsNullOrEmpty(entry.Value))
+                {
+                    EnvironmentWriter.Write($"\t{entry.Key}");
+
+                    EnvironmentWriter.Write(
+                        entry.Value == null
+                            ? $"\t\tand it was null"
+                            : $"\t\tand it was empty");
+                }
+
                 // If the environment doesn't have the variable set, or if its value differs from what we have saved, set it
                 // to the saved value.  Doing the comparison before setting is faster than unconditionally setting it using
                 // the API.
