@@ -318,13 +318,16 @@ namespace Microsoft.Build.BackEnd
                 ((IBuildComponent)objectCache).ShutdownComponent();
             }
 
+            // logic cloned in Microsoft.Build.BackEnd.RequestBuilder.RestoreOperatingEnvironment
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
                 // Restore the original current directory.
                 NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
 
                 // Restore the original environment.
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
+                var currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+
+                foreach (KeyValuePair<string, string> entry in currentEnvironment)
                 {
                     if (!_savedEnvironment.ContainsKey(entry.Key))
                     {
@@ -334,7 +337,10 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (KeyValuePair<string, string> entry in _savedEnvironment)
                 {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
+                    {
+                        Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    }
                 }
             }
 
