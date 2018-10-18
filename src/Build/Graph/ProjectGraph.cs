@@ -341,7 +341,7 @@ namespace Microsoft.Build.Graph
         private void LoadGraph(ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate, ProjectCollection projectCollection, ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress)
         {
             var waitHandle = new AutoResetEvent(false);
-            while (projectsToEvaluate.Count != 0 || tasksInProgress.Count() != 0)
+            while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
             {
                 ConfigurationMetadata projectToEvaluate;
                 if (projectsToEvaluate.Count != 0)
@@ -366,9 +366,9 @@ namespace Microsoft.Build.Graph
                             string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
                             PropertyDictionary<ProjectPropertyInstance> projectReferenceGlobalProperties = GetProjectReferenceGlobalProperties(projectReferenceToParse, projectToEvaluate.GlobalProperties);
                             var projectReferenceConfigurationMetadata = new ConfigurationMetadata(projectReferenceFullPath, projectReferenceGlobalProperties);
-                            if (!_allParsedProjects.TryGetValue(projectReferenceConfigurationMetadata, out var _))
+                            if (!tasksInProgress.ContainsKey(projectReferenceConfigurationMetadata))
                             {
-                                if (!tasksInProgress.TryGetValue(projectReferenceConfigurationMetadata, out var _))
+                                if (!_allParsedProjects.ContainsKey(projectReferenceConfigurationMetadata))
                                 {
                                     projectsToEvaluate.Enqueue(projectReferenceConfigurationMetadata);
                                 }
