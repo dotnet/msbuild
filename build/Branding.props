@@ -1,40 +1,14 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <BuildName>cli</BuildName>
-    <SdkBrandName>Microsoft .NET Core SDK $(CliBrandingVersion)</SdkBrandName>
-    <MSBuildExtensionsBrandName>.NET Standard Support for Visual Studio 2015</MSBuildExtensionsBrandName>
-    <SharedFrameworkBrandName>Microsoft .NET Core Runtime 2.1.0 - Preview</SharedFrameworkBrandName>
-    <SharedHostBrandName>Microsoft .NET Core Host 2.1.0 - Preview</SharedHostBrandName>
-    <HostFxrBrandName>Microsoft .NET Core Host FX Resolver 2.1.0 - Preview</HostFxrBrandName>
+    <ArtifactNameSdk>dotnet-cli-internal</ArtifactNameSdk>
+    <ArtifactNameSdkDebug>dotnet-cli-internal-debug</ArtifactNameSdkDebug>
+    <ArtifactNameSdkLanguagePack>dotnet-sdk-langpack</ArtifactNameSdkLanguagePack>
 
-    <SharedFrameworkName>Microsoft.NETCore.App</SharedFrameworkName>
-    <SharedFrameworkNugetName>$(SharedFrameworkName)</SharedFrameworkNugetName>
+    <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)</ArtifactNameWithVersionSdk>
+    <ArtifactNameMSBuildExtensions>dotnet-standard-support-vs2015</ArtifactNameMSBuildExtensions>
+    <ArtifactNameWithVersionMSBuildExtensions>$(ArtifactNameMSBuildExtensions)-$(SdkVersion)</ArtifactNameWithVersionMSBuildExtensions>
 
-    <ProductMonikerRid Condition=" '$(Rid)' == 'ubuntu.16.04-x64' OR
-                                   '$(Rid)' == 'fedora.24-x64' OR
-                                   '$(Rid)' == 'rhel.6-x64' OR
-                                   '$(Rid)' == 'linux-musl-x64' OR
-                                   '$(Rid)' == 'opensuse.42.1-x64' ">$(Rid)</ProductMonikerRid>
-    <ProductMonikerRid Condition=" '$(ProductMonikerRid)' == '' ">$(OSName)-$(Architecture)</ProductMonikerRid>
-
-    <HostMonikerRid Condition=" '$(HostRid)' == 'ubuntu.16.04-x64' OR
-                                '$(HostRid)' == 'fedora.24-x64' OR
-                                '$(HostRid)' == 'rhel.6-x64' OR
-                                '$(HostRid)' == 'linux-musl-x64' OR
-                                '$(HostRid)' == 'opensuse.42.1-x64' ">$(HostRid)</HostMonikerRid>
-    <HostMonikerRid Condition=" '$(HostMonikerRid)' == '' ">$(HostOSName)-$(Architecture)</HostMonikerRid>
-    <HostMonikerRidForFileName>$(HostMonikerRid)</HostMonikerRidForFileName>
-    <HostMonikerRidForFileName Condition=" '$(IsDebianBaseDistro)' == 'true' OR '$(IsRPMBasedDistro)' == 'true' ">$(Architecture)</HostMonikerRidForFileName>
-
-    <ArtifactNameSdk>dotnet-sdk-internal</ArtifactNameSdk>
-    <ArtifactNameCombinedHostHostFxrFrameworkSdk>dotnet-sdk</ArtifactNameCombinedHostHostFxrFrameworkSdk>
-    <ArtifactNameSdkLanguagePack>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-langpack</ArtifactNameSdkLanguagePack>
-
-    <ArtifactNameWithVersionSdk>$(ArtifactNameSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdk>
-    <ArtifactNameWithVersionMSBuildExtensions>dotnet-standard-support-vs2015-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionMSBuildExtensions>
-    <ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
-    <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)-$(ProductMonikerRid)</ArtifactNameWithVersionSdkLanguagePack>
-    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>$(ArtifactNameCombinedHostHostFxrFrameworkSdk)-$(SdkVersion)-</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid>
-    <DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>$(DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdkWithoutHostMonikerRid)$(HostMonikerRidForFileName)</DistroSpecificArtifactNameWithVersionCombinedHostHostFxrFrameworkSdk>
+    <ArtifactNameWithVersionSdkDebug>$(ArtifactNameSdkDebug)-$(SdkVersion)</ArtifactNameWithVersionSdkDebug>
+    <ArtifactNameWithVersionSdkLanguagePack>$(ArtifactNameSdkLanguagePack)-$(SdkVersion)</ArtifactNameWithVersionSdkLanguagePack>
   </PropertyGroup>
 </Project>

@@ -17,7 +17,10 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             {
                 userFacingMessages = new[]
                 {
-                    ex.Message
+                    String.Format(
+                        CommonLocalizableStrings.FailedToUninstallToolPackage,
+                        packageId,
+                        ex.Message),
                 };
             }
             else if (ex is ToolConfigurationException || ex is ShellShimException)

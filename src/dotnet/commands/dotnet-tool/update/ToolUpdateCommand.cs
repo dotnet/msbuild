@@ -19,16 +19,16 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 {
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
 
-    internal delegate (IToolPackageStore, IToolPackageInstaller) CreateToolPackageStoreAndInstaller(
+    internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageInstaller, IToolPackageUninstaller) CreateToolPackageStoresAndInstallerAndUninstaller(
         DirectoryPath? nonGlobalLocation = null,
-        IEnumerable<string> additionalRestoreArguments = null);
+		IEnumerable<string> additionalRestoreArguments = null);
 
     internal class ToolUpdateCommand : CommandBase
     {
         private readonly IReporter _reporter;
         private readonly IReporter _errorReporter;
         private readonly CreateShellShimRepository _createShellShimRepository;
-        private readonly CreateToolPackageStoreAndInstaller _createToolPackageStoreAndInstaller;
+        private readonly CreateToolPackageStoresAndInstallerAndUninstaller _createToolPackageStoreInstallerUninstaller;
 
         private readonly PackageId _packageId;
         private readonly string _configFilePath;
@@ -41,7 +41,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
         public ToolUpdateCommand(AppliedOption appliedCommand,
             ParseResult parseResult,
-            CreateToolPackageStoreAndInstaller createToolPackageStoreAndInstaller = null,
+            CreateToolPackageStoresAndInstallerAndUninstaller createToolPackageStoreInstallerUninstaller = null,
             CreateShellShimRepository createShellShimRepository = null,
             IReporter reporter = null)
             : base(parseResult)
@@ -60,8 +60,8 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             _toolPath = appliedCommand.SingleArgumentOrDefault("tool-path");
             _forwardRestoreArguments = appliedCommand.OptionValuesToBeForwarded();
 
-            _createToolPackageStoreAndInstaller = createToolPackageStoreAndInstaller ??
-                                                  ToolPackageFactory.CreateToolPackageStoreAndInstaller;
+            _createToolPackageStoreInstallerUninstaller = createToolPackageStoreInstallerUninstaller ??
+                                                  ToolPackageFactory.CreateToolPackageStoresAndInstallerAndUninstaller;
 
             _createShellShimRepository =
                 createShellShimRepository ?? ShellShimRepositoryFactory.CreateShellShimRepository;
@@ -80,15 +80,17 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                 toolPath = new DirectoryPath(_toolPath);
             }
 
-            (IToolPackageStore toolPackageStore, IToolPackageInstaller toolPackageInstaller) =
-                _createToolPackageStoreAndInstaller(toolPath, _forwardRestoreArguments);
-            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
+            (IToolPackageStore toolPackageStore,
+             IToolPackageStoreQuery toolPackageStoreQuery,
+             IToolPackageInstaller toolPackageInstaller,
+             IToolPackageUninstaller toolPackageUninstaller) = _createToolPackageStoreInstallerUninstaller(toolPath, _forwardRestoreArguments);
 
+            IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
             IToolPackage oldPackage;
             try
             {
-                oldPackage = toolPackageStore.EnumeratePackageVersions(_packageId).SingleOrDefault();
+                oldPackage = toolPackageStoreQuery.EnumeratePackageVersions(_packageId).SingleOrDefault();
                 if (oldPackage == null)
                 {
                     throw new GracefulException(
@@ -125,12 +127,12 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             {
                 RunWithHandlingUninstallError(() =>
                 {
-                    foreach (CommandSettings command in oldPackage.Commands)
+                    foreach (RestoredCommand command in oldPackage.Commands)
                     {
                         shellShimRepository.RemoveShim(command.Name);
                     }
 
-                    oldPackage.Uninstall();
+                    toolPackageUninstaller.Uninstall(oldPackage.PackageDirectory);
                 });
 
                 RunWithHandlingInstallError(() =>
@@ -141,7 +143,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                         targetFramework: _framework,
                         verbosity: _verbosity);
 
-                    foreach (CommandSettings command in newInstalledPackage.Commands)
+                    foreach (RestoredCommand command in newInstalledPackage.Commands)
                     {
                         shellShimRepository.CreateShim(command.Executable, command.Name);
                     }

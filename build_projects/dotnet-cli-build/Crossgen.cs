@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Build.Tasks
             // occasionally formatted as something that base would recognize as
             // a canonically formatted warning anyway.
             //
-            // One thing that is consistent is that crossgne errors go to stderr
+            // One thing that is consistent is that crossgen errors go to stderr
             // and everything else goes to stdout. Above, we set stderr to high
             // importance above, and stdout to normal. So we can use that here
             // to distinguish between errors and messages.

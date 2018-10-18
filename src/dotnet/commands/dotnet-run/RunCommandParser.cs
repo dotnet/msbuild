@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli
                     (
                         configuration: o.SingleArgumentOrDefault("--configuration"),
                         framework: o.SingleArgumentOrDefault("--framework"),
+                        runtime: o.SingleArgumentOrDefault("--runtime"),
                         noBuild: o.HasOption("--no-build"),
                         project: o.SingleArgumentOrDefault("--project"),
                         launchProfile: o.SingleArgumentOrDefault("--launch-profile"),
@@ -35,6 +36,7 @@ namespace Microsoft.DotNet.Cli
                     CommonOptions.HelpOption(),
                     CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                     CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
+                    CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                     Create.Option(
                         "-p|--project",
                         LocalizableStrings.CommandOptionProjectDescription,

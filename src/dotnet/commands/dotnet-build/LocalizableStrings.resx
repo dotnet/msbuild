@@ -126,7 +126,7 @@
   <data name="NoDependenciesOptionDescription" xml:space="preserve">
     <value>Do not build project-to-project references and only build the specified project.</value>
   </data>
-  <data name="NoIncrementialOptionDescription" xml:space="preserve">
+  <data name="NoIncrementalOptionDescription" xml:space="preserve">
     <value>Do not use incremental building.</value>
   </data>
   <data name="OutputOptionDescription" xml:space="preserve">

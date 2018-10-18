@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>List tools installed in the current development environment.</source>
-        <target state="translated">列出目前開發環境中所安裝的工具。</target>
+        <source>List tools installed globally or locally.</source>
+        <target state="needs-review-translation">列出目前開發環境中所安裝的工具。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -28,8 +28,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="translated">警告: 工具套件 '{0}' 無效: {1}</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="needs-review-translation">警告: 工具套件 '{0}' 無效: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">

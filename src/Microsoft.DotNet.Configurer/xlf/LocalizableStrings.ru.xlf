@@ -25,30 +25,16 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
 Дополнительные сведения о телеметрии в средствах .NET Core: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Не удалось изначально создать кэш NuGet. {0} завершился с ошибкой: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">Идет настройка...
----------------
-Выполняется команда для заполнения локального кэша пакетов, повышения скорости восстановления и обеспечения автономного доступа. Ее выполнение может занять до одной минуты и производится только один раз.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
 ----------------------------------------
 1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="translated">Отказано в разрешении на изменение папки "{0}".
+        <target state="needs-review-translation">Отказано в разрешении на изменение папки "{0}".
 
 Ниже приведено несколько способов устранения этой ошибки.
 ----------------------------------------

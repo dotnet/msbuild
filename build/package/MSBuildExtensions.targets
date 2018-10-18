@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Generate MSI/Bundle Properties -->
+  <PropertyGroup>
+    <InstallerOutputDirectory>$(PackagesDirectory)</InstallerOutputDirectory>
+    <SdkMSBuildExtensionsNuspecFile>$([MSBuild]::NormalizePath($(RepoRoot)/packaging/windows/msbuildextensions/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.nuspec))</SdkMSBuildExtensionsNuspecFile>
+    <SdkMSBuildExtensionsNupkgFile>$([MSBuild]::NormalizePath($(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.$(FullNugetVersion).nupkg))</SdkMSBuildExtensionsNupkgFile>
+    <SdkMSBuildExtensionsSwrFile>$([MSBuild]::NormalizePath($(InstallerOutputDirectory)/VS.Redist.Common.Net.Core.SDK.MSBuildExtensions.swr))</SdkMSBuildExtensionsSwrFile>
+    <SdkGenerateNupkgPowershellScript>$([MSBuild]::NormalizePath($(RepoRoot)/packaging/windows/msbuildextensions/generatenupkg.ps1))</SdkGenerateNupkgPowershellScript>
+  </PropertyGroup>
+
+  <Target Name="GenerateSdkMSBuildExtensionsNupkg"
+          DependsOnTargets="Init;Layout"
+          Inputs="$(MSBuildExtensionsLayoutDirectory)/**/*;
+                    $(SdkMSBuildExtensionsNuspecFile);
+                    $(SdkGenerateNupkgPowershellScript)"
+          Outputs="$(SdkMSBuildExtensionsNupkgFile);$(SdkMSBuildExtensionsSwrFile)">
+
+    <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
+                      &quot;$(MSBuildExtensionsLayoutDirectory)&quot; ^
+                      &quot;$(FullNugetVersion)&quot; ^
+                      &quot;$(SdkMSBuildExtensionsNuspecFile)&quot; ^
+                      &quot;$(SdkMSBuildExtensionsNupkgFile)&quot;" />
+
+    <GenerateMSBuildExtensionsSWR MSBuildExtensionsLayoutDirectory="$(MSBuildExtensionsLayoutDirectory)"
+                                    OutputFile="$(SdkMSBuildExtensionsSwrFile)"/>
+  </Target>
+
+  <Target Name="GenerateMSBuildExtensions"
+        DependsOnTargets="Init;
+                          Layout;
+                          GenerateSdkMSBuildExtensionsNupkg" 
+        Condition=" '$(OS)' == 'Windows_NT' "/>
+
+</Project>

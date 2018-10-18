@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>List tools installed in the current development environment.</source>
-        <target state="translated">Wyświetl listę narzędzi zainstalowanych w bieżącym środowisku deweloperskim.</target>
+        <source>List tools installed globally or locally.</source>
+        <target state="needs-review-translation">Wyświetl listę narzędzi zainstalowanych w bieżącym środowisku deweloperskim.</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -28,8 +28,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="translated">Ostrzeżenie: pakiet narzędzia „{0}” jest nieprawidłowy: {1}</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="needs-review-translation">Ostrzeżenie: pakiet narzędzia „{0}” jest nieprawidłowy: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">

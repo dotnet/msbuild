@@ -15,8 +15,8 @@ Das Tool "{1}" (Version {2}) wurde erfolgreich installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Install a tool for use on the command line.</source>
-        <target state="translated">Hiermit wird ein Tool zur Verwendung über die Befehlszeile installiert.</target>
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="needs-review-translation">Hiermit wird ein Tool zur Verwendung über die Befehlszeile installiert.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

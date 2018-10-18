@@ -9,11 +9,12 @@ using FluentAssertions;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
+using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Tool.Install;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.ShellShim;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Newtonsoft.Json;
@@ -21,7 +22,6 @@ using Xunit;
 using Parser = Microsoft.DotNet.Cli.Parser;
 using System.Runtime.InteropServices;
 using LocalizableStrings = Microsoft.DotNet.Tools.Tool.Install.LocalizableStrings;
-using Microsoft.DotNet.ShellShim;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
@@ -29,8 +29,9 @@ namespace Microsoft.DotNet.Tests.Commands
     {
         private readonly IFileSystem _fileSystem;
         private readonly IToolPackageStore _toolPackageStore;
+        private readonly IToolPackageStoreQuery _toolPackageStoreQuery;
         private readonly CreateShellShimRepository _createShellShimRepository;
-        private readonly CreateToolPackageStoreAndInstaller _createToolPackageStoreAndInstaller;
+        private readonly CreateToolPackageStoresAndInstaller _createToolPackageStoreAndInstaller;
         private readonly EnvironmentPathInstructionMock _environmentPathInstructionMock;
         private readonly AppliedOption _appliedCommand;
         private readonly ParseResult _parseResult;
@@ -40,6 +41,7 @@ namespace Microsoft.DotNet.Tests.Commands
         private readonly string _pathToPlacePackages;
         private const string PackageId = "global.tool.console.demo";
         private const string PackageVersion = "1.0.4";
+        private const string ToolCommandName = "SimulatorCommand";
 
         public ToolInstallCommandTests()
         {
@@ -47,8 +49,11 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
             _temporaryDirectory =  _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
             _pathToPlaceShim = Path.Combine(_temporaryDirectory, "pathToPlace");
+            _fileSystem.Directory.CreateDirectory(_pathToPlaceShim);
             _pathToPlacePackages = _pathToPlaceShim + "Packages";
-            _toolPackageStore = new ToolPackageStoreMock(new DirectoryPath(_pathToPlacePackages), _fileSystem);
+            var toolPackageStoreMock = new ToolPackageStoreMock(new DirectoryPath(_pathToPlacePackages), _fileSystem);
+            _toolPackageStore = toolPackageStoreMock;
+            _toolPackageStoreQuery = toolPackageStoreMock;
             _createShellShimRepository =
                 (nonGlobalLocation) => new ShellShimRepository(
                     new DirectoryPath(_pathToPlaceShim),
@@ -57,8 +62,7 @@ namespace Microsoft.DotNet.Tests.Commands
                     filePermissionSetter: new NoOpFilePermissionSetter());
             _environmentPathInstructionMock =
                 new EnvironmentPathInstructionMock(_reporter, _pathToPlaceShim);
-            _createToolPackageStoreAndInstaller =
-                (location, forwardArguments) => (_toolPackageStore, CreateToolPackageInstaller());
+            _createToolPackageStoreAndInstaller = (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, CreateToolPackageInstaller());
 
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId}");
             _appliedCommand = result["dotnet"]["tool"]["install"];
@@ -89,7 +93,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenRunWithPackageIdWithSourceItShouldCreateValidShim()
         {
-            const string sourcePath = "http://mysouce.com";
+            const string sourcePath = "http://mysource.com";
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --add-source {sourcePath}");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
             ParseResult parseResult =
@@ -97,7 +101,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
 
             var toolToolPackageInstaller = CreateToolPackageInstaller(
-            feeds: new MockFeed[] {
+            feeds: new[] {
                     new MockFeed
                     {
                         Type = MockFeedType.ImplicitAdditionalFeed,
@@ -107,7 +111,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             new MockFeedPackage
                             {
                                 PackageId = PackageId,
-                                Version = PackageVersion
+                                Version = PackageVersion,
+                                ToolCommandName = ToolCommandName,
                             }
                         }
                     }
@@ -115,7 +120,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var installCommand = new ToolInstallCommand(appliedCommand,
                 parseResult,
-                (location, forwardArguments) => (_toolPackageStore, toolToolPackageInstaller),
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolToolPackageInstaller),
                 _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
@@ -166,7 +171,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var installToolCommand = new ToolInstallCommand(
                 _appliedCommand,
                 _parseResult,
-                (location, forwardArguments) => (_toolPackageStore, toolPackageInstaller),
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
                 _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
@@ -189,7 +194,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var installCommand = new ToolInstallCommand(
                 _appliedCommand,
                 _parseResult,
-                (location, forwardArguments) => (_toolPackageStore, toolPackageInstaller),
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
                 _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
@@ -223,7 +228,7 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(string.Format(
                     CommonLocalizableStrings.ShellShimConflict,
-                    ProjectRestorerMock.FakeCommandName));
+                    ToolCommandName));
 
             _fileSystem.Directory.Exists(Path.Combine(_pathToPlacePackages, PackageId)).Should().BeFalse();
         }
@@ -238,7 +243,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var installCommand = new ToolInstallCommand(
                 _appliedCommand,
                 _parseResult,
-                (location, forwardArguments) => (_toolPackageStore, toolPackageInstaller),
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
                 _createShellShimRepository,
                 _environmentPathInstructionMock,
                 _reporter);
@@ -272,7 +277,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -322,7 +327,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -348,7 +353,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -398,7 +403,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should()
                 .Equal(string.Format(
                     LocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.FakeCommandName,
+                    ToolCommandName,
                     PackageId,
                     PackageVersion).Green());
         }
@@ -471,7 +476,7 @@ namespace Microsoft.DotNet.Tests.Commands
         public void AndPackagedShimIsProvidedWhenRunWithPackageIdItCreateShimUsingPackagedShim()
         {
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
-            var prepackagedShimPath = Path.Combine (_temporaryDirectory, ProjectRestorerMock.FakeCommandName + extension);
+            var prepackagedShimPath = Path.Combine (_temporaryDirectory, ToolCommandName + extension);
             var tokenToIdentifyPackagedShim = "packagedShim";
             _fileSystem.File.WriteAllText(prepackagedShimPath, tokenToIdentifyPackagedShim);
 
@@ -487,7 +492,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var installCommand = new ToolInstallCommand(appliedCommand,
                 parseResult,
-                (location, forwardArguments) => (_toolPackageStore, new ToolPackageInstallerMock(
+                (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, new ToolPackageInstallerMock(
                     fileSystem: _fileSystem,
                     store: _toolPackageStore,
                     packagedShimsMap: packagedShimsMap,
@@ -522,7 +527,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var extension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : string.Empty;
             return Path.Combine(
                 _pathToPlaceShim,
-                ProjectRestorerMock.FakeCommandName + extension);
+                ToolCommandName + extension);
         }
 
         private class NoOpFilePermissionSetter : IFilePermissionSetter

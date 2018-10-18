@@ -25,30 +25,16 @@ Read more about .NET Core CLI Tools telemetry: https://aka.ms/dotnet-cli-telemet
 閱讀更多 .NET Core CLI 工具遙測的相關內容: https://aka.ms/dotnet-cli-telemetry</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">無法備妥 NuGet 快取。{0} 失敗，發生: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">正在設定...
---------------
-正在執行命令以填入您的本機套件快取，以改善還原速度並允許離線存取。此命令需要最長一分鐘的時間才能完成，且只會執行一次。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
 ----------------------------------------
 1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="translated">無權修改 '{0}' 資料夾。
+        <target state="needs-review-translation">無權修改 '{0}' 資料夾。
 
 您可以使用下列選項修正這項錯誤:
 ----------------------------------------

@@ -15,8 +15,8 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Install a tool for use on the command line.</source>
-        <target state="translated">コマンド ラインで使用するツールをインストールします。</target>
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="needs-review-translation">コマンド ラインで使用するツールをインストールします。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

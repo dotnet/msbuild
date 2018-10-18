@@ -1,182 +1,28 @@
 # .NET Command Line Interface
 
-[![.NET Slack Status](https://aspnetcoreslack.herokuapp.com/badge.svg?2)](http://tattoocoder.com/aspnet-slack-sign-up/) [![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/dotnet/cli](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/cli?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command, the native packages for various supported platforms and the documentation.
+This repo contains the source code for cross-platform [.NET Core](http://github.com/dotnet/core) command line toolchain. It contains the implementation of each command and the documentation.
 
-Looking for V1 of the .NET Core tooling?
-----------------------------------------
+# Looking for the .NET Core SDK tooling?
 
-If you are looking for the v2.0 release of the .NET Core tools (CLI, MSBuild and the new csproj), head over to https://dot.net/core and download!
+If you are looking for the latest nightly of the .NET Core SDK, see https://github.com/dotnet/core-sdk.
 
-> **Note:** the release/2.2.1xx branch of the CLI repo is based on an upcoming update of the SDK and is considered pre-release. For production-level usage, please use the
-> released version of the tools available at https://dot.net/core
+# Found an issue?
 
-Found an issue?
----------------
 You can consult the [Documents Index](Documentation/README.md) to find out the current issues and to see the workarounds.
 
 If you don't find your issue, please file one! However, given that this is a very high-frequency repo, we've setup some [basic guidelines](Documentation/project-docs/issue-filing-guide.md) to help you. Please consult those first.
 
 This project has adopted the code of conduct defined by the [Contributor Covenant](http://contributor-covenant.org/) to clarify expected behavior in our community. For more information, see the [.NET Foundation Code of Conduct](http://www.dotnetfoundation.org/code-of-conduct).
 
-Build Status
-------------
+# Build status
 
-|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux arm Archive|Linux arm64 Archive|Linux Native Installers|RHEL 6 Archive|Linux-musl Archive|
-|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linux-arm-build-badge]][linux-arm-build]|[![][linux-arm64-build-badge]][linux-arm64-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][linux-musl-build-badge]][linux-musl-build]|
-
-[win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9306/badge
-[win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9306
-
-[win-x86-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9307/badge
-[win-x86-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9307
-
-[osx-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9304/badge
-[osx-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9304
-
-[linux-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9303/badge
-[linux-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9303
-
-[linux-arm-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9301/badge
-[linux-arm-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9301
-
-[linux-arm64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9302/badge
-[linux-arm64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9302
-
-[linuxnative-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9299/badge
-[linuxnative-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9299
-
-[rhel6-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9305/badge
-[rhel6-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9305
-
-[linux-musl-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9300/badge
-[linux-musl-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9300
-
-Installers and Binaries
------------------------
-
-You can download the .NET Core SDK as either an installer (MSI, PKG) or a zip (zip, tar.gz). The .NET Core SDK contains both the .NET Core runtime and CLI tools.
-
-To download the .NET Core runtime **without** the SDK, visit https://github.com/dotnet/core-setup#daily-builds.
-
-> **Note:** Be aware that the following installers are the **latest bits**. If you
-> want to install the latest released versions, check out the [preceding section](#looking-for-v1-of-the-net-core-tooling).
-> In order to be able to restore these pre-release packages, you may need to add a NuGet feed pointing to https://dotnet.myget.org/F/dotnet-core/api/v3/index.json. Other feeds may also be necessary depending on what kind of project you are working with.
-
-| Platform | Latest Daily Build<br>*release/2.2.1xx*<br>[![][version-badge]][version] |
-| -------- | :-------------------------------------: |
-| **Windows x64** | [Installer][win-x64-installer] - [Checksum][win-x64-installer-checksum]<br>[zip][win-x64-zip] - [Checksum][win-x64-zip-checksum] |
-| **Windows x86** | [Installer][win-x86-installer] - [Checksum][win-x86-installer-checksum]<br>[zip][win-x86-zip] - [Checksum][win-x86-zip-checksum] |
-| **macOS** | [Installer][osx-installer] - [Checksum][osx-installer-checksum]<br>[tar.gz][osx-targz] - [Checksum][osx-targz-checksum] |
-| **Linux x64** | [DEB Installer][linux-DEB-installer] - [Checksum][linux-DEB-installer-checksum]<br>[RPM Installer][linux-RPM-installer] - [Checksum][linux-RPM-installer-checksum]<br>_see installer note below_<sup>1</sup><br>[tar.gz][linux-targz] - [Checksum][linux-targz-checksum] |
-| **Linux arm** | [tar.gz][linux-arm-targz] - [Checksum][linux-arm-targz-checksum] |
-| **Linux arm64** | [tar.gz][linux-arm64-targz] - [Checksum][linux-arm64-targz-checksum] |
-| **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
-| **Linux-musl** | [tar.gz][linux-musl-targz] - [Checksum][linux-musl-targz-checksum] |
-
-| Latest Coherent Build<sup>2</sup><br>*release/2.2.1xx* |
+|Windows x64 |
 |:------:|
-| [![][coherent-version-badge]][coherent-version] |
+|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7716/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7716)|
 
-Reference notes:
-> **1**: *Our Debian packages are put together slightly differently than the other OS specific installers. Instead of combining everything, we have separate component packages that depend on each other. If you're installing these directly from the .deb files (via dpkg or similar), then you'll need to install the [corresponding Host, Host FX Resolver, and Shared Framework packages](https://github.com/dotnet/core-setup#daily-builds) before installing the Sdk package.*
-> <br><br>**2**: *A 'coherent' build is defined as a build where the Runtime version matches between the CLI and Asp.NET.*
-
-[version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/latest.version
-[coherent-version]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/latest.coherent.version
-[comment]: # (The latest versions are always the same across all platforms. Just need one to show, so picking win-x64's svg.)
-[version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/win_x64_Release_version_badge.svg
-[coherent-version-badge]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/win_x64_Release_coherent_badge.svg
-
-[win-x64-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x64.exe
-[win-x64-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x64.exe.sha
-[win-x64-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x64.zip
-[win-x64-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x64.zip.sha
-
-[win-x86-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x86.exe
-[win-x86-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x86.exe.sha
-[win-x86-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x86.zip
-[win-x86-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-x86.zip.sha
-
-[osx-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-osx-x64.pkg
-[osx-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-osx-x64.pkg.sha
-[osx-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-osx-x64.tar.gz
-[osx-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-osx-x64.tar.gz.sha
-
-[linux-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-x64.tar.gz
-[linux-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-x64.tar.gz.sha
-
-[linux-arm-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-arm.tar.gz
-[linux-arm-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-arm.tar.gz.sha
-
-[linux-arm64-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-arm64.tar.gz
-[linux-arm64-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-arm64.tar.gz.sha
-
-[linux-DEB-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-x64.deb
-[linux-DEB-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-x64.deb.sha
-
-[linux-RPM-installer]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-x64.rpm
-[linux-RPM-installer-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-x64.rpm.sha
-
-[rhel-6-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-rhel.6-x64.tar.gz
-[rhel-6-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-rhel.6-x64.tar.gz.sha
-
-[linux-musl-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-musl-x64.tar.gz
-[linux-musl-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-musl-x64.tar.gz.sha
-
-# Debian daily feed
-
-Newest SDK binaries for 2.0.0 in debian feed may be delayed due to external issues by up to 24h.
-
-## Obtaining binaries
-
-### Add debian feed:
-Ubuntu 14.04
-```
-sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
-
-sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-sudo apt-get update
-```
-
-Ubuntu 16.04
-```
-sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
-
-sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-sudo apt-get update
-```
-
-Debian 8
-```
-sudo sh -c 'echo "deb [arch=amd64] http://apt-mo.trafficmanager.net/repos/dotnet/ jessie main" > /etc/apt/sources.list.d/dotnetdev.list'
-
-sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-sudo apt-get update
-```
-
-### Install:
-```
-sudo apt-get install <DebianPackageName>=<Version>
-```
-
-### To list available packages:
-```
-apt-cache search dotnet-sdk | grep 2.0.0
-```
-
-Docker
-------
-
-You can also use our Docker base images found on https://hub.docker.com/r/microsoft/dotnet to set up your dev or testing environment for usage.
-
-Basic usage
------------
+# Basic usage
 
 When you have the .NET Command Line Interface installed on your OS of choice, you can try it out using some of the samples on the [dotnet/core repo](https://github.com/dotnet/core/tree/master/samples). You can download the sample in a directory, and then you can kick the tires of the CLI.
 
@@ -200,21 +46,64 @@ that you can run using `dotnet bin/[configuration]/[framework]/[binaryname.dll]`
 
 For more details, refer to the [documentation](https://aka.ms/dotnet-cli-docs).
 
-Building from source
---------------------
+# Building from source
 
 If you are building from source, take note that the build depends on NuGet packages hosted on MyGet, so if it is down, the build may fail. If that happens, you can always see the [MyGet status page](http://status.myget.org/) for more info.
 
 Read over the [contributing guidelines](CONTRIBUTING.md) and [developer documentation](Documentation) for prerequisites for building from source.
 
-Questions & Comments
---------------------
+# Questions and comments
 
 For all feedback, use the Issues on this repository.
 
-License
--------
+# License
 
 By downloading the .zip you are agreeing to the terms in the project [EULA](https://aka.ms/dotnet-core-eula).
 
+# Repository SLA
 
+This Service-Level Agreement (SLA) represents the commitment of the maintainers of the .NET Core CLI/SDK repositories to community members and contributors.
+
+## Pull requests
+
+While the maintainers of this repository have the right and obligation to move .NET Core in a direction which might conflict with pull requests from community contributors, pull requests from community contributors should receive prompt feedback and either be approved by assigning to an appropriate release milestone or closed with gratitude and a valid explanation.  Pull requests from community contributors should not be put in the backlog milestone because pull requests rarely stay valid over long periods of time; thanking the contributor for their effort and closing the pull request with an explanation is preferable to letting the pull request linger in backlog limbo.
+
+### New pull requests
+
+The maintainers of the repository will triage new pull requests from community contributors within **one week** of the creation of the pull request.
+
+The community pull request will be triaged as follows:
+
+* **Approved** - the pull request has been approved by the maintainers and should be assigned to an upcoming release milestone.  Additionally, the pull request should be assigned to a maintainer to assist the completion of the pull request.  The assigned maintainer will review the pull request, mentor the contributor regarding the standards and practices of the codebase, and inform the contributor when there might be an issue blocking the merging of the pull request, such as merge conflicts, changes in schedule necessitating branch retargeting, branch lockdowns, etc.  The assigned maintainer should provide initial feedback to the contributor within **three business days** of being assigned the pull request.
+* **Pending discussion** - there are questions the maintainers have about the pull request that need to be resolved: the code needs additional work, unit tests are missing, whether or not the pull request aligns with the direction for the codebase, or the maintainers need clarification as to the purpose of the pull request.  Whenever possible, the discussion should take place solely in the GitHub pull request or in a linked GitHub issue.
+* **Rejected** - The pull request is not in the direction the maintainers want to take the codebase, has too much risk, does not solve a problem of meaningful priority, or the pull request is stale and requires additional work to bring into a mergeable state.  Regardless of the reason for rejecting a pull request, maintainers should always thank the contributor for their effort and for being a valued member of the .NET Core community.
+
+For any pull request, if the contributor has been asked for updates or clarifications and the maintainer has not heard back from the contributor for **one month**, the pull request will be assumed to be abandoned and will be closed, unless other time limits have been agreed upon between the contributor and the maintainer.
+
+### Stale pull requests
+
+As codebases change significantly over time and stale pull requests are unlikely to be merged without significant additional work, any pull request older than six months from a community contributor should be closed with an explanation as to why the pull request was not merged.   However, contributors may choose to update their feature branch and re-open the pull request (or re-submit a new pull request) if it is again ready to merge.  At such time, the maintainers should treat the reopening as if it were a new pull request and decide to accept the pull request and for which release milestone it belongs to.
+
+## Issues
+
+Reported issues from community members will be treated identically to any other issue, whether discovered by the maintainers, other Microsoft employees, etc.
+
+The maintainers will triage issues **each business day**:
+
+* High priority issues (crash, hang, data loss, regression, security, or other major malfunction) will get triaged to a Microsoft developer and put in their queue to address in the current milestone.
+
+* Small malfunctions will be marked as such, assigned when developers are available, and moved to a future release milestone or the backlog milestone that represents no particular release.
+
+* Minor issues (spelling errors, fit-n-finish, small issues with easy/obvious workaround) will be marked as `good first issue` for community contributors and will be moved to a backlog milestone mapping to no particular release.
+  
+* Even if an issue is not marked as `good first issue`, we welcome community contributions on any issue, but if the issue is currently assigned to someone, check with them first before working on a fix.
+
+Issues may be closed by the maintainers of the repository for the following reasons:
+
+* **Not repro** - the maintainer is unable to reproduce the issue following the steps outlined in the issue.  Contributors and community members may reopen the issue if they believe they have discovered another way of reproducing the issue.
+
+* **Won't fix** - the maintainer has determined the issue has a valid reason to not be fixed, such as being too risky, code is scheduled for obsoletion in an upcoming release, fix is needed only for an out-of-service release, etc.  Contributors and community members should not reopen the issue unless there is a justifiable reason to do so, such as strong community demand, new information about the issue which might increase the severity, etc.
+
+* **Fixed** - the maintainer has merged a pull request that addresses the issue.  The maintainer should follow-up on the issue to inform the community regarding which release to expect the fix in.
+
+Because any code repository gradually amasses a non-trivial number of minor bugs that are unlikely to ever get fixed due to scheduling or other constraints, and which become increasingly irrelevant as the product changes, the maintainers should periodically (once or twice a year) close minor issues older than a year that no longer meet the bar as **won't fix**.  This action should include issues assigned to the backlog milestone so that the backlog isn't an issue graveyard.

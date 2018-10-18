@@ -54,12 +54,14 @@ namespace Microsoft.DotNet.Tests.Commands
                         new MockFeedPackage
                         {
                             PackageId = _packageId.ToString(),
-                            Version = LowerPackageVersion
+                            Version = LowerPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
                         },
                         new MockFeedPackage
                         {
                             PackageId = _packageId.ToString(),
-                            Version = HigherPackageVersion
+                            Version = HigherPackageVersion,
+                            ToolCommandName = "SimulatorCommand"
                         }
                     }
                 }
@@ -134,7 +136,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var command = new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                (location, forwardArguments) => (_store,
+                (location, forwardArguments) => (_store, _store,
                     new ToolPackageInstallerMock(
                         _fileSystem,
                         _store,
@@ -143,7 +145,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             _reporter,
                             _mockFeeds
                         ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error")),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 _ => GetMockedShellShimRepository(),
                 _reporter);
 
@@ -163,7 +166,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var command = new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                (location, forwardArguments) => (_store,
+                (location, forwardArguments) => (_store, _store,
                     new ToolPackageInstallerMock(
                         _fileSystem,
                         _store,
@@ -172,7 +175,8 @@ namespace Microsoft.DotNet.Tests.Commands
                             _reporter,
                             _mockFeeds
                         ),
-                        installCallback: () => throw new ToolConfigurationException("Simulated error"))),
+                        installCallback: () => throw new ToolConfigurationException("Simulated error")),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 _ => GetMockedShellShimRepository(),
                 _reporter);
 
@@ -213,7 +217,7 @@ namespace Microsoft.DotNet.Tests.Commands
             return new ToolInstallCommand(
                 result["dotnet"]["tool"]["install"],
                 result,
-                (location, forwardArguments) => (_store, new ToolPackageInstallerMock(
+                (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
                     _fileSystem,
                     _store,
                     new ProjectRestorerMock(
@@ -233,14 +237,15 @@ namespace Microsoft.DotNet.Tests.Commands
             return new ToolUpdateCommand(
                 result["dotnet"]["tool"]["update"],
                 result,
-                (location, forwardArguments) => (_store, new ToolPackageInstallerMock(
+                (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(
                     _fileSystem,
                     _store,
                     new ProjectRestorerMock(
                         _fileSystem,
                         _reporter,
                         _mockFeeds
-                    ))),
+                    )),
+                    new ToolPackageUninstallerMock(_fileSystem, _store)),
                 (_) => GetMockedShellShimRepository(),
                 _reporter);
         }

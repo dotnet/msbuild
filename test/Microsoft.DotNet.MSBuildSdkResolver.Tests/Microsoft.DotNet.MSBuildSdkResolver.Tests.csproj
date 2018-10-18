@@ -3,14 +3,13 @@
     <TargetFrameworks>net461;$(CliTargetFramework)</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(CliTargetFramework)</TargetFrameworks>
 
-     <!--
+    <!--
      https://github.com/dotnet/cli/issues/9851: For now test only on net461 on Windows because
      we can't load a different hostfxr.dll into the test than the one that is already loaded
      on Core.
      -->
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net461</TargetFrameworks>
 
-    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>

@@ -127,7 +127,7 @@
     <value>Please specify one tool Package Id to uninstall.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Uninstall a tool from the current development environment.</value>
+    <value>Uninstall a global tool or local tool.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
     <value>Uninstall the tool from the current user's tools directory.</value>

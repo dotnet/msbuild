@@ -146,6 +146,11 @@ Ein ausführbares Projekt sollte ein ausführbares TFM (z.B. netcoreapp2.0) verw
         <target state="translated">Das Zielframework für die Ausführung. Das Zielframework muss auch in der Projektdatei angegeben werden.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RuntimeOptionDescription">
+        <source>The target runtime to run for.</source>
+        <target state="new">The target runtime to run for.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -5,6 +5,9 @@ using Microsoft.DotNet.Tools.Restore;
 using FluentAssertions;
 using Xunit;
 using System;
+using System.IO;
+using System.Runtime.InteropServices;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
@@ -12,6 +15,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
     {
         private const string ExpectedPrefix =
             "exec <msbuildpath> -maxcpucount -verbosity:m -nologo -target:Restore";
+        private static readonly string WorkingDirectory = 
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetRestoreInvocation));
 
         [Theory]
         [InlineData(new string[] { }, "")]
@@ -21,9 +26,9 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "-r", "<runtime>" }, "-property:RuntimeIdentifiers=<runtime>")]
         [InlineData(new string[] { "--runtime", "<runtime>" }, "-property:RuntimeIdentifiers=<runtime>")]
         [InlineData(new string[] { "-r", "<runtime0>", "-r", "<runtime1>" }, "-property:RuntimeIdentifiers=<runtime0>%3B<runtime1>")]
-        [InlineData(new string[] { "--packages", "<packages>" }, "-property:RestorePackagesPath=<packages>")]
+        [InlineData(new string[] { "--packages", "<packages>" }, "-property:RestorePackagesPath=<cwd><packages>")]
         [InlineData(new string[] { "--disable-parallel" }, "-property:RestoreDisableParallel=true")]
-        [InlineData(new string[] { "--configfile", "<config>" }, "-property:RestoreConfigFile=<config>")]
+        [InlineData(new string[] { "--configfile", "<config>" }, "-property:RestoreConfigFile=<cwd><config>")]
         [InlineData(new string[] { "--no-cache" }, "-property:RestoreNoCache=true")]
         [InlineData(new string[] { "--ignore-failed-sources" }, "-property:RestoreIgnoreFailedSources=true")]
         [InlineData(new string[] { "--no-dependencies" }, "-property:RestoreRecursive=false")]
@@ -31,12 +36,17 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--verbosity", "minimal" }, @"-verbosity:minimal")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                expectedAdditionalArgs =
+                    (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
+                    .Replace("<cwd>", WorkingDirectory);
 
-            var msbuildPath = "<msbuildpath>";
-            RestoreCommand.FromArgs(args, msbuildPath)
-                .GetProcessStartInfo().Arguments
-                .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+                var msbuildPath = "<msbuildpath>";
+                RestoreCommand.FromArgs(args, msbuildPath)
+                    .GetProcessStartInfo().Arguments
+                    .Should().Be($"{ExpectedPrefix}{expectedAdditionalArgs}");
+            });
         }
     }
 }
