@@ -51,6 +51,8 @@ namespace Microsoft.DotNet.Tests.EndToEnd
 
             new RunCommand()
                 .WithWorkingDirectory(projectDirectory)
+                //  Set DOTNET_ROOT as workaround for https://github.com/dotnet/cli/issues/10196
+                .WithEnvironmentVariable("DOTNET_ROOT", Path.GetDirectoryName(DotnetUnderTest.FullName))
                 .ExecuteWithCapturedOutput()
                 .Should().Pass()
                      .And.HaveStdOutContaining("Hello World!");
