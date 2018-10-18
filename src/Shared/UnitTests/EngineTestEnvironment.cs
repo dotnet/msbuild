@@ -3,13 +3,61 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Shouldly;
 
 namespace Microsoft.Build.UnitTests
 {
     public partial class TestEnvironment
     {
+        // reset the default build manager and the state it might have accumulated from other tests
+        private object _resetBuildManager = new ResetDefaultBuildManager();
+
+        private class ResetDefaultBuildManager
+        {
+            protected internal static FieldInfo SingletonField;
+
+            public ResetDefaultBuildManager()
+            {
+                if (DefaultBuildManagerIsInstantiated())
+                {
+                    DisposeDefaultBuildManager();
+                }
+            }
+
+            private static void DisposeDefaultBuildManager()
+            {
+                try
+                {
+                    BuildManager.DefaultBuildManager.BeginBuild(
+                        new BuildParameters()
+                        {
+                            EnableNodeReuse = false,
+                            ShutdownInProcNodeOnBuildFinish = true
+                        });
+                }
+                finally
+                {
+                    BuildManager.DefaultBuildManager.EndBuild();
+                    BuildManager.DefaultBuildManager.Dispose();
+                }
+            }
+
+            private static bool DefaultBuildManagerIsInstantiated()
+            {
+                if (SingletonField == null)
+                {
+                    SingletonField = typeof(BuildManager).GetField("s_singletonInstance", BindingFlags.Static | BindingFlags.NonPublic);
+                }
+
+                SingletonField.ShouldNotBeNull();
+
+                return SingletonField.GetValue(null) != null;
+            }
+        }
+
         /// <summary>
         ///     Creates a test variant that corresponds to a project collection which will have its projects unloaded,
         ///     loggers unregistered, toolsets removed and disposed when the test completes
