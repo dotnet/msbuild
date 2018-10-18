@@ -10,7 +10,7 @@ Please refer to [dotnet/cli](https://github.com/dotnet/cli) for .NET Core CLI so
 
 |Windows x64 |
 |:------:|
-|[![](https://dnceng.visualstudio.com/internal/_apis/build/status/dotnet/sdk/DotNet-Core-Sdk%203.0%20(Windows)%20(YAML)%20(Official))](https://dnceng.visualstudio.com/internal/_build?definitionId=140)|
+|[![](https://dev.azure.com/dnceng/internal/_apis/build/status/dotnet/sdk/DotNet-Core-Sdk%203.0%20(Windows)%20(YAML)%20(Official))](https://dev.azure.com/dnceng/internal/_build?definitionId=140)|
 
 ## How do I engage and contribute?
 We welcome you to try things out, [file issues](https://github.com/dotnet/sdk/issues), make feature requests and join us in design conversations.
