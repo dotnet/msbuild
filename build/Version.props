@@ -15,12 +15,16 @@
 
     <VersionSuffix Condition=" '$(DropSuffix)' != 'true' ">$(ReleaseSuffix)-$(CommitCount)</VersionSuffix>
 
-    <FullNugetVersion>$(CliVersionNoSuffix)-$(ReleaseSuffix)-$(CommitCount)</FullNugetVersion>
+    <SuffixedNugetVersion>$(CliVersionNoSuffix)-$(ReleaseSuffix)-$(CommitCount)</SuffixedNugetVersion>
+    <FullNugetVersion Condition=" '$(FullNugetVersion)' == '' ">$(SuffixedNugetVersion)</FullNugetVersion>
 
     <NugetVersion Condition=" '$(DropSuffix)' != 'true' ">$(FullNugetVersion)</NugetVersion>
     <NugetVersion Condition=" '$(NugetVersion)' == '' ">$(CliVersionNoSuffix)</NugetVersion>
 
     <SdkVersion>$(NugetVersion)</SdkVersion>
     <SdkNugetVersion>$(NugetVersion)</SdkNugetVersion>
+
+    <FullNugetVersion Condition=" '$(IsNotOrchestratedPublish)' == 'false' ">$(NugetVersion)</FullNugetVersion>
+
   </PropertyGroup>
 </Project>

@@ -31,7 +31,28 @@ namespace Microsoft.DotNet.Cli
                         "--interactive",
                         LocalizableStrings.CmdInteractiveRestoreOptionDescription,
                         Accept.NoArguments()
-                              .ForwardAs("-property:NuGetInteractive=true")) }).ToArray();
+                            .ForwardAs("-property:NuGetInteractive=true")),
+                    Create.Option(
+                        "--use-lock-file",
+                        LocalizableStrings.CmdUseLockFileOptionDescription,
+                        Accept.NoArguments()
+                            .ForwardAs("-property:RestorePackagesWithLockFile=true")),
+                    Create.Option(
+                        "--locked-mode",
+                        LocalizableStrings.CmdLockedModeOptionDescription,
+                        Accept.NoArguments()
+                            .ForwardAs("-property:RestoreLockedMode=true")),
+                    Create.Option(
+                        "--lock-file-path",
+                        LocalizableStrings.CmdLockFilePathOptionDescription,
+                        Accept.ExactlyOneArgument()
+                            .With(name: LocalizableStrings.CmdLockFilePathOption)
+                            .ForwardAsSingle(o => $"-property:NuGetLockFilePath={o.Arguments.Single()}")),
+                    Create.Option(
+                        "--force-evaluate",
+                        LocalizableStrings.CmdReevaluateOptionDescription,
+                        Accept.NoArguments()
+                            .ForwardAs("-property:RestoreForceEvaluate=true")) }).ToArray();
         }
 
         public static Option[] AddImplicitRestoreOptions(
