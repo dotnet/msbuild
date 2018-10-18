@@ -1220,6 +1220,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RestoreOperatingEnvironment()
         {
+            // logic cloned in Microsoft.Build.BackEnd.InProcNode.HandleShutdown
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
                 ErrorUtilities.VerifyThrow(_requestEntry.RequestConfiguration.SavedCurrentDirectory != null, "Current directory not previously saved.");
@@ -1265,8 +1266,7 @@ namespace Microsoft.Build.BackEnd
                 // If the environment doesn't have the variable set, or if its value differs from what we have saved, set it
                 // to the saved value.  Doing the comparison before setting is faster than unconditionally setting it using
                 // the API.
-                string value;
-                if (!currentEnvironment.TryGetValue(entry.Key, out value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
+                if (!currentEnvironment.TryGetValue(entry.Key, out var currentValue) || !string.Equals(entry.Value, currentValue, StringComparison.Ordinal))
                 {
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                 }
