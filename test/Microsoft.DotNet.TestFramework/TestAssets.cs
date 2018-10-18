@@ -64,7 +64,7 @@ namespace Microsoft.DotNet.TestFramework
                 this);
         }
 
-        public DirectoryInfo CreateTestDirectory(string testProjectName = "temp", [CallerMemberName] string callingMethod = "", string identifier = "")
+        public DirectoryInfo CreateTestDirectory(string testProjectName = "", [CallerMemberName] string callingMethod = "", string identifier = "")
         {
             var testDestination = GetTestDestinationDirectoryPath(testProjectName, callingMethod, identifier);
 
@@ -85,7 +85,13 @@ namespace Microsoft.DotNet.TestFramework
             //  Find the name of the assembly the test comes from based on the the base directory and how the output path has been constructed
             string testAssemblyName = new DirectoryInfo(baseDirectory).Parent.Parent.Name;
 
-            return Path.Combine(_testWorkingFolder, testAssemblyName, callingMethod + identifier, testProjectName);
+            string directory = Path.Combine(_testWorkingFolder, testAssemblyName, callingMethod + identifier);
+
+            if (!string.IsNullOrEmpty(testProjectName))
+            {
+                directory = Path.Combine(directory, testProjectName);
+            }
+            return directory;
         }
     }
 }
