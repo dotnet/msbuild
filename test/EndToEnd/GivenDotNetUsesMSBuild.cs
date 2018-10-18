@@ -17,55 +17,53 @@ namespace Microsoft.DotNet.Tests.EndToEnd
         [Fact]
         public void ItCanNewRestoreBuildRunCleanMSBuildProject()
         {
-            using (DisposableDirectory directory = Temp.CreateDirectory())
-            {
-                string projectDirectory = directory.Path;
+            var directory = TestAssets.CreateTestDirectory();
+            string projectDirectory = directory.FullName;
 
-                string newArgs = "console --debug:ephemeral-hive --no-restore";
-                var newResult = new NewCommandShim()
-                    .WithWorkingDirectory(projectDirectory)
-                    .ExecuteWithCapturedOutput(newArgs);
+            string newArgs = "console --debug:ephemeral-hive --no-restore";
+            var newResult = new NewCommandShim()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput(newArgs);
 
-                newResult.Should().Pass();
+            newResult.Should().Pass();
 
-                string projectPath = Directory.GetFiles(projectDirectory, "*.csproj").Single();
+            string projectPath = Directory.GetFiles(projectDirectory, "*.csproj").Single();
 
-                //  Override TargetFramework since there aren't .NET Core 3 templates yet
-                //  https://github.com/dotnet/core-sdk/issues/24 tracks removing this workaround
-                XDocument project = XDocument.Load(projectPath);
-                var ns = project.Root.Name.Namespace;
-                project.Root.Element(ns + "PropertyGroup")
-                    .Element(ns + "TargetFramework")
-                    .Value = "netcoreapp3.0";
-                project.Save(projectPath);
+            //  Override TargetFramework since there aren't .NET Core 3 templates yet
+            //  https://github.com/dotnet/core-sdk/issues/24 tracks removing this workaround
+            XDocument project = XDocument.Load(projectPath);
+            var ns = project.Root.Name.Namespace;
+            project.Root.Element(ns + "PropertyGroup")
+                .Element(ns + "TargetFramework")
+                .Value = "netcoreapp3.0";
+            project.Save(projectPath);
 
 
-                new RestoreCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute("/p:SkipInvalidConfigurations=true")
-                    .Should().Pass();
+            new RestoreCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute("/p:SkipInvalidConfigurations=true")
+                .Should().Pass();
 
-                new BuildCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute()
-                    .Should().Pass();
+            new BuildCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should().Pass();
 
-                new RunCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .ExecuteWithCapturedOutput()
-                    .Should().Pass()
-                         .And.HaveStdOutContaining("Hello World!");
+            new RunCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .ExecuteWithCapturedOutput()
+                .Should().Pass()
+                     .And.HaveStdOutContaining("Hello World!");
 
-                var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
-                binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
+            var binDirectory = new DirectoryInfo(projectDirectory).Sub("bin");
+            binDirectory.Should().HaveFilesMatching("*.dll", SearchOption.AllDirectories);
 
-                new CleanCommand()
-                    .WithWorkingDirectory(projectDirectory)
-                    .Execute()
-                    .Should().Pass();
+            new CleanCommand()
+                .WithWorkingDirectory(projectDirectory)
+                .Execute()
+                .Should().Pass();
 
-                binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
-            }
+            binDirectory.Should().NotHaveFilesMatching("*.dll", SearchOption.AllDirectories);
         }
 
         [Fact]
