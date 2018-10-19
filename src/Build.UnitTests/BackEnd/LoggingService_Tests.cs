@@ -993,7 +993,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 targetId: -1,
                 taskId: -1);
 
-            BuildRequestData buildRequestData = new BuildRequestData("projectFile", new Dictionary<string, string>(), "15.0", new[] { "Build" }, null);
+            BuildRequestData buildRequestData = new BuildRequestData("projectFile", new Dictionary<string, string>(), "Current", new[] { "Build" }, null);
 
             ConfigCache configCache = host.GetComponent(BuildComponentType.ConfigCache) as ConfigCache;
 

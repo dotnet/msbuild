@@ -1,4 +1,4 @@
-<Project Sdk="RoslynTools.RepoToolset">
+﻿<Project Sdk="RoslynTools.RepoToolset">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
 
@@ -105,7 +105,7 @@
       <Link>StringBuilderCache.cs</Link>
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="..\Shared\ReuseableStringBuilder.cs" >
+    <Compile Include="..\Shared\ReuseableStringBuilder.cs">
       <Link>ReuseableStringBuilder.cs</Link>
     </Compile>
     <Compile Include="..\Shared\StrongNameHelpers.cs">
@@ -744,7 +744,7 @@
          path for some tests.  So include it twice. -->
     <Content Include="Microsoft.Common.props" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>15.0\Microsoft.Common.props</Link>
+      <Link>Current\Microsoft.Common.props</Link>
     </Content>
     <Content Include="Microsoft.Common.tasks">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -765,6 +765,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.VisualStudioVersion.v15.Common.props">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Microsoft.VisualStudioVersion.v16.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <!-- Resource Files -->
@@ -971,6 +974,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
+    <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="..\..\15.0\Bin\Roslyn" />
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers\$(MicrosoftNetCompilersVersion)\tools\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 

@@ -1275,6 +1275,14 @@ Project(""{";
 @"<?xml version=`1.0` encoding=`utf-8`?>
   <Project xmlns = 'msbuildnamespace'>
 
+    <ItemDefinitionGroup>
+      <Compile A=`a`/>
+      <B M1=`dv1`>
+        <M2>dv2</M2>
+      </B>
+      <C/>
+    </ItemDefinitionGroup>
+
     <ItemGroup>
       <Compile Include=`Class1.cs` A=`a` />
       <Compile Include=`Class2.cs` />
