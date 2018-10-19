@@ -120,7 +120,7 @@ namespace Microsoft.NET.Pack.Tests
         }
 
         [WindowsOnlyFact]
-        public void Packing_an_app_exclude_dependencys_framework_assemblies_dependency()
+        public void Packing_an_app_exclude_dependencies_framework_assemblies_dependency()
         {
             TestProject testProject = new TestProject()
             {
@@ -156,6 +156,27 @@ namespace Microsoft.NET.Pack.Tests
             var dependencies = PackAndGetDependencies(testProject);
 
             dependencies.Should().BeEmpty();
+        }
+
+        [Theory]
+        [InlineData("Microsoft.AspNetCore.App")]
+        [InlineData("Microsoft.AspNetCore.All")]
+        public void Package_an_aspnetcore_2_1_app_does_not_include_the_implicit_dependency(string packageId)
+        {
+            TestProject testProject = new TestProject()
+            {
+                Name = "PackAspNetCoreApp21App",
+                IsSdkProject = true,
+                TargetFrameworks = "netcoreapp2.1",
+                IsExe = true
+            };
+
+            testProject.PackageReferences.Add(new TestPackageReference(packageId, ""));
+
+            var dependencies = PackAndGetDependencies(testProject);
+
+            dependencies.Should().BeEmpty();
+
         }
 
         [Fact]

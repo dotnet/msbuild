@@ -13,7 +13,7 @@ namespace Microsoft.NET.Build.Tasks
     /// build tasks.
     /// </summary>
     /// <remarks>
-    /// Source compatible with ususal Log.LogXxx MSBuild task code. (Subset of
+    /// Source compatible with usual Log.LogXxx MSBuild task code. (Subset of
     /// API chosen based on actual usage in SDK, and with a deliberate goal of
     /// eliminating some of the excessive overloading in TaskLoggingHelper.
     ///

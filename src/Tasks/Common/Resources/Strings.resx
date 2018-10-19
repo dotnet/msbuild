@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -381,10 +381,6 @@ The following are names of parameters or literal values and should not be transl
     <value>NETSDK1065: Cannot find app host for {0}. {0} could be an invalid runtime identifier (RID). For more information about RID, see https://aka.ms/rid-catalog.</value>
     <comment>{StrBegin="NETSDK1065: "}</comment>
   </data>
-  <data name="CannotUseAppHostWithoutRuntimeIdentifier" xml:space="preserve">
-    <value>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</value>
-    <comment>{StrBegin="NETSDK1066: "}</comment>
-  </data>
   <data name="CannotUseSelfContainedWithoutAppHost" xml:space="preserve">
     <value>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</value>
     <comment>{StrBegin="NETSDK1067: "}</comment>
@@ -403,5 +399,33 @@ The following are names of parameters or literal values and should not be transl
   </data>
   <data name="PackageReferenceVersionNotRecommended" xml:space="preserve">
     <value>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</value>
+  </data>
+  <data name="AppHostNotWindowsCLI" xml:space="preserve">
+    <value>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</value>
+    <comment>{StrBegin="NETSDK1072: "}</comment>
+  </data>
+  <data name="UnknownFrameworkReference" xml:space="preserve">
+    <value>NETSDK1073: The FrameworkReference '{0}' was not recognized</value>
+    <comment>{StrBegin="NETSDK1073: "}</comment>
+  </data>
+  <data name="AppHostCustomizationRequiresWindowsHostWarning" xml:space="preserve">
+    <value>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows.</value>
+    <comment>{StrBegin="NETSDK1074: "}</comment>
+  </data>
+  <data name="InvalidResourceUpdate" xml:space="preserve">
+    <value>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</value>
+    <comment>{StrBegin="NETSDK1075: "}</comment>
+  </data>
+  <data name="AddResourceWithNonIntegerResource" xml:space="preserve">
+    <value>NETSDK1076: AddResource can only be used with integer resource types.</value>
+    <comment>{StrBegin="NETSDK1076: "}</comment>
+  </data>
+  <data name="FailedToLockResource" xml:space="preserve">
+    <value>NETSDK1077: Failed to lock resource.</value>
+    <comment>{StrBegin="NETSDK1077: "}</comment>
+  </data>
+  <data name="AppHostNotWindows" xml:space="preserve">
+    <value>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</value>
+    <comment>{StrBegin="NETSDK1078: "}</comment>
   </data>
 </root>

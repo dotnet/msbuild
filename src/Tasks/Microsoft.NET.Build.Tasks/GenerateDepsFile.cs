@@ -35,6 +35,8 @@ namespace Microsoft.NET.Build.Tasks
 
         public string PlatformLibraryName { get; set; }
 
+        public ITaskItem[] RuntimeFrameworks { get; set; }
+
         [Required]
         public string AssemblyName { get; set; }
 
@@ -138,6 +140,7 @@ namespace Microsoft.NET.Build.Tasks
                 NuGetUtils.ParseFrameworkName(TargetFramework),
                 RuntimeIdentifier,
                 PlatformLibraryName,
+                RuntimeFrameworks,
                 IsSelfContained);
 
             DependencyContext dependencyContext = new DependencyContextBuilder(mainProject, projectContext, IncludeRuntimeFileVersions)
