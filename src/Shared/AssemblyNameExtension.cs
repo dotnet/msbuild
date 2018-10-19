@@ -50,6 +50,21 @@ namespace Microsoft.Build.Shared
         Default = 15, // 0000 0000 0000 1111
     }
 
+    internal struct AssemblyNameExtensionState
+    {
+        internal AssemblyName AsAssemblyName;
+
+        internal string AsString;
+
+        internal bool IsSimpleName;
+
+        internal bool HasProcessorArchitectureInFusionName;
+
+        internal bool Immutable;
+
+        internal HashSet<AssemblyNameExtension> RemappedFrom;
+    }
+
     /// <summary>
     /// A replacement for AssemblyName that optimizes calls to FullName which is expensive.
     /// The assembly name is represented internally by an AssemblyName and a string, conversion
@@ -86,6 +101,16 @@ namespace Microsoft.Build.Shared
         internal AssemblyNameExtension(AssemblyName assemblyName) : this()
         {
             asAssemblyName = assemblyName;
+        }
+
+        internal AssemblyNameExtension(AssemblyNameExtensionState state)
+        {
+            asAssemblyName = state.AsAssemblyName;
+            asString = state.AsString;
+            isSimpleName = state.IsSimpleName;
+            hasProcessorArchitectureInFusionName = state.HasProcessorArchitectureInFusionName;
+            immutable = state.Immutable;
+            remappedFrom = state.RemappedFrom;
         }
 
         /// <summary>
@@ -167,7 +192,7 @@ namespace Microsoft.Build.Shared
                 asAssemblyName.SetPublicKey(publicKey);
                 asAssemblyName.SetPublicKeyToken(publicKeyToken);
             }
-
+            
             asString = info.GetString("asStr");
             isSimpleName = info.GetBoolean("isSName");
             hasProcessorArchitectureInFusionName = info.GetBoolean("hasCpuArch");
@@ -965,6 +990,17 @@ namespace Microsoft.Build.Shared
             }
             return true;
         }
+
+        public AssemblyNameExtensionState GetState() =>
+            new AssemblyNameExtensionState
+            {
+                AsAssemblyName = asAssemblyName,
+                AsString = asString,
+                IsSimpleName = isSimpleName,
+                HasProcessorArchitectureInFusionName = hasProcessorArchitectureInFusionName,
+                Immutable = Immutable,
+                RemappedFrom = remappedFrom
+            };
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
