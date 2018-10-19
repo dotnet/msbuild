@@ -152,6 +152,51 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'@(SdkBuildWarning)' != ''">
     <NetSdkWarning FormattedText="%(SdkBuildWarning.Identity)" />
   </Target>
+
+  <UsingTask TaskName="ResolveFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+  
+  <Target Name="ResolveFrameworkReferences" BeforeTargets="_CheckForInvalidConfigurationAndPlatform;CollectPackageReferences">
+    <ItemGroup>
+      <!-- The KnownFrameworkReference items that this target expects will be defined in the bundled
+           versions .props file. They should look something like this: -->
+      
+      <!--
+      <KnownFrameworkReference Include="Microsoft.AspNetCore"
+                               RuntimeFrameworkName="Microsoft.AspNetCore.App"
+                               DefaultRuntimeFrameworkVersion="2.1.1"
+                               LatestRuntimeFrameworkVersion="2.1.3"
+                               TargetingPackName="Microsoft.AspNetCore.App"
+                               TargetingPackVersion="2.1.0"
+                               />
+      -->
+      
+    </ItemGroup>
+
+    <ResolveFrameworkReferences FrameworkReferences="@(FrameworkReference)"
+                                KnownFrameworkReferences="@(KnownFrameworkReference)">
+      <Output TaskParameter="PackageReferencesToAdd" ItemName="PackageReferenceToAdd" />
+      <Output TaskParameter="RuntimeFrameworks" ItemName="RuntimeFramework" />
+      <Output TaskParameter="UnresolvedFrameworkReferences" ItemName="_UnresolvedFrameworkReference" />
+      
+    </ResolveFrameworkReferences>
+
+    <ItemGroup>
+      <PackageReference Include="@(PackageReferenceToAdd)" />
+    </ItemGroup>
+    
+  </Target>
+
+  <UsingTask TaskName="ReportUnknownFrameworkReferences" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
+
+  <!-- Report unresolved FrameworkReferences in a separate target so that the error is only reported on Build, not Restore. -->
+  <Target Name="ReportUnresolvedFrameworkReferences" DependsOnTargets="ResolveFrameworkReferences"
+          BeforeTargets="_CheckForInvalidConfigurationAndPlatform"
+          Condition="'@(_UnresolvedFrameworkReference)' != ''">
+
+    <!-- Use a custom task in order to report multiple errors instead of stopping on the first one (which would happen if we batched) -->
+    <ReportUnknownFrameworkReferences UnresolvedFrameworkReferences="@(_UnresolvedFrameworkReference)"/>
+    
+  </Target>
   
   <!--
     Automatically add Link metadata to items of specific types if they are outside of the project folder and don't already have the Link metadata set.

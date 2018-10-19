@@ -26,6 +26,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime,
                 Constants.DefaultPlatformLibrary,
+                runtimeFrameworks: null,
                 isSelfContained: false);
 
             IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())
@@ -45,6 +46,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 FrameworkConstants.CommonFrameworks.NetCoreApp10,
                 runtime,
                 Constants.DefaultPlatformLibrary,
+                runtimeFrameworks: null,
                 isSelfContained: false);
 
             IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())

@@ -33,7 +33,7 @@ namespace Microsoft.NET.Build.Tests
             // The repro here is very sensitive to the target framework and packages used. This specific case
             // net46 using only System.Collections.Immutable v1.4.0 will not pull in System.Runtime from a
             // package or from Microsoft.NET.Build.Extensions as a primary reference and so RARs dependency
-            // walk needs to find it in order for ImplictlyExpandDesignTimeFacades to inject it.
+            // walk needs to find it in order for ImplicitlyExpandDesignTimeFacades to inject it.
 
             var netFrameworkLibrary = new TestProject()
             {

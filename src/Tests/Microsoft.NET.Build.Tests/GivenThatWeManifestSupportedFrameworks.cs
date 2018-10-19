@@ -14,9 +14,9 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Build.Tests
 {
-    public class GiventThatWeManifestSupportedFrameworks : SdkTest
+    public class GivenThatWeManifestSupportedFrameworks : SdkTest
     {
-        public GiventThatWeManifestSupportedFrameworks(ITestOutputHelper log) : base(log)
+        public GivenThatWeManifestSupportedFrameworks(ITestOutputHelper log) : base(log)
         {
         }
 
@@ -60,7 +60,10 @@ namespace Microsoft.NET.Build.Tests
             string maximumVersion = getMaximumVersion.GetValues().Single();
             List<string> supportedFrameworks = getSupportedFrameworks.GetValues();
 
-            supportedFrameworks.Should().Contain($"{targetFrameworkIdentifier},Version=v{maximumVersion}");
+            string expectedTFM = $"{targetFrameworkIdentifier},Version=v{maximumVersion}";
+
+            supportedFrameworks.Should().Contain(expectedTFM,
+                because: $"Microsoft.NET.SupportedTargetFrameworks.targets should include an entry for {expectedTFM}");
         }
     }
 }

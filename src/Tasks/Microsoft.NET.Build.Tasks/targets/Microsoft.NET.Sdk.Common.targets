@@ -30,12 +30,16 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <!--
      Some versions of Microsoft.NET.Test.Sdk.targets change the OutputType after we've set _IsExecutable and
-     HasRuntimeOutput default in Microsfot.NET.Sdk.BeforeCommon.targets. Refresh these value here for backwards
+     HasRuntimeOutput default in Microsoft.NET.Sdk.BeforeCommon.targets. Refresh these value here for backwards
      compatibilty with that.
    -->
   <PropertyGroup>
     <_IsExecutable Condition="'$(OutputType)' == 'Exe' or '$(OutputType)'=='WinExe'">true</_IsExecutable>
     <HasRuntimeOutput Condition="'$(_UsingDefaultForHasRuntimeOutput)' == 'true'">$(_IsExecutable)</HasRuntimeOutput>
+
+    <!-- Only use the default apphost if building without a RID and without a deps file path (used by GenerateDeps.proj for CLI tools). -->
+    <DefaultAppHostRuntimeIdentifier Condition="'$(DefaultAppHostRuntimeIdentifier)' == '' and '$(RuntimeIdentifier)' == '' and '$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true' and '$(ProjectDepsFilePath)' == ''">$(NETCoreSdkRuntimeIdentifier)</DefaultAppHostRuntimeIdentifier>
+    <RuntimeIdentifiers Condition="'$(DefaultAppHostRuntimeIdentifier)' != ''">$(RuntimeIdentifiers);$(DefaultAppHostRuntimeIdentifier)</RuntimeIdentifiers>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(DotnetCliToolTargetFramework)' == '' And '$(BundledNETCoreAppTargetFrameworkVersion)' != ''">

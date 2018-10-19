@@ -139,7 +139,7 @@ public static class Program
             publishDirectory.Should().HaveFile($"Hello.World{Constants.ExeSuffix}");
         }
 
-        //Note: Pre Netcoreapp2.0 stanalone activation uses renamed dotnet.exe
+        //Note: Pre Netcoreapp2.0 standalone activation uses renamed dotnet.exe
         //      While Post 2.0 we are shifting to using apphost.exe, so both publish needs to be validated
         [Fact]
         public void Publish_standalone_post_netcoreapp2_app_and_it_should_run()

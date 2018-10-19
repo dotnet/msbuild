@@ -26,6 +26,6 @@
     
   </ItemGroup>
 
-  <Import Project="..\Directory.Build.targets" />
+  <Import Project="..\..\Directory.Build.targets" />
 
 </Project>

@@ -29,9 +29,11 @@ namespace Microsoft.NET.Publish.Tests
         [InlineData(null, "netcoreapp2.1")]
         [InlineData("true", "netcoreapp2.1")]
         [InlineData("false", "netcoreapp2.1")]
-        [InlineData(null, "netcoreapp2.2")]
-        [InlineData("true", "netcoreapp2.2")]
-        [InlineData("false", "netcoreapp2.2")]
+        //  Tests disabled in master branch since it can't currently target 2.2, because that's also under development
+        //  (https://github.com/dotnet/cli/issues/10125)
+        //[InlineData(null, "netcoreapp2.2")]
+        //[InlineData("true", "netcoreapp2.2")]
+        //[InlineData("false", "netcoreapp2.2")]
         public void It_publishes_with_or_without_apphost(string useAppHost, string targetFramework)
         {
             var runtimeIdentifier = RuntimeEnvironment.GetRuntimeIdentifier();
@@ -93,25 +95,6 @@ namespace Microsoft.NET.Publish.Tests
                     .And
                     .HaveStdOutContaining("Hello World!");
             }
-        }
-
-        [Fact]
-        public void It_errors_when_using_app_host_without_rid()
-        {
-            var testAsset = _testAssetsManager
-                .CopyTestAsset(TestProjectName)
-                .WithSource();
-
-            var publishCommand = new PublishCommand(Log, testAsset.TestRoot);
-            publishCommand
-                .Execute(
-                    "/p:SelfContained=false",
-                    "/p:UseAppHost=true",
-                    "/p:TargetFramework=netcoreapp2.2")
-                .Should()
-                .Fail()
-                .And
-                .HaveStdOutContaining(Strings.CannotUseAppHostWithoutRuntimeIdentifier);
         }
 
         [Fact]

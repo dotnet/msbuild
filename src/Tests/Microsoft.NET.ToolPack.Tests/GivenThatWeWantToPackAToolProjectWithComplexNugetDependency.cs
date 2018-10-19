@@ -34,7 +34,7 @@ namespace Microsoft.NET.ToolPack.Tests
                                         .WithSource()
                                         .WithProjectChanges(project =>
                                         {
-                                            ChangeToPackageThatDependesOnOtherPackage(project);
+                                            ChangeToPackageThatDependsOnOtherPackage(project);
 
                                             XNamespace ns = project.Root.Name.Namespace;
                                             XElement propertyGroup = project.Root.Elements(ns + "PropertyGroup").First();
@@ -75,7 +75,7 @@ namespace Microsoft.NET.ToolPack.Tests
             }
         }
 
-        private static void ChangeToPackageThatDependesOnOtherPackage(XDocument project)
+        private static void ChangeToPackageThatDependsOnOtherPackage(XDocument project)
         {
             XNamespace ns = project.Root.Name.Namespace;
             XElement itemGroup = project.Root.Elements(ns + "ItemGroup").First();

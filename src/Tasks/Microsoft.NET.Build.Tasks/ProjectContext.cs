@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Build.Framework;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using System;
@@ -12,6 +13,20 @@ namespace Microsoft.NET.Build.Tasks
 {
     internal class ProjectContext
     {
+        public class RuntimeFramework
+        {
+            public string Name { get; set; }
+            public string Version { get; set; }
+
+            public RuntimeFramework() { }
+
+            public RuntimeFramework(ITaskItem item)
+            {
+                Name = item.ItemSpec;
+                Version = item.GetMetadata(MetadataKeys.Version);
+            }
+        }
+
         private readonly LockFile _lockFile;
         private readonly LockFileTarget _lockFileTarget;
         internal HashSet<PackageIdentity> PackagesToBeFiltered { get; set; }
@@ -33,22 +48,31 @@ namespace Microsoft.NET.Build.Tasks
 
         public LockFileTargetLibrary PlatformLibrary { get; }
 
+        public RuntimeFramework [] RuntimeFrameworks { get; }
+
         public LockFile LockFile => _lockFile;
         public LockFileTarget LockFileTarget => _lockFileTarget;
 
-        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget, LockFileTargetLibrary platformLibrary, bool isFrameworkDependent)
+        public ProjectContext(LockFile lockFile, LockFileTarget lockFileTarget,
+            //  Trimmed from publish output, and if there are no runtimeFrameworks, written to runtimeconfig.json
+            LockFileTargetLibrary platformLibrary,
+            //  Written to runtimeconfig.json
+            RuntimeFramework[] runtimeFrameworks,
+            bool isFrameworkDependent)
         {
             Debug.Assert(lockFile != null);
             Debug.Assert(lockFileTarget != null);
             if (isFrameworkDependent)
             {
-                Debug.Assert(platformLibrary != null);
+                Debug.Assert(platformLibrary != null || 
+                    (runtimeFrameworks != null && runtimeFrameworks.Any()));
             }
 
             _lockFile = lockFile;
             _lockFileTarget = lockFileTarget;
 
             PlatformLibrary = platformLibrary;
+            RuntimeFrameworks = runtimeFrameworks;
             IsFrameworkDependent = isFrameworkDependent;
         }
 
@@ -62,7 +86,10 @@ namespace Microsoft.NET.Build.Tasks
 
             if (IsFrameworkDependent)
             {
-                allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(PlatformLibrary, libraryLookup));
+                if (PlatformLibrary != null)
+                {
+                    allExclusionList.UnionWith(_lockFileTarget.GetPlatformExclusionList(PlatformLibrary, libraryLookup));
+                }
             }
 
             if (excludeFromPublishPackageIds?.Any() == true)
