@@ -88,4 +88,5 @@
       Projects="@(ExtensionRestore)">
     </MSBuild>
   </Target>
+
 </Project>
