@@ -340,7 +340,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         private void LoadGraph(ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate, ProjectCollection projectCollection, ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress)
         {
-            var waitHandle = new AutoResetEvent(false);
+            var evaluationWaitHandle = new AutoResetEvent(false);
             while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
             {
                 ConfigurationMetadata projectToEvaluate;
@@ -371,6 +371,7 @@ namespace Microsoft.Build.Graph
                                 if (!_allParsedProjects.ContainsKey(projectReferenceConfigurationMetadata))
                                 {
                                     projectsToEvaluate.Enqueue(projectReferenceConfigurationMetadata);
+                                    evaluationWaitHandle.Set();
                                 }
                             }
                         }
@@ -383,7 +384,7 @@ namespace Microsoft.Build.Graph
                         task.ContinueWith(_ =>
                         {
                             tasksInProgress.TryRemove(projectToEvaluate, out var _);
-                            waitHandle.Set();
+                            evaluationWaitHandle.Set();
                         });
                         task.Start();
                     }
@@ -392,7 +393,7 @@ namespace Microsoft.Build.Graph
                 {
                     // if projectsToEvaluate is empty but there are tasks in progress, there is nothing to do till a task completes and discovers new projects
                     // wait till a task completes and sends a signal
-                    waitHandle.WaitOne();
+                    evaluationWaitHandle.WaitOne();
                 }
             }
         }
