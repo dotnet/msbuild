@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1844,7 +1844,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ReadStateFile()
         {
-            _cache = (SystemState)StateFileBase.DeserializeCache(_stateFile, Log, typeof(SystemState));
+            _cache = SystemState.DeserializeCache(_stateFile, Log);
 
             // Construct the cache if necessary.
             if (_cache == null)
