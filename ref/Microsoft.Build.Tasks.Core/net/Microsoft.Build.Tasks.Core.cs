@@ -932,6 +932,7 @@ namespace Microsoft.Build.Tasks
         public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
         public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
         public override bool Execute() { throw null; }
+        public static void InitializeSerializers() { }
     }
     public sealed partial class ResolveCodeAnalysisRuleSet : Microsoft.Build.Tasks.TaskExtension
     {
