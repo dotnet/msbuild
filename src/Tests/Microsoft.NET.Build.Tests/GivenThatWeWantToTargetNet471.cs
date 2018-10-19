@@ -462,5 +462,95 @@ public static class NS16LibClass
 
 
         }
+
+        //  Regression test for https://github.com/dotnet/sdk/issues/2479
+        [FullMSBuildOnlyFact]
+        public void HttpClient_can_be_used_in_project_references()
+        {
+            var referencedProject = new TestProject()
+            {
+                Name = "ReferencedHttpClientProject",
+                IsExe = false,
+                IsSdkProject = false,
+                TargetFrameworkVersion = "v4.7.1"
+            };
+            referencedProject.PackageReferences.Add(new TestPackageReference("dotless.Core", "1.6.4"));
+            referencedProject.PackageReferences.Add(new TestPackageReference("Microsoft.Owin.Security.Facebook", "4.0.0"));
+
+            referencedProject.SourceFiles["FacebookHandler.cs"] = @"
+using System;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
+public class FacebookHandler : HttpClientHandler
+{
+	protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+	{
+        return await base.SendAsync(request, cancellationToken);
+    }
+}";
+
+            var testProject = new TestProject()
+            {
+                Name = "Net471HttpClientTest",
+                IsExe = true,
+                IsSdkProject = false,
+                TargetFrameworkVersion = "v4.7.1"
+            };
+
+            testProject.AdditionalProperties["RestoreProjectStyle"] = "PackageReference";
+
+            testProject.ReferencedProjects.Add(referencedProject);
+            testProject.SourceFiles["Program.cs"] = @"
+using Microsoft.Owin.Security.Facebook;
+using Owin;
+
+public class Startup
+{
+    public static void Main(string [] args)
+    {
+    }
+
+    public void Configuration(IAppBuilder app)
+    {
+        var facebookOptions = new FacebookAuthenticationOptions
+        {
+            BackchannelHttpHandler = new FacebookHandler()
+        };
+    }
+}
+";
+
+            var testAsset = _testAssetsManager.CreateTestProject(testProject)
+                .WithProjectChanges((projectPath, project) =>
+                {
+                    if (Path.GetFileNameWithoutExtension(projectPath) == testProject.Name)
+                    {
+                        var ns = project.Root.Name.Namespace;
+
+                        //  Add target which helped trigger the error case.  A target like this was provided as
+                        //  a workaround to a different issue: https://github.com/dotnet/sdk/pull/1582#issuecomment-329571228
+                        var reproTarget = XElement.Parse(@"
+  <Target Name=""AddAdditionalReference"" AfterTargets=""ImplicitlyExpandNETStandardFacades"">
+    <ItemGroup>
+      <Reference Include = ""@(_NETStandardLibraryNETFrameworkLib)"" Condition = ""'%(FileName)' == 'system.net.http'"">
+        <Private>true</Private>
+      </Reference>
+    </ItemGroup>
+  </Target> ");
+                        foreach (var element in reproTarget.DescendantsAndSelf())
+                        {
+                            element.Name = ns + element.Name.LocalName;
+                        }
+                        project.Root.Add(reproTarget);
+                    }
+                })
+                .Restore(Log, testProject.Name);
+
+            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot, testProject.Name));
+
+            buildCommand.Execute().Should().Pass();
+        }
     }
 }

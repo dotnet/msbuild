@@ -235,6 +235,25 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void ItemsWithNoWinnerWillBeUnresolvedIfAnotherItemLoses()
+        {
+            int[] versions = new[]
+            {
+                3,
+                3,
+                2
+            };
+
+            var items = versions.Select(v => new MockConflictItem() { FileVersion = new Version(v, 0, 0, 0) })
+                .ToArray();
+
+            var result = GetConflicts(items);
+
+            result.Conflicts.Should().BeEquivalentTo(new[] { items[2] });
+            result.UnresolvedConflicts.Should().BeEquivalentTo(new[] { items[0], items[1] });
+        }
+
+        [Fact]
         public void WhenItemsConflictAndBothArePlatformItemsTheConflictCannotBeResolved()
         {
             var item1 = new MockConflictItem() { ItemType = ConflictItemType.Platform };
