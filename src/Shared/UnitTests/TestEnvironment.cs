@@ -365,13 +365,17 @@ namespace Microsoft.Build.UnitTests
             AssertDictionaryInclusion(_initialEnvironment, environment, "added");
             AssertDictionaryInclusion(environment, _initialEnvironment, "removed");
 
-            // a includes b
-            void AssertDictionaryInclusion(IDictionary a, IDictionary b, string operation)
+            void AssertDictionaryInclusion(IDictionary superset, IDictionary subset, string operation)
             {
-                foreach (var key in b.Keys)
+                foreach (var key in subset.Keys)
                 {
-                    a.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
-                    a[key].ShouldBe(b[key]);
+                    // workaround for https://github.com/Microsoft/msbuild/pull/3866
+                    // if the initial environment had empty keys, then MSBuild will accidentally remove them via Environment.SetEnvironmentVariable
+                    if (operation != "removed" || !string.IsNullOrEmpty((string) subset[key]))
+                    {
+                        superset.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
+                        superset[key].ShouldBe(subset[key]);
+                    }
                 }
             }
         }
