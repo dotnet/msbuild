@@ -97,12 +97,12 @@ Copyright (c) .NET Foundation. All rights reserved.
   <ItemGroup>
     <!-- Set implicit metadata on ASP.NET package references -->
     <PackageReference Update="Microsoft.AspNetCore.App">
-      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">true</PrivateAssets>
+      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
       <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
     </PackageReference>
   
     <PackageReference Update="Microsoft.AspNetCore.All">
-      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">true</PrivateAssets>
+      <PrivateAssets Condition="'%(PackageReference.Version)' == ''">all</PrivateAssets>
       <Publish Condition="'%(PackageReference.Version)' == ''">true</Publish>
     </PackageReference>
   
