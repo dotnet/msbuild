@@ -34,6 +34,7 @@ using Microsoft.VisualStudio.Profiler;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
+using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.BackEnd
 {

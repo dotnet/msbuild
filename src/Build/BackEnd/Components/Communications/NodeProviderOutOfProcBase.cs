@@ -17,9 +17,10 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using DotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 
 namespace Microsoft.Build.BackEnd
 {
