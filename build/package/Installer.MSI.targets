@@ -181,10 +181,10 @@
                       '$(SdkInstallerNuspecFile)' ^
                       '$(SdkInstallerNupkgFile)'" />
 
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
-                      '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(SuffixedNugetVersion)'
-                      '$(SdkInstallerNuspec21File)'
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
+                      '$(CombinedFrameworkSdkHostInstallerFile)' ^
+                      '$(SuffixedNugetVersion)' ^
+                      '$(SdkInstallerNuspec21File)' ^
                       '$(SdkInstallerNupkg21File)'" />
     </Target>
 
