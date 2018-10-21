@@ -3,33 +3,9 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 #
 
-FROM microsoft/dotnet-buildtools-prereqs:opensuse-42.3-d46ee12-20180327014902
+FROM microsoft/dotnet-buildtools-prereqs:opensuse-42.3-c103199-20180628122439
 
-# Install the base toolchain we need to build anything (clang, cmake, make and the like)
-# this does not include libraries that we need to compile different projects, we'd like
-# them in a different layer.
-RUN zypper -n install binutils \
-              cmake \
-              which \
-              gcc \
-              llvm-clang \
-              tar \
-              ncurses-utils \
-              curl \
-              git \
-              sudo && \
-    zypper clean -a
-
-# Dependencies of CoreCLR and CoreFX.
-
-RUN zypper -n install --force-resolution \
-                      libunwind \
-                      libicu \
-                      lttng-ust \
-                      libuuid1 \
-                      libopenssl1_0_0 \
-                      libcurl4 \
-                      krb5 && \
+RUN zypper -n install sudo && \
     zypper clean -a
 
 # Setup User to match Host User, and give superuser permissions
