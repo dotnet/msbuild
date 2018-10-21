@@ -8,7 +8,7 @@ $restore = if (Test-Path variable:restore) { $restore } else { $true }
 $verbosity = if (Test-Path variable:verbosity) { $verbosity } else { "minimal" }
 $warnaserror = if (Test-Path variable:warnaserror) { $warnaserror } else { $true }
 $msbuildEngine = if (Test-Path variable:msbuildEngine) { $msbuildEngine } else { $null }
-$useInstalledDotNetCli = if (Test-Path variable:useInstalledCli) { $useInstalledCli } else { $true }
+$useInstalledDotNetCli = if (Test-Path variable:useInstalledDotNetCli) { $useInstalledDotNetCli } else { $true }
 
 set-strictmode -version 2.0
 $ErrorActionPreference = "Stop"
