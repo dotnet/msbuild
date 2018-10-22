@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
@@ -13,9 +14,9 @@ using Xunit;
 namespace Microsoft.NET.Build.Tasks.UnitTests
 {
     /// <summary>
-    /// Tests that PublishAssembliesResolver resolves assemblies correctly.
+    /// Tests that AssetsFileResolver resolves files correctly.
     /// </summary>
-    public class GivenAPublishAssembliesResolver
+    public class GivenAnAssetsFileResolver
     {
         [Theory]
         [MemberData(nameof(ProjectData))]
@@ -29,7 +30,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 runtimeFrameworks: null,
                 isSelfContained: false);
 
-            IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())
+            IEnumerable<ResolvedFile> resolvedFiles = new AssetsFileResolver(new MockPackageResolver())
                 .Resolve(projectContext);
 
             resolvedFiles
@@ -49,7 +50,7 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
                 runtimeFrameworks: null,
                 isSelfContained: false);
 
-            IEnumerable<ResolvedFile> resolvedFiles = new PublishAssembliesResolver(new MockPackageResolver())
+            IEnumerable<ResolvedFile> resolvedFiles = new AssetsFileResolver(new MockPackageResolver())
                 .WithPreserveStoreLayout(true)
                 .Resolve(projectContext);
 
@@ -189,7 +190,13 @@ namespace Microsoft.NET.Build.Tasks.UnitTests
 
             string sourcepath = Path.Combine(packageDirectory, filePath);
             string sourcedir = Path.GetDirectoryName(sourcepath);
-            string destinationSubDirPath = preserveStoreLayout ? sourcedir.Substring(packageRoot.Length): destinationSubDirectory;
+            string destinationSubDirPath = preserveStoreLayout ? sourcedir.Substring(packageRoot.Length) : destinationSubDirectory;
+
+            if (!String.IsNullOrEmpty(destinationSubDirPath) && !destinationSubDirPath.EndsWith(Path.DirectorySeparatorChar))
+            {
+                destinationSubDirPath += Path.DirectorySeparatorChar;
+            }
+
             return new ResolvedFile(
                 sourcepath,
                 destinationSubDirPath,

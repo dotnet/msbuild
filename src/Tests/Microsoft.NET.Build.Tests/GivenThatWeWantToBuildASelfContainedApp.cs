@@ -60,6 +60,10 @@ namespace Microsoft.NET.Build.Tests
                 $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
             });
 
+            outputDirectory.Should().NotHaveFiles(new[] {
+                $"apphost{Constants.ExeSuffix}",
+            });
+
             Command.Create(selfContainedExecutableFullPath, new string[] { })
                 .CaptureStdOut()
                 .Execute()

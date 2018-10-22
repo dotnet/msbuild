@@ -47,6 +47,10 @@ namespace Microsoft.NET.Publish.Tests
                 $"{FileConstants.DynamicLibPrefix}hostpolicy{FileConstants.DynamicLibSuffix}",
             });
 
+            publishDirectory.Should().NotHaveFiles(new[] {
+                $"apphost{Constants.ExeSuffix}",
+            });
+
             Command.Create(Path.Combine(publishDirectory.FullName, selfContainedExecutable), new string[] { })
                 .CaptureStdOut()
                 .Execute()

@@ -10,23 +10,23 @@ using NuGet.Packaging.Core;
 
 namespace Microsoft.NET.Build.Tasks
 {
-    internal class PublishAssembliesResolver
+    internal class AssetsFileResolver
     {
         private readonly IPackageResolver _packageResolver;
-        private IEnumerable<string> _excludeFromPublishPackageIds;
+        private IEnumerable<string> _excludedPackageIds;
         private bool _preserveStoreLayout;
 
-        public PublishAssembliesResolver(IPackageResolver packageResolver)
+        public AssetsFileResolver(IPackageResolver packageResolver)
         {
             _packageResolver = packageResolver;
         }
 
-        public PublishAssembliesResolver WithExcludeFromPublish(IEnumerable<string> excludeFromPublishPackageIds)
+        public AssetsFileResolver WithExcludedPackages(IEnumerable<string> excludedPackageIds)
         {
-            _excludeFromPublishPackageIds = excludeFromPublishPackageIds;
+            _excludedPackageIds = excludedPackageIds;
             return this;
         }
-        public PublishAssembliesResolver WithPreserveStoreLayout(bool preserveStoreLayout)
+        public AssetsFileResolver WithPreserveStoreLayout(bool preserveStoreLayout)
         {
             _preserveStoreLayout = preserveStoreLayout;
             return this;
@@ -35,7 +35,7 @@ namespace Microsoft.NET.Build.Tasks
         {
             List<ResolvedFile> results = new List<ResolvedFile>();
 
-            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_excludeFromPublishPackageIds))
+            foreach (LockFileTargetLibrary targetLibrary in projectContext.GetRuntimeLibraries(_excludedPackageIds))
             {
                 if (!targetLibrary.IsPackage())
                 {
@@ -78,12 +78,10 @@ namespace Microsoft.NET.Build.Tasks
                         locale = null;
                     }
 
-                    locale = GetDestinationSubDirectory(sourcePath, pkgRoot, locale);
-
                     results.Add(
                         new ResolvedFile(
                             sourcePath: sourcePath,
-                            destinationSubDirectory: locale,
+                            destinationSubDirectory: GetDestinationSubDirectory(sourcePath, pkgRoot, locale),
                             package: targetLibraryPackage,
                             assetType: AssetType.Resources));
                 }
@@ -110,24 +108,30 @@ namespace Microsoft.NET.Build.Tasks
         {
             if (!string.IsNullOrEmpty(runtimeTarget.Runtime))
             {
-                return Path.GetDirectoryName(runtimeTarget.Path);
+                return Path.GetDirectoryName(runtimeTarget.Path) + Path.DirectorySeparatorChar;
             }
 
             return null;
         }
 
-        private string GetDestinationSubDirectory(string libraryPath, string pkgRoot, string destpath = null)
+        private string GetDestinationSubDirectory(string libraryPath, string pkgRoot, string destPath = null)
         {
             if (_preserveStoreLayout && pkgRoot != null)
             {
-                if (! libraryPath.StartsWith(pkgRoot))
+                if (!libraryPath.StartsWith(pkgRoot))
                 {
                     throw new BuildErrorException(Strings.IncorrectPackageRoot, pkgRoot, libraryPath);
                 }
 
-                destpath = Path.GetDirectoryName(libraryPath.Substring(pkgRoot.Length));
+                destPath = Path.GetDirectoryName(libraryPath.Substring(pkgRoot.Length));
             }
-            return destpath;
+
+            if (destPath != null && destPath[destPath.Length - 1] != Path.DirectorySeparatorChar)
+            {
+                destPath += Path.DirectorySeparatorChar;
+            }
+
+            return destPath;
         }
     }
 }
