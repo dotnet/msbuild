@@ -17,7 +17,7 @@
     <MicrosoftNETCoreAppPackageVersion>2.2.0-preview3-27014-02</MicrosoftNETCoreAppPackageVersion>
     <!-- https://github.com/dotnet/cli/issues/9851  -->
     <MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>3.0.0-preview1-26816-04</MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>
-    <MicrosoftBuildPackageVersion>15.9.0-preview-000008</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>15.9.19</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
