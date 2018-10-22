@@ -87,58 +87,29 @@ namespace Microsoft.DotNet.Tools.Tool.Update
 
             IShellShimRepository shellShimRepository = _createShellShimRepository(toolPath);
 
-            IToolPackage oldPackage;
-            try
-            {
-                oldPackage = toolPackageStoreQuery.EnumeratePackageVersions(_packageId).SingleOrDefault();
-                if (oldPackage == null)
-                {
-                    throw new GracefulException(
-                        messages: new[]
-                        {
-                            string.Format(
-                                LocalizableStrings.ToolNotInstalled,
-                                _packageId),
-                        },
-                        isUserError: false);
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                throw new GracefulException(
-                    messages: new[]
-                    {
-                        string.Format(
-                            LocalizableStrings.ToolHasMultipleVersionsInstalled,
-                            _packageId),
-                    },
-                    isUserError: false);
-            }
-
-            FilePath? configFile = null;
-            if (_configFilePath != null)
-            {
-                configFile = new FilePath(_configFilePath);
-            }
+            IToolPackage oldPackageNullable = GetOldPackage(toolPackageStoreQuery);
 
             using (var scope = new TransactionScope(
                 TransactionScopeOption.Required,
                 TimeSpan.Zero))
             {
-                RunWithHandlingUninstallError(() =>
+                if (oldPackageNullable != null)
                 {
-                    foreach (RestoredCommand command in oldPackage.Commands)
+                    RunWithHandlingUninstallError(() =>
                     {
-                        shellShimRepository.RemoveShim(command.Name);
-                    }
+                        foreach (RestoredCommand command in oldPackageNullable.Commands)
+                        {
+                            shellShimRepository.RemoveShim(command.Name);
+                        }
 
-                    toolPackageUninstaller.Uninstall(oldPackage.PackageDirectory);
-                });
+                        toolPackageUninstaller.Uninstall(oldPackageNullable.PackageDirectory);
+                    });
+                }
 
                 RunWithHandlingInstallError(() =>
                 {
                     IToolPackage newInstalledPackage = toolPackageInstaller.InstallPackage(
-                        new PackageLocation(nugetConfig: configFile, additionalFeeds: _additionalFeeds),
+                        new PackageLocation(nugetConfig: GetConfigFile(), additionalFeeds: _additionalFeeds),
                         packageId: _packageId,
                         targetFramework: _framework,
                         verbosity: _verbosity);
@@ -148,7 +119,7 @@ namespace Microsoft.DotNet.Tools.Tool.Update
                         shellShimRepository.CreateShim(command.Executable, command.Name);
                     }
 
-                    PrintSuccessMessage(oldPackage, newInstalledPackage);
+                    PrintSuccessMessage(oldPackageNullable, newInstalledPackage);
                 });
 
                 scope.Complete();
@@ -227,9 +198,51 @@ namespace Microsoft.DotNet.Tools.Tool.Update
             }
         }
 
+        private FilePath? GetConfigFile()
+        {
+            FilePath? configFile = null;
+            if (_configFilePath != null)
+            {
+                configFile = new FilePath(_configFilePath);
+            }
+
+            return configFile;
+        }
+
+        private IToolPackage GetOldPackage(IToolPackageStoreQuery toolPackageStoreQuery)
+        {
+            IToolPackage oldPackageNullable;
+            try
+            {
+                oldPackageNullable = toolPackageStoreQuery.EnumeratePackageVersions(_packageId).SingleOrDefault();
+            }
+            catch (InvalidOperationException)
+            {
+                throw new GracefulException(
+                    messages: new[]
+                    {
+                        string.Format(
+                            LocalizableStrings.ToolHasMultipleVersionsInstalled,
+                            _packageId),
+                    },
+                    isUserError: false);
+            }
+
+            return oldPackageNullable;
+        }
+
         private void PrintSuccessMessage(IToolPackage oldPackage, IToolPackage newInstalledPackage)
         {
-            if (oldPackage.Version != newInstalledPackage.Version)
+            if (oldPackage == null)
+            {
+                _reporter.WriteLine(
+                    string.Format(
+                        Install.LocalizableStrings.InstallationSucceeded,
+                        string.Join(", ", newInstalledPackage.Commands.Select(c => c.Name)),
+                        newInstalledPackage.Id,
+                        newInstalledPackage.Version.ToNormalizedString()).Green());
+            }
+            else if (oldPackage.Version != newInstalledPackage.Version)
             {
                 _reporter.WriteLine(
                     string.Format(

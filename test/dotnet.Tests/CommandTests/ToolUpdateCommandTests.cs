@@ -69,7 +69,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenANonExistentPackageItErrors()
+        public void GivenANonFeedExistentPackageItErrors()
         {
             var packageId = "does.not.exist";
             var command = CreateUpdateCommand($"-g {packageId}");
@@ -78,9 +78,18 @@ namespace Microsoft.DotNet.Tests.Commands
 
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(
-                    string.Format(
-                        LocalizableStrings.ToolNotInstalled,
-                        packageId));
+                   Tools.Tool.Install.LocalizableStrings.ToolInstallationRestoreFailed);
+        }
+
+        [Fact]
+        public void GivenANonExistentPackageItInstallTheLatest()
+        {
+            var command = CreateUpdateCommand($"-g {_packageId}");
+
+            command.Execute();
+
+            _store.EnumeratePackageVersions(_packageId).Single().Version.ToFullString().Should()
+                .Be(HigherPackageVersion);
         }
 
         [Fact]
