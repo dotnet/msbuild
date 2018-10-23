@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -28,6 +29,45 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
+        [Fact]
+        public void ConstructWithSingleNodeWithProjectInstanceFactory()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1);
+
+                bool factoryCalled = false;
+                var projectGraph = new ProjectGraph(
+                    entryProject.Path,
+                    ProjectCollection.GlobalProjectCollection,
+                    (projectPath, globalProperties, projectCollection) =>
+                    {
+                        factoryCalled = true;
+                        return ProjectGraph.DefaultProjectInstanceFactory(
+                            projectPath,
+                            globalProperties,
+                            projectCollection);
+                    });
+                projectGraph.ProjectNodes.Count.ShouldBe(1);
+                projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
+                factoryCalled.ShouldBeTrue();
+            }
+        }
+
+        [Fact(Skip="Disabling for now as most recent exp/net472 break exception throwing on graph API. Bug #3871")]
+        public void ConstructWithProjectInstanceFactory_FactoryReturnsNull_Throws()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1);
+
+                Should.Throw<InvalidOperationException>(() => new ProjectGraph(
+                    entryProject.Path,
+                    ProjectCollection.GlobalProjectCollection,
+                    (projectPath, globalProperties, projectCollection) => null));
+            }
+        }
+        
         /// <summary>
         ///   1
         ///  / \
