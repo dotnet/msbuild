@@ -219,28 +219,52 @@ namespace Microsoft.Build.Graph
                 entryPointConfigurationMetadata.Add(configurationMetadata);
             }
 
-            LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress, projectInstanceFactory);
-            foreach (var configurationMetadata in entryPointConfigurationMetadata)
+            bool exceptionInLoading = false;
+            if (LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress, projectInstanceFactory, out List<Exception> exceptions))
             {
-                entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
-                if (!nodeStates.TryGetValue(_allParsedProjects[configurationMetadata], out var _))
+                foreach (var configurationMetadata in entryPointConfigurationMetadata)
                 {
-                    DetectCycles(_allParsedProjects[configurationMetadata], nodeStates, projectCollection, configurationMetadata.GlobalProperties);
+                    entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
+                    if (!nodeStates.TryGetValue(_allParsedProjects[configurationMetadata], out var _))
+                    {
+                        try
+                        {
+                            DetectCycles(_allParsedProjects[configurationMetadata], nodeStates, projectCollection, configurationMetadata.GlobalProperties);
+                        }
+                        catch (CircularDependencyException ex)
+                        {
+                            if (exceptions == null)
+                            {
+                                exceptions = new List<Exception>();
+                            }
+                            exceptions.Add(ex);
+                            exceptionInLoading = true;
+                        }
+                    }
                 }
+
+                var graphRoots = new List<ProjectGraphNode>(entryPointNodes.Count);
+                foreach (var entryPointNode in entryPointNodes)
+                {
+                    if (entryPointNode.ReferencingProjects.Count == 0)
+                    {
+                        graphRoots.Add(entryPointNode);
+                    }
+                }
+
+                EntryPointNodes = entryPointNodes.AsReadOnly();
+                ProjectNodes = _allParsedProjects.Values.ToList();
+                GraphRoots = graphRoots.AsReadOnly();
+            }
+            else
+            {
+                exceptionInLoading = true;
             }
 
-            var graphRoots = new List<ProjectGraphNode>(entryPointNodes.Count);
-            foreach(var entryPointNode in entryPointNodes)
+            if (exceptionInLoading)
             {
-                if (entryPointNode.ReferencingProjects.Count == 0)
-                {
-                    graphRoots.Add(entryPointNode);
-                }
+                throw new AggregateException(exceptions);
             }
-
-            EntryPointNodes = entryPointNodes.AsReadOnly();
-            ProjectNodes = _allParsedProjects.Values.ToList();
-            GraphRoots = graphRoots.AsReadOnly();
         }
 
         /// <summary>
@@ -414,13 +438,16 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Load a graph with root node at entryProjectFile
         /// Maintain a queue of projects to be processed and evaluate projects in parallel
+        /// Returns false if loading the graph is not successful 
         /// </summary>
-        private void LoadGraph(
+        private bool LoadGraph(
             ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate,
             ProjectCollection projectCollection,
             ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress,
-            ProjectInstanceFactoryFunc projectInstanceFactory)
+            ProjectInstanceFactoryFunc projectInstanceFactory,
+            out List<Exception> exceptions)
         {
+            var exceptionsInTasks = new ConcurrentBag<Exception>();
             var evaluationWaitHandle = new AutoResetEvent(false);
             while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
             {
@@ -464,6 +491,10 @@ namespace Microsoft.Build.Graph
                         // signal the wait handle to process new projects that have been discovered by this task or exit if all projects have been evaluated
                         task.ContinueWith(_ =>
                         {
+                            if (task.IsFaulted)
+                            {
+                                exceptionsInTasks.Add(task.Exception.InnerException);
+                            }
                             tasksInProgress.TryRemove(projectToEvaluate, out var _);
                             evaluationWaitHandle.Set();
                         });
@@ -477,6 +508,14 @@ namespace Microsoft.Build.Graph
                     evaluationWaitHandle.WaitOne();
                 }
             }
+            if(exceptionsInTasks.Count != 0)
+            {
+                exceptions = exceptionsInTasks.ToList();
+                return false;
+            }
+
+            exceptions = null;
+            return true;
         }
 
         private enum NodeState

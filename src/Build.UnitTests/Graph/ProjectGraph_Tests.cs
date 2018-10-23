@@ -161,7 +161,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 var proj3 = CreateProject(env, 3, new[] { 1 });
                 var projectsInCycle = new List<string>() {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
                 string expectedErrorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
+                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<CircularDependencyException>().Message.ShouldContain(expectedErrorMessage.ToString());
             }
         }
 
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
                 CreateProject(env, 2, new[] { 2 });
                 CreateProject(env, 3);
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
+                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<CircularDependencyException>();
             }
         }
 
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProject(env, 10);
                 var projectsInCycle = new List<string>(){proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
                 var errorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
-                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
+                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<CircularDependencyException>().Message.ShouldContain(errorMessage.ToString());
             }
         }
 
@@ -359,7 +359,7 @@ namespace Microsoft.Build.Graph.UnitTests
 </Project>");
                 CreateProject(env, 3);
 
-                Should.Throw<InvalidProjectFileException>(() => new ProjectGraph(entryProject.Path));
+                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<InvalidProjectFileException>();
             }
         }
 
