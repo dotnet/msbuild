@@ -49,7 +49,7 @@ namespace Microsoft.Build.Graph
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile)
-            : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), ProjectCollection.GlobalProjectCollection)
+            : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), ProjectCollection.GlobalProjectCollection, null)
         {
         }
 
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Graph
         /// <param name="entryProjectFiles">The project files to use as the entry points in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles)
-            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles), ProjectCollection.GlobalProjectCollection)
+            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles), ProjectCollection.GlobalProjectCollection, null)
         {
         }
 
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Graph
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile, ProjectCollection projectCollection)
-            : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), projectCollection)
+            : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), projectCollection, null)
         {
         }
 
@@ -81,7 +81,27 @@ namespace Microsoft.Build.Graph
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles, ProjectCollection projectCollection)
-            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles), projectCollection)
+            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles), projectCollection, null)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a graph starting from the given project file, evaluating with the global project collection and no global properties.
+        /// </summary>
+        /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
+        /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
+        /// <param name="projectInstanceFactory">
+        /// A delegate used for constructing a <see cref="ProjectInstance"/>, called for each
+        /// project created during graph creation. This value can be null, which uses
+        /// a default implementation that calls the ProjectInstance constructor. See the remarks
+        /// on the <see cref="ProjectInstanceFactoryFunc"/> for other scenarios.
+        /// </param>
+        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="System.InvalidOperationException">
+        /// If a null reference is returned from <paramref name="projectInstanceFactory"/>.
+        /// </exception>
+        public ProjectGraph(string entryProjectFile, ProjectCollection projectCollection, ProjectInstanceFactoryFunc projectInstanceFactory)
+            : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), projectCollection, projectInstanceFactory)
         {
         }
 
@@ -92,7 +112,7 @@ namespace Microsoft.Build.Graph
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case no global properties will be set.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile, IDictionary<string, string> globalProperties)
-            : this(new ProjectGraphEntryPoint(entryProjectFile, globalProperties).AsEnumerable(), ProjectCollection.GlobalProjectCollection)
+            : this(new ProjectGraphEntryPoint(entryProjectFile, globalProperties).AsEnumerable(), ProjectCollection.GlobalProjectCollection, null)
         {
         }
 
@@ -103,7 +123,7 @@ namespace Microsoft.Build.Graph
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case no global properties will be set.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles, IDictionary<string, string> globalProperties)
-            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles, globalProperties), ProjectCollection.GlobalProjectCollection)
+            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles, globalProperties), ProjectCollection.GlobalProjectCollection, null)
         {
         }
 
@@ -115,7 +135,7 @@ namespace Microsoft.Build.Graph
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(string entryProjectFile, IDictionary<string, string> globalProperties, ProjectCollection projectCollection)
-            : this(new ProjectGraphEntryPoint(entryProjectFile, globalProperties).AsEnumerable(), projectCollection)
+            : this(new ProjectGraphEntryPoint(entryProjectFile, globalProperties).AsEnumerable(), projectCollection, null)
         {
         }
 
@@ -127,7 +147,7 @@ namespace Microsoft.Build.Graph
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles, IDictionary<string, string> globalProperties, ProjectCollection projectCollection)
-            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles, globalProperties), projectCollection)
+            : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles, globalProperties), projectCollection, null)
         {
         }
 
@@ -137,7 +157,7 @@ namespace Microsoft.Build.Graph
         /// <param name="entryPoint">The entry point to use in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(ProjectGraphEntryPoint entryPoint)
-            : this(entryPoint.AsEnumerable(), ProjectCollection.GlobalProjectCollection)
+            : this(entryPoint.AsEnumerable(), ProjectCollection.GlobalProjectCollection, null)
         {
         }
 
@@ -147,7 +167,7 @@ namespace Microsoft.Build.Graph
         /// <param name="entryPoints">The entry points to use in constructing the graph</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(IEnumerable<ProjectGraphEntryPoint> entryPoints)
-            : this(entryPoints, ProjectCollection.GlobalProjectCollection)
+            : this(entryPoints, ProjectCollection.GlobalProjectCollection, null)
         {
         }
 
@@ -158,7 +178,7 @@ namespace Microsoft.Build.Graph
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
         public ProjectGraph(ProjectGraphEntryPoint entryPoint, ProjectCollection projectCollection)
-            : this(entryPoint.AsEnumerable(), projectCollection)
+            : this(entryPoint.AsEnumerable(), projectCollection, null)
         {
         }
 
@@ -167,10 +187,24 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <param name="entryPoints">The entry points to use in constructing the graph</param>
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
+        /// <param name="projectInstanceFactory">
+        /// A delegate used for constructing a <see cref="ProjectInstance"/>, called for each
+        /// project created during graph creation. This value can be null, which uses
+        /// a default implementation that calls the ProjectInstance constructor. See the remarks
+        /// on <see cref="ProjectInstanceFactoryFunc"/> for other scenarios.
+        /// </param>
         /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
-        public ProjectGraph(IEnumerable<ProjectGraphEntryPoint> entryPoints, ProjectCollection projectCollection)
+        /// <exception cref="System.InvalidOperationException">
+        /// If a null reference is returned from <paramref name="projectInstanceFactory"/>.
+        /// </exception>
+        public ProjectGraph(
+            IEnumerable<ProjectGraphEntryPoint> entryPoints,
+            ProjectCollection projectCollection,
+            ProjectInstanceFactoryFunc projectInstanceFactory)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+
+            projectInstanceFactory = projectInstanceFactory ?? DefaultProjectInstanceFactory;
 
             var nodeStates = new Dictionary<ProjectGraphNode, NodeState>();
             var entryPointNodes = new List<ProjectGraphNode>();
@@ -185,8 +219,8 @@ namespace Microsoft.Build.Graph
                 entryPointConfigurationMetadata.Add(configurationMetadata);
             }
 
-            LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress);
-            foreach(var configurationMetadata in entryPointConfigurationMetadata)
+            LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress, projectInstanceFactory);
+            foreach (var configurationMetadata in entryPointConfigurationMetadata)
             {
                 entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
                 if (!nodeStates.TryGetValue(_allParsedProjects[configurationMetadata], out var _))
@@ -316,17 +350,60 @@ namespace Microsoft.Build.Graph
             return targetLists;
         }
 
+        /// <summary>
+        /// A callback used for constructing a <see cref="ProjectInstance"/> for a specific
+        /// <see cref="ProjectGraphEntryPoint"/> instance.
+        /// </summary>
+        /// <param name="projectPath">The path to the project file to parse.</param>
+        /// <param name="globalProperties">The global properties to be used for creating the ProjectInstance.</param>
+        /// <param name="projectCollection">The <see cref="ProjectCollection"/> context for parsing.</param>
+        /// <returns>A <see cref="ProjectInstance"/> instance. This value must not be null.</returns>
+        /// <remarks>
+        /// The default version of this delegate used by ProjectGraph simply calls the
+        /// ProjectInstance constructor with information from the parameters. This delegate
+        /// is provided as a hook to allow scenarios like creating a <see cref="Project"/>
+        /// instance before converting it to a ProjectInstance for use by the ProjectGraph.
+        ///
+        /// The returned ProjectInstance will be stored and provided with the ProjectGraph.
+        /// If this callback chooses to generate an immutable ProjectInstance, e.g. by
+        /// using <see cref="Project.CreateProjectInstance()"/> with the flag
+        /// <see cref="ProjectInstanceSettings.Immutable"/>, the resulting ProjectGraph
+        /// nodes might not be buildable.
+        /// </remarks>
+        public delegate ProjectInstance ProjectInstanceFactoryFunc(
+            string projectPath,
+            Dictionary<string, string> globalProperties,
+            ProjectCollection projectCollection);
+
+        internal static ProjectInstance DefaultProjectInstanceFactory(
+            string projectPath,
+            Dictionary<string, string> globalProperties,
+            ProjectCollection projectCollection)
+        {
+            return new ProjectInstance(
+                projectPath,
+                globalProperties,
+                MSBuildConstants.CurrentToolsVersion,
+                projectCollection);
+        }
+
         private ProjectGraphNode CreateNewNode(
             ConfigurationMetadata configurationMetadata,
-            ProjectCollection projectCollection)
+            ProjectCollection projectCollection,
+            ProjectInstanceFactoryFunc projectInstanceFactory)
         {
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
-            var projectInstance = new ProjectInstance(
+
+            var projectInstance = projectInstanceFactory(
                 configurationMetadata.ProjectFullPath,
                 globalProperties,
-                configurationMetadata.ToolsVersion,
                 projectCollection);
+            if (projectInstance == null)
+            {
+                throw new InvalidOperationException(ResourceUtilities.GetResourceString("NullReferenceFromProjectInstanceFactory"));
+            }
+
             var graphNode = new ProjectGraphNode(
                 projectInstance,
                 globalProperties);
@@ -338,7 +415,11 @@ namespace Microsoft.Build.Graph
         /// Load a graph with root node at entryProjectFile
         /// Maintain a queue of projects to be processed and evaluate projects in parallel
         /// </summary>
-        private void LoadGraph(ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate, ProjectCollection projectCollection, ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress)
+        private void LoadGraph(
+            ConcurrentQueue<ConfigurationMetadata> projectsToEvaluate,
+            ProjectCollection projectCollection,
+            ConcurrentDictionary<ConfigurationMetadata, object> tasksInProgress,
+            ProjectInstanceFactoryFunc projectInstanceFactory)
         {
             var evaluationWaitHandle = new AutoResetEvent(false);
             while (projectsToEvaluate.Count != 0 || tasksInProgress.Count != 0)
@@ -349,7 +430,7 @@ namespace Microsoft.Build.Graph
                     projectToEvaluate = projectsToEvaluate.Dequeue();
                     var task = new Task(() =>
                     {
-                        ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection);
+                        ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory);
                         IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ProjectReferenceItemName);
                         foreach (var projectReferenceToParse in projectReferenceItems)
                         {

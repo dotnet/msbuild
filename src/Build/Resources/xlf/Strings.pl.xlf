@@ -50,7 +50,7 @@
         <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
         <target state="new">MSB4251: There is a circular dependency involving the following projects: {0}</target>
         <note>
-      {StrBegin="MSB4251:" This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
     </note>
       </trans-unit>
@@ -63,6 +63,14 @@
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Nie można zakończyć operacji, ponieważ metoda BeginBuild nie została jeszcze wywołana.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="new">MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
       </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>

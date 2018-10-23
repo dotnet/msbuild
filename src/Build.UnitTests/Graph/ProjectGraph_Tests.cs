@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -28,6 +29,45 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
+        [Fact]
+        public void ConstructWithSingleNodeWithProjectInstanceFactory()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1);
+
+                bool factoryCalled = false;
+                var projectGraph = new ProjectGraph(
+                    entryProject.Path,
+                    ProjectCollection.GlobalProjectCollection,
+                    (projectPath, globalProperties, projectCollection) =>
+                    {
+                        factoryCalled = true;
+                        return ProjectGraph.DefaultProjectInstanceFactory(
+                            projectPath,
+                            globalProperties,
+                            projectCollection);
+                    });
+                projectGraph.ProjectNodes.Count.ShouldBe(1);
+                projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
+                factoryCalled.ShouldBeTrue();
+            }
+        }
+
+        [Fact(Skip="Disabling for now as most recent exp/net472 break exception throwing on graph API. Bug #3871")]
+        public void ConstructWithProjectInstanceFactory_FactoryReturnsNull_Throws()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = CreateProject(env, 1);
+
+                Should.Throw<InvalidOperationException>(() => new ProjectGraph(
+                    entryProject.Path,
+                    ProjectCollection.GlobalProjectCollection,
+                    (projectPath, globalProperties, projectCollection) => null));
+            }
+        }
+        
         /// <summary>
         ///   1
         ///  / \
@@ -362,13 +402,13 @@ namespace Microsoft.Build.Graph.UnitTests
                 var entryPointNode1 = projectGraph.EntryPointNodes.First();
                 var entryPointNode2 = projectGraph.EntryPointNodes.Last();
 
-                // The entrypoints should not be the same node, but should point to the same project
+                // The entry points should not be the same node, but should point to the same project
                 entryPointNode1.ShouldNotBe(entryPointNode2);
                 entryPointNode1.ProjectInstance.FullPath.ShouldBe(entryPointNode2.ProjectInstance.FullPath);
                 entryPointNode1.GlobalProperties["Platform"].ShouldBe("x86");
                 entryPointNode2.GlobalProperties["Platform"].ShouldBe("x64");
 
-                // The entrypoints should not not have the same project reference, but should point to the same project reference file
+                // The entry points should not have the same project reference, but should point to the same project reference file
                 entryPointNode1.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode2.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode1.ProjectReferences.First().ShouldNotBe(entryPointNode2.ProjectReferences.First());
@@ -401,13 +441,13 @@ namespace Microsoft.Build.Graph.UnitTests
                 var entryPointNode1 = projectGraph.EntryPointNodes.First();
                 var entryPointNode2 = projectGraph.EntryPointNodes.Last();
 
-                // The entrypoints should not be the same node, but should point to the same project
+                // The entry points should not be the same node, but should point to the same project
                 entryPointNode1.ShouldNotBe(entryPointNode2);
                 entryPointNode1.ProjectInstance.FullPath.ShouldBe(entryPointNode2.ProjectInstance.FullPath);
                 entryPointNode1.GlobalProperties["Platform"].ShouldBe("x86");
                 entryPointNode2.GlobalProperties["Platform"].ShouldBe("x64");
 
-                // The entrypoints should have the same project reference since it's platform-agnostic
+                // The entry points should have the same project reference since they're platform-agnostic
                 entryPointNode1.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode2.ProjectReferences.Count.ShouldBe(1);
                 entryPointNode1.ProjectReferences.First().ShouldBe(entryPointNode2.ProjectReferences.First());
