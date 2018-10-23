@@ -1710,7 +1710,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="CircularDependencyInProjectGraph" UESanitized="false" Visibility="Public">
     <value>MSB4251: There is a circular dependency involving the following projects: {0}</value>
     <comment>
-      {StrBegin="MSB4251:" This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
       request a target to build itself (perhaps via a chain of other targets)
     </comment>
   </data>
