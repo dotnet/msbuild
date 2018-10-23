@@ -283,10 +283,10 @@ Copyright (c) .NET Foundation. All rights reserved.
      -->
   <UsingTask TaskName="CreateAppHost" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
   <Target Name="_CreateAppHost"
-          Inputs="@(IntermediateAssembly)"
+          Inputs="@(IntermediateAssembly);@(_NativeRestoredAppHostNETCore)"
           Outputs="@(_NativeAppHostNETCore)"
           DependsOnTargets="_GetAppHostPaths;CoreCompile"
-          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true'">
+          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and Exists('@(IntermediateAssembly)') and Exists('@(_NativeRestoredAppHostNETCore)')">
     <PropertyGroup>
       <_UseWindowsGraphicalUserInterface Condition="($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win'))) and '$(OutputType)'=='WinExe'">true</_UseWindowsGraphicalUserInterface>
     </PropertyGroup>
@@ -294,8 +294,7 @@ Copyright (c) .NET Foundation. All rights reserved.
                    AppHostDestinationPath="@(_NativeAppHostNETCore)"
                    AppBinaryName="$(AssemblyName)$(TargetExt)"
                    IntermediateAssembly="@(IntermediateAssembly->'%(FullPath)')"
-                   WindowsGraphicalUserInterface="$(_UseWindowsGraphicalUserInterface)"
-                   Condition="'@(_NativeRestoredAppHostNETCore)' != ''" />
+                   WindowsGraphicalUserInterface="$(_UseWindowsGraphicalUserInterface)" />
   </Target>
 
   <!--
