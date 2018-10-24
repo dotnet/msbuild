@@ -60,16 +60,14 @@ namespace Microsoft.Build.Tasks
                     return null;
                 }
 
-                var versionPayload = ExtractVersionPayload(frameworkName.Version);
+                VersionPayload versionPayload = ExtractVersionPayload(frameworkName.Version);
 
-                return frameworkName == null
-                    ? null
-                    : new FrameworkNamePayload
-                    {
-                        Version = versionPayload,
-                        Identifier = frameworkName.Identifier,
-                        Profile = frameworkName.Profile
-                    };
+                return new FrameworkNamePayload
+                {
+                    Version = versionPayload,
+                    Identifier = frameworkName.Identifier,
+                    Profile = frameworkName.Profile
+                };
             }
 
             private static AssemblyNameExtensionPayload[] ExtractDependenciesPayload(AssemblyNameExtension[] dependencies)

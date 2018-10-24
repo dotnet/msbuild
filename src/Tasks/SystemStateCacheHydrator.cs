@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks
                     return null;
                 }
 
-                var version = HydrateVersion(frameworkNamePayload.Version);
+                Version version = HydrateVersion(frameworkNamePayload.Version);
 
                 return new FrameworkName(frameworkNamePayload.Identifier, version, frameworkNamePayload.Profile);
             }
@@ -104,9 +104,9 @@ namespace Microsoft.Build.Tasks
 
                 var remappedFrom = new HashSet<AssemblyNameExtension>();
 
-                foreach (AssemblyNameExtensionPayload assemblyNameData in remappedFromPayload)
+                foreach (AssemblyNameExtensionPayload assemblyNamePayload in remappedFromPayload)
                 {
-                    AssemblyNameExtension assembly = HydrateAssembly(assemblyNameData);
+                    AssemblyNameExtension assembly = HydrateAssembly(assemblyNamePayload);
                     remappedFrom.Add(assembly);
                 }
 
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Tasks
 
                 Version version = HydrateVersion(asAssemblyNamePayload.Version);
                 CultureInfo cultureInfo = HydrateCultureInfo(asAssemblyNamePayload.CultureInfo);
-                StrongNameKeyPair keyPair = HydrateKeyPairData(asAssemblyNamePayload.KeyPair);
+                StrongNameKeyPair keyPair = HydrateKeyPair(asAssemblyNamePayload.KeyPair);
 
                 var asAssemblyName = new AssemblyName
                 {
@@ -158,12 +158,12 @@ namespace Microsoft.Build.Tasks
                 }
 
                 return new Version
-                    (
-                        versionPayload.Major,
-                        versionPayload.Minor,
-                        versionPayload.Build,
-                        versionPayload.Revision
-                    );
+                (
+                    versionPayload.Major,
+                    versionPayload.Minor,
+                    versionPayload.Build,
+                    versionPayload.Revision
+                );
             }
 
             private static CultureInfo HydrateCultureInfo(CultureInfoPayload infoPayload)
@@ -171,7 +171,7 @@ namespace Microsoft.Build.Tasks
                 return infoPayload == null ? null : new CultureInfo(infoPayload.LCID);
             }
 
-            private static StrongNameKeyPair HydrateKeyPairData(StrongNameKeyPairPayload keyPairPayload)
+            private static StrongNameKeyPair HydrateKeyPair(StrongNameKeyPairPayload keyPairPayload)
             {
                 return keyPairPayload == null ? null : new StrongNameKeyPair(keyPairPayload.PublicKey);
             }
