@@ -194,7 +194,7 @@ namespace Microsoft.Build.Graph
         /// </param>
         /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/>
         /// If a null reference is returned from <paramref name="projectInstanceFactory"/>, the InnerException contains <see cref="InvalidOperationException"/></exception>
-        /// <exception cref="CircularDependencyException"> If the evaluation is successful but the project graph contains a circular dependency</exception>
+        /// <exception cref="CircularDependencyException">If the evaluation is successful but the project graph contains a circular dependency</exception>
         public ProjectGraph(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
             ProjectCollection projectCollection,
