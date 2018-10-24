@@ -110,6 +110,8 @@ namespace Microsoft.Build.Shared
             hasProcessorArchitectureInFusionName = state.HasProcessorArchitectureInFusionName;
             immutable = state.Immutable;
             remappedFrom = state.RemappedFrom;
+
+            InitializeRemappedFrom();
         }
 
         /// <summary>
