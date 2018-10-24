@@ -54,17 +54,17 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact(Skip="Disabling for now as most recent exp/net472 break exception throwing on graph API. Bug #3871")]
+        [Fact]
         public void ConstructWithProjectInstanceFactory_FactoryReturnsNull_Throws()
         {
             using (var env = TestEnvironment.Create())
             {
                 TransientTestFile entryProject = CreateProject(env, 1);
 
-                Should.Throw<InvalidOperationException>(() => new ProjectGraph(
+                Should.Throw<AggregateException>(() => new ProjectGraph(
                     entryProject.Path,
                     ProjectCollection.GlobalProjectCollection,
-                    (projectPath, globalProperties, projectCollection) => null));
+                    (projectPath, globalProperties, projectCollection) => null)).InnerException.ShouldBeOfType<InvalidOperationException>();
             }
         }
         
@@ -359,7 +359,7 @@ namespace Microsoft.Build.Graph.UnitTests
 </Project>");
                 CreateProject(env, 3);
 
-                Should.Throw<InvalidProjectFileException>(() => new ProjectGraph(entryProject.Path));
+                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<InvalidProjectFileException>();
             }
         }
 
