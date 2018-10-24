@@ -51,7 +51,8 @@ namespace Microsoft.Build.Tasks
                     return null;
                 }
 
-                var version = new Version(frameworkNamePayload.Version);
+                var version = HydrateVersion(frameworkNamePayload.Version);
+
                 return new FrameworkName(frameworkNamePayload.Identifier, version, frameworkNamePayload.Profile);
             }
 
@@ -143,9 +144,20 @@ namespace Microsoft.Build.Tasks
 
             private static Version HydrateVersion(VersionPayload versionPayload)
             {
-                return versionPayload == null
-                    ? null
-                    : new Version
+                if (versionPayload == null)
+                {
+                    return null;
+                }
+                if (versionPayload.Build < 0 && versionPayload.Revision < 0)
+                {
+                    return new Version(versionPayload.Major, versionPayload.Minor);
+                }
+                if (versionPayload.Revision < 0)
+                {
+                    return new Version(versionPayload.Major, versionPayload.Minor, versionPayload.Build);
+                }
+
+                return new Version
                     (
                         versionPayload.Major,
                         versionPayload.Minor,

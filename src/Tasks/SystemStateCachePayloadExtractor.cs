@@ -55,11 +55,18 @@ namespace Microsoft.Build.Tasks
 
             private static FrameworkNamePayload ExtractFrameworkNamePayload(FrameworkName frameworkName)
             {
+                if (frameworkName == null)
+                {
+                    return null;
+                }
+
+                var versionPayload = ExtractVersionPayload(frameworkName.Version);
+
                 return frameworkName == null
                     ? null
                     : new FrameworkNamePayload
                     {
-                        Version = frameworkName.Version.ToString(),
+                        Version = versionPayload,
                         Identifier = frameworkName.Identifier,
                         Profile = frameworkName.Profile
                     };

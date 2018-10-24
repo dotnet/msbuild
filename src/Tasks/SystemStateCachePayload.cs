@@ -112,8 +112,8 @@ namespace Microsoft.Build.Tasks
         [Bond.Schema]
         private class FrameworkNamePayload
         {
-            [Bond.Id(0), Bond.Type(typeof(nullable<string>))]
-            internal string Version { get; set; }
+            [Bond.Id(0), Bond.Type(typeof(nullable<VersionPayload>))]
+            internal VersionPayload Version { get; set; }
 
             [Bond.Id(1), Bond.Type(typeof(nullable<string>))]
             internal string Identifier { get; set; }
@@ -134,16 +134,16 @@ namespace Microsoft.Build.Tasks
         private class VersionPayload
         {
             [Bond.Id(0)]
-            internal int Major;
+            internal int Major { get; set; }
 
             [Bond.Id(1)]
-            internal int Minor;
+            internal int Minor { get; set; }
 
             [Bond.Id(2)]
-            internal int Build;
+            internal int Build { get; set; }
 
             [Bond.Id(3)]
-            internal int Revision;
+            internal int Revision { get; set; }
         }
 
         [Bond.Schema]
