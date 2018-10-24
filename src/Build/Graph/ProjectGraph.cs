@@ -47,7 +47,7 @@ namespace Microsoft.Build.Graph
         /// Constructs a graph starting from the given project file, evaluating with the global project collection and no global properties.
         /// </summary>
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(string entryProjectFile)
             : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), ProjectCollection.GlobalProjectCollection, null)
         {
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Graph
         /// Constructs a graph starting from the given project files, evaluating with the global project collection and no global properties.
         /// </summary>
         /// <param name="entryProjectFiles">The project files to use as the entry points in constructing the graph</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles)
             : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles), ProjectCollection.GlobalProjectCollection, null)
         {
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(string entryProjectFile, ProjectCollection projectCollection)
             : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), projectCollection, null)
         {
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <param name="entryProjectFiles">The project files to use as the entry points in constructing the graph</param>
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles, ProjectCollection projectCollection)
             : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles), projectCollection, null)
         {
@@ -96,9 +96,8 @@ namespace Microsoft.Build.Graph
         /// a default implementation that calls the ProjectInstance constructor. See the remarks
         /// on the <see cref="ProjectInstanceFactoryFunc"/> for other scenarios.
         /// </param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
-        /// <exception cref="System.InvalidOperationException">
-        /// If a null reference is returned from <paramref name="projectInstanceFactory"/>.
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/>
+        /// If a null reference is returned from <paramref name="projectInstanceFactory"/>, the InnerException contains <see cref="InvalidOperationException"/></exception>
         /// </exception>
         public ProjectGraph(string entryProjectFile, ProjectCollection projectCollection, ProjectInstanceFactoryFunc projectInstanceFactory)
             : this(new ProjectGraphEntryPoint(entryProjectFile).AsEnumerable(), projectCollection, projectInstanceFactory)
@@ -110,7 +109,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case no global properties will be set.</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(string entryProjectFile, IDictionary<string, string> globalProperties)
             : this(new ProjectGraphEntryPoint(entryProjectFile, globalProperties).AsEnumerable(), ProjectCollection.GlobalProjectCollection, null)
         {
@@ -121,7 +120,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <param name="entryProjectFiles">The project files to use as the entry points in constructing the graph</param>
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case no global properties will be set.</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles, IDictionary<string, string> globalProperties)
             : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles, globalProperties), ProjectCollection.GlobalProjectCollection, null)
         {
@@ -133,7 +132,7 @@ namespace Microsoft.Build.Graph
         /// <param name="entryProjectFile">The project file to use as the entry point in constructing the graph</param>
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case no global properties will be set.</param>
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(string entryProjectFile, IDictionary<string, string> globalProperties, ProjectCollection projectCollection)
             : this(new ProjectGraphEntryPoint(entryProjectFile, globalProperties).AsEnumerable(), projectCollection, null)
         {
@@ -145,7 +144,7 @@ namespace Microsoft.Build.Graph
         /// <param name="entryProjectFiles">The project files to use as the entry points in constructing the graph</param>
         /// <param name="globalProperties">The global properties to use for all projects. May be null, in which case no global properties will be set.</param>
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(IEnumerable<string> entryProjectFiles, IDictionary<string, string> globalProperties, ProjectCollection projectCollection)
             : this(ProjectGraphEntryPoint.CreateEnumerable(entryProjectFiles, globalProperties), projectCollection, null)
         {
@@ -155,7 +154,7 @@ namespace Microsoft.Build.Graph
         /// Constructs a graph starting from the given graph entry point, evaluating with the global project collection.
         /// </summary>
         /// <param name="entryPoint">The entry point to use in constructing the graph</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(ProjectGraphEntryPoint entryPoint)
             : this(entryPoint.AsEnumerable(), ProjectCollection.GlobalProjectCollection, null)
         {
@@ -165,7 +164,7 @@ namespace Microsoft.Build.Graph
         /// Constructs a graph starting from the given graph entry points, evaluating with the global project collection.
         /// </summary>
         /// <param name="entryPoints">The entry points to use in constructing the graph</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(IEnumerable<ProjectGraphEntryPoint> entryPoints)
             : this(entryPoints, ProjectCollection.GlobalProjectCollection, null)
         {
@@ -176,7 +175,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         /// <param name="entryPoint">The entry point to use in constructing the graph</param>
         /// <param name="projectCollection">The collection with which all projects in the graph should be associated. May not be null.</param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
+        /// <exception cref = "AggregateException" > If the evaluation of any project in the graph fails, the InnerException contains<see cref="InvalidProjectFileException"/></exception>
         public ProjectGraph(ProjectGraphEntryPoint entryPoint, ProjectCollection projectCollection)
             : this(entryPoint.AsEnumerable(), projectCollection, null)
         {
@@ -193,10 +192,9 @@ namespace Microsoft.Build.Graph
         /// a default implementation that calls the ProjectInstance constructor. See the remarks
         /// on <see cref="ProjectInstanceFactoryFunc"/> for other scenarios.
         /// </param>
-        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails. The InnerException contains <see cref="InvalidOperationException"/>.</exception>
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails, the InnerException contains <see cref="InvalidProjectFileException"/>
+        /// If a null reference is returned from <paramref name="projectInstanceFactory"/>, the InnerException contains <see cref="InvalidOperationException"/></exception>
         /// <exception cref="CircularDependencyException"> If the evaluation is successful but the project graph contains a circular dependency</exception>
-        /// If a null reference is returned from <paramref name="projectInstanceFactory"/>.
-        /// </exception>
         public ProjectGraph(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
             ProjectCollection projectCollection,
