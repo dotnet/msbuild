@@ -488,6 +488,7 @@ namespace Microsoft.Build.Graph
                     evaluationWaitHandle.WaitOne();
                 }
             }
+            
             if(exceptionsInTasks.Count != 0)
             {
                 exceptions = exceptionsInTasks.ToList();
