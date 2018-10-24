@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>ArgumentForwardingTests</AssemblyName>
-    <OutputType>Exe</OutputType>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
   </PropertyGroup>
 
@@ -19,7 +18,7 @@
 
   <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
 
-    <Exec Command="$(PreviousStageDotnet) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
+    <Exec Command="$(_DotNetRoot)/dotnet publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
   </Target>
 
 </Project>

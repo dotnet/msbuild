@@ -209,6 +209,7 @@ namespace Microsoft.DotNet.Tests
             commandFile.Should().Be("projectpathtestcommand1.exe");
         }
 
+        [Fact]
         public void It_wraps_command_with_CMD_EXE_when_command_has_CMD_Extension_and_using_WindowsExePreferredCommandSpecFactory()
         {
             var environment = new EnvironmentProvider(new[] { ".cmd" });
