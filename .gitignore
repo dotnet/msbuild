@@ -41,7 +41,7 @@ Library/
 cmake/
 
 # stage0 install directory
-.dotnet_stage0
+.dotnet/
 
 # build tools directory
 build_tools

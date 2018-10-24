@@ -10,7 +10,6 @@ build\sdks\sdks.csproj
 build\templates\templates.csproj
 build\test\RunTest.proj
 build_projects\Microsoft.DotNet.Cli.Build.SelfTest\InvokeWithStage2.proj
-build_projects\update-dependencies\update-dependencies.csproj
 tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
 -->
@@ -37,6 +36,12 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
   </PropertyGroup>
 
+   <PropertyGroup>
+    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
   <Import Project="build/BranchInfo.props" />
   <Import Project="build/AzureInfo.props" />
 
@@ -60,7 +65,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <Import Project="build/BuildDefaults.props" />
     <Import Project="build/SetupPreviousStage.props" />
 
-    <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>
   
 </Project>

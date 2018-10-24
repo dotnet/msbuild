@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             // Verify
             String[] trxFiles = Directory.GetFiles(trxLoggerDirectory, "*.trx");
-            Assert.Equal(1, trxFiles.Length);
+            Assert.Single(trxFiles);
             result.StdOut.Should().Contain(trxFiles[0]);
 
             // Cleanup trxLoggerDirectory if it exist
@@ -404,7 +404,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify coverage file.
             DirectoryInfo d = new DirectoryInfo(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
-            Assert.Equal(1, coverageFileInfos.Length);
+            Assert.Single(coverageFileInfos);
 
             result.ExitCode.Should().Be(1);
         }
@@ -438,7 +438,7 @@ namespace Microsoft.DotNet.Cli.Test.Tests
             // Verify coverage file.
             DirectoryInfo d = new DirectoryInfo(resultsDirectory);
             FileInfo[] coverageFileInfos = d.GetFiles("*.coverage", SearchOption.AllDirectories);
-            Assert.Equal(1, coverageFileInfos.Length);
+            Assert.Single(coverageFileInfos);
 
             result.ExitCode.Should().Be(1);
         }

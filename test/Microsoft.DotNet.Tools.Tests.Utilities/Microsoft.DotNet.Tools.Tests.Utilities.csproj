@@ -3,7 +3,7 @@
     <Description>Microsoft.DotNet.Tools.Tests.Utilities Class Library</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Microsoft.DotNet.Tools.Tests.Utilities</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
