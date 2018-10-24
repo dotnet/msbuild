@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
-
   <!-- Repo Version Information -->
   <PropertyGroup>
     <VersionPrefix>3.0.100</VersionPrefix>
     <PreReleaseVersionLabel>preview1</PreReleaseVersionLabel>
   </PropertyGroup>
-
   <!-- Production Dependencies -->
   <PropertyGroup>
     <MicrosoftBuildFrameworkVersion>15.4.8</MicrosoftBuildFrameworkVersion>
@@ -26,12 +23,10 @@
     <SystemDiagnosticsFileVersionInfoVersion>4.0.0</SystemDiagnosticsFileVersionInfoVersion>
     <SystemReflectionMetadataVersion>1.5.0</SystemReflectionMetadataVersion>
   </PropertyGroup>
-
   <!-- Get .NET Framework reference assemblies from NuGet packages -->
   <PropertyGroup>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
   </PropertyGroup>
-
   <!-- Test Dependencies -->
   <PropertyGroup>
     <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
@@ -39,7 +34,6 @@
     <MicrosoftDotNetCliUtilsVersion>2.0.0</MicrosoftDotNetCliUtilsVersion>
     <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
   </PropertyGroup>
-
   <PropertyGroup>
     <RestoreSources>
       $(RestoreSources);
