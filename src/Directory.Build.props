@@ -86,4 +86,10 @@
     <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Use IBC optimization data if available -->
+    <IbcOptimizationDataDir Condition="$(Optimize) == 'true'">$(NuGetPackageRoot)\RoslynDependencies.ProjectSystem.OptimizationData\$(RoslynDependenciesProjectSystemOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
+
+  </PropertyGroup>
+
 </Project>

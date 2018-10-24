@@ -47,6 +47,10 @@
     </ItemGroup>
   </Target>
 
+  <ItemGroup>
+     <PackageReference Include="RoslynDependencies.ProjectSystem.OptimizationData" />
+  </ItemGroup>
+
   <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 
   <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.targets" />
