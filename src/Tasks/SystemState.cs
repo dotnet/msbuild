@@ -109,7 +109,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Class that holds the current file state.
         /// </summary>
-        [Serializable]
         private sealed class FileState
         {
             /// <summary>
@@ -235,17 +234,6 @@ namespace Microsoft.Build.Tasks
         )
         {
             redistList = RedistList.GetRedistList(installedAssemblyTableInfos);
-        }
-
-        /// <summary>
-        /// Serialize the contents of the class.
-        /// </summary>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(info, "info");
-
-            info.AddValue("fileState", instanceLocalFileStateCache);
         }
 
         /// <summary>

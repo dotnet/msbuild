@@ -70,8 +70,7 @@ namespace Microsoft.Build.Shared
     /// The assembly name is represented internally by an AssemblyName and a string, conversion
     /// between the two is done lazily on demand.
     /// </summary>
-    [Serializable]
-    internal sealed class AssemblyNameExtension : ISerializable, IEquatable<AssemblyNameExtension>
+    internal sealed class AssemblyNameExtension : IEquatable<AssemblyNameExtension>
     {
         private AssemblyName asAssemblyName = null;
         private string asString = null;
@@ -146,61 +145,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Ctor for deserializing from state file (binary serialization).
-        /// <remarks>This is required because AssemblyName is not Serializable on .NET Core.</remarks>
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
-        private AssemblyNameExtension(SerializationInfo info, StreamingContext context)
-        {
-            var hasAssemblyName = info.GetBoolean("hasAN");
-
-            if (hasAssemblyName)
-            {
-                var name = info.GetString("name");
-                var publicKey = (byte[]) info.GetValue("pk", typeof(byte[]));
-                var publicKeyToken = (byte[]) info.GetValue("pkt", typeof(byte[]));
-                var version = (Version)info.GetValue("ver", typeof(Version));
-                var flags = (AssemblyNameFlags) info.GetInt32("flags");
-                var processorArchitecture = (ProcessorArchitecture) info.GetInt32("cpuarch");
-
-                CultureInfo cultureInfo = null;
-                var hasCultureInfo = info.GetBoolean("hasCI");
-                if (hasCultureInfo)
-                {
-                    cultureInfo = new CultureInfo(info.GetInt32("ci"));
-                }
-
-                var hashAlgorithm = (System.Configuration.Assemblies.AssemblyHashAlgorithm) info.GetInt32("hashAlg");
-                var versionCompatibility = (AssemblyVersionCompatibility) info.GetInt32("verCompat");
-                var codeBase = info.GetString("codebase");
-                var keyPair = (StrongNameKeyPair) info.GetValue("keypair", typeof(StrongNameKeyPair));
-
-                asAssemblyName = new AssemblyName
-                {
-                    Name = name,
-                    Version = version,
-                    Flags = flags,
-                    ProcessorArchitecture = processorArchitecture,
-                    CultureInfo = cultureInfo,
-                    HashAlgorithm = hashAlgorithm,
-                    VersionCompatibility = versionCompatibility,
-                    CodeBase = codeBase,
-                    KeyPair = keyPair
-                };
-
-                asAssemblyName.SetPublicKey(publicKey);
-                asAssemblyName.SetPublicKeyToken(publicKeyToken);
-            }
-            
-            asString = info.GetString("asStr");
-            isSimpleName = info.GetBoolean("isSName");
-            hasProcessorArchitectureInFusionName = info.GetBoolean("hasCpuArch");
-            immutable = info.GetBoolean("immutable");
-            remappedFrom = (HashSet<AssemblyNameExtension>) info.GetValue("remapped", typeof(HashSet<AssemblyNameExtension>));
-        }
-
-        /// <summary>
         /// To be used as a delegate. Gets the AssemblyName of the given file.
         /// </summary>
         /// <param name="path"></param>
@@ -260,15 +204,6 @@ namespace Microsoft.Build.Shared
             }
 #endif
             return assemblyName == null ? null : new AssemblyNameExtension(assemblyName);
-        }
-
-        /// <summary>
-        /// Run after the object has been deserialized
-        /// </summary>
-        [OnDeserialized]
-        private void SetRemappedFromDefaultAfterSerialization(StreamingContext sc)
-        {
-            InitializeRemappedFrom();
         }
 
         /// <summary>
@@ -1001,36 +936,5 @@ namespace Microsoft.Build.Shared
                 Immutable = Immutable,
                 RemappedFrom = remappedFrom
             };
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("hasAN", asAssemblyName != null);
-            if (asAssemblyName != null)
-            {
-                info.AddValue("name", asAssemblyName.Name);
-                info.AddValue("pk", asAssemblyName.GetPublicKey());
-                info.AddValue("pkt", asAssemblyName.GetPublicKeyToken());
-                info.AddValue("ver", asAssemblyName.Version);
-                info.AddValue("flags", (int) asAssemblyName.Flags);
-                info.AddValue("cpuarch", (int) asAssemblyName.ProcessorArchitecture);
-
-                info.AddValue("hasCI", asAssemblyName.CultureInfo != null);
-                if (asAssemblyName.CultureInfo != null)
-                {
-                    info.AddValue("ci", asAssemblyName.CultureInfo.LCID);
-                }
-
-                info.AddValue("hashAlg", asAssemblyName.HashAlgorithm);
-                info.AddValue("verCompat", asAssemblyName.VersionCompatibility);
-                info.AddValue("codebase", asAssemblyName.CodeBase);
-                info.AddValue("keypair", asAssemblyName.KeyPair);
-            }
-
-            info.AddValue("asStr", asString);
-            info.AddValue("isSName", isSimpleName);
-            info.AddValue("hasCpuArch", hasProcessorArchitectureInFusionName);
-            info.AddValue("immutable", immutable);
-            info.AddValue("remapped", remappedFrom);
-        }
     }
 }
