@@ -193,8 +193,8 @@ namespace Microsoft.Build.Graph
         /// a default implementation that calls the ProjectInstance constructor. See the remarks
         /// on <see cref="ProjectInstanceFactoryFunc"/> for other scenarios.
         /// </param>
-        /// <exception cref="InvalidProjectFileException">If the evaluation of any project in the graph fails.</exception>
-        /// <exception cref="System.InvalidOperationException">
+        /// <exception cref="AggregateException">If the evaluation of any project in the graph fails. The InnerException contains <see cref="InvalidOperationException"/>.</exception>
+        /// <exception cref="CircularDependencyException"> If the evaluation is successful but the project graph contains a circular dependency</exception>
         /// If a null reference is returned from <paramref name="projectInstanceFactory"/>.
         /// </exception>
         public ProjectGraph(
@@ -219,7 +219,6 @@ namespace Microsoft.Build.Graph
                 entryPointConfigurationMetadata.Add(configurationMetadata);
             }
 
-            bool exceptionInLoading = false;
             if (LoadGraph(projectsToEvaluate, projectCollection, tasksInProgress, projectInstanceFactory, out List<Exception> exceptions))
             {
                 foreach (var configurationMetadata in entryPointConfigurationMetadata)
@@ -227,19 +226,7 @@ namespace Microsoft.Build.Graph
                     entryPointNodes.Add(_allParsedProjects[configurationMetadata]);
                     if (!nodeStates.TryGetValue(_allParsedProjects[configurationMetadata], out var _))
                     {
-                        try
-                        {
-                            DetectCycles(_allParsedProjects[configurationMetadata], nodeStates, projectCollection, configurationMetadata.GlobalProperties);
-                        }
-                        catch (CircularDependencyException ex)
-                        {
-                            if (exceptions == null)
-                            {
-                                exceptions = new List<Exception>();
-                            }
-                            exceptions.Add(ex);
-                            exceptionInLoading = true;
-                        }
+                        DetectCycles(_allParsedProjects[configurationMetadata], nodeStates, projectCollection, configurationMetadata.GlobalProperties);
                     }
                 }
 
@@ -257,11 +244,6 @@ namespace Microsoft.Build.Graph
                 GraphRoots = graphRoots.AsReadOnly();
             }
             else
-            {
-                exceptionInLoading = true;
-            }
-
-            if (exceptionInLoading)
             {
                 throw new AggregateException(exceptions);
             }

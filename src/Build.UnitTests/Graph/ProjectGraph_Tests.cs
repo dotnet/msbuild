@@ -54,17 +54,17 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact(Skip="Disabling for now as most recent exp/net472 break exception throwing on graph API. Bug #3871")]
+        [Fact]
         public void ConstructWithProjectInstanceFactory_FactoryReturnsNull_Throws()
         {
             using (var env = TestEnvironment.Create())
             {
                 TransientTestFile entryProject = CreateProject(env, 1);
 
-                Should.Throw<InvalidOperationException>(() => new ProjectGraph(
+                Should.Throw<AggregateException>(() => new ProjectGraph(
                     entryProject.Path,
                     ProjectCollection.GlobalProjectCollection,
-                    (projectPath, globalProperties, projectCollection) => null));
+                    (projectPath, globalProperties, projectCollection) => null)).InnerException.ShouldBeOfType<InvalidOperationException>();
             }
         }
         
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 var proj3 = CreateProject(env, 3, new[] { 1 });
                 var projectsInCycle = new List<string>() {entryProject.Path, proj3.Path, proj2.Path, entryProject.Path};
                 string expectedErrorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
-                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<CircularDependencyException>().Message.ShouldContain(expectedErrorMessage.ToString());
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(expectedErrorMessage.ToString());
             }
         }
 
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 TransientTestFile entryProject = CreateProject(env, 1, new[] { 2, 3 });
                 CreateProject(env, 2, new[] { 2 });
                 CreateProject(env, 3);
-                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<CircularDependencyException>();
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path));
             }
         }
 
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProject(env, 10);
                 var projectsInCycle = new List<string>(){proj2.Path, proj3.Path, proj7.Path, proj6.Path, proj2.Path };
                 var errorMessage = ProjectGraph.FormatCircularDependencyError(projectsInCycle);
-                Should.Throw<AggregateException>(() => new ProjectGraph(entryProject.Path)).InnerException.ShouldBeOfType<CircularDependencyException>().Message.ShouldContain(errorMessage.ToString());
+                Should.Throw<CircularDependencyException>(() => new ProjectGraph(entryProject.Path)).Message.ShouldContain(errorMessage.ToString());
             }
         }
 
