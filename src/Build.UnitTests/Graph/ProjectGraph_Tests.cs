@@ -247,7 +247,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 CreateProject(env, 3);
                 ProjectGraph graph = new ProjectGraph(entryProject.Path);
                 graph.ProjectNodes.Count.ShouldBe(3);
-                GetNodeForProject(graph, 3).GlobalProperties.First().Key.ShouldBe("A");
+                GetNodeForProject(graph, 3).GlobalProperties["A"].ShouldBe("B");
             }
         }
 
