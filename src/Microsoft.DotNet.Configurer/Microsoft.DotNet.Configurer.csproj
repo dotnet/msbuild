@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <Version>$(SdkVersion)</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
     <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
@@ -10,6 +9,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <Description>SLN file reader/writer</Description>
-    <Version>$(SdkVersion)</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
     <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

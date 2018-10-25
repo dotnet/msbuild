@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <Version>$(SdkVersion)</Version>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>dotnet</AssemblyName>
     <OutputType>Exe</OutputType>
@@ -12,6 +11,7 @@
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
     <PackageId>Microsoft.DotNet.Cli</PackageId>
     <UseAppHost>false</UseAppHost>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
@@ -78,7 +78,7 @@
     <PackageReference Include="Microsoft.TemplateEngine.Utils" Version="$(MicrosoftTemplateEngineUtilsPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
-    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(AspNetCoreVersion)" />
+    <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="commands\dotnet-migrate\xlf" />

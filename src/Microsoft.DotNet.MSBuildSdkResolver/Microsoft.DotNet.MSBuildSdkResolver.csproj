@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>$(SdkVersion)</Version>
     <TargetFrameworks>netstandard2.0;net46</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard2.0</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -12,6 +11,7 @@
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
     <PublishDir>$(SdkResolverOutputDirectory)</PublishDir>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

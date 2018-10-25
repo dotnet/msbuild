@@ -3,14 +3,13 @@
   <Import Project="$(RepoRoot)/build/MSBuildExtensions.targets" />
 
   <PropertyGroup>
-    <Version>$(SdkVersion)</Version>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <CopyBuildOutputToPublishDirectory>false</CopyBuildOutputToPublishDirectory>
     <AssetTargetFallback>dotnet5.4</AssetTargetFallback>
-    <PublishDir>$(CliOutputDirectory)</PublishDir>
     <PackageId>Microsoft.DotNet.Cli.Runtime</PackageId>
     <NoPackageAnalysis>true</NoPackageAnalysis>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,10 +29,10 @@
 
   <Target Name="PublishMSBuildExtensions"
           DependsOnTargets="GenerateMSBuildExtensions"
-          AfterTargets="Publish">
+          AfterTargets="Build">
     <ItemGroup>
       <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
-        <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(PublishDir)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
+        <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(OutputPath)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
         <PackagePath>%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
       </MSBuildExtensionsContent>
     </ItemGroup>
@@ -43,27 +42,27 @@
   </Target>
 
   <Target Name="PublishSdks"
-          AfterTargets="Publish">
+          AfterTargets="Build">
     <ItemGroup>
       <SdksToBundle Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
-          CLIBuildDll=$(CLIBuildDll);
+          _DotNetRoot=$(_DotNetRoot);
           NuGetPackagesDir=$(NuGetPackagesDir);
-          SdkLayoutDirectory=$(PublishDir)/Sdks/%(BundledSdk.Identity);
+          SdkLayoutDirectory=$(OutputPath)Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);
-          DependencyPackageVersion=%(BundledSdk.Version);
-          PreviousStageDirectory=$(PreviousStageDirectory)
+          DependencyPackageVersion=%(BundledSdk.Version)
         </Properties>
       </SdksToBundle>
     </ItemGroup>
 
     <MSBuild
       BuildInParallel="False"
-      Projects="@(SdksToBundle)">
+      Projects="@(SdksToBundle)"
+      >
     </MSBuild>
 
     <ItemGroup>
-      <SdksContent Include="$(PublishDir)/Sdks/**/*">
+      <SdksContent Include="$(OutputPath)/Sdks/**/*">
         <PackagePath>Sdks/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
       </SdksContent>
     </ItemGroup>
@@ -73,7 +72,7 @@
           AfterTargets="PublishMSBuildExtensions"
           Condition=" '$(OS)' != 'Windows_NT' ">
     
-    <Exec Command="find $(PublishDir) -type d -exec chmod 755 {} \;" />
-    <Exec Command="find $(PublishDir) -type f -exec chmod 644 {} \;" />
+    <Exec Command="find $(OutputPath) -type d -exec chmod 755 {} \;" />
+    <Exec Command="find $(OutputPath) -type f -exec chmod 644 {} \;" />
   </Target>
 </Project>

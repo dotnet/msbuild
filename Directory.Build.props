@@ -21,7 +21,7 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <OrchestratedPackageVersionsProps>$(GeneratedPropsDir)/OrchestratedPackageVersionsProps.props</OrchestratedPackageVersionsProps>
 
     <NuGetPackagesDir>$(NUGET_PACKAGES)</NuGetPackagesDir>
-    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot)/.nuget/packages</NuGetPackagesDir>
+    <NuGetPackagesDir Condition=" '$(NuGetPackagesDir)' == '' ">$(RepoRoot).nuget/packages</NuGetPackagesDir>
     <GeneratedNuGetConfig>$(RepoRoot)/NuGet.Config</GeneratedNuGetConfig>
 
     <RelativeCLIBuildBinaries>build_projects/dotnet-cli-build/bin</RelativeCLIBuildBinaries>
@@ -44,9 +44,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
   <Import Project="build/BranchInfo.props" />
   <Import Project="build/AzureInfo.props" />
-
-  <Import Project="build/DependencyVersions.props" />
-  <Import Project="build/Version.props" />
 
   <Import Project="build/Branding.props" />
 

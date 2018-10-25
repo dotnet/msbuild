@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <VersionPropsIsImported>true</VersionPropsIsImported>
   </PropertyGroup>
 
   <!-- Repo Version Information -->
@@ -14,31 +15,21 @@
 
   <!-- Production Dependencies -->
   <PropertyGroup>
-    <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview2-35157</MicrosoftAspNetCoreAllPackageVersion>
-    <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
+    <DotNetCoreSdkLKGVersion>3.0.100-preview-009722</DotNetCoreSdkLKGVersion>
 
-    <!-- https://github.com/dotnet/cli/issues/9851  -->
-    <MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>3.0.0-preview1-26816-04</MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly>
+    <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview3-35364</MicrosoftAspNetCoreAllPackageVersion>
+    <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
+    <MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion>
+
+    <MicrosoftNETCoreDotNetHostResolverPackageVersion>2.2.0-preview3-27001-02</MicrosoftNETCoreDotNetHostResolverPackageVersion>
     <MicrosoftBuildPackageVersion>15.9.0-preview-000008</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
-    <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftFSharpCompilerPackageVersion>10.2.3-rtm-180727-0</MicrosoftFSharpCompilerPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>2.9.0-beta8-63127-03</MicrosoftCodeAnalysisCSharpPackageVersion>
-    <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
-    <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
-    <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
-    <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
     <MicrosoftNETSdkPackageVersion>3.0.100-preview1-63312-01</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>3.0.0-alpha1-10062</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkWebPackageVersion>2.2.100-preview3-20180930-2076033</MicrosoftNETSdkWebPackageVersion>
-    <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
-    <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
-    <MicrosoftDotNetCommonItemTemplatesPackageVersion>1.0.2-beta4-20180930-2076037</MicrosoftDotNetCommonItemTemplatesPackageVersion>
-    <MicrosoftDotNetCommonProjectTemplates22PackageVersion>$(MicrosoftDotNetCommonItemTemplatesPackageVersion)</MicrosoftDotNetCommonProjectTemplates22PackageVersion>
-    <MicrosoftDotNetTestProjectTemplates22PackageVersion>1.0.2-beta4-20180821-1966911</MicrosoftDotNetTestProjectTemplates22PackageVersion>
+
     <MicrosoftTemplateEngineCliPackageVersion>1.0.2-beta4-20180930-2076037</MicrosoftTemplateEngineCliPackageVersion>
     <MicrosoftTemplateEngineAbstractionsPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineAbstractionsPackageVersion>
     <MicrosoftTemplateEngineCliLocalizationPackageVersion>$(MicrosoftTemplateEngineCliPackageVersion)</MicrosoftTemplateEngineCliLocalizationPackageVersion>
@@ -49,52 +40,29 @@
     <MicrosoftDotNetCliCommandLinePackageVersion>0.1.1</MicrosoftDotNetCliCommandLinePackageVersion>
     <MicrosoftDotNetProjectJsonMigrationPackageVersion>1.3.1</MicrosoftDotNetProjectJsonMigrationPackageVersion>
     <MicrosoftDotNetToolsMigrateCommandPackageVersion>$(MicrosoftDotNetProjectJsonMigrationPackageVersion)</MicrosoftDotNetToolsMigrateCommandPackageVersion>
-    <NuGetBuildTasksPackageVersion>4.9.0-preview3.5473</NuGetBuildTasksPackageVersion>
-    <NuGetBuildTasksPackPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksPackPackageVersion>
+    <NuGetBuildTasksPackageVersion>5.0.0-preview1.5495</NuGetBuildTasksPackageVersion>
     <NuGetCommonPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommonPackageVersion>
-    <NuGetCommandLineXPlatPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetCommandLineXPlatPackageVersion>
     <NuGetConfigurationPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetConfigurationPackageVersion>
     <NuGetFrameworksPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetFrameworksPackageVersion>
     <NuGetPackagingPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetPackagingPackageVersion>
     <NuGetProjectModelPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetProjectModelPackageVersion>
     <NuGetVersioningPackageVersion>$(NuGetBuildTasksPackageVersion)</NuGetVersioningPackageVersion>
-    <MicrosoftBuildNuGetSdkResolverPackageVersion>$(NuGetBuildTasksPackageVersion)</MicrosoftBuildNuGetSdkResolverPackageVersion>
     <MicrosoftNETTestSdkPackageVersion>15.9.0-preview-20180807-05</MicrosoftNETTestSdkPackageVersion>
-    <MicrosoftTestPlatformCLIPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformCLIPackageVersion>
-    <MicrosoftTestPlatformBuildPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</MicrosoftTestPlatformBuildPackageVersion>
     <MSTestVersion>1.3.2</MSTestVersion>
     <XUnitVersion>2.3.1</XUnitVersion>
     <NUnit3TemplatesVersion>1.5.1</NUnit3TemplatesVersion>
-  </PropertyGroup>
 
-  <!-- Test Dependencies -->
-  <PropertyGroup>
-    <FluentAssertionsVersion>4.19.2</FluentAssertionsVersion>
-    <FluentAssertionsJsonVersion>4.19.0</FluentAssertionsJsonVersion>
-    <MicrosoftDotNetCliUtilsVersion>2.0.0</MicrosoftDotNetCliUtilsVersion>
-    <MicrosoftNETTestSdkVersion>15.0.0</MicrosoftNETTestSdkVersion>
+    <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</CLI_NETStandardLibraryNETFrameworkVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <RestoreSources>
       $(RestoreSources);
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/packages/index.json;
-      https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
-      https://dotnet.myget.org/F/vstest/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnet.myget.org/F/aspnetcore-release/api/v3/index.json;
-      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://dotnet.myget.org/F/templating/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-web/api/v3/index.json;
-      https://dotnet.myget.org/f/roslyn/api/v3/index.json;
       https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
-      https://www.myget.org/F/container-tools-for-visual-studio/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180420-03/aspnet-inputs/index.json;
       https://dotnet.myget.org/F/msbuild/api/v3/index.json;
-      https://dotnet.myget.org/F/vstest/api/v3/index.json;
-      https://dotnetfeed.blob.core.windows.net/orchestrated-release-2-1/20180725-02/final/index.json
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      https://dotnet.myget.org/F/aspnetcore-dev/api/v3/index.json;
     </RestoreSources>
   </PropertyGroup>
 </Project>

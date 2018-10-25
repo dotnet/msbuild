@@ -51,5 +51,4 @@
   <Import Project="build/BuildAndPublishAllLinuxDistrosNativeInstallers.targets" />
   <Import Project="build/Package.targets" />
   <Import Project="build/Test.targets" />
-  <Import Project="build/Publish.targets" />
 </Project>

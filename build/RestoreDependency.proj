@@ -2,12 +2,6 @@
   <!-- workaround for https://github.com/Microsoft/msbuild/issues/885 -->
   <!-- renaming the property because the original property is a global property and therefore
        cannot be redefined at runtime. -->
-  <PropertyGroup>
-    <CLIBuildDllPath>$([MSBuild]::Unescape($(CLIBuildDll)))</CLIBuildDllPath>
-  </PropertyGroup>
-
-  <UsingTask TaskName="DotNetRestore" AssemblyFile="$(CLIBuildDllPath)" />
-
   <Target Name="CopySdkToOutput"
           DependsOnTargets="PrepareBundledDependencyProps;
                             EnsureDependencyRestored;
@@ -25,7 +19,8 @@
   <Target Name="GetSdkItemsToCopy">
     <ItemGroup>
       <SdkContent Include="$(DependencyNuPkgPath)/**/*" 
-                  Exclude="$(DependencyNuPkgPath)/$(DependencyPackageName).nuspec;
+                  Exclude="$(DependencyNuPkgPath)/.signature.p7s;
+                           $(DependencyNuPkgPath)/$(DependencyPackageName).nuspec;
                            $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg;
                            $(DependencyNuPkgPath)/$(DependencyPackageName).$(DependencyPackageVersion).nupkg.sha512" />
     </ItemGroup>
@@ -33,9 +28,7 @@
 
   <Target Name="EnsureDependencyRestored"
           Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')">
-    <DotNetRestore ToolPath="$(PreviousStageDirectory)"
-                   ProjectPath="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
-                   AdditionalParameters="/p:DependencyPackageName=$(DependencyPackageName) /p:DependencyPackageVersion=$(DependencyPackageVersion)" />
+    <Exec Command="$(_DotNetRoot)dotnet restore $(MSBuildThisFileDirectory)/sdks/sdks.csproj /p:RestorePackagesPath=$(NuGetPackagesDir) /p:DependencyPackageName=$(DependencyPackageName) /p:DependencyPackageVersion=$(DependencyPackageVersion)" />
   </Target>
 
   <Target Name="PrepareBundledDependencyProps">
