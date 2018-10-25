@@ -260,7 +260,7 @@ namespace Microsoft.NET.Build.Tests
                 .CopyTestAsset("HelloWorld")
                 .WithSource();
 
-            var buildCommand = new BuildCommand(Log, Path.Combine(testAsset.TestRoot));
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
             buildCommand
                 .Execute(new string[] {
                     "/restore",
