@@ -102,7 +102,7 @@ namespace Microsoft.Build.Tasks
                     return null;
                 }
 
-                var remappedFrom = new HashSet<AssemblyNameExtension>();
+                var remappedFrom = new HashSet<AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
 
                 foreach (AssemblyNameExtensionPayload assemblyNamePayload in remappedFromPayload)
                 {
