@@ -2609,6 +2609,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(@"c:\AppData\Local", localAppDataValue);
         }
 
+        [Fact]
+        public void ReservedMSBuildProperties()
+        {
+            ProjectRootElement xml = ProjectRootElement.Create();
+            xml.DefaultTargets = "Build";
+            Project project = new Project(xml);
+
+            Version.TryParse(project.GetPropertyValue("MSBuildAssemblyVersion"), out Version assemblyVersionAsVersion).ShouldBeTrue();
+
+            // This version has historically not incremented for patch releases
+            assemblyVersionAsVersion.Minor.ShouldBe(0);
+
+            // Version parses missing elements into -1, and this property should be Major.0 only
+            assemblyVersionAsVersion.Build.ShouldBe(-1);
+            assemblyVersionAsVersion.Revision.ShouldBe(-1);
+        }
+
         /// <summary>
         /// Test standard reserved properties
         /// </summary>
