@@ -24,6 +24,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -125,6 +126,8 @@ namespace Microsoft.Build.CommandLine
                 //  This forces the type to initialize in this static constructor and thus    //
                 //  any configuration file exceptions can be caught here.                     //
                 ////////////////////////////////////////////////////////////////////////////////
+                System.Threading.Tasks.Task.Run(() => ResolveAssemblyReference.InitializeSerializers());
+                
                 s_exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
 
                 s_initialized = true;
