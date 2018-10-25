@@ -1,6 +1,7 @@
 ﻿<Project Sdk="RoslynTools.RepoToolset">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
+  <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
