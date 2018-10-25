@@ -233,6 +233,25 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         [Fact]
+        public void TestGlobalPropertiesInProjectReferences()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile entryProject = env.CreateFile("1.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""2.proj"" AdditionalProperties=""A=B""/>
+  </ItemGroup>
+</Project>");
+                CreateProject(env, 2, new[] { 3 });
+                CreateProject(env, 3);
+                ProjectGraph graph = new ProjectGraph(entryProject.Path);
+                graph.ProjectNodes.Count.ShouldBe(3);
+                GetNodeForProject(graph, 3).GlobalProperties.First().Key.ShouldBe("A");
+            }
+        }
+
+        [Fact]
         public void ConstructWithConvergingProperties()
         {
             using (var env = TestEnvironment.Create())
