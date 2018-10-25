@@ -27,8 +27,10 @@
       <DotNetCoreSdkLKGPublishDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/SdkLKG))</DotNetCoreSdkLKGPublishDirectory>
       <NextStagePropsPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/PreviousStage.props))</NextStagePropsPath>
 
-      <_DotNetRoot>$(DOTNET_INSTALL_DIR)</_DotNetRoot>
-      <_DotNetRoot Condition="'$(_DotNetRoot)' == ''">$(RepoRoot).dotnet\</_DotNetRoot>
-      <_DotNetRoot Condition="!HasTrailingSlash('$(_DotNetRoot)')">$(_DotNetRoot)\</_DotNetRoot>
+      <_DotNetHiveRoot>$(DOTNET_INSTALL_DIR)</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet\</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)\</_DotNetHiveRoot>
+
+      <DotNetExe>$(_DotNetHiveRoot)dotnet$(ExeExtension)</DotNetExe>
   </PropertyGroup>
 </Project>

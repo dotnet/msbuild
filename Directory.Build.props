@@ -42,9 +42,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
-  <Import Project="build/BranchInfo.props" />
-  <Import Project="build/AzureInfo.props" />
-
   <Import Project="build/Branding.props" />
 
   <Import Project="build/FileExtensions.props" />
@@ -56,11 +53,9 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
   <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">
     <!-- These imports aren't required for signing, and some of them have syntax which isn't supported in MSBuild 14,
          which is what the signing build uses -->
-    <Import Project="build/BundledTools.props" />
     <Import Project="build/BundledSdks.props" />
 
     <Import Project="build/BuildDefaults.props" />
-    <Import Project="build/SetupPreviousStage.props" />
 
     <Import Project="build/GenerateResxSource.targets" />
   </ImportGroup>

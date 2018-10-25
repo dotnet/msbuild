@@ -46,7 +46,7 @@
     <ItemGroup>
       <SdksToBundle Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
-          _DotNetRoot=$(_DotNetRoot);
+          DotNetExe=$(DotNetExe);
           NuGetPackagesDir=$(NuGetPackagesDir);
           SdkLayoutDirectory=$(OutputPath)Sdks/%(BundledSdk.Identity);
           DependencyPackageName=%(BundledSdk.Identity);

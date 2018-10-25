@@ -72,7 +72,7 @@
 
       <ExtensionRestore Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
-          _DotNetRoot=$(_DotNetRoot);
+          DotNetExe=$(DotNetExe);
           NuGetPackagesDir=$(NuGetPackagesDir);
           DependencyPackageName=%(ExtensionPackageToRestore.Identity);
           DependencyPackageVersion=%(ExtensionPackageToRestore.Version);

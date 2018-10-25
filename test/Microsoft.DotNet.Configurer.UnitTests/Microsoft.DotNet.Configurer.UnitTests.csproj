@@ -22,7 +22,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Content Include="$(_DotNetRoot)\sdk\$(DotNetCoreSdkLKGVersion)\.version">
+    <Content Include="$(_DotNetHiveRoot)\sdk\$(DotNetCoreSdkLKGVersion)\.version">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

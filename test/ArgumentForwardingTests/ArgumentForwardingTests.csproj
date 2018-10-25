@@ -18,7 +18,7 @@
 
   <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
 
-    <Exec Command="$(_DotNetRoot)/dotnet publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
+    <Exec Command="$(DotNetExe) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
   </Target>
 
 </Project>

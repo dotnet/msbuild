@@ -12,12 +12,8 @@
                             GenerateMSBuildExtensions" />
 
   <Target Name="Package"
-          DependsOnTargets="BuildDotnetCliBuildFramework;
-                            Init;
-                            Layout;
-                            GenerateNugetPackages;
-                            GenerateArchives;
-                            GenerateInstallers" />
+          DependsOnTargets="Layout;
+                            GenerateArchives;" />
 
 
 
