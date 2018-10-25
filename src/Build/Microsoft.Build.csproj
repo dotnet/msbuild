@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.IO.Compression" />
