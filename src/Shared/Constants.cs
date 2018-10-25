@@ -73,6 +73,11 @@ namespace Microsoft.Build.Shared
         /// The most current VSGeneralAssemblyVersion known to this version of MSBuild.
         /// </summary>
         internal const string CurrentAssemblyVersion = "15.1.0.0";
+
+        /// <summary>
+        /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
+        /// </summary>
+        internal const string CurrentProductVersion = "16.0";
     }
 
     /// <summary>
