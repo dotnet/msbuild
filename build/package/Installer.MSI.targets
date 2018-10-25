@@ -177,14 +177,14 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
                       '$(CombinedFrameworkSdkHostInstallerFile)' ^
-                      '$(FullNugetVersion)' ^
+                      '$(SuffixedNugetVersion)' ^
                       '$(SdkInstallerNuspecFile)' ^
                       '$(SdkInstallerNupkgFile)'" />
 
-      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript)
-                      '$(CombinedFrameworkSdkHostInstallerFile)'
-                      '$(SuffixedNugetVersion)'
-                      '$(SdkInstallerNuspec21File)'
+      <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
+                      '$(CombinedFrameworkSdkHostInstallerFile)' ^
+                      '$(SuffixedNugetVersion)' ^
+                      '$(SdkInstallerNuspec21File)' ^
                       '$(SdkInstallerNupkg21File)'" />
     </Target>
 
@@ -198,7 +198,7 @@
 
       <Exec Command="powershell -NoProfile -NoLogo $(SdkGenerateNupkgPowershellScript) ^
                       '$(MSBuildExtensionsLayoutDirectory)' ^
-                      '$(FullNugetVersion)' ^
+                      '$(SuffixedNugetVersion)' ^
                       '$(SdkMSBuildExtensionsNuspecFile)' ^
                       '$(SdkMSBuildExtensionsNupkgFile)'" />
       
