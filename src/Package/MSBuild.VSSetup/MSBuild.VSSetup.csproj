@@ -48,6 +48,7 @@
   </Target>
 
   <ItemGroup>
+     <!-- This package needs to be restored _somewhere_ but it isn't used in this project. -->
      <PackageReference Include="RoslynDependencies.OptimizationData" />
   </ItemGroup>
 
