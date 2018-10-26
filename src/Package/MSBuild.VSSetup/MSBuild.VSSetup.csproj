@@ -48,7 +48,7 @@
   </Target>
 
   <ItemGroup>
-     <PackageReference Include="RoslynDependencies.ProjectSystem.OptimizationData" />
+     <PackageReference Include="RoslynDependencies.OptimizationData" />
   </ItemGroup>
 
   <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
