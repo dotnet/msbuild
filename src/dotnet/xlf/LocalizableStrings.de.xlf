@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="src/dotnet/LocalizableStrings.resx">
     <body>
@@ -50,7 +50,7 @@
       </trans-unit>
       <trans-unit id="Project">
         <source>Project</source>
-        <target state="translated">Projekt</target>
+        <target state="translated">Projekt </target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectFile">
@@ -130,7 +130,7 @@
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="translated">Löschen</target>
+        <target state="translated">löschen</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">
@@ -145,7 +145,7 @@
       </trans-unit>
       <trans-unit id="List">
         <source>List</source>
-        <target state="translated">Auflisten</target>
+        <target state="translated">Liste</target>
         <note />
       </trans-unit>
       <trans-unit id="Load">
@@ -275,7 +275,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneXFound">
         <source>More than one {0} found.</source>
-        <target state="translated">Es wurden mehrere Elemente vom Typ "{0}" gefunden.</target>
+        <target state="translated">Es wurden mehrere Elemente "{0}" gefunden.</target>
         <note />
       </trans-unit>
       <trans-unit id="XAlreadyContainsY">
@@ -310,7 +310,7 @@
       </trans-unit>
       <trans-unit id="SpecifyAtLeastOne">
         <source>Please specify at least one {0}.</source>
-        <target state="translated">Geben Sie mindestens ein Element vom Typ "{0}" an.</target>
+        <target state="translated">Geben Sie mindestens ein Element "{0}" an.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotConnectWithTheServer">
@@ -355,7 +355,7 @@
       </trans-unit>
       <trans-unit id="FoundInvalidProject">
         <source>Found a project `{0}` but it is invalid.</source>
-        <target state="translated">Ein Projekt vom Typ "{0}" wurde gefunden, ist aber ungültig.</target>
+        <target state="translated">Ein Projekt "{0}" wurde gefunden, ist aber ungültig.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProject">
@@ -420,7 +420,7 @@
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAReference">
         <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis vom Typ "{1}" vorhanden.</target>
+        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis "{1}" vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageReferenceDoesNotExist">
@@ -445,7 +445,7 @@
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAPackageReference">
         <source>Project {0} already has a reference `{1}`.</source>
-        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis vom Typ "{1}" vorhanden.</target>
+        <target state="translated">Für das Projekt "{0}" ist bereits ein Verweis "{1}" vorhanden.</target>
         <note />
       </trans-unit>
       <trans-unit id="PleaseSpecifyVersion">
@@ -555,7 +555,7 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Das Projekt "{1}" enthält keine Verweise vom Typ "{0}". ;; "{0}" ist die Art des angeforderten Elements (Projekt, Paket, P2P). "{1}" ist das Objekt, für das ein Vorgang ausgeführt wird (eine Projektdatei oder eine Projektmappendatei). </target>
+        <target state="translated">Das Projekt "{1}" enthält keine Verweise "{0}". ;; "{0}" ist die Art des angeforderten Elements (Projekt, Paket, P2P). "{1}" ist das Objekt, für das ein Vorgang ausgeführt wird (eine Projektdatei oder eine Projektmappendatei). </target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">

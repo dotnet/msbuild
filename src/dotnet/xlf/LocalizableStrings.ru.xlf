@@ -120,7 +120,7 @@
       </trans-unit>
       <trans-unit id="Add">
         <source>Add</source>
-        <target state="translated">Добавить</target>
+        <target state="translated">добавить</target>
         <note />
       </trans-unit>
       <trans-unit id="Remove">
@@ -130,7 +130,7 @@
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="translated">Удаление.</target>
+        <target state="translated">Удалить</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">
@@ -140,7 +140,7 @@
       </trans-unit>
       <trans-unit id="New">
         <source>New</source>
-        <target state="translated">Создать</target>
+        <target state="translated">Новое</target>
         <note />
       </trans-unit>
       <trans-unit id="List">
