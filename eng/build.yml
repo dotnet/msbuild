@@ -16,7 +16,6 @@ phases:
       _HelixType: build/product
       _HelixBuildConfig: $(_BuildConfig)
       _TeamName: DotNetCore
-
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
         _OfficialBuildIdArgs: ''
