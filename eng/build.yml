@@ -9,7 +9,6 @@ phases:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true
     enableMicrobuild: true
-    publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 
       ${{ insert }}: ${{ parameters.variables }}
@@ -17,12 +16,12 @@ phases:
       _HelixType: build/product
       _HelixBuildConfig: $(_BuildConfig)
       _TeamName: DotNetCore
-      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
         _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
         _OfficialBuildIdArgs: ''
         _PublishArgs: ''
         _SignArgs: ''
-      ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
         _HelixSource: official/dotnet/sdk/$(Build.SourceBranch)
         _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
         _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
@@ -34,7 +33,7 @@ phases:
         _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
     steps:
-    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
       - task: AzureKeyVault@1
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'

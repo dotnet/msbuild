@@ -3,11 +3,11 @@ trigger:
 
 variables:
   teamName: Roslyn-Project-System
-  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+  ${{ if eq(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedKey:
     PB_PublishBlobFeedUrl:
     _DotNetPublishToBlobFeed: false
-  ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+  ${{ if ne(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
     _DotNetPublishToBlobFeed: true
 
@@ -16,33 +16,33 @@ phases:
   parameters:
     agentOs: Windows_NT
     queue:
-      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-        name: Helix
-      ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
-        name: DotNetCore-Windows
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        name: dotnet-external-temp
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        name: dotnet-internal-temp
       parallel: 2
       timeoutInMinutes: 120
       matrix:
-        ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
           Build_Debug:
             _BuildConfig: Debug
             _PublishType: none
             _SignType: test
         Build_Release:
           _BuildConfig: Release
-          ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
             _PublishType: none
             _SignType: test
-          ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+          ${{ if ne(variables['System.TeamProject'], 'public') }}:
             _PublishType: blob
             _SignType: real
 
-- ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+- ${{ if eq(variables['System.TeamProject'], 'public') }}:
   - template: /eng/build.yml
     parameters:
       agentOs: Windows_NT_FullFramework
       queue:
-        name: DotNetCore-Windows
+        name: dotnet-external-temp
         parallel: 2
         timeoutInMinutes: 120
         matrix:
@@ -59,7 +59,7 @@ phases:
     parameters:
       agentOs: Ubuntu_14_04
       queue: 
-        name: DotNetCore-Linux
+        name: Hosted Ubuntu 1604
         parallel: 2
         timeoutInMinutes: 120
         matrix:
@@ -78,7 +78,7 @@ phases:
     parameters:
       agentOs: Ubuntu_16_04
       queue: 
-        name: DotNetCore-Linux
+        name: Hosted Ubuntu 1604
         parallel: 2
         timeoutInMinutes: 120
         matrix:
