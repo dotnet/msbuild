@@ -12,12 +12,29 @@ phases:
     queue: ${{ parameters.queue }}
     variables: 
       ${{ insert }}: ${{ parameters.variables }}
+      _AgentOSName: ${{ parameters.agentOs }}
       _HelixType: build/product
       _HelixBuildConfig: $(_BuildConfig)
+      _TeamName: DotNetCore
+
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
       ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: ''
+        _PublishArgs: ''
+        _SignArgs: ''
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
         _HelixSource: official/dotnet/sdk/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                  /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                  /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                  /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                  /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                  /p:PB_PublishType=$(_PublishType)
+        _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
     steps:
     - ${{ if ne(variables['System.TeamProject'], 'public') }}:
@@ -25,7 +42,7 @@ phases:
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'
           KeyVaultName: EngKeyVault
-          SecretsFilter: 'dotnetfeed-storage-access-key-1'
+          SecretsFilter: 'dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
         condition: succeeded()
       - task: AzureKeyVault@1
         inputs:
@@ -35,11 +52,11 @@ phases:
         condition: always()
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
-      - script: build\CIBuild.cmd
-                  -configuration %BuildConfig%
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
-                  /p:PB_PublishType=%PublishType%
+      - script: eng\common\CIBuild.cmd
+                  -configuration $(_BuildConfig)
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -47,12 +64,12 @@ phases:
           PublishType: $(_PublishType)
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT_FullFramework') }}:
-      - script: build\CIBuild.cmd 
-                  -configuration %BuildConfig%
-                  -fullMSBuild
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=%BlobFeedUrl%
-                  /p:PB_PublishType=%PublishType%
+      - script: eng\common\CIBuild.cmd 
+                  -configuration $(_BuildConfig)
+                  -msbuildEngine vs
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
@@ -60,46 +77,43 @@ phases:
           PublishType: $(_PublishType)
 
     - ${{ if notIn(parameters.agentOs, 'Windows_NT', 'Windows_NT_FullFramework') }}:
-      - script: build/cibuild.sh 
-                  --configuration $BuildConfig
-                  /p:PB_PublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                  /p:PB_PublishBlobFeedUrl=$BlobFeedUrl
-                  /p:PB_PublishType=$PublishType
+      - script: eng/common/cibuild.sh 
+                  --configuration $(_BuildConfig)
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           BuildConfig: $(_BuildConfig)
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
 
-    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      - task: PublishTestResults@1
-        displayName: Publish Test Results
-        inputs:
-          testRunner: XUnit
-          testResultsFiles: '**\*.xml'
-          searchFolder: '$(Build.SourcesDirectory)\artifacts\$(_BuildConfig)\TestResults'
-          testRunTitle: 'Unit Test Results'
-          platform: '$(BuildPlatform)'
-          configuration: '$(_BuildConfig)'
-        condition: and(succeededOrFailed(), ne(variables['PB_SkipTests'], 'true'))
+    - task: PublishTestResults@1
+      displayName: Publish Test Results
+      inputs:
+        testRunner: XUnit
+        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
+        testRunTitle: 'Unit Test Results'
+        platform: '$(BuildPlatform)'
+        configuration: '$(_BuildConfig)'
+      condition: not(succeeded())
 
-      - task: CopyFiles@2
-        displayName: Stage Build Artifacts
-        inputs:
-          SourceFolder: '$(Build.SourcesDirectory)'
-          Contents: |
-           artifacts\$(_BuildConfig)\bin\**\*
-           artifacts\$(_BuildConfig)\log\**\*
-           artifacts\$(_BuildConfig)\packages\**\*
-           artifacts\$(_BuildConfig)\TestResults\**\*
-          TargetFolder: '$(Build.ArtifactStagingDirectory)'
-        condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
+    - task: CopyFiles@2
+      displayName: Gather Logs
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: |
+         artifacts/log/$(_BuildConfig)/**/*
+         artifacts/TestResults/$(_BuildConfig)/**/*
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      continueOnError: true
+      condition: not(succeeded())
 
-      - task: PublishBuildArtifacts@1
-        displayName: Publish Build Artifacts
-        inputs:
-          PathtoPublish: '$(Build.ArtifactStagingDirectory)\artifacts\$(_BuildConfig)'
-          ArtifactName: '$(Build.BuildNumber)'
-          publishLocation: FilePath
-          TargetPath: '$(DropRoot)\$(TeamName)\$(Build.DefinitionName)'
-        condition: and(succeededOrFailed(), in(variables['_PublishType'], 'drop', 'blob'))
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Logs to VSTS
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(_AgentOSName)_$(Agent.JobName)_$(Build.BuildNumber)'
+        publishLocation: Container
+      continueOnError: true
+      condition: not(succeeded())

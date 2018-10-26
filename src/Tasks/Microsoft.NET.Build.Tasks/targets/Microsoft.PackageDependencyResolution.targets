@@ -197,6 +197,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <_PackAsToolShimRuntimeIdentifiers Include="$(PackAsToolShimRuntimeIdentifiers)"/>
+
+      <!-- Pass these packages into the ResolvePackageAssets task to verify that the restored versions of the packages
+           match the expected version -->
+      <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.NETCore.App'" />
+      <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.AspNetCore.App'" />
+      <ExpectedPlatformPackages Include="@(PackageReference)" Condition="'%(Identity)' == 'Microsoft.AspNetCore.All'" />
     </ItemGroup>
 
     <ResolvePackageAssets 
@@ -207,6 +213,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       EmitAssetsLogMessages="$(EmitAssetsLogMessages)"
       TargetFrameworkMoniker="$(NuGetTargetMoniker)"
       RuntimeIdentifier="$(RuntimeIdentifier)"
+      DefaultAppHostRuntimeIdentifier="$(DefaultAppHostRuntimeIdentifier)"
       MarkPackageReferencesAsExternallyResolved="$(MarkPackageReferencesAsExternallyResolved)"
       DisablePackageAssetsCache="$(DisablePackageAssetsCache)"
       DisableFrameworkAssemblies="$(DisableLockFileFrameworks)"

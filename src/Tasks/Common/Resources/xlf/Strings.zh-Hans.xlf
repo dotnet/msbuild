@@ -2,10 +2,30 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../Strings.resx">
     <body>
+      <trans-unit id="FailedToLockResource">
+        <source>NETSDK1077: Failed to lock resource.</source>
+        <target state="new">NETSDK1077: Failed to lock resource.</target>
+        <note>{StrBegin="NETSDK1077: "}</note>
+      </trans-unit>
+      <trans-unit id="AddResourceWithNonIntegerResource">
+        <source>NETSDK1076: AddResource can only be used with integer resource types.</source>
+        <target state="new">NETSDK1076: AddResource can only be used with integer resource types.</target>
+        <note>{StrBegin="NETSDK1076: "}</note>
+      </trans-unit>
+      <trans-unit id="InvalidResourceUpdate">
+        <source>NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</source>
+        <target state="new">NETSDK1075: Update handle is invalid. This instance may not be used for further updates.</target>
+        <note>{StrBegin="NETSDK1075: "}</note>
+      </trans-unit>
+      <trans-unit id="AppHostCustomizationRequiresWindowsHostWarning">
+        <source>NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows.</source>
+        <target state="new">NETSDK1074: The application host executable will not be customized because adding resources requires that the build be performed on Windows.</target>
+        <note>{StrBegin="NETSDK1074: "}</note>
+      </trans-unit>
       <trans-unit id="AppHostNotWindows">
-        <source>NETSDK1071: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
-        <target state="new">NETSDK1071: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>
-        <note>{StrBegin="NETSDK1071: "}</note>
+        <source>NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</source>
+        <target state="new">NETSDK1078: Unable to use '{0}' as application host executable because it's not a Windows PE file.</target>
+        <note>{StrBegin="NETSDK1078: "}</note>
       </trans-unit>
       <trans-unit id="AppHostNotWindowsCLI">
         <source>NETSDK1072: Unable to use '{0}' as application host executable because it's not a Windows executable for the CUI (Console) subsystem.</source>
@@ -21,11 +41,6 @@
         <source>NETSDK1001: At least one possible target framework must be specified.</source>
         <target state="translated">NETSDK1001: 必须指定至少一个可能的目标框架。</target>
         <note>{StrBegin="NETSDK1001: "}</note>
-      </trans-unit>
-      <trans-unit id="CannotUseAppHostWithoutRuntimeIdentifier">
-        <source>NETSDK1066: A RuntimeIdentifier must be specified to publish a framework-dependent application with an application host.</source>
-        <target state="translated">NETSDK1066: 必须指定一个 RuntimeIdentifier，以通过应用程序主机发布框架依赖型应用程序。</target>
-        <note>{StrBegin="NETSDK1066: "}</note>
       </trans-unit>
       <trans-unit id="CannotUseSelfContainedWithoutAppHost">
         <source>NETSDK1067: Self-contained applications are required to use the application host. Either set SelfContained to false or set UseAppHost to true.</source>
@@ -76,6 +91,11 @@
         <source>NETSDK1008: Missing '{0}' metadata on '{1}' item '{2}'.</source>
         <target state="translated">NETSDK1008: 在“{1}”项“{2}”上缺少“{0}”元数据。</target>
         <note>{StrBegin="NETSDK1008: "}</note>
+      </trans-unit>
+      <trans-unit id="PackageReferenceVersionNotRecommended">
+        <source>NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</source>
+        <target state="new">NETSDK1071: A PackageReference to '{0}' specified a Version of `{1}`. Specifying the version of this package is not recommended. For more information, see https://aka.ms/sdkimplicitrefs</target>
+        <note />
       </trans-unit>
       <trans-unit id="UnknownFrameworkReference">
         <source>NETSDK1073: The FrameworkReference '{0}' was not recognized</source>

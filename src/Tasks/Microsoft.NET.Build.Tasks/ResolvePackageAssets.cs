@@ -55,6 +55,11 @@ namespace Microsoft.NET.Build.Tasks
         public string RuntimeIdentifier { get; set; }
 
         /// <summary>
+        /// The runtime identifier for the default apphost.
+        /// </summary>
+        public string DefaultAppHostRuntimeIdentifier { get; set; }
+
+        /// <summary>
         /// Do not write package assets cache to disk nor attempt to read previous cache from disk.
         /// </summary>
         public bool DisablePackageAssetsCache { get; set; }
@@ -341,7 +346,7 @@ namespace Microsoft.NET.Build.Tasks
                         foreach (var implicitPackage in ExpectedPlatformPackages)
                         {
                             writer.Write(implicitPackage.ItemSpec ?? "");
-                            writer.Write(implicitPackage.GetMetadata(MetadataKeys.ExpectedVersion) ?? "");
+                            writer.Write(implicitPackage.GetMetadata(MetadataKeys.Version) ?? "");
                         }
                     }
                     writer.Write(ProjectAssetsCacheFile);
@@ -349,6 +354,7 @@ namespace Microsoft.NET.Build.Tasks
                     writer.Write(ProjectLanguage ?? "");
                     writer.Write(ProjectPath);
                     writer.Write(RuntimeIdentifier ?? "");
+                    writer.Write(DefaultAppHostRuntimeIdentifier ?? "");
                     if (ShimRuntimeIdentifiers != null)
                     {
                         foreach (var r in ShimRuntimeIdentifiers)
@@ -852,7 +858,7 @@ namespace Microsoft.NET.Build.Tasks
                     foreach (var implicitPackage in _task.ExpectedPlatformPackages)
                     {
                         var packageName = implicitPackage.ItemSpec;
-                        var expectedVersion = implicitPackage.GetMetadata(MetadataKeys.ExpectedVersion);
+                        var expectedVersion = implicitPackage.GetMetadata(MetadataKeys.Version);
 
                         if (string.IsNullOrEmpty(packageName) ||
                             string.IsNullOrEmpty(expectedVersion) ||
@@ -872,7 +878,7 @@ namespace Microsoft.NET.Build.Tasks
                             if (!hasTwoPeriods(expectedVersion))
                             {
                                 expectedVersion += ".0";
-                            }                        
+                            }
 
                             if (restoredVersion != expectedVersion)
                             {
@@ -892,6 +898,26 @@ namespace Microsoft.NET.Build.Tasks
                 WriteItems(
                     _runtimeTarget,
                     package => package.NativeLibraries);
+
+                WriteDefaultNativeApphostAsset();
+            }
+
+            private void WriteDefaultNativeApphostAsset()
+            {
+                if (string.IsNullOrEmpty(_task.DefaultAppHostRuntimeIdentifier))
+                {
+                    return;
+                }
+
+                var assetPathAndLibrary = FindApphostInRuntimeTarget(
+                    _task.DotNetAppHostExecutableNameWithoutExtension + ExecutableExtension.ForRuntimeIdentifier(_task.DefaultAppHostRuntimeIdentifier),
+                    _lockFile.GetTargetAndThrowIfNotFound(
+                        NuGetUtils.ParseFrameworkName(_task.TargetFrameworkMoniker),
+                        _task.DefaultAppHostRuntimeIdentifier
+                    )
+                );
+
+                WriteItem(assetPathAndLibrary.Item1, assetPathAndLibrary.Item2);
             }
 
             private void WriteApphostsForShimRuntimeIdentifiers()

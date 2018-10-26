@@ -253,6 +253,48 @@ namespace Microsoft.NET.Build.Tests
         }
 
         [Theory]
+        [InlineData("netcoreapp2.1")]
+        public void It_builds_a_runnable_apphost_by_default(string targetFramework)
+        {
+            var testAsset = _testAssetsManager
+                .CopyTestAsset("HelloWorld")
+                .WithSource();
+
+            var buildCommand = new BuildCommand(Log, testAsset.TestRoot);
+            buildCommand
+                .Execute(new string[] {
+                    "/restore",
+                    $"/p:TargetFramework={targetFramework}",
+                    $"/p:NETCoreSdkRuntimeIdentifier={EnvironmentInfo.GetCompatibleRid(targetFramework)}"
+                })
+                .Should()
+                .Pass();
+
+            var outputDirectory = buildCommand.GetOutputDirectory(targetFramework);
+            var hostExecutable = $"HelloWorld{Constants.ExeSuffix}";
+
+            outputDirectory.Should().OnlyHaveFiles(new[] {
+                hostExecutable,
+                "HelloWorld.dll",
+                "HelloWorld.pdb",
+                "HelloWorld.deps.json",
+                "HelloWorld.runtimeconfig.dev.json",
+                "HelloWorld.runtimeconfig.json",
+            });
+
+            Command.Create(Path.Combine(outputDirectory.FullName, hostExecutable), new string[] {})
+                .EnvironmentVariable(
+                    Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)",
+                    Path.GetDirectoryName(TestContext.Current.ToolsetUnderTest.DotNetHostPath))
+                .CaptureStdOut()
+                .Execute()
+                .Should()
+                .Pass()
+                .And
+                .HaveStdOutContaining("Hello World!");
+        }
+
+        [Theory]
         [InlineData("netcoreapp2.0")]
         [InlineData("netcoreapp2.1")]
         public void It_runs_the_app_from_the_output_folder(string targetFramework)

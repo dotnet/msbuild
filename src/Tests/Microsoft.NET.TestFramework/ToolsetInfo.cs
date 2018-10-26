@@ -162,7 +162,7 @@ namespace Microsoft.NET.TestFramework
             if (repoRoot != null)
             {
                 ret.CliVersionForBundledVersions = GetDotNetCliVersion();
-                ret.SdksPath = Path.Combine(repoArtifactsDir, configuration, "bin", "Sdks");
+                ret.SdksPath = Path.Combine(repoArtifactsDir, "bin", configuration, "Sdks");
             }
 
             if (!string.IsNullOrEmpty(commandLine.FullFrameworkMSBuildPath))

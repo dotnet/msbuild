@@ -7,8 +7,8 @@ using System.IO;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Creates the AppHost.exe to be used by the published app.
-    /// This embeds the app dll path into the AppHost.exe and performs additional customizations as requested.
+    /// Creates the runtime host to be used for an application.
+    /// This embeds the application DLL path into the apphost and performs additional customizations as requested.
     /// </summary>
     public class CreateAppHost : TaskBase
     {
@@ -16,34 +16,25 @@ namespace Microsoft.NET.Build.Tasks
         public string AppHostSourcePath { get; set; }
 
         [Required]
-        public string AppHostDestinationDirectoryPath { get; set; }
+        public string AppHostDestinationPath { get; set; }
 
         [Required]
         public string AppBinaryName { get; set; }
 
-        public bool WindowsGraphicalUserInterface { get; set; }
+        [Required]
+        public string IntermediateAssembly { get; set; }
 
-        [Output]
-        public string ModifiedAppHostPath { get; set; }
+        public bool WindowsGraphicalUserInterface { get; set; }
 
         protected override void ExecuteCore()
         {
-            var hostExtension = Path.GetExtension(AppHostSourcePath);
-            var appbaseName = Path.GetFileNameWithoutExtension(AppBinaryName);
-            var destinationDirectory = Path.GetFullPath(AppHostDestinationDirectoryPath);
-            ModifiedAppHostPath = Path.Combine(destinationDirectory, $"{appbaseName}{hostExtension}");
-
-            if (!File.Exists(ModifiedAppHostPath))
-            {
-                AppHost.Create(
-                    AppHostSourcePath,
-                    ModifiedAppHostPath,
-                    AppBinaryName,
-                    options: new AppHostOptions()
-                    {
-                        WindowsGraphicalUserInterface = WindowsGraphicalUserInterface
-                    });
-            }
+            AppHost.Create(
+                AppHostSourcePath,
+                AppHostDestinationPath,
+                AppBinaryName,
+                windowsGraphicalUserInterface : WindowsGraphicalUserInterface,
+                intermediateAssembly: IntermediateAssembly,
+                log: Log);
         }
     }
 }

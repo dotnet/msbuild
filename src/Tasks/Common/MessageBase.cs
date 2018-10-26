@@ -13,9 +13,13 @@ namespace Microsoft.NET.Build.Tasks
     public abstract class MessageBase : TaskBase
     {
         /// <summary>
+        /// Formatted text for the message
+        /// </summary>
+        public string FormattedText { get; set; }
+
+        /// <summary>
         /// The name of the resource in Strings.resx that contains the desired error message.
         /// </summary>
-        [Required]
         public string ResourceName { get; set; }
 
         /// <summary>
@@ -31,17 +35,34 @@ namespace Microsoft.NET.Build.Tasks
 
         protected override void ExecuteCore()
         {
-            if (FormatArguments == null || FormatArguments.Length == 0)
+            string message = null;
+            if (string.IsNullOrEmpty(FormattedText) && string.IsNullOrEmpty(ResourceName))
             {
-                // We use a single-item array with one empty string in this case so that
-                // it is possible to interpret FormatArguments="$(EmptyVariable)" as a request
-                // to pass an empty string on to string.Format. Note if there are not placeholders
-                // in the string, then the empty string arg will be ignored.
-                FormatArguments = EmptyArguments;
+                throw new ArgumentException($"Either {nameof(FormattedText)} or {nameof(ResourceName)} must be specified.");
             }
+            else if (!string.IsNullOrEmpty(FormattedText) && !string.IsNullOrEmpty(ResourceName))
+            {
+                throw new ArgumentException($"Only one of {nameof(FormattedText)} and {nameof(ResourceName)} can be specified.");
+            }
+            else if (!string.IsNullOrEmpty(ResourceName))
+            {
+                if (FormatArguments == null || FormatArguments.Length == 0)
+                {
+                    // We use a single-item array with one empty string in this case so that
+                    // it is possible to interpret FormatArguments="$(EmptyVariable)" as a request
+                    // to pass an empty string on to string.Format. Note if there are not placeholders
+                    // in the string, then the empty string arg will be ignored.
+                    FormatArguments = EmptyArguments;
+                }
 
-            string format = Strings.ResourceManager.GetString(ResourceName, Strings.Culture);
-            string message = string.Format(CultureInfo.CurrentCulture, format, FormatArguments);
+                string format = Strings.ResourceManager.GetString(ResourceName, Strings.Culture);
+                message = string.Format(CultureInfo.CurrentCulture, format, FormatArguments);
+            }
+            else
+            {
+                message = FormattedText;
+            }
+            
 
             LogMessage(message);
         }
