@@ -88,7 +88,8 @@
 
   <PropertyGroup>
     <!-- Use IBC optimization data if available -->
-    <IbcOptimizationDataDir Condition="$(Optimize) == 'true'">$(NuGetPackageRoot)\RoslynDependencies.ProjectSystem.OptimizationData\$(RoslynDependenciesProjectSystemOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
+    <RoslynDependenciesOptimizationDataVersion Condition="'$(RoslynDependenciesOptimizationDataVersion)' == ''">2.11.0-beta3.20181025.2</RoslynDependenciesOptimizationDataVersion>
+    <IbcOptimizationDataDir>$(NuGetPackageRoot)\RoslynDependencies.OptimizationData\$(RoslynDependenciesOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
 
   </PropertyGroup>
 
