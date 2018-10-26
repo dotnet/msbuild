@@ -19,9 +19,6 @@ phases:
 
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
         _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
-      ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
         _OfficialBuildIdArgs: ''
         _PublishArgs: ''
         _SignArgs: ''
