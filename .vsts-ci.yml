@@ -97,7 +97,7 @@ phases:
     parameters:
       agentOs: Darwin
       queue: 
-        name: Hosted macOS
+        name: DotNetCore-Mac
         parallel: 2
         timeoutInMinutes: 120
         matrix:
