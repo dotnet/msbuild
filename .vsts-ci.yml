@@ -3,10 +3,10 @@ trigger:
 
 variables:
   teamName: Roslyn-Project-System
-  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+  ${{ if eq(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedKey:
     PB_PublishBlobFeedUrl:
-  ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+  ${{ if ne(variables['System.TeamProject'], 'public') }}:
     PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
 
 phases:
@@ -14,27 +14,27 @@ phases:
   parameters:
     agentOs: Windows_NT
     queue:
-      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
         name: Helix
-      ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
         name: DotNetCore-Windows
       parallel: 2
       matrix:
-        ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
           Build_Debug:
             _BuildConfig: Debug
             _PublishType: none
             _SignType: test
         Build_Release:
           _BuildConfig: Release
-          ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+          ${{ if eq(variables['System.TeamProject'], 'public') }}:
             _PublishType: none
             _SignType: test
-          ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+          ${{ if ne(variables['System.TeamProject'], 'public') }}:
             _PublishType: blob
             _SignType: real
 
-- ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+- ${{ if eq(variables['System.TeamProject'], 'public') }}:
   - template: /eng/build.yml
     parameters:
       agentOs: Windows_NT_FullFramework

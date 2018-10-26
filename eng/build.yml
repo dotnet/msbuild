@@ -9,19 +9,18 @@ phases:
     name: ${{ parameters.agentOs }}
     enableTelemetry: true
     enableMicrobuild: true
-    publicBuildReasons: PullRequest
     queue: ${{ parameters.queue }}
     variables: 
       ${{ insert }}: ${{ parameters.variables }}
       _HelixType: build/product
       _HelixBuildConfig: $(_BuildConfig)
-      ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
         _HelixSource: pr/dotnet/sdk/$(Build.SourceBranch)
-      ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
         _HelixSource: official/dotnet/sdk/$(Build.SourceBranch)
 
     steps:
-    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
       - task: AzureKeyVault@1
         inputs:
           azureSubscription: 'DotNet-Engineering-Services_KeyVault'
@@ -72,7 +71,7 @@ phases:
           BlobFeedUrl: $(PB_PublishBlobFeedUrl)
           PublishType: $(_PublishType)
 
-    - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
       - task: PublishTestResults@1
         displayName: Publish Test Results
         inputs:
