@@ -552,7 +552,7 @@ namespace Microsoft.Build.Graph
                 {
                     // recursively process newly discovered references
                     var loadReference = DetectCycles(projectReference, nodeState, projectCollection,
-                        globalProperties);
+                        projectReferenceGlobalProperties);
                     if (!loadReference.success)
                     {
                         if (loadReference.projectsInCycle[0].Equals(node.ProjectInstance.FullPath))
