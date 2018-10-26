@@ -17,9 +17,9 @@ phases:
     agentOs: Windows_NT
     queue:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        name: Helix
+        name: dotnet-external-temp
       ${{ if ne(variables['System.TeamProject'], 'public') }}:
-        name: DotNetCore-Windows
+        name: dotnet-internal-temp
       parallel: 2
       timeoutInMinutes: 120
       matrix:
@@ -42,7 +42,7 @@ phases:
     parameters:
       agentOs: Windows_NT_FullFramework
       queue:
-        name: DotNetCore-Windows
+        name: dotnet-external-temp
         parallel: 2
         timeoutInMinutes: 120
         matrix:
@@ -59,7 +59,7 @@ phases:
     parameters:
       agentOs: Ubuntu_14_04
       queue: 
-        name: DotNetCore-Linux
+        name: Hosted Ubuntu 1604
         parallel: 2
         timeoutInMinutes: 120
         matrix:
@@ -78,7 +78,7 @@ phases:
     parameters:
       agentOs: Ubuntu_16_04
       queue: 
-        name: DotNetCore-Linux
+        name: Hosted Ubuntu 1604
         parallel: 2
         timeoutInMinutes: 120
         matrix:
@@ -97,7 +97,7 @@ phases:
     parameters:
       agentOs: Darwin
       queue: 
-        name: DotNetCore-Mac
+        name: Hosted macOS
         parallel: 2
         timeoutInMinutes: 120
         matrix:
