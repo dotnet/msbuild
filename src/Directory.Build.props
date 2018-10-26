@@ -85,12 +85,4 @@
     <!-- When targeting .NET Core, Exe and unit tests projects always use AnyCPU architecture -->
     <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- Use IBC optimization data if available -->
-    <RoslynDependenciesOptimizationDataVersion Condition="'$(RoslynDependenciesOptimizationDataVersion)' == ''">2.11.0-beta3.20181025.2</RoslynDependenciesOptimizationDataVersion>
-    <IbcOptimizationDataDir>$(NuGetPackageRoot)\RoslynDependencies.OptimizationData\$(RoslynDependenciesOptimizationDataVersion)\content\OptimizationData\</IbcOptimizationDataDir>
-
-  </PropertyGroup>
-
 </Project>
