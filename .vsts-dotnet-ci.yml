@@ -38,7 +38,7 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log/**/*'
+      PathtoPublish: 'artifacts/Debug/log'
       ArtifactName: 'FullOnWindows logs'
     condition: succeededOrFailed()
 
@@ -77,7 +77,7 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log/**/*'
+      PathtoPublish: 'artifacts/Debug/log'
       ArtifactName: 'CoreOnWindows logs'
     condition: succeededOrFailed()
 
@@ -99,8 +99,14 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log/**/*'
+      PathtoPublish: 'artifacts/Debug/log'
       ArtifactName: 'CoreOnLinux logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnMac
@@ -121,7 +127,13 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log/**/*'
+      PathtoPublish: 'artifacts/Debug/log'
       ArtifactName: 'CoreOnMac logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      ArtifactName: 'CoreOnMac test logs'
     condition: succeededOrFailed()
 
