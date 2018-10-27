@@ -192,6 +192,9 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
+    <Compile Include="BackEnd\BuildManager\GraphBuildResult.cs" />
+    <Compile Include="BackEnd\BuildManager\GraphBuildSubmission.cs" />
+    <Compile Include="BackEnd\BuildManager\GraphBuildRequestData.cs" />
     <Compile Include="BackEnd\BuildManager\BuildSubmission.cs" />
     <Compile Include="BackEnd\BuildManager\LegacyThreadingData.cs" />
     <Compile Include="BackEnd\BuildManager\RequestedProjectState.cs" />

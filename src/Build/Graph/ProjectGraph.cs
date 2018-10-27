@@ -268,7 +268,7 @@ namespace Microsoft.Build.Graph
         /// </remarks>
         /// <param name="entryProjectTargets">The target list for the entry project. May be null or empty, in which case the entry projects' default targets will be used.</param>
         /// <returns>A dictionary containing the target list for each node.</returns>
-        public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(string[] entryProjectTargets)
+        public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(ICollection<string> entryProjectTargets)
         {
             // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
             Dictionary<ProjectGraphNode, ImmutableList<string>> targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);
@@ -279,7 +279,7 @@ namespace Microsoft.Build.Graph
             // Initial state of the graph traversal.
             foreach (var entryPointNode in EntryPointNodes)
             {
-                ImmutableList<string> entryTargets = entryProjectTargets == null || entryProjectTargets.Length == 0
+                ImmutableList<string> entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
                     ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
                     : ImmutableList.CreateRange(entryProjectTargets);
                 var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);

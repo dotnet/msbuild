@@ -95,9 +95,9 @@ namespace Microsoft.Build.CommandLine
         private static Object s_buildLock = new Object();
 
         /// <summary>
-        /// The currently active build, if any.
+        /// Whether a build has started.
         /// </summary>
-        private static BuildSubmission s_activeBuild;
+        private static bool s_hasBuildStarted;
 
         /// <summary>
         /// Event signalled when the build is complete.
@@ -853,13 +853,13 @@ namespace Microsoft.Build.CommandLine
                 // If the build has already started (or already finished), we will cancel it
                 // If the build has not yet started, it will cancel itself, because
                 // we set alreadyCalled=1
-                BuildSubmission result = null;
+                bool hasBuildStarted = false;
                 lock (s_buildLock)
                 {
-                    result = s_activeBuild;
+                    hasBuildStarted = s_hasBuildStarted;
                 }
 
-                if (result != null)
+                if (hasBuildStarted)
                 {
                     BuildManager.DefaultBuildManager.CancelAllSubmissions();
                     s_buildComplete.WaitOne();
@@ -1064,8 +1064,6 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    BuildRequestData request = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
-
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
                     // By default we log synchronously to the console for compatibility with previous versions,
@@ -1123,7 +1121,7 @@ namespace Microsoft.Build.CommandLine
 #if MSBUILDENABLEVSPROFILING
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
-                    BuildResult results = null;
+                    BuildResultCode? result = null;
                     buildManager.BeginBuild(parameters);
                     Exception exception = null;
                     try
@@ -1131,13 +1129,13 @@ namespace Microsoft.Build.CommandLine
                         try
                         {
                             // Determine if the user specified /Target:Restore which means we should only execute a restore in the fancy way that /restore is executed
-                            bool restoreOnly = request.TargetNames.Count == 1 && String.Equals(request.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
+                            bool restoreOnly = targets.Length == 1 && String.Equals(targets[0], MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
 
                             if (enableRestore || restoreOnly)
                             {
-                                results = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
+                                (result, exception) = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
 
-                                if (results.OverallResult != BuildResultCode.Success)
+                                if (result != BuildResultCode.Success)
                                 {
                                     return false;
                                 }
@@ -1147,12 +1145,19 @@ namespace Microsoft.Build.CommandLine
                             {
                                 if (graphBuild)
                                 {
-                                    results = ExecuteGraphBuild(projectFile, targets, buildManager, projectCollection, globalProperties);
+                                    var request = new GraphBuildRequestData(new ProjectGraphEntryPoint(projectFile, globalProperties), targets, null);
+                                    (result, exception) = ExecuteGraphBuild(buildManager, request);
                                 }
                                 else
                                 {
-                                    results = ExecuteBuild(buildManager, request);
+                                    var request = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
+                                    (result, exception) = ExecuteBuild(buildManager, request);
                                 }
+                            }
+
+                            if (result != null && exception == null)
+                            {
+                                success = result == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -1166,18 +1171,13 @@ namespace Microsoft.Build.CommandLine
                         success = false;
                     }
 
-                    if (results != null && exception == null)
-                    {
-                        success = results.OverallResult == BuildResultCode.Success;
-                        exception = results.Exception;
-                    }
-
                     if (exception != null)
                     {
                         success = false;
 
-                        // InvalidProjectFileExceptions have already been logged.
-                        if (exception.GetType() != typeof(InvalidProjectFileException))
+                        // InvalidProjectFileExceptions and its aggregates have already been logged.
+                        if (exception.GetType() != typeof(InvalidProjectFileException)
+                            && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
                         {
                             if
                                 (
@@ -1233,11 +1233,13 @@ namespace Microsoft.Build.CommandLine
             return success;
         }
 
-        private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
+        private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
         {
+            BuildSubmission submission;
             lock (s_buildLock)
             {
-                s_activeBuild = buildManager.PendBuildRequest(request);
+                submission = buildManager.PendBuildRequest(request);
+                s_hasBuildStarted = true;
 
                 // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
                 // That's so the build does not appear to have completed successfully.
@@ -1247,83 +1249,31 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            return s_activeBuild.Execute();
+            var result = submission.Execute();
+            return (result.OverallResult, result.Exception);
         }
 
-        private static BuildResult ExecuteGraphBuild(
-            string projectFile,
-            string[] targets,
-            BuildManager buildManager,
-            ProjectCollection projectCollection,
-            Dictionary<string, string> globalProperties)
+        private static (BuildResultCode result, Exception exception) ExecuteGraphBuild(BuildManager buildManager, GraphBuildRequestData request)
         {
-            // TODO: Handle Ctrl-C cancellation properly.
-            // s_activeBuild is supposed to be the active build, but we may have multiple going at once.
-            // This may be solved once better integration with the scheduler (#3774) is done.
-            var projectGraph = new ProjectGraph(projectFile, globalProperties, projectCollection);
-            var entryNode = projectGraph.EntryPointNodes.First();
-            var targetLists = projectGraph.GetTargetLists(targets);
-
-            var waitHandle = new AutoResetEvent(true);
-            var graphBuildStateLock = new object();
-
-            var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
-            var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
-            var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
-            BuildResult entryProjectResult = null;
-            while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
+            GraphBuildSubmission submission;
+            lock (s_buildLock)
             {
-                waitHandle.WaitOne();
+                submission = buildManager.PendBuildRequest(request);
+                s_hasBuildStarted = true;
 
-                lock (graphBuildStateLock)
+                // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
+                // That's so the build does not appear to have completed successfully.
+                if (s_buildCancellationSource.IsCancellationRequested)
                 {
-                    var unblockedNodes = blockedNodes
-                        .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
-                        .ToList();
-                    foreach (var node in unblockedNodes)
-                    {
-                        var targetList = targetLists[node];
-                        if (targetList.Count == 0)
-                        {
-                            // An empty target list here means "no targets" instead of "default targets", so don't even build it.
-                            finishedNodes.Add(node);
-                            blockedNodes.Remove(node);
-
-                            waitHandle.Set();
-
-                            continue;
-                        }
-
-                        var request = new BuildRequestData(node.ProjectInstance, targetList.ToArray());
-                        var buildSubmission = buildManager.PendBuildRequest(request);
-                        buildingNodes.Add(buildSubmission, node);
-                        blockedNodes.Remove(node);
-                        buildSubmission.ExecuteAsync(finishedBuildSubmission =>
-                        {
-                            ProjectGraphNode finishedNode;
-                            lock (graphBuildStateLock)
-                            {
-                                finishedNode = buildingNodes[finishedBuildSubmission];
-
-                                finishedNodes.Add(finishedNode);
-                                buildingNodes.Remove(finishedBuildSubmission);
-                            }
-
-                            if (finishedNode == entryNode)
-                            {
-                                entryProjectResult = finishedBuildSubmission.BuildResult;
-                            }
-
-                            waitHandle.Set();
-                        }, null);
-                    }
+                    buildManager.CancelAllSubmissions();
                 }
             }
 
-            return entryProjectResult;
+            GraphBuildResult result = submission.Execute();
+            return (result.OverallResult, result.Exception);
         }
 
-        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        private static (BuildResultCode result, Exception exception) ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
