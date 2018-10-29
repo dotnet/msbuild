@@ -191,6 +191,8 @@ namespace Microsoft.NET.Restore.Tests
             {
                 using (var fileStream = File.OpenRead(nupkg))
                 {
+                    ClientPolicyContext clientPolicyContext = null;
+
                     PackageExtractor.InstallFromSourceAsync(
                         source: null,
                         packageIdentity: identity,
@@ -199,9 +201,8 @@ namespace Microsoft.NET.Restore.Tests
                         packageExtractionContext: new PackageExtractionContext(
                             PackageSaveMode.Defaultv3,
                             XmlDocFileSaveMode.None,
-                            NullLogger.Instance,
-                            signedPackageVerifier: null,
-                            signedPackageVerifierSettings: null),
+                            clientPolicyContext,
+                            NullLogger.Instance),
                         token: CancellationToken.None).Wait();
                 }
             }
