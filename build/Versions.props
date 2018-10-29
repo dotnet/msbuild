@@ -37,8 +37,6 @@
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <DotNetCliVersion>2.1.401</DotNetCliVersion>
-    <!-- We are pretty much always on a preview SDK. No need to warn about it. -->
-    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <VSWhereVersion>2.2.7</VSWhereVersion>
   </PropertyGroup>
 
