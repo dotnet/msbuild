@@ -24,5 +24,10 @@ namespace Microsoft.DotNet.ToolPackage
         public string Runner { get; private set; }
 
         public FilePath Executable { get; private set; }
+
+        public string DebugToString()
+        {
+            return $"ToolCommandName: {Name.Value} - Runner: {Runner} - FilePath: {Executable.Value}";
+        }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -133,7 +134,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 if (!Files.Volume.TryGetValue(pathModel.Volume, out DirectoryNode current))
                 {
                     current = new DirectoryNode();
-                    Files.Volume[pathModel.Volume] = current;
+                    current = Files.Volume.GetOrAdd(pathModel.Volume, current);
                 }
 
                 foreach (string p in pathModel.PathArray)
@@ -153,7 +154,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                     else
                     {
                         DirectoryNode directoryNode = new DirectoryNode();
-                        current.Subs[p] = directoryNode;
+                        directoryNode = (DirectoryNode) current.Subs.GetOrAdd(p , directoryNode);
                         current = directoryNode;
                     }
                 }
@@ -216,7 +217,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
             public IEnumerable<string> EnumerateDirectory(
                 string path,
-                Func<Dictionary<string, IFileSystemTreeNode>, IEnumerable<string>> predicate)
+                Func<ConcurrentDictionary<string, IFileSystemTreeNode>, IEnumerable<string>> predicate)
             {
                 DirectoryNode current = GetParentOfDirectoryNode(path);
 
@@ -450,8 +451,8 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
                 if (_files.TryGetNodeParent(destination, out DirectoryNode current) && current != null)
                 {
-                    current.Subs.Add(new PathModel(destination).FileOrDirectoryName(), sourceFileNode);
-                    sourceParent.Subs.Remove(new PathModel(source).FileOrDirectoryName());
+                    sourceFileNode = (FileNode) current.Subs.GetOrAdd(new PathModel(destination).FileOrDirectoryName(), sourceFileNode);
+                    sourceParent.Subs.TryRemove(new PathModel(source).FileOrDirectoryName(), out _);
                 }
                 else
                 {
@@ -482,7 +483,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                         throw new IOException($"Path {destination} already exists");
                     }
 
-                    current.Subs.Add(new PathModel(destination).FileOrDirectoryName(),
+                    current.Subs.TryAdd(new PathModel(destination).FileOrDirectoryName(),
                         new FileNode(sourceFileNode.Content));
                 }
                 else
@@ -496,7 +497,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 if (_files.TryGetNodeParent(path, out DirectoryNode current))
                 {
                     PathModel pathModel = new PathModel(path);
-                    current.Subs.Remove(pathModel.FileOrDirectoryName());
+                    current.Subs.TryRemove(pathModel.FileOrDirectoryName(), out _);
                 }
                 else
                 {
@@ -577,7 +578,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                 PathModel pathModel = new PathModel(path);
                 if (recursive)
                 {
-                    parentOfPath.Subs.Remove(pathModel.FileOrDirectoryName());
+                    parentOfPath.Subs.TryRemove(pathModel.FileOrDirectoryName(), out _);
                 }
                 else
                 {
@@ -586,7 +587,7 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                         throw new IOException("Directory not empty");
                     }
 
-                    parentOfPath.Subs.Remove(pathModel.FileOrDirectoryName());
+                    parentOfPath.Subs.TryRemove(pathModel.FileOrDirectoryName(), out _);
                 }
             }
 
@@ -624,8 +625,8 @@ namespace Microsoft.Extensions.DependencyModel.Tests
                                               " directory with the same name already exists");
                     }
 
-                    current.Subs.Add(destinationPathModel.FileOrDirectoryName(), sourceNode);
-                    sourceParent.Subs.Remove(parentPathModel.FileOrDirectoryName());
+                    sourceNode = current.Subs.GetOrAdd(destinationPathModel.FileOrDirectoryName(), sourceNode);
+                    sourceParent.Subs.TryRemove(parentPathModel.FileOrDirectoryName(), out _);
                 }
                 else
                 {
@@ -640,14 +641,14 @@ namespace Microsoft.Extensions.DependencyModel.Tests
 
         private class DirectoryNode : IFileSystemTreeNode
         {
-            public Dictionary<string, IFileSystemTreeNode> Subs { get; } =
-                new Dictionary<string, IFileSystemTreeNode>();
+            public ConcurrentDictionary<string, IFileSystemTreeNode> Subs { get; } =
+                new ConcurrentDictionary<string, IFileSystemTreeNode>();
         }
 
         private class FileSystemRoot
         {
             // in Linux there is only one Node, and the name is empty
-            public Dictionary<string, DirectoryNode> Volume { get; } = new Dictionary<string, DirectoryNode>();
+            public ConcurrentDictionary<string, DirectoryNode> Volume { get; } = new ConcurrentDictionary<string, DirectoryNode>();
         }
 
         private class FileNode : IFileSystemTreeNode
