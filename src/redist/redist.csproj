@@ -29,7 +29,7 @@
 
   <Target Name="PublishMSBuildExtensions"
           DependsOnTargets="GenerateMSBuildExtensions"
-          AfterTargets="Build">
+          AfterTargets="Build;Publish">
     <ItemGroup>
       <MSBuildExtensionsContent Update="@(MSBuildExtensionsContent)">
         <DestinationPath Condition="'%(MSBuildExtensionsContent.DestinationPath)' == ''">$(OutputPath)/%(MSBuildExtensionsContent.DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)</DestinationPath>
@@ -42,7 +42,7 @@
   </Target>
 
   <Target Name="PublishSdks"
-          AfterTargets="Build">
+          AfterTargets="Build;Publish">
     <ItemGroup>
       <SdksToBundle Include="$(RepoRoot)/build/RestoreDependency.proj">
         <Properties>
@@ -66,6 +66,14 @@
         <PackagePath>Sdks/%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
       </SdksContent>
     </ItemGroup>
+  </Target>
+
+  <Target Name="CopySdksToPublishDir"
+          AfterTargets="Publish">
+    <Copy SourceFiles="@(MSBuildExtensionsContent)"
+          DestinationFiles="@(MSBuildExtensionsContent -> '$(PublishDir)%(DeploymentSubpath)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="@(SdksContent)"
+          DestinationFiles="@(SdksContent -> '$(PublishDir)Sdks/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 
   <Target Name="ChmodPublishDir"

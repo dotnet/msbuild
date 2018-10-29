@@ -22,6 +22,7 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         public GivenDotnetPublishInvocation(ITestOutputHelper output)
         {
             this.output = output;
+            Telemetry.Telemetry.CurrentSessionId = null;
         }
 
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";

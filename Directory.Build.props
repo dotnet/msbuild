@@ -4,11 +4,7 @@
 Projects which don't import dir.props:
 
 build\RestoreDependency.proj
-build\Signing.proj
-build\package\Installer.DEB.proj
 build\sdks\sdks.csproj
-build\templates\templates.csproj
-build\test\RunTest.proj
 build_projects\Microsoft.DotNet.Cli.Build.SelfTest\InvokeWithStage2.proj
 tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
@@ -36,28 +32,17 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
   </PropertyGroup>
 
-   <PropertyGroup>
+  <PropertyGroup>
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
   <Import Project="build/Branding.props" />
-
   <Import Project="build/FileExtensions.props" />
-  <Import Project="build/InputDirectories.props" />
   <Import Project="build/MSBuildExtensions.props" />
-
   <Import Project="build/OutputDirectories.props" />
-
-  <ImportGroup Condition=" '$(BuildingSigningProject)' != 'true' ">
-    <!-- These imports aren't required for signing, and some of them have syntax which isn't supported in MSBuild 14,
-         which is what the signing build uses -->
-    <Import Project="build/BundledSdks.props" />
-
-    <Import Project="build/BuildDefaults.props" />
-
-    <Import Project="build/GenerateResxSource.targets" />
-  </ImportGroup>
-  
+  <Import Project="build/BundledSdks.props" />
+  <Import Project="build/BuildDefaults.props" />
+  <Import Project="build/GenerateResxSource.targets" />
 </Project>

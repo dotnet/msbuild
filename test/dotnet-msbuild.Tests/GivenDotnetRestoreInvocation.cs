@@ -18,6 +18,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetRestoreInvocation));
 
+        public GivenDotnetRestoreInvocation()
+        {
+            Telemetry.Telemetry.CurrentSessionId = null;
+        }
+
         [Theory]
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-s", "<source>" }, "-property:RestoreSources=<source>")]
@@ -42,6 +47,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
+                Telemetry.Telemetry.CurrentSessionId = null;
+
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
                     .Replace("<cwd>", WorkingDirectory);

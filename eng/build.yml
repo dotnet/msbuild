@@ -45,6 +45,15 @@ phases:
         env:
           DropSuffix: $(_DropSuffix)
 
+    - ${{ if eq(parameters.agentOs, 'Arm') }}:
+      - script: eng\cibuild-arm.sh
+                  --skip-prereqs
+                  --configuration $(BuildConfig)
+                  --architecture $(BuildArchitecture)
+        displayName: Build
+        env:
+          DropSuffix: $(_DropSuffix)
+
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
                   --skip-prereqs

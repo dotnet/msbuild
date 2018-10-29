@@ -18,6 +18,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetCleanInvocation));
 
+        public GivenDotnetCleanInvocation()
+        {
+            Telemetry.Telemetry.CurrentSessionId = null;
+        }
+
         [Fact]
         public void ItAddsProjectToMsbuildInvocation()
         {

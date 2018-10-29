@@ -17,6 +17,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetBuildInvocation));
 
+        public GivenDotnetBuildInvocation()
+        {
+            Telemetry.Telemetry.CurrentSessionId = null;
+        }
+
         [Theory]
         [InlineData(new string[] { }, "-target:Build")]
         [InlineData(new string[] { "-o", "foo" }, "-target:Build -property:OutputPath=<cwd>foo")]

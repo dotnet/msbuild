@@ -18,6 +18,11 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetStoreInvocation));
 
+        public GivenDotnetStoreInvocation()
+        {
+            Telemetry.Telemetry.CurrentSessionId = null;
+        }
+
         [Theory]
         [InlineData("-m")]
         [InlineData("--manifest")]

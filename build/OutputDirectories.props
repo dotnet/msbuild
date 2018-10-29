@@ -11,25 +11,23 @@
 
       <BaseIntermediateOutputPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/obj/$(MSBuildProjectName)))</BaseIntermediateOutputPath>
       <OutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/cli))</OutputDirectory>
-      <CliOutputDirectory>$([MSBuild]::NormalizePath($(OutputDirectory)/sdk/$(SdkVersion)))</CliOutputDirectory>
-      <SdkOutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/dotnet))</SdkOutputDirectory>
+
+      <CliOutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsTmpDir)/sdk/$(Version)))</CliOutputDirectory>
+      <SdkOutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsTmpDir)/dotnet))</SdkOutputDirectory>
+
       <SymbolsDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/symbols))</SymbolsDirectory>
-      <CompilationDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/compilation))</CompilationDirectory>
       <IntermediateDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/int))</IntermediateDirectory>
       <PackagesDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/packages))</PackagesDirectory>
-      <SharedFrameworkPublishDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/sharedFrameworkPublish))</SharedFrameworkPublishDirectory>
-      <AspNetCoreSharedFxPublishDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/aspnetSharedFxPublish))</AspNetCoreSharedFxPublishDirectory>
-      <TestOutputDir>$([MSBuild]::NormalizeDirectory($(BaseOutputDirectory)/test))</TestOutputDir>
-      <DotnetInOutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/dotnet/dotnet$(ExeExtension)))</DotnetInOutputDirectory>
+
+      <TestOutputDir>$([MSBuild]::NormalizeDirectory($(ArtifactsTmpDir)/test))</TestOutputDir>
+
       <GeneratedMSBuildExtensionsDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/GeneratedMSBuildExtension))</GeneratedMSBuildExtensionsDirectory>
       <MSBuildExtensionsLayoutDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/MSBuildExtensionsLayout))</MSBuildExtensionsLayoutDirectory>
       <SdkResolverOutputDirectory>$([MSBuild]::NormalizePath($(MSBuildExtensionsLayoutDirectory)/MSBuildSdkResolver))</SdkResolverOutputDirectory>
-      <DotNetCoreSdkLKGPublishDirectory>$([MSBuild]::NormalizePath($(IntermediateDirectory)/SdkLKG))</DotNetCoreSdkLKGPublishDirectory>
-      <NextStagePropsPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/PreviousStage.props))</NextStagePropsPath>
 
       <_DotNetHiveRoot>$(DOTNET_INSTALL_DIR)</_DotNetHiveRoot>
-      <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet\</_DotNetHiveRoot>
-      <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)\</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="'$(_DotNetHiveRoot)' == ''">$(RepoRoot).dotnet/</_DotNetHiveRoot>
+      <_DotNetHiveRoot Condition="!HasTrailingSlash('$(_DotNetHiveRoot)')">$(_DotNetHiveRoot)/</_DotNetHiveRoot>
 
       <DotNetExe>$(_DotNetHiveRoot)dotnet$(ExeExtension)</DotNetExe>
   </PropertyGroup>

@@ -242,7 +242,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
             }
 
             //  Flow the TEST_PACKAGES environment variable to the child process
-            psi.Environment["TEST_PACKAGES"] = System.Environment.GetEnvironmentVariable("TEST_PACKAGES");
+            psi.Environment["TEST_PACKAGES"] = new RepoDirectoriesProvider().TestPackages;
         }
 
         private void AddDotnetToolPathToAvoidSettingPermanentEnvInBuildMachineOnWindows()
