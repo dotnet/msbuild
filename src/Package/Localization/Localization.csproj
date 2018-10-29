@@ -3,6 +3,7 @@
     <TargetFramework Condition="$(MonoBuild) != 'true'">netcoreapp2.1</TargetFramework>
     <TargetFramework Condition="$(MonoBuild) == 'true'">net461</TargetFramework>
     <NuspecFile>Microsoft.Build.Localization.nuspec</NuspecFile>
+    <IsShipping>false</IsShipping>
     <NoPackageAnalysis>true</NoPackageAnalysis>
   </PropertyGroup>
 
