@@ -326,7 +326,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This should cause that request to cancel and fail.
         /// </summary>
         [Fact]
-        [Trait("CrashesOnNetCore", "true")]
         public void TestEngineShutdownWhileActive()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -355,7 +354,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that issuing a simple request results in a successful completion.
         /// </summary>
         [Fact]
-        [Trait("CrashesOnNetCore", "true")]
         public void TestSimpleBuildScenario()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -383,7 +381,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// engine interface.
         /// </summary>
         [Fact]
-        [Trait("CrashesOnNetCore", "true")]
         public void TestBuildWithChildren()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
@@ -437,8 +434,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// the build will continue and complete successfully.
         /// </summary>
         [Fact]
-        [Trait("CrashesOnNetCore", "true")]
-
         public void TestBuildWithNewConfiguration()
         {
             BuildRequestData data = new BuildRequestData(Path.GetFullPath("TestFile"), new Dictionary<string, string>(), "TestToolsVersion", new string[0], null);
