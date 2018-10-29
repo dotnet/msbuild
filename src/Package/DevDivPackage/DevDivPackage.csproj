@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <NuspecFile>VS.ExternalAPIs.MSBuild.nuspec</NuspecFile>
+    <IsShipping>false</IsShipping>
     <PlatformTarget>x86</PlatformTarget>
     <DisableSemVer2>true</DisableSemVer2>
   </PropertyGroup>
