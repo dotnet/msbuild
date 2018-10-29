@@ -1,10 +1,4 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup>
-    <!-- Add IsImplicitlyDefined to any packages that were 'magically' referenced (RepoTools!). This
-         should be removed if RepoTools adds the metadata for their package references. -->
-    <PackageReference Update="@(PackageReference)" IsImplicitlyDefined="true" />
-  </ItemGroup>
-
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
   </PropertyGroup>
