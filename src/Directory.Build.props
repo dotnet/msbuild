@@ -2,12 +2,6 @@
   <!-- Import the repo root props -->
   <Import Project="..\Directory.Build.props"/>
 
-  <ItemGroup>
-    <!-- Add IsImplicitlyDefined to any packages that were 'magically' referenced (RepoTools!). This
-         should be removed if RepoTools adds the metadata for their package references. -->
-    <PackageReference Update="@(PackageReference)" IsImplicitlyDefined="true" />
-  </ItemGroup>
-
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
   </PropertyGroup>
