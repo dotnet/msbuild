@@ -1013,6 +1013,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@".\", true)]
         [InlineData(@"\..", true)]
         [InlineData(@"\.", true)]
+        [InlineData(@"..\..\a", true)]
+        [InlineData(@"..\..\..\a", true)]
         [InlineData(@"b..\", false)]
         [InlineData(@"b.\", false)]
         [InlineData(@"\b..", false)]

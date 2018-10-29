@@ -382,6 +382,67 @@ namespace Microsoft.Build.UnitTests.Definition
                 );
         }
 
+        [Theory]
+        [MemberData(nameof(ContextDisambiguatesRelativeGlobsData))]
+        public void ContextDisambiguatesDistinctRelativeGlobsOutsideOfProjectConePointingToSameFile(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var globDirectory = _env.DefaultTestDirectory.CreateDirectory("glob");
+
+            var projectRoot = _env.DefaultTestDirectory.CreateDirectory("proj");
+
+            var project1Directory = projectRoot.CreateDirectory("Project1");
+
+            var project2SubDir = projectRoot.CreateDirectory("subdirectory");
+
+            var project2Directory = project2SubDir.CreateDirectory("Project2");
+
+            var context = EvaluationContext.Create(policy);
+
+            var evaluationCount = 0;
+
+            File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
+
+            EvaluateProjects(
+                new []
+                {
+                    new ProjectSpecification(
+                        Path.Combine(project1Directory.Path, "1"),
+                        @"<Project>
+                            <ItemGroup>
+                                <i Include=`../../glob/*.cs` />
+                            </ItemGroup>
+                        </Project>"),
+                    new ProjectSpecification(
+                        Path.Combine(project2Directory.Path, "2"),
+                        @"<Project>
+                            <ItemGroup>
+                                <i Include=`../../../glob/*.cs` />
+                            </ItemGroup>
+                        </Project>")
+                },
+                context,
+                project =>
+                {
+                    var projectName = Path.GetFileNameWithoutExtension(project.FullPath);
+                    var globFixedDirectoryPart = projectName.EndsWith("1")
+                        ? Path.Combine("..", "..", "glob")
+                        : Path.Combine("..", "..", "..", "glob");
+
+                    // globs have the fixed directory part prepended, so add it to the expected results
+                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount]
+                        .Select(i => Path.Combine(globFixedDirectoryPart, i))
+                        .ToArray();
+
+                    var actualGlobExpansion = project.GetItems("i");
+                    ObjectModelHelpers.AssertItems(expectedGlobExpansion, actualGlobExpansion);
+
+                    evaluationCount++;
+
+                    File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
+                }
+                );
+        }
+
         private static string[] _projectsWithOutOfConeGlobs =
         {
             @"<Project>
@@ -397,43 +458,34 @@ namespace Microsoft.Build.UnitTests.Definition
             </Project>",
         };
 
-        public static IEnumerable<object> ContextCachesCommonOutOfProjectConeGlobData
+        [Theory]
+        [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
+        // projects should cache glob expansions when the __fully qualified__ glob is shared between projects and points outside of project cone
+        public void ContextCachesCommonOutOfProjectConeFullyQualifiedGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
-            get
-            {
-                // combine the globbing test data with another bool for relative / absolute itemspecs
-                foreach (var itemSpecPathIsRelative in new []{true, false})
-                {
-                    foreach (var globData in ContextPinsGlobExpansionCacheData)
-                    {
-                        var globDataArray = (object[]) globData;
-
-                        yield return new[]
-                        {
-                            itemSpecPathIsRelative,
-                            globDataArray[0],
-                            globDataArray[1],
-                        };
-                    }
-                }
-            }
+            ContextCachesCommonOutOfProjectConeGlob2(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        [Theory]
-        [MemberData(nameof(ContextCachesCommonOutOfProjectConeGlobData))]
-        // projects should cache glob expansions when the glob is shared between projects and points outside of project cone
-        public void ContextCachesCommonOutOfProjectConeGlob(bool itemSpecPathIsRelative, EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        [Theory (Skip="https://github.com/Microsoft/msbuild/issues/3889")]
+        [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
+        // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
+        public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
         {
-            var testDirectory = _env.DefaultTestDirectory.Path;
-            var globDirectory = Path.Combine(testDirectory, "GlobDirectory");
+            ContextCachesCommonOutOfProjectConeGlob2(itemSpecPathIsRelative: true, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
+        }
+
+        private void ContextCachesCommonOutOfProjectConeGlob2(bool itemSpecPathIsRelative, EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
+        {
+            var testDirectory = _env.DefaultTestDirectory;
+            var globDirectory = testDirectory.CreateDirectory("GlobDirectory");
 
             var itemSpecDirectoryPart = itemSpecPathIsRelative
                 ? Path.Combine("..", "GlobDirectory")
-                : globDirectory;
+                : globDirectory.Path;
 
             itemSpecDirectoryPart = itemSpecDirectoryPart.WithTrailingSlash();
 
-            Directory.CreateDirectory(globDirectory);
+            Directory.CreateDirectory(globDirectory.Path);
 
             // Globs with a directory part will produce items prepended with that directory part
             foreach (var globExpansion in expectedGlobExpansions)
@@ -446,13 +498,13 @@ namespace Microsoft.Build.UnitTests.Definition
 
             var projectSpecs = _projectsWithOutOfConeGlobs
                 .Select(p => string.Format(p, itemSpecDirectoryPart))
-                .Select((p, i) => new ProjectSpecification(Path.Combine(testDirectory, $"ProjectDirectory{i}", $"Project{i}.proj"), p));
+                .Select((p, i) => new ProjectSpecification(Path.Combine(testDirectory.Path, $"ProjectDirectory{i}", $"Project{i}.proj"), p));
 
             var context = EvaluationContext.Create(policy);
 
             var evaluationCount = 0;
 
-            File.WriteAllText(Path.Combine(globDirectory, $"{evaluationCount}.cs"), "");
+            File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
                 projectSpecs,
@@ -462,7 +514,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     var expectedGlobExpansion = expectedGlobExpansions[evaluationCount];
                     evaluationCount++;
 
-                    File.WriteAllText(Path.Combine(globDirectory, $"{evaluationCount}.cs"), "");
+                    File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
                 }
@@ -686,18 +738,18 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private struct ProjectSpecification
         {
-            public string ProjectPath { get; }
+            public string ProjectFilePath { get; }
             public string ProjectContents { get; }
 
-            public ProjectSpecification(string projectPath, string projectContents)
+            public ProjectSpecification(string projectFilePath, string projectContents)
             {
-                ProjectPath = projectPath;
+                ProjectFilePath = projectFilePath;
                 ProjectContents = projectContents;
             }
 
             public void Deconstruct(out string projectPath, out string projectContents)
             {
-                projectPath = this.ProjectPath;
+                projectPath = this.ProjectFilePath;
                 projectContents = this.ProjectContents;
             }
         }
@@ -711,13 +763,13 @@ namespace Microsoft.Build.UnitTests.Definition
 
             var projects = new List<Project>();
 
-            foreach (var (projectPath, projectContents) in projectSpecs)
+            foreach (var (projectFilePath, projectContents) in projectSpecs)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(projectPath));
-                File.WriteAllText(projectPath, projectContents.Cleanup());
+                Directory.CreateDirectory(Path.GetDirectoryName(projectFilePath));
+                File.WriteAllText(projectFilePath, projectContents.Cleanup());
 
                 var project = Project.FromFile(
-                    projectPath,
+                    projectFilePath,
                     new ProjectOptions
                     {
                         ProjectCollection = collection,
