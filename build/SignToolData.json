@@ -48,7 +48,9 @@
     "exclude": [
         "mscorlib.dll",
         "netstandard.dll",
+        "System.Buffers.dll",
         "System.Collections.Immutable.dll",
+        "System.Memory.dll",
         "System.Threading.Tasks.Dataflow.dll",
         "Microsoft.IO.Redist.dll"
       ]
