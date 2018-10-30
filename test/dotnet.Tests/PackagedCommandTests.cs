@@ -245,12 +245,12 @@ namespace Microsoft.DotNet.Tests
 
             new PackCommand()
                 .WithWorkingDirectory(toolWithRandPkgNameDir)
-                .Execute($"-o \"{pkgsDir.FullName}\"")
+                .Execute($"-o \"{pkgsDir.FullName}\" /p:version=1.0.0")
                 .Should().Pass();
 
             new RestoreCommand()
                 .WithWorkingDirectory(appWithDepOnToolDir)
-                .Execute($"--packages \"{pkgsDir.FullName}\"")
+                .Execute($"--source \"{pkgsDir.FullName}\"")
                 .Should().Pass();
 
             new TestCommand("dotnet")

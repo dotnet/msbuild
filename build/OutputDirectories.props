@@ -7,7 +7,6 @@
            BaseOutputPath is the project-specific output folder that each project builds into.
            This is not confusing at all. -->
       <BaseOutputDirectory>$([MSBuild]::NormalizePath($(RepoRoot)/bin/$(CliBuildStage)))</BaseOutputDirectory>
-      <BaseOutputPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/bin/$(MSBuildProjectName)))</BaseOutputPath>
 
       <BaseIntermediateOutputPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/obj/$(MSBuildProjectName)))</BaseIntermediateOutputPath>
       <OutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/cli))</OutputDirectory>

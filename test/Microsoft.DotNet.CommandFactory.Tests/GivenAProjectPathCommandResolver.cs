@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Tests
             var environment = new EnvironmentProvider(new[] { ".cmd" });
             var platformCommandSpecFactory = new WindowsExePreferredCommandSpecFactory();
 
-            var pathCommandResolver = new PathCommandResolver(environment, platformCommandSpecFactory);
+            var pathCommandResolver = new ProjectPathCommandResolver(environment, platformCommandSpecFactory);
 
             var testCommandPath =
                 CommandResolverTestUtils.CreateNonRunnableTestCommand(s_testProjectDirectory, "cmdWrapCommand", ".cmd");
@@ -223,7 +223,8 @@ namespace Microsoft.DotNet.Tests
             var commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "cmdWrapCommand",
-                CommandArguments = null
+                CommandArguments = null,
+                ProjectDirectory = s_testProjectDirectory
             };
 
             var result = pathCommandResolver.Resolve(commandResolverArguments);

@@ -203,11 +203,11 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
                 args = newArgs;
 
-                executable = new Muxer().MuxerPath;
+                executable = DotnetUnderTest.FullName;
             }
             else if ( executable == "dotnet")
             {
-                executable = new Muxer().MuxerPath;
+                executable = DotnetUnderTest.FullName;
             }
             else if (!Path.IsPathRooted(executable))
             {

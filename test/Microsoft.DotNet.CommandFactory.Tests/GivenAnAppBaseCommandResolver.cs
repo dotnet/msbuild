@@ -163,11 +163,11 @@ namespace Microsoft.DotNet.Tests
             var pathCommandResolver = new PathCommandResolver(environment, platformCommandSpecFactory);
 
             var testCommandPath =
-                CommandResolverTestUtils.CreateNonRunnableTestCommand(AppContext.BaseDirectory, "cmdWrapCommand", ".cmd");
+                CommandResolverTestUtils.CreateNonRunnableTestCommand(AppContext.BaseDirectory, "someWrapCommand", ".cmd");
 
             var commandResolverArguments = new CommandResolverArguments()
             {
-                CommandName = "cmdWrapCommand",
+                CommandName = "someWrapCommand",
                 CommandArguments = null
             };
 

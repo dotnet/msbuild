@@ -4,7 +4,9 @@
   </PropertyGroup>
   <Import Condition=" '$(VersionPropsIsImported)' == '' " Project="eng/Versions.props" />
   <PropertyGroup>
-    <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
+    <RestorePackagesPath Condition=" '$(RestorePackagesPath)' == '' ">$(RepoRoot).nuget/packages</RestorePackagesPath>
+    <RestoreAdditionalProjectSources>$(RepoRoot)/artifacts/tmp/$(Configuration)/test/packages</RestoreAdditionalProjectSources>
+
     <NoPackageAnalysis>true</NoPackageAnalysis>
 
     <!-- Needed while dotnet/sdk version used does not support 3.0 yet -->
