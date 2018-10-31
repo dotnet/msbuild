@@ -45,7 +45,7 @@ namespace Microsoft.NET.Build.Tasks
                     TaskItem packageReference = new TaskItem(knownFrameworkReference.TargetingPackName);
                     packageReference.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
                     packageReference.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
-                    packageReference.SetMetadata("PrivateAssets", "true");
+                    packageReference.SetMetadata("PrivateAssets", "all");
 
                     packageReferencesToAdd.Add(packageReference);
 
