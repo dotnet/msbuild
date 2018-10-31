@@ -25,5 +25,7 @@
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+
+    <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
   </PropertyGroup>
 </Project>

@@ -29,9 +29,17 @@
           Outputs="@(CreateTestAssetPackageNuPkgsOutput)">
     <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
 
-    <Exec Command="$(DotNetExe) restore %(TestPackageProject.ProjectPath) /p:RestoreAdditionalProjectSources=$(TestPackagesDir) /p:ImportDirectoryBuildTargets=false" WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))" />
- 
-    <Exec Command="$(DotNetExe) pack %(TestPackageProject.ProjectPath) --output $(TestPackagesDir) %(TestPackageProject.MsbuildArgs) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:Version=%(TestPackageProject.Version)" />
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Properties="RestoreAdditionalProjectSources=$(TestPackagesDir);ImportDirectoryBuildTargets=false"
+      Targets="Restore" />
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Properties="PackageOutputPath=$(TestPackagesDir);%(TestPackageProject.MsbuildArgs);RestoreAdditionalProjectSources=$(TestOutputDir)/packages;Version=%(TestPackageProject.Version)"
+      Targets="Pack" />
   </Target>
 
   <Target Name="CopyDirectoryBuildTestDependencies" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">

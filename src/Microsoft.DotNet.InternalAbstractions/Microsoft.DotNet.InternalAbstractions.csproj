@@ -9,7 +9,6 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>git://github.com/dotnet/cli</RepositoryUrl>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 

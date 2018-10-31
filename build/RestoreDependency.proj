@@ -28,7 +28,11 @@
 
   <Target Name="EnsureDependencyRestored"
           Condition="!Exists('$(DependencyNuPkgPath)/$(DependencyPackageName.ToLower()).nuspec')">
-    <Exec Command="$(DotNetExe) restore $(MSBuildThisFileDirectory)/sdks/sdks.csproj /p:RestorePackagesPath=$(NuGetPackagesDir) /p:DependencyPackageName=$(DependencyPackageName) /p:DependencyPackageVersion=$(DependencyPackageVersion)" />
+    <MSBuild
+      BuildInParallel="False"
+      Projects="$(MSBuildThisFileDirectory)/sdks/sdks.csproj"
+      Properties="RestorePackagesPath=$(NuGetPackagesDir);DependencyPackageName=$(DependencyPackageName);DependencyPackageVersion=$(DependencyPackageVersion)"
+      Targets="Restore" />
   </Target>
 
   <Target Name="PrepareBundledDependencyProps">

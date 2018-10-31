@@ -17,8 +17,11 @@
   </ItemGroup>
 
   <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
-
-    <Exec Command="$(DotNetExe) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
+    <MSBuild
+      BuildInParallel="False"
+      Projects="../ArgumentsReflector/ArgumentsReflector.csproj"
+      Properties="PublishDir=$(OutputPath)"
+      Targets="Publish" />
   </Target>
 
 </Project>
