@@ -240,5 +240,82 @@ namespace Microsoft.DotNet.ToolManifest
             public string version { get; set; }
             public string[] commands { get; set; }
         }
+
+        public FilePath FindFirst()
+        {
+            foreach ((FilePath possibleManifest, DirectoryPath _) in EnumerateDefaultAllPossibleManifests())
+            {
+                if (_fileSystem.File.Exists(possibleManifest.Value))
+                {
+                    return possibleManifest;
+                }
+            }
+
+            throw new ToolManifestCannotBeFoundException(
+                    string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
+                        string.Join(Environment.NewLine, EnumerateDefaultAllPossibleManifests().Select(f => f.manifestfile.Value))));
+        }
+
+        public void Add(
+            FilePath to,
+            PackageId packageId,
+            NuGetVersion nuGetVersion,
+            ToolCommandName[] toolCommandName)
+        {
+            SerializableLocalToolsManifest deserializedManifest =
+                   DeserializeLocalToolsManifest(to);
+
+            List<ToolManifestPackage> toolManifestPackages =
+                GetToolManifestPackageFromOneManifestFile(deserializedManifest, to, to.GetDirectoryPath());
+
+            var existing = toolManifestPackages.Where(t => t.PackageId.Equals(packageId));
+            if (existing.Any())
+            {
+                var existingPackage = existing.Single();
+
+                if (existingPackage.PackageId.Equals(packageId)
+                    && existingPackage.Version == nuGetVersion
+                    && CommandNamesEqual(existingPackage.CommandNames, toolCommandName))
+                {
+                    return;
+                }
+
+                throw new ToolManifestException(string.Format(
+                    LocalizableStrings.ManifestPackageIdCollision,
+                    packageId.ToString(),
+                    nuGetVersion.ToNormalizedString(),
+                    to.Value,
+                    existingPackage.PackageId.ToString(),
+                    existingPackage.Version.ToNormalizedString()));
+            }
+
+            deserializedManifest.tools.Add(
+                packageId.ToString(),
+                new SerializableLocalToolSinglePackage
+                {
+                    version = nuGetVersion.ToNormalizedString(),
+                    commands = toolCommandName.Select(c => c.Value).ToArray()
+                });
+
+            _fileSystem.File.WriteAllText(
+                to.Value,
+                JsonConvert.SerializeObject(deserializedManifest, Formatting.Indented));
+        }
+
+        private bool CommandNamesEqual(ToolCommandName[] left, ToolCommandName[] right)
+        {
+            if (left == null && right == null)
+            {
+                return true;
+            }
+            else if (right == null || left == null)
+            {
+                return false;
+            }
+            else
+            {
+                return left.SequenceEqual(right);
+            }
+        }
     }
 }

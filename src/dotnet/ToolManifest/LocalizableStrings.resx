@@ -150,4 +150,7 @@
   <data name="ManifestMissingIsRoot" xml:space="preserve">
     <value>Missing 'isRoot' entry.</value>
   </data>
+  <data name="ManifestPackageIdCollision" xml:space="preserve">
+    <value>Cannot add package {0} version {1} to manifest file {2}. Package {3} version {4} exists.</value>
+  </data>
 </root>
