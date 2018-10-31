@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
@@ -45,7 +45,7 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">Die Zielruntime, für die die Anwendung veröffentlicht wird. Standardmäßig wird eine frameworkunabhängige Anwendung ohne ausführbare Datei veröffentlicht.</target>
+        <target state="translated">Die Zielruntime für die Veröffentlichung. Diese wird verwendet, wenn eine eigenständige Bereitstellung erstellt wird. Standardmäßig wird eine Framework-abhängige Anwendung veröffentlicht.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -56,7 +56,7 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Veröffentlichen Sie die .NET Core-Runtime mit Ihrer Anwendung, damit die Runtime auf dem Zielcomputer nicht installiert werden muss. Der Standardwert ist "true", wenn ein Runtimebezeichner angegeben ist.</target>
+        <target state="translated">Hiermit wird die .NET Core-Runtime mit Ihrer Anwendung veröffentlicht, sodass die Runtime nicht auf dem Zielcomputer installiert werden muss. Der Standardwert ist TRUE, wenn eine Runtime-ID angegeben wird.</target>
         <note />
       </trans-unit>
     </body>

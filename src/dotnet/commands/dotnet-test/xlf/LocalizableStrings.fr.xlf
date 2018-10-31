@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
@@ -65,11 +65,7 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">Journaliseur à utiliser pour les résultats des tests.
-                                        Exemples :
-                                        Journal au format trx avec un nom de fichier unique : --logger trx
-                                        Journal au format trx avec le nom de fichier spécifié : --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Pour plus d'informations sur les arguments du journaliseur, consultez https://aka.ms/vstest-report.</target>
+        <target state="translated">Journaliseur à utiliser pour les résultats des tests. Exemples : Journal au format trx utilisant un nom de fichier unique : --logger trx Journal au format trx utilisant le nom de fichier spécifié : --logger "trx;LogFileName=&lt;TestResults.trx&gt;" Pour plus d’informations sur les arguments du journaliseur, consultez https://aka.ms/vstest-report.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
