@@ -50,6 +50,7 @@
         "netstandard.dll",
         "System.Buffers.dll",
         "System.Collections.Immutable.dll",
+        "System.Numerics.Vectors.dll",
         "System.Memory.dll",
         "System.Threading.Tasks.Dataflow.dll",
         "Microsoft.IO.Redist.dll"
