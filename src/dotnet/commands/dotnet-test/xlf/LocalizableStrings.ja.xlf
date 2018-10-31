@@ -65,7 +65,11 @@
                                         Log in trx format using a unqiue file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="translated">テスト結果に使用するロガー。例: 一意のファイル名を使用する trx 形式のログ: --logger trx 指定したファイル名を使用する trx 形式のログ: --logger "trx;LogFileName=&lt;TestResults.trx&gt;" ロガー引数の詳細については、https://aka.ms/vstest-report をご覧ください。</target>
+        <target state="translated">テスト結果のために使用するロガー。
+                                        例:
+                                        一意のファイル名を使用して trx 形式でログを記録します: --logger trx
+                                        指定されたファイル名を使用して trx 形式でログを記録します: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        ロガーの引数の詳細は、https://aka.ms/vstest-report をご覧ください。</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">
