@@ -3,7 +3,7 @@
     <VersionMajor>3</VersionMajor>
     <VersionMinor>0</VersionMinor>
     <VersionPatch>100</VersionPatch>
-    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">alpha1</ReleaseSuffix>
+    <ReleaseSuffix Condition=" '$(ReleaseSuffix)' == '' ">preview</ReleaseSuffix>
 
     <!-- When running on VSO (for official builds) use a real number. -->
     <BuildNumber Condition="'$(BuildNumber)' == ''">$([System.String]::Copy('$(BUILD_BUILDNUMBER)').Replace('.' ,'-'))</BuildNumber>
