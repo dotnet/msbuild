@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Configuration" Version="4.3.0-beta1-2418" />
+    <PackageReference Include="NuGet.Configuration" Version="4.3.0-preview3-4146" />
   </ItemGroup>
 </Project>

@@ -9,14 +9,11 @@
   <ItemGroup>
     <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.props" />
     <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.targets" />
-
-    <CreateTestAssetPackageNuPkgsInput Include="%(TestPackageProject.ProjectDir)/**/*" />
   </ItemGroup>
 
   <ItemGroup>
     <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.props" />
     <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
-    <CreateTestAssetPackageNuPkgsOutput Include="%(TestPackageProject.PackageOutput)" />
   </ItemGroup>
 
   <Target Name="PrepareTests"
@@ -24,13 +21,14 @@
                             CopyDirectoryBuildTestDependencies;
                             OverlaySdkOnLKG"
           AfterTargets="Build">
-    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
           DependsOnTargets="SetupTestPackageProjectData;"
           Inputs="@(CreateTestAssetPackageNuPkgsInput)"
           Outputs="@(CreateTestAssetPackageNuPkgsOutput)">
+    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
+
     <Exec Command="$(DotNetExe) restore %(TestPackageProject.ProjectPath) /p:RestoreAdditionalProjectSources=$(TestPackagesDir) /p:ImportDirectoryBuildTargets=false" WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))" />
  
     <Exec Command="$(DotNetExe) pack %(TestPackageProject.ProjectPath) --output $(TestPackagesDir) %(TestPackageProject.MsbuildArgs) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:Version=%(TestPackageProject.Version)" />

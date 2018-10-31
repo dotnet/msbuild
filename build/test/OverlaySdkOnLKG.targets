@@ -14,6 +14,6 @@
   </Target>
 
   <Target Name="PublishRedist">
-    <Exec Command="$(DotNetExe) publish $(RepoRoot)/src/redist/redist.csproj --no-build --output $(CliOutputDirectory)" WorkingDirectory="$(RepoRoot)/src/redist" />
+    <Exec Command="$(DotNetExe) publish $(RepoRoot)/src/redist/redist.csproj --output $(CliOutputDirectory)" WorkingDirectory="$(RepoRoot)/src/redist" />
   </Target>
 </Project>

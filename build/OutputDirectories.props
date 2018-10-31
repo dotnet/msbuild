@@ -3,20 +3,14 @@
       <CliBuildStage Condition="'$(CliBuildStage)' == '' And '$(CliOuterBuildStage)' != ''">$([MSBuild]::Add($(CliOuterBuildStage), '1'))</CliBuildStage>
       <CliBuildStage Condition="'$(CliBuildStage)' == ''">2</CliBuildStage>
 
-      <!-- BaseOutputDirectory is the root output path for this stage and RID
-           BaseOutputPath is the project-specific output folder that each project builds into.
-           This is not confusing at all. -->
-      <BaseOutputDirectory>$([MSBuild]::NormalizePath($(RepoRoot)/bin/$(CliBuildStage)))</BaseOutputDirectory>
-
-      <BaseIntermediateOutputPath>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/obj/$(MSBuildProjectName)))</BaseIntermediateOutputPath>
-      <OutputDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/cli))</OutputDirectory>
+      <OutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/cli))</OutputDirectory>
 
       <CliOutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsTmpDir)/sdk/$(Version)))</CliOutputDirectory>
       <SdkOutputDirectory>$([MSBuild]::NormalizePath($(ArtifactsTmpDir)/dotnet))</SdkOutputDirectory>
 
-      <SymbolsDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/symbols))</SymbolsDirectory>
-      <IntermediateDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/int))</IntermediateDirectory>
-      <PackagesDirectory>$([MSBuild]::NormalizePath($(BaseOutputDirectory)/packages))</PackagesDirectory>
+      <SymbolsDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/symbols))</SymbolsDirectory>
+      <IntermediateDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/int))</IntermediateDirectory>
+      <PackagesDirectory>$([MSBuild]::NormalizePath($(ArtifactsDir)/packages))</PackagesDirectory>
 
       <TestOutputDir>$([MSBuild]::NormalizeDirectory($(ArtifactsTmpDir)/test))</TestOutputDir>
 

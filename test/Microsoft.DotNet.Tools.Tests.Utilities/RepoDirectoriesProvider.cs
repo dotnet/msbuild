@@ -77,13 +77,8 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
                 .First(d => !d.Contains("NuGetFallbackFolder"));
 
             _testPackages = Path.Combine(_artifacts, "tmp", configuration, "test", "packages");
-            // _testPackages = Environment.GetEnvironmentVariable("TEST_PACKAGES");
-            // if (string.IsNullOrEmpty(_testPackages))
-            // {
-            //     throw new InvalidOperationException("TEST_PACKAGES environment variable not set");
-            // }
 
-            _testArtifactsFolder = Path.Combine(_artifacts, "test", "artifacts");
+            _testArtifactsFolder = Path.Combine(_artifacts, "tmp", configuration, "test", "artifacts");
 
             _testWorkingFolder = Path.Combine(_artifacts, "tmp", configuration, "test");
             
