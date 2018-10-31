@@ -177,7 +177,7 @@ namespace Microsoft.DotNet.MSBuildSdkResolver
             {
                 int h1 = DotnetExeDirectory.GetHashCode();
                 int h2 = MSBuildVersion.GetHashCode();
-                return ((h1 << 5) + h1) ^ h2;
+                return unchecked(((h1 << 5) + h1) ^ h2);
             }
         }
 
