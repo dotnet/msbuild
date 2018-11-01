@@ -21,5 +21,7 @@ if($Architecture.StartsWith("arm", [StringComparison]::OrdinalIgnoreCase))
     $InstallArchitecture = "x64"
 }
 
-Invoke-Expression "$RepoRoot\eng\common\build.ps1 -restore -build $ExtraParameters"
+$ArchitectureParam="/p:Architecture=$Architecture"
+
+Invoke-Expression "$RepoRoot\eng\common\build.ps1 -restore -build $ArchitectureParam $ExtraParameters"
 if($LASTEXITCODE -ne 0) { throw "Failed to build" }

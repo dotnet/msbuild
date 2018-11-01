@@ -38,7 +38,6 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
-  <Import Project="build/Branding.props" />
   <Import Project="build/FileExtensions.props" />
   <Import Project="build/MSBuildExtensions.props" />
   <Import Project="build/OutputDirectories.props" />

@@ -126,25 +126,6 @@ phases:
 
 - template: /eng/build.yml
   parameters:
-    agentOs: Arm
-    queue:
-      name: Hosted Ubuntu 1604
-      matrix:
-        Build_Arm_NoSuffix_Release:
-          _BuildConfig: Release
-          _BuildArchitecture: 'arm'
-          _DropSuffix: true
-        Build_Arm_Debug:
-          _BuildConfig: Debug
-          _BuildArchitecture: 'arm'
-          _DropSuffix: ''
-        Build_Arm64_Debug:
-          _BuildConfig: Debug
-          _BuildArchitecture: 'arm64'
-          _DropSuffix: ''
-
-- template: /eng/build.yml
-  parameters:
     agentOs: Darwin
     queue: 
       name: Hosted macOS

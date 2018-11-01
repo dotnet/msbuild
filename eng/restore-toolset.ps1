@@ -19,9 +19,11 @@ function InitializeCustomSDKToolset {
   $env:VSTEST_BUILD_TRACE=1
   $env:VSTEST_TRACE_BUILD=1
 
+  $env:DOTNET_CLI_TELEMETRY_PROFILE=$env:DOTNET_CLI_TELEMETRY_PROFILE;https://github.com/dotnet/cli
+
   # The following frameworks and tools are used only for testing.
   # Do not attempt to install them in source build.
-  if ($env:DotNetBuildFromSource -eq "true") {
+  if ($env:DotNetBuildFromSource -eq "true" -or $Architecture -ne $InstallArchitecture) {
     return
   }
 

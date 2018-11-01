@@ -26,6 +26,7 @@ phases:
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: build.cmd
+                  -test -sign -pack -publish -ci
                   -Configuration $(BuildConfig)
                   -Architecture $(BuildArchitecture)
         displayName: Build
@@ -35,7 +36,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
       - script: ./build.sh
-                  --skip-prereqs
+                  --test --pack --publish --ci
                   --configuration $(BuildConfig)
                   $(DockerParameter)
                   --architecture $(BuildArchitecture)
@@ -45,18 +46,9 @@ phases:
         env:
           DropSuffix: $(_DropSuffix)
 
-    - ${{ if eq(parameters.agentOs, 'Arm') }}:
-      - script: eng\cibuild-arm.sh
-                  --skip-prereqs
-                  --configuration $(BuildConfig)
-                  --architecture $(BuildArchitecture)
-        displayName: Build
-        env:
-          DropSuffix: $(_DropSuffix)
-
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
-                  --skip-prereqs
+                  --test --pack --publish --ci
                   --configuration $(BuildConfig)
         displayName: Build
 
