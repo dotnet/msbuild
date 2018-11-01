@@ -38,8 +38,14 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts\Debug\log'
-      ArtifactName: 'FullOnWindows logs'
+      PathtoPublish: 'artifacts/Debug/log'
+      ArtifactName: 'FullOnWindows build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnWindows
@@ -77,8 +83,14 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts\Debug\log'
-      ArtifactName: 'CoreOnWindows logs'
+      PathtoPublish: 'artifacts/Debug/log'
+      ArtifactName: 'CoreOnWindows build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      ArtifactName: 'CoreOnWindows test logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnLinux
@@ -100,7 +112,13 @@ phases:
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/Debug/log'
-      ArtifactName: 'CoreOnLinux logs'
+      ArtifactName: 'CoreOnLinux build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnMac
@@ -122,6 +140,12 @@ phases:
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/Debug/log'
-      ArtifactName: 'CoreOnMac logs'
+      ArtifactName: 'CoreOnMac build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      ArtifactName: 'CoreOnMac test logs'
     condition: succeededOrFailed()
 
