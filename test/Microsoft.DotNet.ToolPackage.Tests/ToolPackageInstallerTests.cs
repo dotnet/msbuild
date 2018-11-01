@@ -688,7 +688,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
         // repro https://github.com/dotnet/cli/issues/10101
         public void GivenAPackageWithCasingAndenUSPOSIXInstallSucceeds(bool testMockBehaviorIsInSync)
         {
-            var nugetConfigPath = WriteNugetConfigFileToPointToTheFeed();
+            var nugetConfigPath = GenerateRandomNugetConfigFilePath();
             var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(emptySource);
 
@@ -708,9 +708,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                     }
             };
 
-            var (store, installer, reporter, fileSystem) = Setup(
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
                 useMock: testMockBehaviorIsInSync,
-                feeds: new[] { feed });
+                feeds: new[] { feed },
+                writeLocalFeedToNugetConfig: nugetConfigPath);
 
             CultureInfo currentCultureBefore = CultureInfo.CurrentCulture;
             try
@@ -729,7 +730,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
 
                 fileSystem.File.Exists(package.Commands[0].Executable.Value).Should().BeTrue($"{package.Commands[0].Executable.Value} should exist");
 
-                package.Uninstall();
+                uninstaller.Uninstall(package.PackageDirectory);
             }
             finally
             {
