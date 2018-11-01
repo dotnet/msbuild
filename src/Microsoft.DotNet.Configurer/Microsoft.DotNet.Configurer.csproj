@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+    <Version>$(SdkVersion)</Version>
     <TargetFramework>netstandard2.0</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
@@ -17,10 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
     <PackageReference Include="NuGet.Common" Version="$(NuGetCommonPackageVersion)" />
     <PackageReference Include="NuGet.Configuration" Version="$(NuGetConfigurationPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Archive" Version="$(MicrosoftDotNetArchivePackageVersion)" />
     <PackageReference Include="XliffTasks" Version="$(XliffTasksPackageVersion)" PrivateAssets="All" />
   </ItemGroup>
 

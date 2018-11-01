@@ -15,8 +15,8 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Install a tool for use on the command line.</source>
-        <target state="translated">명령줄에서 사용할 도구를 설치합니다.</target>
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="needs-review-translation">명령줄에서 사용할 도구를 설치합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

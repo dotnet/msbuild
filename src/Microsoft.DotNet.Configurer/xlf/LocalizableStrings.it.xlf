@@ -25,30 +25,16 @@ Gli strumenti di .NET Core consentono di raccogliere i dati di utilizzo allo sco
 Per altre informazioni sulla telemetria degli strumenti dell'interfaccia della riga di comando di .NET Core, vedere https://aka.ms/dotnet-cli-telemetry.</target>
         <note />
       </trans-unit>
-      <trans-unit id="FailedToPrimeCacheError">
-        <source>Failed to prime the NuGet cache. {0} failed with: {1}</source>
-        <target state="translated">Non è possibile inizializzare la cache NuGet. {0} non riuscito. Errore: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NugetCachePrimeMessage">
-        <source>Configuring...
---------------
-A command is running to populate your local package cache to improve restore speed and enable offline access. This command takes up to one minute to complete and only runs once.</source>
-        <target state="translated">Configurazione...
---------------
-È in esecuzione un comando per popolare la cache dei pacchetti locale, migliorare la velocità di ripristino e abilitare l'accesso offline. Il completamento di questo comando, che viene eseguito una sola volta, richiede fino a un minuto.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="UnauthorizedAccessMessage">
         <source>Permission denied to modify the '{0}' folder.
 
 Here are some options to fix this error:
 ----------------------------------------
 1. Re-run this command with elevated access.
-2. Disabled the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
+2. Disable the first run experience by setting the environment variable DOTNET_SKIP_FIRST_TIME_EXPERIENCE to true.
 3. Copy the .NET Core SDK to a non-protected location and use it from there.
     </source>
-        <target state="translated">L'autorizzazione per modificare la cartella '{0}' è stata negata.
+        <target state="needs-review-translation">L'autorizzazione per modificare la cartella '{0}' è stata negata.
 
 Ecco alcune opzioni per correggere questo errore:
 ----------------------------------------

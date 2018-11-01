@@ -24,14 +24,14 @@ namespace Microsoft.DotNet.Cli
                     LocalizableStrings.OutputOptionDescription,
                     Accept.ExactlyOneArgument()
                           .With(name: LocalizableStrings.OutputOptionName)
-                          .ForwardAsSingle(o => $"-property:OutputPath={o.Arguments.Single()}")),
+                          .ForwardAsSingle(o => $"-property:OutputPath={CommandDirectoryContext.GetFullPath(o.Arguments.Single())}")),
                 CommonOptions.FrameworkOption(LocalizableStrings.FrameworkOptionDescription),
                 CommonOptions.ConfigurationOption(LocalizableStrings.ConfigurationOptionDescription),
                 CommonOptions.RuntimeOption(LocalizableStrings.RuntimeOptionDescription),
                 CommonOptions.VersionSuffixOption(),
                 Create.Option(
                     "--no-incremental",
-                    LocalizableStrings.NoIncrementialOptionDescription),
+                    LocalizableStrings.NoIncrementalOptionDescription),
                 Create.Option(
                     "--no-dependencies",
                     LocalizableStrings.NoDependenciesOptionDescription,

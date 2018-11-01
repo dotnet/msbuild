@@ -14,14 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.App" Version="2.1.0-preview1-26116-04" />
-    <PackageReference Include="Microsoft.Build" Version="15.4.8" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.4.8" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.0.1" />
-    <PackageReference Include="System.Dynamic.Runtime" Version="4.0.11" />
+    <PackageReference Include="Microsoft.Build" Version="15.7.179" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.7.179" />
     <PackageReference Include="System.Reflection.Metadata" Version="1.4.2" />
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
-    <PackageReference Include="System.Xml.XmlSerializer" Version="4.0.11" />
     <PackageReference Include="WindowsAzure.Storage" Version="7.2.1" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.0.0" />
 

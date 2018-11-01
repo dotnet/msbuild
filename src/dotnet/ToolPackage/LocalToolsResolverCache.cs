@@ -1,0 +1,233 @@
+// Copyright (c) .NET Foundation and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.DotNet.Cli.Utils;
+using Microsoft.DotNet.Configurer;
+using Microsoft.Extensions.EnvironmentAbstractions;
+using Newtonsoft.Json;
+using NuGet.Frameworks;
+using NuGet.Versioning;
+
+namespace Microsoft.DotNet.ToolPackage
+{
+    internal class LocalToolsResolverCache : ILocalToolsResolverCache
+    {
+        private readonly DirectoryPath _cacheVersionedDirectory;
+        private readonly IFileSystem _fileSystem;
+        private const int LocalToolResolverCacheVersion = 1;
+
+        public LocalToolsResolverCache(IFileSystem fileSystem = null,
+            DirectoryPath? cacheDirectory = null,
+            int version = LocalToolResolverCacheVersion)
+        {
+            _fileSystem = fileSystem ?? new FileSystemWrapper();
+            DirectoryPath appliedCacheDirectory =
+                cacheDirectory ?? new DirectoryPath(Path.Combine(CliFolderPathCalculator.ToolsResolverCachePath));
+            _cacheVersionedDirectory = appliedCacheDirectory.WithSubDirectories(version.ToString());
+        }
+
+        public void Save(
+            IDictionary<RestoredCommandIdentifier, RestoredCommand> restoredCommandMap,
+            DirectoryPath nuGetGlobalPackagesFolder)
+        {
+            EnsureFileStorageExists();
+
+            foreach (var distinctPackageIdAndRestoredCommandMap in restoredCommandMap.GroupBy(x => x.Key.PackageId))
+            {
+                PackageId distinctPackageId = distinctPackageIdAndRestoredCommandMap.Key;
+                string packageCacheFile = GetCacheFile(distinctPackageId);
+                if (_fileSystem.File.Exists(packageCacheFile))
+                {
+                    var existingCacheTable = GetCacheTable(packageCacheFile);
+
+                    var diffedRow = distinctPackageIdAndRestoredCommandMap
+                        .Where(pair => !TryGetMatchingRestoredCommand(
+                            pair.Key,
+                            nuGetGlobalPackagesFolder,
+                            existingCacheTable, out _))
+                        .Select(pair => ConvertToCacheRow(pair.Key, pair.Value, nuGetGlobalPackagesFolder));
+
+                    _fileSystem.File.WriteAllText(
+                        packageCacheFile,
+                        JsonConvert.SerializeObject(existingCacheTable.Concat(diffedRow)));
+                }
+                else
+                {
+                    var rowsToAdd =
+                        distinctPackageIdAndRestoredCommandMap
+                            .Select(mapWithSamePackageId
+                                => ConvertToCacheRow(
+                                    mapWithSamePackageId.Key,
+                                    mapWithSamePackageId.Value,
+                                    nuGetGlobalPackagesFolder));
+
+                    _fileSystem.File.WriteAllText(
+                        packageCacheFile,
+                        JsonConvert.SerializeObject(rowsToAdd));
+                }
+            }
+        }
+
+        public bool TryLoad(
+            RestoredCommandIdentifier restoredCommandIdentifier,
+            DirectoryPath nuGetGlobalPackagesFolder,
+            out RestoredCommand restoredCommand)
+        {
+            string packageCacheFile = GetCacheFile(restoredCommandIdentifier.PackageId);
+            if (_fileSystem.File.Exists(packageCacheFile))
+            {
+                if (TryGetMatchingRestoredCommand(
+                    restoredCommandIdentifier,
+                    nuGetGlobalPackagesFolder,
+                    GetCacheTable(packageCacheFile),
+                    out restoredCommand))
+                {
+                    return true;
+                }
+            }
+
+            restoredCommand = null;
+            return false;
+        }
+
+        private CacheRow[] GetCacheTable(string packageCacheFile)
+        {
+            CacheRow[] cacheTable = Array.Empty<CacheRow>();
+
+            try
+            {
+                cacheTable =
+                    JsonConvert.DeserializeObject<CacheRow[]>(_fileSystem.File.ReadAllText(packageCacheFile));
+            }
+            catch (JsonReaderException)
+            {
+                // if file is corrupted, treat it as empty since it is not the source of truth
+            }
+
+            return cacheTable;
+        }
+
+        public bool TryLoadHighestVersion(
+            RestoredCommandIdentifierVersionRange query,
+            DirectoryPath nuGetGlobalPackagesFolder,
+            out RestoredCommand restoredCommandList)
+        {
+            restoredCommandList = null;
+            string packageCacheFile = GetCacheFile(query.PackageId);
+            if (_fileSystem.File.Exists(packageCacheFile))
+            {
+                var list = GetCacheTable(packageCacheFile)
+                    .Select(c => Convert(query.PackageId, c, nuGetGlobalPackagesFolder))
+                    .Where(strongTypeStored =>
+                        query.VersionRange.Satisfies(strongTypeStored.restoredCommandIdentifier.Version))
+                    .Where(onlyVersionSatisfies =>
+                        onlyVersionSatisfies.restoredCommandIdentifier ==
+                        query.WithVersion(onlyVersionSatisfies.restoredCommandIdentifier.Version))
+                    .OrderByDescending(allMatched => allMatched.restoredCommandIdentifier.Version)
+                    .FirstOrDefault();
+
+                if (!list.restoredCommand.Equals(default(RestoredCommand)))
+                {
+                    restoredCommandList = list.restoredCommand;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private string GetCacheFile(PackageId packageId)
+        {
+            return _cacheVersionedDirectory.WithFile(packageId.ToString()).Value;
+        }
+
+        private void EnsureFileStorageExists()
+        {
+            _fileSystem.Directory.CreateDirectory(_cacheVersionedDirectory.Value);
+        }
+
+        private static CacheRow ConvertToCacheRow(
+            RestoredCommandIdentifier restoredCommandIdentifier,
+            RestoredCommand restoredCommandList,
+            DirectoryPath nuGetGlobalPackagesFolder)
+        {
+            return new CacheRow
+            {
+                Version = restoredCommandIdentifier.Version.ToNormalizedString(),
+                TargetFramework = restoredCommandIdentifier.TargetFramework.GetShortFolderName(),
+                RuntimeIdentifier = restoredCommandIdentifier.RuntimeIdentifier.ToLowerInvariant(),
+                Name = restoredCommandIdentifier.CommandName.Value,
+                Runner = restoredCommandList.Runner,
+                RelativeToNuGetGlobalPackagesFolderPathToDll =
+                    Path.GetRelativePath(nuGetGlobalPackagesFolder.Value, restoredCommandList.Executable.Value)
+            };
+        }
+
+        private static
+            (RestoredCommandIdentifier restoredCommandIdentifier,
+            RestoredCommand restoredCommand)
+            Convert(
+                PackageId packageId,
+                CacheRow cacheRow,
+                DirectoryPath nuGetGlobalPackagesFolder)
+        {
+            RestoredCommandIdentifier restoredCommandIdentifier =
+                new RestoredCommandIdentifier(
+                    packageId,
+                    NuGetVersion.Parse(cacheRow.Version),
+                    NuGetFramework.Parse(cacheRow.TargetFramework),
+                    cacheRow.RuntimeIdentifier,
+                    new ToolCommandName(cacheRow.Name));
+
+            RestoredCommand restoredCommand =
+                new RestoredCommand(
+                    new ToolCommandName(cacheRow.Name),
+                    cacheRow.Runner,
+                    nuGetGlobalPackagesFolder
+                        .WithFile(cacheRow.RelativeToNuGetGlobalPackagesFolderPathToDll));
+
+            return (restoredCommandIdentifier, restoredCommand);
+        }
+
+        private static bool TryGetMatchingRestoredCommand(
+            RestoredCommandIdentifier restoredCommandIdentifier,
+            DirectoryPath nuGetGlobalPackagesFolder,
+            CacheRow[] cacheTable,
+            out RestoredCommand restoredCommandList)
+        {
+            (RestoredCommandIdentifier restoredCommandIdentifier, RestoredCommand restoredCommand)[]
+                matchingRow = cacheTable
+                    .Select(c => Convert(restoredCommandIdentifier.PackageId, c, nuGetGlobalPackagesFolder))
+                    .Where(candidate => candidate.restoredCommandIdentifier == restoredCommandIdentifier).ToArray();
+
+            if (matchingRow.Length >= 2)
+            {
+                throw new ResolverCacheInconsistentException(
+                    $"more than one row for {restoredCommandIdentifier.DebugToString()}");
+            }
+
+            if (matchingRow.Length == 1)
+            {
+                restoredCommandList = matchingRow[0].restoredCommand;
+                return true;
+            }
+
+            restoredCommandList = null;
+            return false;
+        }
+
+        private class CacheRow
+        {
+            public string Version { get; set; }
+            public string TargetFramework { get; set; }
+            public string RuntimeIdentifier { get; set; }
+            public string Name { get; set; }
+            public string Runner { get; set; }
+            public string RelativeToNuGetGlobalPackagesFolderPathToDll { get; set; }
+        }
+    }
+}

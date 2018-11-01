@@ -19,7 +19,7 @@ namespace Microsoft.DotNet.Tests.EndToEnd
             {
                 string projectDirectory = directory.Path;
 
-                string newArgs = "console -f netcoreapp2.2 --debug:ephemeral-hive --no-restore";
+                string newArgs = "console -f netcoreapp3.0 --debug:ephemeral-hive --no-restore";
                 new NewCommandShim()
                     .WithWorkingDirectory(projectDirectory)
                     .Execute(newArgs)
@@ -87,34 +87,6 @@ namespace Microsoft.DotNet.Tests.EndToEnd
                 .ExecuteWithCapturedOutput("prefercliruntime")
                 .Should().Pass()
                 .And.HaveStdOutContaining("Hello I prefer the cli runtime World!");;
-        }
-
-        [Fact(Skip="https://github.com/dotnet/cli/issues/9688")]
-        public void ItCanRunAToolThatInvokesADependencyToolInACSProj()
-        {
-            var repoDirectoriesProvider = new RepoDirectoriesProvider();
-
-            var testInstance = TestAssets.Get("TestAppWithProjDepTool")
-                                         .CreateInstance()
-                                         .WithSourceFiles()
-                                         .WithRestoreFiles();
-
-            var configuration = "Debug";
-
-            var testProjectDirectory = testInstance.Root;
-
-            new BuildCommand()
-                .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"-c {configuration} ")
-                .Should()
-                .Pass();
-
-            new DotnetCommand(DotnetUnderTest.WithBackwardsCompatibleRuntimes)
-                .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput(
-                    $"-d dependency-tool-invoker -c {configuration} -f netcoreapp2.2 portable")
-                .Should().Pass()
-                     .And.HaveStdOutContaining("Hello Portable World!");;
         }
     }
 }

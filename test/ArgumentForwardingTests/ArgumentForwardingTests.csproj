@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <AssemblyName>ArgumentForwardingTests</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\dotnet\dotnet.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
     <ProjectReference Include="..\Microsoft.DotNet.Tools.Tests.Utilities\Microsoft.DotNet.Tools.Tests.Utilities.csproj" />
   </ItemGroup>
@@ -17,12 +17,10 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)"/>
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
   </ItemGroup>
 
-  <Target Name="PrecompileScript" 
-          BeforeTargets="Build" 
-          Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
+  <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
 
     <Exec Command="$(PreviousStageDotnet) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
   </Target>

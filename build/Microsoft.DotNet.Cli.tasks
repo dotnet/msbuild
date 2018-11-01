@@ -21,7 +21,6 @@
   <UsingTask TaskName="GenerateGuidFromName" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateMSBuildExtensionsSWR" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GenerateMsiVersion" AssemblyFile="$(CLIBuildDll)" />
-  <UsingTask TaskName="GenerateNuGetPackagesArchiveVersion" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetCurrentRuntimeInformation" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="GetUseBundledNETCoreAppPackageVersionAsDefaultNetCorePatchVersion" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="MakeRelative" AssemblyFile="$(CLIBuildDll)" />
@@ -33,6 +32,7 @@
   <UsingTask TaskName="TarGzFileExtractToDirectory" AssemblyFile="$(CLIBuildDll)" />
   <UsingTask TaskName="UpdateVersionsRepo" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="UploadToAzure" AssemblyFile="$(CLIBuildDll)"/>
+  <UsingTask TaskName="UploadToLinuxPackageRepository" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="ZipFileCreateFromDirectory" AssemblyFile="$(CLIBuildDll)"/>
   <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(CLIBuildDll)"/>
 </Project>

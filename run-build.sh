@@ -19,6 +19,11 @@ check_min_reqs() {
     return 0
 }
 
+function GetVersionsPropsVersion {
+  VersionsProps="$REPOROOT/build/DependencyVersions.props"
+  echo "$( awk -F'[<>]' "/<$1>/{print \$3}" "$VersionsProps" )"
+}
+
 # args:
 # remote_path - $1
 # [out_path] - $2 - stdout if not provided
@@ -158,6 +163,7 @@ export MSBUILDDISABLENODEREUSE=1
 export DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
 
 # Install a stage 0
+DotNetCliVersion="$( GetVersionsPropsVersion DotNetCoreSdkLKGVersion )"
 INSTALL_ARCHITECTURE=$ARCHITECTURE
 archlower="$(echo $ARCHITECTURE | awk '{print tolower($0)}')"
 if [[ $archlower == 'arm'* ]]; then
@@ -165,7 +171,7 @@ if [[ $archlower == 'arm'* ]]; then
 fi
 
 if [ "$STAGE0_SOURCE_DIR" == "" ]; then
-    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.1.300" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$INSTALL_ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "$DotNetCliVersion" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$INSTALL_ARCHITECTURE" $LINUX_PORTABLE_INSTALL_ARGS)
 else
     echo "Copying bootstrap cli from $STAGE0_SOURCE_DIR"
     cp -r $STAGE0_SOURCE_DIR/* "$DOTNET_INSTALL_DIR"
@@ -175,6 +181,15 @@ EXIT_CODE=$?
 if [ $EXIT_CODE != 0 ]; then
     echo "run-build: Error: installing stage0 with exit code $EXIT_CODE." >&2
     exit $EXIT_CODE
+fi
+
+# These are used to test 1.x/2.x scenarios
+# Don't install in source build or when cross-compiling
+if [[ "$DotNetBuildFromSource" != "true" && "$ARCHITECTURE" == "$INSTALL_ARCHITECTURE" ]]; then
+    #ignore 1.1.2 install failure, as it is not present on all platforms
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "1.1.2" --runtime "dotnet" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" || true)
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.0.0" --runtime "dotnet" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" || true)
+    (set -x ; "$REPOROOT/scripts/obtain/dotnet-install.sh" --version "2.1.0" --runtime "dotnet" --install-dir "$DOTNET_INSTALL_DIR" --architecture "$ARCHITECTURE" || true)
 fi
 
 # Put stage 0 on the PATH (for this shell only)
@@ -192,7 +207,7 @@ fi
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 
 if [ $BUILD -eq 1 ]; then
-    dotnet msbuild build.proj /bl:msbuild.generatepropsfile.binlog /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:WriteDynamicPropsToStaticPropsFiles ${argsnotargets[@]}
+    dotnet msbuild build.proj /bl:msbuild.generatepropsfile.binlog /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS /p:GeneratePropsFile=true /t:BuildDotnetCliBuildFramework ${argsnotargets[@]}
     dotnet msbuild build.proj /bl:msbuild.mainbuild.binlog /m /v:normal /fl /flp:v=diag /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args
 else
     echo "Not building due to --nobuild"

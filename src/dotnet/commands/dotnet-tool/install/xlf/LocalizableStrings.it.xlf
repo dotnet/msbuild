@@ -15,8 +15,8 @@ Lo strumento '{1}' (versione '{2}') è stato installato.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDescription">
-        <source>Install a tool for use on the command line.</source>
-        <target state="translated">Installa uno strumento da usare sulla riga di comando.</target>
+        <source>Install global or local tool. Local tools are added to manifest and restored.</source>
+        <target state="needs-review-translation">Installa uno strumento da usare sulla riga di comando.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigFileOptionDescription">

@@ -1,26 +1,22 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">windows</OSPlatform>
+    <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">linux</OSPlatform>
+    <OSPlatform Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">osx</OSPlatform>
+
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <Architecture Condition=" $(Architecture) == '' ">$(OSArchitecture.ToLower())</Architecture>
+
     <CLITargets Condition=" '$(CLITargets)' == '' ">Prepare;Compile;Test;Package;Publish</CLITargets>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <!-- Currently, 'arm*' SDK's do not include the LZMA for performance upon extraction of the NuGet archive. -->
     <!-- https://github.com/dotnet/cli/issues/8800 -->
     <IncludeNuGetPackageArchive Condition=" $(Architecture.StartsWith('arm')) ">false</IncludeNuGetPackageArchive>
     <IncludeNuGetPackageArchive Condition=" '$(IncludeNuGetPackageArchive)' == '' ">true</IncludeNuGetPackageArchive>
-    <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' AND
-        ($(Rid.StartsWith('rhel.6'))
-        OR $(Rid.StartsWith('linux-musl'))
-        OR $(Rid.StartsWith('fedora.27'))
-        OR $(Rid.StartsWith('opensuse.42.3'))
-        OR $(Rid.StartsWith('ubuntu.18.04')))">true</SkipBuildingInstallers>
-    <SkipBuildingInstallers Condition=" '$(SkipBuildingInstallers)' == '' ">false</SkipBuildingInstallers>
+    <IncludeAspNetCoreRuntime Condition="'$(IncludeAspNetCoreRuntime)' == ''">true</IncludeAspNetCoreRuntime>
+    <IncludeMSBuildSdkResolver Condition="'$(IncludeMSBuildSdkResolver)' == ''">true</IncludeMSBuildSdkResolver>
     <UsePortableLinuxSharedFramework Condition=" '$(UsePortableLinuxSharedFramework)' == '' AND '$(OSPlatform)' == 'linux' AND '$(Rid)' != 'rhel.6-x64' AND '$(Rid)' != 'linux-musl-x64' ">true</UsePortableLinuxSharedFramework>
-    <IncludeSharedFrameworksForBackwardsCompatibilityTests Condition=" $(IncludeSharedFrameworksForBackwardsCompatibilityTests) == ''
-        AND '$(Rid)' != 'linux-x64'
-        AND '$(Rid)' != 'rhel.6-x64'
-        AND '$(Rid)' != 'linux-musl-x64'
-        AND '$(Rid)' != 'fedora.27-x64'
-        AND '$(Rid)' != 'opensuse.42.3-x64'
-        AND '$(Rid)' != 'ubuntu.18.04-x64'">true</IncludeSharedFrameworksForBackwardsCompatibilityTests>
+
     <HighEntropyVA>true</HighEntropyVA>
 
     <!-- Only use asset target fallback that we set (not implicit one to net461). -->

@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using FluentAssertions;
 using System.Linq;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Tools.Publish;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -13,6 +15,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenDotnetPublishInvocation
     {
+        private static readonly string WorkingDirectory = 
+            TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPublishInvocation));
         private readonly ITestOutputHelper output;
 
         public GivenDotnetPublishInvocation(ITestOutputHelper output)
@@ -26,30 +30,35 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { }, "")]
         [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<publishdir>")]
-        [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<publishdir>")]
+        [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
+        [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config>")]
         [InlineData(new string[] { "--configuration", "<config>" }, "-property:Configuration=<config>")]
         [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "-property:VersionSuffix=<versionsuffix>")]
-        [InlineData(new string[] { "--manifest", "<manifestfiles>" }, "-property:TargetManifestFiles=<manifestfiles>")]
+        [InlineData(new string[] { "--manifest", "<manifestfiles>" }, "-property:TargetManifestFiles=<cwd><manifestfiles>")]
         [InlineData(new string[] { "-v", "minimal" }, "-verbosity:minimal")]
         [InlineData(new string[] { "--verbosity", "minimal" }, "-verbosity:minimal")]
         [InlineData(new string[] { "<project>" }, "<project>")]
         [InlineData(new string[] { "<project>", "<extra-args>" }, "<project> <extra-args>")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            expectedAdditionalArgs = (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}");
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                expectedAdditionalArgs =
+                    (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
+                    .Replace("<cwd>", WorkingDirectory);
 
-            var msbuildPath = "<msbuildpath>";
-            var command = PublishCommand.FromArgs(args, msbuildPath);
+                var msbuildPath = "<msbuildpath>";
+                var command = PublishCommand.FromArgs(args, msbuildPath);
 
-            command.SeparateRestoreCommand
-                   .Should()
-                   .BeNull();
+                command.SeparateRestoreCommand
+                    .Should()
+                    .BeNull();
 
-            command.GetProcessStartInfo()
-                   .Arguments.Should()
-                   .Be($"{ExpectedPrefix} -restore -target:Publish{expectedAdditionalArgs}");
+                command.GetProcessStartInfo()
+                    .Arguments.Should()
+                    .Be($"{ExpectedPrefix} -restore -target:Publish{expectedAdditionalArgs}");
+            });
         }
 
         [Theory]
@@ -95,27 +104,32 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--framework", "<tfm>" }, "-property:TargetFramework=<tfm>")]
         [InlineData(new string[] { "-r", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
         [InlineData(new string[] { "--runtime", "<rid>" }, "-property:RuntimeIdentifier=<rid>")]
-        [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<publishdir>")]
-        [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<publishdir>")]
+        [InlineData(new string[] { "-o", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
+        [InlineData(new string[] { "--output", "<publishdir>" }, "-property:PublishDir=<cwd><publishdir>")]
         [InlineData(new string[] { "-c", "<config>" }, "-property:Configuration=<config>")]
         [InlineData(new string[] { "--configuration", "<config>" }, "-property:Configuration=<config>")]
         [InlineData(new string[] { "--version-suffix", "<versionsuffix>" }, "-property:VersionSuffix=<versionsuffix>")]
-        [InlineData(new string[] { "--manifest", "<manifestfiles>" }, "-property:TargetManifestFiles=<manifestfiles>")]
+        [InlineData(new string[] { "--manifest", "<manifestfiles>" }, "-property:TargetManifestFiles=<cwd><manifestfiles>")]
         [InlineData(new string[] { "-v", "minimal" }, "-verbosity:minimal")]
         [InlineData(new string[] { "--verbosity", "minimal" }, "-verbosity:minimal")]
         [InlineData(new string[] { "--no-build" }, "-property:NoBuild=true")]
         public void OptionForwardingIsCorrect(string[] args, string expectedAdditionalArgs)
         {
-            var expectedArgs = expectedAdditionalArgs.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
+            {
+                var expectedArgs = expectedAdditionalArgs
+                    .Replace("<cwd>", WorkingDirectory)
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            var parser = Parser.Instance;
+                var parser = Parser.Instance;
 
-            var result = parser.ParseFrom("dotnet publish", args);
+                var result = parser.ParseFrom("dotnet publish", args);
 
-            result["dotnet"]["publish"]
-                .OptionValuesToBeForwarded()
-                .Should()
-                .BeEquivalentTo(expectedArgs);
+                result["dotnet"]["publish"]
+                    .OptionValuesToBeForwarded()
+                    .Should()
+                    .BeEquivalentTo(expectedArgs);
+            });
         }
     }
 }

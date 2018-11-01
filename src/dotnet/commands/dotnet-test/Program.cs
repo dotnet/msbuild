@@ -84,34 +84,19 @@ namespace Microsoft.DotNet.Tools.Test
         {
             DebugHelper.HandleDebugSwitch(ref args);
 
-            TestCommand cmd;
-
-            try
-            {
-                cmd = FromArgs(args);
-            }
-            catch (CommandCreationException e)
-            {
-                return e.ExitCode;
-            }
-
             // Workaround for https://github.com/Microsoft/vstest/issues/1503
             const string NodeWindowEnvironmentName = "MSBUILDENSURESTDOUTFORTASKPROCESSES";
             string previousNodeWindowSetting = Environment.GetEnvironmentVariable(NodeWindowEnvironmentName);
 
-            int result = -1;
-
             try
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, "1");
-                result = cmd.Execute();
+                return FromArgs(args).Execute();
             }
             finally
             {
                 Environment.SetEnvironmentVariable(NodeWindowEnvironmentName, previousNodeWindowSetting);
             }
-
-            return result;
         }
 
         private static string GetSemiColonEscapedString(string arg)

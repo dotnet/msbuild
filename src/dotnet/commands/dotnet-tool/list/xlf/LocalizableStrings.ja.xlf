@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="ja" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CommandDescription">
-        <source>List tools installed in the current development environment.</source>
-        <target state="translated">現在の開発環境にインストールされているツールを一覧表示します。</target>
+        <source>List tools installed globally or locally.</source>
+        <target state="needs-review-translation">現在の開発環境にインストールされているツールを一覧表示します。</target>
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
@@ -28,8 +28,9 @@
         <note />
       </trans-unit>
       <trans-unit id="InvalidPackageWarning">
-        <source>Warning: tool package '{0}' is invalid: {1}</source>
-        <target state="translated">警告: ツール パッケージ '{0}' が無効です: {1}</target>
+        <source>Warning: tool package '{0}' is invalid, please contact tool author:
+{1}</source>
+        <target state="needs-review-translation">警告: ツール パッケージ '{0}' が無効です: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="NeedGlobalOrToolPath">

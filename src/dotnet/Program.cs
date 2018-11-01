@@ -19,6 +19,7 @@ using NuGet.Frameworks;
 using Command = Microsoft.DotNet.Cli.Utils.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 using LocalizableStrings = Microsoft.DotNet.Cli.Utils.LocalizableStrings;
+using Microsoft.DotNet.CommandFactory;
 
 namespace Microsoft.DotNet.Cli
 {
@@ -90,7 +91,6 @@ namespace Microsoft.DotNet.Cli
             var lastArg = 0;
             TopLevelCommandParserResult topLevelCommandParserResult = TopLevelCommandParserResult.Empty;
 
-            using (INuGetCacheSentinel nugetCacheSentinel = new NuGetCacheSentinel())
             using (IFirstTimeUseNoticeSentinel disposableFirstTimeUseNoticeSentinel =
                 new FirstTimeUseNoticeSentinel())
             {
@@ -171,7 +171,6 @@ namespace Microsoft.DotNet.Cli
                             skipFirstRunExperience);
 
                         ConfigureDotNetForFirstTimeUse(
-                            nugetCacheSentinel,
                             firstTimeUseNoticeSentinel,
                             aspNetCertificateSentinel,
                             toolPathSentinel,
@@ -221,7 +220,7 @@ namespace Microsoft.DotNet.Cli
             }
             else
             {
-                CommandResult result = Command.Create(
+                CommandResult result = CommandFactoryUsingResolver.Create(
                         "dotnet-" + topLevelCommandParserResult.Command,
                         appArgs,
                         FrameworkConstants.CommonFrameworks.NetStandardApp15)
@@ -252,7 +251,6 @@ namespace Microsoft.DotNet.Cli
         }
 
         private static void ConfigureDotNetForFirstTimeUse(
-            INuGetCacheSentinel nugetCacheSentinel,
             IFirstTimeUseNoticeSentinel firstTimeUseNoticeSentinel,
             IAspNetCertificateSentinel aspNetCertificateSentinel,
             IFileSentinel toolPathSentinel,
@@ -262,16 +260,10 @@ namespace Microsoft.DotNet.Cli
         {
             using (PerfTrace.Current.CaptureTiming())
             {
-                var nugetPackagesArchiver = new NuGetPackagesArchiver();
                 var environmentPath = EnvironmentPathFactory.CreateEnvironmentPath(hasSuperUserAccess, environmentProvider);
                 var commandFactory = new DotNetCommandFactory(alwaysRunOutOfProc: true);
-                var nugetCachePrimer = new NuGetCachePrimer(
-                    nugetPackagesArchiver,
-                    nugetCacheSentinel);
                 var aspnetCertificateGenerator = new AspNetCoreCertificateGenerator();
                 var dotnetConfigurer = new DotnetFirstTimeUseConfigurer(
-                    nugetCachePrimer,
-                    nugetCacheSentinel,
                     firstTimeUseNoticeSentinel,
                     aspNetCertificateSentinel,
                     aspnetCertificateGenerator,

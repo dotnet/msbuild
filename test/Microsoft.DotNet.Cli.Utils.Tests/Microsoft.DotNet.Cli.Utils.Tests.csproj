@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
-    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
     <AssemblyName>Microsoft.DotNet.Cli.Utils.Tests</AssemblyName>
     <OutputType>Exe</OutputType>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
@@ -11,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\artifacts\*\stage2\sdk\*\.version">
+    <Content Include="$(SdkOutputDirectory)\sdk\*\.version">
       <Link>.version</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -40,25 +39,5 @@
     <PackageReference Include="Microsoft.Build.Runtime" Version="$(MicrosoftBuildRuntimePackageVersion)" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
   </ItemGroup>
-
-  <Target Name="CreateDotnetToolsTestAsset" AfterTargets="Build">
-
-    <PropertyGroup>
-      <testAssetSourceRoot>$(OutputPath)/TestDotnetToolsLayoutDirectory</testAssetSourceRoot>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <TestDotnetTools Include="$(RepoRoot)/build/BundledDotnetTools.proj">
-        <Properties>
-          DotnetToolsLayoutDirectory=$(SdkOutputDirectory)/DotnetTools;
-          TemplateFillInPackageName=dotnet-watch;
-          TemplateFillInPackageVersion=$(DotnetWatchPackageVersion);
-          PreviousStageDirectory=$(PreviousStageDirectory);
-          DotnetToolsLayoutDirectory=$(testAssetSourceRoot)
-        </Properties>
-      </TestDotnetTools>
-    </ItemGroup>
-    <MSBuild BuildInParallel="False" Projects="@(TestDotnetTools)" />
-  </Target>
 
 </Project>

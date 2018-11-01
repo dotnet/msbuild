@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <RestoreAdditionalProjectSources Condition="'$(TEST_PACKAGES)' != ''">$(TEST_PACKAGES)</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
@@ -14,6 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="dotnet-dependency-tool-invoker" Version="1.0.0-*" />
+    <DotNetCliToolReference Include="dotnet-hello" Version="1.0.0-*" />
   </ItemGroup>
 </Project>

@@ -18,11 +18,11 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private static string GetMessage(string commandName)
         {
-            var commandRemoveLeadningDotnet = commandName.Replace("dotnet-", string.Empty);
-            var packageName = "dotnet-" + commandRemoveLeadningDotnet.ToLower();
+            var commandRemoveLeadingDotnet = commandName.Replace("dotnet-", string.Empty);
+            var packageName = "dotnet-" + commandRemoveLeadingDotnet.ToLower();
 
             return string.Format(LocalizableStrings.CannotFindCommandAvailableAsTool,
-                commandRemoveLeadningDotnet,
+                commandRemoveLeadingDotnet,
                 packageName);
         }
     }

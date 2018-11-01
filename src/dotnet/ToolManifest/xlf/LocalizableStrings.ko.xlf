@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
+    <body>
+      <trans-unit id="VersionIsInvalid">
+        <source>Version {0} is invalid.</source>
+        <target state="new">Version {0} is invalid.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FieldCommandsIsMissing">
+        <source>Missing 'commands' entry.</source>
+        <target state="new">Missing 'commands' entry.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidManifestFilePrefix">
+        <source>Invalid manifest file. Path {0}:
+{1}</source>
+        <target state="new">Invalid manifest file. Path {0}:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotFindAnyManifestsFileSearched">
+        <source>Cannot find any manifests file. Searched:
+{0}</source>
+        <target state="new">Cannot find any manifests file. Searched:
+{0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InPackage">
+        <source>In package {0}:
+{1}</source>
+        <target state="new">In package {0}:
+{1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestVersionHigherThanSupported">
+        <source>Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</source>
+        <target state="new">Manifest version is {0}. This manifest may not be supported in this SDK version that can support up to manifest version {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestVersion0">
+        <source>Manifest version 0 is not supported.</source>
+        <target state="new">Manifest version 0 is not supported.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolMissingVersion">
+        <source>Missing 'version' entry.</source>
+        <target state="new">Missing 'version' entry.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="JsonParsingError">
+        <source>Json parsing error in file {0} : {1}</source>
+        <target state="new">Json parsing error in file {0} : {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestMissingIsRoot">
+        <source>Missing 'isRoot' entry.</source>
+        <target state="new">Missing 'isRoot' entry.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
