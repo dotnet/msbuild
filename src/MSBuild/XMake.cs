@@ -21,6 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -557,6 +558,7 @@ namespace Microsoft.Build.CommandLine
                 bool enableProfiler = false;
                 bool interactive = false;
                 bool isolateProjects = false;
+                bool graphBuild = false;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -588,6 +590,7 @@ namespace Microsoft.Build.CommandLine
                         ref enableProfiler,
                         ref restoreProperties,
                         ref isolateProjects,
+                        ref graphBuild,
                         recursing: false
                         ))
                 {
@@ -624,7 +627,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects))
+                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects, graphBuild))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -925,7 +928,8 @@ namespace Microsoft.Build.CommandLine
             ProfilerLogger profilerLogger,
             bool enableProfiler,
             bool interactive,
-            bool isolateProjects
+            bool isolateProjects,
+            bool graphBuild
         )
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
@@ -1141,7 +1145,14 @@ namespace Microsoft.Build.CommandLine
 
                             if (!restoreOnly)
                             {
-                                results = ExecuteBuild(buildManager, request);
+                                if (graphBuild)
+                                {
+                                    results = ExecuteGraphBuild(projectFile, targets, buildManager, projectCollection, globalProperties);
+                                }
+                                else
+                                {
+                                    results = ExecuteBuild(buildManager, request);
+                                }
                             }
                         }
                         finally
@@ -1237,6 +1248,79 @@ namespace Microsoft.Build.CommandLine
             }
 
             return s_activeBuild.Execute();
+        }
+
+        private static BuildResult ExecuteGraphBuild(
+            string projectFile,
+            string[] targets,
+            BuildManager buildManager,
+            ProjectCollection projectCollection,
+            Dictionary<string, string> globalProperties)
+        {
+            // TODO: Handle Ctrl-C cancellation properly.
+            // s_activeBuild is supposed to be the active build, but we may have multiple going at once.
+            // This may be solved once better integration with the scheduler (#3774) is done.
+            var projectGraph = new ProjectGraph(projectFile, globalProperties, projectCollection);
+            var entryNode = projectGraph.EntryPointNodes.First();
+            var targetLists = projectGraph.GetTargetLists(targets);
+
+            var waitHandle = new AutoResetEvent(true);
+            var graphBuildStateLock = new object();
+
+            var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
+            var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
+            var buildingNodes = new Dictionary<BuildSubmission, ProjectGraphNode>();
+            BuildResult entryProjectResult = null;
+            while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
+            {
+                waitHandle.WaitOne();
+
+                lock (graphBuildStateLock)
+                {
+                    var unblockedNodes = blockedNodes
+                        .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
+                        .ToList();
+                    foreach (var node in unblockedNodes)
+                    {
+                        var targetList = targetLists[node];
+                        if (targetList.Count == 0)
+                        {
+                            // An empty target list here means "no targets" instead of "default targets", so don't even build it.
+                            finishedNodes.Add(node);
+                            blockedNodes.Remove(node);
+
+                            waitHandle.Set();
+
+                            continue;
+                        }
+
+                        var request = new BuildRequestData(node.ProjectInstance, targetList.ToArray());
+                        var buildSubmission = buildManager.PendBuildRequest(request);
+                        buildingNodes.Add(buildSubmission, node);
+                        blockedNodes.Remove(node);
+                        buildSubmission.ExecuteAsync(finishedBuildSubmission =>
+                        {
+                            ProjectGraphNode finishedNode;
+                            lock (graphBuildStateLock)
+                            {
+                                finishedNode = buildingNodes[finishedBuildSubmission];
+
+                                finishedNodes.Add(finishedNode);
+                                buildingNodes.Remove(finishedBuildSubmission);
+                            }
+
+                            if (finishedNode == entryNode)
+                            {
+                                entryProjectResult = finishedBuildSubmission.BuildResult;
+                            }
+
+                            waitHandle.Set();
+                        }, null);
+                    }
+                }
+            }
+
+            return entryProjectResult;
         }
 
         private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
@@ -1917,6 +2001,7 @@ namespace Microsoft.Build.CommandLine
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
             ref bool isolateProjects,
+            ref bool graphBuild,
             bool recursing
         )
         {
@@ -2029,6 +2114,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref enableProfiler,
                                                                ref restoreProperties,
                                                                ref isolateProjects,
+                                                               ref graphBuild,
                                                                recursing: true
                                                              );
                         }
@@ -2079,6 +2165,11 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
                     {
                         isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
+                    {
+                        graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
                     }
 
                     // figure out which loggers are going to listen to build events
@@ -2363,30 +2454,12 @@ namespace Microsoft.Build.CommandLine
                 bool restart = true;
                 while (restart)
                 {
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle].Length == 0)
-                    {
-                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "clientToServerPipeHandle");
-                    }
-                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle].Length == 0)
-                    {
-                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "serverToClientPipeHandle");
-                    }
-
-                    string clientToServerPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle][0];
-                    string serverToClientPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle][0];
-#endif
-
                     Exception nodeException = null;
                     NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
                     // normal OOP node case
                     if (nodeModeNumber == 1)
                     {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcNode node = new OutOfProcNode();
-#else
-                        OutOfProcNode node = new OutOfProcNode(clientToServerPipeHandle, serverToClientPipeHandle);
-#endif
 
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
@@ -2397,11 +2470,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if (nodeModeNumber == 2)
                     {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-#else
-                        OutOfProcTaskHostNode node = new OutOfProcTaskHostNode(clientToServerPipeHandle, serverToClientPipeHandle);
-#endif
                         shutdownReason = node.Run(out nodeException);
                     }
                     else
@@ -3545,6 +3614,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

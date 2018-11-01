@@ -1496,7 +1496,7 @@ namespace Microsoft.Build.Construction
 
                     _encoding = saveEncoding;
 
-                    FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
+                    var fileInfo = FileUtilities.GetFileInfoNoThrow(_projectFileLocation.File);
 
                     // If the file was deleted by a race with someone else immediately after it was written above
                     // then we obviously can't read the write time. In this obscure case, we'll retain the 

@@ -16,12 +16,12 @@
     </description>
     <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <dependencies>
-      <group targetFramework="net46">
+      <group targetFramework="net472">
         <dependency id="Microsoft.Build.Framework" version="$version$" />
       </group>
     </dependencies>
   </metadata>
   <files>
-    <file src="Microsoft.Build.Engine.dll" target="lib\net46" />
+    <file src="Microsoft.Build.Engine.dll" target="lib\net472" />
   </files>
 </package>

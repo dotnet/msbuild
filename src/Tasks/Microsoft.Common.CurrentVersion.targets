@@ -830,6 +830,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterBuild
     </BuildDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+  </ItemGroup>
+
   <Target
       Name="Build"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "
@@ -917,6 +922,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterRebuild;
     </RebuildDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+  </ItemGroup>
 
   <Target
       Name="Rebuild"
@@ -4965,6 +4974,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AfterClean
     </CleanDependsOn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
+  </ItemGroup>
+
   <Target
       Name="Clean"
       Condition=" '$(_InvalidConfigurationWarning)' != 'true' "

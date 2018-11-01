@@ -1333,6 +1333,14 @@ namespace Microsoft.Build.Shared
             return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
         }
 
+        internal static void EnsureDirectoryExists(string directoryPath)
+        {
+            if (directoryPath != null && !DefaultFileSystem.DirectoryExists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+        }
+
         // Method is simple set of function calls and may inline;
         // we don't want it inlining into the tight loop that calls it as an exit case,
         // so mark as non-inlining

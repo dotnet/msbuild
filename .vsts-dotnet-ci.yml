@@ -22,7 +22,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
+      testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
@@ -67,7 +67,7 @@ phases:
     inputs:
       testRunTitle: 'Windows-on-core Full Framework'
       testRunner: XUnit
-      testResultsFiles: 'artifacts/**/*UnitTests_net46*.xml'
+      testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
       publishRunAttachments: true
       mergeTestResults: true
     condition: always()
