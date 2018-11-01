@@ -85,7 +85,9 @@
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe.config" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll.config" />
 
-      <FreshlyBuiltProjects Include="$(OutputPath)**\*props" />
+      <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.Common.props" />
+      <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.VisualStudioVersion.*.Common.props" />
+      <FreshlyBuiltProjects Include="$(OutputPath)**\*props" Exclude="@(FreshlyBuiltRootProjects)" />
       <FreshlyBuiltProjects Include="$(OutputPath)**\*targets" />
       <FreshlyBuiltProjects Include="$(OutputPath)**\*tasks" />
       <FreshlyBuiltProjects Include="$(OutputPath)**\*xml" />
@@ -129,6 +131,8 @@
     <Copy SourceFiles="@(RoslynBinaries)"
           DestinationFiles="@(RoslynBinaries -> '$(BootstrapDestination)15.0\Bin\Roslyn\%(RecursiveDir)%(Filename)%(Extension)')" />
     <!-- Copy our freshly-built props and targets, overwriting anything we copied from the machine -->
+    <Copy SourceFiles="@(FreshlyBuiltRootProjects)"
+          DestinationFiles="@(FreshlyBuiltRootProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\%(Filename)%(Extension)')" />
     <Copy SourceFiles="@(FreshlyBuiltProjects)"
           DestinationFiles="@(FreshlyBuiltProjects -> '$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
