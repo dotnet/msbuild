@@ -6,46 +6,6 @@
 
 set -e
 
-machine_has() {
-    hash "$1" > /dev/null 2>&1
-    return $?
-}
-
-check_min_reqs() {
-    if ! machine_has "curl"; then
-        echo "run-build: Error: curl is required to download dotnet. Install curl to proceed." >&2
-        return 1
-    fi
-    return 0
-}
-
-function GetVersionsPropsVersion {
-  VersionsProps="$REPOROOT/build/DependencyVersions.props"
-  echo "$( awk -F'[<>]' "/<$1>/{print \$3}" "$VersionsProps" )"
-}
-
-# args:
-# remote_path - $1
-# [out_path] - $2 - stdout if not provided
-download() {
-    eval $invocation
-    
-    local remote_path=$1
-    local out_path=${2:-}
-
-    local failed=false
-    if [ -z "$out_path" ]; then
-        curl --retry 10 -sSL --create-dirs $remote_path || failed=true
-    else
-        curl --retry 10 -sSL --create-dirs -o $out_path $remote_path || failed=true
-    fi
-    
-    if [ "$failed" = true ]; then
-        echo "run-build: Error: Download failed" >&2
-        return 1
-    fi
-}
-
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -145,5 +105,4 @@ if [ $BUILD -eq 1 ]; then
     . "$REPOROOT/eng/common/build.sh" --build --restore "$@"
 else
     echo "Not building due to --nobuild"
-    echo "Command that would be run is: 'dotnet msbuild build.proj /m /p:Architecture=$ARCHITECTURE $CUSTOM_BUILD_ARGS $args'"
 fi

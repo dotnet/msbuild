@@ -22,6 +22,8 @@ namespace Microsoft.DotNet.Cli.Build.Tests
                 .WithSourceFiles()
                 .WithRestoreFiles();
 
+            Console.WriteLine($"PATH: {testInstance.Root}");
+
             new BuildCommand()
                 .WithWorkingDirectory(testInstance.Root)
                 .Execute()
