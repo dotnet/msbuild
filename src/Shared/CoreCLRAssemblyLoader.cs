@@ -73,29 +73,18 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private Assembly TryGetWellKnownAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
-        {
-            if (!_wellKnownAssemblyNames.Contains(assemblyName.Name))
-            {
-                return null;
-            }
-
-            assemblyName.Version = _currentAssemblyVersion;
-
-            return context.LoadFromAssemblyName(assemblyName);
-        }
-
         private Assembly TryResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
         {
             lock (_guard)
             {
-                Assembly assembly = TryGetWellKnownAssembly(context, assemblyName);
-
-                if (assembly != null)
+                if (_wellKnownAssemblyNames.Contains(assemblyName.Name))
                 {
-                    return assembly;
+                    // Ensure we are attempting to load a matching version
+                    // of the Microsoft.Build.* assembly.
+                    assemblyName.Version = _currentAssemblyVersion;
                 }
 
+                Assembly assembly;
                 if (_namesToAssemblies.TryGetValue(assemblyName.FullName, out assembly))
                 {
                     return assembly;
