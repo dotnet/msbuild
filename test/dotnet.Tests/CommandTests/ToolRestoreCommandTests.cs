@@ -120,9 +120,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 new MockManifestFileFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
-                        new[] {_toolCommandNameA}),
+                        new[] {_toolCommandNameA},
+                        new DirectoryPath(_temporaryDirectory)),
                     new ToolManifestPackage(_packageIdB, _packageVersionB,
-                        new[] {_toolCommandNameB})
+                        new[] {_toolCommandNameB},
+                        new DirectoryPath(_temporaryDirectory))
                 });
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
@@ -157,9 +159,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 new MockManifestFileFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
-                        new[] {_toolCommandNameA}),
+                        new[] {_toolCommandNameA},
+                        new DirectoryPath(_temporaryDirectory)),
                     new ToolManifestPackage(_packageIdB, _packageVersionB,
-                        new[] {_toolCommandNameB})
+                        new[] {_toolCommandNameB},
+                        new DirectoryPath(_temporaryDirectory))
                 });
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
@@ -192,9 +196,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 new MockManifestFileFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
-                        new[] {_toolCommandNameA}),
+                        new[] {_toolCommandNameA},
+                        new DirectoryPath(_temporaryDirectory)),
                     new ToolManifestPackage(_packageIdWithCommandNameCollisionWithA,
-                        _packageVersionWithCommandNameCollisionWithA, new[] {_toolCommandNameA})
+                        _packageVersionWithCommandNameCollisionWithA, new[] {_toolCommandNameA},
+                        new DirectoryPath(_temporaryDirectory))
                 });
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
@@ -228,9 +234,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 new MockManifestFileFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
-                        new[] {_toolCommandNameA}),
+                        new[] {_toolCommandNameA},
+                        new DirectoryPath(_temporaryDirectory)),
                     new ToolManifestPackage(new PackageId("non-exists"), NuGetVersion.Parse("1.0.0"),
-                        new[] {new ToolCommandName("non-exists"),})
+                        new[] {new ToolCommandName("non-exists")},
+                        new DirectoryPath(_temporaryDirectory))
                 });
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
@@ -271,7 +279,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 new MockManifestFileFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
-                        new[] {differentCommandNameA, differentCommandNameB}),
+                        new[] {differentCommandNameA, differentCommandNameB},
+                        new DirectoryPath(_temporaryDirectory)),
                 });
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
@@ -322,7 +331,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 new MockManifestFileFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
-                        new[] {_toolCommandNameA})
+                        new[] {_toolCommandNameA},
+                        new DirectoryPath(_temporaryDirectory))
                 });
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
@@ -350,7 +360,8 @@ namespace Microsoft.DotNet.Tests.Commands
                 new MockManifestFileFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
-                        new[] {_toolCommandNameA})
+                        new[] {_toolCommandNameA},
+                        new DirectoryPath(_temporaryDirectory))
                 });
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,

@@ -48,7 +48,7 @@ namespace Microsoft.DotNet.Tests.Commands
             {
                 new MockFeed
                 {
-                    Type = MockFeedType.FeedFromLookUpNugetConfig,
+                    Type = MockFeedType.FeedFromGlobalNugetConfig,
                     Packages = new List<MockFeedPackage>
                     {
                         new MockFeedPackage

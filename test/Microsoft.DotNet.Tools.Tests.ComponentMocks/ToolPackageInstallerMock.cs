@@ -128,7 +128,11 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             var executable = packageDirectory.WithFile("exe");
             _fileSystem.File.CreateEmptyFile(executable.Value);
 
-            MockFeedPackage package = _projectRestorer.GetPackage(packageId.ToString(), versionRange, packageLocation.NugetConfig);
+            MockFeedPackage package = _projectRestorer.GetPackage(
+                packageId.ToString(),
+                versionRange,
+                packageLocation.NugetConfig,
+                packageLocation.RootConfigDirectory);
 
             return new TestToolPackage
             {

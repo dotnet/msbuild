@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
+using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -16,12 +17,19 @@ namespace Microsoft.DotNet.ToolManifest
         public PackageId PackageId { get; }
         public NuGetVersion Version { get; }
         public ToolCommandName[] CommandNames { get; }
+        /// <summary>
+        /// The directory that will take effect first.
+        /// When it is under .config directory, it is not .config directory
+        /// it is .config's parent directory
+        /// </summary>
+        public DirectoryPath FirstEffectDirectory { get; }
 
-        public ToolManifestPackage(
-            PackageId packagePackageId,
+        public ToolManifestPackage(PackageId packagePackageId,
             NuGetVersion version,
-            ToolCommandName[] toolCommandNames)
+            ToolCommandName[] toolCommandNames,
+            DirectoryPath firstEffectDirectory)
         {
+            FirstEffectDirectory = firstEffectDirectory;
             PackageId = packagePackageId;
             Version = version ?? throw new ArgumentNullException(nameof(version));
             CommandNames = toolCommandNames ?? throw new ArgumentNullException(nameof(toolCommandNames));
@@ -37,7 +45,9 @@ namespace Microsoft.DotNet.ToolManifest
         {
             return PackageId.Equals(other.PackageId) &&
                    EqualityComparer<NuGetVersion>.Default.Equals(Version, other.Version) &&
-                   CommandNamesEqual(other.CommandNames);
+                   CommandNamesEqual(other.CommandNames) &&
+                   FirstEffectDirectory.Value.TrimEnd('/', '\\')
+                     .Equals(other.FirstEffectDirectory.Value.TrimEnd('/', '\\'), StringComparison.Ordinal);
         }
 
         private bool CommandNamesEqual(ToolCommandName[] otherCommandNames)

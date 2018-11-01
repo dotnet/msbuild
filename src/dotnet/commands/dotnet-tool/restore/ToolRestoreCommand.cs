@@ -123,7 +123,8 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                         _toolPackageInstaller.InstallPackageToExternalManagedLocation(
                             new PackageLocation(
                                 nugetConfig: configFile,
-                                additionalFeeds: _sources),
+                                additionalFeeds: _sources,
+                                rootConfigDirectory: package.FirstEffectDirectory),
                             package.PackageId, ToVersionRangeWithOnlyOneVersion(package.Version), targetFramework,
                             verbosity: _verbosity);
 

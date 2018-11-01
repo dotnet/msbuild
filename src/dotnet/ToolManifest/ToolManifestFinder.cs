@@ -18,29 +18,29 @@ namespace Microsoft.DotNet.ToolManifest
 {
     internal class ToolManifestFinder : IToolManifestFinder
     {
-        private readonly DirectoryPath _probStart;
+        private readonly DirectoryPath _probeStart;
         private readonly IFileSystem _fileSystem;
         private const string _manifestFilenameConvention = "dotnet-tools.json";
 
         // The supported tool manifest file version.
         private const int SupportedVersion = 1;
 
-        public ToolManifestFinder(DirectoryPath probStart, IFileSystem fileSystem = null)
+        public ToolManifestFinder(DirectoryPath probeStart, IFileSystem fileSystem = null)
         {
-            _probStart = probStart;
+            _probeStart = probeStart;
             _fileSystem = fileSystem ?? new FileSystemWrapper();
         }
 
         public IReadOnlyCollection<ToolManifestPackage> Find(FilePath? filePath = null)
         {
-            IEnumerable<FilePath> allPossibleManifests =
+            IEnumerable<(FilePath manifestfile, DirectoryPath _)> allPossibleManifests =
                 filePath != null
-                    ? new[] {filePath.Value}
+                    ? new[] {(filePath.Value, filePath.Value.GetDirectoryPath())}
                     : EnumerateDefaultAllPossibleManifests();
 
             bool findAnyManifest = false;
             var result = new List<ToolManifestPackage>();
-            foreach (FilePath possibleManifest in allPossibleManifests)
+            foreach ((FilePath possibleManifest, DirectoryPath correspondingDirectory) in allPossibleManifests)
             {
                 if (!_fileSystem.File.Exists(possibleManifest.Value))
                 {
@@ -52,7 +52,7 @@ namespace Microsoft.DotNet.ToolManifest
                     DeserializeLocalToolsManifest(possibleManifest);
 
                 List<ToolManifestPackage> toolManifestPackageFromOneManifestFile =
-                    GetToolManifestPackageFromOneManifestFile(deserializedManifest, possibleManifest);
+                    GetToolManifestPackageFromOneManifestFile(deserializedManifest, possibleManifest, correspondingDirectory);
 
                 foreach (ToolManifestPackage p in toolManifestPackageFromOneManifestFile)
                 {
@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.ToolManifest
             {
                 throw new ToolManifestCannotBeFoundException(
                     string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
-                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => f.Value))));
+                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => f.manifestfile.Value))));
             }
 
             return result;
@@ -82,7 +82,7 @@ namespace Microsoft.DotNet.ToolManifest
         public bool TryFind(ToolCommandName toolCommandName, out ToolManifestPackage toolManifestPackage)
         {
             toolManifestPackage = default(ToolManifestPackage);
-            foreach (FilePath possibleManifest in EnumerateDefaultAllPossibleManifests())
+            foreach ((FilePath possibleManifest, DirectoryPath correspondingDirectory) in EnumerateDefaultAllPossibleManifests())
             {
                 if (!_fileSystem.File.Exists(possibleManifest.Value))
                 {
@@ -93,7 +93,7 @@ namespace Microsoft.DotNet.ToolManifest
                     DeserializeLocalToolsManifest(possibleManifest);
 
                 List<ToolManifestPackage> toolManifestPackages =
-                    GetToolManifestPackageFromOneManifestFile(deserializedManifest, possibleManifest);
+                    GetToolManifestPackageFromOneManifestFile(deserializedManifest, possibleManifest, correspondingDirectory);
 
                 foreach (var package in toolManifestPackages)
                 {
@@ -130,7 +130,9 @@ namespace Microsoft.DotNet.ToolManifest
         }
 
         private List<ToolManifestPackage> GetToolManifestPackageFromOneManifestFile(
-            SerializableLocalToolsManifest deserializedManifest, FilePath path)
+            SerializableLocalToolsManifest deserializedManifest,
+            FilePath path,
+            DirectoryPath correspondingDirectory)
         {
             List<ToolManifestPackage> result = new List<ToolManifestPackage>();
             var errors = new List<string>();
@@ -191,7 +193,8 @@ namespace Microsoft.DotNet.ToolManifest
                     result.Add(new ToolManifestPackage(
                         packageId,
                         version,
-                        ToolCommandName.Convert(tools.Value.commands)));
+                        ToolCommandName.Convert(tools.Value.commands),
+                        correspondingDirectory));
                 }
             }
 
@@ -206,15 +209,15 @@ namespace Microsoft.DotNet.ToolManifest
             return result;
         }
 
-        private IEnumerable<FilePath> EnumerateDefaultAllPossibleManifests()
+        private IEnumerable<(FilePath manifestfile, DirectoryPath manifestFileFirstEffectDirectory)> EnumerateDefaultAllPossibleManifests()
         {
-            DirectoryPath? currentSearchDirectory = _probStart;
+            DirectoryPath? currentSearchDirectory = _probeStart;
             while (currentSearchDirectory.HasValue)
             {
                 var currentSearchDotConfigDirectory = currentSearchDirectory.Value.WithSubDirectories(Constants.DotConfigDirectoryName);
                 var tryManifest = currentSearchDirectory.Value.WithFile(_manifestFilenameConvention);
-                yield return currentSearchDotConfigDirectory.WithFile(_manifestFilenameConvention);
-                yield return tryManifest;
+                yield return (currentSearchDotConfigDirectory.WithFile(_manifestFilenameConvention), currentSearchDirectory.Value);
+                yield return (tryManifest, currentSearchDirectory.Value);
                 currentSearchDirectory = currentSearchDirectory.Value.GetParentPathNullable();
             }
         }
