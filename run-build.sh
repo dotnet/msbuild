@@ -32,6 +32,8 @@ while [[ $# > 0 ]]; do
     case $lowerI in
         -c|--configuration)
             export CONFIGURATION=$2
+            args+=("--configuration")
+            args+=("$2")
             shift
             ;;
         -a|--architecture)

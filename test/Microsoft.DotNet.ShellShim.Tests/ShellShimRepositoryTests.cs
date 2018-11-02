@@ -453,41 +453,8 @@ namespace Microsoft.DotNet.ShellShim.Tests
             return stdOut ?? "";
         }
 
-        private static FileInfo GetStage2DotnetPath()
-        {
-            string stage2DotnetPath;
-
-            var environmentProvider = new EnvironmentProvider();
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                stage2DotnetPath = environmentProvider.GetCommandPath("dotnet", ".exe");
-            }
-            else
-            {
-                stage2DotnetPath = environmentProvider.GetCommandPath("dotnet");
-            }
-
-            var stage2Dotnet = new FileInfo(stage2DotnetPath);
-            return stage2Dotnet;
-        }
-
         private static string GetAppHostTemplateFromStage2()
         {
-            var environmentProvider = new EnvironmentProvider();
-            string stage2DotnetPath;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                stage2DotnetPath = environmentProvider.GetCommandPath("dotnet", ".exe");
-            }
-            else
-            {
-                stage2DotnetPath = environmentProvider.GetCommandPath("dotnet");
-            }
-
-            var stage2Dotnet = GetStage2DotnetPath();
-
             var stage2AppHostTemplateDirectory =
                 new DirectoryInfo(new RepoDirectoriesProvider().Stage2Sdk)
                 .GetDirectory("AppHostTemplate").FullName;

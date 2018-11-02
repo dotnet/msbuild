@@ -56,8 +56,8 @@ phases:
     - task: PublishTestResults@1
       displayName: Publish Test Results
       inputs:
-        testRunner: VSTest
-        testResultsFiles: '**/*.trx'
+        testRunner: XUnit
+        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
         testRunTitle: 'Unit Test Results'
         platform: '$(BuildPlatform)'
         configuration: '$(_BuildConfig)'
@@ -68,9 +68,8 @@ phases:
       inputs:
         SourceFolder: '$(Build.SourcesDirectory)'
         Contents: |
-         msbuild.log
-         msbuild.mainbuild.binlog
-         msbuild.generatepropsfile.binlog
+         artifacts/log/$(_BuildConfig)/**/*
+         artifacts/TestResults/$(_BuildConfig)/**/*
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
       continueOnError: true
       condition: always()
