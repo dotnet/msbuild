@@ -356,12 +356,5 @@ namespace Microsoft.Build.BackEnd
         }
 
         #endregion
-        /// <summary>
-        /// Returns true if the result applies to this request.
-        /// </summary>
-        internal bool DoesResultApplyToRequest(BuildResult result)
-        {
-            return _globalRequestId == result.GlobalRequestId && _nodeRequestId == result.NodeRequestId;
-        }
     }
 }

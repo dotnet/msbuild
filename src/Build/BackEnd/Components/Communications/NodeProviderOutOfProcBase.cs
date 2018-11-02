@@ -568,12 +568,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
-            /// <summary>
-            /// Whether to trace communications.
-            /// Stored here as a field to avoid a function call when writing packets
-            /// </summary>
-            private static bool s_trace = String.Equals(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"), "1", StringComparison.Ordinal);
-
             // The pipe(s) used to communicate with the node.
             private Stream _clientToServerStream;
             private Stream _serverToClientStream;
@@ -738,13 +732,6 @@ namespace Microsoft.Build.BackEnd
                     writeStream.Position = 1;
                     writeStream.Write(BitConverter.GetBytes((int)writeStream.Length - 5), 0, 4);
 
-#if FALSE
-                    if (trace) // Avoid method call
-                    {
-                        CommunicationsUtilities.Trace(nodeId, "Sending Packet of type {0} with length {1}", packet.Type.ToString(), writeStream.Length - 5);
-                    }
-#endif
-
                     byte[] writeStreamBuffer = writeStream.GetBuffer();
 
                     for (int i = 0; i < writeStream.Length; i += MaxPacketWriteSize)
@@ -887,7 +874,6 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                NodePacketType packetType = (NodePacketType)_headerByte[0];
                 int packetLength = BitConverter.ToInt32(_headerByte, 1);
 
                 byte[] packetData;

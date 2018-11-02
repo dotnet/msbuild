@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests.Definition
             // Should not throw
             string msbuildOverrideTasksPath = null;
             string defaultOverrideToolsVersion = null;
-            string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal(0, values.Count);
         }
@@ -664,7 +664,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
                 // Should throw ...
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -699,7 +699,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
                 // Should throw ...
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -758,7 +758,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
             // Should not throw ...
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -856,7 +856,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
                 // Should throw ...
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -887,7 +887,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
                 // Should throw ...
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -927,7 +927,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             string msbuildOverrideTasksPath;
             string defaultOverrideToolsVersion = null;
-            string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal(0, values.Count);
         }
@@ -957,7 +957,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             string msbuildOverrideTasksPath;
             string defaultOverrideToolsVersion = null;
-            string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal(1, values.Count);
             Assert.Equal(1, values["2.0"].Properties.Count);
@@ -1184,7 +1184,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
                 // Should throw ...
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -1211,7 +1211,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -1243,7 +1243,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -1277,7 +1277,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
                 // throws
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -1384,7 +1384,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -1417,7 +1417,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
                 // should throw... 
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -1455,7 +1455,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                null,
@@ -1490,7 +1490,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                null,
@@ -1532,7 +1532,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                null,
@@ -1573,7 +1573,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                null,
@@ -1606,7 +1606,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                null,
@@ -1632,7 +1632,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -1660,7 +1660,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 subKey1.SetValue("MSBuildProjectFile", @"SomeRegistryValue");
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                GetStandardRegistryReader(),
@@ -1706,7 +1706,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            null,
@@ -1997,7 +1997,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2043,7 +2043,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2093,7 +2093,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2178,7 +2178,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2210,7 +2210,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2319,7 +2319,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-                string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+                ToolsetReader.ReadAllToolsets
                                                            (
                                                                values,
                                                                new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), mockRegistryKey),
@@ -2514,7 +2514,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2728,7 +2728,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2778,7 +2778,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),
@@ -2830,7 +2830,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ProjectCollection e = new ProjectCollection(globalProperties, null, ToolsetDefinitionLocations.None);
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
-            string defaultToolsVersion = ToolsetReader.ReadAllToolsets
+            ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
                                                            GetStandardRegistryReader(),

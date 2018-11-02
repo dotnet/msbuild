@@ -2879,7 +2879,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequestData requestData = new BuildRequestData(pi, new[] { "Build" });
                 BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
-                BuildResult br = submission.Execute();
+                submission.Execute();
                 project1DoneEvent.Set();
             });
 
@@ -2889,7 +2889,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project2);
                 BuildRequestData requestData = new BuildRequestData(pi, new[] { "Build" });
                 BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
-                BuildResult br = submission.Execute();
+                submission.Execute();
                 project2DoneEvent.Set();
             });
 

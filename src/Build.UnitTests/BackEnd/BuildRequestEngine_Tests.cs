@@ -27,8 +27,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     public class BuildRequestEngine_Tests : IDisposable
     {
-        private delegate void EndpointOperationDelegate(NodeEndpointInProc endpoint);
-
         internal class MockRequestBuilder : IRequestBuilder, IBuildComponent
         {
             public bool ThrowExceptionOnRequest
@@ -502,20 +500,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = new BuildRequest(1 /* submission id */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);
             request.GlobalRequestId = _globalRequestId++;
             return request;
-        }
-
-        private void WaitForEngineStatus(BuildRequestEngineStatus expectedStatus)
-        {
-            DateTime time = DateTime.Now;
-            while (DateTime.Now - time > new TimeSpan(0, 0, 5))
-            {
-                WaitForEvent(_engineStatusChangedEvent, "EngineStatusChanged");
-                if (expectedStatus == _engineStatusChanged_Status)
-                {
-                    return;
-                }
-            }
-            Assert.True(false, "Engine failed to change to status " + expectedStatus);
         }
 
         private void VerifyEngineStatus(BuildRequestEngineStatus expectedStatus)

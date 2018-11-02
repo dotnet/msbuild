@@ -205,8 +205,6 @@ namespace Microsoft.Build.UnitTests
             IDictionary targetOutputs
             )
         {
-            ILogger[] loggers = { MockLogger, new ConsoleLogger() };
-
             return BuildProjectFile(projectFileName, targetNames, globalPropertiesPassedIntoTask, targetOutputs, null);
         }
 

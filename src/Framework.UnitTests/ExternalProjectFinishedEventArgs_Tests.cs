@@ -14,11 +14,6 @@ namespace Microsoft.Build.UnitTests
     public class ExternalProjectFinishedEventArgs_Tests
     {
         /// <summary>
-        /// Default event to use in tests.
-        /// </summary>
-        private ExternalProjectFinishedEventArgs _baseExternalProjectFinishedEvent = new ExternalProjectFinishedEventArgs("Message", "HelpKeyword", "Sender", "ProjectFile", true);
-
-        /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
         [Fact]

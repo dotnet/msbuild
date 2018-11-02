@@ -412,6 +412,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            /*
             /// <summary>
             /// Throws out the deserialized items.
             /// </summary>
@@ -419,7 +420,6 @@ namespace Microsoft.Build.Execution
             /// Not presently used, but could be used for a multi-stage caching mechanism which first throws out decompressed items,
             /// then if more space is needed, starts throwing out the compressed ones.
             /// </remarks>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Keeping around so that we can potentially expand on our current caching mechanism later")]
             public void ReleaseItems()
             {
                 if (_compressedItems == null)
@@ -427,6 +427,7 @@ namespace Microsoft.Build.Execution
                     CompressItems();
                 }
             }
+            */
 
             /// <summary>
             /// Translates an items store.

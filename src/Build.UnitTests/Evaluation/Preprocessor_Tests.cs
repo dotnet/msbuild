@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
             xml1.InitialTargets = "i1";
             xml1.AddImport("p2");
-            ProjectRootElement xml2 = ProjectRootElement.Create("p2");
+            ProjectRootElement.Create("p2");
 
             Project project = new Project(xml1);
 
@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
             xml1.AddProperty("p", "v");
             xml1.AddImport("p2");
-            ProjectRootElement xml2 = ProjectRootElement.Create("p2");
+            ProjectRootElement.Create("p2");
 
             Project project = new Project(xml1);
 
@@ -1103,7 +1103,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             ProjectRootElement xml1 = ProjectRootElement.Create("p1");
             ProjectRootElement xml2 = ProjectRootElement.Create("p2");
-            ProjectRootElement xml3 = ProjectRootElement.Create("p3");
+            ProjectRootElement.Create("p3");
 
             xml1.AddProperty("Import", "p2");
             xml2.AddProperty("Import", "p3");

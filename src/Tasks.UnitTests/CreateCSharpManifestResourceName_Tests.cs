@@ -505,7 +505,6 @@ namespace Microsoft.Build.UnitTests
             CreateCSharpManifestResourceName c = new CreateCSharpManifestResourceName();
             c.BuildEngine = m;
 
-            string result =
             CreateCSharpManifestResourceName.CreateManifestNameImpl
                 (
                     "MyForm.resx",

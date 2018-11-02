@@ -644,7 +644,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 Assert.True(_host.SetTaskParameters(parameters));
 
-                bool executeValue = _host.Execute();
+                _host.Execute();
             }
            );
         }
@@ -1410,14 +1410,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, Tuple<string, ElementLocation>> parameters = new Dictionary<string, Tuple<string, ElementLocation>>(StringComparer.OrdinalIgnoreCase);
             parameters["ExecuteReturnParam"] = new Tuple<string, ElementLocation>(returnParam ? "true" : "false", ElementLocation.Create("foo.proj"));
             return parameters;
-        }
-
-        /// <summary>
-        /// Helper method for tests
-        /// </summary>
-        private IElementLocation GetParameterLocation(string name)
-        {
-            return ElementLocation.Create(".", 1, 1);
         }
 
         /// <summary>

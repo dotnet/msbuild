@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
                 cache.AddResult(result);
 
-                BuildResult retrievedResult = cache.GetResultForRequest(request);
+                cache.GetResultForRequest(request);
             }
            );
         }
