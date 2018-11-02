@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../CommonLocalizableStrings.resx">
     <body>
@@ -24,7 +24,7 @@
       </trans-unit>
       <trans-unit id="ProjectReferenceRemoved">
         <source>Project reference `{0}` removed.</source>
-        <target state="translated">Référence de projet '{0}' retirée.</target>
+        <target state="translated">Référence de projet '{0}' supprimée.</target>
         <note />
       </trans-unit>
       <trans-unit id="Project">
@@ -104,17 +104,17 @@
       </trans-unit>
       <trans-unit id="Add">
         <source>Add</source>
-        <target state="translated">Ajouter</target>
+        <target state="translated">ajouter</target>
         <note />
       </trans-unit>
       <trans-unit id="Remove">
         <source>Remove</source>
-        <target state="translated">Retirer</target>
+        <target state="translated">Supprimer</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="translated">Supprimer</target>
+        <target state="translated">supprimer</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">
@@ -159,7 +159,7 @@
       </trans-unit>
       <trans-unit id="File">
         <source>File</source>
-        <target state="translated">Fichier</target>
+        <target state="translated">fichier</target>
         <note />
       </trans-unit>
       <trans-unit id="Directory">

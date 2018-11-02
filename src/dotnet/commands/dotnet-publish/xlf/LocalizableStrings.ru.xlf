@@ -45,8 +45,7 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">Целевая среда выполнения, для которой публикуется приложение.
-Значение по умолчанию — публикация зависимого от платформы приложения без исполняемого файла.</target>
+        <target state="translated">Целевая среда для публикации. Используется при создании автономного развертывания. По умолчанию публикация выполняется в приложение, зависимое от платформы.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +56,8 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Опубликуйте среду выполнения .NET Core вместе с приложением, чтобы ее не нужно было устанавливать на целевом компьютере. Если идентификатор среды выполнения указан, значение по умолчанию — true.</target>
+        <target state="translated">Опубликовать среду выполнения .NET Core вместе с вашим приложением, чтобы ее не пришлось устанавливать на целевом компьютере.
+Значение по умолчанию — 'true', если указан идентификатор среды выполнения.</target>
         <note />
       </trans-unit>
     </body>

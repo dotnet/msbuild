@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../LocalizableStrings.resx">
     <body>
@@ -45,8 +45,7 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">O tempo de execução de destino no qual publicar o aplicativo.
-O padrão é publicar um aplicativo dependente da estrutura sem um executável.</target>
+        <target state="translated">O runtime de destino a ser publicado. Isto é usado quando estiver criando um deployment auto-contido. O padrão é publicar uma aplicação dependente de framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +56,7 @@ O padrão é publicar um aplicativo dependente da estrutura sem um executável.<
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publique o tempo de execução .NET Core com seu aplicativo para que o tempo de execução não precise ser instalado no computador de destino. Assumirá 'true' como padrão se um identificador de tempo de execução for especificado.</target>
+        <target state="translated">Publica o runtime do .NET Core com sua aplicação para que o mesmo não precise estar instalado na máquina de destino. O padrão é 'verdadeiro' se um identificador de runtime for especificado.</target>
         <note />
       </trans-unit>
     </body>
