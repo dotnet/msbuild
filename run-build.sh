@@ -36,15 +36,15 @@ while [[ $# > 0 ]]; do
             ;;
         -a|--architecture)
             ARCHITECTURE="$2"
+            args+=("/p:Architecture=$ARCHITECTURE")
             shift
             ;;
         --runtime-id)
-            CUSTOM_BUILD_ARGS="/p:Rid=\"$2\""
+            args+=("/p:Rid=\"$2\"")
             shift
             ;;
         --linux-portable)
-            LINUX_PORTABLE_INSTALL_ARGS="--runtime-id linux-x64"
-            CUSTOM_BUILD_ARGS="/p:OSName=\"linux\" /p:IslinuxPortable=\"true\""
+            args+=("/p:Rid=linux-x64 /p:OSName=\"linux\" /p:IslinuxPortable=\"true\"")
             ;;
         --help)
             echo "Usage: $0 [--configuration <CONFIGURATION>] [--architecture <ARCHITECTURE>] [--docker <IMAGENAME>] [--help]"
@@ -57,13 +57,11 @@ while [[ $# > 0 ]]; do
             exit 0
             ;;
         *)
-            args="$args $1"
+            args+=("$1")
             ;;
     esac
 
     shift
 done
 
-ARCHITECTURE_PARAM="/p:Architecture=$ARCHITECTURE"
-
-. "$REPOROOT/eng/common/build.sh" --build --restore "$ARCHITECTURE_PARAM" "$LINUX_PORTABLE_INSTALL_ARGS" "$CUSTOM_BUILD_ARGS" "$@"
+. "$REPOROOT/eng/common/build.sh" --build --restore "${args[@]}"

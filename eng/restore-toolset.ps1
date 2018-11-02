@@ -19,7 +19,7 @@ function InitializeCustomSDKToolset {
   $env:VSTEST_BUILD_TRACE=1
   $env:VSTEST_TRACE_BUILD=1
 
-  $env:DOTNET_CLI_TELEMETRY_PROFILE=$env:DOTNET_CLI_TELEMETRY_PROFILE;https://github.com/dotnet/cli
+  $env:DOTNET_CLI_TELEMETRY_PROFILE='$env:DOTNET_CLI_TELEMETRY_PROFILE;https://github.com/dotnet/cli'
 
   # The following frameworks and tools are used only for testing.
   # Do not attempt to install them in source build.
@@ -41,7 +41,7 @@ function InstallDotNetSharedFramework([string]$version) {
     & $installScript -Version $version -InstallDir $dotnetRoot -Runtime "dotnet"
 
     if($lastExitCode -ne 0) {
-      throw "Failed to install shared Framework $version to '$dotnetRoot' (exit code '$lastExitCode')."
+      Write-Output "Failed to install Shared Framework $version. Ignoring failure as not all distros carrie all versions of the framework."
     }
   }
 }
