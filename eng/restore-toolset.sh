@@ -41,7 +41,7 @@ function InitializeCustomSDKToolset {
     return
   fi
 
-  InstallDotNetSharedFramework "9.1.2"
+  InstallDotNetSharedFramework "1.1.2"
   InstallDotNetSharedFramework "2.0.0"
   InstallDotNetSharedFramework "2.1.0"
 }

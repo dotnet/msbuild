@@ -23,10 +23,11 @@ phases:
       LinuxPortable: $(_LinuxPortable)
       RuntimeId: $(_RuntimeIdentifier)
 
+    #Add --ci/-ci flag back to builds below. See https://github.com/dotnet/cli/issues/10267
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: build.cmd
-                  -test -sign -pack -publish -ci
+                  -test -sign -pack -publish
                   -Configuration $(BuildConfig)
                   -Architecture $(BuildArchitecture)
         displayName: Build
@@ -36,7 +37,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
       - script: ./build.sh
-                  --test --pack --publish --ci
+                  --test --pack --publish
                   --configuration $(BuildConfig)
                   $(DockerParameter)
                   --architecture $(BuildArchitecture)
@@ -48,7 +49,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
-                  --test --pack --publish --ci
+                  --test --pack --publish
                   --configuration $(BuildConfig)
         displayName: Build
 
