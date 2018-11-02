@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <DotNetCoreSdkLKGVersion>3.0.100-alpha1-009674</DotNetCoreSdkLKGVersion>
+    <DotNetCoreSdkLKGVersion>3.0.100-preview-009718</DotNetCoreSdkLKGVersion>
     <DotnetCliInternalVersion>3.0.100-alpha1-20181017-4</DotnetCliInternalVersion>
     <MicrosoftNETSdkPackageVersion>3.0.100-preview1.18516.1</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
