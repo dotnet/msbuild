@@ -119,6 +119,7 @@ namespace Microsoft.NET.Build.Tasks
                                                             IntPtr lParam);
 
             public const int UserStoppedResourceEnumerationHRESULT = unchecked((int)0x80073B02);
+            public const int ResourceDataNotFoundHRESULT = unchecked((int)0x80070714);
 
             // Querying and loading resources
 
@@ -220,9 +221,11 @@ namespace Microsoft.NET.Build.Tasks
             {
                 if (!Kernel32.EnumResourceTypes(hModule, enumTypesCallback, errorInfoPtr))
                 {
-                    CaptureEnumResourcesErrorInfo(errorInfoPtr);
-
-                    errorInfo.ThrowException();
+                    if (Marshal.GetHRForLastWin32Error() != Kernel32.ResourceDataNotFoundHRESULT)
+                    {
+                        CaptureEnumResourcesErrorInfo(errorInfoPtr);
+                        errorInfo.ThrowException();
+                    }
                 }
             }
             finally
