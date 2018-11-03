@@ -704,6 +704,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         {
                             PackageId = packageId.ToString(),
                             Version = packageVersion,
+                            ToolCommandName = "DemoWithCasing",
                         }
                     }
             };
