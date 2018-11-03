@@ -16,9 +16,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildFrameworkPackageVersion)" />
-    <PackageReference Include="runtime.linux-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly)" />
-    <PackageReference Include="runtime.osx-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly)" />
-    <PackageReference Include="runtime.linux-musl-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion_ForMSBuildSdkResolverOnly)" />
+    <PackageReference Include="runtime.linux-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" />
+    <PackageReference Include="runtime.osx-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" />
+    <PackageReference Include="runtime.linux-musl-x64.Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotNetHostResolverPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

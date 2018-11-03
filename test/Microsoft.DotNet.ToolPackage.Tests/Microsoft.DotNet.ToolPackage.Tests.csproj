@@ -73,11 +73,11 @@
       <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalToolWithDifferentCasing</testAssetSourceRoot>
     </PropertyGroup>
     <Copy SourceFiles="SampleGlobalToolWithDifferentCasing/DotnetToolSettings.xml" DestinationFolder="$(testAssetSourceRoot)" />
-    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Restore" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;ForceRestoreToEvaluateSeparately=1">
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Restore" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false;ForceRestoreToEvaluateSeparately=1">
     </MSBuild>
-    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/">
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false">
     </MSBuild>
-    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)/TestAssetLocalNugetFeed">
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)TestAssetLocalNugetFeed;BaseIntermediateOutputPath=$(testAssetSourceRoot)/obj/;ImportDirectoryBuildProps=false;ImportDirectoryBuildTargets=false">
     </MSBuild>
   </Target>
 
