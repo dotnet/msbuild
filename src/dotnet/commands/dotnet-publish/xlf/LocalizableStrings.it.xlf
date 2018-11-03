@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../LocalizableStrings.resx">
     <body>
@@ -45,8 +45,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">Runtime di destinazione per cui pubblicare l'applicazione.
-Per impostazione predefinita, viene pubblicata un'applicazione dipendente dal framework senza un eseguibile.</target>
+        <target state="translated">Runtime di destinazione per cui eseguire la pubblicazione. Viene usato durante la creazione di un pacchetto di distribuzione autonomo.
+Per impostazione predefinita, viene generato un pacchetto dipendente dal framework.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +57,8 @@ Per impostazione predefinita, viene pubblicata un'applicazione dipendente dal fr
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Pubblica il runtime di .NET Core con l'applicazione in modo che non sia necessario installarlo nel computer di destinazione. Se si specifica un identificatore di runtime, l'impostazione predefinita è 'true'.</target>
+        <target state="translated">Pubblica il runtime di.NET Core con l'applicazione in modo che non sia necessario installarlo nel computer di destinazione.
+L'impostazione predefinita è 'true' se si specifica un identificatore di runtime.</target>
         <note />
       </trans-unit>
     </body>

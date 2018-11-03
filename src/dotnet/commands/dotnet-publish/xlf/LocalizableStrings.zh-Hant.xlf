@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../LocalizableStrings.resx">
     <body>
@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="FrameworkOption">
         <source>FRAMEWORK</source>
-        <target state="translated">架構</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="FrameworkOptionDescription">
@@ -45,8 +45,7 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">要發佈應用程式的目標執行階段。
-預設為發佈與 Framework 相依的應用程式，不含可執行檔。</target>
+        <target state="translated">要發佈至的目標執行階段。在建立獨立式部署時會使用此項目。預設為發佈與 Framework 相依的應用程式。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +56,7 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">隨著應用程式一併發行 .NET Core 執行階段，因此不需要在目標電腦上安裝此執行階段。若指定了執行階段識別碼，則預設為 'true'。</target>
+        <target state="translated">利用您的應用程式發佈 .NET Core 執行階段，使目標電腦不必安裝執行階段。如有指定執行階段識別碼，預設為 'true'。</target>
         <note />
       </trans-unit>
     </body>
