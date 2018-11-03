@@ -2350,7 +2350,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var exception = Assert.Throws<InvalidProjectFileException>(() =>
             {
-                IList<ProjectItem> items = ObjectModelHelpers.GetItemsFromFragment(content);
+                ObjectModelHelpers.GetItemsFromFragment(content);
             });
 
             Assert.Equal("The required attribute \"Update\" is empty or missing from the element <i>.", exception.Message);

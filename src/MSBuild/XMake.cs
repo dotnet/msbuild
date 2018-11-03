@@ -229,6 +229,7 @@ namespace Microsoft.Build.CommandLine
             return exitCode;
         }
 
+#if !FEATURE_GET_COMMANDLINE
         /// <summary>
         /// Insert the command executable path as the first element of the args array.
         /// </summary>
@@ -243,6 +244,7 @@ namespace Microsoft.Build.CommandLine
 
             return newArgArray;
         }
+#endif // !FEATURE_GET_COMMANDLINE
 
         /// <summary>
         /// Append output file with elapsedTime

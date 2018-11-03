@@ -51,6 +51,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary> 
         private const string OverrideTasksFilePattern = "*.overridetasks";
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Regkey that we check to see whether Dev10 is installed.  This should exist if any SKU of Dev10 is installed, 
         /// but is not removed even when the last version of Dev10 is uninstalled, due to 10.0\bsln sticking around. 
@@ -105,13 +106,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private const string Dev10LightSwitchInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vslscore";
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on 
         /// the current machine, false otherwise. 
         /// </summary>
         private static bool? s_dev10IsInstalled = null;
-#endif
+#endif // FEATURE_WIN32_REGISTRY
 
         /// <summary>
         /// Name of the tools version

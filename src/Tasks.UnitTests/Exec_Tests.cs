@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
         public void ExitCodeGetter()
         {
             Exec exec = PrepareExec("exit 120");
-            bool result = exec.Execute();
+            exec.Execute();
 
             Assert.Equal(120, exec.ExitCode);
         }
@@ -551,7 +551,7 @@ namespace Microsoft.Build.UnitTests
 
             exec.CustomErrorRegularExpression = "~!@#$%^_)(*&^%$#@@#XF &%^%T$REd((((([[[[";
             exec.CustomWarningRegularExpression = "*";
-            bool result = exec.Execute();
+            exec.Execute();
 
             MockEngine e = (MockEngine)exec.BuildEngine;
             Console.WriteLine(e.Log);

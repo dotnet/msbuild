@@ -386,7 +386,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             Assert.Equal(1, cache.Count);
 
             XmlDocument document2 = new XmlDocument();
-            string return2 = cache.Add(stringToAdd, document2);
+            cache.Add(stringToAdd, document2);
             Assert.Equal(1, cache.Count);
 
             cache.Clear(document2);
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             XmlDocument document = new XmlDocument();
 
             string stringToAdd = "Test1";
-            string return1 = cache.Add(stringToAdd, document);
+            cache.Add(stringToAdd, document);
             Assert.Equal(1, cache.Count);
 
             stringToAdd = "Test2";
@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             XmlDocument document = new XmlDocument();
 
             string stringToAdd = "Test1";
-            string return1 = cache.Add(stringToAdd, document);
+            cache.Add(stringToAdd, document);
             Assert.Equal(1, cache.Count);
 
             stringToAdd = "Test2";

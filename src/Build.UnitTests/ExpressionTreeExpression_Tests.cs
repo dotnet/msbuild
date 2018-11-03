@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests
 
             foreach (string file in FilesWithExistenceChecks)
             {
-                using (StreamWriter sw = File.CreateText(file)) {; }
+                using (File.CreateText(file)) { }
             }
         }
 
@@ -501,7 +501,7 @@ namespace Microsoft.Build.UnitTests
                         FileSystems.Default
                         );
 
-                var value = tree.Evaluate(state);
+                tree.Evaluate(state);
             }
             catch (InvalidProjectFileException ex)
             {

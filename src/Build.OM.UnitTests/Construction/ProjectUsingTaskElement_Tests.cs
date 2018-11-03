@@ -370,7 +370,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </UsingTask>
                     </Project>
                 ";
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
             }
            );
@@ -391,7 +391,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </UsingTask>
                     </Project>
                 ";
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
             }
            );
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </UsingTask>
                     </Project>
                 ";
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
             }
            );
@@ -460,7 +460,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
+                Helpers.GetFirst(project.Children);
                 Assert.True(false);
             }
            );
@@ -482,7 +482,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
+                Helpers.GetFirst(project.Children);
                 Assert.True(false);
             }
            );

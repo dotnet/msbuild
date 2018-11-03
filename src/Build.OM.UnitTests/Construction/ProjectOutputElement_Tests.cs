@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }
