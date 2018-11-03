@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Transactions;
+using System.Threading;
 using FluentAssertions;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Cli;
@@ -679,6 +680,63 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             AssertPackageInstall(reporter, fileSystem, package, store, storeQuery);
 
             uninstaller.Uninstall(package.PackageDirectory);
+        }
+
+        [NonWindowsOnlyTheory]
+        [InlineData(false)]
+        [InlineData(true)]
+        // repro https://github.com/dotnet/cli/issues/10101
+        public void GivenAPackageWithCasingAndenUSPOSIXInstallSucceeds(bool testMockBehaviorIsInSync)
+        {
+            var nugetConfigPath = GenerateRandomNugetConfigFilePath();
+            var emptySource = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(emptySource);
+
+            var packageId = new PackageId("Global.Tool.Console.Demo.With.Casing");
+            var packageVersion = "2.0.4";
+            var feed = new MockFeed
+            {
+                Type = MockFeedType.ImplicitAdditionalFeed,
+                Uri = nugetConfigPath.Value,
+                Packages = new List<MockFeedPackage>
+                    {
+                        new MockFeedPackage
+                        {
+                            PackageId = packageId.ToString(),
+                            Version = packageVersion,
+                            ToolCommandName = "DemoWithCasing",
+                        }
+                    }
+            };
+
+            var (store, storeQuery, installer, uninstaller, reporter, fileSystem) = Setup(
+                useMock: testMockBehaviorIsInSync,
+                feeds: new[] { feed },
+                writeLocalFeedToNugetConfig: nugetConfigPath);
+
+            CultureInfo currentCultureBefore = CultureInfo.CurrentCulture;
+            try
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US-POSIX");
+                IToolPackage package = null;
+                Action action = () => package = installer.InstallPackage(
+                    new PackageLocation(
+                        nugetConfig: nugetConfigPath,
+                        additionalFeeds: new[] { emptySource }),
+                    packageId: packageId,
+                    versionRange: VersionRange.Parse(packageVersion),
+                    targetFramework: _testTargetframework);
+
+                action.ShouldNotThrow<ToolConfigurationException>();
+
+                fileSystem.File.Exists(package.Commands[0].Executable.Value).Should().BeTrue($"{package.Commands[0].Executable.Value} should exist");
+
+                uninstaller.Uninstall(package.PackageDirectory);
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = currentCultureBefore;
+            }
         }
 
         private static void AssertPackageInstall(

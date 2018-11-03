@@ -72,9 +72,26 @@ namespace Microsoft.DotNet.Cli.Test.Tests
 
             new DotnetTestCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore")
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore /p:IsTestProject=true")
                 .Should().Fail()
                 .And.HaveStdOutContaining("project.assets.json");
+        }
+
+        [Fact]
+        public void ItDoesNotRunTestsIfThereIsNoIsTestProject()
+        {
+            string testAppName = "VSTestCore";
+            var testInstance = TestAssets.Get(testAppName)
+                            .CreateInstance()
+                            .WithSourceFiles();
+
+            var testProjectDirectory = testInstance.Root.FullName;
+
+            new DotnetTestCommand()
+                .WithWorkingDirectory(testProjectDirectory)
+                .ExecuteWithCapturedOutput($"{TestBase.ConsoleLoggerOutputNormal} --no-restore")
+                .Should().Pass()
+                .And.HaveStdOutContaining("Skipping running test for project");
         }
 
         [Fact]

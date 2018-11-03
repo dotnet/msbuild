@@ -49,6 +49,11 @@
     <Content Remove="SampleGlobalToolWithShim/**" />
     <EmbeddedResource Remove="SampleGlobalToolWithShim/**" />
     <None Remove="SampleGlobalToolWithShim/**" />
+
+    <Compile Remove="SampleGlobalToolWithDifferentCasing/**" />
+    <Content Remove="SampleGlobalToolWithDifferentCasing/**" />
+    <EmbeddedResource Remove="SampleGlobalToolWithDifferentCasing/**" />
+    <None Remove="SampleGlobalToolWithDifferentCasing/**" />
   </ItemGroup>
 
   <UsingTask TaskName="DownloadFile" AssemblyFile="$(CLIBuildDll)" />
@@ -63,6 +68,19 @@
     <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/">
     </MSBuild>
     <MSBuild BuildInParallel="False" Projects="SampleGlobalTool/consoledemo.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)/TestAssetLocalNugetFeed">
+    </MSBuild>
+  </Target>
+
+  <Target Name="CreateNupkgWithDifferentCasingFromSource" BeforeTargets="Build">
+    <PropertyGroup>
+      <testAssetSourceRoot>$(BaseOutputPath)/TestAsset/SampleGlobalToolWithDifferentCasing</testAssetSourceRoot>
+    </PropertyGroup>
+    <Copy SourceFiles="SampleGlobalToolWithDifferentCasing/DotnetToolSettings.xml" DestinationFolder="$(testAssetSourceRoot)" />
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Restore" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/;ForceRestoreToEvaluateSeparately=1">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="Build;Publish" Properties="Configuration=Release;BaseOutputPath=$(testAssetSourceRoot)/bin/">
+    </MSBuild>
+    <MSBuild BuildInParallel="False" Projects="SampleGlobalToolWithDifferentCasing/ConsoleDemoWithCasing.csproj" Targets="pack" Properties="Configuration=Release;NuspecFile=includepublish.nuspec;NuspecBasePath=$(testAssetSourceRoot);PackageOutputPath=$(OutputPath)/TestAssetLocalNugetFeed">
     </MSBuild>
   </Target>
 

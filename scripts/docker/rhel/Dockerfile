@@ -6,6 +6,14 @@
 # Dockerfile that creates a container suitable to build dotnet-cli
 FROM microsoft/dotnet-buildtools-prereqs:rhel-7-rpmpkg-e1b4a89-20175311035359
 
+# Install repository configuration
+RUN curl https://packages.microsoft.com/config/rhel/7/prod.repo > ./microsoft-prod.repo
+RUN cp ./microsoft-prod.repo /etc/yum.repos.d/
+
+# Install Microsoft's GPG public key
+RUN curl https://packages.microsoft.com/keys/microsoft.asc > ./microsoft.asc
+RUN rpm --import ./microsoft.asc
+
 # Setup User to match Host User, and give superuser permissions
 ARG USER_ID=0
 RUN useradd -m code_executor -u ${USER_ID} -g root

@@ -212,7 +212,7 @@ namespace Microsoft.DotNet.ToolPackage
             return lockFile
                 ?.Targets?.SingleOrDefault(t => t.RuntimeIdentifier != null)
                 ?.Libraries?.SingleOrDefault(l =>
-                    string.Compare(l.Name, id.ToString(), StringComparison.CurrentCultureIgnoreCase) == 0);
+                    string.Compare(l.Name, id.ToString(), StringComparison.OrdinalIgnoreCase) == 0);
         }
 
         private LockFileTargetLibrary FindLibraryInLockFile(LockFile lockFile)

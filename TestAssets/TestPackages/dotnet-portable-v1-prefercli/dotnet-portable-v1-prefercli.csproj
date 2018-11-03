@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <BuiltProjectOutputGroupOutput Include="$(ProjectRuntimeConfigFilePath)">
-      <FinalOutputPath>$(ProjectRuntimeConfigFilePath)</FinalOutputPath>
-    </BuiltProjectOutputGroupOutput>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="..\dotnet-portable\Program.cs" />
   </ItemGroup>  
 </Project>

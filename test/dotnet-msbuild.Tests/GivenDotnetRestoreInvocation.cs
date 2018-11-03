@@ -34,6 +34,10 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         [InlineData(new string[] { "--no-dependencies" }, "-property:RestoreRecursive=false")]
         [InlineData(new string[] { "-v", "minimal" }, @"-verbosity:minimal")]
         [InlineData(new string[] { "--verbosity", "minimal" }, @"-verbosity:minimal")]
+        [InlineData(new string[] { "--use-lock-file" }, "-property:RestorePackagesWithLockFile=true")]
+        [InlineData(new string[] { "--locked-mode" }, "-property:RestoreLockedMode=true")]
+        [InlineData(new string[] { "--force-evaluate" }, "-property:RestoreForceEvaluate=true")]
+        [InlineData(new string[] { "--lock-file-path", "<lockFilePath>" }, "-property:NuGetLockFilePath=<lockFilePath>")]
         public void MsbuildInvocationIsCorrect(string[] args, string expectedAdditionalArgs)
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>

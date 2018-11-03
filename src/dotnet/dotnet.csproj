@@ -11,6 +11,7 @@
     <RootNamespace>Microsoft.DotNet.Cli</RootNamespace>
     <DefineConstants Condition="'$(IncludeAspNetCoreRuntime)' == 'false'">$(DefineConstants);EXCLUDE_ASPNETCORE</DefineConstants>
     <PackageId>Microsoft.DotNet.Cli</PackageId>
+    <UseAppHost>false</UseAppHost>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="commands\dotnet-new\**" />
