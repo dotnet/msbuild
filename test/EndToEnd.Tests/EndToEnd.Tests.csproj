@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>EndToEnd.Tests</AssemblyName>
-    <OutputType>Exe</OutputType>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
   </PropertyGroup>
 

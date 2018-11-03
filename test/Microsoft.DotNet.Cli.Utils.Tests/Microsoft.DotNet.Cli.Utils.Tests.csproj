@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>Microsoft.DotNet.Cli.Utils.Tests</AssemblyName>
-    <OutputType>Exe</OutputType>
     <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>

@@ -60,13 +60,14 @@ phases:
           _RuntimeIdentifier: ''
           _BuildArchitecture: 'x64'
           _DropSuffix: ''
-        Build_Fedora_27_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker fedora.27'
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
+        # https://github.com/dotnet/cli/issues/10274
+        # Build_Fedora_27_Debug_x64:
+        #   _BuildConfig: Debug
+        #   _DockerParameter: '--docker fedora.27'
+        #   _LinuxPortable: '--linux-portable'
+        #   _RuntimeIdentifier: ''
+        #   _BuildArchitecture: 'x64'
+        #   _DropSuffix: ''
         Build_OpenSUSE_42_3_Debug_x64:
           _BuildConfig: Debug
           _DockerParameter: '--docker opensuse.42.3'
