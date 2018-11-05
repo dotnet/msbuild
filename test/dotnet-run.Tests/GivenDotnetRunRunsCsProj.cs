@@ -650,12 +650,16 @@ namespace Microsoft.DotNet.Cli.Run.Tests
         {
             var testInstance = TestAssets.Get("AppOutputsExecutablePath").CreateInstance().WithSourceFiles();
 
-            var result = new RunCommand()
-                .WithWorkingDirectory(testInstance.Root.FullName)
-                .ExecuteWithCapturedOutput();
+            var command = new RunCommand()
+                .WithWorkingDirectory(testInstance.Root.FullName);
 
-            result.Should().Pass()
-                .And.HaveStdOutContaining($"dotnet{Constants.ExeSuffix}");
+            command.Environment["UseAppHost"] = "false";
+
+            command.ExecuteWithCapturedOutput()
+                   .Should()
+                   .Pass()
+                   .And
+                   .HaveStdOutContaining($"dotnet{Constants.ExeSuffix}");
         }
 
         [Fact]
@@ -665,7 +669,7 @@ namespace Microsoft.DotNet.Cli.Run.Tests
 
             var result = new RunCommand()
                 .WithWorkingDirectory(testInstance.Root.FullName)
-                .ExecuteWithCapturedOutput($"-r {RuntimeEnvironment.GetRuntimeIdentifier()}");
+                .ExecuteWithCapturedOutput();
 
             result.Should().Pass()
                 .And.HaveStdOutContaining($"AppOutputsExecutablePath{Constants.ExeSuffix}");

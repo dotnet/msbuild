@@ -205,8 +205,16 @@ namespace Microsoft.DotNet.Tools.Run
 
             CommandSpec commandSpec = new CommandSpec(runProgram, runArguments);
 
-            return CommandFactoryUsingResolver.Create(commandSpec)
+            var command = CommandFactoryUsingResolver.Create(commandSpec)
                 .WorkingDirectory(runWorkingDirectory);
+
+            var rootVariableName = Environment.Is64BitProcess ? "DOTNET_ROOT" : "DOTNET_ROOT(x86)";
+            if (Environment.GetEnvironmentVariable(rootVariableName) == null)
+            {
+                command.EnvironmentVariable(rootVariableName, Path.GetDirectoryName(new Muxer().MuxerPath));
+            }
+
+            return command;
         }
 
         private void ThrowUnableToRunError(ProjectInstance project)
