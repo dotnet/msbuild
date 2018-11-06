@@ -23,9 +23,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 Build Status
 ------------
 
-|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux arm Archive|Linux arm64 Archive|Linux Native Installers|RHEL 6 Archive|Linux-musl Archive|
+|Windows x64|Windows x86|macOS|Linux x64 Archive|Linux arm Archive|Linux arm64 Archive|Linux Native Installers|RHEL 6 Archive|Linux-musl Archive|Windows Arm|
 |:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|:------:|
-|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linux-arm-build-badge]][linux-arm-build]|[![][linux-arm64-build-badge]][linux-arm64-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][linux-musl-build-badge]][linux-musl-build]|
+|[![][win-x64-build-badge]][win-x64-build]|[![][win-x86-build-badge]][win-x86-build]|[![][osx-build-badge]][osx-build]|[![][linux-build-badge]][linux-build]|[![][linux-arm-build-badge]][linux-arm-build]|[![][linux-arm64-build-badge]][linux-arm64-build]|[![][linuxnative-build-badge]][linuxnative-build]|[![][rhel6-build-badge]][rhel6-build]|[![][linux-musl-build-badge]][linux-musl-build]|[![][win-arm-build-badge]][win-arm-build]|
 
 [win-x64-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9306/badge
 [win-x64-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9306
@@ -54,6 +54,9 @@ Build Status
 [linux-musl-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9300/badge
 [linux-musl-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9300
 
+[win-arm-build-badge]: https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/9300/badge
+[win-arm-build]: https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=9300
+
 Installers and Binaries
 -----------------------
 
@@ -75,6 +78,7 @@ To download the .NET Core runtime **without** the SDK, visit https://github.com/
 | **Linux arm64** | [tar.gz][linux-arm64-targz] - [Checksum][linux-arm64-targz-checksum] |
 | **RHEL 6** | [tar.gz][rhel-6-targz] - [Checksum][rhel-6-targz-checksum] |
 | **Linux-musl** | [tar.gz][linux-musl-targz] - [Checksum][linux-musl-targz-checksum] |
+| **Windows arm** | [zip][win-arm-zip] - [Checksum][win-arm-zip-checksum] |
 
 | Latest Coherent Build<sup>2</sup><br>*release/2.2.1xx* |
 |:------:|
@@ -125,6 +129,9 @@ Reference notes:
 
 [linux-musl-targz]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-musl-x64.tar.gz
 [linux-musl-targz-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-linux-musl-x64.tar.gz.sha
+
+[win-arm-zip]: https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-arm.zip
+[win-arm-zip-checksum]: https://dotnetclichecksums.blob.core.windows.net/dotnet/Sdk/release/2.2.1xx/dotnet-sdk-latest-win-arm.zip.sha
 
 # Debian daily feed
 
