@@ -387,6 +387,7 @@ namespace Microsoft.DotNet.Tests
                 .WithNuGetConfigAndExternalRestoreSources(new RepoDirectoriesProvider().TestPackages);
             var testProjectDirectory = testInstance.Root.FullName;
             var fallbackFolder = Path.Combine(testProjectDirectory, "fallbackFolder");
+            var nugetPackages = Path.Combine(testProjectDirectory, "nugetPackages");
 
             PopulateFallbackFolder(testProjectDirectory, fallbackFolder);
 
@@ -394,13 +395,26 @@ namespace Microsoft.DotNet.Tests
 
             new RestoreCommand()
                 .WithWorkingDirectory(testProjectDirectory)
-                .Execute($"--configfile {nugetConfig}")
+                .Execute($"--configfile {nugetConfig} /p:RestorePackagesPath={nugetPackages}")
                 .Should()
                 .Pass();
 
+            // We need to run the tool once to generate the deps.json
+            // otherwise we end up with a different error message.
+            var commandResolverArguments = new CommandResolverArguments()
+            {
+                CommandName = "dotnet-fallbackfoldertool",
+                CommandArguments = null,
+                ProjectDirectory = testProjectDirectory
+            };
+
+            var result = projectToolsCommandResolver.Resolve(commandResolverArguments);
+
+            result.Should().NotBeNull();
+
             Directory.Delete(Path.Combine(fallbackFolder, "dotnet-fallbackfoldertool"), true);
 
-            var commandResolverArguments = new CommandResolverArguments()
+            commandResolverArguments = new CommandResolverArguments()
             {
                 CommandName = "dotnet-fallbackfoldertool",
                 CommandArguments = null,

@@ -60,13 +60,14 @@ phases:
           _RuntimeIdentifier: ''
           _BuildArchitecture: 'x64'
           _DropSuffix: ''
-        Build_Fedora_27_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker fedora.27'
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
+        # https://github.com/dotnet/cli/issues/10274
+        # Build_Fedora_27_Debug_x64:
+        #   _BuildConfig: Debug
+        #   _DockerParameter: '--docker fedora.27'
+        #   _LinuxPortable: '--linux-portable'
+        #   _RuntimeIdentifier: ''
+        #   _BuildArchitecture: 'x64'
+        #   _DropSuffix: ''
         Build_OpenSUSE_42_3_Debug_x64:
           _BuildConfig: Debug
           _DockerParameter: '--docker opensuse.42.3'
@@ -102,20 +103,6 @@ phases:
           _RuntimeIdentifier: '--runtime-id rhel.6-x64'
           _BuildArchitecture: 'x64'
           _DropSuffix: ''
-        Build_Arm_Debug:
-          _BuildConfig: Debug
-          _DockerParameter: ''
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'arm'
-          _DropSuffix: ''
-        Build_Arm64_Debug:
-          _BuildConfig: Debug
-          _DockerParameter: ''
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'arm64'
-          _DropSuffix: ''
         Build_Linux_musl_Debug_x64:
           _BuildConfig: Debug
           _DockerParameter: '--docker alpine.3.6'
@@ -136,13 +123,6 @@ phases:
           _LinuxPortable: '--linux-portable'
           _RuntimeIdentifier: ''
           _BuildArchitecture: 'x64'
-          _DropSuffix: true
-        Build_Arm_NoSuffix_Release:
-          _BuildConfig: Release
-          _DockerParameter: ''
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'arm'
           _DropSuffix: true
 
 - template: /eng/build.yml

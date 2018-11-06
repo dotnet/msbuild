@@ -7,6 +7,8 @@
   <Target Name="SetupTestPackageProjectData"
           DependsOnTargets="SetupTestPackageProjectFrameworks">
     <ItemGroup>
+      <CreateTestAssetPackageNuPkgsInput Include="%(TestPackageProject.ProjectDir)/**/*" />
+      <CreateTestAssetPackageNuPkgsOutput Include="%(TestPackageProject.PackageOutput)" />
     </ItemGroup>
   </Target>
 
@@ -20,45 +22,13 @@
 
   <Target Name="SetupTestPackageProjectBaseData">
     <ItemGroup>
-      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils"
-                              Condition=" '$(IsDesktopAvailable)' == 'True' " >
-        <Name>Microsoft.DotNet.Cli.Utils</Name>
-        <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
-        <Clean>False</Clean>
-        <MsbuildArgs>/p:NoWarn=NU5104</MsbuildArgs>
-      </BaseTestPackageProject>
-      <BaseTestPackageProject Include="src/Microsoft.DotNet.Cli.Utils"
-                              Condition=" '$(IsDesktopAvailable)' == 'False' " >
-        <Name>Microsoft.DotNet.Cli.Utils</Name>
-        <ProjectName>Microsoft.DotNet.Cli.Utils.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
-        <Clean>False</Clean>
-        <MsbuildArgs>/p:TargetFramework=netstandard2.0 /p:NoWarn=NU5104</MsbuildArgs>
-      </BaseTestPackageProject>
-      <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
-        <Name>Microsoft.DotNet.InternalAbstractions</Name>
-        <ProjectName>Microsoft.DotNet.InternalAbstractions.csproj</ProjectName>
-        <IsTool>True</IsTool>
-        <IsApplicable>True</IsApplicable>
-        <VersionPrefix>2.0.0</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
-        <Clean>False</Clean>
-      </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/PackageWithFakeNativeDep"
-                              Condition=" '$(IsDesktopAvailable)' == 'True' " >
+                              Condition=" '$(OS)' == 'Windows_NT' " >
         <Name>PackageWithFakeNativeDep</Name>
         <ProjectName>PackageWithFakeNativeDep.csproj</ProjectName>
         <IsTool>False</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-dependency-context-test">
@@ -66,29 +36,26 @@
         <ProjectName>dotnet-dependency-context-test.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
+        <Version>$(Version)</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-and-portable"
-                              Condition=" '$(IsDesktopAvailable)' == 'True' " >
+                              Condition=" '$(OS)' == 'Windows_NT' " >
         <Name>dotnet-desktop-and-portable</Name>
         <ProjectName>dotnet-desktop-and-portable.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
+        <Version>$(Version)</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-desktop-binding-redirects"
-                              Condition=" '$(IsDesktopAvailable)' == 'True' ">
+                              Condition=" '$(OS)' == 'Windows_NT' ">
         <Name>dotnet-desktop-binding-redirects</Name>
         <ProjectName>dotnet-desktop-binding-redirects.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsMsbuild>True</IsMsbuild>
         <IsApplicable>$(DesktopAvailable)</IsApplicable>
-        <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-        <VersionSuffix>$(VersionSuffix)</VersionSuffix>
+        <Version>$(Version)</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v1/dotnet-hello">
@@ -96,8 +63,7 @@
         <ProjectName>dotnet-hello.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-hello/v2/dotnet-hello">
@@ -105,8 +71,7 @@
         <ProjectName>dotnet-hello.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>2.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>2.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-outputsframeworkversion/dotnet-outputsframeworkversion-netcoreapp1.0">
@@ -114,8 +79,7 @@
         <ProjectName>dotnet-outputsframeworkversion-netcoreapp1.0.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable">
@@ -123,8 +87,7 @@
         <ProjectName>dotnet-portable.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1">
@@ -132,8 +95,7 @@
         <ProjectName>dotnet-portable-v1.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-portable-v1-prefercli">
@@ -141,8 +103,7 @@
         <ProjectName>dotnet-portable-v1-prefercli.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-fallbackfoldertool">
@@ -150,8 +111,7 @@
         <ProjectName>dotnet-fallbackfoldertool.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/dotnet-prefercliruntime">
@@ -159,8 +119,7 @@
         <ProjectName>dotnet-prefercliruntime.csproj</ProjectName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="TestAssets/TestPackages/ToolWithOutputName">
@@ -169,13 +128,17 @@
         <NuPkgName>ToolWithOutputName</NuPkgName>
         <IsTool>True</IsTool>
         <IsApplicable>True</IsApplicable>
-        <VersionPrefix>1.0.0</VersionPrefix>
-        <VersionSuffix></VersionSuffix>
+        <Version>1.0.0</Version>
         <Clean>True</Clean>
       </BaseTestPackageProject>
 
       <BaseTestPackageProject>
+        <NuPkgName Condition=" '%(NuPkgName)' == '' ">%(Name)</NuPkgName>
+      </BaseTestPackageProject>
+
+      <BaseTestPackageProject>
         <ProjectDir>$(RepoRoot)%(Identity)/</ProjectDir>
+        <PackageOutput>$(TestPackagesDir)/%(NuPkgName).%(Version).nupkg</PackageOutput>
         <OutputPath>$(TestPackagesBuildDir)%(Identity)/bin/$(Configuration)/</OutputPath>
       </BaseTestPackageProject>
 

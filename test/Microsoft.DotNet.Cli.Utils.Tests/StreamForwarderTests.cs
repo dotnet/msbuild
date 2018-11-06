@@ -43,7 +43,7 @@ namespace StreamForwarderTests
         }
 
         [Theory]
-        [MemberData("ForwardingTheoryVariations")]
+        [MemberData(nameof(ForwardingTheoryVariations))]
         public void TestForwardingOnly(string inputStr, string[] expectedWrites)
         {
             for (int i = 0; i < expectedWrites.Length; ++i)
@@ -55,7 +55,7 @@ namespace StreamForwarderTests
         }
 
         [Theory]
-        [MemberData("ForwardingTheoryVariations")]
+        [MemberData(nameof(ForwardingTheoryVariations))]
         public void TestCaptureOnly(string inputStr, string[] expectedWrites)
         {
             for (int i = 0; i < expectedWrites.Length; ++i)
@@ -69,7 +69,7 @@ namespace StreamForwarderTests
         }
 
         [Theory]
-        [MemberData("ForwardingTheoryVariations")]
+        [MemberData(nameof(ForwardingTheoryVariations))]
         public void TestCaptureAndForwardingTogether(string inputStr, string[] expectedWrites)
         {
             for (int i = 0; i < expectedWrites.Length; ++i)

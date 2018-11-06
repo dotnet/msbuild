@@ -2,9 +2,8 @@
 
   <PropertyGroup>
     <Description>Microsoft.DotNet.TestFramework Class Library</Description>
-    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
@@ -13,5 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
   </ItemGroup>
+
+  <Import Project="$(RepoRoot)/build/Test.targets" />
   
 </Project>

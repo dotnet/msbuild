@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetStoreInvocation
+    public class GivenDotnetStoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -target:ComposeStore <project>";
         static readonly string[] ArgsPrefix = { "--manifest", "<project>" };

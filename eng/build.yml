@@ -23,9 +23,11 @@ phases:
       LinuxPortable: $(_LinuxPortable)
       RuntimeId: $(_RuntimeIdentifier)
 
+    #Add --ci/-ci flag back to builds below. See https://github.com/dotnet/cli/issues/10267
     steps:
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: build.cmd
+                  -test -sign -pack -publish
                   -Configuration $(BuildConfig)
                   -Architecture $(BuildArchitecture)
         displayName: Build
@@ -35,7 +37,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
       - script: ./build.sh
-                  --skip-prereqs
+                  --test --pack --publish
                   --configuration $(BuildConfig)
                   $(DockerParameter)
                   --architecture $(BuildArchitecture)
@@ -47,15 +49,15 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
-                  --skip-prereqs
+                  --test --pack --publish
                   --configuration $(BuildConfig)
         displayName: Build
 
     - task: PublishTestResults@1
       displayName: Publish Test Results
       inputs:
-        testRunner: VSTest
-        testResultsFiles: '**/*.trx'
+        testRunner: XUnit
+        testResultsFiles: 'artifacts/TestResults/$(_BuildConfig)/*.xml'
         testRunTitle: 'Unit Test Results'
         platform: '$(BuildPlatform)'
         configuration: '$(_BuildConfig)'
@@ -66,9 +68,8 @@ phases:
       inputs:
         SourceFolder: '$(Build.SourcesDirectory)'
         Contents: |
-         msbuild.log
-         msbuild.mainbuild.binlog
-         msbuild.generatepropsfile.binlog
+         artifacts/log/$(_BuildConfig)/**/*
+         artifacts/TestResults/$(_BuildConfig)/**/*
         TargetFolder: '$(Build.ArtifactStagingDirectory)'
       continueOnError: true
       condition: always()

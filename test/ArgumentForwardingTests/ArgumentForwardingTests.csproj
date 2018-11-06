@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <AssemblyName>ArgumentForwardingTests</AssemblyName>
-    <OutputType>Exe</OutputType>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>
   </PropertyGroup>
 
@@ -14,15 +13,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
   </ItemGroup>
 
   <Target Name="PrecompileScript" BeforeTargets="Build" Condition=" '$(IsCrossTargetingBuild)' != 'true' ">
-
-    <Exec Command="$(PreviousStageDotnet) publish ../ArgumentsReflector/ArgumentsReflector.csproj --output $(OutputPath)" />
+    <MSBuild
+      BuildInParallel="False"
+      Projects="../ArgumentsReflector/ArgumentsReflector.csproj"
+      Properties="PublishDir=$(OutputPath)"
+      Targets="Publish" />
   </Target>
 
 </Project>

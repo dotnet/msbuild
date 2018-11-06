@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), testAsset.props))\testAsset.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NuGet.Configuration" Version="4.3.0-beta1-2418" />
+    <PackageReference Include="NuGet.Configuration" Version="4.3.0-preview3-4146" />
   </ItemGroup>
 </Project>

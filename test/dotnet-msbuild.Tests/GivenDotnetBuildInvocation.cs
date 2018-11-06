@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetBuildInvocation
+    public class GivenDotnetBuildInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
 

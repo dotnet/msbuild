@@ -11,7 +11,7 @@ using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetRestoreInvocation
+    public class GivenDotnetRestoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private const string ExpectedPrefix =
             "exec <msbuildpath> -maxcpucount -verbosity:m -nologo -target:Restore";
@@ -42,6 +42,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         {
             CommandDirectoryContext.PerformActionWithBasePath(WorkingDirectory, () =>
             {
+                Telemetry.Telemetry.CurrentSessionId = null;
+
                 expectedAdditionalArgs =
                     (string.IsNullOrEmpty(expectedAdditionalArgs) ? "" : $" {expectedAdditionalArgs}")
                     .Replace("<cwd>", WorkingDirectory);

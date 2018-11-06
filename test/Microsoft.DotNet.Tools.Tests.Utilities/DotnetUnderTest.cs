@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using Microsoft.DotNet.Cli.Utils;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
@@ -16,9 +17,21 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
         {
             get
             {
+                // This will hurt us when we try to publish and run tests
+                // separately. Filled an issue against arcade to change
+                // the CLI used to run the tests, at which point we can
+                // revert this code to what it was before.
+                // Issue: https://github.com/dotnet/arcade/issues/1207
                 if (_pathToDotnetUnderTest == null)
                 {
-                    _pathToDotnetUnderTest = new Muxer().MuxerPath;
+                    _pathToDotnetUnderTest = Path.Combine(
+                        new RepoDirectoriesProvider().DotnetRoot,
+                        "dotnet");
+
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        _pathToDotnetUnderTest = $"{_pathToDotnetUnderTest}.exe";
+                    }
                 }
                 
                 return _pathToDotnetUnderTest;

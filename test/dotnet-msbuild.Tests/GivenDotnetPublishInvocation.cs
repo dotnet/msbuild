@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetPublishInvocation
+    public class GivenDotnetPublishInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPublishInvocation));

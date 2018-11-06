@@ -1,109 +1,49 @@
 <Project ToolsVersion="14.0" DefaultTargets="Test">
   <Import Project="test/TestPackageProjects.targets" />
-  <Import Project="test/TestProjects.targets" />
   <Import Project="test/OverlaySdkOnLKG.targets" />
 
   <PropertyGroup>
-    <PathListSeparator>:</PathListSeparator>
-    <PathListSeparator Condition=" '$(OS)' == 'Windows_NT' ">%3b</PathListSeparator>
-    <ExecPath>$(SdkOutputDirectory)$(PathListSeparator)$(PATH)</ExecPath>
-    <ExecPath Condition=" '$(OS)' == 'Windows_NT' ">$(OutputDirectory)</ExecPath>
-    <TestPackagesDir>$(TestOutputDir)/packages/</TestPackagesDir>
-    <TestArtifactsDir>$(TestOutputDir)/artifacts/</TestArtifactsDir>
-    <TestResultXmlDir>$(TestOutputDir)/results/</TestResultXmlDir>
-    <RoslynDirectory>$(SdkOutputDirectory)/sdk/$(DotNetCoreSdkLKGVersion)/Roslyn</RoslynDirectory>
-    <ExternalRestoreSourcesTestsContainer>$(TestArtifactsDir)/ExternalRestoreSourcesForTestsContainer.txt</ExternalRestoreSourcesTestsContainer>
+    <TestPackagesDir>$(TestOutputDir)packages</TestPackagesDir>
   </PropertyGroup>
 
-  <Target Name="Test"
-          Condition=" '$(CLIBUILD_SKIP_TESTS)' != 'true' And !$(Architecture.StartsWith('arm')) "
-          DependsOnTargets="BuildTests;">
+  <ItemGroup>
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.props" />
+    <_CopyDirectoryBuildTestDependenciesInput Include="$(MSBuildThisFileDirectory)test/Empty.targets" />
+  </ItemGroup>
 
-    <!-- Make ure the test packages directory exists so that it's not an error to have it as a package source -->
-    <MakeDir Directories="$(TestPackagesDir)" />
-    
-    <ItemGroup>
-      <ProjectsToTest Include="build/test/RunTest.proj">
-        <Properties>
-          CLIBuildDll=$(CLIBuildDll);
-          Configuration=$(Configuration);
-          TestArtifactsDir=$(TestArtifactsDir);
-          TestPackagesDir=$(TestPackagesDir);
-          PreviousStageProps=$(NextStagePropsPath);
-          TestProject=%(TestProjects.Identity);
-          TestResultXmlDir=$(TestResultXmlDir);
-          ToolPath=$(SdkOutputDirectory);
-          WorkingDirectory=$([System.IO.Directory]::GetParent(%(TestProjects.Identity)))
-        </Properties>
-      </ProjectsToTest>
-    </ItemGroup>
-
-    <Message Text="Starting test execution" Importance="High" />
-  
-    <MSBuild
-      BuildInParallel="True"
-      Projects="@(ProjectsToTest)">
-    </MSBuild>
-
-    <Exec Command="$(DotnetInOutputDirectory) exec $(RoslynDirectory)/bincore/VBCSCompiler.dll -shutdown" />
-
-    <Message Text="Finished test execution" Importance="High" />
-  </Target>
+  <ItemGroup>
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.props" />
+    <_CopyDirectoryBuildTestDependenciesOutput Include="$(ArtifactsTmpDir)Directory.Build.targets" />
+  </ItemGroup>
 
   <Target Name="PrepareTests"
-          DependsOnTargets="Init;
-                            SetupTestProjectData;
-                            OverlaySdkOnLKG">
-    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
-
-    <PropertyGroup>
-      <!-- Some tests depends on $(RID) property in project file -->
-      <RidPassedToPrepareTest Condition="'$(Rid)' != ''">"/p:Rid=$(Rid)"</RidPassedToPrepareTest>
-    </PropertyGroup>
-
-    <WriteLinesToFile Condition="'$(ExternalRestoreSources)' != ''"
-                      File="$(ExternalRestoreSourcesTestsContainer)"
-                      Lines="&lt;add key=&quot;PrivateBlobFeed%(NugetConfigPrivateFeeds.Identity)&quot; value=&quot;%(NugetConfigPrivateFeeds.Identity)&quot; /&gt;"
-                      Overwrite="false" />
-  </Target>
-
-  <Target Name="RestoreTests"
-          DependsOnTargets="PrepareTests;
-                            CreateTestAssetPackageNuPkgs;">
-
-    <DotNetRestore ToolPath="$(SdkOutputDirectory)"
-                   ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
-                   AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath) $(RidPassedToPrepareTest)" />
-  </Target>
-
-  <Target Name="BuildTests"
-          DependsOnTargets="RestoreTests;">
-    <DotNetBuild ToolPath="$(SdkOutputDirectory)"
-                 ProjectPath="&quot;$(TestDirectory)/Microsoft.DotNet.Cli.Tests.sln&quot;"
-                 AdditionalParameters="/p:PreviousStageProps=$(NextStagePropsPath) $(RidPassedToPrepareTest)"
-                 MaxCpuCount="1" />
+          DependsOnTargets="CreateTestAssetPackageNuPkgs;
+                            CopyDirectoryBuildTestDependencies;
+                            OverlaySdkOnLKG"
+          AfterTargets="Build">
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
           DependsOnTargets="SetupTestPackageProjectData;"
-          Outputs="%(TestPackageProject.Identity)">
+          Inputs="@(CreateTestAssetPackageNuPkgsInput)"
+          Outputs="@(CreateTestAssetPackageNuPkgsOutput)">
+    <MakeDir Directories="$(TestPackagesDir)" Condition="!Exists('$(TestPackagesDir)')"/>
 
-    <DotNetRestore ToolPath="$(SdkOutputDirectory)"
-                   WorkingDirectory="$([System.IO.Directory]::GetParent('%(TestPackageProject.ProjectPath)'))"
-                   ProjectPath="%(TestPackageProject.ProjectPath)"
-                   AdditionalParameters="/p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)"
-                   />
- 
-    <!-- https://github.com/NuGet/Home/issues/4063 -->
-    <DotNetPack Output="$(TestPackagesDir)"
-                ProjectPath="%(TestPackageProject.ProjectPath)"
-                ToolPath="$(SdkOutputDirectory)"
-                VersionSuffix="%(TestPackageProject.VersionSuffix)"
-                MsbuildArgs="%(TestPackageProject.MsbuildArgs) /p:SdkNuGetVersion=$(SdkNugetVersion) /p:RestoreAdditionalProjectSources=$(TestOutputDir)/packages /p:PreviousStageProps=$(NextStagePropsPath)" />
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Properties="RestoreAdditionalProjectSources=$(TestPackagesDir);ImportDirectoryBuildTargets=false"
+      Targets="Restore" />
+
+    <MSBuild
+      BuildInParallel="False"
+      Projects="%(TestPackageProject.ProjectPath)"
+      Properties="PackageOutputPath=$(TestPackagesDir);%(TestPackageProject.MsbuildArgs);RestoreAdditionalProjectSources=$(TestOutputDir)/packages;Version=%(TestPackageProject.Version)"
+      Targets="Pack" />
   </Target>
 
-  <Target Name="EnsureStageSeparation">
-    <DotNetMSBuild Arguments="/v:diag $(RepoRoot)/build_projects/Microsoft.DotNet.Cli.Build.SelfTest/InvokeWithStage0.proj /p:OutputDirectory=&quot;$(SdkOutputDirectory)&quot;"
-                   ToolPath="$(PreviousStageDirectory)" />
+  <Target Name="CopyDirectoryBuildTestDependencies" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
+    <Copy SourceFiles="@(_CopyDirectoryBuildTestDependenciesInput)" DestinationFiles="@(_CopyDirectoryBuildTestDependenciesOutput)" />
   </Target>
+
 </Project>
