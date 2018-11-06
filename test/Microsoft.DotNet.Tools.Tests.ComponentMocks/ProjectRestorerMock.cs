@@ -57,7 +57,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
         }
 
         public void Restore(FilePath project,
-            FilePath? nugetConfig = null,
+            PackageLocation packageLocation,
             string verbosity = null)
         {
             string packageId;
@@ -92,7 +92,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
             var feedPackage = GetPackage(
                 packageId,
                 versionRange,
-                nugetConfig);
+                packageLocation.NugetConfig);
 
             var packageVersion = feedPackage.Version;
             targetFramework = string.IsNullOrEmpty(targetFramework) ? "targetFramework" : targetFramework;
