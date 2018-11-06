@@ -13,7 +13,7 @@ done
 
 REPO_ROOT="$( cd -P "$( dirname "$SOURCE" )/../" && pwd )"
 
-STAGE0_DIR=$REPO_ROOT/.dotnet_stage0/x64
+STAGE0_DIR=$REPO_ROOT/.dotnet
 export PATH=$STAGE0_DIR:$PATH
 
 

@@ -10,7 +10,7 @@ for %%i in (%~dp0..\) DO (
 title CLI Build (%CLI_REPO_ROOT%)
 
 REM Add Stage 0 CLI to path
-set PATH=%CLI_REPO_ROOT%.dotnet_stage0\x64;%PATH%
+set PATH=%CLI_REPO_ROOT%.dotnet;%PATH%
 
 set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
 set DOTNET_MULTILEVEL_LOOKUP=0
