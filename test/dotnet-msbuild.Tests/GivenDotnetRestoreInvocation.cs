@@ -11,17 +11,12 @@ using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetRestoreInvocation
+    public class GivenDotnetRestoreInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private const string ExpectedPrefix =
             "exec <msbuildpath> -maxcpucount -verbosity:m -nologo -target:Restore";
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetRestoreInvocation));
-
-        public GivenDotnetRestoreInvocation()
-        {
-            Telemetry.Telemetry.CurrentSessionId = null;
-        }
 
         [Theory]
         [InlineData(new string[] { }, "")]

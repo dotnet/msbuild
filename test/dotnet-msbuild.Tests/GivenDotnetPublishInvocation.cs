@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetPublishInvocation
+    public class GivenDotnetPublishInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPublishInvocation));
@@ -22,7 +22,6 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
         public GivenDotnetPublishInvocation(ITestOutputHelper output)
         {
             this.output = output;
-            Telemetry.Telemetry.CurrentSessionId = null;
         }
 
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";

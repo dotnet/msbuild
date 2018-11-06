@@ -12,18 +12,13 @@ using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetPackInvocation
+    public class GivenDotnetPackInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -restore -target:pack";
         const string ExpectedNoBuildPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -target:pack";
 
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetPackInvocation));
-
-        public GivenDotnetPackInvocation()
-        {
-            Telemetry.Telemetry.CurrentSessionId = null;
-        }
 
         [Theory]
         [InlineData(new string[] { }, "")]

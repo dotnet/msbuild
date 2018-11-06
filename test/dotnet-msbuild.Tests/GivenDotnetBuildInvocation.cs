@@ -10,17 +10,12 @@ using Xunit;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetBuildInvocation
+    public class GivenDotnetBuildInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m";
 
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetBuildInvocation));
-
-        public GivenDotnetBuildInvocation()
-        {
-            Telemetry.Telemetry.CurrentSessionId = null;
-        }
 
         [Theory]
         [InlineData(new string[] { }, "-target:Build")]

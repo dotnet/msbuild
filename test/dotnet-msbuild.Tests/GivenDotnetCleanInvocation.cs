@@ -11,17 +11,12 @@ using Microsoft.DotNet.Tools.Tests.Utilities;
 
 namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
-    public class GivenDotnetCleanInvocation
+    public class GivenDotnetCleanInvocation : IClassFixture<NullCurrentSessionIdFixture>
     {
         const string ExpectedPrefix = "exec <msbuildpath> -maxcpucount -verbosity:m -verbosity:normal -target:Clean";
 
         private static readonly string WorkingDirectory = 
             TestPathUtilities.FormatAbsolutePath(nameof(GivenDotnetCleanInvocation));
-
-        public GivenDotnetCleanInvocation()
-        {
-            Telemetry.Telemetry.CurrentSessionId = null;
-        }
 
         [Fact]
         public void ItAddsProjectToMsbuildInvocation()
