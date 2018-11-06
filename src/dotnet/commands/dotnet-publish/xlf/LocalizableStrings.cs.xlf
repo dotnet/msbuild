@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
@@ -45,8 +45,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">Cílový modul runtime pro publikování aplikace.
-Výchozí možnost je publikovat aplikaci pro určitou architekturu bez spustitelného souboru.</target>
+        <target state="translated">Modul runtime, který je cílem publikování. Používá se při vytváření samostatného nasazení.
+Ve výchozím nastavení je publikována aplikace závislá na architektuře.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +57,8 @@ Výchozí možnost je publikovat aplikaci pro určitou architekturu bez spustite
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publikuje spolu s aplikací modul runtime .NET Core, aby se tento modul nemusel instalovat na cílový počítač. Standardně se nastaví na True, pokud je zadaný identifikátor modulu runtime.</target>
+        <target state="translated">Publikujte se svou aplikací modul runtime pro .NET Core, aby ho nebylo nutné instalovat na cílovém počítači.
+Pokud není zadán identifikátor modul runtime, výchozí hodnota je true.</target>
         <note />
       </trans-unit>
     </body>

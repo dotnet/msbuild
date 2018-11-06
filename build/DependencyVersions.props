@@ -12,13 +12,13 @@
     <DotnetWatchPackageVersion>2.2.0-preview3-35497</DotnetWatchPackageVersion>
     <MicrosoftNETCoreAppPackageVersion>2.2.0-preview3-27014-02</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreDotNetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetHostResolverPackageVersion>
-    <MicrosoftBuildPackageVersion>15.9.19</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>15.9.20</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
     <MicrosoftBuildRuntimePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildRuntimePackageVersion>
     <MicrosoftBuildLocalizationPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildLocalizationPackageVersion>
     <MicrosoftBuildUtilitiesCorePackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildUtilitiesCorePackageVersion>
-    <MicrosoftFSharpCompilerPackageVersion>10.2.3-rtm-180727-0</MicrosoftFSharpCompilerPackageVersion>
-    <MicrosoftCodeAnalysisCSharpPackageVersion>2.9.0-beta8-63127-03</MicrosoftCodeAnalysisCSharpPackageVersion>
+    <MicrosoftFSharpCompilerPackageVersion>10.2.3-rtm-181017-0</MicrosoftFSharpCompilerPackageVersion>
+    <MicrosoftCodeAnalysisCSharpPackageVersion>2.10.0-beta2-63410-10</MicrosoftCodeAnalysisCSharpPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNETCoreCompilersPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNETCoreCompilersPackageVersion>
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
@@ -60,7 +60,7 @@
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
     <MSTestVersion>1.3.2</MSTestVersion>
     <XUnitVersion>2.3.1</XUnitVersion>
-    <NUnit3TemplatesVersion>1.5.2</NUnit3TemplatesVersion>
+    <NUnit3TemplatesVersion>1.5.3</NUnit3TemplatesVersion>
   </PropertyGroup>
 
   <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->

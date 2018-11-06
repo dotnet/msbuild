@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="src/dotnet/LocalizableStrings.resx">
     <body>
@@ -55,7 +55,7 @@
       </trans-unit>
       <trans-unit id="ProjectFile">
         <source>Project file</source>
-        <target state="translated">Arquivo de projeto</target>
+        <target state="translated">Arquivo de Projeto</target>
         <note />
       </trans-unit>
       <trans-unit id="Reference">
@@ -120,7 +120,7 @@
       </trans-unit>
       <trans-unit id="Add">
         <source>Add</source>
-        <target state="translated">Adicionar</target>
+        <target state="translated">adicionar</target>
         <note />
       </trans-unit>
       <trans-unit id="Remove">
@@ -135,7 +135,7 @@
       </trans-unit>
       <trans-unit id="Update">
         <source>Update</source>
-        <target state="translated">Atualizar</target>
+        <target state="translated">Atualização</target>
         <note />
       </trans-unit>
       <trans-unit id="New">
@@ -160,7 +160,7 @@
       </trans-unit>
       <trans-unit id="Find">
         <source>Find</source>
-        <target state="translated">Localizar</target>
+        <target state="translated">Encontrar</target>
         <note />
       </trans-unit>
       <trans-unit id="Error">

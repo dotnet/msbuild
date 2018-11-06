@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="src/dotnet/LocalizableStrings.resx">
     <body>
@@ -120,7 +120,7 @@
       </trans-unit>
       <trans-unit id="Add">
         <source>Add</source>
-        <target state="translated">新增</target>
+        <target state="translated">加入</target>
         <note />
       </trans-unit>
       <trans-unit id="Remove">
@@ -155,7 +155,7 @@
       </trans-unit>
       <trans-unit id="Save">
         <source>Save</source>
-        <target state="translated">[儲存]</target>
+        <target state="translated">儲存</target>
         <note />
       </trans-unit>
       <trans-unit id="Find">
@@ -185,7 +185,7 @@
       </trans-unit>
       <trans-unit id="Type">
         <source>Type</source>
-        <target state="translated">類型</target>
+        <target state="translated">型別</target>
         <note />
       </trans-unit>
       <trans-unit id="Value">

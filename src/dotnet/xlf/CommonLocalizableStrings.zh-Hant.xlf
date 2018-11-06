@@ -104,7 +104,7 @@
       </trans-unit>
       <trans-unit id="Add">
         <source>Add</source>
-        <target state="translated">新增</target>
+        <target state="translated">加入</target>
         <note />
       </trans-unit>
       <trans-unit id="Remove">
@@ -139,7 +139,7 @@
       </trans-unit>
       <trans-unit id="Save">
         <source>Save</source>
-        <target state="translated">[儲存]</target>
+        <target state="translated">儲存</target>
         <note />
       </trans-unit>
       <trans-unit id="Find">
@@ -169,7 +169,7 @@
       </trans-unit>
       <trans-unit id="Type">
         <source>Type</source>
-        <target state="translated">類型</target>
+        <target state="translated">型別</target>
         <note />
       </trans-unit>
       <trans-unit id="Value">
@@ -579,7 +579,7 @@
       </trans-unit>
       <trans-unit id="CmdFramework">
         <source>FRAMEWORK</source>
-        <target state="translated">架構</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectNotCompatibleWithFrameworks">
@@ -875,7 +875,7 @@ setx PATH "%PATH%;{0}"
       </trans-unit>
       <trans-unit id="FrameworkArgumentName">
         <source>FRAMEWORK</source>
-        <target state="translated">架構</target>
+        <target state="translated">FRAMEWORK</target>
         <note />
       </trans-unit>
       <trans-unit id="RuntimeIdentifierArgumentName">

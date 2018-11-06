@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
@@ -65,11 +65,11 @@
                                         Log in trx format using a unique file name: --logger trx
                                         Log in trx format using the specified file name: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
                                         See https://aka.ms/vstest-report for more information on logger arguments.</source>
-        <target state="needs-review-translation">Registrador que se utiliza para los resultados de las pruebas.
-                                        Ejemplos:
-                                        Registrar en formato trx con un nombre de archivo único: --logger trx
-                                        Registrar en formato trx con el nombre de archivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
-                                        Vea https://aka.ms/vstest-report para obtener más información sobre argumentos de registrador.</target>
+        <target state="translated">El registrador que se utilizará para los resultados de la prueba.
+                                        Ejemplo:
+                                        Inicie sesión en formato trx mediante un nombre de archivo único: --logger trx
+                                        Inicie sesión en formato trx mediante el nombre de archivo especificado: --logger "trx;LogFileName=&lt;TestResults.trx&gt;"
+                                        Consulte https://aka.ms/vstest-report para obtener más información sobre los argumentos del registrador.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdOutputDir">

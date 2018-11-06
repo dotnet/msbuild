@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
@@ -45,8 +45,7 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">Entorno de tiempo de ejecución para el que se publica la aplicación.
-La opción predeterminada es publicar una aplicación dependiente de la plataforma sin archivo ejecutable.</target>
+        <target state="translated">El tiempo de ejecución objetivo para publicar. Esto se utiliza al crear una implementación independiente. El valor predeterminado es publicar una aplicación dependiente del marco.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +56,7 @@ La opción predeterminada es publicar una aplicación dependiente de la platafor
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Publica el tiempo de ejecución de .NET Core con su aplicación para que no sea necesario instalarlo en la máquina de destino. Si se especifica un identificador de tiempo de ejecución, se toma como predeterminado el valor "true".</target>
+        <target state="translated">Publique el tiempo de ejecución de .NET Core con la aplicación para que no sea necesario instalar el tiempo de ejecución en el equipo de destino. El valor predeterminado es "true" si se especifica un identificador de tiempo de ejecución.</target>
         <note />
       </trans-unit>
     </body>

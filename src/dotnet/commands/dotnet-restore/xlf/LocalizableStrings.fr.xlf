@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../LocalizableStrings.resx">
     <body>
@@ -96,27 +96,27 @@ Cela équivaut à supprimer project.assets.json.</target>
       </trans-unit>
       <trans-unit id="CmdLockedModeOptionDescription">
         <source>Don't allow updating project lock file.</source>
-        <target state="new">Don't allow updating project lock file.</target>
+        <target state="translated">Ne pas autoriser la mise à jour du fichier de verrouillage du projet.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockFilePathOption">
         <source>LOCK_FILE_PATH</source>
-        <target state="new">LOCK_FILE_PATH</target>
+        <target state="translated">LOCK_FILE_PATH</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdLockFilePathOptionDescription">
         <source>Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</source>
-        <target state="new">Output location where project lock file is written. By default, this is 'PROJECT_ROOT\packages.lock.json'.</target>
+        <target state="translated">Emplacement de sortie où le fichier de verrouillage du projet est écrit. Par défaut, le chemin est « PROJECT_ROOT\packages.lock.json ».</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdReevaluateOptionDescription">
         <source>Forces restore to reevaluate all dependencies even if a lock file already exists.</source>
-        <target state="new">Forces restore to reevaluate all dependencies even if a lock file already exists.</target>
+        <target state="translated">Force la restauration à réévaluer toutes les dépendances, même s'il existe déjà un fichier de verrouillage.</target>
         <note />
       </trans-unit>
       <trans-unit id="CmdUseLockFileOptionDescription">
         <source>Enables project lock file to be generated and used with restore.</source>
-        <target state="new">Enables project lock file to be generated and used with restore.</target>
+        <target state="translated">Permet au fichier de verrouillage du projet d'être généré et utilisé avec la restauration.</target>
         <note />
       </trans-unit>
     </body>
