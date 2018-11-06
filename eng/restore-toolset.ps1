@@ -3,12 +3,6 @@ function InitializeCustomSDKToolset {
     return
   }
 
-  # Disable first run since we want to control all package sources
-  $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-
-  # Don't resolve shared frameworks from user or global locations
-  $env:DOTNET_MULTILEVEL_LOOKUP=0
-
   # Turn off MSBuild Node re-use
   $env:MSBUILDDISABLENODEREUSE=1
 
