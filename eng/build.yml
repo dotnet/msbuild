@@ -37,7 +37,6 @@ phases:
                   /p:PB_PublishType=$(_PublishType)
         _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
-    #Add --ci/-ci flag back to builds below. See https://github.com/dotnet/cli/issues/10267
     steps:
     - ${{ if ne(variables['System.TeamProject'], 'public') }}:
       - task: AzureKeyVault@1
@@ -55,7 +54,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: build.cmd
-                  -test -sign -pack -publish
+                  -test -sign -pack -publish -ci
                   -Configuration $(BuildConfig)
                   -Architecture $(BuildArchitecture)
                   $(_PublishArgs)
@@ -70,7 +69,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
       - script: ./build.sh
-                  --test --pack --publish
+                  --test --pack --publish --ci
                   --configuration $(BuildConfig)
                   $(DockerParameter)
                   --architecture $(BuildArchitecture)
@@ -82,7 +81,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
-                  --test --pack --publish
+                  --test --pack --publish --ci
                   --configuration $(BuildConfig)
         displayName: Build
 
