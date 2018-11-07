@@ -20,7 +20,10 @@ phases:
   parameters:
     agentOs: Windows_NT
     queue:
-      name: Hosted VS2017
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        name: dotnet-external-temp
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        name: dotnet-internal-temp
       parallel: 2
       matrix:
         ${{ if eq(variables['System.TeamProject'], 'public') }}:
