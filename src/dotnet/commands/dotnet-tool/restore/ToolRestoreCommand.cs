@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
@@ -96,115 +97,111 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                 return 0;
             }
 
-            Dictionary<RestoredCommandIdentifier, RestoredCommand> dictionary =
-                new Dictionary<RestoredCommandIdentifier, RestoredCommand>();
+            ToolRestoreResult[] toolRestoreResults =
+                packagesFromManifest
+                    .Select(package => InstallPackages(package, configFile))
+                    .AsParallel().ToArray();
 
-            Dictionary<PackageId, ToolPackageException> toolPackageExceptions =
-                new Dictionary<PackageId, ToolPackageException>();
+            Dictionary<RestoredCommandIdentifier, RestoredCommand> downloaded =
+                toolRestoreResults.SelectMany(result => result.SaveToCache)
+                    .ToDictionary(pair => pair.Item1, pair => pair.Item2);
 
-            List<string> errorMessages = new List<string>();
-            List<string> successMessages = new List<string>();
+            EnsureNoCommandNameCollision(downloaded);
 
-            foreach (var package in packagesFromManifest)
-            {
-                string targetFramework = BundledTargetFramework.GetTargetFrameworkMoniker();
+            _localToolsResolverCache.Save(downloaded, _nugetGlobalPackagesFolder);
 
-                if (PackageHasBeenRestored(package, targetFramework))
-                {
-                    successMessages.Add(string.Format(
-                        LocalizableStrings.RestoreSuccessful, package.PackageId,
-                        package.Version.ToNormalizedString(), string.Join(", ", package.CommandNames)));
-                    continue;
-                }
-
-                try
-                {
-                    IToolPackage toolPackage =
-                        _toolPackageInstaller.InstallPackageToExternalManagedLocation(
-                            new PackageLocation(
-                                nugetConfig: configFile,
-                                additionalFeeds: _sources,
-                                rootConfigDirectory: package.FirstEffectDirectory),
-                            package.PackageId, ToVersionRangeWithOnlyOneVersion(package.Version), targetFramework,
-                            verbosity: _verbosity);
-
-                    if (!ManifestCommandMatchesActualInPackage(package.CommandNames, toolPackage.Commands))
-                    {
-                        errorMessages.Add(
-                            string.Format(LocalizableStrings.CommandsMismatch,
-                                JoinBySpaceWithQuote(package.CommandNames.Select(c => c.Value.ToString())),
-                                package.PackageId,
-                                JoinBySpaceWithQuote(toolPackage.Commands.Select(c => c.Name.ToString()))));
-                    }
-
-                    foreach (RestoredCommand command in toolPackage.Commands)
-                    {
-                        dictionary.Add(
-                            new RestoredCommandIdentifier(
-                                toolPackage.Id,
-                                toolPackage.Version,
-                                NuGetFramework.Parse(targetFramework),
-                                Constants.AnyRid,
-                                command.Name),
-                            command);
-                    }
-
-                    successMessages.Add(string.Format(
-                        LocalizableStrings.RestoreSuccessful, package.PackageId,
-                        package.Version.ToNormalizedString(), string.Join(" ", package.CommandNames)));
-                }
-                catch (ToolPackageException e)
-                {
-                    toolPackageExceptions.Add(package.PackageId, e);
-                }
-            }
-
-            EnsureNoCommandNameCollision(dictionary);
-
-            _localToolsResolverCache.Save(dictionary, _nugetGlobalPackagesFolder);
-
-            return PrintConclusionAndReturn(dictionary.Count() > 0, toolPackageExceptions, errorMessages, successMessages);
+            return PrintConclusionAndReturn(toolRestoreResults);
         }
 
-        private int PrintConclusionAndReturn(
-            bool anySuccess,
-            Dictionary<PackageId, ToolPackageException> toolPackageExceptions,
-            List<string> errorMessages,
-            List<string> successMessages)
+        private ToolRestoreResult InstallPackages(
+            ToolManifestPackage package,
+            FilePath? configFile)
         {
-            if (toolPackageExceptions.Any() || errorMessages.Any())
+            string targetFramework = BundledTargetFramework.GetTargetFrameworkMoniker();
+
+            if (PackageHasBeenRestored(package, targetFramework))
+            {
+                return ToolRestoreResult.Success(
+                    saveToCache: Array.Empty<(RestoredCommandIdentifier, RestoredCommand)>(),
+                    message: string.Format(
+                        LocalizableStrings.RestoreSuccessful, package.PackageId,
+                        package.Version.ToNormalizedString(), string.Join(", ", package.CommandNames)));
+            }
+
+            try
+            {
+                IToolPackage toolPackage =
+                    _toolPackageInstaller.InstallPackageToExternalManagedLocation(
+                        new PackageLocation(
+                            nugetConfig: configFile,
+                            additionalFeeds: _sources,
+                            rootConfigDirectory: package.FirstEffectDirectory),
+                        package.PackageId, ToVersionRangeWithOnlyOneVersion(package.Version), targetFramework,
+                        verbosity: _verbosity);
+
+                if (!ManifestCommandMatchesActualInPackage(package.CommandNames, toolPackage.Commands))
+                {
+                    return ToolRestoreResult.Failure(
+                        string.Format(LocalizableStrings.CommandsMismatch,
+                            JoinBySpaceWithQuote(package.CommandNames.Select(c => c.Value.ToString())),
+                            package.PackageId,
+                            JoinBySpaceWithQuote(toolPackage.Commands.Select(c => c.Name.ToString()))));
+                }
+
+                return ToolRestoreResult.Success(
+                    saveToCache: toolPackage.Commands.Select(command => (
+                        new RestoredCommandIdentifier(
+                            toolPackage.Id,
+                            toolPackage.Version,
+                            NuGetFramework.Parse(targetFramework),
+                            Constants.AnyRid,
+                            command.Name),
+                        command)).ToArray(),
+                    message: string.Format(
+                        LocalizableStrings.RestoreSuccessful,
+                        package.PackageId,
+                        package.Version.ToNormalizedString(),
+                        string.Join(" ", package.CommandNames)));
+            }
+            catch (ToolPackageException e)
+            {
+                return ToolRestoreResult.Failure(package.PackageId, e);
+            }
+        }
+
+        private int PrintConclusionAndReturn(ToolRestoreResult[] toolRestoreResults)
+        {
+            if (toolRestoreResults.Any(r => !r.IsSuccess))
             {
                 _reporter.WriteLine(Environment.NewLine);
                 _errorReporter.WriteLine(string.Join(
-                                        Environment.NewLine,
-                                        CreateErrorMessage(toolPackageExceptions).Concat(errorMessages)).Red());
+                    Environment.NewLine,
+                    toolRestoreResults.Where(r => !r.IsSuccess).Select(r => r.Message)).Red());
 
-                _reporter.WriteLine(Environment.NewLine);
+                var successMessage = toolRestoreResults.Where(r => r.IsSuccess).Select(r => r.Message);
+                if (successMessage.Any())
+                {
+                    _reporter.WriteLine(Environment.NewLine);
+                    _reporter.WriteLine(string.Join(Environment.NewLine, successMessage));
 
-                _reporter.WriteLine(string.Join(Environment.NewLine, successMessages));
+                }
+
                 _errorReporter.WriteLine(Environment.NewLine +
-                    (anySuccess
-                    ? LocalizableStrings.RestorePartiallyFailed
-                    : LocalizableStrings.RestoreFailed).Red());
+                                         (toolRestoreResults.Any(r => r.IsSuccess)
+                                             ? LocalizableStrings.RestorePartiallyFailed
+                                             : LocalizableStrings.RestoreFailed).Red());
 
                 return 1;
             }
             else
             {
-                _reporter.WriteLine(string.Join(Environment.NewLine, successMessages));
+                _reporter.WriteLine(string.Join(Environment.NewLine,
+                    toolRestoreResults.Where(r => r.IsSuccess).Select(r => r.Message)));
                 _reporter.WriteLine(Environment.NewLine);
                 _reporter.WriteLine(LocalizableStrings.LocalToolsRestoreWasSuccessful.Green());
 
                 return 0;
             }
-        }
-
-        private static IEnumerable<string> CreateErrorMessage(
-            Dictionary<PackageId, ToolPackageException> toolPackageExceptions)
-        {
-            return toolPackageExceptions.Select(p =>
-                string.Format(LocalizableStrings.PackageFailedToRestore,
-                    p.Key.ToString(), p.Value.ToString()));
         }
 
         private static bool ManifestCommandMatchesActualInPackage(
@@ -299,6 +296,48 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                 includeMinVersion: true,
                 maxVersion: version,
                 includeMaxVersion: true);
+        }
+
+        private struct ToolRestoreResult
+        {
+            public (RestoredCommandIdentifier, RestoredCommand)[] SaveToCache { get; }
+            public bool IsSuccess { get; }
+            public string Message { get; }
+
+            private ToolRestoreResult(
+                (RestoredCommandIdentifier, RestoredCommand)[] saveToCache,
+                bool isSuccess, string message)
+            {
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    throw new ArgumentException("message", nameof(message));
+                }
+
+                SaveToCache = saveToCache ?? Array.Empty<(RestoredCommandIdentifier, RestoredCommand)>();
+                IsSuccess = isSuccess;
+                Message = message;
+            }
+
+            public static ToolRestoreResult Success(
+                (RestoredCommandIdentifier, RestoredCommand)[] saveToCache,
+                string message)
+            {
+                return new ToolRestoreResult(saveToCache, true, message);
+            }
+
+            public static ToolRestoreResult Failure(string message)
+            {
+                return new ToolRestoreResult(null, false, message);
+            }
+
+            public static ToolRestoreResult Failure(
+                PackageId packageId,
+                ToolPackageException toolPackageException)
+            {
+                return new ToolRestoreResult(null, false,
+                    string.Format(LocalizableStrings.PackageFailedToRestore,
+                        packageId.ToString(), toolPackageException.ToString()));
+            }
         }
     }
 }

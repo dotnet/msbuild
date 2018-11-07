@@ -213,18 +213,37 @@ namespace Microsoft.DotNet.Tests.Commands
                 _reporter
             );
 
+            var allPossibleErrorMessage = new[]
+            {
+                string.Format(LocalizableStrings.PackagesCommandNameCollisionConclusion,
+                    string.Join(Environment.NewLine,
+                        new[]
+                        {
+                            "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
+                                _toolCommandNameA.Value,
+                                _packageIdA.ToString()),
+                            "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
+                                "A",
+                                _packageIdWithCommandNameCollisionWithA.ToString())
+                        })),
+
+                string.Format(LocalizableStrings.PackagesCommandNameCollisionConclusion,
+                    string.Join(Environment.NewLine,
+                        new[]
+                        {
+                            "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
+                                "A",
+                                _packageIdWithCommandNameCollisionWithA.ToString()),
+                            "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
+                                _toolCommandNameA.Value,
+                                _packageIdA.ToString()),
+                        })),
+            };
+
             Action a = () => toolRestoreCommand.Execute();
             a.ShouldThrow<ToolPackageException>()
                 .And.Message
-                .Should().Be(string.Format(LocalizableStrings.PackagesCommandNameCollisionConclusion,
-                        string.Join(Environment.NewLine,
-                            new[] {
-                                 "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
-                                    _toolCommandNameA.Value,
-                                    _packageIdA.ToString()),
-                                "\t" + string.Format(LocalizableStrings.PackagesCommandNameCollisionForOnePackage,
-                                    "A",
-                                    _packageIdWithCommandNameCollisionWithA.ToString())})));
+                .Should().BeOneOf(allPossibleErrorMessage, "Run in parallel, no order guarantee");
         }
 
         [Fact]
