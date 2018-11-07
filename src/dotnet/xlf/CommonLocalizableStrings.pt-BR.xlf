@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../CommonLocalizableStrings.resx">
     <body>
@@ -9,12 +9,13 @@
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual usar.</target>
+        <target state="translated">Foi encontrado mais de um projeto em ‘{0}’. Especifique qual deve ser usado.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
         <source>Project already has a reference to `{0}`.</source>
-        <target state="translated">O projeto já tem uma referência para ‘{0}’.</target>
+        <target state="translated">O projeto já tem uma referência a ‘{0}’.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectReferenceCouldNotBeFound">
@@ -34,7 +35,7 @@
       </trans-unit>
       <trans-unit id="ProjectFile">
         <source>Project file</source>
-        <target state="translated">Arquivo de projeto</target>
+        <target state="translated">Arquivo de Projeto</target>
         <note />
       </trans-unit>
       <trans-unit id="Reference">
@@ -104,7 +105,7 @@
       </trans-unit>
       <trans-unit id="Add">
         <source>Add</source>
-        <target state="translated">Adicionar</target>
+        <target state="translated">adicionar</target>
         <note />
       </trans-unit>
       <trans-unit id="Remove">
@@ -119,7 +120,7 @@
       </trans-unit>
       <trans-unit id="Update">
         <source>Update</source>
-        <target state="translated">Atualizar</target>
+        <target state="translated">Atualização</target>
         <note />
       </trans-unit>
       <trans-unit id="New">
@@ -144,7 +145,7 @@
       </trans-unit>
       <trans-unit id="Find">
         <source>Find</source>
-        <target state="translated">Localizar</target>
+        <target state="translated">Encontrar</target>
         <note />
       </trans-unit>
       <trans-unit id="Error">
@@ -344,7 +345,8 @@
       </trans-unit>
       <trans-unit id="CouldNotFindSolutionOrDirectory">
         <source>Could not find solution or directory `{0}`.</source>
-        <target state="translated">Não foi possível encontrar a solução ou diretório ‘{0}’.</target>
+        <target state="translated">Não foi possível encontrar a solução ou o diretório ‘{0}’.
+</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionDoesNotExist">
@@ -474,7 +476,8 @@
       </trans-unit>
       <trans-unit id="NoReferencesFound">
         <source>There are no {0} references in project {1}. ;; {0} is the type of the item being requested (project, package, p2p) and {1} is the object operated on (a project file or a solution file). </source>
-        <target state="translated">Não há referências {0} no projeto {1}. ;; {0} é o tipo do item sendo solicitado (projeto, pacote, p2p) e {1} é o objeto no qual ocorre a operação (um arquivo de projeto ou um arquivo de solução). </target>
+        <target state="translated">Não há referências de {0} no projeto {1}. ;; {0} é o tipo do item que está sendo solicitado (projeto, pacote, p2p) e {1} é o objeto no qual ocorre a operação (um arquivo de projeto ou de solução). 
+</target>
         <note />
       </trans-unit>
       <trans-unit id="NoProjectsFound">

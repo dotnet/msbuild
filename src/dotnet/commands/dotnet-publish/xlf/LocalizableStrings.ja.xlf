@@ -45,8 +45,7 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">発行するアプリケーションのターゲット ランタイム。
-既定値は、実行可能ファイルのないフレームワーク依存のアプリケーションを発行することです。</target>
+        <target state="translated">発行するターゲット ランタイムです。自己完結型の配置を作成するときに使用されます。既定では、フレームワークに依存したアプリケーションが発行されます。</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +56,7 @@ The default is to publish a framework-dependent application.</source>
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">ランタイムをターゲット マシンにインストールしなくてもよいよう、.NET Core ランタイムをアプリケーションと一緒に発行します。ランタイム ID が指定される場合、既定の 'true' になります。</target>
+        <target state="translated">ランタイムをターゲット マシンにインストールする必要がないように、アプリケーションに .NET Core ランタイムを発行します。ランタイム識別子が指定されている場合、既定値は 'true' です。</target>
         <note />
       </trans-unit>
     </body>
