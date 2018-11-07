@@ -34,11 +34,10 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                 useMock: testMockBehaviorIsInSync,
                 feeds: GetMockFeedsForSource(source));
 
-            var package = installer.InstallPackage(
+            var package = installer.InstallPackage(new PackageLocation(additionalFeeds: new[] {source}),
                 packageId: TestPackageId,
                 versionRange: VersionRange.Parse(TestPackageVersion),
-                targetFramework: _testTargetframework,
-                additionalFeeds: new[] {source});
+                targetFramework: _testTargetframework);
 
             package.PackagedShims.Should().ContainSingle(f => f.Value.Contains("demo.exe") || f.Value.Contains("demo"));
 

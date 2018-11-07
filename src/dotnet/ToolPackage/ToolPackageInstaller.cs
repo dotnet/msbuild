@@ -31,12 +31,11 @@ namespace Microsoft.DotNet.ToolPackage
             _offlineFeed = offlineFeed ?? new DirectoryPath(CliFolderPathCalculator.CliFallbackFolderPath);
         }
 
-        public IToolPackage InstallPackage(PackageId packageId,
+        public IToolPackage InstallPackage(
+            PackageLocation packageLocation,
+            PackageId packageId,
             VersionRange versionRange = null,
             string targetFramework = null,
-            FilePath? nugetConfig = null,
-            DirectoryPath? rootConfigDirectory = null,
-            string[] additionalFeeds = null,
             string verbosity = null)
         {
             var packageRootDirectory = _store.GetRootPackageDirectory(packageId);
@@ -56,14 +55,14 @@ namespace Microsoft.DotNet.ToolPackage
                             targetFramework: targetFramework ?? BundledTargetFramework.GetTargetFrameworkMoniker(),
                             restoreDirectory: stageDirectory,
                             assetJsonOutputDirectory: stageDirectory,
-                            rootConfigDirectory: rootConfigDirectory,
-                            additionalFeeds: additionalFeeds);
+                            rootConfigDirectory: packageLocation.RootConfigDirectory,
+                            additionalFeeds: packageLocation.AdditionalFeeds);
 
                         try
                         {
                             _projectRestorer.Restore(
                                 tempProject,
-                                nugetConfig,
+                                packageLocation,
                                 verbosity: verbosity);
                         }
                         finally
