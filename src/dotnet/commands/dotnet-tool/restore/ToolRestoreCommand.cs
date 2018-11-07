@@ -102,13 +102,13 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                     .Select(package => InstallPackages(package, configFile))
                     .AsParallel().ToArray();
 
-            Dictionary<RestoredCommandIdentifier, RestoredCommand> succeeded =
+            Dictionary<RestoredCommandIdentifier, RestoredCommand> downloaded =
                 toolRestoreResults.SelectMany(result => result.SaveToCache)
                     .ToDictionary(pair => pair.Item1, pair => pair.Item2);
 
-            EnsureNoCommandNameCollision(succeeded);
+            EnsureNoCommandNameCollision(downloaded);
 
-            _localToolsResolverCache.Save(succeeded, _nugetGlobalPackagesFolder);
+            _localToolsResolverCache.Save(downloaded, _nugetGlobalPackagesFolder);
 
             return PrintConclusionAndReturn(toolRestoreResults);
         }
@@ -178,11 +178,13 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                     Environment.NewLine,
                     toolRestoreResults.Where(r => !r.IsSuccess).Select(r => r.Message)).Red());
 
-                _reporter.WriteLine(Environment.NewLine);
+                var successMessage = toolRestoreResults.Where(r => r.IsSuccess).Select(r => r.Message);
+                if (successMessage.Any())
+                {
+                    _reporter.WriteLine(Environment.NewLine);
+                    _reporter.WriteLine(string.Join(Environment.NewLine, successMessage));
 
-                _reporter.WriteLine(
-                    string.Join(Environment.NewLine,
-                        toolRestoreResults.Where(r => r.IsSuccess).Select(r => r.Message)));
+                }
 
                 _errorReporter.WriteLine(Environment.NewLine +
                                          (toolRestoreResults.Any(r => r.IsSuccess)
