@@ -15,6 +15,12 @@ function InitializeCustomSDKToolset {
 
   $env:DOTNET_CLI_TELEMETRY_PROFILE='$env:DOTNET_CLI_TELEMETRY_PROFILE;https://github.com/dotnet/cli'
 
+  # when architecture is not set, we should stop. This is usually when doing publish assets
+  if ((Test-Path variable:Architecture) -eq $False)
+  {
+    return
+  }
+
   # The following frameworks and tools are used only for testing.
   # Do not attempt to install them in source build.
   if ($env:DotNetBuildFromSource -eq "true" -or $Architecture -ne $InstallArchitecture) {
