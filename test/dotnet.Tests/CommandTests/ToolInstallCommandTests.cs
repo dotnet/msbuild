@@ -73,7 +73,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenRunWithPackageIdItShouldCreateValidShim()
         {
-            var installToolCommand = new ToolInstallCommand(_appliedCommand,
+            var installToolCommand = new ToolInstallGlobalOrToolPathCommand(_appliedCommand,
                 _parseResult,
                 _createToolPackageStoreAndInstaller,
                 _createShellShimRepository,
@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Tests.Commands
                     }
             });
 
-            var installCommand = new ToolInstallCommand(appliedCommand,
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(appliedCommand,
                 parseResult,
                 (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolToolPackageInstaller),
                 _createShellShimRepository,
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenRunWithPackageIdItShouldShowPathInstruction()
         {
-            var installCommand = new ToolInstallCommand(_appliedCommand,
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(_appliedCommand,
                 _parseResult,
                 _createToolPackageStoreAndInstaller,
                 _createShellShimRepository,
@@ -168,7 +168,7 @@ namespace Microsoft.DotNet.Tests.Commands
                     reporter: _reporter),
                 warningsMap: injectedWarnings);
 
-            var installToolCommand = new ToolInstallCommand(
+            var installToolCommand = new ToolInstallGlobalOrToolPathCommand(
                 _appliedCommand,
                 _parseResult,
                 (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
@@ -191,7 +191,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 CreateToolPackageInstaller(
                     installCallback: () => throw new ToolPackageException(ErrorMessage));
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 _appliedCommand,
                 _parseResult,
                 (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             _fileSystem.File.CreateEmptyFile(ExpectedCommandPath()); // Create conflict shim
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 _appliedCommand,
                 _parseResult,
                 _createToolPackageStoreAndInstaller,
@@ -240,7 +240,7 @@ namespace Microsoft.DotNet.Tests.Commands
             CreateToolPackageInstaller(
                 installCallback: () => throw new ToolConfigurationException("Simulated error"));
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 _appliedCommand,
                 _parseResult,
                 (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, toolPackageInstaller),
@@ -262,7 +262,7 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenRunWithPackageIdItShouldShowSuccessMessage()
         {
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 _appliedCommand,
                 _parseResult,
                 _createToolPackageStoreAndInstaller,
@@ -289,7 +289,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version {invalidVersion}");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 appliedCommand,
                 result,
                 _createToolPackageStoreAndInstaller,
@@ -312,7 +312,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version {PackageVersion}");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 appliedCommand,
                 result,
                 _createToolPackageStoreAndInstaller,
@@ -338,7 +338,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version [1.0,2.0]");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 appliedCommand,
                 result,
                 _createToolPackageStoreAndInstaller,
@@ -364,7 +364,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version [5.0,10.0]");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 appliedCommand,
                 result,
                 _createToolPackageStoreAndInstaller,
@@ -388,7 +388,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ParseResult result = Parser.Instance.Parse($"dotnet tool install -g {PackageId} --version 1.0.*");
             AppliedOption appliedCommand = result["dotnet"]["tool"]["install"];
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 appliedCommand,
                 result,
                 _createToolPackageStoreAndInstaller,
@@ -416,7 +416,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var parser = Parser.Instance;
             var parseResult = parser.ParseFrom("dotnet tool", new[] {"install", "-g", PackageId});
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 appliedCommand,
                 parseResult,
                 _createToolPackageStoreAndInstaller,
@@ -438,7 +438,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var parser = Parser.Instance;
             var parseResult = parser.ParseFrom("dotnet tool", new[] { "install", "-g", PackageId });
 
-            var installCommand = new ToolInstallCommand(
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(
                 appliedCommand,
                 parseResult,
                 _createToolPackageStoreAndInstaller,
@@ -460,7 +460,7 @@ namespace Microsoft.DotNet.Tests.Commands
             var parser = Parser.Instance;
             var parseResult = parser.ParseFrom("dotnet tool", new[] {"install", "-g", PackageId});
 
-            var installCommand = new ToolInstallCommand(appliedCommand,
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(appliedCommand,
                 parseResult,
                 _createToolPackageStoreAndInstaller,
                 _createShellShimRepository,
@@ -490,7 +490,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 [new PackageId(PackageId)] = new[] {new FilePath(prepackagedShimPath)}
             };
 
-            var installCommand = new ToolInstallCommand(appliedCommand,
+            var installCommand = new ToolInstallGlobalOrToolPathCommand(appliedCommand,
                 parseResult,
                 (location, forwardArguments) => (_toolPackageStore, _toolPackageStoreQuery, new ToolPackageInstallerMock(
                     fileSystem: _fileSystem,

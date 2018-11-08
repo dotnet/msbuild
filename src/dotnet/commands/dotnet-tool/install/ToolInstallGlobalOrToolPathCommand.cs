@@ -22,7 +22,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 		DirectoryPath? nonGlobalLocation = null,
 		IEnumerable<string> forwardRestoreArguments = null);
 
-    internal class ToolInstallCommand : CommandBase
+    internal class ToolInstallGlobalOrToolPathCommand : CommandBase
     {
         private readonly IEnvironmentPathInstruction _environmentPathInstruction;
         private readonly IReporter _reporter;
@@ -40,7 +40,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
         private readonly string _toolPath;
         private IEnumerable<string> _forwardRestoreArguments;
 
-        public ToolInstallCommand(
+        public ToolInstallGlobalOrToolPathCommand(
             AppliedOption appliedCommand,
             ParseResult parseResult,
             CreateToolPackageStoresAndInstaller createToolPackageStoreAndInstaller = null,
