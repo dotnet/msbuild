@@ -114,6 +114,136 @@ namespace Microsoft.Build.Tasks
 
         internal ResolveAssemblyReferenceIOTracker IoTracker { get; set; } = new ResolveAssemblyReferenceIOTracker();
 
+        internal ResolveAssemblyReferenceTaskInput Input
+        {
+            get => new ResolveAssemblyReferenceTaskInput
+            {
+                AllowedAssemblyExtensions = AllowedAssemblyExtensions,
+                AllowedRelatedFileExtensions = AllowedRelatedFileExtensions,
+                AppConfigFile = AppConfigFile,
+                Assemblies = Assemblies,
+                AssemblyFiles = AssemblyFiles,
+                AutoUnify = AutoUnify,
+                BuildEngine = BuildEngine,
+                CandidateAssemblyFiles = CandidateAssemblyFiles,
+                CopyLocalDependenciesWhenParentReferenceInGac = CopyLocalDependenciesWhenParentReferenceInGac,
+                DoNotCopyLocalIfInGac = DoNotCopyLocalIfInGac,
+                FindDependencies = FindDependencies,
+                FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences,
+                FindRelatedFiles = FindRelatedFiles,
+                FindSatellites = FindSatellites,
+                FindSerializationAssemblies = FindSerializationAssemblies,
+                FullFrameworkAssemblyTables = FullFrameworkAssemblyTables,
+                FullFrameworkFolders = FullFrameworkFolders,
+                FullTargetFrameworkSubsetNames = FullTargetFrameworkSubsetNames,
+                IgnoreDefaultInstalledAssemblySubsetTables = IgnoreDefaultInstalledAssemblySubsetTables,
+                IgnoreDefaultInstalledAssemblyTables = IgnoreDefaultInstalledAssemblyTables,
+                IgnoreTargetFrameworkAttributeVersionMismatch = IgnoreTargetFrameworkAttributeVersionMismatch,
+                IgnoreVersionForFrameworkReferences = IgnoreVersionForFrameworkReferences,
+                InstalledAssemblySubsetTables = InstalledAssemblySubsetTables,
+                InstalledAssemblyTables = InstalledAssemblyTables,
+                IoTracker = IoTracker,
+                LatestTargetFrameworkDirectories = LatestTargetFrameworkDirectories,
+                ProfileName = ProfileName,
+                ResolvedSDKReferences = ResolvedSDKReferences,
+                SearchPaths = SearchPaths,
+                ShouldExecuteInProcess = ShouldExecuteInProcess,
+                Silent = Silent,
+                StateFile = StateFile,
+                SupportsBindingRedirectGeneration = SupportsBindingRedirectGeneration,
+                TargetFrameworkDirectories = TargetFrameworkDirectories,
+                TargetFrameworkMoniker = TargetFrameworkMoniker,
+                TargetFrameworkMonikerDisplayName = TargetFrameworkMonikerDisplayName,
+                TargetFrameworkSubsets = TargetFrameworkSubsets,
+                TargetFrameworkVersion = TargetFrameworkVersion,
+                TargetProcessorArchitecture = TargetProcessorArchitecture,
+                TargetedRuntimeVersion = TargetedRuntimeVersion,
+                UnresolveFrameworkAssembliesFromHigherFrameworks = UnresolveFrameworkAssembliesFromHigherFrameworks,
+                WarnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatch,
+            };
+
+            set
+            {
+                AllowedAssemblyExtensions = value.AllowedAssemblyExtensions;
+                AllowedRelatedFileExtensions = value.AllowedRelatedFileExtensions;
+                AppConfigFile = value.AppConfigFile;
+                Assemblies = value.Assemblies;
+                AssemblyFiles = value.AssemblyFiles;
+                AutoUnify = value.AutoUnify;
+                BuildEngine = value.BuildEngine;
+                CandidateAssemblyFiles = value.CandidateAssemblyFiles;
+                CopyLocalDependenciesWhenParentReferenceInGac = value.CopyLocalDependenciesWhenParentReferenceInGac;
+                DoNotCopyLocalIfInGac = value.DoNotCopyLocalIfInGac;
+                FindDependencies = value.FindDependencies;
+                FindDependenciesOfExternallyResolvedReferences = value.FindDependenciesOfExternallyResolvedReferences;
+                FindRelatedFiles = value.FindRelatedFiles;
+                FindSatellites = value.FindSatellites;
+                FindSerializationAssemblies = value.FindSerializationAssemblies;
+                FullFrameworkAssemblyTables = value.FullFrameworkAssemblyTables;
+                FullFrameworkFolders = value.FullFrameworkFolders;
+                FullTargetFrameworkSubsetNames = value.FullTargetFrameworkSubsetNames;
+                HostObject = null;
+                IgnoreDefaultInstalledAssemblySubsetTables = value.IgnoreDefaultInstalledAssemblySubsetTables;
+                IgnoreDefaultInstalledAssemblyTables = value.IgnoreDefaultInstalledAssemblyTables;
+                IgnoreTargetFrameworkAttributeVersionMismatch = value.IgnoreTargetFrameworkAttributeVersionMismatch;
+                IgnoreVersionForFrameworkReferences = value.IgnoreVersionForFrameworkReferences;
+                InstalledAssemblySubsetTables = value.InstalledAssemblySubsetTables;
+                InstalledAssemblyTables = value.InstalledAssemblyTables;
+                IoTracker = value.IoTracker;
+                LatestTargetFrameworkDirectories = value.LatestTargetFrameworkDirectories;
+                ProfileName = value.ProfileName;
+                ResolvedSDKReferences = value.ResolvedSDKReferences;
+                SearchPaths = value.SearchPaths;
+                ShouldExecuteInProcess = value.ShouldExecuteInProcess;
+                Silent = value.Silent;
+                StateFile = value.StateFile;
+                SupportsBindingRedirectGeneration = value.SupportsBindingRedirectGeneration;
+                TargetFrameworkDirectories = value.TargetFrameworkDirectories;
+                TargetFrameworkMoniker = value.TargetFrameworkMoniker;
+                TargetFrameworkMonikerDisplayName = value.TargetFrameworkMonikerDisplayName;
+                TargetFrameworkSubsets = value.TargetFrameworkSubsets;
+                TargetFrameworkVersion = value.TargetFrameworkVersion;
+                TargetProcessorArchitecture = value.TargetProcessorArchitecture;
+                TargetedRuntimeVersion = value.TargetedRuntimeVersion;
+                UnresolveFrameworkAssembliesFromHigherFrameworks =
+                    value.UnresolveFrameworkAssembliesFromHigherFrameworks;
+                WarnOrErrorOnTargetArchitectureMismatch = value.WarnOrErrorOnTargetArchitectureMismatch;
+            }
+        }
+
+        internal ResolveAssemblyReferenceTaskOutput Output
+        {
+            get => new ResolveAssemblyReferenceTaskOutput
+            {
+                CopyLocalFiles = CopyLocalFiles,
+                DependsOnNETStandard = DependsOnNETStandard,
+                DependsOnSystemRuntime = DependsOnSystemRuntime,
+                FilesWritten = FilesWritten,
+                RelatedFiles = RelatedFiles,
+                ResolvedDependencyFiles = ResolvedDependencyFiles,
+                ResolvedFiles = ResolvedFiles,
+                SatelliteFiles = SatelliteFiles,
+                ScatterFiles = ScatterFiles,
+                SerializationAssemblyFiles = SerializationAssemblyFiles,
+                SuggestedRedirects = SuggestedRedirects
+            };
+
+            private set
+            {
+                _copyLocalFiles = value.CopyLocalFiles;
+                DependsOnNETStandard = value.DependsOnNETStandard;
+                DependsOnSystemRuntime = value.DependsOnSystemRuntime;
+                _filesWritten = new ArrayList(value.FilesWritten);
+                _relatedFiles = value.RelatedFiles;
+                _resolvedDependencyFiles = value.ResolvedDependencyFiles;
+                _resolvedFiles = value.ResolvedFiles;
+                _satelliteFiles = value.SatelliteFiles;
+                _scatterFiles = value.ScatterFiles;
+                _serializationAssemblyFiles = value.SerializationAssemblyFiles;
+                _suggestedRedirects = value.SuggestedRedirects;
+            }
+        }
+
         /// <summary>
         /// If set to true, it forces to unresolve framework assemblies with versions higher or equal the version of the target framework, regardless of the target framework
         /// </summary>
