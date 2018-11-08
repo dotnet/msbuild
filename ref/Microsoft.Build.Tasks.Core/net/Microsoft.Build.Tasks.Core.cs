@@ -917,6 +917,7 @@ namespace Microsoft.Build.Tasks
         public string[] SearchPaths { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]
         public Microsoft.Build.Framework.ITaskItem[] SerializationAssemblyFiles { get { throw null; } }
+        public bool ShouldExecuteInProcess { get { throw null; } set { } }
         public bool Silent { get { throw null; } set { } }
         public string StateFile { get { throw null; } set { } }
         [Microsoft.Build.Framework.OutputAttribute]

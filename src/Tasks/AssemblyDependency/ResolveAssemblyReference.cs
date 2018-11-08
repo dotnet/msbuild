@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -21,6 +21,7 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using System.Xml.Linq;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.NamedPipeClient;
 
 namespace Microsoft.Build.Tasks
 {
@@ -111,6 +112,8 @@ namespace Microsoft.Build.Tasks
         private bool _logVerboseSearchResults = false;
         private WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
         private bool _unresolveFrameworkAssembliesFromHigherFrameworks = false;
+
+        public bool ShouldExecuteInProcess { get; set; }
 
         internal ResolveAssemblyReferenceIOTracker IoTracker { get; set; } = new ResolveAssemblyReferenceIOTracker();
 
@@ -3083,8 +3086,9 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
-            return Execute
-            (
+            return ShouldExecuteInProcess
+                ? Execute
+                (
                     new FileExists(p =>
                     {
                         IoTracker.Track(p);
@@ -3118,7 +3122,15 @@ namespace Microsoft.Build.Tasks
                     new GetAssemblyPathInGac(GetAssemblyPathInGac),
                     new IsWinMDFile(AssemblyInformation.IsWinMDFile),
                     new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
-            );
+                )
+                : ExecuteAsService();
+        }
+
+        private bool ExecuteAsService()
+        {
+            var client = new ResolveAssemblyReferenceNamedPipeClient();
+            Output = client.Execute(Input);
+            return true;
         }
 
         #endregion
