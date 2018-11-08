@@ -65,6 +65,7 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
+    <Compile Include="AssemblyDependency\ResolveAssemblyReferenceIOTracker.cs" />
     <Compile Include="Bond\InputBuffer.cs" />
     <Compile Include="Bond\InputStream.cs" />
     <Compile Include="Bond\IntegerHelper.cs" />

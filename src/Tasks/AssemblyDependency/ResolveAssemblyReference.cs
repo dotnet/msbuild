@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -111,6 +111,8 @@ namespace Microsoft.Build.Tasks
         private bool _logVerboseSearchResults = false;
         private WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
         private bool _unresolveFrameworkAssembliesFromHigherFrameworks = false;
+
+        internal ResolveAssemblyReferenceIOTracker IoTracker { get; set; } = new ResolveAssemblyReferenceIOTracker();
 
         /// <summary>
         /// If set to true, it forces to unresolve framework assemblies with versions higher or equal the version of the target framework, regardless of the target framework
@@ -2953,23 +2955,39 @@ namespace Microsoft.Build.Tasks
         {
             return Execute
             (
-                new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
-                new DirectoryExists(p => FileUtilities.DirectoryExistsNoThrow(p)),
-                new GetDirectories(Directory.GetDirectories),
-                new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
-                new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
+                    new FileExists(p =>
+                    {
+                        IoTracker.Track(p);
+                        return FileUtilities.FileExistsNoThrow(p);
+                    }),
+                    new DirectoryExists(p =>
+                    {
+                        IoTracker.Track(p);
+                        return FileUtilities.DirectoryExistsNoThrow(p);
+                    }),
+                    new GetDirectories((path, searchPattern) =>
+                    {
+                        IoTracker.Track(path);
+                        return Directory.GetDirectories(path, searchPattern);
+                    }),
+                    new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
+                    new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
 #if FEATURE_WIN32_REGISTRY
-                new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
-                new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
+                    new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
+                    new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
 #endif
-                new GetLastWriteTime(NativeMethodsShared.GetLastWriteFileUtcTime),
-                new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
+                    new GetLastWriteTime(path =>
+                    {
+                        IoTracker.Track(path);
+                        return NativeMethodsShared.GetLastWriteFileUtcTime(path);
+                    }),
+                    new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
 #if FEATURE_WIN32_REGISTRY
-                new OpenBaseKey(RegistryHelper.OpenBaseKey),
+                    new OpenBaseKey(RegistryHelper.OpenBaseKey),
 #endif
-                new GetAssemblyPathInGac(GetAssemblyPathInGac),
-                new IsWinMDFile(AssemblyInformation.IsWinMDFile),
-                new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
+                    new GetAssemblyPathInGac(GetAssemblyPathInGac),
+                    new IsWinMDFile(AssemblyInformation.IsWinMDFile),
+                    new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
             );
         }
 
