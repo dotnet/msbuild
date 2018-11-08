@@ -11,8 +11,11 @@ steps:
   inputs:
     signType: '$(SignType)'
 
-- task: ms-vseng.MicroBuildTasks.a9799c06-320f-4175-8756-31cd731bd5f3.MicroBuildIBCMergePlugin@0
-  displayName: Install IBCMerge Plugin
+- task: NuGetRestore@1
+  displayName: Restore internal toolset
+  inputs:
+    solution: 'build\Internal\Toolsets.csproj'
+    feed: '8f470c7e-ac49-4afe-a6ee-cf784e438b93'
 
 - task: CmdLine@1
   displayName: Print Vars

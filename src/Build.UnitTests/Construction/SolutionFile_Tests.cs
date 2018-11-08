@@ -708,7 +708,7 @@ namespace Microsoft.Build.UnitTests.Construction
             using (var env = TestEnvironment.Create())
             {
                 var solutionFolder = env.CreateFolder(Path.Combine(FileUtilities.GetTemporaryDirectory(), "sln"));
-                var projectFolder = env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
+                env.CreateFolder(Path.Combine(solutionFolder.Path, "RelativePath"));
 
                 SolutionFile p = new SolutionFile();
                 p.FullPath = Path.Combine(solutionFolder.Path, "RelativePath", "project file");
@@ -762,7 +762,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -780,7 +780,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -862,7 +862,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (Exception ex)
             {
@@ -1138,7 +1138,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (InvalidProjectFileException e)
             {
@@ -1682,7 +1682,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -1709,7 +1709,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -1736,7 +1736,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }

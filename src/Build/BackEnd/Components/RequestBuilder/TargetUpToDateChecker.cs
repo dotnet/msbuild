@@ -624,7 +624,6 @@ namespace Microsoft.Build.BackEnd
                         // are the transform expressions, not the item type from which the items were originally derived.
                         foreach (KeyValuePair<string, IList<ProjectItemInstance>> outputEntry in outputItemVectors)
                         {
-                            string outputItemExpression = outputEntry.Key;
                             IList<ProjectItemInstance> outputItems = outputEntry.Value;
 
                             // We count backwards so that as we remove items, we are removing them from the end, thereby

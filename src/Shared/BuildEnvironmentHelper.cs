@@ -16,10 +16,10 @@ namespace Microsoft.Build.Shared
     {
         // Since this class is added as 'link' to shared source in multiple projects,
         // MSBuildConstants.CurrentVisualStudioVersion is not available in all of them.
-        private const string CurrentVisualStudioVersion = "15.0";
+        private const string CurrentVisualStudioVersion = "16.0";
 
         // MSBuildConstants.CurrentToolsVersion
-        private const string CurrentToolsVersion = "15.0";
+        private const string CurrentToolsVersion = "Current";
 
         /// <summary>
         /// Name of the Visual Studio (and Blend) process.
@@ -604,7 +604,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Path to the root Visual Studio install directory
-        /// (e.g. 'c:\Program Files (x86)\Microsoft Visual Studio 15.0')
+        /// (e.g. 'C:\Program Files (x86)\Microsoft Visual Studio\Preview\Enterprise')
         /// </summary>
         internal string VisualStudioInstallRootDirectory { get; }
 

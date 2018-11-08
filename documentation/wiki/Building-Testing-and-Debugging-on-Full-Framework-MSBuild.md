@@ -43,4 +43,4 @@ Please see [Contributing Code](https://github.com/Microsoft/msbuild/blob/master/
 
 To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd`) which produces a bootstrap directory mimicing a Visual Studio installation.
 
-Now, just point `artifacts\Debug\bootstrap\net472\MSBuild\15.0\Bin\MSBuild.exe` at a project file.
+Now, just point `artifacts\Debug\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe` at a project file.

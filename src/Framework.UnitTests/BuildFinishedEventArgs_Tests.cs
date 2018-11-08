@@ -14,11 +14,6 @@ namespace Microsoft.Build.UnitTests
     public class BuildFinishedEventArgs_Tests
     {
         /// <summary>
-        /// Default buildFinished event to use in tests.
-        /// </summary>
-        private BuildFinishedEventArgs _baseFinishedEvent = new BuildFinishedEventArgs("Message", "HelpKeyword", true);
-
-        /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
         [Fact]

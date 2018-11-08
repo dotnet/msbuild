@@ -6,7 +6,7 @@
     <!-- Node reuse requires an API new to .NET Core 2.1 not yet available
          in .NETStandard. -->
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
-    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">net46;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OsEnvironment)'=='windows'">$(FullFrameworkTFM);netcoreapp2.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
@@ -21,6 +21,7 @@
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</Description>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
+    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
 
     <!-- Do not generate a warning that our 'stable' package should not have a prerelease dependency. -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
@@ -30,16 +31,18 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.IO.Compression" />
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
+    <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
-
     <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
+
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-    <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -189,6 +192,9 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
+    <Compile Include="BackEnd\BuildManager\GraphBuildResult.cs" />
+    <Compile Include="BackEnd\BuildManager\GraphBuildSubmission.cs" />
+    <Compile Include="BackEnd\BuildManager\GraphBuildRequestData.cs" />
     <Compile Include="BackEnd\BuildManager\BuildSubmission.cs" />
     <Compile Include="BackEnd\BuildManager\LegacyThreadingData.cs" />
     <Compile Include="BackEnd\BuildManager\RequestedProjectState.cs" />
@@ -281,6 +287,7 @@
     <Compile Include="Evaluation\LazyItemEvaluator.ItemFactoryWrapper.cs" />
     <Compile Include="Evaluation\LazyItemEvaluator.RemoveOperation.cs" />
     <Compile Include="Evaluation\MetadataReference.cs" />
+    <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
     <Compile Include="Logging\EvaluationLocationIdAgnosticComparer.cs" />

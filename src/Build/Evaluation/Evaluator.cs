@@ -69,27 +69,6 @@ namespace Microsoft.Build.Evaluation
         private static readonly char[] s_splitter = new char[] { ';' };
 
         /// <summary>
-        /// Locals types names. We only have these because 'Built In' has a space,
-        /// else we would use LocalsTypes enum names.
-        /// Note: This should match LocalsTypes enum.
-        /// </summary>
-        private static readonly string[] s_localsTypesNames = new string[]
-        {
-                "Project",
-                "Built In",
-                "Environment",
-                "Toolset",
-                "SubToolset",
-                "Global",
-                "EvaluateExpression",
-                "EvaluateCondition",
-                "ToolsVersion",
-                "Properties",
-                "ItemDefinitions",
-                "Items"
-        };
-
-        /// <summary>
         /// Expander for evaluating conditions
         /// </summary>
         private readonly Expander<P, I> _expander;
@@ -276,73 +255,6 @@ namespace Microsoft.Build.Evaluation
         /// ability, without having a language service.
         /// </summary>
         internal delegate bool EvaluateConditionalExpression(string unexpandedExpression);
-
-        /// <summary>
-        /// Enumeration for locals types
-        /// Note: This should match LocalsTypesNames
-        /// </summary>
-        private enum LocalsTypes : int
-        {
-            /// <summary>
-            /// Project,
-            /// </summary>
-            Project,
-
-            /// <summary>
-            /// BuiltIn,
-            /// </summary>
-            BuiltIn,
-
-            /// <summary>
-            /// Environment,
-            /// </summary>
-            Environment,
-
-            /// <summary>
-            /// Toolset,
-            /// </summary>
-            Toolset,
-
-            /// <summary>
-            /// SubToolset,
-            /// </summary>
-            SubToolset,
-
-            /// <summary>
-            /// Global,
-            /// </summary>
-            Global,
-
-            /// <summary>
-            /// EvaluateExpression,
-            /// </summary>
-            EvaluateExpression,
-
-            /// <summary>
-            /// EvaluateCondition,
-            /// </summary>
-            EvaluateCondition,
-
-            /// <summary>
-            /// ToolsVersion,
-            /// </summary>
-            ToolsVersion,
-
-            /// <summary>
-            /// Properties,
-            /// </summary>
-            Properties,
-
-            /// <summary>
-            /// ItemDefinitions,
-            /// </summary>
-            ItemDefinitions,
-
-            /// <summary>
-            /// Items
-            /// </summary>
-            Items
-        }
 
         /// <summary>
         /// Evaluates the project data passed in.

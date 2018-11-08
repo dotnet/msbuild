@@ -187,9 +187,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                NodeEndpointInProc.EndpointPair endpoints =
-                    NodeEndpointInProc.CreateInProcEndpoints(
-                        NodeEndpointInProc.EndpointMode.Synchronous, null);
+                NodeEndpointInProc.CreateInProcEndpoints(
+                    NodeEndpointInProc.EndpointMode.Synchronous, null);
             }
            );
         }
@@ -199,9 +198,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                NodeEndpointInProc.EndpointPair endpoints =
-                    NodeEndpointInProc.CreateInProcEndpoints(
-                        NodeEndpointInProc.EndpointMode.Asynchronous, null);
+                NodeEndpointInProc.CreateInProcEndpoints(
+                    NodeEndpointInProc.EndpointMode.Asynchronous, null);
             }
            );
         }
@@ -405,17 +403,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 caught = true;
             }
             Assert.True(caught); // "Did not receive InternalErrorException."
-        }
-
-        private void VerifyListenCallSuccess(NodeEndpointInProc endpoint)
-        {
-            endpoint.Listen(_host);
-        }
-
-        private void VerifyConnectCallSuccess(NodeEndpointInProc endpoint)
-        {
-            endpoint.Connect(_host);
-            Assert.Equal(endpoint.LinkStatus, LinkStatus.Active);
         }
 
         private void DisconnectionTestHelper(NodeEndpointInProc.EndpointMode mode)

@@ -73,7 +73,7 @@ def CreateJob(script, runtime, osName, isPR, machineAffinityOverride = null, sho
 
 // sourcebuild simulation
 CreateJob(
-    "./build/build.sh build -dotnetBuildFromSource -bootstraponly -skiptests -pack -configuration Release",
+    "./build/build.sh build -dotnetBuildFromSource -skiptests -pack -configuration Release",
     "CoreCLR",
     "RHEL7.2",
     true,

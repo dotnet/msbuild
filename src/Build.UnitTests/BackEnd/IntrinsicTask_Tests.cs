@@ -2187,42 +2187,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(new string[] { "start:[j1]", "end:[]", "start:[j1]", "end:[]" });
         }
 
-#if false // Not implemented yet: this was working when we were cloning, but now needs some thought.
-
-        /// <summary>
-        /// The historical task output publishing model prevents a called target seeing outputs
-        /// from tasks in the same target that have already run. We choose to not follow this model
-        /// for itemgroups in targets.
-        /// </summary>
-        [Test]
-        public void RemovesAreVisibleToCalledTarget()
-        {
-            MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-                  <ItemGroup>
-                    <i Include='i1;i2'/>
-                  </ItemGroup> 
-                  <Target Name='t'>
-                    <Message Text='a:[@(i)]'/>
-                    <ItemGroup>
-                      <i Remove='i2'/>
-                    </ItemGroup>
-                    <Message Text='b:[@(i)]'/>
-                    <CallTarget Targets='t2'/>
-                    <Message Text='d:[@(i)]'/>                    
-                  </Target>
-                  <Target Name='t2'>
-                    <Message Text='c:[@(i)]'/>
-                  </Target>
-                </Project>
-            ")));
-            p.Build(new string[] { "t" });
-
-            logger.AssertLogContains(new string[] { "a:[i1;i2]", "b:[i1]", "c:[i1]", "d:[i1]" });
-        }
-#endif
-
         /// <summary>
         /// Whidbey behavior was that items/properties emitted by a target being called, were
         /// not visible to subsequent tasks in the calling target. (That was because the project

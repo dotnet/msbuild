@@ -25,14 +25,6 @@ namespace Microsoft.Build.CommandLine
     internal sealed class InitializationException : Exception
     {
         /// <summary>
-        /// Private default constructor prevents parameterless instantiation.
-        /// </summary>
-        private InitializationException()
-        {
-            // do nothing
-        }
-
-        /// <summary>
         /// This constructor initializes the exception message.
         /// </summary>
         /// <param name="message"></param>
