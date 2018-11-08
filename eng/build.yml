@@ -18,26 +18,58 @@ phases:
       _HelixBuildConfig: $(_BuildConfig)
       BuildConfig: $(_BuildConfig)
       BuildArchitecture: $(_BuildArchitecture)
-      _HelixSource: pr/dotnet/cli/$(Build.SourceBranch)
       DockerParameter: $(_DockerParameter)
       LinuxPortable: $(_LinuxPortable)
       RuntimeId: $(_RuntimeIdentifier)
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        _HelixSource: pr/dotnet/cli/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: ''
+        _PublishArgs: ''
+        _SignArgs: ''
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        _HelixSource: official/dotnet/cli/$(Build.SourceBranch)
+        _OfficialBuildIdArgs: /p:OfficialBuildId=$(BUILD.BUILDNUMBER)
+        _PublishArgs: /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+                  /p:DotNetPublishBlobFeedUrl=$(PB_PublishBlobFeedUrl)
+                  /p:DotNetPublishToBlobFeed=$(_DotNetPublishToBlobFeed)
+                  /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+                  /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
+                  /p:PB_PublishType=$(_PublishType)
+        _SignArgs: /p:DotNetSignType=$(_SignType) /p:TeamName=$(_TeamName)
 
-    #Add --ci/-ci flag back to builds below. See https://github.com/dotnet/cli/issues/10267
     steps:
+    - ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'DotNet-Engineering-Services_KeyVault'
+          KeyVaultName: EngKeyVault
+          SecretsFilter: 'dotnetfeed-storage-access-key-1,microsoft-symbol-server-pat,symweb-symbol-server-pat'
+        condition: succeeded()
+      - task: AzureKeyVault@1
+        inputs:
+          azureSubscription: 'HelixProd_KeyVault'
+          KeyVaultName: HelixProdKV
+          SecretsFilter: 'HelixApiAccessToken'
+        condition: always()
+
     - ${{ if eq(parameters.agentOs, 'Windows_NT') }}:
       - script: build.cmd
-                  -test -sign -pack -publish
+                  -test -sign -pack -publish -ci
                   -Configuration $(BuildConfig)
                   -Architecture $(BuildArchitecture)
+                  $(_PublishArgs)
+                  $(_SignArgs)
+                  $(_OfficialBuildIdArgs)
         displayName: Build
         env:
           DOTNET_CLI_UI_LANGUAGE: $(_DOTNET_CLI_UI_LANGUAGE)
           DropSuffix: $(_DropSuffix)
+          BlobFeedUrl: $(PB_PublishBlobFeedUrl)
+          PublishType: $(_PublishType)
 
     - ${{ if eq(parameters.agentOs, 'Linux') }}:
       - script: ./build.sh
-                  --test --pack --publish
+                  --test --pack --publish --ci
                   --configuration $(BuildConfig)
                   $(DockerParameter)
                   --architecture $(BuildArchitecture)
@@ -49,7 +81,7 @@ phases:
 
     - ${{ if eq(parameters.agentOs, 'Darwin') }}:
       - script: ./build.sh
-                  --test --pack --publish
+                  --test --pack --publish --ci
                   --configuration $(BuildConfig)
         displayName: Build
 

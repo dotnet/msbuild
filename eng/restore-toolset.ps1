@@ -3,12 +3,6 @@ function InitializeCustomSDKToolset {
     return
   }
 
-  # Disable first run since we want to control all package sources
-  $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-
-  # Don't resolve shared frameworks from user or global locations
-  $env:DOTNET_MULTILEVEL_LOOKUP=0
-
   # Turn off MSBuild Node re-use
   $env:MSBUILDDISABLENODEREUSE=1
 
@@ -20,6 +14,12 @@ function InitializeCustomSDKToolset {
   $env:VSTEST_TRACE_BUILD=1
 
   $env:DOTNET_CLI_TELEMETRY_PROFILE='$env:DOTNET_CLI_TELEMETRY_PROFILE;https://github.com/dotnet/cli'
+
+  # when architecture is not set, we should stop. This is usually when doing publish assets
+  if ((Test-Path variable:Architecture) -eq $False)
+  {
+    return
+  }
 
   # The following frameworks and tools are used only for testing.
   # Do not attempt to install them in source build.

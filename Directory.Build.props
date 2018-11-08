@@ -34,6 +34,8 @@ tools\TestAssetsDependencies\TestAssetsDependencies.csproj
     <!-- disabling source link RHEL.6 as the sourcelink package is missing native dependencies for it -->
     <EnableSourceLink Condition=" '$(Rid)' == 'rhel.6-x64' ">false</EnableSourceLink>
     <EnableSourceControlManagerQueries Condition=" '$(Rid)' == 'rhel.6-x64' ">false</EnableSourceControlManagerQueries>
+    <DeterministicSourcePaths Condition=" '$(Rid)' == 'rhel.6-x64' ">false</DeterministicSourcePaths>
+    <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
   </PropertyGroup>
 
   <PropertyGroup>

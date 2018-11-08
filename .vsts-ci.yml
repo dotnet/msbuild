@@ -3,133 +3,157 @@ trigger:
 
 variables:
   teamName: Roslyn-Project-System
+  ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    PB_PublishBlobFeedKey:
+    PB_PublishBlobFeedUrl:
+    _DotNetPublishToBlobFeed: false
+    _PublishType: none
+    _SignType: test
+  ${{ if ne(variables['System.TeamProject'], 'public') }}:
+    PB_PublishBlobFeedUrl: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+    _DotNetPublishToBlobFeed: true
+    _PublishType: blob
+    _SignType: real
 
 phases:
 - template: /eng/build.yml
   parameters:
     agentOs: Windows_NT
     queue:
-      name: Hosted VS2017
+      ${{ if eq(variables['System.TeamProject'], 'public') }}:
+        name: dotnet-external-temp
+      ${{ if ne(variables['System.TeamProject'], 'public') }}:
+        name: dotnet-internal-temp
       parallel: 2
       matrix:
-        Build_Debug_x86:
-          _BuildConfig: Debug
-          _BuildArchitecture: x86
-          _DOTNET_CLI_UI_LANGUAGE: ''
-          _DropSuffix: ''
+        ${{ if eq(variables['System.TeamProject'], 'public') }}:
+          Build_Debug_x86:
+            _BuildConfig: Debug
+            _BuildArchitecture: x86
+            _DOTNET_CLI_UI_LANGUAGE: ''
+            _DropSuffix: ''
+          Build_ES_Debug_x64:
+            _BuildConfig: Debug
+            _BuildArchitecture: x64
+            _DOTNET_CLI_UI_LANGUAGE: es
+            _DropSuffix: ''
+          Build_DropSuffix_Release_x64:
+            _BuildConfig: Release
+            _BuildArchitecture: x64
+            _DOTNET_CLI_UI_LANGUAGE: ''
+            _DropSuffix: true
         Build_Release_x64:
           _BuildConfig: Release
           _BuildArchitecture: x64
           _DOTNET_CLI_UI_LANGUAGE: ''
           _DropSuffix: ''
-        Build_ES_Debug_x64:
-          _BuildConfig: Debug
-          _BuildArchitecture: x64
-          _DOTNET_CLI_UI_LANGUAGE: es
-          _DropSuffix: ''
-        Build_DropSuffix_Release_x64:
-          _BuildConfig: Release
-          _BuildArchitecture: x64
-          _DOTNET_CLI_UI_LANGUAGE: ''
-          _DropSuffix: true
 
-- template: /eng/build.yml
-  parameters:
-    agentOs: Linux
-    queue:
-      name: Hosted Ubuntu 1604
-      matrix:
-        Build_Ubuntu_14_04_Release_x64:
-          _BuildConfig: Release
-          _DockerParameter: '--docker ubuntu.14.04'
-          _LinuxPortable: ''
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_Ubuntu_16_04_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker ubuntu.16.04'
-          _LinuxPortable: ''
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_Ubuntu_18_04_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker ubuntu.18.04'
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        # https://github.com/dotnet/cli/issues/10274
-        # Build_Fedora_27_Debug_x64:
-        #   _BuildConfig: Debug
-        #   _DockerParameter: '--docker fedora.27'
-        #   _LinuxPortable: '--linux-portable'
-        #   _RuntimeIdentifier: ''
-        #   _BuildArchitecture: 'x64'
-        #   _DropSuffix: ''
-        Build_OpenSUSE_42_3_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker opensuse.42.3'
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_CentOS_7_1_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker centos'
-          _LinuxPortable: ''
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_Debian_8_2_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker debian'
-          _LinuxPortable: ''
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_Rhel_7_2_Release_x64:
-          _BuildConfig: Release
-          _DockerParameter: '--docker rhel'
-          _LinuxPortable: ''
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_Rhel_6_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker rhel.6'
-          _LinuxPortable: ''
-          _RuntimeIdentifier: '--runtime-id rhel.6-x64'
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_Linux_musl_Debug_x64:
-          _BuildConfig: Debug
-          _DockerParameter: '--docker alpine.3.6'
-          _LinuxPortable: ''
-          _RuntimeIdentifier: '--runtime-id linux-musl-x64'
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_LinuxPortable_Release_x64:
-          _BuildConfig: Release
-          _DockerParameter: ''
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: ''
-        Build_LinuxPortable_NoSuffix_Release_x64:
-          _BuildConfig: Release
-          _DockerParameter: ''
-          _LinuxPortable: '--linux-portable'
-          _RuntimeIdentifier: ''
-          _BuildArchitecture: 'x64'
-          _DropSuffix: true
+- ${{ if eq(variables['System.TeamProject'], 'public') }}:
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Linux
+      queue:
+        name: Hosted Ubuntu 1604
+        matrix:
+          Build_Ubuntu_14_04_Release_x64:
+            _BuildConfig: Release
+            _DockerParameter: '--docker ubuntu.14.04'
+            _LinuxPortable: ''
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_Ubuntu_16_04_Debug_x64:
+            _BuildConfig: Debug
+            _DockerParameter: '--docker ubuntu.16.04'
+            _LinuxPortable: ''
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_Ubuntu_18_04_Debug_x64:
+            _BuildConfig: Debug
+            _DockerParameter: '--docker ubuntu.18.04'
+            _LinuxPortable: '--linux-portable'
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          # https://github.com/dotnet/cli/issues/10274
+          # Build_Fedora_27_Debug_x64:
+          #   _BuildConfig: Debug
+          #   _DockerParameter: '--docker fedora.27'
+          #   _LinuxPortable: '--linux-portable'
+          #   _RuntimeIdentifier: ''
+          #   _BuildArchitecture: 'x64'
+          #   _DropSuffix: ''
+          Build_OpenSUSE_42_3_Debug_x64:
+            _BuildConfig: Debug
+            _DockerParameter: '--docker opensuse.42.3'
+            _LinuxPortable: '--linux-portable'
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_CentOS_7_1_Debug_x64:
+            _BuildConfig: Debug
+            _DockerParameter: '--docker centos'
+            _LinuxPortable: ''
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_Debian_8_2_Debug_x64:
+            _BuildConfig: Debug
+            _DockerParameter: '--docker debian'
+            _LinuxPortable: ''
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_Rhel_7_2_Release_x64:
+            _BuildConfig: Release
+            _DockerParameter: '--docker rhel'
+            _LinuxPortable: ''
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_Rhel_6_Debug_x64:
+            _BuildConfig: Debug
+            _DockerParameter: '--docker rhel.6'
+            _LinuxPortable: ''
+            _RuntimeIdentifier: '--runtime-id rhel.6-x64'
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_Linux_musl_Debug_x64:
+            _BuildConfig: Debug
+            _DockerParameter: '--docker alpine.3.6'
+            _LinuxPortable: ''
+            _RuntimeIdentifier: '--runtime-id linux-musl-x64'
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_LinuxPortable_Release_x64:
+            _BuildConfig: Release
+            _DockerParameter: ''
+            _LinuxPortable: '--linux-portable'
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: ''
+          Build_LinuxPortable_NoSuffix_Release_x64:
+            _BuildConfig: Release
+            _DockerParameter: ''
+            _LinuxPortable: '--linux-portable'
+            _RuntimeIdentifier: ''
+            _BuildArchitecture: 'x64'
+            _DropSuffix: true
 
-- template: /eng/build.yml
-  parameters:
-    agentOs: Darwin
-    queue: 
-      name: Hosted macOS
-      matrix:
-        Build_Release:
-          _BuildConfig: Release
+  - template: /eng/build.yml
+    parameters:
+      agentOs: Darwin
+      queue:
+        name: Hosted macOS
+        matrix:
+          Build_Release:
+            _BuildConfig: Release
+
+- ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+  - template: /eng/common/templates/phases/publish-build-assets.yml
+    parameters:
+      dependsOn:
+        - Windows_NT
+      queue:
+        name: Hosted VS2017

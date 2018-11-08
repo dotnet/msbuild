@@ -3,17 +3,11 @@ function InitializeCustomSDKToolset {
     return
   fi
 
-  # Disable first run since we want to control all package sources
-  export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-
   # Enable verbose VS Test Console logging
   export VSTEST_BUILD_TRACE=1
   export VSTEST_TRACE_BUILD=1
 
   export DOTNET_CLI_TELEMETRY_PROFILE='$ARCHITECTURE;https://github.com/dotnet/cli'
-
-  # Don't resolve shared frameworks from user or global locations
-  export DOTNET_MULTILEVEL_LOOKUP=0
 
   # Turn off MSBuild Node re-use
   export MSBUILDDISABLENODEREUSE=1
