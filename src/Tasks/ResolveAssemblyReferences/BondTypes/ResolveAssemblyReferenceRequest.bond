@@ -1,0 +1,84 @@
+﻿import "ReadOnlyTaskItem.bond"
+
+namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
+
+struct ResolveAssemblyReferenceRequest
+{
+	0: vector<string> AllowedAssemblyExtensions;
+
+	1: vector<string> AllowedRelatedFileExtensions;
+
+	2: nullable<string> AppConfigFile;
+
+	3: vector<ReadOnlyTaskItem> Assemblies;
+
+	4: vector<ReadOnlyTaskItem> AssemblyFiles;
+
+	5: bool AutoUnify;
+
+	6: vector<string> CandidateAssemblyFiles;
+
+	7: bool CopyLocalDependenciesWhenParentReferenceInGac;
+
+	8: bool DoNotCopyLocalIfInGac;
+
+	9: bool FindDependencies;
+
+	10: bool FindDependenciesOfExternallyResolvedReferences;
+
+	11: bool FindRelatedFiles;
+
+	12: bool FindSatellites;
+
+	13: bool FindSerializationAssemblies;
+
+	14: vector<ReadOnlyTaskItem> FullFrameworkAssemblyTables;
+
+	15: vector<string> FullFrameworkFolders;
+
+	16: vector<string> FullTargetFrameworkSubsetNames;
+
+	17: bool IgnoreDefaultInstalledAssemblySubsetTables;
+
+	18: bool IgnoreDefaultInstalledAssemblyTables;
+
+	19: bool IgnoreTargetFrameworkAttributeVersionMismatch;
+
+	20: bool IgnoreVersionForFrameworkReferences;
+
+	21: vector<ReadOnlyTaskItem> InstalledAssemblySubsetTables;
+
+	22: vector<ReadOnlyTaskItem> InstalledAssemblyTables;
+
+	23: vector<string> LatestTargetFrameworkDirectories;
+
+	24: nullable<string> ProfileName;
+
+	25: vector<ReadOnlyTaskItem> ResolvedSDKReferences;
+
+	26: vector<string> SearchPaths;
+
+	27: bool Silent;
+
+	28: nullable<string> StateFile;
+
+	29: bool SupportsBindingRedirectGeneration;
+
+	30: nullable<string> TargetedRuntimeVersion;
+
+	31: vector<string> TargetFrameworkDirectories;
+
+	32: nullable<string> TargetFrameworkMoniker;
+
+	33: nullable<string> TargetFrameworkMonikerDisplayName;
+
+	34: vector<string> TargetFrameworkSubsets;
+
+	35: nullable<string> TargetFrameworkVersion;
+
+	36: nullable<string> TargetProcessorArchitecture;
+
+	37: bool UnresolveFrameworkAssembliesFromHigherFrameworks;
+
+	38: nullable<string> WarnOrErrorOnTargetArchitectureMismatch;
+}

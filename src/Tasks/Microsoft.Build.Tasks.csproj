@@ -480,6 +480,10 @@
     <Compile Include="RemoveDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <None Include="ResolveAssemblyReferences\BondTypes\ReadOnlyTaskItem.bond" />
+    <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceBuildEventArgs.bond" />
+    <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceRequest.bond" />
+    <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceResponse.bond" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>

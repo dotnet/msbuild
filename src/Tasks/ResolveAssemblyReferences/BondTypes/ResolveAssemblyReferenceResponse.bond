@@ -1,0 +1,14 @@
+﻿import "ReadOnlyTaskItem.bond"
+
+namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
+
+struct ResolveAssemblyReferenceResponse
+{
+	0: vector<ResolveAssemblyReferenceBuildEventArgs> BuildEventArgsQueue;
+
+	1: string DependsOnNETStandard;
+
+	2: string DependsOnSystemRuntime;
+
+	3: vector<ReadOnlyTaskItem> TaskItems;
+}

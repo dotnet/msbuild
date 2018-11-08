@@ -1,0 +1,10 @@
+﻿namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
+
+struct ReadOnlyTaskItem
+{
+	0: string ItemSpec;
+
+	1: map<string, string> MetadataNameToValue;
+
+	2: int32 ResponseFieldIds;
+}

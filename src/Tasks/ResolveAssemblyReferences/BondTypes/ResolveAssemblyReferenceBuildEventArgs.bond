@@ -1,0 +1,39 @@
+﻿namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
+
+enum BuildEventArgsType
+{
+	Error,
+	Message,
+	Warning
+}
+
+struct ResolveAssemblyReferenceBuildEventArgs
+{
+	0: BuildEventArgsType BuildEventArgsType = Error;
+
+	1: string Message;
+
+	2: nullable<string> HelpKeyword;
+
+	3: string SenderName;
+
+	4: int64 EventTimestamp;
+
+	5: vector<string> MessageArgs;
+
+	6: int32 Importance;
+
+	7: nullable<string> Subcategory;
+
+	8: nullable<string> Code;
+	
+	9: nullable<string> File;
+
+	10: int32 LineNumber;
+
+	11: int32 ColumnNumber;
+
+	12: int32 EndLineNumber;
+
+	13: int32 EndColumnNumber;
+}
