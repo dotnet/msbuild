@@ -480,6 +480,8 @@
     <Compile Include="RemoveDir.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ResolveAssemblyReferences\Abstractions\IResolveAssemblyReferenceService.cs" />
+    <Compile Include="ResolveAssemblyReferences\Abstractions\IResolveAssemblyReferenceTask.cs" />
     <None Include="ResolveAssemblyReferences\BondTypes\ReadOnlyTaskItem.bond" />
     <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceBuildEventArgs.bond" />
     <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceRequest.bond" />
