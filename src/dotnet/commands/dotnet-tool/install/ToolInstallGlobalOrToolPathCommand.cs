@@ -76,16 +76,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
 
         public override int Execute()
         {
-            if (string.IsNullOrWhiteSpace(_toolPath) && !_global)
-            {
-                throw new GracefulException(LocalizableStrings.InstallToolCommandNeedGlobalOrToolPath);
-            }
-
-            if (!string.IsNullOrWhiteSpace(_toolPath) && _global)
-            {
-                throw new GracefulException(LocalizableStrings.InstallToolCommandInvalidGlobalAndToolPath);
-            }
-
             if (_configFilePath != null && !File.Exists(_configFilePath))
             {
                 throw new GracefulException(

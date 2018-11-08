@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.Tools.Tool
             new Dictionary<string, Func<AppliedOption, CommandBase>>
             {
                 ["install"] =
-                appliedOption => new ToolInstallGlobalOrToolPathCommand(
+                appliedOption => new ToolInstallCommand(
                     appliedOption["install"],
                     ParseResult),
                 ["uninstall"] =
