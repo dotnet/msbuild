@@ -6,7 +6,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ToolManifest
 {
-    internal interface IToolManifestFile
+    internal interface IToolManifestFinder
     {
         IReadOnlyCollection<ToolManifestPackage> Find(FilePath? filePath = null);
     }

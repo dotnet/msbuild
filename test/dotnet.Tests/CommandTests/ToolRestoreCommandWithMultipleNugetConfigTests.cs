@@ -125,8 +125,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenManifestPackageAreFromDifferentDirectoryItCanFindTheRightNugetConfigAndSaveToCache()
         {
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {_toolCommandNameA},
@@ -139,7 +139,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -171,11 +171,11 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Should().BeTrue();
         }
 
-        private class MockManifestFile : IToolManifestFile
+        private class MockManifestFinder : IToolManifestFinder
         {
             private readonly IReadOnlyCollection<ToolManifestPackage> _toReturn;
 
-            public MockManifestFile(IReadOnlyCollection<ToolManifestPackage> toReturn)
+            public MockManifestFinder(IReadOnlyCollection<ToolManifestPackage> toReturn)
             {
                 _toReturn = toReturn;
             }

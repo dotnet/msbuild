@@ -116,8 +116,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenRunItCanSaveCommandsToCache()
         {
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {_toolCommandNameA},
@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -155,8 +155,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenRunItCanSaveCommandsToCacheAndShowSuccessMessage()
         {
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {_toolCommandNameA},
@@ -169,7 +169,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -192,8 +192,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenRestoredCommandHasTheSameCommandNameItThrows()
         {
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {_toolCommandNameA},
@@ -206,7 +206,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -249,8 +249,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenSomePackageFailedToRestoreItCanRestorePartiallySuccessful()
         {
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {_toolCommandNameA},
@@ -263,7 +263,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -294,8 +294,8 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             ToolCommandName differentCommandNameA = new ToolCommandName("different-command-nameA");
             ToolCommandName differentCommandNameB = new ToolCommandName("different-command-nameB");
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {differentCommandNameA, differentCommandNameB},
@@ -305,7 +305,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -323,13 +323,13 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenCannotFindManifestFileItPrintsWarning()
         {
-            IToolManifestFile realManifestFileImplementationWithMockFileSystem =
-                new ToolManifestFile(new DirectoryPath(Path.GetTempPath()), _fileSystem);
+            IToolManifestFinder realManifestFinderImplementationWithMockFinderSystem =
+                new ToolManifestFinder(new DirectoryPath(Path.GetTempPath()), _fileSystem);
 
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                realManifestFileImplementationWithMockFileSystem,
+                realManifestFinderImplementationWithMockFinderSystem,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -346,8 +346,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenPackageIsRestoredAlreadyItWillNotRestoreItAgain()
         {
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {_toolCommandNameA},
@@ -357,7 +357,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -375,8 +375,8 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void WhenPackageIsRestoredAlreadyButDllIsRemovedItRestoresAgain()
         {
-            IToolManifestFile manifestFile =
-                new MockManifestFile(new[]
+            IToolManifestFinder manifestFinder =
+                new MockManifestFinder(new[]
                 {
                     new ToolManifestPackage(_packageIdA, _packageVersionA,
                         new[] {_toolCommandNameA},
@@ -386,7 +386,7 @@ namespace Microsoft.DotNet.Tests.Commands
             ToolRestoreCommand toolRestoreCommand = new ToolRestoreCommand(_appliedCommand,
                 _parseResult,
                 _toolPackageInstallerMock,
-                manifestFile,
+                manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
                 _nugetGlobalPackagesFolder,
@@ -402,11 +402,11 @@ namespace Microsoft.DotNet.Tests.Commands
             _installCalledCount.Should().Be(installCallCountBeforeTheSecondRestore + 1);
         }
 
-        private class MockManifestFile : IToolManifestFile
+        private class MockManifestFinder : IToolManifestFinder
         {
             private readonly IReadOnlyCollection<ToolManifestPackage> _toReturn;
 
-            public MockManifestFile(IReadOnlyCollection<ToolManifestPackage> toReturn)
+            public MockManifestFinder(IReadOnlyCollection<ToolManifestPackage> toReturn)
             {
                 _toReturn = toReturn;
             }

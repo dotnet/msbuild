@@ -47,8 +47,8 @@ namespace Microsoft.DotNet.Tests
             NuGetVersion packageVersionA = NuGetVersion.Parse("1.0.4");
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, ManifestFilename),
                 _jsonContent.Replace("$TOOLCOMMAND$", toolCommand));
-            ToolManifestFile toolManifest =
-                new ToolManifestFile(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            ToolManifestFinder toolManifest =
+                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
             ToolCommandName toolCommandNameA = new ToolCommandName(toolCommand);
             var fakeExecutable = _nugetGlobalPackagesFolder.WithFile("fakeExecutable.dll");
             _fileSystem.Directory.CreateDirectory(_nugetGlobalPackagesFolder.Value);
@@ -90,8 +90,8 @@ namespace Microsoft.DotNet.Tests
             NuGetVersion packageVersionA = NuGetVersion.Parse("1.0.4");
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, ManifestFilename),
                 _jsonContent.Replace("$TOOLCOMMAND$", toolCommandNameA.Value));
-            ToolManifestFile toolManifest =
-                new ToolManifestFile(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            ToolManifestFinder toolManifest =
+                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
 
             var fakeExecutable = _nugetGlobalPackagesFolder.WithFile("fakeExecutable.dll");
             _fileSystem.Directory.CreateDirectory(_nugetGlobalPackagesFolder.Value);
@@ -130,8 +130,8 @@ namespace Microsoft.DotNet.Tests
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, ManifestFilename),
                 _jsonContentWithDotnetDash);
-            ToolManifestFile toolManifest =
-                new ToolManifestFile(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            ToolManifestFinder toolManifest =
+                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
 
             var fakeExecutableA = _nugetGlobalPackagesFolder.WithFile("fakeExecutable-a.dll");
             var fakeExecutableDotnetA = _nugetGlobalPackagesFolder.WithFile("fakeExecutable-a.dll");
