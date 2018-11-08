@@ -1,4 +1,4 @@
-﻿<Project Sdk="RoslynTools.RepoToolset">
+<Project Sdk="RoslynTools.RepoToolset">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -65,6 +65,11 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
+    <Compile Include="Bond\InputBuffer.cs" />
+    <Compile Include="Bond\InputStream.cs" />
+    <Compile Include="Bond\IntegerHelper.cs" />
+    <Compile Include="Bond\OutputBuffer.cs" />
+    <Compile Include="Bond\OutputStream.cs" />
     <Compile Include="ConvertToAbsolutePath.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -961,6 +966,8 @@
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
   <ItemGroup>
+    <PackageReference Include="Bond.CSharp" />
+
     <!-- reference both when repotoolset is not adding compiler references -->
     <PackageReference Include="Microsoft.Net.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
     <PackageReference Include="Microsoft.NETCore.Compilers" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
