@@ -37,12 +37,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_TransformWebConfig">
 
     <PropertyGroup>
-      <_IsAspNetCoreProject Condition="%(ProjectCapability.Identity) == 'AspNetCore'">true</_IsAspNetCoreProject>
+      <_IsAspNetCoreProject Condition=" %(ProjectCapability.Identity) == 'AspNetCore' ">true</_IsAspNetCoreProject>
       <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(UseAppHost)</_UseAppHost>
-      <_UseAppHost Condition=" '$(_UseAppHost)' == ''">$(SelfContained)</_UseAppHost>
-      <_UseAppHost Condition=" '$(_UseAppHost)' == ''">false</_UseAppHost>
-      <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
-      <_TransformWebConfigForAzure Condition=" '$(PublishProvider)' == 'AzureWebSite' Or '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1'">true</_TransformWebConfigForAzure>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(SelfContained)</_UseAppHost>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' Or '$(RuntimeIdentifier)' == '' ">false</_UseAppHost>
+      <_ExecutableExtension Condition=" '$(_ExecutableExtension)' == '' And $(RuntimeIdentifier.StartsWith('win')) ">.exe</_ExecutableExtension>
+      <_TransformWebConfigForAzure Condition=" '$(PublishProvider)' == 'AzureWebSite' Or '$(WEBSITE_SITE_NAME)' != '' Or '$(DOTNET_CONFIGURE_AZURE)' == 'true' Or '$(DOTNET_CONFIGURE_AZURE)' == '1' ">true</_TransformWebConfigForAzure>
     </PropertyGroup>
     
 
@@ -184,11 +184,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="_GenerateRunCommandFile">
 
     <PropertyGroup>
-      <_IsWebJobProject Condition="'$(_IsWebJobProject)' == '' and '$(WebJobName)' != '' and '$(WebJobType)' != ''">true</_IsWebJobProject>
+      <_IsWebJobProject Condition=" '$(_IsWebJobProject)' == '' And '$(WebJobName)' != '' And '$(WebJobType)' != '' ">true</_IsWebJobProject>
       <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(UseAppHost)</_UseAppHost>
       <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">$(SelfContained)</_UseAppHost>
-      <_UseAppHost Condition=" '$(_UseAppHost)' == '' ">false</_UseAppHost>
-      <_ExecutableExtension Condition="'$(_ExecutableExtension)' == '' and $(RuntimeIdentifier.StartsWith('win'))">.exe</_ExecutableExtension>
+      <_UseAppHost Condition=" '$(_UseAppHost)' == '' Or '$(RuntimeIdentifier)' == '' ">false</_UseAppHost>
+      <_ExecutableExtension Condition=" '$(_ExecutableExtension)' == '' And $(RuntimeIdentifier.StartsWith('win')) ">.exe</_ExecutableExtension>
     </PropertyGroup>
 
     <GenerateRunCommandFile
