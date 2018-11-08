@@ -497,6 +497,8 @@
     <Compile Include="ResolveAssemblyReferences\Domain\TaskItemField.cs" />
     <Compile Include="ResolveAssemblyReferences\Engine\ResolveAssemblyReferenceServiceGateway.cs" />
     <Compile Include="ResolveAssemblyReferences\Engine\ResolveAssemblyReferenceStatelessTask.cs" />
+    <Compile Include="ResolveAssemblyReferences\NamedPipeClient\ResolveAssemblyReferenceNamedPipeClient.cs" />
+    <Compile Include="ResolveAssemblyReferences\NamedPipeServer\ResolveAssemblyReferenceNamedPipeServer.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\EventQueueBuildEngine.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceCacheService.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceTaskGateway.cs" />

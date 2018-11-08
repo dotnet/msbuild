@@ -2715,6 +2715,14 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         public System.Collections.Generic.List<Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem> TaskItems { get { throw null; } set { } }
     }
 }
+namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.NamedPipeServer
+{
+    public partial class ResolveAssemblyReferenceNamedPipeServer
+    {
+        public ResolveAssemblyReferenceNamedPipeServer(int numThreads=1) { }
+        public void Start() { }
+    }
+}
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Serialization
 {
     public partial class BondDeserializer<T> where T : new()
