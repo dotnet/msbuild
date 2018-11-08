@@ -166,7 +166,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenConflictedManifestFileInDifferentFieldsItReturnMergedContent()
+        public void GivenConflictedManifestFileInDifferentDirectoriesItReturnMergedContent()
         {
             var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
             _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
@@ -202,7 +202,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenConflictedManifestFileInDifferentFieldsItOnlyConsiderTheFirstIsRoot()
+        public void GivenConflictedManifestFileInDifferentDirectoriesItOnlyConsiderTheFirstIsRoot()
         {
             var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
             _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);

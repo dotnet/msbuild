@@ -193,8 +193,16 @@ namespace Microsoft.DotNet.ToolManifest
 
         private static bool CommandNamesEqual(ToolCommandName[] left, ToolCommandName[] right)
         {
-            if (left == null) return right == null;
-            if (right == null) return false;
+            if (left == null)
+            {
+                return right == null;
+            }
+
+            if (right == null)
+            {
+                return false;
+            }
+
             return left.SequenceEqual(right);
         }
 
