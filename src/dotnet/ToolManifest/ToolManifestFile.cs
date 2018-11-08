@@ -16,7 +16,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolManifest
 {
-    internal class ToolManifestFinder : IToolManifestFinder
+    internal class ToolManifestFile : IToolManifestFile
     {
         private readonly DirectoryPath _probeStart;
         private readonly IFileSystem _fileSystem;
@@ -25,7 +25,7 @@ namespace Microsoft.DotNet.ToolManifest
         // The supported tool manifest file version.
         private const int SupportedVersion = 1;
 
-        public ToolManifestFinder(DirectoryPath probeStart, IFileSystem fileSystem = null)
+        public ToolManifestFile(DirectoryPath probeStart, IFileSystem fileSystem = null)
         {
             _probeStart = probeStart;
             _fileSystem = fileSystem ?? new FileSystemWrapper();

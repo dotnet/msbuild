@@ -23,7 +23,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
         private readonly string _configFilePath;
         private readonly IReporter _errorReporter;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
-        private readonly IToolManifestFinder _toolManifestFinder;
+        private readonly IToolManifestFile _toolManifestFile;
         private readonly DirectoryPath _nugetGlobalPackagesFolder;
         private readonly AppliedOption _options;
         private readonly IFileSystem _fileSystem;
@@ -36,7 +36,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             AppliedOption appliedCommand,
             ParseResult result,
             IToolPackageInstaller toolPackageInstaller = null,
-            IToolManifestFinder toolManifestFinder = null,
+            IToolManifestFile toolManifestFile = null,
             ILocalToolsResolverCache localToolsResolverCache = null,
             IFileSystem fileSystem = null,
             DirectoryPath? nugetGlobalPackagesFolder = null,
@@ -59,9 +59,9 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
                 _toolPackageInstaller = toolPackageInstaller;
             }
 
-            _toolManifestFinder
-                = toolManifestFinder
-                  ?? new ToolManifestFinder(new DirectoryPath(Directory.GetCurrentDirectory()));
+            _toolManifestFile
+                = toolManifestFile
+                  ?? new ToolManifestFile(new DirectoryPath(Directory.GetCurrentDirectory()));
 
             _localToolsResolverCache = localToolsResolverCache ?? new LocalToolsResolverCache();
             _fileSystem = fileSystem ?? new FileSystemWrapper();
@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             IReadOnlyCollection<ToolManifestPackage> packagesFromManifest;
             try
             {
-                packagesFromManifest = _toolManifestFinder.Find(customManifestFileLocation);
+                packagesFromManifest = _toolManifestFile.Find(customManifestFileLocation);
             }
             catch (ToolManifestCannotBeFoundException e)
             {

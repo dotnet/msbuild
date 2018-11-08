@@ -17,19 +17,19 @@ namespace Microsoft.DotNet.CommandFactory
 {
     internal class LocalToolsCommandResolver : ICommandResolver
     {
-        private readonly ToolManifestFinder _toolManifest;
+        private readonly ToolManifestFile _toolManifest;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
         private readonly IFileSystem _fileSystem;
         private readonly DirectoryPath _nugetGlobalPackagesFolder;
         private const string LeadingDotnetPrefix = "dotnet-";
 
         public LocalToolsCommandResolver(
-            ToolManifestFinder toolManifest = null,
+            ToolManifestFile toolManifest = null,
             ILocalToolsResolverCache localToolsResolverCache = null,
             IFileSystem fileSystem = null,
             DirectoryPath? nugetGlobalPackagesFolder = null)
         {
-            _toolManifest = toolManifest ?? new ToolManifestFinder(new DirectoryPath(Directory.GetCurrentDirectory()));
+            _toolManifest = toolManifest ?? new ToolManifestFile(new DirectoryPath(Directory.GetCurrentDirectory()));
             _localToolsResolverCache = localToolsResolverCache ?? new LocalToolsResolverCache();
             _fileSystem = fileSystem ?? new FileSystemWrapper();
             _nugetGlobalPackagesFolder =
