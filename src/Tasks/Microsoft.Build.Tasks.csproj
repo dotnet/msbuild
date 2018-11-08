@@ -497,6 +497,9 @@
     <Compile Include="ResolveAssemblyReferences\Engine\ResolveAssemblyReferenceStatelessTask.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\EventQueueBuildEngine.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceTaskGateway.cs" />
+    <Compile Include="ResolveAssemblyReferences\Services\DirectoryWatcher.cs" />
+    <Compile Include="ResolveAssemblyReferences\Services\FileSystemChange.cs" />
+    <Compile Include="ResolveAssemblyReferences\Services\IDirectoryWatcher.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
