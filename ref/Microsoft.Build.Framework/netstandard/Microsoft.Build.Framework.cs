@@ -37,6 +37,8 @@ namespace Microsoft.Build.Framework
         public string SenderName { get { throw null; } }
         public int ThreadId { get { throw null; } }
         public System.DateTime Timestamp { get { throw null; } }
+        public string UnformattedMessage { get { throw null; } }
+        public System.DateTime UtcTimestamp { get { throw null; } }
     }
     public partial class BuildEventContext
     {
@@ -310,6 +312,7 @@ namespace Microsoft.Build.Framework
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName) { }
         public LazyFormattedBuildEventArgs(string message, string helpKeyword, string senderName, System.DateTime eventTimestamp, params object[] messageArgs) { }
         public override string Message { get { throw null; } }
+        public object[] UnparsedArguments { get { throw null; } }
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(4), AllowMultiple=false, Inherited=true)]
     public sealed partial class LoadInSeparateAppDomainAttribute : System.Attribute

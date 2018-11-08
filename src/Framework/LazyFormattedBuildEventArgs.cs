@@ -17,12 +17,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Stores the message arguments.
         /// </summary>
-        private object[] arguments;
+        internal object[] arguments;
 
         /// <summary>
         /// Stores the original culture for String.Format.
         /// </summary>
-        private string originalCultureName;
+        internal string originalCultureName;
 
         /// <summary>
         /// Non-serializable CultureInfo object
@@ -35,6 +35,8 @@ namespace Microsoft.Build.Framework
         /// </summary>
         [NonSerialized]
         private Object locker;
+
+        public object[] UnparsedArguments => arguments;
 
         /// <summary>
         /// This constructor allows all event data to be initialized.
