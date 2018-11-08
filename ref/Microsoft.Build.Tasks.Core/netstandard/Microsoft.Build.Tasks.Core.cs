@@ -959,3 +959,186 @@ namespace Microsoft.Build.Tasks.Hosting
         bool Compile();
     }
 }
+namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
+{
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("gbc", "0.11.0.0")]
+    public enum BuildEventArgsType
+    {
+        Error = 0,
+        Message = 1,
+        Warning = 2,
+    }
+    [Bond.SchemaAttribute]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("gbc", "0.11.0.0")]
+    public partial class ReadOnlyTaskItem : Microsoft.Build.Framework.ITaskItem, Microsoft.Build.Framework.ITaskItem2
+    {
+        public ReadOnlyTaskItem() { }
+        public ReadOnlyTaskItem(string itemSpec) { }
+        protected ReadOnlyTaskItem(string fullName, string name) { }
+        public string EvaluatedIncludeEscaped { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)0)]
+        public string ItemSpec { get { throw null; } set { } }
+        public int MetadataCount { get { throw null; } }
+        public System.Collections.ICollection MetadataNames { get { throw null; } }
+        [Bond.IdAttribute((ushort)1)]
+        public System.Collections.Generic.Dictionary<string, string> MetadataNameToValue { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)2)]
+        public int ResponseFieldIds { get { throw null; } set { } }
+        public System.Collections.IDictionary CloneCustomMetadata() { throw null; }
+        public System.Collections.IDictionary CloneCustomMetadataEscaped() { throw null; }
+        public void CopyMetadataTo(Microsoft.Build.Framework.ITaskItem destinationItem) { }
+        public string GetMetadata(string metadataName) { throw null; }
+        public string GetMetadataValueEscaped(string metadataName) { throw null; }
+        public void RemoveMetadata(string metadataName) { }
+        public void SetMetadata(string metadataName, string metadataValue) { }
+        public void SetMetadataValueLiteral(string metadataName, string metadataValue) { }
+    }
+    [Bond.SchemaAttribute]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("gbc", "0.11.0.0")]
+    public partial class ResolveAssemblyReferenceBuildEventArgs
+    {
+        public ResolveAssemblyReferenceBuildEventArgs() { }
+        protected ResolveAssemblyReferenceBuildEventArgs(string fullName, string name) { }
+        [Bond.IdAttribute((ushort)0)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.BuildEventArgsType BuildEventArgsType { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)8)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string Code { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)11)]
+        public int ColumnNumber { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)13)]
+        public int EndColumnNumber { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)12)]
+        public int EndLineNumber { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)4)]
+        public long EventTimestamp { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)9)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string File { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)2)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string HelpKeyword { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)6)]
+        public int Importance { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)10)]
+        public int LineNumber { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)1)]
+        public string Message { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)5)]
+        public string[] MessageArgs { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)3)]
+        public string SenderName { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)7)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string Subcategory { get { throw null; } set { } }
+    }
+    [Bond.SchemaAttribute]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("gbc", "0.11.0.0")]
+    public partial class ResolveAssemblyReferenceRequest
+    {
+        public ResolveAssemblyReferenceRequest() { }
+        protected ResolveAssemblyReferenceRequest(string fullName, string name) { }
+        [Bond.IdAttribute((ushort)0)]
+        public string[] AllowedAssemblyExtensions { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)1)]
+        public string[] AllowedRelatedFileExtensions { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)2)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string AppConfigFile { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)3)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] Assemblies { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)4)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] AssemblyFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)5)]
+        public bool AutoUnify { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)6)]
+        public string[] CandidateAssemblyFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)7)]
+        public bool CopyLocalDependenciesWhenParentReferenceInGac { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)8)]
+        public bool DoNotCopyLocalIfInGac { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)9)]
+        public bool FindDependencies { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)10)]
+        public bool FindDependenciesOfExternallyResolvedReferences { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)11)]
+        public bool FindRelatedFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)12)]
+        public bool FindSatellites { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)13)]
+        public bool FindSerializationAssemblies { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)14)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] FullFrameworkAssemblyTables { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)15)]
+        public string[] FullFrameworkFolders { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)16)]
+        public string[] FullTargetFrameworkSubsetNames { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)17)]
+        public bool IgnoreDefaultInstalledAssemblySubsetTables { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)18)]
+        public bool IgnoreDefaultInstalledAssemblyTables { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)19)]
+        public bool IgnoreTargetFrameworkAttributeVersionMismatch { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)20)]
+        public bool IgnoreVersionForFrameworkReferences { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)21)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] InstalledAssemblySubsetTables { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)22)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] InstalledAssemblyTables { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)23)]
+        public string[] LatestTargetFrameworkDirectories { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)24)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string ProfileName { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)25)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] ResolvedSDKReferences { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)26)]
+        public string[] SearchPaths { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)27)]
+        public bool Silent { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)28)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string StateFile { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)29)]
+        public bool SupportsBindingRedirectGeneration { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)30)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string TargetedRuntimeVersion { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)31)]
+        public string[] TargetFrameworkDirectories { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)32)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string TargetFrameworkMoniker { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)33)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string TargetFrameworkMonikerDisplayName { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)34)]
+        public string[] TargetFrameworkSubsets { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)35)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string TargetFrameworkVersion { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)36)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string TargetProcessorArchitecture { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)37)]
+        public bool UnresolveFrameworkAssembliesFromHigherFrameworks { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)38)]
+        [Bond.TypeAttribute(typeof(Bond.Tag.nullable<string>))]
+        public string WarnOrErrorOnTargetArchitectureMismatch { get { throw null; } set { } }
+    }
+    [Bond.SchemaAttribute]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("gbc", "0.11.0.0")]
+    public partial class ResolveAssemblyReferenceResponse
+    {
+        public ResolveAssemblyReferenceResponse() { }
+        protected ResolveAssemblyReferenceResponse(string fullName, string name) { }
+        [Bond.IdAttribute((ushort)0)]
+        public System.Collections.Generic.List<Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ResolveAssemblyReferenceBuildEventArgs> BuildEventArgsQueue { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)1)]
+        public string DependsOnNETStandard { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)2)]
+        public string DependsOnSystemRuntime { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)3)]
+        public System.Collections.Generic.List<Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem> TaskItems { get { throw null; } set { } }
+    }
+}

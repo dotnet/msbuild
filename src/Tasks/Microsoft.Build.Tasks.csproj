@@ -484,6 +484,13 @@
     <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceBuildEventArgs.bond" />
     <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceRequest.bond" />
     <None Include="ResolveAssemblyReferences\BondTypes\ResolveAssemblyReferenceResponse.bond" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ReadOnlyTaskItem.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ReadOnlyTaskItem_types.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceBuildEventArgs_types.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceRequest_types.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceResponse.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceResponse_types.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\TaskItemField.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
