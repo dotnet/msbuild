@@ -31,7 +31,7 @@ namespace Microsoft.DotNet.ToolManifest
             FilePath to,
             PackageId packageId,
             NuGetVersion nuGetVersion,
-            ToolCommandName[] toolCommandName)
+            ToolCommandName[] toolCommandNames)
         {
             SerializableLocalToolsManifest deserializedManifest =
                 DeserializeLocalToolsManifest(to);
@@ -46,7 +46,7 @@ namespace Microsoft.DotNet.ToolManifest
 
                 if (existingPackage.PackageId.Equals(packageId)
                     && existingPackage.Version == nuGetVersion
-                    && CommandNamesEqual(existingPackage.CommandNames, toolCommandName))
+                    && CommandNamesEqual(existingPackage.CommandNames, toolCommandNames))
                 {
                     return;
                 }
@@ -65,7 +65,7 @@ namespace Microsoft.DotNet.ToolManifest
                 new SerializableLocalToolSinglePackage
                 {
                     version = nuGetVersion.ToNormalizedString(),
-                    commands = toolCommandName.Select(c => c.Value).ToArray()
+                    commands = toolCommandNames.Select(c => c.Value).ToArray()
                 });
 
             _fileSystem.File.WriteAllText(
@@ -80,7 +80,9 @@ namespace Microsoft.DotNet.ToolManifest
                 DeserializeLocalToolsManifest(manifest);
 
             List<ToolManifestPackage> toolManifestPackages =
-                GetToolManifestPackageFromOneManifestFile(deserializedManifest, manifest,
+                GetToolManifestPackageFromOneManifestFile(
+                    deserializedManifest,
+                    manifest,
                     correspondingDirectory);
 
             return (toolManifestPackages, deserializedManifest.isRoot.Value);
@@ -191,18 +193,9 @@ namespace Microsoft.DotNet.ToolManifest
 
         private static bool CommandNamesEqual(ToolCommandName[] left, ToolCommandName[] right)
         {
-            if (left == null && right == null)
-            {
-                return true;
-            }
-            else if (right == null || left == null)
-            {
-                return false;
-            }
-            else
-            {
-                return left.SequenceEqual(right);
-            }
+            if (left == null) return right == null;
+            if (right == null) return false;
+            return left.SequenceEqual(right);
         }
 
         private class SerializableLocalToolsManifest

@@ -220,7 +220,6 @@ namespace Microsoft.DotNet.Tests.Commands
         public void DifferentVersionOfManifestFileItShouldThrow()
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContentHigherVersion);
-            BufferedReporter bufferedReporter = new BufferedReporter();
             var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
             Action a = () => toolManifest.Find();
 
@@ -233,7 +232,6 @@ namespace Microsoft.DotNet.Tests.Commands
         public void MissingIsRootInManifestFileItShouldThrow()
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContentIsRootMissing);
-            BufferedReporter bufferedReporter = new BufferedReporter();
             var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
             Action a = () => toolManifest.Find();
 
@@ -360,7 +358,6 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename),
                 _jsonContentHigherVersion);
-            BufferedReporter bufferedReporter = new BufferedReporter();
             var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
 
             Action a = () => toolManifest.TryFind(new ToolCommandName("dotnetsay"), out var result);
@@ -392,7 +389,6 @@ namespace Microsoft.DotNet.Tests.Commands
         [Fact]
         public void GivenManifestFileOnSameDirectoryItThrowsWhenTheManifestFileCannotBeFound()
         {
-            string manifestPath = Path.Combine(_testDirectoryRoot, _manifestFilename);
             var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
             Action a = () => toolManifest.FindFirst();
 

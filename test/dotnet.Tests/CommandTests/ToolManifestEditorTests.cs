@@ -32,7 +32,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenManifestFileOnSameDirectoryItCanAddEntryToIt()
+        public void GivenManifestFileItCanAddEntryToIt()
         {
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
@@ -102,7 +102,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenManifestFileOnSameDirectoryWhenAddingTheSamePackageIdSameVersionSameCommandsItDoesNothing()
+        public void GivenManifestFileWhenAddingTheSamePackageIdSameVersionSameCommandsItDoesNothing()
         {
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
