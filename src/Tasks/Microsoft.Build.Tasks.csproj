@@ -493,6 +493,8 @@
     <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceResponse.cs" />
     <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceResponse_types.cs" />
     <Compile Include="ResolveAssemblyReferences\Domain\TaskItemField.cs" />
+    <Compile Include="ResolveAssemblyReferences\Engine\ResolveAssemblyReferenceServiceGateway.cs" />
+    <Compile Include="ResolveAssemblyReferences\Engine\ResolveAssemblyReferenceStatelessTask.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
