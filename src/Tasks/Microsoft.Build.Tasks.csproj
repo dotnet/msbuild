@@ -489,6 +489,8 @@
     <Compile Include="ResolveAssemblyReferences\Domain\ReadOnlyTaskItem.cs" />
     <Compile Include="ResolveAssemblyReferences\Domain\ReadOnlyTaskItem_types.cs" />
     <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceBuildEventArgs_types.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceEvaluation.cs" />
+    <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceRequestComparer.cs" />
     <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceRequest_types.cs" />
     <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceResponse.cs" />
     <Compile Include="ResolveAssemblyReferences\Domain\ResolveAssemblyReferenceResponse_types.cs" />
@@ -496,6 +498,7 @@
     <Compile Include="ResolveAssemblyReferences\Engine\ResolveAssemblyReferenceServiceGateway.cs" />
     <Compile Include="ResolveAssemblyReferences\Engine\ResolveAssemblyReferenceStatelessTask.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\EventQueueBuildEngine.cs" />
+    <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceCacheService.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\ResolveAssemblyReferenceTaskGateway.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\DirectoryWatcher.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\FileSystemChange.cs" />
