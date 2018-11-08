@@ -1142,3 +1142,18 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         public System.Collections.Generic.List<Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem> TaskItems { get { throw null; } set { } }
     }
 }
+namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Serialization
+{
+    public partial class BondDeserializer<T> where T : new()
+    {
+        public BondDeserializer() { }
+        public static T Deserialize(System.IO.Stream stream) { throw null; }
+        public static void Initialize() { }
+    }
+    public partial class BondSerializer<T> where T : new()
+    {
+        public BondSerializer() { }
+        public static void Initialize() { }
+        public static void Serialize(System.IO.Stream stream, T obj) { }
+    }
+}

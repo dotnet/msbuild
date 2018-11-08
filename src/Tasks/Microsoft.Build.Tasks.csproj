@@ -503,6 +503,8 @@
     <Compile Include="ResolveAssemblyReferences\Services\DirectoryWatcher.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\FileSystemChange.cs" />
     <Compile Include="ResolveAssemblyReferences\Services\IDirectoryWatcher.cs" />
+    <Compile Include="ResolveAssemblyReferences\Serialization\BondDeserializer.cs" />
+    <Compile Include="ResolveAssemblyReferences\Serialization\BondSerializer.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveKeySource.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
