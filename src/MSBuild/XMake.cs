@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -25,6 +25,8 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain;
+using Microsoft.Build.Tasks.ResolveAssemblyReferences.Serialization;
 using Microsoft.Build.Utilities;
 #if (!STANDALONEBUILD)
 using Microsoft.Internal.Performance;
@@ -126,6 +128,9 @@ namespace Microsoft.Build.CommandLine
                 //  This forces the type to initialize in this static constructor and thus    //
                 //  any configuration file exceptions can be caught here.                     //
                 ////////////////////////////////////////////////////////////////////////////////
+                System.Threading.Tasks.Task.Run(() => { BondSerializer<ResolveAssemblyReferenceRequest>.Initialize(); });
+                System.Threading.Tasks.Task.Run(() => { BondDeserializer<ResolveAssemblyReferenceResponse>.Initialize(); });
+
                 s_exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
 
                 s_initialized = true;
