@@ -130,7 +130,7 @@ namespace Microsoft.DotNet.Tools.Tests.ComponentMocks
 
             MockFeedPackage package = _projectRestorer.GetPackage(
                 packageId.ToString(),
-                versionRange,
+                versionRange ?? VersionRange.Parse("*"),
                 packageLocation.NugetConfig,
                 packageLocation.RootConfigDirectory);
 

@@ -2,11 +2,48 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</source>
+        <target state="new">Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InstallationSucceeded">
         <source>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</source>
         <target state="translated">Możesz wywołać narzędzie za pomocą następującego polecenia: {0}
 Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>Install the tool and add to the local tool manifest.</source>
+        <target state="new">Install the tool and add to the local tool manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
+        <source>Local option(--local) does not support framework option.</source>
+        <target state="new">Local option(--local) does not support framework option.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalToolInstallationSucceeded">
+        <source>You can invoke the tool using the following command with prefix: {0}
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
+        <target state="new">You can invoke the tool using the following command with prefix: {0}
+Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="new">Path to the manifest file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Only the local option(--local) support manifest file option (--tool-manifest).</source>
+        <target state="new">Only the local option(--local) support manifest file option (--tool-manifest).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -87,16 +124,6 @@ Pomyślnie zainstalowano narzędzie „{1}” (wersja: „{2}”).</target>
       <trans-unit id="InvalidNuGetVersionRange">
         <source>Specified version '{0}' is not a valid NuGet version range.</source>
         <target state="translated">Określona wersja „{0}” nie należy do prawidłowego zakresu wersji pakietu NuGet.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Określ opcję globalną (--global) lub opcję ścieżki narzędzia (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">Opcja (--global) powoduje konflikt z opcją ścieżki narzędzia (--tool-path). Określ tylko jedną z opcji.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolInstallationFailed">

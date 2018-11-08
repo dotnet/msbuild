@@ -184,6 +184,11 @@ namespace Microsoft.DotNet.Tests.Commands
             {
                 return _toReturn;
             }
+
+            public FilePath FindFirst()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
