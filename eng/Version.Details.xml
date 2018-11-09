@@ -6,5 +6,9 @@
       <Uri></Uri>
       <Sha></Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Net.Sdk" Version="3.0.100-preview.18554.1">
+      <Uri></Uri>
+      <Sha></Sha>
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
