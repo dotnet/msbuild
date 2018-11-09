@@ -60,6 +60,8 @@ namespace Microsoft.DotNet.Cli
                                     NuGetCommandParser.NuGet(),
                                     StoreCommandParser.Store(),
                                     HelpCommandParser.Help(),
+                                    Create.Command("fsc", CompletionOnlyDescription),
+                                    Create.Command("fsi", CompletionOnlyDescription),
                                     Create.Command("msbuild", CompletionOnlyDescription),
                                     Create.Command("vstest", CompletionOnlyDescription),
                                     CompleteCommandParser.Complete(),

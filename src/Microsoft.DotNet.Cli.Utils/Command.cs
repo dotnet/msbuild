@@ -21,7 +21,7 @@ namespace Microsoft.DotNet.Cli.Utils
 
         private bool _running = false;
 
-        private static string[] _knownCommandsAvailableAsDotNetTool = new[] { "dotnet-dev-certs", "dotnet-ef", "dotnet-sql-cache", "dotnet-user-secrets", "dotnet-watch" };
+        private static string[] _knownCommandsAvailableAsDotNetTool = new[] { "dotnet-dev-certs", "dotnet-ef", "dotnet-sql-cache", "dotnet-user-secrets", "dotnet-watch", "fsc", "fsi" };
 
         private Command(CommandSpec commandSpec)
         {

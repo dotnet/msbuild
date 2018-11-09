@@ -297,6 +297,16 @@
         <target state="translated">執行 .NET Core 應用程式。</target>
         <note />
       </trans-unit>
+      <trans-unit id="FscDefinition">
+        <source>Execute F# compiler.</source>
+        <target state="new">Execute F# compiler.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FsiDefinition">
+        <source>Start F# Interective / execute F# scripts.</source>
+        <target state="new">Start F# Interective / execute F# scripts.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
