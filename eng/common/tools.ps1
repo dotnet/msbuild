@@ -81,7 +81,7 @@ function InstallDotNetSdk([string] $dotnetRoot, [string] $version) {
 
 function InitializeVisualStudioBuild {
   $vsToolsPath = $env:VS150COMNTOOLS
-  if ($vsToolsPath -eq $null) {
+  if ($vsToolsPath -eq $null) { 
     $vsToolsPath = $env:VS160COMNTOOLS
   }
 
@@ -94,7 +94,7 @@ function InitializeVisualStudioBuild {
     $vsSdkInstallDir = Join-Path $vsInstallDir "VSSDK\"
     $vsVersion = $vsInfo.installationVersion.Split('.')[0] + "0"
 
-    Set-Item "env:VS$($vsVersion)COMNTOOLS" (Join-Path $vsInstallDir "Common7\Tools\")
+    Set-Item "env:VS$($vsVersion)COMNTOOLS" (Join-Path $vsInstallDir "Common7\Tools\")    
     Set-Item "env:VSSDK$($vsVersion)Install" $vsSdkInstallDir
     $env:VSSDKInstall = $vsSdkInstallDir
   }
@@ -137,7 +137,7 @@ function LocateVisualStudio {
   return $vsInfo[0]
 }
 
-function ConfigureTools {
+function ConfigureTools { 
   # Include custom tools configuration
   $script = Join-Path $EngRoot "configure-toolset.ps1"
 

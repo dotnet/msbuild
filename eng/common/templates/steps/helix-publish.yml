@@ -8,9 +8,14 @@ parameters:
   HelixPostCommands: ''
   WorkItemDirectory: ''
   WorkItemCommand: ''
-  IncludeDotNetSdk: false
+  CorrelationPayloadDirectory: ''
+  IncludeDotNetCli: false
+  DotNetCliPackageType: ''
+  DotNetCliVersion: ''
   EnableXUnitReporter: false
   WaitForWorkItemCompletion: true
+  condition: succeeded()
+  continueOnError: false
 
 steps:
   - task: DotNetCoreCLI@2
@@ -28,8 +33,12 @@ steps:
       HelixAccessToken: ${{ parameters.HelixAccessToken }}
       HelixPreCommands: ${{ parameters.HelixPreCommands }}
       HelixPostCommands: ${{ parameters.HelixPostCommands }}
-      IncludeDotNetSdk: ${{ parameters.IncludeDotNetSdk }}
-      EnableXUnitReporter: ${{ parameters.EnableXUnitReporter }}
-      WaitForWorkItemCompletion: ${{ parameters.WaitForWorkItemCompletion }}
       WorkItemDirectory: ${{ parameters.WorkItemDirectory }}
       WorkItemCommand: ${{ parameters.WorkItemCommand }}
+      IncludeDotNetCli: ${{ parameters.IncludeDotNetCli }}
+      DotNetCliPackageType: ${{ parameters.DotNetCliPackageType }}
+      DotNetCliVersion: ${{ parameters.DotNetCliVersion }}
+      EnableXUnitReporter: ${{ parameters.EnableXUnitReporter }}
+      WaitForWorkItemCompletion: ${{ parameters.WaitForWorkItemCompletion }}
+    condition: ${{ parameters.condition }}
+    continueOnError: ${{ parameters.continueOnError }}
