@@ -52,18 +52,17 @@ namespace Microsoft.DotNet.ToolManifest
 
         private bool CommandNamesEqual(ToolCommandName[] otherCommandNames)
         {
-            if (CommandNames == null && otherCommandNames == null)
+            if (CommandNames == null)
             {
-                return true;
+                return otherCommandNames == null;
             }
-            else if (otherCommandNames == null || CommandNames == null)
+
+            if (otherCommandNames == null)
             {
                 return false;
             }
-            else
-            {
-                return CommandNames.SequenceEqual(otherCommandNames);
-            }
+
+            return CommandNames.SequenceEqual(otherCommandNames);
         }
 
         public override int GetHashCode()

@@ -19,11 +19,14 @@ using System.Linq;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
-    public class ToolManifestTests
+    public class ToolManifestFinderTests
     {
         private readonly IFileSystem _fileSystem;
+        private readonly List<ToolManifestPackage> _defaultExpectedResult;
+        private readonly string _testDirectoryRoot;
+        private const string _manifestFilename = "dotnet-tools.json";
 
-        public ToolManifestTests()
+        public ToolManifestFinderTests()
         {
             _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
             _testDirectoryRoot = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
@@ -163,7 +166,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenConflictedManifestFileInDifferentFieldsItReturnMergedContent()
+        public void GivenConflictedManifestFileInDifferentDirectoriesItReturnMergedContent()
         {
             var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
             _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
@@ -199,7 +202,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenConflictedManifestFileInDifferentFieldsItOnlyConsiderTheFirstIsRoot()
+        public void GivenConflictedManifestFileInDifferentDirectoriesItOnlyConsiderTheFirstIsRoot()
         {
             var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
             _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
@@ -217,7 +220,6 @@ namespace Microsoft.DotNet.Tests.Commands
         public void DifferentVersionOfManifestFileItShouldThrow()
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContentHigherVersion);
-            BufferedReporter bufferedReporter = new BufferedReporter();
             var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
             Action a = () => toolManifest.Find();
 
@@ -230,7 +232,6 @@ namespace Microsoft.DotNet.Tests.Commands
         public void MissingIsRootInManifestFileItShouldThrow()
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename), _jsonContentIsRootMissing);
-            BufferedReporter bufferedReporter = new BufferedReporter();
             var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
             Action a = () => toolManifest.Find();
 
@@ -357,11 +358,42 @@ namespace Microsoft.DotNet.Tests.Commands
         {
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename),
                 _jsonContentHigherVersion);
-            BufferedReporter bufferedReporter = new BufferedReporter();
             var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
 
             Action a = () => toolManifest.TryFind(new ToolCommandName("dotnetsay"), out var result);
             a.ShouldThrow<ToolManifestException>();
+        }
+
+        [Fact]
+        public void GivenManifestFileOnSameDirectoryItCanFindTheFirstManifestFile()
+        {
+            string manifestPath = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestPath, _jsonContent);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            FilePath toolmanifestFilePath = toolManifest.FindFirst();
+
+            toolmanifestFilePath.Value.Should().Be(manifestPath);
+        }
+
+        [Fact]
+        public void GivenManifestFileOnSameDirectoryItDoesNotThrowsWhenTheManifestFileIsNotValid()
+        {
+            string manifestPath = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestPath, _jsonWithMissingField);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            FilePath toolmanifestFilePath = toolManifest.FindFirst();
+
+            toolmanifestFilePath.Value.Should().Be(manifestPath);
+        }
+
+        [Fact]
+        public void GivenManifestFileOnSameDirectoryItThrowsWhenTheManifestFileCannotBeFound()
+        {
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+            Action a = () => toolManifest.FindFirst();
+
+            a.ShouldThrow<ToolManifestCannotBeFoundException>().And.Message.Should()
+                .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
         }
 
         private string _jsonContent =
@@ -541,8 +573,6 @@ namespace Microsoft.DotNet.Tests.Commands
    }
 }";
 
-        private readonly List<ToolManifestPackage> _defaultExpectedResult;
-        private readonly string _testDirectoryRoot;
-        private const string _manifestFilename = "dotnet-tools.json";
+
     }
 }
