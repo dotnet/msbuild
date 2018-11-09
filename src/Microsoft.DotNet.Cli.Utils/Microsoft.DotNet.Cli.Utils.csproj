@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>$(SdkVersion)</Version>
-    <TargetFrameworks>$(CliTargetFramework);net46</TargetFrameworks>
+    <TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(CliTargetFramework)</TargetFrameworks>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>

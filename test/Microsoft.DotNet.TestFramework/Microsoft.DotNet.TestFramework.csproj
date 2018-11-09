@@ -3,15 +3,16 @@
   <PropertyGroup>
     <Description>Microsoft.DotNet.TestFramework Class Library</Description>
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
-    <TargetFramework>$(CliTargetFramework)</TargetFramework>
+    <TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(CliTargetFramework)</TargetFrameworks>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.DotNet.Cli.Utils\Microsoft.DotNet.Cli.Utils.csproj" />
   </ItemGroup>
-  
+
 </Project>
