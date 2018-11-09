@@ -86,6 +86,7 @@ def static getBuildJobName(def configuration, def os) {
             else {
                 TriggerBuilder builder = TriggerBuilder.triggerOnCommit()
                 builder.emitTrigger(newJob)
+                Utilities.addPeriodicTrigger(newJob, "@daily", true)
             }
         }
       }
@@ -160,6 +161,7 @@ def static getBuildJobName(def configuration, def os) {
             else {
                 TriggerBuilder builder = TriggerBuilder.triggerOnCommit()
                 builder.emitTrigger(newJob)
+                Utilities.addPeriodicTrigger(newJob, "@daily", true)
             }
         }
       }
