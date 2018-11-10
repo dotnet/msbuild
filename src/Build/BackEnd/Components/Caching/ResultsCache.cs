@@ -16,7 +16,6 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class ResultsCache : IResultsCache
     {
-        #region Private Data
         /// <summary>
         /// The table of all build results.  This table is indexed by configuration id and
         /// contains BuildResult objects which have all of the target information.
@@ -24,39 +23,11 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, BuildResult> _resultsByConfiguration;
 
         /// <summary>
-        /// The component host.
-        /// </summary>
-        private IBuildComponentHost _componentHost;
-
-        #endregion
-
-        /// <summary>
         /// Creates an empty results cache.
         /// </summary>
         public ResultsCache()
         {
             _resultsByConfiguration = new ConcurrentDictionary<int, BuildResult>();
-        }
-
-        /// <summary>
-        /// Enum for CheckResults helper function.
-        /// </summary>
-        private enum TargetClass
-        {
-            /// <summary>
-            /// Targets explicitly specified in the build request.
-            /// </summary>
-            Explicit,
-
-            /// <summary>
-            /// Targets which are declared as initial targets.
-            /// </summary>
-            Initial,
-
-            /// <summary>
-            /// Targets which are the default when no explicit targets are specified.
-            /// </summary>
-            Default,
         }
 
         /// <summary>
@@ -191,7 +162,7 @@ namespace Microsoft.Build.BackEnd
                     BuildResult allResults = _resultsByConfiguration[request.ConfigurationId];
 
                     // Check for targets explicitly specified.
-                    bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, TargetClass.Explicit, response.ExplicitTargetsToBuild, skippedResultsAreOK);
+                    bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, response.ExplicitTargetsToBuild, skippedResultsAreOK);
 
                     if (explicitTargetsSatisfied)
                     {
@@ -199,7 +170,7 @@ namespace Microsoft.Build.BackEnd
                         response.Type = ResultsCacheResponseType.Satisfied;
 
                         // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
-                        if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, TargetClass.Initial, null, skippedResultsAreOK))
+                        if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, null, skippedResultsAreOK))
                         {
                             response.Type = ResultsCacheResponseType.NotSatisfied;
                         }
@@ -209,7 +180,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             // Check for the default target, if necessary.  If we don't know what the default targets are, we
                             // assume they are not satisfied.
-                            if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, TargetClass.Default, null, skippedResultsAreOK))
+                            if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, null, skippedResultsAreOK))
                             {
                                 response.Type = ResultsCacheResponseType.NotSatisfied;
                             }
@@ -287,7 +258,6 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host, "host");
-            _componentHost = host;
         }
 
         /// <summary>
@@ -303,7 +273,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for component creation.
         /// </summary>
-        static internal IBuildComponent CreateComponent(BuildComponentType componentType)
+        internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
             ErrorUtilities.VerifyThrow(componentType == BuildComponentType.ResultsCache, "Cannot create components of type {0}", componentType);
             return new ResultsCache();
@@ -314,12 +284,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="result">The result to examine</param>
         /// <param name="targets">The targets to search for</param>
-        /// <param name="targetClass">The class of targets</param>
         /// <param name="targetsMissingResults">An optional list to be populated with missing targets</param>
         /// <param name="skippedResultsAreOK">If true, a status of "skipped" counts as having valid results 
         /// for that target.  Otherwise, a skipped target is treated as equivalent to a missing target.</param>
         /// <returns>False if there were missing results, true otherwise.</returns>
-        private bool CheckResults(BuildResult result, List<string> targets, TargetClass targetClass, HashSet<string> targetsMissingResults, bool skippedResultsAreOK)
+        private static bool CheckResults(BuildResult result, List<string> targets, HashSet<string> targetsMissingResults, bool skippedResultsAreOK)
         {
             bool returnValue = true;
             foreach (string target in targets)

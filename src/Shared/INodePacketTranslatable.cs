@@ -15,13 +15,9 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal interface INodePacketTranslatable
     {
-        #region Methods
-
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
         void Translate(INodePacketTranslator translator);
-
-        #endregion
     }
 }
