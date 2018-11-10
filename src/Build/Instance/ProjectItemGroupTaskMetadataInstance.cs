@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name} Value={_value} Condition={_condition}")]
-    public class ProjectItemGroupTaskMetadataInstance : INodePacketTranslatable
+    public class ProjectItemGroupTaskMetadataInstance : ITranslatable
     {
         /// <summary>
         /// Name of the metadatum
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Execution
             return new ProjectItemGroupTaskMetadataInstance(this);
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _name);
             translator.Translate(ref _value);
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectItemGroupTaskMetadataInstance FactoryForDeserialization(INodePacketTranslator translator)
         {
             var instance = new ProjectItemGroupTaskMetadataInstance();
-            ((INodePacketTranslatable) instance).Translate(translator);
+            ((ITranslatable) instance).Translate(translator);
 
             return instance;
         }

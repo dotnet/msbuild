@@ -76,7 +76,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
 
             var original = CreateTargetTask(null, parametersCopy, outputs);
 
-            ((INodePacketTranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectTaskInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new TargetTaskComparer());

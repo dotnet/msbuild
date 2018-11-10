@@ -50,7 +50,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// A result of executing a target or task.
     /// </summary>
-    internal class WorkUnitResult : INodePacketTranslatable
+    internal class WorkUnitResult : ITranslatable
     {
         /// <summary>
         /// The result.
@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private WorkUnitResult(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>

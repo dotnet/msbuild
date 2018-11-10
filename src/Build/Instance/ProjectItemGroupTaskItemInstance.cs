@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} Include={_include} Exclude={_exclude} Remove={_remove} Condition={_condition}")]
-    public class ProjectItemGroupTaskItemInstance: INodePacketTranslatable
+    public class ProjectItemGroupTaskItemInstance: ITranslatable
     {
         /// <summary>
         /// Item type, for example "Compile"
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Execution
             return new ProjectItemGroupTaskItemInstance(this);
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _itemType);
             translator.Translate(ref _include);
@@ -396,7 +396,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectItemGroupTaskItemInstance FactoryForDeserialization(INodePacketTranslator translator)
         {
             var instance = new ProjectItemGroupTaskItemInstance();
-            ((INodePacketTranslatable)instance).Translate(translator);
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
         }

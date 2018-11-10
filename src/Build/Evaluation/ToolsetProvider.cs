@@ -13,7 +13,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Class which provides access to toolsets.
     /// </summary>
-    internal class ToolsetProvider : IToolsetProvider, INodePacketTranslatable
+    internal class ToolsetProvider : IToolsetProvider, ITranslatable
     {
         /// <summary>
         /// A mapping of tools versions to Toolsets, which contain the public Toolsets.
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private ToolsetProvider(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         #region IToolsetProvider Members
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Translates to and from binary form.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.TranslateDictionary(ref _toolsets, StringComparer.OrdinalIgnoreCase, Toolset.FactoryForDeserialization);
         }

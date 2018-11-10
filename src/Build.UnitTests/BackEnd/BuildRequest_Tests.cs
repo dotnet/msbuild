@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(NodePacketType.BuildRequest, request.Type);
 
-            ((INodePacketTranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             BuildRequest deserializedRequest = packet as BuildRequest;

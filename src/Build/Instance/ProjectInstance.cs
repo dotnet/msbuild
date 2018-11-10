@@ -69,7 +69,7 @@ namespace Microsoft.Build.Execution
     /// Constructors are internal in order to direct users to Project class instead; these are only createable via Project objects.
     /// </comments>
     [DebuggerDisplay(@"{FullPath} #Targets={TargetsCount} DefaultTargets={(DefaultTargets == null) ? System.String.Empty : System.String.Join("";"", DefaultTargets.ToArray())} ToolsVersion={Toolset.ToolsVersion} InitialTargets={(InitialTargets == null) ? System.String.Empty : System.String.Join("";"", InitialTargets.ToArray())} #GlobalProperties={GlobalProperties.Count} #Properties={Properties.Count} #ItemTypes={ItemTypes.Count} #Items={Items.Count}")]
-    public class ProjectInstance : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>, IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>, INodePacketTranslatable
+    public class ProjectInstance : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>, IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>, ITranslatable
     {
         /// <summary>
         /// Targets in the project after overrides have been resolved.
@@ -445,7 +445,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private ProjectInstance(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -1858,7 +1858,7 @@ namespace Microsoft.Build.Execution
         /// Translate the project instance to or from a stream.
         /// Only translates global properties, properties, items, and mutability.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _translateEntireState);
 
@@ -2193,7 +2193,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void Cache(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
 
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -2208,7 +2208,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void RetrieveFromCache(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// IMMUTABLE OBJECT.
     /// </summary>
     [DebuggerDisplay("{_name}={EvaluatedValue}")]
-    public class ProjectMetadataInstance : IKeyed, IValued, IEquatable<ProjectMetadataInstance>, INodePacketTranslatable, IMetadatum, IDeepCloneable<ProjectMetadataInstance>, IImmutable
+    public class ProjectMetadataInstance : IKeyed, IValued, IEquatable<ProjectMetadataInstance>, ITranslatable, IMetadatum, IDeepCloneable<ProjectMetadataInstance>, IImmutable
     {
         /// <summary>
         /// Name of the metadatum
@@ -172,7 +172,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             // Read implementation is directly in the constructor so that fields can be read-only
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");

@@ -16,7 +16,7 @@ namespace Microsoft.Build.Execution
     /// This is an immutable class
     /// </remarks>
     [DebuggerDisplay("ExecuteTargets={_executeTargets} Condition={_condition}")]
-    public sealed class ProjectOnErrorInstance : ProjectTargetInstanceChild, INodePacketTranslatable
+    public sealed class ProjectOnErrorInstance : ProjectTargetInstanceChild, ITranslatable
     {
         /// <summary>
         /// Unevaluated executetargets value.
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Execution
             get { return _executeTargetsLocation; }
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {

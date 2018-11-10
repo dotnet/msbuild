@@ -11,7 +11,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Class representing a reference to a project import path with property fall-back
     /// </summary>
-    internal class ProjectImportPathMatch : INodePacketTranslatable
+    internal class ProjectImportPathMatch : ITranslatable
     {
         /// <summary>
         /// ProjectImportPathMatch instance representing no fall-back
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Evaluation
 
         public ProjectImportPathMatch(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>

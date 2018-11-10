@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        INodePacketTranslatable
+        ITranslatable
     {
         /// <summary>
         /// The TaskParameterType of the wrapped parameter

@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// 2. The request was blocked on some set of build requests.  This class will then contain the build results 
     ///    needed to satisfy those requests.
     /// </summary>
-    internal class BuildRequestUnblocker : INodePacketTranslatable, INodePacket
+    internal class BuildRequestUnblocker : ITranslatable, INodePacket
     {
         /// <summary>
         /// The node request id of the request which is blocked and now will either result or have results reported.

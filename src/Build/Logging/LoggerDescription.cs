@@ -20,7 +20,7 @@ namespace Microsoft.Build.Logging
     /// can be used to instantiate the logger and can be serialized to be passed between different
     /// processes.
     /// </summary>
-    public class LoggerDescription : INodePacketTranslatable
+    public class LoggerDescription : ITranslatable
     {
         #region Constructor
 
@@ -344,7 +344,7 @@ namespace Microsoft.Build.Logging
 
         #region INodePacketTranslatable Members
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _loggerClassName);
             translator.Translate(ref _loggerSwitchParameters);
@@ -356,7 +356,7 @@ namespace Microsoft.Build.Logging
         static internal LoggerDescription FactoryForTranslation(INodePacketTranslator translator)
         {
             LoggerDescription description = new LoggerDescription();
-            ((INodePacketTranslatable)description).Translate(translator);
+            ((ITranslatable)description).Translate(translator);
             return description;
         }
 

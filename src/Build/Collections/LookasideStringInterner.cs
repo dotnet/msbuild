@@ -16,7 +16,7 @@ namespace Microsoft.Build.Collections
     /// original strings.  The interner itself is also transmitted ahead of time, with the IDs, allowing 
     /// reconstruction of the original strings.  This ensures each string is transmitted exactly once.
     /// </remarks>
-    internal class LookasideStringInterner : INodePacketTranslatable
+    internal class LookasideStringInterner : ITranslatable
     {
         /// <summary>
         /// Index used for null strings.

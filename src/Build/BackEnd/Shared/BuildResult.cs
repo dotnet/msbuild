@@ -274,7 +274,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildResult(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -533,7 +533,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _submissionId);
             translator.Translate(ref _configurationId);

@@ -121,7 +121,7 @@
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\INodePacketTranslatable.cs" />
+    <Compile Include="..\Shared\ITranslatable.cs" />
     <Compile Include="..\Shared\INodePacketTranslator.cs" />
     <Compile Include="..\Shared\NodePacketTranslator.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />

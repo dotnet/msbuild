@@ -24,7 +24,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// This class represents all of the settings which must be specified to start a build.
     /// </summary>
-    public class BuildParameters : INodePacketTranslatable
+    public class BuildParameters : ITranslatable
     {
         /// <summary>
         /// The default thread stack size for threads owned by MSBuild.
@@ -242,7 +242,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildParameters(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -758,7 +758,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Implementation of the serialization mechanism.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _buildId);
             /* No build thread priority during translation.  We specifically use the default (which is ThreadPriority.Normal) */

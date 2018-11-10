@@ -597,7 +597,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Base class for testing
         /// </summary>
-        private class BaseClass : INodePacketTranslatable
+        private class BaseClass : ITranslatable
         {
             /// <summary>
             /// A field.

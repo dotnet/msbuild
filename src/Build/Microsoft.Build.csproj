@@ -160,7 +160,7 @@
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\INodePacketTranslatable.cs" />
+    <Compile Include="..\Shared\ITranslatable.cs" />
     <Compile Include="..\Shared\INodePacketTranslator.cs" />
     <Compile Include="..\Shared\NodePacketTranslator.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />

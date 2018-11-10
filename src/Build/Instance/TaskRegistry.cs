@@ -48,7 +48,7 @@ namespace Microsoft.Build.Execution
     ///            AssemblyName="utiltasks.dll"
     ///            AssemblyFile="$(MyDownloadedTasks)\"/&gt;
     /// </example>
-    internal sealed class TaskRegistry : INodePacketTranslatable
+    internal sealed class TaskRegistry : ITranslatable
     {
         /// <summary>
         /// The fallback task registry
@@ -700,7 +700,7 @@ namespace Microsoft.Build.Execution
         /// the set of identity parameters
         /// </summary>
         [DebuggerDisplay("{Name} ParameterCount = {TaskIdentityParameters.Count}")]
-        internal class RegisteredTaskIdentity : INodePacketTranslatable
+        internal class RegisteredTaskIdentity : ITranslatable
         {
             private string _name;
             private IDictionary<string, string> _taskIdentityParameters;
@@ -983,7 +983,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// A record for a task registration which also contains the factory which matches the record
         /// </summary>
-        internal class RegisteredTaskRecord : INodePacketTranslatable
+        internal class RegisteredTaskRecord : ITranslatable
         {
             /// <summary>
             /// Default task factory to use if one is not specified
@@ -1485,7 +1485,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Keep track of the xml which will be sent to the inline task factory and the parameters if any which will also be passed in
             /// </summary>
-            internal class ParameterGroupAndTaskElementRecord : INodePacketTranslatable
+            internal class ParameterGroupAndTaskElementRecord : ITranslatable
             {
                 /// <summary>
                 /// The list of parameters found in the using task along with a corosponding UsingTaskParameterInfo which contains the specific information about it

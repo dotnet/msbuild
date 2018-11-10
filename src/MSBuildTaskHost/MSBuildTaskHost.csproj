@@ -85,8 +85,8 @@
     <Compile Include="..\Shared\INodePacketHandler.cs">
       <Link>INodePacketHandler.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\INodePacketTranslatable.cs">
-      <Link>INodePacketTranslatable.cs</Link>
+    <Compile Include="..\Shared\ITranslatable.cs">
+      <Link>ITranslatable.cs</Link>
     </Compile>
     <Compile Include="..\Shared\INodePacketTranslator.cs">
       <Link>INodePacketTranslator.cs</Link>

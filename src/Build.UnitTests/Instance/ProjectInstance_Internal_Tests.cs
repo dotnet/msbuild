@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             original.TranslateEntireState = true;
 
-            ((INodePacketTranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new ProjectInstanceComparer());
@@ -728,7 +728,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     pi.AddItem("foo", "bar");
                     pi.TranslateEntireState = true;
 
-                    ((INodePacketTranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
+                    ((ITranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
                     var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
                     return copy;

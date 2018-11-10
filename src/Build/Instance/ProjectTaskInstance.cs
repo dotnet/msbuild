@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// This is an immutable class
     /// </remarks>
     [DebuggerDisplay("Name={_name} Condition={_condition} ContinueOnError={_continueOnError} MSBuildRuntime={MSBuildRuntime} MSBuildArchitecture={MSBuildArchitecture} #Parameters={_parameters.Count} #Outputs={_outputs.Count}")]
-    public sealed class ProjectTaskInstance : ProjectTargetInstanceChild, INodePacketTranslatable
+    public sealed class ProjectTaskInstance : ProjectTargetInstanceChild, ITranslatable
     {
         /// <summary>
         /// Name of the task, possibly qualified, as it appears in the project
@@ -358,7 +358,7 @@ namespace Microsoft.Build.Execution
             _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {

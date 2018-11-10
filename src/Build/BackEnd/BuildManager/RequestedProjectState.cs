@@ -10,7 +10,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Interface defining properties, items, and metadata of interest for a <see cref="BuildRequestData"/>.
     /// </summary>
-    public class RequestedProjectState : INodePacketTranslatable
+    public class RequestedProjectState : ITranslatable
     {
         private List<string> _propertyFilters;
         private IDictionary<string, List<string>> _itemFilters;
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Execution
             set => _itemFilters = value;
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _propertyFilters);
             translator.TranslateDictionary(ref _itemFilters, TranslateString, TranslateMetadataForItem, CreateItemMetadataDictionary);

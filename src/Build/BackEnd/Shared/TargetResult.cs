@@ -19,7 +19,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the result items for a single target as well as the overall result code.
     /// </summary>
-    public class TargetResult : ITargetResult, INodePacketTranslatable
+    public class TargetResult : ITargetResult, ITranslatable
     {
         /// <summary>
         /// The result for this target.
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private TargetResult(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -319,7 +319,7 @@ namespace Microsoft.Build.Execution
         /// useful to keep separate as it is where we spend most of our time serializing for large projects, and these are the bits
         /// we throw out of memory when the cache gets collected.
         /// </summary>
-        private class ItemsStore : INodePacketTranslatable
+        private class ItemsStore : ITranslatable
         {
             /// <summary>
             /// The default compression threshold.

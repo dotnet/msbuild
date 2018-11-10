@@ -19,7 +19,7 @@ namespace Microsoft.Build.Construction
     /// DO NOT make these objects any larger. There are huge numbers of them and they are transmitted between nodes.
     /// </remarks>
     [Serializable]
-    public abstract class ElementLocation : IElementLocation, INodePacketTranslatable, IImmutable
+    public abstract class ElementLocation : IElementLocation, ITranslatable, IImmutable
     {
         /// <summary>
         /// The singleton empty element location.
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Construction
         /// Always send as ints, even if ushorts are being used: otherwise it'd
         /// need a byte to discriminate and the savings would be microscopic.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
 

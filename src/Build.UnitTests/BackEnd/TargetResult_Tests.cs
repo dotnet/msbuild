@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
 
-            ((INodePacketTranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult(new BuildAbortedException()));
 
-            ((INodePacketTranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(result.ResultCode, deserializedResult.ResultCode);

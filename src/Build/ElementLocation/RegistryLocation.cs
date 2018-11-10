@@ -17,7 +17,7 @@ namespace Microsoft.Build.Construction
     /// DO NOT make it public without considering a solution to this problem.
     /// </remarks>
     [Serializable]
-    internal class RegistryLocation : IElementLocation, INodePacketTranslatable
+    internal class RegistryLocation : IElementLocation, ITranslatable
     {
         /// <summary>
         /// The location.

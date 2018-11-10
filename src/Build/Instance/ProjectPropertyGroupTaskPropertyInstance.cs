@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name}={Value} Condition={_condition}")]
-    public class ProjectPropertyGroupTaskPropertyInstance : INodePacketTranslatable
+    public class ProjectPropertyGroupTaskPropertyInstance : ITranslatable
     {
         /// <summary>
         /// Name of the property
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Execution
             return new ProjectPropertyGroupTaskPropertyInstance(this);
         }
 
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _name);
             translator.Translate(ref _value);
@@ -145,7 +145,7 @@ namespace Microsoft.Build.Execution
         internal static ProjectPropertyGroupTaskPropertyInstance FactoryForDeserialization(INodePacketTranslator translator)
         {
             var instance = new ProjectPropertyGroupTaskPropertyInstance();
-            ((INodePacketTranslatable) instance).Translate(translator);
+            ((ITranslatable) instance).Translate(translator);
 
             return instance;
         }

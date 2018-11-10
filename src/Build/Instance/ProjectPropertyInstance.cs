@@ -18,7 +18,7 @@ namespace Microsoft.Build.Execution
     /// Added and removed via methods on the ProjectInstance object.
     /// </summary>
     [DebuggerDisplay("{_name}={_escapedValue}")]
-    public class ProjectPropertyInstance : IKeyed, IValued, IProperty, IEquatable<ProjectPropertyInstance>, INodePacketTranslatable, IDeepCloneable<ProjectPropertyInstance>
+    public class ProjectPropertyInstance : IKeyed, IValued, IProperty, IEquatable<ProjectPropertyInstance>, ITranslatable, IDeepCloneable<ProjectPropertyInstance>
     {
         /// <summary>
         /// Name of the property
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
 

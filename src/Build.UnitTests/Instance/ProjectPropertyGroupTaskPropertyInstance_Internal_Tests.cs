@@ -20,7 +20,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
         {
             var original = CreateTargetProperty();
 
-            ((INodePacketTranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectPropertyGroupTaskPropertyInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             Assert.Equal(original, copy, new TargetPropertyComparer());

@@ -75,8 +75,8 @@ namespace Microsoft.Build.BackEnd
                 typeof(T).IsAssignableFrom(type),
                 $"{typeName} must be a {typeof(T).FullName}");
             ErrorUtilities.VerifyThrowInvalidOperation(
-                typeof(INodePacketTranslatable).IsAssignableFrom(type),
-                $"{typeName} must be a {nameof(INodePacketTranslatable)}");
+                typeof(ITranslatable).IsAssignableFrom(type),
+                $"{typeName} must be a {nameof(ITranslatable)}");
 
             var parameterlessConstructor = parameterlessConstructorCache.Value.GetOrAdd(
                 type,
@@ -98,7 +98,7 @@ namespace Microsoft.Build.BackEnd
                     return constructor;
                 });
 
-            var targetInstanceChild = (INodePacketTranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
+            var targetInstanceChild = (ITranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
 
             targetInstanceChild.Translate(translator);
 

@@ -39,7 +39,7 @@ namespace Microsoft.Build.Evaluation
     /// UNDONE: Review immutability. If this is not immutable, add a mechanism to notify the project collection/s owning it to increment their toolsetVersion.
     /// </remarks>
     [DebuggerDisplay("ToolsVersion={ToolsVersion} ToolsPath={ToolsPath} #Properties={_properties.Count}")]
-    public class Toolset : INodePacketTranslatable
+    public class Toolset : ITranslatable
     {
         /// <summary>
         /// these files list all default tasks and task assemblies that do not need to be explicitly declared by projects
@@ -366,7 +366,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private Toolset(INodePacketTranslator translator)
         {
-            ((INodePacketTranslatable)this).Translate(translator);
+            ((ITranslatable)this).Translate(translator);
         }
 
         /// <summary>
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Function for serialization.
         /// </summary>
-        void INodePacketTranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(INodePacketTranslator translator)
         {
             translator.Translate(ref _toolsVersion);
             translator.Translate(ref _toolsPath);
