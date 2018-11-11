@@ -18,7 +18,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 {
     internal delegate IShellShimRepository CreateShellShimRepository(DirectoryPath? nonGlobalLocation = null);
     internal delegate (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) CreateToolPackageStoresAndUninstaller(DirectoryPath? nonGlobalLocation = null);
-    internal class ToolUninstallCommand : CommandBase
+    internal class ToolUninstallGlobalOrToolPathCommand : CommandBase
     {
         private readonly AppliedOption _options;
         private readonly IReporter _reporter;
@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
         private CreateShellShimRepository _createShellShimRepository;
         private CreateToolPackageStoresAndUninstaller _createToolPackageStoresAndUninstaller;
 
-        public ToolUninstallCommand(
+        public ToolUninstallGlobalOrToolPathCommand(
             AppliedOption options,
             ParseResult result,
             CreateToolPackageStoresAndUninstaller createToolPackageStoreAndUninstaller = null,

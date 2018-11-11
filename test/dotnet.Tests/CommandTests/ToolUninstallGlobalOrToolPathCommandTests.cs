@@ -26,7 +26,7 @@ using Microsoft.DotNet.ShellShim;
 
 namespace Microsoft.DotNet.Tests.Commands
 {
-    public class ToolUninstallCommandTests
+    public class ToolUninstallGlobalOrToolPathCommandTests
     {
         private readonly BufferedReporter _reporter;
         private readonly IFileSystem _fileSystem;
@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tests.Commands
         private readonly string _shimsDirectory;
         private readonly string _toolsDirectory;
 
-        public ToolUninstallCommandTests()
+        public ToolUninstallGlobalOrToolPathCommandTests()
         {
             _reporter = new BufferedReporter();
             _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
@@ -215,7 +215,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 _reporter);
         }
 
-        private ToolUninstallCommand CreateUninstallCommand(string options, Action uninstallCallback = null)
+        private ToolUninstallGlobalOrToolPathCommand CreateUninstallCommand(string options, Action uninstallCallback = null)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool uninstall " + options);
 
@@ -229,7 +229,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 return (store, store, packageUninstaller);
             }
 
-            return new ToolUninstallCommand(
+            return new ToolUninstallGlobalOrToolPathCommand(
                 result["dotnet"]["tool"]["uninstall"],
                 result,
                 createToolPackageStoreAndUninstaller,
