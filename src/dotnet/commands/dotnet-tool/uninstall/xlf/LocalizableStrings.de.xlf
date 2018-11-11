@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and add to the local tool manifest.</source>
+        <target state="new">Uninstall the tool and add to the local tool manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="new">Path to the manifest file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Only the local option(--local) support manifest file option (--tool-manifest).</source>
+        <target state="new">Only the local option(--local) support manifest file option (--tool-manifest).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">Die NuGet-Paket-ID des Tools, das deinstalliert werden soll.</target>
@@ -47,14 +67,9 @@
         <target state="translated">Fehler beim Deinstallieren des Tools "{0}": {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Geben Sie entweder die globale Option (--global) oder die Toolpfadoption (--tool-path) an.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) verursacht einen Konflikt mit der Toolpfadoption (--tool-path). Geben Sie nur eine der beiden Optionen an.</target>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</source>
+        <target state="new">Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

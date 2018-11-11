@@ -103,6 +103,77 @@ namespace Microsoft.DotNet.Tests.Commands
             _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeFalse();
             _fileSystem.File.Exists(shimPath).Should().BeFalse();
         }
+        
+        [Fact]
+        public void GivenAPackageWhenCallFromUninstallRedirectCommandItUninstalls()
+        {
+            CreateInstallCommand($"-g {PackageId}").Execute().Should().Be(0);
+
+            _reporter
+                .Lines
+                .Last()
+                .Should()
+                .Contain(string.Format(
+                    InstallLocalizableStrings.InstallationSucceeded,
+                    ProjectRestorerMock.DefaultToolCommandName,
+                    PackageId,
+                    PackageVersion));
+
+            var packageDirectory = new DirectoryPath(Path.GetFullPath(_toolsDirectory))
+                .WithSubDirectories(PackageId, PackageVersion);
+            var shimPath = Path.Combine(
+                _shimsDirectory,
+                ProjectRestorerMock.DefaultToolCommandName +
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
+
+            _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeTrue();
+            _fileSystem.File.Exists(shimPath).Should().BeTrue();
+
+            _reporter.Lines.Clear();
+
+            
+            ParseResult result = Parser.Instance.Parse("dotnet tool uninstall " + $"-g {PackageId}");
+
+            (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) CreateToolPackageStoreAndUninstaller(
+                DirectoryPath? directoryPath)
+            {
+                var store = new ToolPackageStoreMock(
+                    new DirectoryPath(_toolsDirectory),
+                    _fileSystem);
+                var packageUninstaller = new ToolPackageUninstallerMock(_fileSystem, store);
+                return (store, store, packageUninstaller);
+            }
+
+            var toolUninstallGlobalOrToolPathCommand = new ToolUninstallGlobalOrToolPathCommand(
+                result["dotnet"]["tool"]["uninstall"],
+                result,
+                CreateToolPackageStoreAndUninstaller,
+                (_) => new ShellShimRepository(
+                    new DirectoryPath(_shimsDirectory),
+                    fileSystem: _fileSystem,
+                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
+                _reporter);
+            
+            var uninstallCommand 
+                = new ToolUninstallCommand(
+                    result["dotnet"]["tool"]["uninstall"], 
+                    result, 
+                    toolUninstallGlobalOrToolPathCommand: toolUninstallGlobalOrToolPathCommand) ;
+
+            uninstallCommand.Execute().Should().Be(0);
+            
+            _reporter
+                .Lines
+                .Single()
+                .Should()
+                .Contain(string.Format(
+                    LocalizableStrings.UninstallSucceeded,
+                    PackageId,
+                    PackageVersion));
+
+            _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeFalse();
+            _fileSystem.File.Exists(shimPath).Should().BeFalse();
+        }
 
         [Fact]
         public void GivenAFailureToUninstallItLeavesItInstalled()
@@ -148,20 +219,6 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
-        {
-            var uninstallCommand = CreateUninstallCommand($"-g --tool-path {Path.GetTempPath()} {PackageId}");
-
-            Action a = () => uninstallCommand.Execute();
-
-            a.ShouldThrow<GracefulException>()
-                .And
-                .Message
-                .Should()
-                .Be(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
-        }
-
-        [Fact]
         public void GivenAnInvalidToolPathItThrowsException()
         {
             var toolPath = "tool-path-does-not-exist";
@@ -175,20 +232,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Message
                 .Should()
                 .Be(string.Format(LocalizableStrings.InvalidToolPathOption, toolPath));
-        }
-
-        [Fact]
-        public void WhenRunWithNeitherOfGlobalNorToolPathShowErrorMessage()
-        {
-            var uninstallCommand = CreateUninstallCommand(PackageId);
-
-            Action a = () => uninstallCommand.Execute();
-
-            a.ShouldThrow<GracefulException>()
-                .And
-                .Message
-                .Should()
-                .Be(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
         }
 
         private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)

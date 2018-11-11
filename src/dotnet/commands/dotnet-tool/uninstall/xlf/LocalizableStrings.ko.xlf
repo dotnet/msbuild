@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and add to the local tool manifest.</source>
+        <target state="new">Uninstall the tool and add to the local tool manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="new">Path to the manifest file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Only the local option(--local) support manifest file option (--tool-manifest).</source>
+        <target state="new">Only the local option(--local) support manifest file option (--tool-manifest).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">제거할 도구의 NuGet 패키지 ID입니다.</target>
@@ -47,14 +67,9 @@
         <target state="translated">도구 '{0}'을(를) 제거하지 못했습니다. {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">전역 옵션(-global) 또는 도구 경로 옵션(--tool-path)을 지정하세요.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(-global)이 도구 경로 옵션(--tool-path)과 충돌합니다. 옵션 중 하나만 지정하세요.</target>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</source>
+        <target state="new">Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

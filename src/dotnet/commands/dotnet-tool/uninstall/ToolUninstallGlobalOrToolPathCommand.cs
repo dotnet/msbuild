@@ -62,16 +62,6 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
                 toolDirectoryPath = new DirectoryPath(toolPath);
             }
 
-            if (toolDirectoryPath == null && !global)
-            {
-                throw new GracefulException(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
-            }
-
-            if (toolDirectoryPath != null && global)
-            {
-                throw new GracefulException(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
-            }
-
             (IToolPackageStore toolPackageStore, IToolPackageStoreQuery toolPackageStoreQuery, IToolPackageUninstaller toolPackageUninstaller)
                 = _createToolPackageStoresAndUninstaller(toolDirectoryPath);
             IShellShimRepository shellShimRepository = _createShellShimRepository(toolDirectoryPath);
