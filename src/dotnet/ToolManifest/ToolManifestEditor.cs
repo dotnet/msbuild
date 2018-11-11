@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -217,6 +218,44 @@ namespace Microsoft.DotNet.ToolManifest
             [JsonProperty(Required = Required.Always)]
             // The dictionary's key is the package id
             public Dictionary<string, SerializableLocalToolSinglePackage> tools { get; set; }
+
+            public SerializableLocalToolsManifest With(Dictionary<string, SerializableLocalToolSinglePackage> newTools)
+            {
+                return new SerializableLocalToolsManifest
+                {
+                    version = this.version,
+                    isRoot = this.isRoot,
+                    tools = newTools
+                };
+            }
+        }
+
+        public void Remove(FilePath fromFilePath, PackageId packageId)
+        {
+            SerializableLocalToolsManifest deserializedManifest =
+                DeserializeLocalToolsManifest(fromFilePath);
+
+            List<ToolManifestPackage> toolManifestPackages =
+                GetToolManifestPackageFromOneManifestFile(
+                    deserializedManifest,
+                    fromFilePath,
+                    fromFilePath.GetDirectoryPath());
+
+            if (!toolManifestPackages.Any(t => t.PackageId.Equals(packageId)))
+            {
+                throw new ToolManifestException(string.Format(
+                    LocalizableStrings.CannotFindPackageIdInManifest, packageId));
+            }
+
+            var removed = deserializedManifest.tools
+                .Where(pair => !pair.Key.Equals(packageId.ToString(), StringComparison.Ordinal))
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            var newSerializableLocalToolsManifest = deserializedManifest.With(removed);
+
+            _fileSystem.File.WriteAllText(
+                fromFilePath.Value,
+                JsonConvert.SerializeObject(newSerializableLocalToolsManifest, Formatting.Indented));
         }
     }
 }
