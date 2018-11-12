@@ -47,6 +47,11 @@
         <target state="translated">從目前使用者的工具目錄，解除安裝工具。</target>
         <note />
       </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled. Entry is removed from manifest file {1}.</source>
+        <target state="new">Tool '{0}' was successfully uninstalled. Entry is removed from manifest file {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
         <target state="translated">已成功解除安裝工具 '{0}' ('{1}' 版)。</target>

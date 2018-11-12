@@ -8,5 +8,6 @@ namespace Microsoft.DotNet.ToolManifest
     internal interface IToolManifestEditor
     {
         void Add(FilePath to, PackageId packageId, NuGetVersion nuGetVersion, ToolCommandName[] toolCommandNames);
+        void Remove(FilePath fromFilePath, PackageId packageId);
     }
 }

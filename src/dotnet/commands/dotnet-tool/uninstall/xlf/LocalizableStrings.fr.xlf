@@ -47,6 +47,11 @@
         <target state="translated">Désinstallez l'outil du répertoire des outils de l'utilisateur actuel.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled. Entry is removed from manifest file {1}.</source>
+        <target state="new">Tool '{0}' was successfully uninstalled. Entry is removed from manifest file {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
         <target state="translated">L'outil '{0}' (version '{1}') a été désinstallé.</target>

@@ -168,4 +168,7 @@
   <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
     <value>Only the local option(--local) support manifest file option (--tool-manifest).</value>
   </data>
+  <data name="UninstallLocalToolSucceeded" xml:space="preserve">
+    <value>Tool '{0}' was successfully uninstalled. Entry is removed from manifest file {1}.</value>
+  </data>
 </root>

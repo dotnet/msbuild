@@ -15,6 +15,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
 
     internal class ToolUninstallCommand : CommandBase
     {
+        private readonly ToolUninstallLocalCommand _toolUninstallLocalCommand;
         private readonly ToolUninstallGlobalOrToolPathCommand _toolUninstallGlobalOrToolPathCommand;
         private readonly bool _global;
         private readonly bool _local;
@@ -28,14 +29,18 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             AppliedOption options,
             ParseResult result,
             IReporter reporter = null,
-            ToolUninstallGlobalOrToolPathCommand toolUninstallGlobalOrToolPathCommand = null)
+            ToolUninstallGlobalOrToolPathCommand toolUninstallGlobalOrToolPathCommand = null,
+            ToolUninstallLocalCommand toolUninstallLocalCommand = null)
             : base(result)
         {
-            
+            _toolUninstallLocalCommand
+                = toolUninstallLocalCommand ??
+                  new ToolUninstallLocalCommand(options, result);
+
             _toolUninstallGlobalOrToolPathCommand =
                 toolUninstallGlobalOrToolPathCommand
                 ?? new ToolUninstallGlobalOrToolPathCommand(options, result);
-            
+
             _global = options.ValueOrDefault<bool>(GlobalOption);
             _local = options.ValueOrDefault<bool>(LocalOption);
             _toolPath = options.SingleArgumentOrDefault(ToolPathOption);
@@ -59,7 +64,7 @@ namespace Microsoft.DotNet.Tools.Tool.Uninstall
             }
             else
             {
-                return 1;
+                return _toolUninstallLocalCommand.Execute();
             }
         }
 
