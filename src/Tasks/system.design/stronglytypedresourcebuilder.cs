@@ -86,7 +86,7 @@ namespace Microsoft.Build.Tasks
                 TypeName = typeName;
                 Value = value;
 
-                if (typeName.Contains(","))
+                if (typeName.Contains(',', StringComparison.Ordinal))
                 {
                     string[] parts = typeName.Split(',');
                     TypeName = parts[0]; // strip off the assembly specification or alias
