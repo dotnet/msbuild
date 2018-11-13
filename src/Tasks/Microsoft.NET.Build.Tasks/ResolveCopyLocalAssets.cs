@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Foundation and contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using NuGet.Packaging.Core;
@@ -11,11 +12,11 @@ using System.Collections.Generic;
 namespace Microsoft.NET.Build.Tasks
 {
     /// <summary>
-    /// Resolves the assemblies to be published for a .NET app.
+    /// Resolves the assets from the package dependencies that should be copied to output/publish directories.
     /// </summary>
-    public class ResolvePublishAssemblies : TaskBase
+    public class ResolveCopyLocalAssets : TaskBase
     {
-        private readonly List<ITaskItem> _assembliesToPublish = new List<ITaskItem>();
+        private readonly List<ITaskItem> _resolvedAssets = new List<ITaskItem>();
 
         [Required]
         public string ProjectPath { get; set; }
@@ -31,7 +32,7 @@ namespace Microsoft.NET.Build.Tasks
 
         public ITaskItem[] RuntimeFrameworks { get; set; }
 
-        public ITaskItem[] ExcludeFromPublishPackageReferences { get; set; }
+        public ITaskItem[] ExcludedPackageReferences { get; set; }
 
         public bool PreserveStoreLayout { get; set; }
 
@@ -39,21 +40,13 @@ namespace Microsoft.NET.Build.Tasks
 
         public bool IsSelfContained { get; set; }
 
-        /// <summary>
-        /// All the assemblies to publish.
-        /// </summary>
         [Output]
-        public ITaskItem[] AssembliesToPublish
-        {
-            get { return _assembliesToPublish.ToArray(); }
-        }
+        public ITaskItem[] ResolvedAssets => _resolvedAssets.ToArray();
 
         protected override void ExecuteCore()
         {
             var lockFileCache = new LockFileCache(this);
             LockFile lockFile = lockFileCache.GetLockFile(AssetsFilePath);
-            IEnumerable<string> excludeFromPublishPackageIds = PackageReferenceConverter.GetPackageIds(ExcludeFromPublishPackageReferences);
-            IPackageResolver packageResolver = NuGetPackageResolver.CreateResolver(lockFile, ProjectPath);
             HashSet<PackageIdentity> packagestoBeFiltered = null;
 
             if (RuntimeStorePackages != null && RuntimeStorePackages.Length > 0)
@@ -74,31 +67,31 @@ namespace Microsoft.NET.Build.Tasks
 
             projectContext.PackagesToBeFiltered = packagestoBeFiltered;
 
-            var assemblyResolver =
-                new PublishAssembliesResolver(packageResolver)
-                    .WithExcludeFromPublish(excludeFromPublishPackageIds)
+            var assetsFileResolver =
+                new AssetsFileResolver(NuGetPackageResolver.CreateResolver(lockFile, ProjectPath))
+                    .WithExcludedPackages(PackageReferenceConverter.GetPackageIds(ExcludedPackageReferences))
                     .WithPreserveStoreLayout(PreserveStoreLayout);
 
-            IEnumerable<ResolvedFile> resolvedAssemblies = assemblyResolver.Resolve(projectContext);
-            foreach (ResolvedFile resolvedAssembly in resolvedAssemblies)
+            foreach (var resolvedFile in assetsFileResolver.Resolve(projectContext))
             {
-                TaskItem item = new TaskItem(resolvedAssembly.SourcePath);
-                item.SetMetadata("DestinationSubPath", resolvedAssembly.DestinationSubPath);
-                item.SetMetadata("AssetType", resolvedAssembly.Asset.ToString().ToLower());
-                item.SetMetadata(MetadataKeys.PackageName, resolvedAssembly.Package.Id.ToString());
-                item.SetMetadata(MetadataKeys.PackageVersion, resolvedAssembly.Package.Version.ToString().ToLower());
+                TaskItem item = new TaskItem(resolvedFile.SourcePath);
 
-                if (resolvedAssembly.Asset == AssetType.Resources)
+                item.SetMetadata(MetadataKeys.DestinationSubPath, resolvedFile.DestinationSubPath);
+                item.SetMetadata(MetadataKeys.DestinationSubDirectory, resolvedFile.DestinationSubDirectory);
+                item.SetMetadata(MetadataKeys.AssetType, resolvedFile.Asset.ToString().ToLower());
+                item.SetMetadata(MetadataKeys.PackageName, resolvedFile.Package.Id.ToString());
+                item.SetMetadata(MetadataKeys.PackageVersion, resolvedFile.Package.Version.ToString().ToLower());
+
+                if (resolvedFile.Asset == AssetType.Resources)
                 {
                     //  For resources, the DestinationSubDirectory is set to the locale.  Set the Culture
                     //  metadata on the generated item to this value so that the satellite assemblies can
                     //  be filtered by culture.
-                    item.SetMetadata(MetadataKeys.Culture, resolvedAssembly.DestinationSubDirectory);
+                    item.SetMetadata(MetadataKeys.Culture, resolvedFile.DestinationSubDirectory.TrimEnd(Path.DirectorySeparatorChar));
                 }
 
-                _assembliesToPublish.Add(item);
+                _resolvedAssets.Add(item);
             }
-
         }
     }
 }
