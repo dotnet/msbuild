@@ -21,5 +21,6 @@
     <PackageReference Include="FluentAssertions" Version="4.18.0" />
     <PackageReference Include="xunit" Version="2.2.0-beta4-build3444" />
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="$(MicrosoftDotNetPlatformAbstractionsPackageVersion)" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.6.0" />
   </ItemGroup>
 </Project>
