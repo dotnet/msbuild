@@ -103,7 +103,23 @@ namespace Microsoft.Build.Tasks
             internal String TypeName { get; }
             internal Type Type { get; }
             internal object Value { get; }
-            internal string ValueAsString => Value.ToString();
+
+            internal string ValueAsString
+            {
+                get
+                {
+                    if (Type != null && Type.IsAssignableFrom(typeof(string)))
+                    {
+                        return (string)Value;
+                    }
+                    else if (TypeName.Equals(typeof(string).FullName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return (string)Value;
+                    }
+
+                    return null;
+                }
+            }
         }
 
         internal static CodeCompileUnit Create(IDictionary resourceList, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
