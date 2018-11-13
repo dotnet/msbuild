@@ -3055,7 +3055,7 @@ namespace Microsoft.Build.Tasks
                                 string typeName = dataElem.Attribute("type")?.Value;
                                 string value = dataElem.Element("value").Value;
 
-                                if (typeName != null && typeName.Contains(","))
+                                if (typeName != null && typeName.Contains(',', StringComparison.Ordinal))
                                 {
                                     string[] parts = typeName.Split(',');
                                     typeName = parts[0]; // strip off the assembly name or alias, if any
