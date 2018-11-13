@@ -3055,10 +3055,10 @@ namespace Microsoft.Build.Tasks
                                 string typeName = dataElem.Attribute("type")?.Value;
                                 string value = dataElem.Element("value").Value;
 
-                                if (typeName != null && typeName.Contains(',', StringComparison.Ordinal))
+                                if (typeName != null)
                                 {
-                                    string[] parts = typeName.Split(',');
-                                    typeName = parts[0]; // strip off the assembly name or alias, if any
+                                    int pos = typeName.IndexOf(",", StringComparison.Ordinal);
+                                    if (pos > 0) typeName = typeName.Substring(0, pos); // strip off the assembly name or alias, if any
                                 }
 
                                 if (typeName == "System.Resources.ResXFileRef")

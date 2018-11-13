@@ -86,10 +86,10 @@ namespace Microsoft.Build.Tasks
                 TypeName = typeName;
                 Value = value;
 
-                if (typeName.Contains(',', StringComparison.Ordinal))
+                int pos = typeName.IndexOf(",", StringComparison.Ordinal);
+                if (pos > 0)
                 {
-                    string[] parts = typeName.Split(',');
-                    TypeName = parts[0]; // strip off the assembly specification or alias
+                    typeName = typeName.Substring(0, pos); // strip off the assembly specification or alias
                 }
             }
 
