@@ -3064,11 +3064,11 @@ namespace Microsoft.Build.Tasks
                                 if (typeName == "System.Resources.ResXFileRef")
                                 {
                                     // The "real" type of a ResXFileRef is embedded in the value.
-                                    string[] parts = value.Split(';');
-                                    typeName = parts[1];
+                                    var pos = value.IndexOf(';');
+                                    if (pos > 0) typeName = value.Substring(pos + 1);
 
-                                    parts = typeName.Split(',');
-                                    typeName = parts[0];
+                                    pos = typeName.IndexOf(',');
+                                    if (pos > 0) typeName = typeName.Substring(0, pos);
                                 }
 
                                 AddResource(reader, name, value, filename, typeName);

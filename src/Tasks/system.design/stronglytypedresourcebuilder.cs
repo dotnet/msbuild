@@ -145,8 +145,7 @@ namespace Microsoft.Build.Tasks
                 }
 
 #if FEATURE_WINFORMS_RESX
-                var node = de.Value as ResXDataNode;
-                if (node != null)
+                if (de.Value is ResXDataNode node)
                 {
                     string keyname = (string)de.Key;
                     if (keyname != node.Name)
