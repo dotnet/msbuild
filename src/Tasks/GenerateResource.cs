@@ -3057,7 +3057,7 @@ namespace Microsoft.Build.Tasks
 
                                 if (typeName != null)
                                 {
-                                    int pos = typeName.IndexOf(",", StringComparison.Ordinal);
+                                    int pos = typeName.IndexOf(',');
                                     if (pos > 0) typeName = typeName.Substring(0, pos); // strip off the assembly name or alias, if any
                                 }
 
