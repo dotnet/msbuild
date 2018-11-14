@@ -40,7 +40,7 @@
         <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
         <VersionSuffix>$(VersionSuffix)</VersionSuffix>
         <Clean>False</Clean>
-        <MsbuildArgs>/p:TargetFramework=netcoreapp2.2 /p:NoWarn=NU5104</MsbuildArgs>
+        <MsbuildArgs>/p:TargetFramework=$(CliTargetFramework) /p:NoWarn=NU5104</MsbuildArgs>
       </BaseTestPackageProject>
       <BaseTestPackageProject Include="src/Microsoft.DotNet.InternalAbstractions">
         <Name>Microsoft.DotNet.InternalAbstractions</Name>
