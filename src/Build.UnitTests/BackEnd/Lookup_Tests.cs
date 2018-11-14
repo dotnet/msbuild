@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             table1.Add(new ProjectItemInstance(project, "i2", "a%3b1", project.FullPath));
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
             lookup.PopulateWithItem(new ProjectItemInstance(project, "i1", "a2", project.FullPath));
             lookup.PopulateWithItem(new ProjectItemInstance(project, "i2", "a%282", project.FullPath));
 
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             table1.Add(new ProjectItemInstance(project, "i2", "a%3b1", project.FullPath));
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Should return item from the secondary table.
             Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x"); // Doesn't matter really
+            lookup.EnterScope("x"); // Doesn't matter really
 
             Assert.Equal(0, lookup.GetItems("i1").Count);
         }
@@ -830,7 +830,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -840,7 +840,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             group.Add(item1);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
-            Lookup.Scope enteredScope2 = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make another modification to the item
             newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -871,7 +871,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -1139,7 +1139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
@@ -1218,7 +1218,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(property, lookup.GetProperty("p1"));
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             Assert.Equal(property, lookup.GetProperty("p1"));
         }
@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(null, lookup.GetProperty("p1"));
 
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
+            lookup.EnterScope("x");
 
             Assert.Equal(null, lookup.GetProperty("p1"));
         }
@@ -1286,149 +1286,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Now the lookup and original group are updated
             Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);
             Assert.Equal("v4", group["p1"].EvaluatedValue);
-        }
-
-#if false
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void LeaveTooMuch()
-        {
-            Lookup lookup = LookupHelpers.CreateEmptyLookup();
-            Lookup.Scope enteredScope = lookup.EnterScope("x");
-            enteredScope.LeaveScope();
-            enteredScope.LeaveScope();
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void RemoveScopeOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            scopePassedBetweenThreads.LeaveScope();
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void PopulateWithItemOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.PopulateWithItem(new ProjectItemInstance(project, "x", "y"));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void PopulateWithItemsOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.PopulateWithItems("x", new List<ProjectItemInstance>());
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void AddNewItemOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.AddNewItem(new ProjectItemInstance(project, "x", "y"));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void AddNewItemsOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.AddNewItemsOfItemType("x", new List<ProjectItemInstance>());
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void RemoveItemOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.RemoveItem(new ProjectItemInstance(project, "x", "y"));
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void RemoveItemsOnDifferentThread()
-        {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            List<ProjectItemInstance> list = new List<ProjectItemInstance>();
-            list.Add(new ProjectItemInstance(project, "x", "y"));
-            lookupPassedBetweenThreads.RemoveItems(list);
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void ModifyItemOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.ModifyItems("x", new List<ProjectItemInstance>(), new Dictionary<string,string>());
-        }
-
-        [Test]
-        [ExpectedException(typeof(InternalErrorException))]
-        public void SetPropertyOnDifferentThread()
-        {
-            Thread thread = new Thread(CreateLookupAndEnterScope);
-            thread.Start();
-            thread.Join();
-
-            Assert.IsNotNull(lookupPassedBetweenThreads);
-            lookupPassedBetweenThreads.SetProperty(ProjectPropertyInstance.Create("x", "y"));
-        }
-#endif
-
-        /// <summary>
-        /// No ideal but simple way to get the lookup from another thread
-        /// </summary>
-        private static Lookup s_lookupPassedBetweenThreads;
-
-        /// <summary>
-        /// Pass scope to other thread
-        /// </summary>
-        private static Lookup.Scope s_scopePassedBetweenThreads;
-
-        private void CreateLookupAndEnterScope()
-        {
-            s_lookupPassedBetweenThreads = LookupHelpers.CreateEmptyLookup();
-            s_scopePassedBetweenThreads = s_lookupPassedBetweenThreads.EnterScope("x");
         }
     }
 

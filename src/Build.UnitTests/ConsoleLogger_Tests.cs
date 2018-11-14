@@ -66,12 +66,6 @@ namespace Microsoft.Build.UnitTests
                 _simulatedConsole.Append(s);
             }
 
-            internal void WriteLine(string s)
-            {
-                Write(s);
-                Write(Environment.NewLine);
-            }
-
             internal void SetColor(ConsoleColor c)
             {
                 switch (c)
@@ -115,12 +109,6 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class MyCustomBuildEventArgs : CustomBuildEventArgs
         {
-            internal MyCustomBuildEventArgs()
-                : base()
-            {
-                // do nothing
-            }
-
             internal MyCustomBuildEventArgs(string message)
                 : base(message, null, null)
             {

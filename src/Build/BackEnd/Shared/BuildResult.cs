@@ -455,17 +455,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Returns true if this result belongs to a root request (that is, no node is waiting for 
-        /// these results.
-        /// </summary>
-        internal bool ResultBelongsToRootRequest
-        {
-            [DebuggerStepThrough]
-            get
-            { return _parentGlobalRequestId == BuildRequest.InvalidGlobalRequestId; }
-        }
-
-        /// <summary>
         /// Indexer which sets or returns results for the specified target
         /// </summary>
         /// <param name="target">The target</param>
@@ -519,10 +508,8 @@ namespace Microsoft.Build.Execution
                 // cached results after the first time the target is built.  As such, we can allow "duplicates" to be merged in because there is
                 // no change.  If, however, this turns out not to be the case, we need to re-evaluate this merging and possibly re-enable the
                 // assertion below.
-#if false
-                // Allow no duplicates.
-                ErrorUtilities.VerifyThrow(!HasResultsForTarget(targetResult.Key), "Results already exist");
-#endif
+                // ErrorUtilities.VerifyThrow(!HasResultsForTarget(targetResult.Key), "Results already exist");
+
                 // Copy the new results in.
                 _resultsByTarget[targetResult.Key] = targetResult.Value;
             }

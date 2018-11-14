@@ -35,11 +35,6 @@ namespace Microsoft.Build.UnitTests.Logging
         /// </summary>
         private LoggingService _initializedService;
 
-        /// <summary>
-        /// The event signaled when shutdown is complete.
-        /// </summary>
-        private ManualResetEvent _shutdownComplete = new ManualResetEvent(false);
-
         #endregion
 
         #region Setup
@@ -187,32 +182,6 @@ namespace Microsoft.Build.UnitTests.Logging
 #endif
 
             Assert.Equal(_initializedService.ServiceState, LoggingServiceState.Shutdown);
-        }
-
-        /// <summary>
-        /// Log some events on one thread and verify that even
-        /// when events are being logged while shutdown is occurring
-        /// that the shutdown still completes.
-        /// </summary>
-        [Fact]
-        public void ShutdownWaitForEvents()
-        {
-            // LoggingBuildComponentHost loggingHost = new LoggingBuildComponentHost();
-            // loggingHost.NumberOfNodes = 2;
-            // IBuildComponent logServiceComponent = LoggingService.CreateLogger(LoggerMode.Asynchronous);
-            // initializedService = logServiceComponent as LoggingService;
-            // shutdownComplete = new ManualResetEvent(false);
-            // Thread loggingThread = new Thread(new ThreadStart(TightLoopLogEvents));
-            // loggingThread.Start();
-            // Give it time to log some events
-            // Thread.Sleep(100);
-            // initializedService.ShutdownComponent();
-            // Assert.IsFalse(initializedService.LoggingQueueHasEvents);
-            // shutdownComplete.Set();
-            // if (initializedService.ServiceState != LoggingServiceState.Shutdown)
-            // {
-            //    Assert.Fail();
-            // }
         }
 
         /// <summary>
@@ -993,7 +962,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 targetId: -1,
                 taskId: -1);
 
-            BuildRequestData buildRequestData = new BuildRequestData("projectFile", new Dictionary<string, string>(), "15.0", new[] { "Build" }, null);
+            BuildRequestData buildRequestData = new BuildRequestData("projectFile", new Dictionary<string, string>(), "Current", new[] { "Build" }, null);
 
             ConfigCache configCache = host.GetComponent(BuildComponentType.ConfigCache) as ConfigCache;
 
@@ -1054,19 +1023,6 @@ namespace Microsoft.Build.UnitTests.Logging
             IBuildComponent logServiceComponent = (IBuildComponent)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             logServiceComponent.InitializeComponent(mockHost);
             _initializedService = logServiceComponent as LoggingService;
-        }
-
-        /// <summary>
-        /// Log a message every 10ms, this is used to verify
-        /// the shutdown is not waiting forever for events as it
-        /// shutsdown.
-        /// </summary>
-        private void TightLoopLogEvents()
-        {
-            while (!_shutdownComplete.WaitOne(10))
-            {
-                _initializedService.LogBuildEvent(new BuildMessageEventArgs("Message", "Help", "Sender", MessageImportance.High));
-            }
         }
 
         /// <summary>

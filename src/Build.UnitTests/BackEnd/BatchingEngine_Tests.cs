@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // This is expected to throw because not all items contain a value for metadata "Culture".
                 // Only a.foo has a Culture metadata.  b.foo does not.
-                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+                BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
             }
            );
         }
@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
                 // This is expected to throw because we have no idea what item list %(Culture) refers to.
-                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
+                BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
             }
            );
         }

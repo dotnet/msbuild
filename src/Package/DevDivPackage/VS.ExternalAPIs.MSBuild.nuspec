@@ -8,17 +8,17 @@
     <version>0.0</version>
   </metadata>
   <files>
-    <file src="Microsoft.Build.dll" target="lib\net46" />
-    <file src="Microsoft.Build.Framework.dll" target="lib\net46" />
-    <file src="Microsoft.Build.Tasks.Core.dll" target="lib\net46" />
-    <file src="Microsoft.Build.Utilities.Core.dll" target="lib\net46" />
+    <file src="Microsoft.Build.dll" target="lib\net472" />
+    <file src="Microsoft.Build.Framework.dll" target="lib\net472" />
+    <file src="Microsoft.Build.Tasks.Core.dll" target="lib\net472" />
+    <file src="Microsoft.Build.Utilities.Core.dll" target="lib\net472" />
 
     <!-- Obsolete but still referenced in the VS repo -->
-    <file src="Microsoft.Build.Engine.dll" target="lib\net46" />
-    <file src="Microsoft.Build.Conversion.Core.dll" target="lib\net46" />
+    <file src="Microsoft.Build.Engine.dll" target="lib\net472" />
+    <file src="Microsoft.Build.Conversion.Core.dll" target="lib\net472" />
 
-    <file src="Microsoft.Build.tlb" target="lib\net46" />
-    <file src="Microsoft.Build.Framework.tlb" target="lib\net46" />
-    <file src="Microsoft.Build.Tasks.Core.tlb" target="lib\net46" />
+    <file src="Microsoft.Build.tlb" target="lib\net472" />
+    <file src="Microsoft.Build.Framework.tlb" target="lib\net472" />
+    <file src="Microsoft.Build.Tasks.Core.tlb" target="lib\net472" />
   </files>
 </package>

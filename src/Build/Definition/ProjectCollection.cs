@@ -2350,7 +2350,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     _loadedProjects.TryGetValue(fullPath, out List<Project> candidates);
 
-                    return candidates ?? (IList<Project>)Enumerable.Empty<Project>();
+                    return candidates ?? (IList<Project>)Array.Empty<Project>();
                 }
             }
 

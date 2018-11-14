@@ -290,16 +290,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
                 project.AddItem("i", wildcard);
 
-                string expected = string.Format(
-                    ObjectModelHelpers.CleanupFileContents(
-@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-  <ItemGroup>
-    <i Include=""{0}"" />
-  </ItemGroup>
-</Project>"),
-                    wildcard
-                );
-
                 List<ProjectItem> items = Helpers.MakeList(project.Items);
                 Assert.Equal(2, items.Count);
                 Assert.Equal(paths[0], items[0].EvaluatedInclude);
@@ -598,7 +588,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item1.AddMetadata("m", "m1");
             project.ReevaluateIfNecessary();
 
-            ProjectItemElement item2 = project.AddItem("i", "i1.xxx")[0].Xml;
+            project.AddItem("i", "i1.xxx");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -622,11 +612,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void AddItemWithMetadata_DoesNotMatchWildcardWithNoMetadata()
         {
             Project project = new Project();
-            ProjectItemElement item1 = project.Xml.AddItem("i", "*.xxx");
+            project.Xml.AddItem("i", "*.xxx");
             project.ReevaluateIfNecessary();
 
             Dictionary<string, string> metadata = new Dictionary<string, string>() { { "m", "m1" } };
-            ProjectItemElement item2 = project.AddItem("i", "i1.xxx", metadata)[0].Xml;
+            project.AddItem("i", "i1.xxx", metadata);
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2025,7 +2015,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItem item = Helpers.GetFirst(project.Items);
 
-            ProjectMetadata metadatum = item.SetMetadataValue("m", "%(l)");
+            item.SetMetadataValue("m", "%(l)");
 
             Assert.Equal("l1", item.GetMetadata("m").EvaluatedValue);
             Assert.Equal("%(l)", item.GetMetadata("m").Xml.Value);
@@ -2228,16 +2218,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 Project project = new Project();
                 project.AddItemFast("i", wildcard);
-
-                string expected = string.Format
-                (
-                        ObjectModelHelpers.CleanupFileContents(
-                            @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                            <ItemGroup>
-                                <i Include=""{0}"" />
-                            </ItemGroup>
-                            </Project>"),
-                    wildcard);
 
                 List<ProjectItem> items = Helpers.MakeList(project.Items);
                 Assert.Equal(2, items.Count);
@@ -2530,7 +2510,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             item1.AddMetadata("m", "m1");
             project.ReevaluateIfNecessary();
 
-            ProjectItemElement item2 = project.AddItemFast("i", "i1.xxx")[0].Xml;
+            project.AddItemFast("i", "i1.xxx");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2554,11 +2534,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void AddItemFastWithMetadata_DoesNotMatchWildcardWithNoMetadata()
         {
             Project project = new Project();
-            ProjectItemElement item1 = project.Xml.AddItem("i", "*.xxx");
+            project.Xml.AddItem("i", "*.xxx");
             project.ReevaluateIfNecessary();
 
             Dictionary<string, string> metadata = new Dictionary<string, string>() { { "m", "m1" } };
-            ProjectItemElement item2 = project.AddItemFast("i", "i1.xxx", metadata)[0].Xml;
+            project.AddItemFast("i", "i1.xxx", metadata);
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">

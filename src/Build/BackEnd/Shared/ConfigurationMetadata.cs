@@ -44,6 +44,19 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Constructor taking individual arguments.
+        /// </summary>
+        public ConfigurationMetadata(string projectFullPath, PropertyDictionary<ProjectPropertyInstance> globalProperties)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, nameof(projectFullPath));
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+
+            ProjectFullPath = projectFullPath;
+            ToolsVersion = MSBuildConstants.CurrentToolsVersion;
+            GlobalProperties = globalProperties;
+        }
+
+        /// <summary>
         /// The full path to the project to build.
         /// </summary>
         public string ProjectFullPath { get; }

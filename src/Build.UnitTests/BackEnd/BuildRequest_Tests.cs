@@ -26,14 +26,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(0, null);
+                CreateNewBuildRequest(0, null);
             }
            );
         }
         [Fact]
         public void TestConstructorGood()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            CreateNewBuildRequest(0, new string[0] { });
         }
 
         [Fact]

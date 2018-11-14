@@ -11,7 +11,7 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// Deserializes and returns BuildEventArgs-derived objects from a BinaryReader
     /// </summary>
-    internal class BuildEventArgsReader
+    public class BuildEventArgsReader
     {
         private readonly BinaryReader binaryReader;
         private readonly int fileFormatVersion;

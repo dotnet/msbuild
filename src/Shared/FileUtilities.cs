@@ -91,12 +91,6 @@ namespace Microsoft.Build.Shared
         private static readonly Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool> FileExistenceCache = new Microsoft.Build.Shared.Concurrent.ConcurrentDictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 #endif
         private static readonly IFileSystem DefaultFileSystem = FileSystems.Default;
-        private enum GetFileAttributesResult
-        {
-            Directory,
-            Error,
-            File,
-        }
 
         /// <summary>
         /// Retrieves the MSBuild runtime cache directory
@@ -358,6 +352,7 @@ namespace Microsoft.Build.Shared
             return Path.GetFullPath(path);
         }
 
+#if FEATURE_LEGACY_GETFULLPATH
         private static bool IsUNCPath(string path)
         {
             if (!NativeMethodsShared.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
@@ -392,6 +387,7 @@ namespace Microsoft.Build.Shared
             */
             return isUNC || path.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1;
         }
+#endif // FEATURE_LEGACY_GETFULLPATH
 
         internal static string FixFilePath(string path)
         {
@@ -432,6 +428,7 @@ namespace Microsoft.Build.Shared
             return shouldAdjust ? newValue.ToString() : value;
         }
 
+#if !FEATURE_SPAN
         private static string ConvertToUnixSlashes(string path)
         {
             if (path.IndexOf('\\') == -1)
@@ -473,8 +470,7 @@ namespace Microsoft.Build.Shared
 
             return hasQuotes ? path.Substring(1, endId - 1) : path;
         }
-
-#if FEATURE_SPAN
+#else
         private static Span<char> ConvertToUnixSlashes(Span<char> path)
         {
             return path.IndexOf('\\') == -1 ? path : CollapseSlashes(path);
@@ -1331,6 +1327,14 @@ namespace Microsoft.Build.Shared
             string directoryName = GetDirectoryNameOfFileAbove(startingDirectory, file, fileSystem);
 
             return String.IsNullOrEmpty(directoryName) ? String.Empty : NormalizePath(directoryName, file);
+        }
+
+        internal static void EnsureDirectoryExists(string directoryPath)
+        {
+            if (directoryPath != null && !DefaultFileSystem.DirectoryExists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
         }
 
         // Method is simple set of function calls and may inline;

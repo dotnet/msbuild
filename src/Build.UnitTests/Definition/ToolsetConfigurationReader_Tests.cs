@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -424,7 +424,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -568,7 +568,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, Toolset> toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
             string msbuildOverrideTasksPath = null;
             string defaultOverrideToolsVersion = null;
-            string defaultToolsVersion = reader.ReadToolsets(toolsets, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
+            reader.ReadToolsets(toolsets, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Dictionary<string, ProjectImportPathMatch> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;
             if (NativeMethodsShared.IsWindows)
@@ -630,7 +630,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }
@@ -664,7 +664,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
-                ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
+                config.GetSection(s_msbuildToolsets);
             }
            );
         }

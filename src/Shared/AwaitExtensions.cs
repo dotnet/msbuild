@@ -107,8 +107,6 @@ namespace Microsoft.Build.Shared
             else
             {
                 var localVariableInitLock = new object();
-                var culture = CultureInfo.CurrentCulture;
-                var uiCulture = CultureInfo.CurrentUICulture;
                 lock (localVariableInitLock)
                 {
                     RegisteredWaitHandle[] callbackHandles = new RegisteredWaitHandle[handles.Length];

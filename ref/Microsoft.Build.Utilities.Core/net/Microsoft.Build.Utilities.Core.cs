@@ -433,6 +433,7 @@ namespace Microsoft.Build.Utilities
         public static void ClearSDKStaticCache() { }
         public static System.Collections.Generic.IDictionary<string, string> FilterPlatformExtensionSDKs(System.Version targetPlatformVersion, System.Collections.Generic.IDictionary<string, string> extensionSdks) { throw null; }
         public static System.Collections.Generic.IList<Microsoft.Build.Utilities.TargetPlatformSDK> FilterTargetPlatformSdks(System.Collections.Generic.IList<Microsoft.Build.Utilities.TargetPlatformSDK> targetPlatformSdkList, System.Version osVersion, System.Version vsVersion) { throw null; }
+        public static string FindRootFolderWhereAllFilesExist(string possibleRoots, string relativeFilePaths) { throw null; }
         public static System.Collections.Generic.IList<Microsoft.Build.Utilities.AssemblyFoldersExInfo> GetAssemblyFoldersExInfo(string registryRoot, string targetFrameworkVersion, string registryKeySuffix, string osVersion, string platform, System.Reflection.ProcessorArchitecture targetProcessorArchitecture) { throw null; }
         public static System.Collections.Generic.IList<Microsoft.Build.Utilities.AssemblyFoldersFromConfigInfo> GetAssemblyFoldersFromConfigInfo(string configFile, string targetFrameworkVersion, System.Reflection.ProcessorArchitecture targetProcessorArchitecture) { throw null; }
         public static string GetDisplayNameForTargetFrameworkDirectory(string targetFrameworkDirectory, System.Runtime.Versioning.FrameworkName frameworkName) { throw null; }
@@ -442,6 +443,8 @@ namespace Microsoft.Build.Utilities
         public static string GetDotNetFrameworkSdkRootRegistryKey(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version) { throw null; }
         public static string GetDotNetFrameworkSdkRootRegistryKey(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version, Microsoft.Build.Utilities.VisualStudioVersion visualStudioVersion) { throw null; }
         public static string GetDotNetFrameworkVersionFolderPrefix(Microsoft.Build.Utilities.TargetDotNetFrameworkVersion version) { throw null; }
+        public static System.Collections.Generic.IEnumerable<string> GetFoldersInVSInstalls(System.Version minVersion=null, System.Version maxVersion=null, string subFolder=null) { throw null; }
+        public static string GetFoldersInVSInstallsAsString(string minVersionString=null, string maxVersionString=null, string subFolder=null) { throw null; }
         public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion) { throw null; }
         public static string GetLatestSDKTargetPlatformVersion(string sdkIdentifier, string sdkVersion, string[] sdkRoots) { throw null; }
         public static string GetPathToBuildTools(string toolsVersion) { throw null; }

@@ -364,7 +364,6 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
             content = content.Replace("`", "\"");
-            MockLogger logger = new MockLogger();
             bool exceptionThrown = false;
             try
             {
@@ -938,7 +937,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                     File.SetAccessControl(solutionFile, security);
 
-                    ProjectRootElement p = ProjectRootElement.Open(solutionFile);
+                    ProjectRootElement.Open(solutionFile);
                 }
                 catch (PrivilegeNotHeldException)
                 {
@@ -989,7 +988,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                     File.SetAccessControl(projectFile, security);
 
-                    ProjectRootElement p = ProjectRootElement.Open(projectFile);
+                    ProjectRootElement.Open(projectFile);
                 }
                 catch (PrivilegeNotHeldException)
                 {
@@ -1031,7 +1030,7 @@ Project(""{";
 
                     File.WriteAllText(solutionFile, content);
 
-                    ProjectRootElement p = ProjectRootElement.Open(solutionFile);
+                    ProjectRootElement.Open(solutionFile);
                 }
                 finally
                 {
@@ -1213,11 +1212,11 @@ Project(""{";
             var id = idg.AddItemDefinition("SomeType");
             id.AddMetadata("sm", "sv");
 
-            var ut = pre.AddUsingTask("name", "assembly", null);
+            pre.AddUsingTask("name", "assembly", null);
 
             var inlineUt = pre.AddUsingTask("anotherName", "somefile", null);
             inlineUt.TaskFactory = "SomeFactory";
-            var utb = inlineUt.AddUsingTaskBody("someEvaluate", "someTaskBody");
+            inlineUt.AddUsingTaskBody("someEvaluate", "someTaskBody");
 
             var choose = pre.CreateChooseElement();
             pre.AppendChild(choose);
@@ -1274,6 +1273,14 @@ Project(""{";
             var project =
 @"<?xml version=`1.0` encoding=`utf-8`?>
   <Project xmlns = 'msbuildnamespace'>
+
+    <ItemDefinitionGroup>
+      <Compile A=`a`/>
+      <B M1=`dv1`>
+        <M2>dv2</M2>
+      </B>
+      <C/>
+    </ItemDefinitionGroup>
 
     <ItemGroup>
       <Compile Include=`Class1.cs` A=`a` />
@@ -1917,14 +1924,6 @@ true, true, true)]
             {
                 Assert.Equal(xml, projectElement.RawXml);
             }
-        }
-
-        private static string SaveToString(ProjectRootElement project)
-        {
-            var writer = new EncodingStringWriter();
-            project.Save(writer);
-
-            return writer.ToString();
         }
 
         /// <summary>

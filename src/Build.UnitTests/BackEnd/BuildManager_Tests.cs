@@ -18,6 +18,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -133,6 +134,43 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.True(properties.TryGetValue("InitialProperty3", out propertyValue));
             Assert.True(String.Equals(propertyValue, "InitialProperty3", StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// A simple successful graph build.
+        /// </summary>
+        [Fact]
+        public void SimpleGraphBuild()
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+<PropertyGroup>
+       <InitialProperty1>InitialProperty1</InitialProperty1>
+       <InitialProperty2>InitialProperty2</InitialProperty2>
+       <InitialProperty3>InitialProperty3</InitialProperty3>
+</PropertyGroup>
+ <Target Name='test'>
+    <Message Text='[success]'/>
+ </Target>
+</Project>
+");
+            GraphBuildRequestData data = GetGraphBuildRequestData(contents);
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.AssertLogContains("[success]");
+            _logger.ProjectStartedEvents.Count.ShouldBe(1);
+
+            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+
+            properties.TryGetValue("InitialProperty1", out string propertyValue).ShouldBeTrue();
+            propertyValue.ShouldBe("InitialProperty1", StringCompareShould.IgnoreCase);
+
+            properties.TryGetValue("InitialProperty2", out propertyValue).ShouldBeTrue();
+            propertyValue.ShouldBe("InitialProperty2", StringCompareShould.IgnoreCase);
+
+            properties.TryGetValue("InitialProperty3", out propertyValue).ShouldBeTrue();
+            propertyValue.ShouldBe("InitialProperty3", StringCompareShould.IgnoreCase);
         }
 
 #if FEATURE_CODETASKFACTORY
@@ -907,25 +945,38 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void BuildRequestWithoutBegin()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-                {
-                    BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-                    _buildManager.BuildRequest(data);
-                }
-           );
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
         }
+
+        /// <summary>
+        /// Submitting a synchronous graph build request before calling BeginBuild yields an InvalidOperationException.
+        /// </summary>
+        [Fact]
+        public void GraphBuildRequestWithoutBegin()
+        {
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
+        }
+
         /// <summary>
         /// Pending a build request before calling BeginBuild yields an InvalidOperationException.
         /// </summary>
         [Fact]
         public void PendBuildRequestWithoutBegin()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-                {
-                    BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-                    _buildManager.PendBuildRequest(data);
-                }
-           );
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
+        }
+
+        /// <summary>
+        /// Pending a build request before calling BeginBuild yields an InvalidOperationException.
+        /// </summary>
+        [Fact]
+        public void PendGraphBuildRequestWithoutBegin()
+        {
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
         /// <summary>
@@ -1002,29 +1053,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ExtraEnds()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                _buildManager.BeginBuild(new BuildParameters());
-                _buildManager.EndBuild();
-                _buildManager.EndBuild();
-            }
-           );
+            _buildManager.BeginBuild(new BuildParameters());
+            _buildManager.EndBuild();
+
+            Assert.Throws<InvalidOperationException>(() => _buildManager.EndBuild());
         }
+
         /// <summary>
         /// Pending a request after EndBuild has been called yields an InvalidOperationException.
         /// </summary>
         [Fact]
         public void PendBuildRequestAfterEnd()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-            {
-                BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
-                _buildManager.BeginBuild(new BuildParameters());
-                _buildManager.EndBuild();
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            _buildManager.BeginBuild(new BuildParameters());
+            _buildManager.EndBuild();
 
-                _buildManager.PendBuildRequest(data);
-            }
-           );
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
+        }
+
+        /// <summary>
+        /// Pending a request after EndBuild has been called yields an InvalidOperationException.
+        /// </summary>
+        [Fact]
+        public void PendGraphBuildRequestAfterEnd()
+        {
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            _buildManager.BeginBuild(new BuildParameters());
+            _buildManager.EndBuild();
+
+            Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
         /// <summary>
@@ -2879,7 +2937,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 BuildRequestData requestData = new BuildRequestData(pi, new[] { "Build" });
                 BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
-                BuildResult br = submission.Execute();
+                submission.Execute();
                 project1DoneEvent.Set();
             });
 
@@ -2889,7 +2947,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project2);
                 BuildRequestData requestData = new BuildRequestData(pi, new[] { "Build" });
                 BuildSubmission submission = BuildManager.DefaultBuildManager.PendBuildRequest(requestData);
-                BuildResult br = submission.Execute();
+                submission.Execute();
                 project2DoneEvent.Set();
             });
 
@@ -3292,22 +3350,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Retrieves a BuildRequestData using the specified contents, default targets and an empty project collection.
         /// </summary>
-        private BuildRequestData GetBuildRequestData(string projectContents)
-        {
-            return GetBuildRequestData(projectContents, new string[] { });
-        }
+        private BuildRequestData GetBuildRequestData(string projectContents) => GetBuildRequestData(projectContents, Array.Empty<string>());
+
+        /// <summary>
+        /// Retrieves a GraphBuildRequestData using the specified contents, default targets and an empty project collection.
+        /// </summary>
+        private GraphBuildRequestData GetGraphBuildRequestData(string projectContents) => GetGraphBuildRequestData(projectContents, Array.Empty<string>());
 
         /// <summary>
         /// Retrieves a BuildRequestData using the specified contents, targets and project collection.
         /// </summary>
         private BuildRequestData GetBuildRequestData(string projectContents, string[] targets, string toolsVersion = null)
-        {
-            var data = new BuildRequestData(
-                CreateProjectInstance(projectContents, toolsVersion, _projectCollection, true), targets,
-                _projectCollection.HostServices);
+            => new BuildRequestData(CreateProjectInstance(projectContents, toolsVersion, _projectCollection, true), targets, _projectCollection.HostServices);
 
-            return data;
-        }
+        /// <summary>
+        /// Retrieves a GraphBuildRequestData using the specified contents, targets and project collection.
+        /// </summary>
+        private GraphBuildRequestData GetGraphBuildRequestData(string projectContents, string[] targets)
+            => new GraphBuildRequestData(CreateProjectGraph(projectContents, _projectCollection), targets, _projectCollection.HostServices);
 
         /// <summary>
         /// Retrieve a ProjectInstance evaluated with the specified contents using the specified projectCollection
@@ -3316,6 +3376,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Project project = CreateProject(contents, toolsVersion, projectCollection, deleteTempProject);
             return project.CreateProjectInstance();
+        }
+
+        /// <summary>
+        /// Retrieve a CreateProjectGraph evaluated with the specified contents using the specified projectCollection
+        /// </summary>
+        private ProjectGraph CreateProjectGraph(string contents, ProjectCollection projectCollection)
+        {
+            var projectFilePath = _env.CreateFile().Path;
+            File.WriteAllText(projectFilePath, contents);
+
+            return new ProjectGraph(projectFilePath, projectCollection);
         }
 
         /// <summary>
@@ -3877,6 +3948,155 @@ $@"<Project InitialTargets=`Sleep`>
                     manager.Dispose();
                 }
             }
+        }
+
+        [Fact]
+        public void GraphBuildValid()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents(@"
+<Project>
+  <Target Name='Build' />
+</Project>
+"));
+
+            var graph = new ProjectGraph(project1);
+            graph.ProjectNodes.Count.ShouldBe(2);
+
+            var data = new GraphBuildRequestData(graph, Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            var node1 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node1).ShouldBeTrue();
+            result.ResultsByNode[node1].OverallResult.ShouldBe(BuildResultCode.Success);
+
+            var node2 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node2).ShouldBeTrue();
+            result.ResultsByNode[node2].OverallResult.ShouldBe(BuildResultCode.Success);
+        }
+
+        [Fact]
+        public void GraphBuildInvalid()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents(@"
+<Project>
+  <WellThisIsntValid>
+</Project>
+"));
+
+            var data = new GraphBuildRequestData(new ProjectGraphEntryPoint(project1), Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions.Count.ShouldBe(1);
+            result.Exception.ShouldBeOfType<AggregateException>().InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBe(project2);
+        }
+
+        [Fact]
+        public void GraphBuildFail()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents(@"
+<Project>
+  <Target Name='Build'>
+    <Error Text='Fail!'/>
+  </Target>
+</Project>
+"));
+
+            var graph = new ProjectGraph(project1);
+            graph.ProjectNodes.Count.ShouldBe(2);
+
+            var data = new GraphBuildRequestData(graph, Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            var node1 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project1, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node1).ShouldBeTrue();
+            result.ResultsByNode[node1].OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            var node2 = graph.ProjectNodes.First(node => node.ProjectInstance.FullPath.Equals(project2, StringComparison.OrdinalIgnoreCase));
+            result.ResultsByNode.ContainsKey(node2).ShouldBeTrue();
+            result.ResultsByNode[node2].OverallResult.ShouldBe(BuildResultCode.Failure);
+        }
+
+        [Fact]
+        public void GraphBuildCircular()
+        {
+            string project1 = _env.CreateFile(".proj").Path;
+            string project2 = _env.CreateFile(".proj").Path;
+
+            File.WriteAllText(project1, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project2}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project2}' Targets='Build' />
+  </Target>
+</Project>
+"));
+            File.WriteAllText(project2, CleanupFileContents($@"
+<Project>
+  <ItemGroup>
+    <ProjectReferenceTargets Include='Build' Targets='Build' />
+    <ProjectReference Include='{project1}' />
+  </ItemGroup>
+  <Target Name='Build'>
+    <MsBuild Projects='{project1}' Targets='Build' />
+  </Target>
+</Project>
+"));
+
+            var data = new GraphBuildRequestData(new ProjectGraphEntryPoint(project1), Array.Empty<string>());
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            result.CircularDependency.ShouldBeTrue();
         }
     }
 }
