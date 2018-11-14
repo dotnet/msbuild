@@ -50,6 +50,22 @@ namespace Microsoft.DotNet.Configurer
             if (ShouldPrintFirstTimeUseNotice())
             {
                 PrintFirstTimeUseNotice();
+                if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
+                {
+                    PrintTelemetryMessage();
+                }
+
+                _firstTimeUseNoticeSentinel.CreateIfNotExists();
+            }
+            else if (ShouldPrintShortFirstTimeUseNotice())
+            {
+                PrintShortFirstTimeUseNotice();
+                if (ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled())
+                {
+                    PrintShorTelemetryMessage();
+                }
+
+                _firstTimeUseNoticeSentinel.CreateIfNotExists();
             }
 
             if (ShouldGenerateAspNetCertificate())
@@ -94,16 +110,41 @@ namespace Microsoft.DotNet.Configurer
         private bool ShouldPrintFirstTimeUseNotice()
         {
             return ShouldRunFirstRunExperience() &&
-                _dotnetFirstRunConfiguration.PrintTelemetryMessage &&
                 !_firstTimeUseNoticeSentinel.Exists();
+        }
+
+        private bool ShouldPrintShortFirstTimeUseNotice()
+        {
+            return !_firstTimeUseNoticeSentinel.Exists();
+        }
+
+        private bool ShouldPrintTelemetryMessageWhenFirstTimeUseNoticeIsEnabled()
+        {
+            return !_dotnetFirstRunConfiguration.TelemetryOptout;
         }
 
         private void PrintFirstTimeUseNotice()
         {
             _reporter.WriteLine();
             _reporter.WriteLine(LocalizableStrings.FirstTimeWelcomeMessage);
+        }
 
-            _firstTimeUseNoticeSentinel.CreateIfNotExists();
+        private void PrintShortFirstTimeUseNotice()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.ShortFirstTimeWelcomeMessage);
+        }
+
+        private void PrintTelemetryMessage()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.TelemetryMessage);
+        }
+
+        private void PrintShorTelemetryMessage()
+        {
+            _reporter.WriteLine();
+            _reporter.WriteLine(LocalizableStrings.ShortTelemetryMessage);
         }
 
         private void PrintUnauthorizedAccessMessage()
