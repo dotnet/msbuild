@@ -51,7 +51,7 @@ platformList.each { platform ->
 
     // Calculate the build command
     if (os.startsWith("Windows_NT")) {
-        osUsedForMachineAffinity = 'Windows_NT'
+        osUsedForMachineAffinity = 'windows.10.amd64.clientrs4.devex.15.8.open'
         buildCommand = "${baseBatchBuildCommand}"
         if (os == 'Windows_NT_ES') {
             buildCommand = """
@@ -111,7 +111,7 @@ ${buildCommand}
     def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
         // Set the label.
         steps {
-            if (osUsedForMachineAffinity == 'Windows_NT' || osUsedForMachineAffinity == 'Windows_2016') {
+            if (osUsedForMachineAffinity == 'windows.10.amd64.clientrs4.devex.15.8.open' || osUsedForMachineAffinity == 'Windows_2016') {
                 // Batch
                 batchFile(buildCommand)
             }
