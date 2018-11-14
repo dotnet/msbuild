@@ -122,7 +122,11 @@ ${buildCommand}
         }
     }
 
-    Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, osVersionUsedForMachineAffinity)
+    if (os.startsWith("Windows_NT")) {
+        Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity)
+    } else {
+        Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, osVersionUsedForMachineAffinity)
+    }
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     // ARM CI runs are build only.
     if ((architecture != 'arm') && (architecture != 'arm64')) {
