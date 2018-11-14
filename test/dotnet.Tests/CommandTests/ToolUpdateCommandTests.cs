@@ -219,11 +219,11 @@ namespace Microsoft.DotNet.Tests.Commands
                     LocalizableStrings.UpdateToolCommandNeedGlobalOrToolPath);
         }
 
-        private ToolInstallCommand CreateInstallCommand(string options)
+        private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
 
-            return new ToolInstallCommand(
+            return new ToolInstallGlobalOrToolPathCommand(
                 result["dotnet"]["tool"]["install"],
                 result,
                 (location, forwardArguments) => (_store, _store, new ToolPackageInstallerMock(

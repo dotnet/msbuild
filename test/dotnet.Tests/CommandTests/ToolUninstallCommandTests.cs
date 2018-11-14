@@ -191,7 +191,7 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Be(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
         }
 
-        private ToolInstallCommand CreateInstallCommand(string options)
+        private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)
         {
             ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
 
@@ -203,7 +203,7 @@ namespace Microsoft.DotNet.Tests.Commands
                     _fileSystem,
                     _reporter));
 
-            return new ToolInstallCommand(
+            return new ToolInstallGlobalOrToolPathCommand(
                 result["dotnet"]["tool"]["install"],
                 result,
                 (location, forwardArguments) => (store, store, packageInstallerMock),

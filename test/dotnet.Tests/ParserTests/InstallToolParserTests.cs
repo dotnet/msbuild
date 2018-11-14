@@ -87,6 +87,26 @@ namespace Microsoft.DotNet.Tests.ParserTests
             var appliedOptions = result["dotnet"]["tool"]["install"];
             appliedOptions.ValueOrDefault<bool>("global").Should().Be(true);
         }
+        
+        [Fact]
+        public void InstallToolParserCanGetLocalOption()
+        {
+            var result = Parser.Instance.Parse("dotnet tool install --local console.test.app");
+
+            var appliedOptions = result["dotnet"]["tool"]["install"];
+            appliedOptions.ValueOrDefault<bool>("local").Should().Be(true);
+        }
+
+        [Fact]
+        public void InstallToolParserCanGetManifestOption()
+        {
+            var result =
+                Parser.Instance.Parse(
+                    "dotnet tool install --local console.test.app --tool-manifest folder/my-manifest.format");
+
+            var appliedOptions = result["dotnet"]["tool"]["install"];
+            appliedOptions.ValueOrDefault<string>("tool-manifest").Should().Be("folder/my-manifest.format");
+        }
 
         [Fact]
         public void InstallToolParserCanParseVerbosityOption()

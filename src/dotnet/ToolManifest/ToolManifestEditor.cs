@@ -15,7 +15,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.DotNet.ToolManifest
 {
-    internal class ToolManifestEditor
+    internal class ToolManifestEditor : IToolManifestEditor
     {
         private readonly IFileSystem _fileSystem;
 
