@@ -31,12 +31,28 @@
         <target state="translated">Operaci nebylo možno dokončit, protože sestavení již probíhá.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In graph based builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</source>
+        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In graph based builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</target>
+        <note>
+      {StrBegin="MSB4252:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference.
+    </note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: Nejde rozbalit metadata ve výrazu {0}. {1}</target>
         <note>{StrBegin="MSB4023: "}UE: This message is shown when metadata cannot be expanded in an expression for some reason e.g. trying to apply
     %(RootDir) to an item-spec that's not a valid path would result in this error.
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
+      </trans-unit>
+      <trans-unit id="CircularDependencyInProjectGraph">
+        <source>MSB4251: There is a circular dependency involving the following projects: {0}</source>
+        <target state="new">MSB4251: There is a circular dependency involving the following projects: {0}</target>
+        <note>
+      {StrBegin="MSB4251:"} This message is shown when a graph build detects a target referenced in a circular manner -- a project cannot
+      request a target to build itself (perhaps via a chain of other targets)
+    </note>
       </trans-unit>
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
@@ -47,6 +63,22 @@
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Operaci nelze dokončit, protože funkce BeginBuild ještě nebyla zavolána.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="NullReferenceFromProjectInstanceFactory">
+        <source>MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</source>
+        <target state="new">MSB4253: A null reference was returned from a user-provided ProjectInstanceFactoryFunc callback. This is not allowed.</target>
+        <note>
+      {StrBegin="MSB4253: "}
+      LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
+        <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
+        <target state="new">MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</target>
+        <note>
+      {StrBegin="MSB4250: "}
+      LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">
         <source>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</source>

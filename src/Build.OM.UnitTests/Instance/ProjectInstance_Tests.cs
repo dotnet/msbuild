@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData1);
 
-            ProjectInstance instance2 = new Project().CreateProjectInstance();
+            new Project().CreateProjectInstance();
 
             BuildRequestData buildRequestData2 = new BuildRequestData(instance1, new string[] { });
 

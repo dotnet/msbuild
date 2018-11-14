@@ -21,6 +21,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -94,9 +95,9 @@ namespace Microsoft.Build.CommandLine
         private static Object s_buildLock = new Object();
 
         /// <summary>
-        /// The currently active build, if any.
+        /// Whether a build has started.
         /// </summary>
-        private static BuildSubmission s_activeBuild;
+        private static bool s_hasBuildStarted;
 
         /// <summary>
         /// Event signalled when the build is complete.
@@ -228,6 +229,7 @@ namespace Microsoft.Build.CommandLine
             return exitCode;
         }
 
+#if !FEATURE_GET_COMMANDLINE
         /// <summary>
         /// Insert the command executable path as the first element of the args array.
         /// </summary>
@@ -242,6 +244,7 @@ namespace Microsoft.Build.CommandLine
 
             return newArgArray;
         }
+#endif // !FEATURE_GET_COMMANDLINE
 
         /// <summary>
         /// Append output file with elapsedTime
@@ -557,6 +560,7 @@ namespace Microsoft.Build.CommandLine
                 bool enableProfiler = false;
                 bool interactive = false;
                 bool isolateProjects = false;
+                bool graphBuild = false;
 
                 CommandLineSwitches switchesFromAutoResponseFile;
                 CommandLineSwitches switchesNotFromAutoResponseFile;
@@ -588,6 +592,7 @@ namespace Microsoft.Build.CommandLine
                         ref enableProfiler,
                         ref restoreProperties,
                         ref isolateProjects,
+                        ref graphBuild,
                         recursing: false
                         ))
                 {
@@ -624,7 +629,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_XML_SCHEMA_VALIDATION
                             needToValidateProject, schemaFile,
 #endif
-                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects))
+                            cpuCount, enableNodeReuse, preprocessWriter, detailedSummary, warningsAsErrors, warningsAsMessages, enableRestore, profilerLogger, enableProfiler, interactive, isolateProjects, graphBuild))
                             {
                                 exitType = ExitType.BuildError;
                             }
@@ -850,13 +855,13 @@ namespace Microsoft.Build.CommandLine
                 // If the build has already started (or already finished), we will cancel it
                 // If the build has not yet started, it will cancel itself, because
                 // we set alreadyCalled=1
-                BuildSubmission result = null;
+                bool hasBuildStarted = false;
                 lock (s_buildLock)
                 {
-                    result = s_activeBuild;
+                    hasBuildStarted = s_hasBuildStarted;
                 }
 
-                if (result != null)
+                if (hasBuildStarted)
                 {
                     BuildManager.DefaultBuildManager.CancelAllSubmissions();
                     s_buildComplete.WaitOne();
@@ -925,7 +930,8 @@ namespace Microsoft.Build.CommandLine
             ProfilerLogger profilerLogger,
             bool enableProfiler,
             bool interactive,
-            bool isolateProjects
+            bool isolateProjects,
+            bool graphBuild
         )
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
@@ -1060,8 +1066,6 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    BuildRequestData request = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
-
                     BuildParameters parameters = new BuildParameters(projectCollection);
 
                     // By default we log synchronously to the console for compatibility with previous versions,
@@ -1119,7 +1123,7 @@ namespace Microsoft.Build.CommandLine
 #if MSBUILDENABLEVSPROFILING
                     DataCollection.CommentMarkProfile(8800, "Pending Build Request from MSBuild.exe");
 #endif
-                    BuildResult results = null;
+                    BuildResultCode? result = null;
                     buildManager.BeginBuild(parameters);
                     Exception exception = null;
                     try
@@ -1127,13 +1131,13 @@ namespace Microsoft.Build.CommandLine
                         try
                         {
                             // Determine if the user specified /Target:Restore which means we should only execute a restore in the fancy way that /restore is executed
-                            bool restoreOnly = request.TargetNames.Count == 1 && String.Equals(request.TargetNames.First(), MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
+                            bool restoreOnly = targets.Length == 1 && String.Equals(targets[0], MSBuildConstants.RestoreTargetName, StringComparison.OrdinalIgnoreCase);
 
                             if (enableRestore || restoreOnly)
                             {
-                                results = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
+                                (result, exception) = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties);
 
-                                if (results.OverallResult != BuildResultCode.Success)
+                                if (result != BuildResultCode.Success)
                                 {
                                     return false;
                                 }
@@ -1141,7 +1145,21 @@ namespace Microsoft.Build.CommandLine
 
                             if (!restoreOnly)
                             {
-                                results = ExecuteBuild(buildManager, request);
+                                if (graphBuild)
+                                {
+                                    var request = new GraphBuildRequestData(new ProjectGraphEntryPoint(projectFile, globalProperties), targets, null);
+                                    (result, exception) = ExecuteGraphBuild(buildManager, request);
+                                }
+                                else
+                                {
+                                    var request = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null);
+                                    (result, exception) = ExecuteBuild(buildManager, request);
+                                }
+                            }
+
+                            if (result != null && exception == null)
+                            {
+                                success = result == BuildResultCode.Success;
                             }
                         }
                         finally
@@ -1155,18 +1173,13 @@ namespace Microsoft.Build.CommandLine
                         success = false;
                     }
 
-                    if (results != null && exception == null)
-                    {
-                        success = results.OverallResult == BuildResultCode.Success;
-                        exception = results.Exception;
-                    }
-
                     if (exception != null)
                     {
                         success = false;
 
-                        // InvalidProjectFileExceptions have already been logged.
-                        if (exception.GetType() != typeof(InvalidProjectFileException))
+                        // InvalidProjectFileExceptions and its aggregates have already been logged.
+                        if (exception.GetType() != typeof(InvalidProjectFileException)
+                            && !(exception is AggregateException aggregateException && aggregateException.InnerExceptions.All(innerException => innerException is InvalidProjectFileException)))
                         {
                             if
                                 (
@@ -1222,11 +1235,13 @@ namespace Microsoft.Build.CommandLine
             return success;
         }
 
-        private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
+        private static (BuildResultCode result, Exception exception) ExecuteBuild(BuildManager buildManager, BuildRequestData request)
         {
+            BuildSubmission submission;
             lock (s_buildLock)
             {
-                s_activeBuild = buildManager.PendBuildRequest(request);
+                submission = buildManager.PendBuildRequest(request);
+                s_hasBuildStarted = true;
 
                 // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
                 // That's so the build does not appear to have completed successfully.
@@ -1236,10 +1251,31 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            return s_activeBuild.Execute();
+            var result = submission.Execute();
+            return (result.OverallResult, result.Exception);
         }
 
-        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
+        private static (BuildResultCode result, Exception exception) ExecuteGraphBuild(BuildManager buildManager, GraphBuildRequestData request)
+        {
+            GraphBuildSubmission submission;
+            lock (s_buildLock)
+            {
+                submission = buildManager.PendBuildRequest(request);
+                s_hasBuildStarted = true;
+
+                // Even if Ctrl-C was already hit, we still pend the build request and then cancel.
+                // That's so the build does not appear to have completed successfully.
+                if (s_buildCancellationSource.IsCancellationRequested)
+                {
+                    buildManager.CancelAllSubmissions();
+                }
+            }
+
+            GraphBuildResult result = submission.Execute();
+            return (result.OverallResult, result.Exception);
+        }
+
+        private static (BuildResultCode result, Exception exception) ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
@@ -1917,6 +1953,7 @@ namespace Microsoft.Build.CommandLine
             ref bool enableProfiler,
             ref Dictionary<string, string> restoreProperties,
             ref bool isolateProjects,
+            ref bool graphBuild,
             bool recursing
         )
         {
@@ -2029,6 +2066,7 @@ namespace Microsoft.Build.CommandLine
                                                                ref enableProfiler,
                                                                ref restoreProperties,
                                                                ref isolateProjects,
+                                                               ref graphBuild,
                                                                recursing: true
                                                              );
                         }
@@ -2079,6 +2117,11 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.IsolateProjects))
                     {
                         isolateProjects = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IsolateProjects], defaultValue: true, resourceName: "InvalidIsolateProjectsValue");
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
+                    {
+                        graphBuild = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild], defaultValue: true, resourceName: "InvalidGraphBuildValue");
                     }
 
                     // figure out which loggers are going to listen to build events
@@ -2363,30 +2406,12 @@ namespace Microsoft.Build.CommandLine
                 bool restart = true;
                 while (restart)
                 {
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle].Length == 0)
-                    {
-                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "clientToServerPipeHandle");
-                    }
-                    if (commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle].Length == 0)
-                    {
-                        CommandLineSwitchException.Throw("ParameterRequiredError", "", "serverToClientPipeHandle");
-                    }
-
-                    string clientToServerPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ClientToServerPipeHandle][0];
-                    string serverToClientPipeHandle = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerToClientPipeHandle][0];
-#endif
-
                     Exception nodeException = null;
                     NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
                     // normal OOP node case
                     if (nodeModeNumber == 1)
                     {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcNode node = new OutOfProcNode();
-#else
-                        OutOfProcNode node = new OutOfProcNode(clientToServerPipeHandle, serverToClientPipeHandle);
-#endif
 
                         // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
@@ -2397,11 +2422,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else if (nodeModeNumber == 2)
                     {
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
                         OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-#else
-                        OutOfProcTaskHostNode node = new OutOfProcTaskHostNode(clientToServerPipeHandle, serverToClientPipeHandle);
-#endif
                         shutdownReason = node.Run(out nodeException);
                     }
                     else
@@ -3545,6 +3566,7 @@ namespace Microsoft.Build.CommandLine
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_32_ProfilerSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_34_InteractiveSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_35_IsolateProjectsSwitch"));
+            Console.WriteLine(AssemblyResources.GetString("HelpMessage_36_GraphBuildSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_7_ResponseFile"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_8_NoAutoResponseSwitch"));
             Console.WriteLine(AssemblyResources.GetString("HelpMessage_5_NoLogoSwitch"));

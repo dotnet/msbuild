@@ -979,7 +979,6 @@ namespace Microsoft.Build.Evaluation
                 // The sourceIndex is the zero-based index into the expression,
                 // where we've essentially read up to and copied into the target string.
                 int sourceIndex = 0;
-                int expressionLength = expression.Length;
 
                 // Search for "$(" in the expression.  Loop until we don't find it 
                 // any more.

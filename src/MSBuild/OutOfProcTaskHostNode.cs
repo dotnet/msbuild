@@ -167,20 +167,10 @@ namespace Microsoft.Build.CommandLine
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
 #endif
 
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-        private string _clientToServerPipeHandle;
-        private string _serverToClientPipeHandle;
-#endif
-
         /// <summary>
         /// Constructor.
         /// </summary>
-        public OutOfProcTaskHostNode(
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-            string clientToServerPipeHandle,
-            string serverToClientPipeHandle
-#endif       
-            )
+        public OutOfProcTaskHostNode()
         {
             // We don't know what the current build thinks this variable should be until RunTask(), but as a fallback in case there are 
             // communications before we get the configuration set up, just go with what was already in the environment from when this node
@@ -189,11 +179,6 @@ namespace Microsoft.Build.CommandLine
 
 #if FEATURE_APPDOMAIN
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandling.UnhandledExceptionHandler);
-#endif
-
-#if !FEATURE_NAMED_PIPES_FULL_DUPLEX
-            _clientToServerPipeHandle = clientToServerPipeHandle;
-            _serverToClientPipeHandle = serverToClientPipeHandle;
 #endif
 
             _receivedPackets = new Queue<INodePacket>();
@@ -540,13 +525,9 @@ namespace Microsoft.Build.CommandLine
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
-#if FEATURE_NAMED_PIPES_FULL_DUPLEX
             string pipeName = "MSBuild" + Process.GetCurrentProcess().Id;
 
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(pipeName);
-#else
-            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(_clientToServerPipeHandle, _serverToClientPipeHandle);
-#endif
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 

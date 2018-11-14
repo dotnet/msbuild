@@ -252,7 +252,7 @@ namespace Microsoft.Build.Tasks
             // as there's no point writing the file
             return haveGeneratedContent ? code : String.Empty;
         }
-#endif
+#else
 
         /// <summary>
         /// Generates the code into a string.
@@ -597,5 +597,6 @@ namespace Microsoft.Build.Tasks
             b.Append("&\"");
             fInDoubleQuotes = true;
         }
+#endif
     }
 }

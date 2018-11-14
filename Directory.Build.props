@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <FullFrameworkTFM>net472</FullFrameworkTFM>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('windows'))">windows</OsEnvironment>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('linux'))">linux</OsEnvironment>
     <OsEnvironment Condition="$([MSBuild]::IsOSPlatform('osx'))">osx</OsEnvironment>
@@ -34,7 +38,7 @@
     <PackageIconUrl>https://go.microsoft.com/fwlink/?linkid=825694</PackageIconUrl>
     <PackageTags>MSBuild</PackageTags>
 
-    <TargetMSBuildToolsVersion>15.0</TargetMSBuildToolsVersion>
+    <TargetMSBuildToolsVersion>Current</TargetMSBuildToolsVersion>
   </PropertyGroup>
 
   <PropertyGroup>

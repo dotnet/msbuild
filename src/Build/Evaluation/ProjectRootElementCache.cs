@@ -211,7 +211,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (projectRootElement != null && _autoReloadFromDisk)
                 {
-                    FileInfo fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
+                    var fileInfo = FileUtilities.GetFileInfoNoThrow(projectFile);
 
                     // If the file doesn't exist on disk, go ahead and use the cached version.
                     // It's an in-memory project that hasn't been saved yet.

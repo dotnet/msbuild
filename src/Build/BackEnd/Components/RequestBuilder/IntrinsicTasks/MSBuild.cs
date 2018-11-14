@@ -243,6 +243,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Parse the global properties into a hashtable.
+            // The behavior of parsing global properties to define and undefine (below) combined with the behavior in Microsoft.Common.CurrentVersion.targets should match the logic in ProjectGraph.
             if (!PropertyParser.GetTableWithEscaping(Log, ResourceUtilities.GetResourceString("General.GlobalProperties"), "Properties", Properties, out Dictionary<string, string> propertiesTable))
             {
                 return false;

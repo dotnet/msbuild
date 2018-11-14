@@ -9,7 +9,7 @@
    <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.props" />
 
    <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
 
     <!-- The IBCMerge process tries to treat this project as
          the real Microsoft.Build.dll, producing thousands
@@ -46,6 +46,11 @@
       <SwrProperty Include="MSBuildConversionBinPath=$(MSBuildConversionBinPath)" />
     </ItemGroup>
   </Target>
+
+  <ItemGroup>
+     <!-- This package needs to be restored _somewhere_ but it isn't used in this project. -->
+     <PackageReference Include="RoslynDependencies.OptimizationData" />
+  </ItemGroup>
 
   <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 

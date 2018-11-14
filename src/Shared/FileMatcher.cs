@@ -24,7 +24,6 @@ namespace Microsoft.Build.Shared
     {
         private readonly IFileSystem _fileSystem;
         private const string recursiveDirectoryMatch = "**";
-        private const string dotdot = "..";
 
         private static readonly string s_directorySeparator = new string(Path.DirectorySeparatorChar, 1);
 

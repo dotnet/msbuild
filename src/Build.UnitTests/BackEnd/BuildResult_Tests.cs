@@ -232,22 +232,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
            );
         }
-        // See the implementation of BuildResult.MergeResults for an explanation of why this
-        // test is disabled.
-#if false
-        [ExpectedException(typeof(InternalErrorException))]
-        [Test]
-        public void TestMergeResultsBad2()
-        {
-            BuildResult result = new BuildResult(1);
-            result["foo"] = new TargetResult(new BuildItem[0] { }, BuildResultCode.Success);
-
-            BuildResult result2 = new BuildResult(1);
-            result2["foo"] = new TargetResult(new BuildItem[0] { }, BuildResultCode.Success);
-
-            result.MergeResults(result2);
-        }
-#endif
 
         [Fact]
         public void TestMergeResultsBad3()

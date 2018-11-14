@@ -46,17 +46,17 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_ASSEMBLY_LOADFROM && !MONO
         private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
+#if FEATURE_ASSEMBLY_LOADFROM
         // Borrowed from genman.
         private const int GENMAN_STRING_BUF_SIZE = 1024;
         private const int GENMAN_LOCALE_BUF_SIZE = 64;
         private const int GENMAN_ENUM_TOKEN_BUF_SIZE = 16; // 128 from genman seems too big.
 
-#if FEATURE_ASSEMBLY_LOADFROM
         static AssemblyInformation()
         {
             AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
         }
-#endif
+#endif // FEATURE_ASSEMBLY_LOADFROM
 
         /// <summary>
         /// Construct an instance for a source file.

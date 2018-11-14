@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandEmptyPropertyExpressionToEmpty()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ProjectHelpers.CreateEmptyProjectInstance();
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
@@ -290,7 +290,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandItemVectorFunctionsInvalid1()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ProjectHelpers.CreateEmptyProjectInstance();
             var expander = CreateItemFunctionExpander();
 
             string result = expander.ExpandIntoStringLeaveEscaped("[@(type-&gt;'%($(a)), '%'')]", ExpanderOptions.ExpandAll, MockElementLocation.Instance);
@@ -304,7 +304,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandItemVectorFunctionsInvalid2()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ProjectHelpers.CreateEmptyProjectInstance();
             var expander = CreateItemFunctionExpander();
 
             string result = expander.ExpandIntoStringLeaveEscaped("[@(i->'%(Meta9))']", ExpanderOptions.ExpandAll, MockElementLocation.Instance);
@@ -321,7 +321,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained1()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ProjectHelpers.CreateEmptyProjectInstance();
             var expander = CreateItemFunctionExpander();
 
             string result = expander.ExpandIntoStringLeaveEscaped("@(i->'%(Meta0)'->'%(Directory)'->Distinct())", ExpanderOptions.ExpandItems, MockElementLocation.Instance);
@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Trait("Category", "mono-osx-failing")]
         public void ExpandItemVectorFunctionsChained2()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ProjectHelpers.CreateEmptyProjectInstance();
             var expander = CreateItemFunctionExpander();
 
             string result = expander.ExpandIntoStringLeaveEscaped("[@(i->'%(Meta0)'->'%(Directory)'->Distinct())]", ExpanderOptions.ExpandItems, MockElementLocation.Instance);
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ExpandItemVectorFunctionsChained3()
         {
-            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            ProjectHelpers.CreateEmptyProjectInstance();
             var expander = CreateItemFunctionExpander();
 
             string result = expander.ExpandIntoStringLeaveEscaped("@(i->'%(MetaBlank)'->'%(Directory)'->Distinct())", ExpanderOptions.ExpandItems, MockElementLocation.Instance);
@@ -1224,7 +1224,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             try
             {
-                MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
+                Helpers.BuildProjectWithNewOMExpectFailure(@"
                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <Function>$([System.IO.Path]::Combine(null,''))</Function>
@@ -1251,7 +1251,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             try
             {
-                MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
+                Helpers.BuildProjectWithNewOMExpectFailure(@"
                 <Project DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <Function>$(System.IO.Path::Combine('a','b'))</Function>
@@ -2225,7 +2225,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(Value)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(Value)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2244,7 +2244,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Lgg)]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Lgg)]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2262,7 +2262,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToUpperInvariant().Foo)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToUpperInvariant().Foo)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2280,7 +2280,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(System.DateTime.Now)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff($(System.DateTime.Now)))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2298,7 +2298,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToLowerInvariant()_goop)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("$(SomeStuff.ToLowerInvariant()_goop)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2315,7 +2315,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(HELLO!))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(HELLO!))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2332,7 +2332,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(-10))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("[$(SomeStuff.Substring(-10))]", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2348,7 +2348,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped("$(([System.DateTime]::Now).ToString(\"MM.dd.yyyy\"))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped("$(([System.DateTime]::Now).ToString(\"MM.dd.yyyy\"))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             }
            );
         }
@@ -2902,7 +2902,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove($(FileWithPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::GetPathOfFileAbove($(FileWithPath)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             });
 
             Assert.Contains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidGetPathOfFileAboveParameter", fileWithPath), exception.Message);
@@ -3065,7 +3065,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-                string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::DoesTaskHostExist('ASDF', 'CurrentArchitecture'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::DoesTaskHostExist('ASDF', 'CurrentArchitecture'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 // We should have failed before now
                 Assert.True(false);
