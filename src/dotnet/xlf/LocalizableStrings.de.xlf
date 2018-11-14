@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="src/dotnet/LocalizableStrings.resx">
     <body>
@@ -50,7 +50,7 @@
       </trans-unit>
       <trans-unit id="Project">
         <source>Project</source>
-        <target state="translated">Projekt</target>
+        <target state="translated">Projekt </target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectFile">
@@ -130,7 +130,7 @@
       </trans-unit>
       <trans-unit id="Delete">
         <source>Delete</source>
-        <target state="translated">Löschen</target>
+        <target state="translated">löschen</target>
         <note />
       </trans-unit>
       <trans-unit id="Update">
@@ -145,7 +145,7 @@
       </trans-unit>
       <trans-unit id="List">
         <source>List</source>
-        <target state="translated">Auflisten</target>
+        <target state="translated">Liste</target>
         <note />
       </trans-unit>
       <trans-unit id="Load">

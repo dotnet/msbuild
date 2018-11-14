@@ -2,11 +2,13 @@
 
   <PropertyGroup>
     <Description>Microsoft.DotNet.TestFramework Class Library</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+    <TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(CliTargetFramework)</TargetFrameworks>
     <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
+    <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,5 +16,4 @@
   </ItemGroup>
 
   <Import Project="$(RepoRoot)/build/Test.targets" />
-  
 </Project>

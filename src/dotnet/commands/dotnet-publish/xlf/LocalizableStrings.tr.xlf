@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../LocalizableStrings.resx">
     <body>
@@ -45,8 +45,8 @@
       <trans-unit id="RuntimeOptionDescription">
         <source>The target runtime to publish for. This is used when creating a self-contained deployment.
 The default is to publish a framework-dependent application.</source>
-        <target state="needs-review-translation">Uygulamanın yayımlanacağı hedef çalışma zamanı.
-Varsayılan seçenek, bir yürütülebilir dosya olmadan çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
+        <target state="translated">Yayımlanacak hedef çalışma zamanı. Bu, şirket içinde barındırılan bir dağıtım oluştururken yararlıdır.
+Varsayılan durum, çerçeveye bağımlı bir uygulama yayımlamaktır.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConfigurationOptionDescription">
@@ -57,7 +57,8 @@ Varsayılan seçenek, bir yürütülebilir dosya olmadan çerçeveye bağımlı 
       <trans-unit id="SelfContainedOptionDescription">
         <source>Publish the .NET Core runtime with your application so the runtime doesn't need to be installed on the target machine.
 The default is 'true' if a runtime identifier is specified.</source>
-        <target state="needs-review-translation">Çalışma zamanının hedef makineye yüklenmesine gerek kalmaması için, .NET Core çalışma zamanını uygulamanızla birlikte yayımlayın. Bir çalışma zamanı tanımlayıcısı belirtilmişse, varsayılan olarak 'true' değerine ayarlanır.</target>
+        <target state="translated">Uygulamanızla birlikte .NET Core çalışma zamanını yayımladığınızda hedef makinede çalışma zamanının yüklü olması gerekmez.
+Varsayılan değeri, bir çalışma zamanı tanımlayıcısı belirtildiyse 'true' şeklindedir.</target>
         <note />
       </trans-unit>
     </body>

@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <Description>SLN file reader/writer</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
+    <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
     <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
