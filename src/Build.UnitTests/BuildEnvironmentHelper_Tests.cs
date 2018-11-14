@@ -216,19 +216,30 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(MSBuildConstants.CurrentVisualStudioVersion, true)]
+        [InlineData("15.0", false)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void BuildEnvironmentDetectsVisualStudioByEnvironment()
+        public void BuildEnvironmentDetectsVisualStudioByEnvironment(string visualStudioVersion, bool shouldBeValid)
         {
             using (var env = new EmptyVSEnviroment())
             {
                 env.WithEnvironment("VSINSTALLDIR", env.TempFolderRoot);
-                env.WithEnvironment("VisualStudioVersion", MSBuildConstants.CurrentVisualStudioVersion);
+                env.WithEnvironment("VisualStudioVersion", visualStudioVersion);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
-                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
-                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
+                if (shouldBeValid)
+                {
+                    BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
+                    BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
+                }
+                else
+                {
+                    // Ensure that no VS instance was found (older versions that shouldn't be discovered).
+                    BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBeNull();
+                    BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.None);
+                }
             }
         }
 
@@ -265,9 +276,10 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [InlineData("16.0")]
-        [InlineData("16.3")]
-        public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion)
+        [InlineData("16.0", true)]
+        [InlineData("16.3", true)]
+        [InlineData("15.0", false)]
+        public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion, bool shouldBeValid)
         {
             using (var env = new EmptyVSEnviroment())
             {
@@ -277,8 +289,17 @@ namespace Microsoft.Build.Engine.UnitTests
                 // This test has no context to find MSBuild other than Visual Studio root.
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
-                BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
-                BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
+                if (shouldBeValid)
+                {
+                    BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBe(env.TempFolderRoot);
+                    BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.VisualStudio);
+                }
+                else
+                {
+                    // Ensure that no VS instance was found (older versions that shouldn't be discovered).
+                    BuildEnvironmentHelper.Instance.VisualStudioInstallRootDirectory.ShouldBeNull();
+                    BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.None);
+                }
             }
         }
 
