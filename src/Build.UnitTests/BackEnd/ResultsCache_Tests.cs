@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
 
 
@@ -175,6 +176,67 @@ namespace Microsoft.Build.UnitTests.BackEnd
             cache.ClearResults();
 
             Assert.Null(cache.GetResultForRequest(request));
+        }
+
+        public static IEnumerable<object> CacheSerializationTestData
+        {
+            get
+            {
+                yield return new[] {new ResultsCache()};
+
+                var request1 = new BuildRequest(1, 2, 3, new[] {"target1"}, null, BuildEventContext.Invalid, null);
+                var request2 = new BuildRequest(4, 5, 6, new[] {"target2"}, null, BuildEventContext.Invalid, null);
+
+                var br1 = new BuildResult(request1);
+                br1.AddResultsForTarget("target1", BuildResultUtilities.GetEmptySucceedingTargetResult());
+
+                var resultsCache = new ResultsCache();
+                resultsCache.AddResult(br1.Clone());
+
+                yield return new[] {resultsCache};
+
+                var br2 = new BuildResult(request2);
+                br2.AddResultsForTarget("target2", BuildResultUtilities.GetEmptyFailingTargetResult());
+
+                var resultsCache2 = new ResultsCache();
+                resultsCache2.AddResult(br1.Clone());
+                resultsCache2.AddResult(br2.Clone());
+
+                yield return new[] {resultsCache2};
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(CacheSerializationTestData))]
+        public void TestResultsCacheTranslation(object obj)
+        {
+            var resultsCache = (ResultsCache)obj;
+
+            resultsCache.Translate(TranslationHelpers.GetWriteTranslator());
+
+            var copy = new ResultsCache(TranslationHelpers.GetReadTranslator());
+
+            copy.ResultsDictionary.Keys.ToHashSet().SetEquals(resultsCache.ResultsDictionary.Keys.ToHashSet()).ShouldBeTrue();
+
+            foreach (var configId in copy.ResultsDictionary.Keys)
+            {
+                var copiedBuildResult = copy.ResultsDictionary[configId];
+                var initialBuildResult = resultsCache.ResultsDictionary[configId];
+
+                copiedBuildResult.SubmissionId.ShouldBe(initialBuildResult.SubmissionId);
+                copiedBuildResult.ConfigurationId.ShouldBe(initialBuildResult.ConfigurationId);
+
+                copiedBuildResult.ResultsByTarget.Keys.ToHashSet().SetEquals(initialBuildResult.ResultsByTarget.Keys.ToHashSet()).ShouldBeTrue();
+
+                foreach (var targetKey in copiedBuildResult.ResultsByTarget.Keys)
+                {
+                    var copiedTargetResult = copiedBuildResult.ResultsByTarget[targetKey];
+                    var initialTargetResult = initialBuildResult.ResultsByTarget[targetKey];
+
+                    copiedTargetResult.WorkUnitResult.ResultCode.ShouldBe(initialTargetResult.WorkUnitResult.ResultCode);
+                    copiedTargetResult.WorkUnitResult.ActionCode.ShouldBe(initialTargetResult.WorkUnitResult.ActionCode);
+                }
+            }
         }
 
         #region Helper Methods

@@ -30,6 +30,11 @@ namespace Microsoft.Build.BackEnd
             _resultsByConfiguration = new ConcurrentDictionary<int, BuildResult>();
         }
 
+        public ResultsCache(ITranslator translator)
+        {
+            Translate(translator);
+        }
+
         /// <summary>
         /// Returns the internal cache for testing purposes.
         /// </summary>
@@ -230,6 +235,22 @@ namespace Microsoft.Build.BackEnd
                 {
                     removedResult.ClearCachedFiles();
                 }
+            }
+        }
+
+        public void Translate(ITranslator translator)
+        {
+            IDictionary<int, BuildResult> localReference = _resultsByConfiguration;
+
+            translator.TranslateDictionary(
+                ref localReference,
+                (ref int i, ITranslator aTranslator) => aTranslator.Translate(ref i),
+                (ref BuildResult result, ITranslator aTranslator) => aTranslator.Translate(ref result),
+                capacity => new ConcurrentDictionary<int, BuildResult>(Environment.ProcessorCount, capacity));
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _resultsByConfiguration = (ConcurrentDictionary<int, BuildResult>) localReference;
             }
         }
 
