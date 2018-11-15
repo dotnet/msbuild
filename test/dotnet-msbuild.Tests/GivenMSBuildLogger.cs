@@ -12,8 +12,8 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
 {
     public class GivenMSBuildLogger
     {
-        [Fact(DisplayName = "It blocks telemetry that is not in the list")]
-        public void ItBlocks()
+        [Fact]
+        public void ItBlocksTelemetryThatIsNotInTheList()
         {
             var fakeTelemetry = new FakeTelemetry();
             var telemetryEventArgs = new TelemetryEventArgs
@@ -30,47 +30,53 @@ namespace Microsoft.DotNet.Cli.MSBuild.Tests
             fakeTelemetry.LogEntry.Should().BeNull();
         }
 
-        [Fact(DisplayName = "It masks event name with targetframeworkeval only on TargetFrameworkVersion")]
-        public void ItMasksTargetFrameworkEventname()
+        [Fact]
+        public void ItMasksEventNameWithTargetframeworkevalOnTargetFrameworkVersionUseWindowsFormsOrWPF()
         {
             var fakeTelemetry = new FakeTelemetry();
             var telemetryEventArgs = new TelemetryEventArgs
             {
-                EventName = "targetframeworkeval",
+                EventName = MSBuildLogger.TargetFrameworkTelemetryEventName,
                 Properties = new Dictionary<string, string>
             {
-                { "TargetFrameworkVersion", ".NETStandard,Version=v2.0"},
+                { MSBuildLogger.TargetFrameworkVersionTelemetryPropertyKey, ".NETStandard,Version=v2.0"},
+                { MSBuildLogger.UseWindowsFormsTelemetryPropertyKey, "true"},
+                { MSBuildLogger.UseWPFTelemetryPropertyKey, "AnyNonTrueValue"},
             }
             };
 
             MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
 
-            fakeTelemetry.LogEntry.EventName.Should().Be("msbuild/targetframeworkeval");
-            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(1);
-            var expectedKey = "TargetFrameworkVersion";
-            fakeTelemetry.LogEntry.Properties.Should().ContainKey(expectedKey);
-            fakeTelemetry.LogEntry.Properties[expectedKey].Should().Be(Sha256Hasher.Hash(".NETSTANDARD,VERSION=V2.0"));
+            fakeTelemetry.LogEntry.EventName.Should().Be($"msbuild/{MSBuildLogger.TargetFrameworkTelemetryEventName}");
+            fakeTelemetry.LogEntry.Properties.Keys.Count.Should().Be(3);
+            fakeTelemetry.LogEntry.Properties[MSBuildLogger.TargetFrameworkVersionTelemetryPropertyKey].Should().Be(Sha256Hasher.Hash(".NETSTANDARD,VERSION=V2.0"));
+            fakeTelemetry.LogEntry.Properties[MSBuildLogger.UseWindowsFormsTelemetryPropertyKey].Should().Be("True");
+            fakeTelemetry.LogEntry.Properties[MSBuildLogger.UseWPFTelemetryPropertyKey]
+                .Should().Be(
+                "False",
+                "sanitize to avoid user input, and since in SDK prop and target non 'true' is effectively false");
         }
 
-        public class FakeTelemetry : ITelemetry
+        [Fact]
+        public void ItMasksEventNameWithTargetframeworkevalOnTargetFrameworkVersionUseWindowsFormsOrWPFWhenFieldIsEmpty()
         {
-            public bool Enabled { get; set; }
-
-            public void TrackEvent(string eventName, IDictionary<string, string> properties, IDictionary<string, double> measurements)
+            var fakeTelemetry = new FakeTelemetry();
+            var telemetryEventArgs = new TelemetryEventArgs
             {
-                LogEntry = new LogEntry { EventName = eventName, Properties = properties, Measurement = measurements };
-
+                EventName = MSBuildLogger.TargetFrameworkTelemetryEventName,
+                Properties = new Dictionary<string, string>
+            {
+                { MSBuildLogger.UseWindowsFormsTelemetryPropertyKey, "null"},
             }
+            };
 
-            public LogEntry LogEntry { get; private set; }
+            MSBuildLogger.FormatAndSend(fakeTelemetry, telemetryEventArgs);
 
+            fakeTelemetry.LogEntry.Properties[MSBuildLogger.UseWindowsFormsTelemetryPropertyKey]
+                .Should().Be(
+                "null",
+                "MSBuild will throw when the task param contain empty and if the field is empty json will emit the entry, so it still need to be set to something.");
         }
 
-        public class LogEntry
-        {
-            public string EventName { get; set; }
-            public IDictionary<string, string> Properties { get; set; }
-            public IDictionary<string, double> Measurement { get; set; }
-        }
     }
 }
