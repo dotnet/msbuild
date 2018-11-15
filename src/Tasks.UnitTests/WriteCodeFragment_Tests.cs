@@ -464,13 +464,9 @@ namespace Microsoft.Build.UnitTests
         private static readonly string WindowsNewLine = $"{VBCarriageReturn}&{VBLineFeed}";
 
         public static readonly string VBLineSeparator =
-#if FEATURE_CODEDOM
-            WindowsNewLine;
-#else
             NativeMethodsShared.IsWindows
                 ? WindowsNewLine
                 : VBLineFeed;
-#endif
 
         /// <summary>
         /// Multi line argument values should cause a verbatim string to be used
