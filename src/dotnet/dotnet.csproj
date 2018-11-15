@@ -49,6 +49,7 @@
     <EmbeddedResource Update="**\dotnet-tool\install\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Install" />
     <EmbeddedResource Update="**\dotnet-tool\update\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Update" />
     <EmbeddedResource Update="**\dotnet-tool\restore\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Restore" />
+    <EmbeddedResource Update="**\dotnet-tool\run\*.resx" Namespace="Microsoft.DotNet.Tools.Tool.Run" />
     <EmbeddedResource Update="ToolManifest\*.resx" Namespace="Microsoft.DotNet.ToolManifest" />
   </ItemGroup>
   <ItemGroup>
@@ -79,9 +80,5 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(IncludeAspNetCoreRuntime)' != 'false' ">
     <PackageReference Include="Microsoft.AspNetCore.DeveloperCertificates.XPlat" Version="$(MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion)" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="commands\dotnet-migrate\xlf" />
-    <Folder Include="dotnet-complete\commands\" />
   </ItemGroup>
 </Project>

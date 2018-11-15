@@ -48,20 +48,10 @@ namespace Microsoft.DotNet.CommandFactory
                 return null;
             }
 
-            var resolveResultWithoutLeadingDotnet = GetPackageCommandSpecUsingMuxer(arguments,
+            var resolveResult = GetPackageCommandSpecUsingMuxer(arguments,
                 new ToolCommandName(arguments.CommandName.Substring(LeadingDotnetPrefix.Length)));
 
-            var resolveResultWithLeadingDotnet =
-                GetPackageCommandSpecUsingMuxer(arguments, new ToolCommandName(arguments.CommandName));
-
-            if (resolveResultWithoutLeadingDotnet != null && resolveResultWithLeadingDotnet != null)
-            {
-                return resolveResultWithoutLeadingDotnet;
-            }
-            else
-            {
-                return resolveResultWithoutLeadingDotnet ?? resolveResultWithLeadingDotnet;
-            }
+            return resolveResult;
         }
 
         private CommandSpec GetPackageCommandSpecUsingMuxer(CommandResolverArguments arguments,
