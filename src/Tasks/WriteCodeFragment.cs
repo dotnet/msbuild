@@ -151,6 +151,11 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, ex.Message);
                 return null;
             }
+            catch (SystemException ex)
+            {
+                Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, ex.Message);
+                return null;
+            }
 
             extension = provider.FileExtension;
 
