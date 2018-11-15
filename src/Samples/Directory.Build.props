@@ -6,7 +6,15 @@
 
     <!-- Don't regulate package versions for samples -->
     <EnableCentralPackageVersions>false</EnableCentralPackageVersions>
+
+    <!-- but do force Roslyn to a version higher than repo-toolset ships, to avoid
+         a bug in the .props file -->
+    <MicrosoftNetCoreCompilersVersion>2.8.2</MicrosoftNetCoreCompilersVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NETCore.Compilers" Version="$(MicrosoftNetCoreCompilersVersion)" />
+  </ItemGroup>
 
   <!-- Import parent props -->
   <Import Project="..\Directory.Build.props"/>

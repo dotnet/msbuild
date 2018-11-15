@@ -5,6 +5,8 @@
 
     <!-- Don't warn on incompatability MSIL vs x86 since this isn't an actual working DLL -->
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
   </PropertyGroup>
 
   <ItemGroup>
