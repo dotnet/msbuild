@@ -46,6 +46,7 @@ namespace Microsoft.NET.Build.Tasks
                     packageReference.SetMetadata(MetadataKeys.Version, knownFrameworkReference.TargetingPackVersion);
                     packageReference.SetMetadata(MetadataKeys.IsImplicitlyDefined, "true");
                     packageReference.SetMetadata("PrivateAssets", "all");
+                    packageReference.SetMetadata("Publish", "true");
 
                     packageReferencesToAdd.Add(packageReference);
 

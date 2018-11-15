@@ -1,9 +1,9 @@
 {
   "tools": {
-    "dotnet": "3.0.100-preview-009738",
+    "dotnet": "3.0.100-preview-009750",
     "vswhere": "2.2.7"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.18556.6"
+    "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.18564.20"
   }
 }

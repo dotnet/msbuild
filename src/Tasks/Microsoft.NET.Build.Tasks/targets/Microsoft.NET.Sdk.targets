@@ -115,17 +115,13 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildDependencyFile"
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
-                            _HandlePackageFileConflicts;
+                            _HandlePackageFileConflictsForBuild;
                             _ComputeReferenceAssemblies"
           BeforeTargets="CopyFilesToOutputDirectory"
-          Condition=" '$(GenerateDependencyFile)' == 'true'"
+          Condition="'$(GenerateDependencyFile)' == 'true'"
           Inputs="$(ProjectAssetsFile);$(MSBuildAllProjects)"
           Outputs="$(ProjectDepsFilePath)">
 
-    <!--
-    Explicitly not passing any ExcludeFromPublishPackageReferences information during 'Build', since these dependencies
-    should be included during 'Build'.  They are only excluded on 'Publish'.
-    -->
     <GenerateDepsFile ProjectPath="$(MSBuildProjectFullPath)"
                       AssetsFilePath="$(ProjectAssetsFile)"
                       DepsFilePath="$(ProjectDepsFilePath)"
@@ -288,7 +284,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           Inputs="@(IntermediateAssembly);@(_NativeRestoredAppHostNETCore)"
           Outputs="@(_NativeAppHostNETCore)"
           DependsOnTargets="_GetAppHostPaths;CoreCompile"
-          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and Exists('@(IntermediateAssembly)') and Exists('@(_NativeRestoredAppHostNETCore)')">
+          Condition="'$(ComputeNETCoreBuildOutputFiles)' == 'true' and
+                     '@(_NativeAppHostNETCore)' != '' and
+                     Exists('@(IntermediateAssembly)') and
+                     Exists('@(_NativeRestoredAppHostNETCore)')">
     <PropertyGroup>
       <_UseWindowsGraphicalUserInterface Condition="($(RuntimeIdentifier.StartsWith('win')) or $(DefaultAppHostRuntimeIdentifier.StartsWith('win'))) and '$(OutputType)'=='WinExe'">true</_UseWindowsGraphicalUserInterface>
     </PropertyGroup>
@@ -311,12 +310,10 @@ Copyright (c) .NET Foundation. All rights reserved.
           DependsOnTargets="ResolvePackageAssets"
           Condition="'$(UseAppHost)' == 'true' and '$(_IsExecutable)' == 'true'">
     <ItemGroup>
-      <_NativeRestoredAppHostNETCore Include="@(NativeCopyLocalItems)"
-                                     Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetAppHostExecutableName)'"/>
       <_NativeAppHostNETCore Include="@(_NativeRestoredAppHostNETCore->'$(IntermediateOutputPath)$(AssemblyName)%(Extension)')" />
     </ItemGroup>
 
-    <NETSdkError Condition="'@(_NativeRestoredAppHostNETCore->Count())' > 1"
+    <NETSdkError Condition="'@(_NativeAppHostNETCore->Count())' > 1"
                  ResourceName="MultipleFilesResolved"
                  FormatArguments="$(_DotNetAppHostExecutableName)" />
   </Target>
@@ -336,19 +333,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <!-- Fallback to renaming the dotnet host if there is no apphost for self-contained builds. -->
     <ItemGroup Condition="'@(_NativeAppHostNETCore)' == '' and '$(SelfContained)' == 'true'">
       <_NativeAppHostNETCore Include="@(NativeCopyLocalItems)"
-                            Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostExecutableName)'" />
+                             Condition="'%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostExecutableName)'" />
     </ItemGroup>
 
     <ItemGroup Condition="'@(_NativeAppHostNETCore)' != ''">
       <!--
-        TODO: Revisit for https://github.com/dotnet/cli/issues/10061 when doing "self-contained" builds
-        During "build" and "run" of .NET Core projects, the assemblies coming from NuGet packages
-        are loaded from the NuGet cache. But, in order for a self-contained app to be runnable,
-        it requires a host in the output directory to load the app.
-        During "publish", all required assets are copied to the publish directory.
+        If not copying local lock file assemblies, copy the host policy and host fxr libraries for self-contained builds.
+        This is required to allow the host to activate in self-contained mode.
       -->
       <None Include="@(NativeCopyLocalItems)"
             Condition="'$(SelfContained)' == 'true' and
+                       '$(CopyLocalLockFileAssemblies)' != 'true' and
                        ('%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostPolicyLibraryName)' or
                         '%(NativeCopyLocalItems.FileName)%(NativeCopyLocalItems.Extension)' == '$(_DotNetHostFxrLibraryName)')">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -358,7 +353,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       <None Include="@(_NativeAppHostNETCore)">
         <Link>$(AssemblyName)$(_NativeExecutableExtension)</Link>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </None>
     </ItemGroup>
   </Target>
