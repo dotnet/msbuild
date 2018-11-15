@@ -3470,6 +3470,13 @@ namespace Microsoft.Build.Tasks
                 logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);
                 return false;
             }
+            catch (SystemException e)
+            {
+                // The actual exception type thrown (System.CodeDom.Compiler.CodeDomProvider.ConfigurationErrorsException)
+                // is private to the CodeDomProvider class, but it inherits from SystemException.
+                logger.LogErrorWithCodeFromResources("GenerateResource.STRCodeDomProviderFailed", stronglyTypedLanguage, e.Message);
+                return false;
+            }
 
             return provider != null;
         }
