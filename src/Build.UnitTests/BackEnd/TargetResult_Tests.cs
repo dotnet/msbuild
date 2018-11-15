@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorNoItems()
         {
-            TargetResult result = new TargetResult(new TaskItem[] { }, TestUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult());
             Assert.Equal(0, result.Items.Length);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructorWithItems()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
             Assert.Equal(1, result.Items.Length);
             Assert.Equal(item.ItemSpec, result.Items[0].ItemSpec);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                TargetResult result = new TargetResult(null, TestUtilities.GetStopWithErrorResult());
+                TargetResult result = new TargetResult(null, BuildResultUtilities.GetStopWithErrorResult());
             }
            );
         }
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructorWithException()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult(new ArgumentException()));
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult(new ArgumentException()));
             Assert.Equal(1, result.Items.Length);
             Assert.NotNull(result.Exception);
             Assert.Equal(typeof(ArgumentException), result.Exception.GetType());
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestConstructorWithExceptionNull()
         {
             TaskItem item = new TaskItem("foo", "bar.proj");
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
             Assert.Equal(1, result.Items.Length);
             Assert.Null(result.Exception);
             Assert.Equal(TargetResultCode.Failure, result.ResultCode);
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskItem item = new TaskItem("foo", "bar.proj");
             item.SetMetadata("a", "b");
 
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult());
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult());
 
             ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskItem item = new TaskItem("foo", "bar.proj");
             item.SetMetadata("a", "b");
 
-            TargetResult result = new TargetResult(new TaskItem[] { item }, TestUtilities.GetStopWithErrorResult(new BuildAbortedException()));
+            TargetResult result = new TargetResult(new TaskItem[] { item }, BuildResultUtilities.GetStopWithErrorResult(new BuildAbortedException()));
 
             ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             TargetResult deserializedResult = TargetResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());

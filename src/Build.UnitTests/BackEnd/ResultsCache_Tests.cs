@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             ResultsCache cache = new ResultsCache();
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "testTarget" }, null, BuildEventContext.Invalid, null); BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
             cache.AddResult(result);
 
             BuildResult retrievedResult = cache.GetResultForRequest(request);
@@ -43,12 +43,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ResultsCache cache = new ResultsCache();
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "testTarget" }, null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
             cache.AddResult(result);
 
             request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "otherTarget" }, null, BuildEventContext.Invalid, null);
             result = new BuildResult(request);
-            result.AddResultsForTarget("otherTarget", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("otherTarget", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result);
 
             BuildResult retrievedResult = cache.GetResultsForConfiguration(1);
@@ -73,11 +73,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ResultsCache cache = new ResultsCache();
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[2] { "testTarget", "testTarget2" }, null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
             cache.AddResult(result);
 
             BuildResult result2 = new BuildResult(request);
-            result2.AddResultsForTarget("testTarget2", TestUtilities.GetEmptySucceedingTargetResult());
+            result2.AddResultsForTarget("testTarget2", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result2);
 
             BuildResult retrievedResult = cache.GetResultForRequest(request);
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ResultsCache cache = new ResultsCache();
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "testTarget" }, null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
             cache.AddResult(result);
 
             BuildResult result2 = new BuildResult(request, new Exception("Test exception"));
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ResultsCache cache = new ResultsCache();
                 BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[2] { "testTarget", "testTarget2" }, null, BuildEventContext.Invalid, null);
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+                result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
                 cache.AddResult(result);
 
                 cache.GetResultForRequest(request);
@@ -124,11 +124,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ResultsCache cache = new ResultsCache();
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "testTarget2" }, null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
             cache.AddResult(result);
 
             BuildResult result2 = new BuildResult(request);
-            result2.AddResultsForTarget("testTarget2", TestUtilities.GetEmptySucceedingTargetResult());
+            result2.AddResultsForTarget("testTarget2", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result2);
 
             BuildResult retrievedResult = cache.GetResultForRequest(request);
@@ -148,8 +148,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "testTarget2" }, null, BuildEventContext.Invalid, null);
 
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
-            result.AddResultsForTarget("testTarget2", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("testTarget2", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result);
 
             ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), new List<string>(new string[] { "testTarget" }), skippedResultsAreOK: false);
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "testTarget2" }, null, BuildEventContext.Invalid, null);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("testTarget", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptyFailingTargetResult());
             cache.AddResult(result);
 
             cache.ClearResults();

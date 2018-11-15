@@ -37,12 +37,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
             BuildResult result1 = new BuildResult(request);
-            result1.ResultsByTarget.Add("FOO", TestUtilities.GetEmptySucceedingTargetResult());
+            result1.ResultsByTarget.Add("FOO", BuildResultUtilities.GetEmptySucceedingTargetResult());
             Assert.True(result1.ResultsByTarget.ContainsKey("foo")); // test comparer
 
             BuildResult result2 = result1.Clone();
 
-            result1.ResultsByTarget.Add("BAR", TestUtilities.GetEmptySucceedingTargetResult());
+            result1.ResultsByTarget.Add("BAR", BuildResultUtilities.GetEmptySucceedingTargetResult());
             Assert.True(result1.ResultsByTarget.ContainsKey("foo")); // test comparer
             Assert.True(result1.ResultsByTarget.ContainsKey("bar"));
 
@@ -98,19 +98,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = new BuildResult(request);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
-            result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
             result.AddResultsForTarget("bar", new TargetResult(new TaskItem[0] { }, new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, new Exception())));
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
-            result.AddResultsForTarget("baz", new TargetResult(new TaskItem[0] { }, TestUtilities.GetStopWithErrorResult(new Exception())));
+            result.AddResultsForTarget("baz", new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetStopWithErrorResult(new Exception())));
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
             BuildRequest request2 = CreateNewBuildRequest(2, new string[0]);
             BuildResult result2 = new BuildResult(request2);
-            result2.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
-            result2.AddResultsForTarget("bar", TestUtilities.GetEmptyFailingTargetResult());
+            result2.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            result2.AddResultsForTarget("bar", BuildResultUtilities.GetEmptyFailingTargetResult());
             Assert.Equal(BuildResultCode.Failure, result2.OverallResult);
         }
 
@@ -127,8 +127,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
-            result.AddResultsForTarget("bar", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("bar", BuildResultUtilities.GetEmptyFailingTargetResult());
 
             Assert.Equal(TargetResultCode.Success, result["foo"].ResultCode);
             Assert.Equal(TargetResultCode.Failure, result["bar"].ResultCode);
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[0]);
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+                result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 ITargetResult targetResult = result["bar"];
             }
            );
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[0]);
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget(null, TestUtilities.GetEmptySucceedingTargetResult());
+                result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
             }
            );
         }
@@ -190,7 +190,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[0]);
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget(null, TestUtilities.GetEmptySucceedingTargetResult());
+                result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
             }
            );
         }
@@ -199,10 +199,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
             BuildResult result2 = new BuildResult(request);
-            result.AddResultsForTarget("bar", TestUtilities.GetEmptyFailingTargetResult());
+            result.AddResultsForTarget("bar", BuildResultUtilities.GetEmptyFailingTargetResult());
 
             result.MergeResults(result2);
             Assert.Equal(TargetResultCode.Success, result["foo"].ResultCode);
@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.MergeResults(result3);
 
             BuildResult result4 = new BuildResult(request);
-            result4.AddResultsForTarget("xor", TestUtilities.GetEmptySucceedingTargetResult());
+            result4.AddResultsForTarget("xor", BuildResultUtilities.GetEmptySucceedingTargetResult());
             result.MergeResults(result4);
             Assert.Equal(TargetResultCode.Success, result["foo"].ResultCode);
             Assert.Equal(TargetResultCode.Failure, result["bar"].ResultCode);
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[0]);
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+                result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
                 result.MergeResults(null);
             }
@@ -240,11 +240,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[0]);
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+                result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
                 BuildRequest request2 = CreateNewBuildRequest(2, new string[0]);
                 BuildResult result2 = new BuildResult(request2);
-                result2.AddResultsForTarget("bar", TestUtilities.GetEmptySucceedingTargetResult());
+                result2.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
                 result.MergeResults(result2);
             }
@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[0]);
             BuildResult result = new BuildResult(request);
-            result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
             Assert.True(result.HasResultsForTarget("foo"));
             Assert.False(result.HasResultsForTarget("bar"));
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             Assert.Equal(countFound, 0);
 
-            result.AddResultsForTarget("foo", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             bool foundFoo = false;
             countFound = 0;
             foreach (KeyValuePair<string, TargetResult> resultPair in result.ResultsByTarget)
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(countFound, 1);
             Assert.True(foundFoo);
 
-            result.AddResultsForTarget("bar", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
             foundFoo = false;
             bool foundBar = false;
             countFound = 0;
@@ -323,8 +323,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.InitialTargets = new List<string> { "a", "b" };
             result.DefaultTargets = new List<string> { "c", "d" };
 
-            result.AddResultsForTarget("alpha", new TargetResult(new TaskItem[] { fooTaskItem }, TestUtilities.GetSuccessResult()));
-            result.AddResultsForTarget("omega", new TargetResult(new TaskItem[] { }, TestUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
+            result.AddResultsForTarget("alpha", new TargetResult(new TaskItem[] { fooTaskItem }, BuildResultUtilities.GetSuccessResult()));
+            result.AddResultsForTarget("omega", new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
 
             Assert.Equal(NodePacketType.BuildResult, (result as INodePacket).Type);
             ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());

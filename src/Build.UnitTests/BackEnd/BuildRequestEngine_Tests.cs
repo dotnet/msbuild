@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 foreach (string target in _entry.Request.Targets)
                 {
-                    result.AddResultsForTarget(target, new TargetResult(new TaskItem[1] { new TaskItem("include", _entry.RequestConfiguration.ProjectFullPath) }, completeSuccess ? TestUtilities.GetSuccessResult() : TestUtilities.GetStopWithErrorResult()));
+                    result.AddResultsForTarget(target, new TargetResult(new TaskItem[1] { new TaskItem("include", _entry.RequestConfiguration.ProjectFullPath) }, completeSuccess ? BuildResultUtilities.GetSuccessResult() : BuildResultUtilities.GetStopWithErrorResult()));
                 }
                 _entry.Complete(result);
             }
@@ -413,7 +413,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Report a result to satisfy the build request
             BuildResult result = new BuildResult(_newRequest_Request.BuildRequests[0]);
-            result.AddResultsForTarget("requiredTarget1", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("requiredTarget1", BuildResultUtilities.GetEmptySucceedingTargetResult());
             _engine.UnblockBuildRequest(new BuildRequestUnblocker(result));
 
             // Continue the request.
@@ -476,7 +476,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Report a result to satisfy the build request
             BuildResult result = new BuildResult(_newRequest_Request.BuildRequests[0]);
-            result.AddResultsForTarget("requiredTarget1", TestUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("requiredTarget1", BuildResultUtilities.GetEmptySucceedingTargetResult());
             _engine.UnblockBuildRequest(new BuildRequestUnblocker(result));
 
             // Continue the request
