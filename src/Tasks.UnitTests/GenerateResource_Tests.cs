@@ -846,7 +846,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
+#endif
                 // Files written should contain STR class file
                 string stronglyTypedFileName = Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs");
                 Assert.Equal(t.FilesWritten[2].ItemSpec, stronglyTypedFileName);
@@ -910,7 +912,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
+#endif
                 // Files written should contain STR class file
                 string stronglyTypedFileName = Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs");
                 Assert.Equal(t.FilesWritten[2].ItemSpec, stronglyTypedFileName);
@@ -940,7 +944,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t2.OutputResources[0].ItemSpec, resourcesFile);
                 Assert.Equal(t2.FilesWritten[0].ItemSpec, resourcesFile);
 
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t2);
+#endif
                 Assert.Equal(t2.FilesWritten[2].ItemSpec, Path.ChangeExtension(t2.Sources[0].ItemSpec, ".cs"));
             }
             finally
@@ -1144,7 +1150,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
+#endif
                 Assert.True(File.Exists(stronglyTypedFileName));
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
@@ -1200,7 +1208,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Should have defaulted the STR filename to the bare output resource name + ".cs"
                 string STRfile = Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs");
@@ -1922,7 +1932,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Verify class was public, as we specified
                 Assert.True(File.ReadAllText(t.StronglyTypedFileName).Contains("public class " + t.StronglyTypedClassName));
 
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
+#endif
             }
             finally
             {
@@ -1970,7 +1982,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.StronglyTypedFileName, Path.ChangeExtension(t.Sources[0].ItemSpec, ".cs"));
                 Assert.True(File.Exists(t.StronglyTypedFileName));
 
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Verify class was internal, since we didn't specify a preference
                 Assert.True(File.ReadAllText(t.StronglyTypedFileName).Contains("internal class " + t.StronglyTypedClassName));
@@ -3628,7 +3642,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
 
+#if FEATURE_RESGENCACHE
                 Utilities.AssertStateFileWasWritten(t);
+#endif
 
                 // Files written should contain STR class file
                 Assert.Equal(Path.ChangeExtension(t.Sources[0].ItemSpec, codeFileExtension), t.StronglyTypedFileName);
