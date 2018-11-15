@@ -29,5 +29,9 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.props" />
   
   <Import Sdk="Microsoft.NET.Sdk.Publish" Project="Sdk.props" />
+
+  <ItemGroup Condition="'$(DisableImplicitFrameworkReferences)' != 'true' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' >= '3.0'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" IsImplicitlyDefined="true" />
+  </ItemGroup>
   
 </Project>
