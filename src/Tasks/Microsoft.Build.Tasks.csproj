@@ -9,7 +9,7 @@
     <GenerateReferenceAssemblySources>true</GenerateReferenceAssemblySources>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
-    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS;FEATURE_CODEDOM</DefineConstants>
     <CreateTlb>true</CreateTlb>
     <IsPackable>true</IsPackable>
     <Description>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</Description>

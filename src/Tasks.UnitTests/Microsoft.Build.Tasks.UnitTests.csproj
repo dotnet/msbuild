@@ -8,7 +8,7 @@
 
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
-    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS_UNITTESTS</DefineConstants>
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS_UNITTESTS;FEATURE_CODEDOM</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

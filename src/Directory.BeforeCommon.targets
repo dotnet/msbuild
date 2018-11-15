@@ -118,7 +118,6 @@
   <PropertyGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('netcore'))">
     <NetCoreBuild>true</NetCoreBuild>
     <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_CODEDOM</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(NetCoreBuild)'=='true'">
