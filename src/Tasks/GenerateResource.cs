@@ -3771,7 +3771,9 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                reader.resourcesHashTable.Add(name, new StronglyTypedResourceBuilder.ResourceData(value.GetType(), value));
+                Type valueType = typeof(object);
+                if (value != null) valueType = value.GetType();
+                reader.resourcesHashTable.Add(name, new StronglyTypedResourceBuilder.ResourceData(valueType, value));
             }
         }
 
