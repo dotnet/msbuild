@@ -443,7 +443,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 
 
         /// <summary>
-        /// Utility function to save the documente in UTF8 and Indented
+        /// Utility function to save the given XML document in UTF8 and indented
         /// </summary>
         /// <param name="document"></param>
         public static void SaveDocument(Xml.XmlDocument document, string outputFileName, System.Text.Encoding encode)
@@ -613,7 +613,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.MsDeploy
 #if NET46
                     arguments.Add(string.Concat(enumName.ToLower(System.Globalization.CultureInfo.InvariantCulture), "=", valueData));
 #else
-                    arguments.Add(string.Concat(enumName.ToLower()));
+                    arguments.Add(string.Concat(enumName.ToLower(), "=", valueData));
 #endif
                 }
             }
