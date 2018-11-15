@@ -10,6 +10,7 @@
 
   <PropertyGroup>
     <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
+    <NoWarn>$(NoWarn);NU5125</NoWarn>
   </PropertyGroup>
 
 </Project>
