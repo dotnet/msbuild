@@ -385,7 +385,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <ItemGroup>
       <_ResolvedCopyLocalPublishAssets Include="@(ReferenceCopyLocalPaths)"
-                                       Exclude="@(_ResolvedCopyLocalPublishAssets)"
+                                       Exclude="@(_ResolvedCopyLocalBuildAssets)"
                                        Condition="'$(PublishReferencesDocumentationFiles)' == 'true' or '%(Extension)' != '.xml'">
         <DestinationSubPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(Filename)%(Extension)</DestinationSubPath>
       </_ResolvedCopyLocalPublishAssets>
