@@ -32,8 +32,9 @@
       <SharedFxDebianPackageFileName>$(SharedFxDebianPackageFileName.ToLower())</SharedFxDebianPackageFileName>
       <SharedFxDebianPackageName>dotnet-runtime-$(SharedFxDebianPackageVersion)</SharedFxDebianPackageName>
       <SharedFxDebianPackageName>$(SharedFxDebianPackageName.ToLower())</SharedFxDebianPackageName>
-      <HostFxrDebianPackageVersion>$(HostFxrMajorMinorVersion)</HostFxrDebianPackageVersion>
-      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrDebianPackageVersion)</HostFxrDebianPackageName>
+      <HostFxrDebianPackageFileName>dotnet-hostfxr-$(HostFxrVersion)</HostFxrDebianPackageFileName>
+      <HostFxrDebianPackageFileName>$(HostFxrDebianPackageFileName.ToLower())</HostFxrDebianPackageFileName>
+      <HostFxrDebianPackageName>dotnet-hostfxr-$(HostFxrMajorMinorVersion)</HostFxrDebianPackageName>
       <HostFxrDebianPackageName>$(HostFxrDebianPackageName.ToLower())</HostFxrDebianPackageName>
       <HostDebianPackageName>dotnet-host</HostDebianPackageName>
       <AspNetCoreSharedFxDebianPackageFileName>aspnetcore-runtime-$(AspNetCoreVersion)</AspNetCoreSharedFxDebianPackageFileName>
