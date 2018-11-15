@@ -171,12 +171,20 @@
     </PropertyGroup>
     <ItemGroup>
       <ToolRuntimeConfigPath Include="$(PublishDir)/**/*.runtimeconfig.json" />
+
+      <MSBuild15Items Include="$(PublishDir)/15.0/**/*" />
     </ItemGroup>
     <ReplaceFileContents
       InputFiles="@(ToolRuntimeConfigPath)"
       DestinationFiles="@(ToolRuntimeConfigPath)"
       ReplacementPatterns="$(ReplacementPattern)"
       ReplacementStrings="$(ReplacementString)" />
+
+    <Move
+      SourceFiles="@(MSBuild15Items)"
+      DestinationFiles="@(MSBuild15Items -> '$(PublishDir)/Current/%(RecursiveDir)%(Filename)%(Extension)')" />
+
+    <RemoveDir Directories="$(PublishDir)/15.0" />
   </Target>
 
   <Target Name="CopyBundledVersions"
