@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
@@ -113,7 +112,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
         private void WatchDirectory(string projectId, string directory)
         {
             Watcher.Watch(directory);
-            var dict = new ConcurrentDictionary<string, string>();
 
             if (!DirectoryToWatchingProjects.TryGetValue(directory, out HashSet<string> watchingProjects))
             {
