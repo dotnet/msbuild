@@ -1386,7 +1386,7 @@ namespace Microsoft.Build.Execution
             /// <returns>The cloned metadata.</returns>
             public IDictionary CloneCustomMetadata()
             {
-                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MetadataCollection.Count, MSBuildNameIgnoreCaseComparer.Default);
 
                 foreach (ProjectMetadataInstance metadatum in MetadataCollection)
                 {
@@ -1403,7 +1403,7 @@ namespace Microsoft.Build.Execution
             /// <returns>The cloned metadata.</returns>
             IDictionary ITaskItem2.CloneCustomMetadataEscaped()
             {
-                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MetadataCollection.Count, MSBuildNameIgnoreCaseComparer.Default);
 
                 foreach (ProjectMetadataInstance metadatum in MetadataCollection)
                 {

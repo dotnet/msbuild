@@ -102,7 +102,7 @@ namespace Microsoft.Build.Utilities
 
             if (itemMetadata.Count > 0)
             {
-                _metadata = new CopyOnWriteDictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                _metadata = new CopyOnWriteDictionary<string, string>(itemMetadata.Count, MSBuildNameIgnoreCaseComparer.Default);
 
                 foreach (DictionaryEntry singleMetadata in itemMetadata)
                 {
@@ -139,6 +139,7 @@ namespace Microsoft.Build.Utilities
                 _definingProject = sourceItemAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
             }
 
+            _metadata = new CopyOnWriteDictionary<string, string>(sourceItem.MetadataCount, MSBuildNameIgnoreCaseComparer.Default);
             sourceItem.CopyMetadataTo(this);
         }
 
