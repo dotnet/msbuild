@@ -17,7 +17,7 @@
     <!-- NU5104: Disable 'A stable release of a package should not have a prerelease dependency' warning globally -->
     <!-- The "pack" command under 'buildCrossTargeting' for 'Microsoft.DotNet.MSBuildSdkResolver' throws a "NU5104" warning/error while using a "2.1.300" stage0 SDK. For: Linux-x64, Linux-arm, and Linux-arm64 -->
     <!-- NU5123: Disable warning for package installation path is too long. We are hitting this for some ni...map file in one of our packages. -->
-    <NoWarn>NU1701;NU5104;NU5123;NU5125</NoWarn>
+    <NoWarn>NU1701;NU5104;NU5123;NU5125;NU5105</NoWarn>
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
