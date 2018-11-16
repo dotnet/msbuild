@@ -30,7 +30,8 @@ def platformList = [
   'Windows_NT:x64:Release',
   'Windows_NT:x86:Debug',
   'Windows_NT_ES:x64:Debug',
-  'Windows_NT_NoSuffix:x64:Release'
+  'Windows_NT_NoSuffix:x64:Release',
+  'Windows_NT:arm:Debug'
 ]
 
 def static getBuildJobName(def configuration, def os, def architecture) {
@@ -50,7 +51,7 @@ platformList.each { platform ->
 
     // Calculate the build command
     if (os.startsWith("Windows_NT")) {
-        osUsedForMachineAffinity = 'Windows_NT'
+        osUsedForMachineAffinity = 'windows.10.amd64.clientrs4.devex.15.8.open'
         buildCommand = "${baseBatchBuildCommand}"
         if (os == 'Windows_NT_ES') {
             buildCommand = """
@@ -63,6 +64,10 @@ ${buildCommand}
 set DropSuffix=true
 ${buildCommand}
 """
+        }
+
+        if (architecture == "arm") {
+          buildCommand = """${buildCommand} /p:CLIBUILD_SKIP_TESTS=true"""
         }
     }
     else if (os == 'Windows_2016') {
@@ -106,7 +111,7 @@ ${buildCommand}
     def newJob = job(Utilities.getFullJobName(project, jobName, isPR)) {
         // Set the label.
         steps {
-            if (osUsedForMachineAffinity == 'Windows_NT' || osUsedForMachineAffinity == 'Windows_2016') {
+            if (osUsedForMachineAffinity == 'windows.10.amd64.clientrs4.devex.15.8.open' || osUsedForMachineAffinity == 'Windows_2016') {
                 // Batch
                 batchFile(buildCommand)
             }
@@ -117,7 +122,11 @@ ${buildCommand}
         }
     }
 
-    Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, osVersionUsedForMachineAffinity)
+    if (os.startsWith("Windows_NT")) {
+        Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity)
+    } else {
+        Utilities.setMachineAffinity(newJob, osUsedForMachineAffinity, osVersionUsedForMachineAffinity)
+    }
     Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
     // ARM CI runs are build only.
     if ((architecture != 'arm') && (architecture != 'arm64')) {

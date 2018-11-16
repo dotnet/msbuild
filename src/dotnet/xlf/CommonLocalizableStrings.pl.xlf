@@ -1,15 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../CommonLocalizableStrings.resx">
     <body>
       <trans-unit id="CouldNotFindAnyProjectInDirectory">
         <source>Could not find any project in `{0}`.</source>
-        <target state="translated">Nie można odnaleźć żadnego projektu w katalogu „{0}”.</target>
+        <target state="translated">Nie można odnaleźć żadnego projektu w lokalizacji „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="MoreThanOneProjectInDirectory">
         <source>Found more than one project in `{0}`. Please specify which one to use.</source>
-        <target state="translated">Znaleziono więcej niż jeden projekt w katalogu „{0}”. Określ, który ma zostać użyty.</target>
+        <target state="translated">Znaleziono więcej niż jeden projekt w lokalizacji „{0}”. Określ, który ma zostać użyty.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectAlreadyHasAreference">
@@ -209,12 +209,12 @@
       </trans-unit>
       <trans-unit id="XYFoundButInvalid">
         <source>{0} `{1}` found but is invalid.</source>
-        <target state="translated">Znaleziono element {0} „{1}”, ale jest on nieprawidłowy.</target>
+        <target state="translated">Element {0} „{1}” został znaleziony, ale jest nieprawidłowy.</target>
         <note />
       </trans-unit>
       <trans-unit id="XFoundButInvalid">
         <source>`{0}` found but is invalid.</source>
-        <target state="translated">Znaleziono element „{0}”, ale jest on nieprawidłowy.</target>
+        <target state="translated">Element „{0}” został znaleziony, ale jest nieprawidłowy.</target>
         <note />
       </trans-unit>
       <trans-unit id="OperationInvalid">
@@ -564,7 +564,7 @@
       </trans-unit>
       <trans-unit id="MoreThanOneSolutionInDirectory">
         <source>Found more than one solution file in {0}. Please specify which one to use.</source>
-        <target state="translated">Znaleziono więcej niż jeden plik rozwiązania w katalogu {0}. Określ, który ma zostać użyty.</target>
+        <target state="translated">Znaleziono więcej niż jeden plik rozwiązania w lokalizacji {0}. Określ, który ma zostać użyty.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionAlreadyContainsProject">

@@ -9,7 +9,7 @@
       </trans-unit>
       <trans-unit id="Arguments">
         <source>Arguments</source>
-        <target state="translated">Arguments</target>
+        <target state="translated">参数</target>
         <note />
       </trans-unit>
       <trans-unit id="CommandDefinition">

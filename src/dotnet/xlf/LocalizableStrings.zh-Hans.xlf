@@ -125,7 +125,7 @@
       </trans-unit>
       <trans-unit id="Remove">
         <source>Remove</source>
-        <target state="translated">移除</target>
+        <target state="translated">删除</target>
         <note />
       </trans-unit>
       <trans-unit id="Delete">
@@ -155,7 +155,7 @@
       </trans-unit>
       <trans-unit id="Save">
         <source>Save</source>
-        <target state="translated">“保存”</target>
+        <target state="translated">保存</target>
         <note />
       </trans-unit>
       <trans-unit id="Find">

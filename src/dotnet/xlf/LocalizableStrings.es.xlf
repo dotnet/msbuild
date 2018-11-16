@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="src/dotnet/LocalizableStrings.resx">
     <body>
@@ -55,7 +55,7 @@
       </trans-unit>
       <trans-unit id="ProjectFile">
         <source>Project file</source>
-        <target state="translated">Archivo del proyecto</target>
+        <target state="translated">Archivo de proyecto</target>
         <note />
       </trans-unit>
       <trans-unit id="Reference">
@@ -165,7 +165,7 @@
       </trans-unit>
       <trans-unit id="Error">
         <source>Error</source>
-        <target state="translated">Error</target>
+        <target state="translated">Fehler</target>
         <note />
       </trans-unit>
       <trans-unit id="Warning">
@@ -175,7 +175,7 @@
       </trans-unit>
       <trans-unit id="File">
         <source>File</source>
-        <target state="translated">Archivo</target>
+        <target state="translated">archivo</target>
         <note />
       </trans-unit>
       <trans-unit id="Directory">

@@ -18,6 +18,7 @@
       BuildInParallel="False"
       Projects="$(RepoRoot)/src/redist/redist.csproj"
       Properties="PublishDir=$(CliOutputDirectory)"
-      Targets="Publish" />
+      Targets="Publish"
+      RemoveProperties="TargetFramework" />
   </Target>
 </Project>
