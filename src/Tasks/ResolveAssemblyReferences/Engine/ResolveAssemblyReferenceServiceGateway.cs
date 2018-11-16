@@ -88,11 +88,17 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Engine
             for (int i = 0; i < taskItems.Length; i++)
             {
                 ITaskItem taskItem = taskItems[i];
-                var readOnlyTaskItem = new ReadOnlyTaskItem(taskItem.ItemSpec);
 
-                // TODO: Perf improvement, copying metadata accounts for a significant percentage of overhead
-                taskItem.CopyMetadataTo(readOnlyTaskItem);
-                readOnlyTaskItems[i] = readOnlyTaskItem;
+                if (taskItem is ITaskItem2 taskItem2 && taskItem2.CloneCustomMetadataEscaped() is Dictionary<string, string> metadataNameToValueDict)
+                {
+                    readOnlyTaskItems[i] = new ReadOnlyTaskItem(taskItem.ItemSpec, metadataNameToValueDict);
+                }
+                else
+                {
+                    var readOnlyTaskItem = new ReadOnlyTaskItem(taskItem.ItemSpec);
+                    taskItem.CopyMetadataTo(readOnlyTaskItem);
+                    readOnlyTaskItems[i] = readOnlyTaskItem;
+                }
             }
 
             return readOnlyTaskItems;
@@ -151,7 +157,8 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Engine
             {
                 if (taskItemPayload.IsResponseField(field))
                 {
-                    // TODO: Perf improvement, constructing engine TaskItems accounts for a significant percentage of overhead
+                    // TODO: Perf improvement, constructing Utilities.TaskItems accounts for ~10% of RAR-aas overhead
+                    // due to slow setting of metadata in the backing CopyOnWriteDictionary.
                     taskItems[nextTaskItemIndex] = new TaskItem(taskItemPayload);
                     nextTaskItemIndex++;
                 }
@@ -162,12 +169,13 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Engine
 
         private static void LogBuildEvents(IBuildEngine buildEngine, List<ResolveAssemblyReferenceBuildEventArgs> buildEventsArgsQueue)
         {
-            // TODO: Perf improvement, the garbage collector seems to get consistently triggered somewhere here and
-            // ends up costing more time than the actual build engine logging
+            // TODO: Perf improvement, LogBuildEvents() accounts for ~10% of RAR-aas overhead.
+            // This is a result of logging on silent verbosities, triggering garbage collection,
+            // and reconstruction of thousands of BuildEventArgs objects.
 
             foreach (ResolveAssemblyReferenceBuildEventArgs buildEventArgs in buildEventsArgsQueue)
             {
-                DateTime eventTimestamp = DateTime.FromFileTimeUtc(buildEventArgs.EventTimestamp);
+                DateTime eventTimestamp = new DateTime(buildEventArgs.EventTimestamp, DateTimeKind.Utc);
 
                 switch (buildEventArgs.BuildEventArgsType)
                 {

@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
-            long eventTimestamp = e.UtcTimestamp.ToFileTimeUtc();
+            long eventTimestamp = e.UtcTimestamp.Ticks;
             string[] messageArgs = ParseMessageArguments(e.UnparsedArguments);
 
             var buildEventArgs = new ResolveAssemblyReferenceBuildEventArgs
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
-            long eventTimestamp = e.UtcTimestamp.ToFileTimeUtc();
+            long eventTimestamp = e.UtcTimestamp.Ticks;
             string[] messageArgs = ParseMessageArguments(e.UnparsedArguments);
 
             var buildEventArgs = new ResolveAssemblyReferenceBuildEventArgs
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
-            long eventTimestamp = e.UtcTimestamp.ToFileTimeUtc();
+            long eventTimestamp = e.UtcTimestamp.Ticks;
             string[] messageArgs = ParseMessageArguments(e.UnparsedArguments);
 
             var buildEventArgs = new ResolveAssemblyReferenceBuildEventArgs

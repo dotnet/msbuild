@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -10,7 +11,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
     {
         public ICollection MetadataNames { get; }
 
-        public int MetadataCount { get; }
+        public int MetadataCount => MetadataNameToValue.Count;
 
         public string EvaluatedIncludeEscaped
         {
@@ -19,9 +20,16 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
             set => throw new System.NotImplementedException();
         }
 
-        public ReadOnlyTaskItem(string itemSpec) : this()
+        internal ReadOnlyTaskItem(string itemSpec, int capacity = 0)
         {
             ItemSpec = itemSpec;
+            _metadataNameToValue = new Dictionary<string, string>(capacity, MSBuildNameIgnoreCaseComparer.Default);
+        }
+
+        internal ReadOnlyTaskItem(string itemSpec, Dictionary<string, string> metadataNameToValue)
+        {
+            ItemSpec = itemSpec;
+            _metadataNameToValue = metadataNameToValue;
         }
 
         public string GetMetadata(string metadataName)

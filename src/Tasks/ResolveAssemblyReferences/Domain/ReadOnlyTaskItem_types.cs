@@ -29,6 +29,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
 {
     using System;
     using System.Collections.Generic;
+    using Microsoft.Build.Collections;
 
     [global::Bond.Schema]
     [System.CodeDom.Compiler.GeneratedCode("gbc", "0.11.0.0")]
@@ -38,7 +39,13 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         public string ItemSpec { get; set; }
 
         [global::Bond.Id(1)]
-        public Dictionary<string, string> MetadataNameToValue { get; set; }
+        public Dictionary<string, string> MetadataNameToValue
+        {
+            get => _metadataNameToValue;
+            set => _metadataNameToValue = new Dictionary<string, string>(value, MSBuildNameIgnoreCaseComparer.Default);
+        }
+
+        private Dictionary<string, string> _metadataNameToValue;
 
         [global::Bond.Id(2)]
         public int ResponseFieldIds { get; set; }
@@ -50,7 +57,11 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         protected ReadOnlyTaskItem(string fullName, string name)
         {
             ItemSpec = "";
-            MetadataNameToValue = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            if (_metadataNameToValue == null)
+            {
+                _metadataNameToValue = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+            }
         }
     }
 } // Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain

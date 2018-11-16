@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 using Microsoft.Build.Framework;
@@ -123,6 +124,11 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
 
             return new ResolveAssemblyReferenceResponse
             {
+                // TODO: Major perf improvement, simply adding the recorded BuildEventArgs to the response
+                // accounts for anywhere from 40-50% of RAR-aas overhead. This is a combination of triggering
+                // ResolveAssemblyReferenceServiceGateway.LogBuildEvents() and blowing up the response
+                // payload size, resulting in slower serialization. RAR will likely need some method of knowing
+                // the current verbosity.
                 BuildEventArgsQueue = buildEngine.BuildEventArgsQueue,
                 DependsOnNETStandard = taskOutput.DependsOnNETStandard,
                 DependsOnSystemRuntime = taskOutput.DependsOnSystemRuntime,
@@ -147,10 +153,24 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             {
                 if (!taskItemToPayload.TryGetValue(taskItem, out ReadOnlyTaskItem taskItemPayload))
                 {
-                    taskItemPayload = new ReadOnlyTaskItem(taskItem.ItemSpec);
+                    taskItemPayload = new ReadOnlyTaskItem(taskItem.ItemSpec, taskItem.MetadataCount);
 
-                    // TODO: Perf improvement, copying metadata accounts for a significant percentage of overhead
-                    taskItem.CopyMetadataTo(taskItemPayload);
+                    // TODO: Perf improvement, copying metadata from Utilities.TaskItem accounts for ~10% of RAR-aas overhead
+                    // due to slow copying of metadata from the backing CopyOnWriteDictionary.
+                    if (taskItem is ITaskItem2 taskItem2)
+                    {
+                        foreach (DictionaryEntry metadataNameWithValue in taskItem2.CloneCustomMetadataEscaped())
+                        {
+                            var metadataName = (string) metadataNameWithValue.Key;
+                            var metadataValue = (string) metadataNameWithValue.Value;
+                            taskItemPayload.MetadataNameToValue[metadataName] = metadataValue;
+                        }
+                    }
+                    else
+                    {
+                        taskItem.CopyMetadataTo(taskItemPayload);
+                    }
+
                     taskItemToPayload[taskItem] = taskItemPayload;
                     taskItemPayloadList.Add(taskItemPayload);
                 }

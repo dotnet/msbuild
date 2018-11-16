@@ -90,6 +90,9 @@
     <Compile Include="..\Shared\AssemblyUtilities.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="..\Shared\NGen.cs">
       <Link>NGen.cs</Link>
     </Compile>
@@ -216,6 +219,9 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\VisualBasictokenizer.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="AppConfig\*.cs">

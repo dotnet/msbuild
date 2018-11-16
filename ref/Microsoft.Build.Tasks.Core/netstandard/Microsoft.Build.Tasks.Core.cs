@@ -974,7 +974,6 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
     public partial class ReadOnlyTaskItem : Microsoft.Build.Framework.ITaskItem, Microsoft.Build.Framework.ITaskItem2
     {
         public ReadOnlyTaskItem() { }
-        public ReadOnlyTaskItem(string itemSpec) { }
         protected ReadOnlyTaskItem(string fullName, string name) { }
         public string EvaluatedIncludeEscaped { get { throw null; } set { } }
         [Bond.IdAttribute((ushort)0)]
