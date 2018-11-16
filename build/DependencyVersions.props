@@ -28,7 +28,7 @@
     <MicrosoftCodeAnalysisBuildTasksPackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftCodeAnalysisBuildTasksPackageVersion>
     <MicrosoftNetCompilersNetcorePackageVersion>$(MicrosoftCodeAnalysisCSharpPackageVersion)</MicrosoftNetCompilersNetcorePackageVersion>
     <MicrosoftNETSdkRazorPackageVersion>2.2.0-preview3-35497</MicrosoftNETSdkRazorPackageVersion>
-    <MicrosoftNETSdkWebPackageVersion>3.0.100-preview-20181107-2190899</MicrosoftNETSdkWebPackageVersion>
+    <MicrosoftNETSdkWebPackageVersion>3.0.100-preview-20181115-2214361</MicrosoftNETSdkWebPackageVersion>
     <MicrosoftNETSdkPublishPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkPublishPackageVersion>
     <MicrosoftNETSdkWebProjectSystemPackageVersion>$(MicrosoftNETSdkWebPackageVersion)</MicrosoftNETSdkWebProjectSystemPackageVersion>
     <MicrosoftNETSdkWindowsDesktopPackageVersion>3.0.0-alpha-27115-10</MicrosoftNETSdkWindowsDesktopPackageVersion>
