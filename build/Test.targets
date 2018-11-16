@@ -33,13 +33,15 @@
       BuildInParallel="False"
       Projects="%(TestPackageProject.ProjectPath)"
       Properties="RestoreAdditionalProjectSources=$(TestPackagesDir);ImportDirectoryBuildTargets=false"
-      Targets="Restore" />
+      Targets="Restore"
+      RemoveProperties="TargetFramework" />
 
     <MSBuild
       BuildInParallel="False"
       Projects="%(TestPackageProject.ProjectPath)"
       Properties="PackageOutputPath=$(TestPackagesDir);%(TestPackageProject.MsbuildArgs);RestoreAdditionalProjectSources=$(TestOutputDir)/packages;Version=%(TestPackageProject.Version)"
-      Targets="Pack" />
+      Targets="Pack"
+      RemoveProperties="TargetFramework" />
   </Target>
 
   <Target Name="CopyDirectoryBuildTestDependencies" Inputs="@(_CopyDirectoryBuildTestDependenciesInput)" Outputs="@(_CopyDirectoryBuildTestDependenciesOutput)">
