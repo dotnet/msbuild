@@ -20,7 +20,8 @@
           DependsOnTargets="CreateTestAssetPackageNuPkgs;
                             CopyDirectoryBuildTestDependencies;
                             OverlaySdkOnLKG"
-          AfterTargets="Build">
+          BeforeTargets="Build"
+          Condition="'$(TargetFramework)' == ''">
   </Target>
 
   <Target Name="CreateTestAssetPackageNuPkgs"
