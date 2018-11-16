@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for the NodePacketTranslators
     /// </summary>
-    public class NodePacketTranslator_Tests
+    public class BinaryTranslator_Tests
     {
         /// <summary>
         /// Tests the SerializationMode property
@@ -31,10 +31,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            INodePacketTranslator translator = NodePacketTranslator.GetReadTranslator(stream, null);
+            INodePacketTranslator translator = BinaryTranslator.GetReadTranslator(stream, null);
             Assert.Equal(TranslationDirection.ReadFromStream, translator.Mode);
 
-            translator = NodePacketTranslator.GetWriteTranslator(stream);
+            translator = BinaryTranslator.GetWriteTranslator(stream);
             Assert.Equal(TranslationDirection.WriteToStream, translator.Mode);
         }
 

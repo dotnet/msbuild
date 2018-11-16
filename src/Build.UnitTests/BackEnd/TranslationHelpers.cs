@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         static internal INodePacketTranslator GetWriteTranslator()
         {
             s_serializationStream = new MemoryStream();
-            return NodePacketTranslator.GetWriteTranslator(s_serializationStream);
+            return BinaryTranslator.GetWriteTranslator(s_serializationStream);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         static internal INodePacketTranslator GetReadTranslator()
         {
             s_serializationStream.Seek(0, SeekOrigin.Begin);
-            return NodePacketTranslator.GetReadTranslator(s_serializationStream, null);
+            return BinaryTranslator.GetReadTranslator(s_serializationStream, null);
         }
 
         /// <summary>

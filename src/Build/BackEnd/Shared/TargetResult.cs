@@ -281,11 +281,11 @@ namespace Microsoft.Build.Execution
                     return null;
                 }
 
-                return NodePacketTranslator.GetWriteTranslator(File.Create(cacheFile));
+                return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
             }
             else
             {
-                return NodePacketTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
             }
         }
 
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Execution
                 {
                     using (DeflateStream inflateStream = new DeflateStream(serializedStream, CompressionMode.Decompress))
                     {
-                        INodePacketTranslator serializedBufferTranslator = NodePacketTranslator.GetReadTranslator(inflateStream, null);
+                        INodePacketTranslator serializedBufferTranslator = BinaryTranslator.GetReadTranslator(inflateStream, null);
                         LookasideStringInterner interner = new LookasideStringInterner(serializedBufferTranslator);
 
                         byte[] buffer = null;
@@ -486,7 +486,7 @@ namespace Microsoft.Build.Execution
 
                         using (MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true))
                         {
-                            INodePacketTranslator itemTranslator = NodePacketTranslator.GetReadTranslator(itemsStream, null);
+                            INodePacketTranslator itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
                             _uncompressedItems = new TaskItem[_itemsCount];
                             for (int i = 0; i < _uncompressedItems.Length; i++)
                             {
@@ -514,14 +514,14 @@ namespace Microsoft.Build.Execution
                 {
                     using (var deflateStream = new DeflateStream(serializedStream, CompressionMode.Compress))
                     {
-                        INodePacketTranslator serializedBufferTranslator = NodePacketTranslator.GetWriteTranslator(deflateStream);
+                        INodePacketTranslator serializedBufferTranslator = BinaryTranslator.GetWriteTranslator(deflateStream);
 
                         // Again, a rough calculation of buffer size, this time for an uncompressed buffer.  We assume compression 
                         // will give us 2:1, as it's all text.
                         int defaultUncompressedBufferCapacity = defaultCompressedBufferCapacity * 2;
                         using (var itemsStream = new MemoryStream(defaultUncompressedBufferCapacity))
                         {
-                            INodePacketTranslator itemTranslator = NodePacketTranslator.GetWriteTranslator(itemsStream);
+                            INodePacketTranslator itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
 
                             // When creating the interner, we use the number of items as the initial size of the collections since the
                             // number of strings will be of the order of the number of items in the collection.  This assumes basically

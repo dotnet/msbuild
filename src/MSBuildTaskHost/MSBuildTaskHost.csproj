@@ -118,8 +118,8 @@
     <Compile Include="..\Shared\NodePacketFactory.cs">
       <Link>NodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\NodePacketTranslator.cs">
-      <Link>NodePacketTranslator.cs</Link>
+    <Compile Include="..\Shared\BinaryTranslator.cs">
+      <Link>BinaryTranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>

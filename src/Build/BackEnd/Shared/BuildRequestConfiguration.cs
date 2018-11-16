@@ -918,12 +918,12 @@ namespace Microsoft.Build.BackEnd
                 if (direction == TranslationDirection.WriteToStream)
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                    return NodePacketTranslator.GetWriteTranslator(File.Create(cacheFile));
+                    return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
                 }
                 else
                 {
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return NodePacketTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
+                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
                 }
             }
             catch (Exception e)

@@ -17,7 +17,7 @@ namespace Microsoft.Build.BackEnd
     /// officially supported by INodePacketTranslator, but that we still want to do 
     /// custom translation of.  
     /// </summary>
-    internal static class NodePacketTranslatorExtensions
+    internal static class TranslatorExtensions
     {
         private static Lazy<ConcurrentDictionary<Type, ConstructorInfo>> parameterlessConstructorCache = new Lazy<ConcurrentDictionary<Type, ConstructorInfo>>(() => new ConcurrentDictionary<Type, ConstructorInfo>());
 

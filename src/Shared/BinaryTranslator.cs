@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd
     /// Each class implements a Translate method on INodePacket which takes this class
     /// as a parameter, and uses it to store and retrieve fields to the stream.
     /// </summary>
-    static internal class NodePacketTranslator
+    static internal class BinaryTranslator
     {
         /// <summary>
         /// Returns a read-only serializer.
@@ -35,7 +35,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The serializer.</returns>
         static internal INodePacketTranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
         {
-            return new NodePacketReadTranslator(stream, buffer);
+            return new BinaryReadTranslator(stream, buffer);
         }
 
         /// <summary>
@@ -45,13 +45,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The serializer.</returns>
         static internal INodePacketTranslator GetWriteTranslator(Stream stream)
         {
-            return new NodePacketWriteTranslator(stream);
+            return new BinaryWriteTranslator(stream);
         }
 
         /// <summary>
         /// Implementation of INodePacketTranslator for reading from a stream.
         /// </summary>
-        private class NodePacketReadTranslator : INodePacketTranslator
+        private class BinaryReadTranslator : INodePacketTranslator
         {
             /// <summary>
             /// The stream used as a source or destination for data.
@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
-            public NodePacketReadTranslator(Stream packetStream, SharedReadBuffer buffer)
+            public BinaryReadTranslator(Stream packetStream, SharedReadBuffer buffer)
             {
                 _packetStream = packetStream;
                 _reader = InterningBinaryReader.Create(packetStream, buffer);
@@ -670,7 +670,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Implementation of INodePacketTranslator for writing to a stream.
         /// </summary>
-        private class NodePacketWriteTranslator : INodePacketTranslator
+        private class BinaryWriteTranslator : INodePacketTranslator
         {
             /// <summary>
             /// The stream used as a source or destination for data.
@@ -686,7 +686,7 @@ namespace Microsoft.Build.BackEnd
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
             /// <param name="packetStream">The stream serving as the source or destination of data.</param>
-            public NodePacketWriteTranslator(Stream packetStream)
+            public BinaryWriteTranslator(Stream packetStream)
             {
                 _packetStream = packetStream;
                 _writer = new BinaryWriter(packetStream);

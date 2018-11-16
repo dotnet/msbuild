@@ -552,7 +552,7 @@ namespace Microsoft.Build.BackEnd
 
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, NodePacketTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
                             }
                             catch (Exception e)
                             {
@@ -582,7 +582,7 @@ namespace Microsoft.Build.BackEnd
                             while (localPacketQueue.TryDequeue(out packet))
                             {
                                 MemoryStream packetStream = new MemoryStream();
-                                INodePacketTranslator writeTranslator = NodePacketTranslator.GetWriteTranslator(packetStream);
+                                INodePacketTranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
 
                                 packetStream.WriteByte((byte)packet.Type);
 
