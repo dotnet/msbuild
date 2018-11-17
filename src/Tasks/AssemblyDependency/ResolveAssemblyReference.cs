@@ -113,7 +113,7 @@ namespace Microsoft.Build.Tasks
         private WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
         private bool _unresolveFrameworkAssembliesFromHigherFrameworks = false;
 
-        public bool ShouldExecuteInProcess { get; set; }
+        public bool ShouldExecuteInProcess { get; set; } = true;
 
         internal ResolveAssemblyReferenceIOTracker IoTracker { get; set; } = new ResolveAssemblyReferenceIOTracker();
 

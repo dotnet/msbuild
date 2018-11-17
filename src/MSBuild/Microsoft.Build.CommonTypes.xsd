@@ -2589,6 +2589,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="ProfileName" />
                     <xs:attribute name="PublicKeysRestrictedForGlobalLocation" />
                     <xs:attribute name="SearchPaths" use="required" />
+                    <xs:attribute name="ShouldExecuteInProcess" type="msb:boolean" />
                     <xs:attribute name="Silent" type="msb:boolean" />
                     <xs:attribute name="StateFile" />
                     <xs:attribute name="TargetedRuntimeVersion" />

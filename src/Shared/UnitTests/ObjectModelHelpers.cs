@@ -675,11 +675,13 @@ namespace Microsoft.Build.UnitTests
             )
         {
             XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
+            var globalProperties = new Dictionary<string, string>(1);
+            globalProperties["ResolveAssemblyReferencesShouldExecuteInProcess"] = "true";
 
             Project project = new Project
                 (
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
-                null,
+                globalProperties,
                 toolsVersion,
                 projectCollection
                 );
@@ -973,8 +975,10 @@ namespace Microsoft.Build.UnitTests
             string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
 
             ProjectCollection projectCollection = new ProjectCollection();
+            var globalProperties = new Dictionary<string, string>(1);
+            globalProperties["ResolveAssemblyReferencesShouldExecuteInProcess"] = "true";
 
-            Project project = new Project(projectFileFullPath, null, null, projectCollection);
+            Project project = new Project(projectFileFullPath, globalProperties, null, projectCollection);
 
             if (touchProject)
             {
@@ -1004,10 +1008,17 @@ namespace Microsoft.Build.UnitTests
             List<ILogger> loggers = new List<ILogger>(1);
             loggers.Add(logger);
 
+            if (globalProperties == null)
+            {
+                globalProperties = new Dictionary<string, string>();
+            }
+
+            globalProperties["ResolveAssemblyReferencesShouldExecuteInProcess"] = "true";
+
             if (string.Equals(Path.GetExtension(projectFileRelativePath), ".sln"))
             {
                 string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
-                BuildRequestData data = new BuildRequestData(projectFileFullPath, globalProperties ?? new Dictionary<string, string>(), null, targets, null);
+                BuildRequestData data = new BuildRequestData(projectFileFullPath, globalProperties, null, targets, null);
                 BuildParameters parameters = new BuildParameters();
                 parameters.Loggers = loggers;
                 BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, data);
@@ -1017,13 +1028,10 @@ namespace Microsoft.Build.UnitTests
             {
                 Project project = LoadProjectFileInTempProjectDirectory(projectFileRelativePath);
 
-                if (globalProperties != null)
+                // add extra properties
+                foreach (KeyValuePair<string, string> globalProperty in globalProperties)
                 {
-                    // add extra properties
-                    foreach (KeyValuePair<string, string> globalProperty in globalProperties)
-                    {
-                        project.SetGlobalProperty(globalProperty.Key, globalProperty.Value);
-                    }
+                    project.SetGlobalProperty(globalProperty.Key, globalProperty.Value);
                 }
 
                 return project.Build(targets, loggers);

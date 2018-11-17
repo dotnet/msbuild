@@ -2078,6 +2078,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesStateFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectFile)AssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <ResolveAssemblyReferencesShouldExecuteInProcess Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesShouldExecuteInProcess)' == ''">false</ResolveAssemblyReferencesShouldExecuteInProcess>
+    </PropertyGroup>
+
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
     <ItemGroup>
       <_ResolveAssemblyReferencesApplicationConfigFileForExes Include="@(AppConfigWithTargetPath)" Condition="'$(AutoGenerateBindingRedirects)'=='true' or '$(AutoUnifyAssemblyReferences)'=='false'"/>
@@ -2131,6 +2135,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         FindSatellites="$(BuildingProject)"
         FindSerializationAssemblies="$(BuildingProject)"
         FindRelatedFiles="$(BuildingProject)"
+        ShouldExecuteInProcess="$(ResolveAssemblyReferencesShouldExecuteInProcess)"
         Silent="$(ResolveAssemblyReferencesSilent)"
         TargetFrameworkVersion="$(TargetFrameworkVersion)"
         TargetFrameworkMoniker="$(TargetFrameworkMoniker)"
