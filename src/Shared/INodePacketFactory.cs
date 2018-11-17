@@ -12,7 +12,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     /// <param name="translator">The translator containing the packet data.</param>
     /// <returns>The packet reconstructed from the stream.</returns>
-    internal delegate INodePacket NodePacketFactoryMethod(INodePacketTranslator translator);
+    internal delegate INodePacket NodePacketFactoryMethod(ITranslator translator);
 
     /// <summary>
     /// This interface represents an object which is used to reconstruct packet objects from
@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
-        void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, INodePacketTranslator translator);
+        void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator);
 
         /// <summary>
         /// Routes the specified packet

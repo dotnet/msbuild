@@ -358,7 +358,7 @@ namespace Microsoft.Build.Execution
             _outputs.Add(new ProjectTaskOutputPropertyInstance(propertyName, taskOutputParameterName, condition ?? String.Empty, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, ElementLocation.EmptyLocation, condition == null ? null : ElementLocation.EmptyLocation));
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -391,12 +391,12 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private static void ParametersKeyTranslator(ref string key, INodePacketTranslator translator)
+        private static void ParametersKeyTranslator(ref string key, ITranslator translator)
         {
             translator.Translate(ref key);
         }
 
-        private static void ParametersValueTranslator(ref Tuple<string, ElementLocation> value, INodePacketTranslator translator)
+        private static void ParametersValueTranslator(ref Tuple<string, ElementLocation> value, ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -418,7 +418,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal new static ProjectTaskInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal new static ProjectTaskInstance FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectTaskInstance>();
         }

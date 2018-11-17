@@ -719,7 +719,7 @@ namespace Microsoft.Build.BackEnd
             public void SendData(INodePacket packet)
             {
                 MemoryStream writeStream = new MemoryStream();
-                INodePacketTranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
                 try
                 {
                     writeStream.WriteByte((byte)packet.Type);
@@ -911,7 +911,7 @@ namespace Microsoft.Build.BackEnd
                     // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
                     using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
                     {
-                        INodePacketTranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
+                        ITranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
                         _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
                     }
                 }

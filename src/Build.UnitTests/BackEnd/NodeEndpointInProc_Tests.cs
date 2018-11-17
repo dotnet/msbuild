@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 throw new NotImplementedException();
             }
 
-            public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, INodePacketTranslator translator)
+            public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
             {
                 throw new NotImplementedException();
             }
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 get { throw new NotImplementedException(); }
             }
 
-            public void Translate(INodePacketTranslator translator)
+            public void Translate(ITranslator translator)
             {
                 throw new NotImplementedException();
             }

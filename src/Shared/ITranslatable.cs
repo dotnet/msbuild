@@ -8,7 +8,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     /// <param name="translator">the translator</param>
     /// <param name="obj">the object to translate</param>
-    internal delegate void Translator<T>(ref T obj, INodePacketTranslator translator);
+    internal delegate void Translator<T>(ref T obj, ITranslator translator);
 
     /// <summary>
     /// An interface representing an object which may be serialized by the node packet serializer.
@@ -18,6 +18,6 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void Translate(INodePacketTranslator translator);
+        void Translate(ITranslator translator);
     }
 }

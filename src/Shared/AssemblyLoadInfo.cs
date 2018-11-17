@@ -95,7 +95,7 @@ namespace Microsoft.Build.Shared
             return ((this.AssemblyName == otherAssemblyInfo.AssemblyName) && (this.AssemblyFile == otherAssemblyInfo.AssemblyFile));
         }
 
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
             string assemblyName = AssemblyName;
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Shared
             translator.Translate(ref assemblyFile);
         }
 
-        static public AssemblyLoadInfo FactoryForTranslation(INodePacketTranslator translator)
+        static public AssemblyLoadInfo FactoryForTranslation(ITranslator translator)
         {
             string assemblyName = null;
             string assemblyFile = null;

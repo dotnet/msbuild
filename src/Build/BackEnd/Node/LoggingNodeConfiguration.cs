@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
             _includeTaskInputs = includeTaskInputs;
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _includeEvaluationMetaprojects);
             translator.Translate(ref _includeEvaluationProfiles);

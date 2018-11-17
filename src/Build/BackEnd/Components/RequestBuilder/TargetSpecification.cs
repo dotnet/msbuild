@@ -47,13 +47,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ElementLocation ReferenceLocation => _referenceLocation;
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _targetName);
             translator.Translate(ref _referenceLocation, ElementLocation.FactoryForDeserialization);
         }
 
-        internal static TargetSpecification FactoryForDeserialization(INodePacketTranslator translator)
+        internal static TargetSpecification FactoryForDeserialization(ITranslator translator)
         {
             var instance = new TargetSpecification();
             ((ITranslatable) instance).Translate(translator);

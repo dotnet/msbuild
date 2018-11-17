@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd
         /// Returns a read-only serializer.
         /// </summary>
         /// <returns>The serializer.</returns>
-        static internal INodePacketTranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
+        static internal ITranslator GetReadTranslator(Stream stream, SharedReadBuffer buffer)
         {
             return new BinaryReadTranslator(stream, buffer);
         }
@@ -43,15 +43,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="stream">The stream containing data to serialize.</param>
         /// <returns>The serializer.</returns>
-        static internal INodePacketTranslator GetWriteTranslator(Stream stream)
+        static internal ITranslator GetWriteTranslator(Stream stream)
         {
             return new BinaryWriteTranslator(stream);
         }
 
         /// <summary>
-        /// Implementation of INodePacketTranslator for reading from a stream.
+        /// Implementation of ITranslator for reading from a stream.
         /// </summary>
-        private class BinaryReadTranslator : INodePacketTranslator
+        private class BinaryReadTranslator : ITranslator
         {
             /// <summary>
             /// The stream used as a source or destination for data.
@@ -668,9 +668,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Implementation of INodePacketTranslator for writing to a stream.
+        /// Implementation of ITranslator for writing to a stream.
         /// </summary>
-        private class BinaryWriteTranslator : INodePacketTranslator
+        private class BinaryWriteTranslator : ITranslator
         {
             /// <summary>
             /// The stream used as a source or destination for data.

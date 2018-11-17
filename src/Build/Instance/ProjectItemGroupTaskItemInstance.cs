@@ -372,7 +372,7 @@ namespace Microsoft.Build.Execution
             return new ProjectItemGroupTaskItemInstance(this);
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _itemType);
             translator.Translate(ref _include);
@@ -393,7 +393,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _metadata, ProjectItemGroupTaskMetadataInstance.FactoryForDeserialization);
         }
 
-        internal static ProjectItemGroupTaskItemInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectItemGroupTaskItemInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectItemGroupTaskItemInstance();
             ((ITranslatable)instance).Translate(translator);

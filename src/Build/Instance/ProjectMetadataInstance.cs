@@ -89,7 +89,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Private constructor used for serialization
         /// </summary>
-        private ProjectMetadataInstance(INodePacketTranslator translator)
+        private ProjectMetadataInstance(ITranslator translator)
         {
             translator.Translate(ref _name);
             translator.Translate(ref _escapedValue);
@@ -172,7 +172,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             // Read implementation is directly in the constructor so that fields can be read-only
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
@@ -224,7 +224,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static ProjectMetadataInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectMetadataInstance FactoryForDeserialization(ITranslator translator)
         {
             return new ProjectMetadataInstance(translator);
         }

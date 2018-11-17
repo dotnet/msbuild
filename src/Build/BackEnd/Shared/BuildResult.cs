@@ -272,7 +272,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        private BuildResult(INodePacketTranslator translator)
+        private BuildResult(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
         }
@@ -533,7 +533,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _submissionId);
             translator.Translate(ref _configurationId);
@@ -554,7 +554,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        internal static BuildResult FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildResult FactoryForDeserialization(ITranslator translator)
         {
             return new BuildResult(translator);
         }

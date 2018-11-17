@@ -42,13 +42,13 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public abstract ElementLocation ConditionLocation { get; }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             // all subclasses should be translateable
             ErrorUtilities.ThrowInternalErrorUnreachable();
         }
 
-        internal static ProjectTargetInstanceChild FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectTargetInstanceChild FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectTargetInstanceChild>();
         }

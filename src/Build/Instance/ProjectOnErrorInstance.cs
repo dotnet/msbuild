@@ -113,7 +113,7 @@ namespace Microsoft.Build.Execution
             get { return _executeTargetsLocation; }
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _executeTargetsLocation, ElementLocation.FactoryForDeserialization);
         }
 
-        internal new static ProjectOnErrorInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal new static ProjectOnErrorInstance FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectOnErrorInstance>();
         }

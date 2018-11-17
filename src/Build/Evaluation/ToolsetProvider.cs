@@ -44,7 +44,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
-        private ToolsetProvider(INodePacketTranslator translator)
+        private ToolsetProvider(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
         }
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Translates to and from binary form.
         /// </summary>
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.TranslateDictionary(ref _toolsets, StringComparer.OrdinalIgnoreCase, Toolset.FactoryForDeserialization);
         }
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static ToolsetProvider FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ToolsetProvider FactoryForDeserialization(ITranslator translator)
         {
             ToolsetProvider provider = new ToolsetProvider(translator);
             return provider;

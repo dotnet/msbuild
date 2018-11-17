@@ -46,13 +46,13 @@ namespace Microsoft.Build.Execution
             get;
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             // all subclasses should be translateable
             ErrorUtilities.ThrowInternalErrorUnreachable();
         }
 
-        internal static ProjectTaskInstanceChild FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectTaskInstanceChild FactoryForDeserialization(ITranslator translator)
         {
             return translator.FactoryForDeserializingTypeWithName<ProjectTaskInstanceChild>();
         }

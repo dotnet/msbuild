@@ -242,7 +242,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Private constructor for deserialization
         /// </summary>
-        private BuildRequestConfiguration(INodePacketTranslator translator)
+        private BuildRequestConfiguration(ITranslator translator)
         {
             Translate(translator);
         }
@@ -598,7 +598,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (IsCacheable)
                     {
-                        INodePacketTranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
+                        ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
 
                         try
                         {
@@ -633,7 +633,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                INodePacketTranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
+                ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
                 try
                 {
                     _project.RetrieveFromCache(translator);
@@ -773,7 +773,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Reads or writes the packet to the serializer.
         /// </summary>
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream && _transferredProperties == null)
             {
@@ -805,7 +805,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildRequestConfiguration FactoryForDeserialization(ITranslator translator)
         {
             return new BuildRequestConfiguration(translator);
         }
@@ -910,7 +910,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private INodePacketTranslator GetConfigurationTranslator(TranslationDirection direction)
+        private ITranslator GetConfigurationTranslator(TranslationDirection direction)
         {
             string cacheFile = GetCacheFile();
             try

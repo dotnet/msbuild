@@ -135,7 +135,7 @@ namespace Microsoft.Build.Execution
             return new ProjectItemGroupTaskMetadataInstance(this);
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _name);
             translator.Translate(ref _value);
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
         }
 
-        internal static ProjectItemGroupTaskMetadataInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectItemGroupTaskMetadataInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectItemGroupTaskMetadataInstance();
             ((ITranslatable) instance).Translate(translator);

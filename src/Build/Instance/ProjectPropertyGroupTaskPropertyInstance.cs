@@ -133,7 +133,7 @@ namespace Microsoft.Build.Execution
             return new ProjectPropertyGroupTaskPropertyInstance(this);
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _name);
             translator.Translate(ref _value);
@@ -142,7 +142,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _conditionLocation, ElementLocation.FactoryForDeserialization);
         }
 
-        internal static ProjectPropertyGroupTaskPropertyInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectPropertyGroupTaskPropertyInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectPropertyGroupTaskPropertyInstance();
             ((ITranslatable) instance).Translate(translator);

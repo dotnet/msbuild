@@ -125,7 +125,7 @@ namespace Microsoft.Build.Execution
         {
             return new ProjectPropertyGroupTaskInstance(this);
         }
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {

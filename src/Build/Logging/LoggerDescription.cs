@@ -344,7 +344,7 @@ namespace Microsoft.Build.Logging
 
         #region INodePacketTranslatable Members
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _loggerClassName);
             translator.Translate(ref _loggerSwitchParameters);
@@ -353,7 +353,7 @@ namespace Microsoft.Build.Logging
             translator.Translate(ref _loggerId);
         }
 
-        static internal LoggerDescription FactoryForTranslation(INodePacketTranslator translator)
+        static internal LoggerDescription FactoryForTranslation(ITranslator translator)
         {
             LoggerDescription description = new LoggerDescription();
             ((ITranslatable)description).Translate(translator);

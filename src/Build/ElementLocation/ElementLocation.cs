@@ -137,7 +137,7 @@ namespace Microsoft.Build.Construction
         /// Always send as ints, even if ushorts are being used: otherwise it'd
         /// need a byte to discriminate and the savings would be microscopic.
         /// </summary>
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
 
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Construction
         /// Factory for serialization.
         /// Custom factory is needed because this class is abstract and uses a factory pattern.
         /// </summary>
-        internal static ElementLocation FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ElementLocation FactoryForDeserialization(ITranslator translator)
         {
             string file = null;
             int line = 0;

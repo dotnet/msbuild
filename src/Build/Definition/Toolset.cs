@@ -364,7 +364,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Private constructor for serialization.
         /// </summary>
-        private Toolset(INodePacketTranslator translator)
+        private Toolset(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
         }
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Function for serialization.
         /// </summary>
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _toolsVersion);
             translator.Translate(ref _toolsPath);
@@ -687,7 +687,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static Toolset FactoryForDeserialization(INodePacketTranslator translator)
+        internal static Toolset FactoryForDeserialization(ITranslator translator)
         {
             Toolset toolset = new Toolset(translator);
             return toolset;

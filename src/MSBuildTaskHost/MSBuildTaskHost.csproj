@@ -88,8 +88,8 @@
     <Compile Include="..\Shared\ITranslatable.cs">
       <Link>ITranslatable.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\INodePacketTranslator.cs">
-      <Link>INodePacketTranslator.cs</Link>
+    <Compile Include="..\Shared\ITranslator.cs">
+      <Link>ITranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InternalErrorException.cs">
       <Link>InternalErrorException.cs</Link>

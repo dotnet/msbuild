@@ -511,7 +511,7 @@ namespace Microsoft.Build.Execution
             return task;
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _name);
             translator.Translate(ref _condition);
@@ -544,7 +544,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        internal static ProjectTargetInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectTargetInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectTargetInstance();
             var translatable = (ITranslatable) instance;

@@ -966,7 +966,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            public void Translate(INodePacketTranslator translator)
+            public void Translate(ITranslator translator)
             {
                 translator.Translate(ref _name);
 
@@ -1698,7 +1698,7 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                public void Translate(INodePacketTranslator translator)
+                public void Translate(ITranslator translator)
                 {
                     translator.Translate(ref _inlineTaskXmlBody);
                     translator.Translate(ref _taskBodyEvaluated);
@@ -1707,13 +1707,13 @@ namespace Microsoft.Build.Execution
                 }
 
                 // todo move to nested function after C# 7
-                private static void TranslatorForTaskParametersKey(ref string key, INodePacketTranslator translator)
+                private static void TranslatorForTaskParametersKey(ref string key, ITranslator translator)
                 {
                     translator.Translate(ref key);
                 }
 
                 // todo move to nested function after C# 7
-                private static void TranslatorForTaskParameterValue(ref TaskPropertyInfo taskPropertyInfo, INodePacketTranslator translator)
+                private static void TranslatorForTaskParameterValue(ref TaskPropertyInfo taskPropertyInfo, ITranslator translator)
                 {
                     string name = null;
                     string propertyTypeName = null;
@@ -1743,7 +1743,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            public void Translate(INodePacketTranslator translator)
+            public void Translate(ITranslator translator)
             {
                 translator.Translate(ref _taskIdentity);
                 translator.Translate(ref _registeredName);
@@ -1760,7 +1760,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            internal static RegisteredTaskRecord FactoryForDeserialization(INodePacketTranslator translator)
+            internal static RegisteredTaskRecord FactoryForDeserialization(ITranslator translator)
             {
                 var instance = new RegisteredTaskRecord();
                 instance.Translate(translator);
@@ -1769,7 +1769,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        public void Translate(INodePacketTranslator translator)
+        public void Translate(ITranslator translator)
         {
             translator.Translate(ref _toolset, Toolset.FactoryForDeserialization);
 
@@ -1783,18 +1783,18 @@ namespace Microsoft.Build.Execution
         }
 
         //todo make nested after C# 7
-        void TranslateTaskRegistrationKey(ref RegisteredTaskIdentity taskIdentity, INodePacketTranslator translator)
+        void TranslateTaskRegistrationKey(ref RegisteredTaskIdentity taskIdentity, ITranslator translator)
         {
             translator.Translate(ref taskIdentity);
         }
 
         //todo make nested after C# 7
-        void TranslateTaskRegistrationValue(ref List<RegisteredTaskRecord> taskRecords, INodePacketTranslator translator)
+        void TranslateTaskRegistrationValue(ref List<RegisteredTaskRecord> taskRecords, ITranslator translator)
         {
             translator.Translate(ref taskRecords, RegisteredTaskRecord.FactoryForDeserialization);
         }
 
-        public static TaskRegistry FactoryForDeserialization(INodePacketTranslator translator)
+        public static TaskRegistry FactoryForDeserialization(ITranslator translator)
         {
             var instance = new TaskRegistry();
             instance.Translate(translator);

@@ -240,7 +240,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Private constructor for translation
         /// </summary>
-        private BuildParameters(INodePacketTranslator translator)
+        private BuildParameters(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
         }
@@ -758,7 +758,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Implementation of the serialization mechanism.
         /// </summary>
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _buildId);
             /* No build thread priority during translation.  We specifically use the default (which is ThreadPriority.Normal) */
@@ -798,7 +798,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The class factory for deserialization.
         /// </summary>
-        internal static BuildParameters FactoryForDeserialization(INodePacketTranslator translator)
+        internal static BuildParameters FactoryForDeserialization(ITranslator translator)
         {
             return new BuildParameters(translator);
         }

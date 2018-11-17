@@ -122,7 +122,7 @@
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\ITranslatable.cs" />
-    <Compile Include="..\Shared\INodePacketTranslator.cs" />
+    <Compile Include="..\Shared\ITranslator.cs" />
     <Compile Include="..\Shared\BinaryTranslator.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />

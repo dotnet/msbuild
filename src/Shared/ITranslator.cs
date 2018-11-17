@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// another method.  When invoked, this delegate should return a new object which has been translated appropriately.
     /// </summary>
     /// <typeparam name="T">The type to be translated.</typeparam>
-    internal delegate T NodePacketValueFactory<T>(INodePacketTranslator translator);
+    internal delegate T NodePacketValueFactory<T>(ITranslator translator);
 
     /// <summary>
     /// This delegate is used to create arbitrary collection types for serialization.
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd
     ///    that by ensuring a single Translate method on a given object can handle both reads and
     ///    writes without referencing any field more than once.
     /// </remarks>
-    internal interface INodePacketTranslator
+    internal interface ITranslator
     {
         /// <summary>
         /// Returns the current serialization mode.

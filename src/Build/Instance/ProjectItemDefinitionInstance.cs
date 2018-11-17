@@ -222,13 +222,13 @@ namespace Microsoft.Build.Execution
             return element;
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _itemType);
             translator.TranslateDictionary(ref _metadata, ProjectMetadataInstance.FactoryForDeserialization);
         }
 
-        internal static ProjectItemDefinitionInstance FactoryForDeserialization(INodePacketTranslator translator)
+        internal static ProjectItemDefinitionInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectItemDefinitionInstance();
             ((ITranslatable) instance).Translate(translator);

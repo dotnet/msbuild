@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Gets a serializer used to write data.  Note that only one such serializer may be used from this class at a time.
         /// </summary>
-        static internal INodePacketTranslator GetWriteTranslator()
+        static internal ITranslator GetWriteTranslator()
         {
             s_serializationStream = new MemoryStream();
             return BinaryTranslator.GetWriteTranslator(s_serializationStream);
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Gets a serializer used to read data.  Note that only one such serializer may be used from this class at a time,
         /// and this must be called after GetWriteTranslator() has been called.
         /// </summary>
-        static internal INodePacketTranslator GetReadTranslator()
+        static internal ITranslator GetReadTranslator()
         {
             s_serializationStream.Seek(0, SeekOrigin.Begin);
             return BinaryTranslator.GetReadTranslator(s_serializationStream, null);

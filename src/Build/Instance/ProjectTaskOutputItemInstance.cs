@@ -134,7 +134,7 @@ namespace Microsoft.Build.Execution
             get { return _itemTypeLocation; }
         }
 
-        void ITranslatable.Translate(INodePacketTranslator translator)
+        void ITranslatable.Translate(ITranslator translator)
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
