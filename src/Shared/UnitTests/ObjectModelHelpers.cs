@@ -245,23 +245,29 @@ namespace Microsoft.Build.UnitTests
 
         public static void AssertItems(string[] expectedItems, IList<TestItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
-            Assert.Equal(expectedItems.Length, items.Count);
+            if (items.Count != 0 || expectedDirectMetadataPerItem.Length != 0)
+            {
+                expectedItems.ShouldNotBeEmpty();
+            }
 
-            Assert.Equal(expectedItems.Length, expectedDirectMetadataPerItem.Length);
-
-            for (int i = 0; i < expectedItems.Length; i++)
+            for (var i = 0; i < expectedItems.Length; i++)
             {
                 if (!normalizeSlashes)
                 {
-                    Assert.Equal(expectedItems[i], items[i].EvaluatedInclude);
+                    expectedItems[i].ShouldBe(items[i].EvaluatedInclude);
                 }
                 else
                 {
-                    Assert.Equal(NormalizeSlashes(expectedItems[i]), items[i].EvaluatedInclude);
+                    var normalizedItem = NormalizeSlashes(expectedItems[i]);
+                    normalizedItem.ShouldBe(items[i].EvaluatedInclude);
                 }
 
                 AssertItemHasMetadata(expectedDirectMetadataPerItem[i], items[i]);
             }
+
+            expectedItems.Length.ShouldBe(items.Count);
+
+            expectedItems.Length.ShouldBe(expectedDirectMetadataPerItem.Length);
         }
 
         /// <summary>

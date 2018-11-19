@@ -1930,10 +1930,11 @@ namespace Microsoft.Build.Shared
                 filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
 
                 // increase the chance of cache hits when multiple relative globs refer to the same base directory
-                if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
-                {
-                    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
-                }
+                // todo https://github.com/Microsoft/msbuild/issues/3889
+                //if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
+                //{
+                //    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                //}
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
