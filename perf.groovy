@@ -41,7 +41,7 @@ def static getBuildJobName(def configuration, def os) {
 
                 steps {
                    // Build solution and run the performance tests
-                   batchFile("\"%WORKSPACE%\\build.cmd\" -configuration ${config} -ci -perf /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
+                   batchFile("\"%WORKSPACE%\\build.cmd\" -configuration ${config} -ci -msbuildEngine dotnet -performanceTest /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
 
                    // Upload perf results to BenchView
                    batchFile("set perfWorkingDirectory=${perfWorkingDirectory}\n" +
@@ -120,7 +120,7 @@ def static getBuildJobName(def configuration, def os) {
 
                 steps {
                    // Build solution and run the performance tests
-                   shell("./build.sh --configuration ${config} --ci --perf /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
+                   shell("./build.sh --configuration ${config} --ci --performancetest /p:PerfIterations=10 /p:PerfOutputDirectory=\"${perfWorkingDirectory}\" /p:PerfCollectionType=stopwatch")
 
                    // Upload perf results to BenchView
                    shell("export perfWorkingDirectory=${perfWorkingDirectory}\n" +
