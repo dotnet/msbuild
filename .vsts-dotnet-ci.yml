@@ -95,7 +95,7 @@ phases:
 
 - phase: CoreOnLinux
   displayName: "Build and test on Linux using .NET Core MSBuild"
-  queue: Hosted Linux Preview
+  queue: 'Hosted Ubuntu 1604'
   steps:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
@@ -123,7 +123,7 @@ phases:
 
 - phase: CoreOnMac
   displayName: "Build and test on macOS using .NET Core MSBuild"
-  queue: 'Hosted macOS Preview'
+  queue: 'Hosted macOS'
   steps:
   - bash: . 'build/cibuild.sh'
     displayName: CI Build
