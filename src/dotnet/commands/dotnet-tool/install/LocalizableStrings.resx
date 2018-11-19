@@ -218,7 +218,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
     <value>PATH</value>
   </data>
   <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
-    <value>Only the local option(--local) support manifest file option (--tool-manifest).</value>
+    <value>Only the local option (--local) supports the manifest file option (--tool-manifest).</value>
   </data>
     <data name="LocalOptionDoesNotSupportFrameworkOption" xml:space="preserve">
     <value>Local option(--local) does not support framework option.</value>

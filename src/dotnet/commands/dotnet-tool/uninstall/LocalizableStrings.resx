@@ -160,15 +160,15 @@
     <value>PATH</value>
   </data>
   <data name="LocalOptionDescription" xml:space="preserve">
-    <value>Uninstall the tool and add to the local tool manifest.</value>
+    <value>Uninstall the tool and remove it from the local tool manifest.</value>
   </data>
   <data name="UninstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
-    <value>Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</value>
+    <value>The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</value>
   </data>
   <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
     <value>Only the local option(--local) support manifest file option (--tool-manifest).</value>
   </data>
   <data name="UninstallLocalToolSucceeded" xml:space="preserve">
-    <value>Tool '{0}' was successfully uninstalled. Entry is removed from manifest file {1}.</value>
+    <value>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</value>
   </data>
 </root>

@@ -42,8 +42,8 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Only the local option(--local) support manifest file option (--tool-manifest).</source>
-        <target state="new">Only the local option(--local) support manifest file option (--tool-manifest).</target>
+        <source>Only the local option (--local) supports the manifest file option (--tool-manifest).</source>
+        <target state="new">Only the local option (--local) supports the manifest file option (--tool-manifest).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
