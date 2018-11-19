@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pl" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="CannotFindPackageIdInManifest">
+        <source>Cannot find any package with package id {0} in manifest file.</source>
+        <target state="new">Cannot find any package with package id {0} in manifest file.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestPackageIdCollision">
         <source>Cannot add package {0} version {1} to manifest file {2}. Package {3} version {4} exists.</source>
         <target state="new">Cannot add package {0} version {1} to manifest file {2}. Package {3} version {4} exists.</target>

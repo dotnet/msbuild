@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="new">Uninstall the tool and remove it from the local tool manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="new">Path to the manifest file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Only the local option(--local) support manifest file option (--tool-manifest).</source>
+        <target state="new">Only the local option(--local) support manifest file option (--tool-manifest).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">要卸载的工具的 NuGet 包 ID。</target>
@@ -27,6 +47,11 @@
         <target state="translated">从当前用户的工具目录中卸载该工具。</target>
         <note />
       </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="new">Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
         <target state="translated">已成功卸载工具“{0}”（版本“{1}”）。</target>
@@ -47,14 +72,9 @@
         <target state="translated">无法卸载工具“{0}”: {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">请指定全局选项(--global)或工具路径选项(--tool-path)。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global)与工具路径选项(--tool-path)冲突。请仅指定其中一种选项。</target>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</source>
+        <target state="new">The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

@@ -42,10 +42,10 @@ namespace Microsoft.DotNet.Tests.Commands
             toolManifestFileEditor.Add(new FilePath(manifestFile),
                 new PackageId("new-tool"),
                 NuGetVersion.Parse("3.0.0"),
-                new[] { new ToolCommandName("newtool") });
+                new[] {new ToolCommandName("newtool")});
 
             _fileSystem.File.ReadAllText(manifestFile).Should().Be(
-@"{
+                @"{
   ""version"": 1,
   ""isRoot"": true,
   ""tools"": {
@@ -72,7 +72,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenManifestFileOnSameDirectoryWhenAddingTheSamePackageIdToolItThrows()
+        public void GivenManifestFileWhenAddingTheSamePackageIdToolItThrows()
         {
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
@@ -114,7 +114,7 @@ namespace Microsoft.DotNet.Tests.Commands
             Action a = () => toolManifestFileEditor.Add(new FilePath(manifestFile),
                 packageId,
                 nuGetVersion,
-                new[] { new ToolCommandName("dotnetsay") });
+                new[] {new ToolCommandName("dotnetsay")});
 
             a.ShouldNotThrow();
 
@@ -122,7 +122,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenAnInvalidManifestFileOnSameDirectoryWhenAddItThrows()
+        public void GivenAnInvalidManifestFileWhenAddItThrows()
         {
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonWithInvalidField);
@@ -135,6 +135,72 @@ namespace Microsoft.DotNet.Tests.Commands
                 packageId,
                 nuGetVersion,
                 new[] {new ToolCommandName("dotnetsay")});
+
+            a.ShouldThrow<ToolManifestException>()
+                .And.Message.Should().Contain(
+                    string.Format(LocalizableStrings.InvalidManifestFilePrefix,
+                        manifestFile,
+                        string.Empty));
+
+            _fileSystem.File.ReadAllText(manifestFile).Should().Be(_jsonWithInvalidField);
+        }
+
+        [Fact]
+        public void GivenManifestFileItCanRemoveEntryFromIt()
+        {
+            string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
+
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+
+            toolManifestFileEditor.Remove(new FilePath(manifestFile),
+                new PackageId("dotnetsay"));
+
+            _fileSystem.File.ReadAllText(manifestFile).Should().Be(
+                @"{
+  ""version"": 1,
+  ""isRoot"": true,
+  ""tools"": {
+    ""t-rex"": {
+      ""version"": ""1.0.53"",
+      ""commands"": [
+        ""t-rex""
+      ]
+    }
+  }
+}");
+        }
+
+        [Fact]
+        public void GivenManifestFileWhenRemoveNonExistPackageIdToolItThrows()
+        {
+            string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
+
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+
+            Action a = () => toolManifestFileEditor.Remove(
+                new FilePath(manifestFile),
+                new PackageId("non-exist"));
+
+            a.ShouldThrow<ToolManifestException>()
+                .And.Message.Should().Contain(string.Format(
+                    LocalizableStrings.CannotFindPackageIdInManifest, "non-exist"));
+
+            _fileSystem.File.ReadAllText(manifestFile).Should().Be(_jsonContent);
+        }
+
+        [Fact]
+        public void GivenAnInvalidManifestFileWhenRemoveItThrows()
+        {
+            string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
+            _fileSystem.File.WriteAllText(manifestFile, _jsonWithInvalidField);
+
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+
+            Action a = () => toolManifestFileEditor.Remove(
+                new FilePath(manifestFile),
+                new PackageId("dotnetsay"));
 
             a.ShouldThrow<ToolManifestException>()
                 .And.Message.Should().Contain(

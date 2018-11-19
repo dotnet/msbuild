@@ -29,215 +29,85 @@ namespace Microsoft.DotNet.Tests.Commands
     public class ToolUninstallCommandTests
     {
         private readonly BufferedReporter _reporter;
-        private readonly IFileSystem _fileSystem;
-        private readonly EnvironmentPathInstructionMock _environmentPathInstructionMock;
 
         private const string PackageId = "global.tool.console.demo";
         private const string PackageVersion = "1.0.4";
-        private readonly string _shimsDirectory;
-        private readonly string _toolsDirectory;
+        
 
         public ToolUninstallCommandTests()
         {
             _reporter = new BufferedReporter();
-            _fileSystem = new FileSystemMockBuilder().UseCurrentSystemTemporaryDirectory().Build();
-            var tempDirectory = _fileSystem.Directory.CreateTemporaryDirectory().DirectoryPath;
-            _shimsDirectory = Path.Combine(tempDirectory, "shims");
-            _toolsDirectory = Path.Combine(tempDirectory, "tools");
-            _environmentPathInstructionMock = new EnvironmentPathInstructionMock(_reporter, _shimsDirectory);
         }
-
-        [Fact]
-        public void GivenANonExistentPackageItErrors()
-        {
-            var packageId = "does.not.exist";
-            var command = CreateUninstallCommand($"-g {packageId}");
-
-            Action a = () => command.Execute();
-
-            a.ShouldThrow<GracefulException>()
-                .And
-                .Message
-                .Should()
-                .Be(string.Format(LocalizableStrings.ToolNotInstalled, packageId));
-        }
-
-        [Fact]
-        public void GivenAPackageItUninstalls()
-        {
-            CreateInstallCommand($"-g {PackageId}").Execute().Should().Be(0);
-
-            _reporter
-                .Lines
-                .Last()
-                .Should()
-                .Contain(string.Format(
-                    InstallLocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.DefaultToolCommandName,
-                    PackageId,
-                    PackageVersion));
-
-            var packageDirectory = new DirectoryPath(Path.GetFullPath(_toolsDirectory))
-                .WithSubDirectories(PackageId, PackageVersion);
-            var shimPath = Path.Combine(
-                _shimsDirectory,
-                ProjectRestorerMock.DefaultToolCommandName +
-                    (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
-
-            _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeTrue();
-            _fileSystem.File.Exists(shimPath).Should().BeTrue();
-
-            _reporter.Lines.Clear();
-
-            CreateUninstallCommand($"-g {PackageId}").Execute().Should().Be(0);
-
-            _reporter
-                .Lines
-                .Single()
-                .Should()
-                .Contain(string.Format(
-                    LocalizableStrings.UninstallSucceeded,
-                    PackageId,
-                    PackageVersion));
-
-            _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeFalse();
-            _fileSystem.File.Exists(shimPath).Should().BeFalse();
-        }
-
-        [Fact]
-        public void GivenAFailureToUninstallItLeavesItInstalled()
-        {
-            CreateInstallCommand($"-g {PackageId}").Execute().Should().Be(0);
-
-            _reporter
-                .Lines
-                .Last()
-                .Should()
-                .Contain(string.Format(
-                    InstallLocalizableStrings.InstallationSucceeded,
-                    ProjectRestorerMock.DefaultToolCommandName,
-                    PackageId,
-                    PackageVersion));
-
-            var packageDirectory = new DirectoryPath(Path.GetFullPath(_toolsDirectory))
-                .WithSubDirectories(PackageId, PackageVersion);
-            var shimPath = Path.Combine(
-                _shimsDirectory,
-                ProjectRestorerMock.DefaultToolCommandName +
-                    (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""));
-
-            _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeTrue();
-            _fileSystem.File.Exists(shimPath).Should().BeTrue();
-
-            Action a = () => CreateUninstallCommand(
-                options: $"-g {PackageId}",
-                uninstallCallback: () => throw new IOException("simulated error"))
-                .Execute();
-
-            a.ShouldThrow<GracefulException>()
-                .And
-                .Message
-                .Should()
-                .Be(string.Format(
-                    CommonLocalizableStrings.FailedToUninstallToolPackage,
-                    PackageId,
-                    "simulated error"));
-
-            _fileSystem.Directory.Exists(packageDirectory.Value).Should().BeTrue();
-            _fileSystem.File.Exists(shimPath).Should().BeTrue();
-        }
-
+        
         [Fact]
         public void WhenRunWithBothGlobalAndToolPathShowErrorMessage()
         {
-            var uninstallCommand = CreateUninstallCommand($"-g --tool-path {Path.GetTempPath()} {PackageId}");
+            var result = Parser.Instance.Parse($"dotnet tool uninstall -g --tool-path /tmp/folder {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["uninstall"];
+            
+            var toolUninstallCommand = new ToolUninstallCommand(
+                appliedCommand,
+                result);
 
-            Action a = () => uninstallCommand.Execute();
+            Action a = () => toolUninstallCommand.Execute();
 
-            a.ShouldThrow<GracefulException>()
-                .And
-                .Message
-                .Should()
-                .Be(LocalizableStrings.UninstallToolCommandInvalidGlobalAndToolPath);
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(string.Format(
+                    LocalizableStrings.UninstallToolCommandInvalidGlobalAndLocalAndToolPath,
+                    "global tool-path"));
         }
 
         [Fact]
-        public void GivenAnInvalidToolPathItThrowsException()
+        public void WhenRunWithBothGlobalAndLocalShowErrorMessage()
         {
-            var toolPath = "tool-path-does-not-exist";
+            var result = Parser.Instance.Parse($"dotnet tool uninstall --local --tool-path /tmp/folder {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["uninstall"];
 
-            var uninstallCommand = CreateUninstallCommand($"--tool-path {toolPath} {PackageId}");
+            var toolUninstallCommand = new ToolUninstallCommand(
+                appliedCommand,
+                result);
 
-            Action a = () => uninstallCommand.Execute();
+            Action a = () => toolUninstallCommand.Execute();
 
-            a.ShouldThrow<GracefulException>()
-                .And
-                .Message
-                .Should()
-                .Be(string.Format(LocalizableStrings.InvalidToolPathOption, toolPath));
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(
+                    string.Format(LocalizableStrings.UninstallToolCommandInvalidGlobalAndLocalAndToolPath,
+                        "local tool-path"));
+        }
+        
+        [Fact]
+        public void WhenRunWithGlobalAndToolManifestShowErrorMessage()
+        {
+            var result =
+                Parser.Instance.Parse($"dotnet tool uninstall -g --tool-manifest folder/my-manifest.format {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["uninstall"];
+
+            var toolUninstallCommand = new ToolUninstallCommand(
+                appliedCommand,
+                result);
+            
+            Action a = () => toolUninstallCommand.Execute();
+
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
 
         [Fact]
-        public void WhenRunWithNeitherOfGlobalNorToolPathShowErrorMessage()
+        public void WhenRunWithToolPathAndToolManifestShowErrorMessage()
         {
-            var uninstallCommand = CreateUninstallCommand(PackageId);
+            var result =
+                Parser.Instance.Parse(
+                    $"dotnet tool uninstall --tool-path /tmp/folder --tool-manifest folder/my-manifest.format {PackageId}");
+            var appliedCommand = result["dotnet"]["tool"]["uninstall"];
 
-            Action a = () => uninstallCommand.Execute();
+            var toolUninstallCommand = new ToolUninstallCommand(
+                appliedCommand,
+                result);
 
-            a.ShouldThrow<GracefulException>()
-                .And
-                .Message
-                .Should()
-                .Be(LocalizableStrings.UninstallToolCommandNeedGlobalOrToolPath);
-        }
+            Action a = () => toolUninstallCommand.Execute();
 
-        private ToolInstallGlobalOrToolPathCommand CreateInstallCommand(string options)
-        {
-            ParseResult result = Parser.Instance.Parse("dotnet tool install " + options);
-
-            var store = new ToolPackageStoreMock(new DirectoryPath(_toolsDirectory), _fileSystem);
-            var packageInstallerMock = new ToolPackageInstallerMock(
-                _fileSystem,
-                store,
-                new ProjectRestorerMock(
-                    _fileSystem,
-                    _reporter));
-
-            return new ToolInstallGlobalOrToolPathCommand(
-                result["dotnet"]["tool"]["install"],
-                result,
-                (location, forwardArguments) => (store, store, packageInstallerMock),
-                (_) => new ShellShimRepository(
-                    new DirectoryPath(_shimsDirectory),
-                    fileSystem: _fileSystem,
-                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
-                _environmentPathInstructionMock,
-                _reporter);
-        }
-
-        private ToolUninstallCommand CreateUninstallCommand(string options, Action uninstallCallback = null)
-        {
-            ParseResult result = Parser.Instance.Parse("dotnet tool uninstall " + options);
-
-            (IToolPackageStore, IToolPackageStoreQuery, IToolPackageUninstaller) createToolPackageStoreAndUninstaller(
-                DirectoryPath? directoryPath)
-            {
-                var store = new ToolPackageStoreMock(
-                    new DirectoryPath(_toolsDirectory),
-                    _fileSystem);
-                var packageUninstaller = new ToolPackageUninstallerMock(_fileSystem, store, uninstallCallback);
-                return (store, store, packageUninstaller);
-            }
-
-            return new ToolUninstallCommand(
-                result["dotnet"]["tool"]["uninstall"],
-                result,
-                createToolPackageStoreAndUninstaller,
-                (_) => new ShellShimRepository(
-                    new DirectoryPath(_shimsDirectory),
-                    fileSystem: _fileSystem,
-                    appHostShellShimMaker: new AppHostShellShimMakerMock(_fileSystem)),
-                _reporter);
+            a.ShouldThrow<GracefulException>().And.Message
+                .Should().Contain(LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
     }
 }

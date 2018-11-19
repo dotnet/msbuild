@@ -2,6 +2,26 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../LocalizableStrings.resx">
     <body>
+      <trans-unit id="LocalOptionDescription">
+        <source>Uninstall the tool and remove it from the local tool manifest.</source>
+        <target state="new">Uninstall the tool and remove it from the local tool manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionDescription">
+        <source>Path to the manifest file.</source>
+        <target state="new">Path to the manifest file.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestPathOptionName">
+        <source>PATH</source>
+        <target state="new">PATH</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
+        <source>Only the local option(--local) support manifest file option (--tool-manifest).</source>
+        <target state="new">Only the local option(--local) support manifest file option (--tool-manifest).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
         <source>The NuGet Package Id of the tool to uninstall.</source>
         <target state="translated">El id. del paquete de NuGet de la herramienta que se desinstalará.</target>
@@ -27,6 +47,11 @@
         <target state="translated">Desinstala la herramienta del directorio de herramientas del usuario actual.</target>
         <note />
       </trans-unit>
+      <trans-unit id="UninstallLocalToolSucceeded">
+        <source>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</source>
+        <target state="new">Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UninstallSucceeded">
         <source>Tool '{0}' (version '{1}') was successfully uninstalled.</source>
         <target state="translated">La herramienta "{0}" (versión "{1}") se desinstaló correctamente.</target>
@@ -47,14 +72,9 @@
         <target state="translated">No se pudo desinstalar la herramienta "{0}": {1}</target>
         <note />
       </trans-unit>
-      <trans-unit id="UninstallToolCommandNeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Especifique la opción global (--global) o la opción de la ruta de acceso de herramientas (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="UninstallToolCommandInvalidGlobalAndToolPath">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) entra en conflicto con la opción de la ruta de acceso de herramientas (--tool-path). Especifique solo una de las opciones.</target>
+      <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</source>
+        <target state="new">The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

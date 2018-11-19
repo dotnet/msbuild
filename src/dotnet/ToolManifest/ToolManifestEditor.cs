@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using Microsoft.CodeAnalysis;
 using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
@@ -60,12 +62,12 @@ namespace Microsoft.DotNet.ToolManifest
                     existingPackage.Version.ToNormalizedString()));
             }
 
-            deserializedManifest.tools.Add(
+            deserializedManifest.Tools.Add(
                 packageId.ToString(),
                 new SerializableLocalToolSinglePackage
                 {
-                    version = nuGetVersion.ToNormalizedString(),
-                    commands = toolCommandNames.Select(c => c.Value).ToArray()
+                    Version = nuGetVersion.ToNormalizedString(),
+                    Commands = toolCommandNames.Select(c => c.Value).ToArray()
                 });
 
             _fileSystem.File.WriteAllText(
@@ -85,7 +87,7 @@ namespace Microsoft.DotNet.ToolManifest
                     manifest,
                     correspondingDirectory);
 
-            return (toolManifestPackages, deserializedManifest.isRoot.Value);
+            return (toolManifestPackages, deserializedManifest.IsRoot.Value);
         }
 
         private SerializableLocalToolsManifest DeserializeLocalToolsManifest(FilePath possibleManifest)
@@ -113,31 +115,31 @@ namespace Microsoft.DotNet.ToolManifest
             List<ToolManifestPackage> result = new List<ToolManifestPackage>();
             var errors = new List<string>();
 
-            if (deserializedManifest.version == 0)
+            if (deserializedManifest.Version == 0)
             {
                 errors.Add(LocalizableStrings.ManifestVersion0);
             }
 
-            if (deserializedManifest.version > SupportedVersion)
+            if (deserializedManifest.Version > SupportedVersion)
             {
                 errors.Add(
                     string.Format(
                         LocalizableStrings.ManifestVersionHigherThanSupported,
-                        deserializedManifest.version, SupportedVersion));
+                        deserializedManifest.Version, SupportedVersion));
             }
 
-            if (!deserializedManifest.isRoot.HasValue)
+            if (!deserializedManifest.IsRoot.HasValue)
             {
                 errors.Add(string.Format(LocalizableStrings.ManifestMissingIsRoot, path.Value));
             }
 
-            foreach (KeyValuePair<string, SerializableLocalToolSinglePackage> tools in deserializedManifest.tools)
+            foreach (KeyValuePair<string, SerializableLocalToolSinglePackage> tools in deserializedManifest.Tools)
             {
                 var packageLevelErrors = new List<string>();
                 var packageIdString = tools.Key;
                 var packageId = new PackageId(packageIdString);
 
-                string versionString = tools.Value.version;
+                string versionString = tools.Value.Version;
                 NuGetVersion version = null;
                 if (versionString is null)
                 {
@@ -151,8 +153,8 @@ namespace Microsoft.DotNet.ToolManifest
                     }
                 }
 
-                if (tools.Value.commands == null
-                    || (tools.Value.commands != null && tools.Value.commands.Length == 0))
+                if (tools.Value.Commands == null
+                    || (tools.Value.Commands != null && tools.Value.Commands.Length == 0))
                 {
                     packageLevelErrors.Add(LocalizableStrings.FieldCommandsIsMissing);
                 }
@@ -169,7 +171,7 @@ namespace Microsoft.DotNet.ToolManifest
                     result.Add(new ToolManifestPackage(
                         packageId,
                         version,
-                        ToolCommandName.Convert(tools.Value.commands),
+                        ToolCommandName.Convert(tools.Value.Commands),
                         correspondingDirectory));
                 }
             }
@@ -185,10 +187,11 @@ namespace Microsoft.DotNet.ToolManifest
             return result;
         }
 
+        [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
         private class SerializableLocalToolSinglePackage
         {
-            public string version { get; set; }
-            public string[] commands { get; set; }
+            public string Version { get; set; }
+            public string[] Commands { get; set; }
         }
 
         private static bool CommandNamesEqual(ToolCommandName[] left, ToolCommandName[] right)
@@ -206,17 +209,44 @@ namespace Microsoft.DotNet.ToolManifest
             return left.SequenceEqual(right);
         }
 
+        [JsonObject(NamingStrategyType = typeof(CamelCaseNamingStrategy))]
         private class SerializableLocalToolsManifest
         {
             [DefaultValue(1)]
             [JsonProperty(DefaultValueHandling = DefaultValueHandling.Populate)]
-            public int version { get; set; }
+            public int Version { get; set; }
 
-            public bool? isRoot { get; set; }
+            public bool? IsRoot { get; set; }
 
             [JsonProperty(Required = Required.Always)]
             // The dictionary's key is the package id
-            public Dictionary<string, SerializableLocalToolSinglePackage> tools { get; set; }
+            public Dictionary<string, SerializableLocalToolSinglePackage> Tools { get; set; }
+        }
+
+        public void Remove(FilePath fromFilePath, PackageId packageId)
+        {
+            SerializableLocalToolsManifest serializableLocalToolsManifest =
+                DeserializeLocalToolsManifest(fromFilePath);
+
+            List<ToolManifestPackage> toolManifestPackages =
+                GetToolManifestPackageFromOneManifestFile(
+                    serializableLocalToolsManifest,
+                    fromFilePath,
+                    fromFilePath.GetDirectoryPath());
+
+            if (!toolManifestPackages.Any(t => t.PackageId.Equals(packageId)))
+            {
+                throw new ToolManifestException(string.Format(
+                    LocalizableStrings.CannotFindPackageIdInManifest, packageId));
+            }
+
+            serializableLocalToolsManifest.Tools = serializableLocalToolsManifest.Tools
+                .Where(pair => !pair.Key.Equals(packageId.ToString(), StringComparison.Ordinal))
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            _fileSystem.File.WriteAllText(
+                           fromFilePath.Value,
+                           JsonConvert.SerializeObject(serializableLocalToolsManifest, Formatting.Indented));
         }
     }
 }
