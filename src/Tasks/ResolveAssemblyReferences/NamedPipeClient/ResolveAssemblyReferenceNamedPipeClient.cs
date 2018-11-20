@@ -11,6 +11,9 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.NamedPipeClient
     {
         private const string PipeName = "ResolveAssemblyReference.Pipe";
 
+        // Temporary fix to make bootstrap build pass without process spawning implemented
+        private const int FallbackTimeout = 5000; 
+
         private ResolveAssemblyReferenceServiceGateway RarTask { get; }
 
         internal ResolveAssemblyReferenceNamedPipeClient()
@@ -32,7 +35,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.NamedPipeClient
         {
             using (var pipe = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.WriteThrough))
             {
-                pipe.Connect();
+                pipe.Connect(FallbackTimeout);
                 BondSerializer<ResolveAssemblyReferenceRequest>.Serialize(pipe, req);
                 return BondDeserializer<ResolveAssemblyReferenceResponse>.Deserialize(pipe);
             }

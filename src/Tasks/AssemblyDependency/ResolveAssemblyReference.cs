@@ -3086,44 +3086,53 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
-            return ShouldExecuteInProcess
-                ? Execute
-                (
-                    new FileExists(p =>
-                    {
-                        IoTracker.Track(p);
-                        return FileUtilities.FileExistsNoThrow(p);
-                    }),
-                    new DirectoryExists(p =>
-                    {
-                        IoTracker.Track(p);
-                        return FileUtilities.DirectoryExistsNoThrow(p);
-                    }),
-                    new GetDirectories((path, searchPattern) =>
-                    {
-                        IoTracker.Track(path);
-                        return Directory.GetDirectories(path, searchPattern);
-                    }),
-                    new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
-                    new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
+            if (!ShouldExecuteInProcess)
+            {
+                try
+                {
+                    return ExecuteAsService();
+                }
+                catch (TimeoutException)
+                {
+                }
+            }
+
+            return Execute
+            (
+                new FileExists(p =>
+                {
+                    IoTracker.Track(p);
+                    return FileUtilities.FileExistsNoThrow(p);
+                }),
+                new DirectoryExists(p =>
+                {
+                    IoTracker.Track(p);
+                    return FileUtilities.DirectoryExistsNoThrow(p);
+                }),
+                new GetDirectories((path, searchPattern) =>
+                {
+                    IoTracker.Track(path);
+                    return Directory.GetDirectories(path, searchPattern);
+                }),
+                new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
+                new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
 #if FEATURE_WIN32_REGISTRY
-                    new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
-                    new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
+                new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
+                new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
 #endif
-                    new GetLastWriteTime(path =>
-                    {
-                        IoTracker.Track(path);
-                        return NativeMethodsShared.GetLastWriteFileUtcTime(path);
-                    }),
-                    new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
+                new GetLastWriteTime(path =>
+                {
+                    IoTracker.Track(path);
+                    return NativeMethodsShared.GetLastWriteFileUtcTime(path);
+                }),
+                new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
 #if FEATURE_WIN32_REGISTRY
-                    new OpenBaseKey(RegistryHelper.OpenBaseKey),
+                new OpenBaseKey(RegistryHelper.OpenBaseKey),
 #endif
-                    new GetAssemblyPathInGac(GetAssemblyPathInGac),
-                    new IsWinMDFile(AssemblyInformation.IsWinMDFile),
-                    new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
-                )
-                : ExecuteAsService();
+                new GetAssemblyPathInGac(GetAssemblyPathInGac),
+                new IsWinMDFile(AssemblyInformation.IsWinMDFile),
+                new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
+            );
         }
 
         private bool ExecuteAsService()
