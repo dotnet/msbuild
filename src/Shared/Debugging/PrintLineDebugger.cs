@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#if DEBUG
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -112,6 +111,7 @@ namespace Microsoft.Build.Shared.Debugging
         // this setter is not thread safe because the assumption is that a writer is set once for the duration of the process (or multiple times from different tests which do not run in parallel).
         public static void SetWriter(CommonWriterType writer)
         {
+#if DEBUG
             var currentWriter = GetStaticWriter();
 
             if (currentWriter != null)
@@ -129,6 +129,7 @@ namespace Microsoft.Build.Shared.Debugging
                     writer.Invoke(id, callsite, message);
                 }
             }
+#endif
         }
 
         public static void UnsetWriter()
@@ -166,9 +167,11 @@ namespace Microsoft.Build.Shared.Debugging
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
+#if DEBUG
             var writer = GetWriter();
 
             writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), new[] {message});
+#endif
         }
 
         public void Log(
@@ -177,9 +180,11 @@ namespace Microsoft.Build.Shared.Debugging
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
+#if DEBUG
             var writer = GetWriter();
 
             writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), args);
+#endif
         }
 
         private static string CallsiteString(string sourceFilePath, string memberName, int sourceLineNumber)
@@ -208,4 +213,3 @@ namespace Microsoft.Build.Shared.Debugging
         }
     }
 }
-#endif
