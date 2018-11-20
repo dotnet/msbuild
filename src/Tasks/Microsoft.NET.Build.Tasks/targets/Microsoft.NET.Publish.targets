@@ -653,4 +653,12 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   </Target>
 
+  <!--
+    This target exists for back-compat with Azure Functions SDK: https://github.com/dotnet/cli/issues/10363
+    Because build copy-local now behaves the same as publish with respect to package dependency resolution,
+    the Azure Functions SDK doesn't need to resolve publish assets for build.
+    TODO: Remove this target when no longer needed as a workaround.
+    -->
+  <Target Name="RunResolvePublishAssemblies" />
+
 </Project>
