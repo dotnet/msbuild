@@ -31,16 +31,13 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
 
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
-    <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
 
+    <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-
     <Reference Include="System.Configuration" />
     <Reference Include="System.IO.Compression" />
   </ItemGroup>

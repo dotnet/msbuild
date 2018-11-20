@@ -956,7 +956,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Memory" />
   </ItemGroup>
 
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
@@ -971,7 +970,6 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
 

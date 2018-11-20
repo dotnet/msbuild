@@ -512,7 +512,7 @@ namespace Microsoft.Build.Shared
                         // to unescape first.
                         string unescapedItemSpec = EscapingUtilities.UnescapeAll(itemSpec);
 
-                        var info = FileUtilities.GetFileInfoNoThrow(unescapedItemSpec);
+                        FileInfo info = FileUtilities.GetFileInfoNoThrow(unescapedItemSpec);
 
                         if (info != null)
                         {
