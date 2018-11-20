@@ -121,12 +121,12 @@ namespace Microsoft.Build.UnitTests
         internal static void AssertItemEvaluationFromProject(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false, bool makeExpectedIncludeAbsolute = false)
         {
             AssertItemEvaluationFromGenericItemEvaluator((p, c) =>
-                {
-                    return new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c)
-                        .Items
-                        .Select(i => (TestItem) new ProjectItemTestItemAdapter(i))
-                        .ToList();
-                },
+            {
+                return new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c)
+                    .Items
+                    .Select(i => (TestItem)new ProjectItemTestItemAdapter(i))
+                    .ToList();
+            },
             projectContents,
             inputFiles,
             expectedInclude,
@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItems(string[] expectedItems, ICollection<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
-            var converteditems = items.Select(i => (TestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var converteditems = items.Select(i => (TestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, converteditems, expectedDirectMetadata, normalizeSlashes);
         }
 
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests
 
         public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
-            var convertedItems = items.Select(i => (TestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var convertedItems = items.Select(i => (TestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, convertedItems, expectedDirectMetadataPerItem, normalizeSlashes);
         }
 
@@ -674,14 +674,12 @@ namespace Microsoft.Build.UnitTests
             string toolsVersion /* may be null */
             )
         {
-            XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
-            var globalProperties = new Dictionary<string, string>(1);
-            globalProperties["ResolveAssemblyReferencesShouldExecuteInProcess"] = "true";
+            XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
 
             Project project = new Project
                 (
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
-                globalProperties,
+                null,
                 toolsVersion,
                 projectCollection
                 );
@@ -975,10 +973,8 @@ namespace Microsoft.Build.UnitTests
             string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
 
             ProjectCollection projectCollection = new ProjectCollection();
-            var globalProperties = new Dictionary<string, string>(1);
-            globalProperties["ResolveAssemblyReferencesShouldExecuteInProcess"] = "true";
 
-            Project project = new Project(projectFileFullPath, globalProperties, null, projectCollection);
+            Project project = new Project(projectFileFullPath, null, null, projectCollection);
 
             if (touchProject)
             {
@@ -1008,17 +1004,10 @@ namespace Microsoft.Build.UnitTests
             List<ILogger> loggers = new List<ILogger>(1);
             loggers.Add(logger);
 
-            if (globalProperties == null)
-            {
-                globalProperties = new Dictionary<string, string>();
-            }
-
-            globalProperties["ResolveAssemblyReferencesShouldExecuteInProcess"] = "true";
-
             if (string.Equals(Path.GetExtension(projectFileRelativePath), ".sln"))
             {
                 string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
-                BuildRequestData data = new BuildRequestData(projectFileFullPath, globalProperties, null, targets, null);
+                BuildRequestData data = new BuildRequestData(projectFileFullPath, globalProperties ?? new Dictionary<string, string>(), null, targets, null);
                 BuildParameters parameters = new BuildParameters();
                 parameters.Loggers = loggers;
                 BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, data);
@@ -1028,10 +1017,13 @@ namespace Microsoft.Build.UnitTests
             {
                 Project project = LoadProjectFileInTempProjectDirectory(projectFileRelativePath);
 
-                // add extra properties
-                foreach (KeyValuePair<string, string> globalProperty in globalProperties)
+                if (globalProperties != null)
                 {
-                    project.SetGlobalProperty(globalProperty.Key, globalProperty.Value);
+                    // add extra properties
+                    foreach (KeyValuePair<string, string> globalProperty in globalProperties)
+                    {
+                        project.SetGlobalProperty(globalProperty.Key, globalProperty.Value);
+                    }
                 }
 
                 return project.Build(targets, loggers);
@@ -1351,13 +1343,13 @@ namespace Microsoft.Build.UnitTests
                 var result = buildManager.Build(
                     new BuildParameters()
                     {
-                        Loggers = new []{logger}
+                        Loggers = new[] { logger }
                     },
                     new BuildRequestData(
                         testProject.ProjectFile,
                         new Dictionary<string, string>(),
                         MSBuildConstants.CurrentToolsVersion,
-                        new string[] {},
+                        new string[] { },
                         null));
 
                 return result;
@@ -1592,7 +1584,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, ITestOutputHelper testOutput = null)
         {
-            Action<string> LogLine = testOutput == null ? (Action<string>) Console.WriteLine : testOutput.WriteLine;
+            Action<string> LogLine = testOutput == null ? (Action<string>)Console.WriteLine : testOutput.WriteLine;
 
             string[] actualLines = SplitIntoLines(actual);
 
