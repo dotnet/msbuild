@@ -4,6 +4,7 @@
 using System;
 using System.Xml;
 using System.Xml.Schema;
+using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Shared
 {
@@ -12,6 +13,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal sealed class BuildEventFileInfo
     {
+        internal static BuildEventFileInfo Empty = new BuildEventFileInfo(ElementLocation.EmptyLocation);
+
         #region Constructors
 
         /// <summary>

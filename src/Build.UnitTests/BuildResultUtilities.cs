@@ -23,6 +23,11 @@ namespace Microsoft.Build.Unittest
             return new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetSuccessResult());
         }
 
+        public static TargetResult GetNonEmptySucceedingTargetResult()
+        {
+            return new TargetResult(new TaskItem[1] { new TaskItem("i", "v")}, BuildResultUtilities.GetSuccessResult());
+        }
+
         public static WorkUnitResult GetSuccessResult()
         {
             return new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);

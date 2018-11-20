@@ -247,6 +247,10 @@ namespace Microsoft.Build.BackEnd
             Translate(translator);
         }
 
+        internal BuildRequestConfiguration()
+        {
+        }
+
         /// <summary>
         /// Flag indicating whether the configuration is allowed to cache.  This does not mean that the configuration will
         /// actually cache - there are several criteria which must for that.
@@ -781,25 +785,36 @@ namespace Microsoft.Build.BackEnd
                 _transferredState = _project;
             }
 
-            translator.Translate(ref _translateEntireProjectInstanceState);
             translator.Translate(ref _configId);
             translator.Translate(ref _projectFullPath);
-            translator.Translate(ref _transferredState, ProjectInstance.FactoryForDeserialization);
-            translator.Translate(ref _transferredProperties, ProjectPropertyInstance.FactoryForDeserialization);
-            translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _toolsVersion);
             translator.Translate(ref _explicitToolsVersionSpecified);
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _translateEntireProjectInstanceState);
+            translator.Translate(ref _transferredState, ProjectInstance.FactoryForDeserialization);
+            translator.Translate(ref _transferredProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
 
             // if the entire state is translated, then the transferred state, if exists, represents the full evaluation data
-            if (_translateEntireProjectInstanceState && 
+            if (_translateEntireProjectInstanceState &&
                 translator.Mode == TranslationDirection.ReadFromStream &&
                 _transferredState != null)
             {
                 SetProjectBasedState(_transferredState);
             }
+        }
+
+        internal void TranslateForFutureUse(ITranslator translator)
+        {
+            translator.Translate(ref _configId);
+            translator.Translate(ref _projectFullPath);
+            translator.Translate(ref _toolsVersion);
+            translator.Translate(ref _explicitToolsVersionSpecified);
+            translator.Translate(ref _projectDefaultTargets);
+            translator.Translate(ref _projectInitialTargets);
+            translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
         }
 
         /// <summary>

@@ -349,7 +349,18 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(
                 ref _configurations,
                 (ref int configId, ITranslator aTranslator) => aTranslator.Translate(ref configId),
-                (ref BuildRequestConfiguration configuration, ITranslator aTranslator) => aTranslator.Translate(ref configuration, BuildRequestConfiguration.FactoryForDeserialization),
+                (ref BuildRequestConfiguration configuration, ITranslator aTranslator) =>
+                {
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        configuration.TranslateForFutureUse(aTranslator);
+                    }
+                    else
+                    {
+                        configuration = new BuildRequestConfiguration();
+                        configuration.TranslateForFutureUse(aTranslator);
+                    }
+                },
                 capacity => new Dictionary<int, BuildRequestConfiguration>(capacity));
 
             translator.TranslateDictionary(

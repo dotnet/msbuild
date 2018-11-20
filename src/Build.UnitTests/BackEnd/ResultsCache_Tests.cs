@@ -9,6 +9,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Shouldly;
@@ -77,9 +78,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result2.AddResultsForTarget("result2target1", BuildResultUtilities.GetEmptyFailingTargetResult());
             cache.AddResult(result2);
 
-            var results = cache.GetEnumerator()
-                .ToEnumerable()
-                .ToArray();
+            var results = cache.GetEnumerator().ToArray();
 
             results.Length.ShouldBe(2);
 

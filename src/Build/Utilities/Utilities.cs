@@ -6,6 +6,7 @@ using System.Xml;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using Microsoft.Build.Collections;
@@ -186,7 +187,7 @@ namespace Microsoft.Build.Internal
             // (single child node with a trivial value or no child nodes)
             if (!node.HasChildNodes)
             {
-                return string.Empty;
+                return String.Empty;
             }
 
             if (node.ChildNodes.Count == 1 && (node.FirstChild.NodeType == XmlNodeType.Text || node.FirstChild.NodeType == XmlNodeType.CDATA))
@@ -297,7 +298,7 @@ namespace Microsoft.Build.Internal
         /// <returns>The modified XML string.</returns>
         internal static string RemoveXmlNamespace(string xml)
         {
-            return s_xmlnsPattern.Replace(xml, string.Empty);
+            return s_xmlnsPattern.Replace(xml, String.Empty);
         }
 
         /// <summary>
@@ -305,7 +306,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static string CreateToolsVersionListString(IEnumerable<Toolset> toolsets)
         {
-            string toolsVersionList = string.Empty;
+            string toolsVersionList = String.Empty;
             foreach (Toolset toolset in toolsets)
             {
                 toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
@@ -450,8 +451,8 @@ namespace Microsoft.Build.Internal
         private static bool UsingDifferentToolsVersionFromProjectFile(string toolsVersionFromProject, string toolsVersionToUse, bool explicitToolsVersionSpecified)
         {
             return (!explicitToolsVersionSpecified &&
-                    !string.IsNullOrEmpty(toolsVersionFromProject) &&
-                    !string.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
+                    !String.IsNullOrEmpty(toolsVersionFromProject) &&
+                    !String.Equals(toolsVersionFromProject, toolsVersionToUse, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -505,7 +506,7 @@ namespace Microsoft.Build.Internal
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
             // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
 
-            bool useLegacyMSBuildExtensionsPathBehavior = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
+            bool useLegacyMSBuildExtensionsPathBehavior = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
 
             string programFiles = FrameworkLocationHelper.programFiles;
             string extensionsPath;
@@ -524,24 +525,24 @@ namespace Microsoft.Build.Internal
             // Windows XP and Windows Server 2003 don't define LocalAppData in their environment.
             // We'll set it here if the environment doesn't have it so projects can reliably
             // depend on $(LocalAppData).
-            string localAppData = string.Empty;
+            string localAppData = String.Empty;
             ProjectPropertyInstance localAppDataProp = environmentProperties.GetProperty(ReservedPropertyNames.localAppData);
             if (localAppDataProp != null)
             {
                 localAppData = localAppDataProp.EvaluatedValue;
             }
 
-            if (string.IsNullOrEmpty(localAppData))
+            if (String.IsNullOrEmpty(localAppData))
             {
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             }
 
-            if (string.IsNullOrEmpty(localAppData))
+            if (String.IsNullOrEmpty(localAppData))
             {
                 localAppData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             }
 
-            if (string.IsNullOrEmpty(localAppData))
+            if (String.IsNullOrEmpty(localAppData))
             {
                 localAppData = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
             }
@@ -598,6 +599,19 @@ namespace Microsoft.Build.Internal
             {
                 yield return entry.Value;
             }
+        }
+
+        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
+        {
+            while (enumerator.MoveNext())
+            {
+                yield return enumerator.Current;
+            }
+        }
+
+        public static T[] ToArray<T>(this IEnumerator<T> enumerator)
+        {
+            return enumerator.ToEnumerable().ToArray();
         }
     }
 }

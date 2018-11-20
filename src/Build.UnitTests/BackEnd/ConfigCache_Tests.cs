@@ -67,8 +67,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().Translate(ref copy);
 
             // test _configurations
-            var initialConfigurations = ToEnumerable(initial.GetEnumerator()).ToArray();
-            var copiedConfigurations = ToEnumerable(copy.GetEnumerator()).ToArray();
+            var initialConfigurations = initial.GetEnumerator().ToArray();
+            var copiedConfigurations = copy.GetEnumerator().ToArray();
 
             Assert.Equal(copiedConfigurations, initialConfigurations, EqualityComparer<BuildRequestConfiguration>.Default);
 
@@ -81,14 +81,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 copy[initialConfiguration.ConfigurationId].ProjectDefaultTargets.ShouldBe(initialConfiguration.ProjectDefaultTargets);
                 copy[initialConfiguration.ConfigurationId].ProjectInitialTargets.ShouldBe(initialConfiguration.ProjectInitialTargets);
-            }
-        }
-
-        private static IEnumerable<BuildRequestConfiguration> ToEnumerable(IEnumerator<BuildRequestConfiguration> enumerator)
-        {
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
             }
         }
     }

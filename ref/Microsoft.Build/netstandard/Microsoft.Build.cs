@@ -949,6 +949,7 @@ namespace Microsoft.Build.Execution
         public System.Collections.Generic.IEnumerable<Microsoft.Build.Logging.ForwardingLoggerRecord> ForwardingLoggers { get { throw null; } set { } }
         public System.Collections.Generic.IDictionary<string, string> GlobalProperties { get { throw null; } set { } }
         public Microsoft.Build.Execution.HostServices HostServices { get { throw null; } set { } }
+        public string[] InputResultsCacheFiles { get { throw null; } set { } }
         public bool Interactive { get { throw null; } set { } }
         public bool IsolateProjects { get { throw null; } set { } }
         public bool LegacyThreadingSemantics { get { throw null; } set { } }
@@ -959,6 +960,7 @@ namespace Microsoft.Build.Execution
         public int MemoryUseLimit { get { throw null; } set { } }
         public string NodeExeLocation { get { throw null; } set { } }
         public bool OnlyLogCriticalEvents { get { throw null; } set { } }
+        public string OutputResultsCacheFile { get { throw null; } set { } }
         public Microsoft.Build.Evaluation.ProjectLoadSettings ProjectLoadSettings { get { throw null; } set { } }
         public bool ResetCaches { get { throw null; } set { } }
         public bool SaveOperatingEnvironment { get { throw null; } set { } }
