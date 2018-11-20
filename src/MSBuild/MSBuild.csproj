@@ -246,6 +246,26 @@
     </ItemGroup>
   </Target>
 
+  <!-- Redistribute core assemblies so that RoslynCodeTaskFactory can reference
+       them when creating assemblies at build time.
+
+       Don't add these to the Content list before RAR, because that might result
+       in resolving references using them instead of the correct build-time references.
+       Instead, add them just afterward, before assigning target paths/copying to
+       the bin folder. -->
+  <Target Name="AddRefAssemblies"
+          DependsOnTargets="ResolveAssemblyReferences"
+          BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\netstandard.dll"
+               Link="ref\netstandard.dll"
+               CopyToOutputDirectory="PreserveNewest" />
+      <Content Include="$(NuGetPackageRoot)\netstandard.library\2.0.0\build\netstandard2.0\ref\mscorlib.dll"
+               Link="ref\mscorlib.dll"
+               CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="GetCustomPackageFiles" BeforeTargets="_GetPackageFiles" DependsOnTargets="RemoveSatelliteDllsFromBuildOutputInPackage">
 
     <ItemGroup>
