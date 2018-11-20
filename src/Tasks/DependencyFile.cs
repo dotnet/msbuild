@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal bool HasFileChanged()
         {
-            var info = FileUtilities.GetFileInfoNoThrow(filename);
+            FileInfo info = FileUtilities.GetFileInfoNoThrow(filename);
 
             // Obviously if the file no longer exists then we are not up to date.
             if (info == null || !info.Exists)

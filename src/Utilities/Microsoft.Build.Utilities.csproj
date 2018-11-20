@@ -19,9 +19,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-
+    
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Memory" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
@@ -32,10 +31,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Text.Encoding.CodePages" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(MonoBuild)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
