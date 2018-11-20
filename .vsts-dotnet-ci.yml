@@ -48,6 +48,27 @@ phases:
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
+- phase: FullReleaseCompileOnWindows
+  displayName: "Build Release on Windows using full MSBuild"
+  queue: 'Hosted VS2017'
+  steps:
+  - task: BatchScript@1
+    displayName: VsDevCmd
+    inputs:
+      filename: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat'
+      modifyEnvironment: true
+  - task: BatchScript@1
+    displayName: cibuild.cmd
+    inputs:
+      filename: 'build/cibuild.cmd'
+      arguments: '-skiptests -configuration Release'
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/Release/log'
+      ArtifactName: 'FullReleaseCompileOnWindows build logs'
+    condition: succeededOrFailed()
+
 - phase: CoreOnWindows
   displayName: "Build and test on Windows using .NET Core MSBuild"
   queue: 'Hosted VS2017'
