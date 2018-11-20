@@ -32,8 +32,8 @@
         <note />
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
-        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In graph based builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</source>
-        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In graph based builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</target>
+        <source>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</source>
+        <target state="new">MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</target>
         <note>
       {StrBegin="MSB4252:"}
       LOCALIZATION: Do not localize the following words: ProjectReference.
@@ -78,6 +78,14 @@
         <note>
       {StrBegin="MSB4250: "}
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
+    </note>
+      </trans-unit>
+      <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
+        <source>MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
+        <target state="new">MSB4254: The MSBuild task is building project(s) {0} which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</target>
+        <note>
+      {StrBegin="MSB4254:"}
+      LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
       </trans-unit>
       <trans-unit id="WaitingForEndOfBuild">

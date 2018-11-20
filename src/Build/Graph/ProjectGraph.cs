@@ -24,7 +24,6 @@ namespace Microsoft.Build.Graph
     /// </summary>
     public sealed class ProjectGraph
     {
-        private const string ProjectReferenceItemName = "ProjectReference";
         private const string FullPathMetadataName = "FullPath";
         private const string ToolsVersionMetadataName = "ToolsVersion";
         private const string PropertiesMetadataName = "Properties";
@@ -438,7 +437,7 @@ namespace Microsoft.Build.Graph
                     var task = new Task(() =>
                     {
                         ProjectGraphNode parsedProject = CreateNewNode(projectToEvaluate, projectCollection, projectInstanceFactory);
-                        IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(ProjectReferenceItemName);
+                        IEnumerable<ProjectItemInstance> projectReferenceItems = parsedProject.ProjectInstance.GetItems(MSBuildConstants.ProjectReferenceItemName);
                         foreach (var projectReferenceToParse in projectReferenceItems)
                         {
                             if (!string.IsNullOrEmpty(projectReferenceToParse.GetMetadataValue(ToolsVersionMetadataName)))
@@ -518,7 +517,7 @@ namespace Microsoft.Build.Graph
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             nodeState[node] = NodeState.InProcess;
-            IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(ProjectReferenceItemName);
+            IEnumerable<ProjectItemInstance> projectReferenceItems = node.ProjectInstance.GetItems(MSBuildConstants.ProjectReferenceItemName);
             foreach (var projectReferenceToParse in projectReferenceItems)
             {
                 string projectReferenceFullPath = projectReferenceToParse.GetMetadataValue(FullPathMetadataName);
