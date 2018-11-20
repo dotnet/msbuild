@@ -1432,15 +1432,13 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _itemDefinitions, ProjectItemDefinitionInstance.FactoryForDeserialization);
                 translator.TranslateDictionary(ref _directMetadata, ProjectMetadataInstance.FactoryForDeserialization);
 
-                if (_itemDefinitions != null &&
-                    _itemDefinitions.Count == 0)
+                if (_itemDefinitions?.Count == 0)
                 {
                     // If there are no item definitions, toss the list.
                     _itemDefinitions = null;
                 }
 
-                if (_directMetadata != null &&
-                    _directMetadata.Count == 0)
+                if (_directMetadata?.Count == 0)
                 {
                     // If there is no metadata, toss the dictionary.
                     _directMetadata = null;
