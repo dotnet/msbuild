@@ -2,7 +2,7 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <DotNetCoreSdkLKGVersion>3.0.100-preview-009722</DotNetCoreSdkLKGVersion>
-    <DotnetCliInternalVersion>3.0.100-preview.18569.3</DotnetCliInternalVersion>
+    <DotnetCliInternalVersion>3.0.100-preview.18569.5</DotnetCliInternalVersion>
     <MicrosoftNETSdkPackageVersion>3.0.100-preview.18565.3</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreAllPackageVersion>
