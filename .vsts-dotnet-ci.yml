@@ -48,8 +48,8 @@ phases:
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
-- phase: FullReleaseCompileOnWindows
-  displayName: "Build Release on Windows using full MSBuild"
+- phase: FullReleaseOnWindows
+  displayName: "Build and test Release on Windows using full MSBuild"
   queue: 'Hosted VS2017'
   steps:
   - task: BatchScript@1
@@ -61,12 +61,36 @@ phases:
     displayName: cibuild.cmd
     inputs:
       filename: 'build/cibuild.cmd'
-      arguments: '-skiptests -configuration Release'
+      arguments: '-configuration Release'
+  - task: PublishTestResults@2
+    displayName: Publish .NET Framework Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full Release Full Framework'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_net472*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Core 2.1 Test Results
+    inputs:
+      testRunTitle: 'Windows-on-full Release .NET Core 2.1'
+      testRunner: XUnit
+      testResultsFiles: 'artifacts/**/*UnitTests_netcoreapp2.1*.xml'
+      publishRunAttachments: true
+      mergeTestResults: true
+    condition: always()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/Release/log'
-      ArtifactName: 'FullReleaseCompileOnWindows build logs'
+      ArtifactName: 'FullOnWindows Release build logs'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs/TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/2/Release/log/TestResults'
+      ArtifactName: 'FullOnWindows Release test logs'
     condition: succeededOrFailed()
 
 - phase: CoreOnWindows
