@@ -2516,7 +2516,7 @@ namespace Microsoft.Build.Tasks
             serializationAssemblyFiles = serializationAssemblyItems.ToArray();
             scatterFiles = scatterItems.ToArray();
 
-            // Sort for stable outputs. (These came from a hashtable, which as undefined enumeration order.)
+             // Sort for stable outputs. (These came from a dictionary, which has undefined enumeration order.)
             Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.GenericComparer);
 
             // Find the copy-local items.
