@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     sealed internal class Reference
     {
         /// <summary>
-        /// Hashtable where ITaskItem.ItemSpec (a string) is the key and ITaskItem is the value.
+        /// dictionary where ITaskItem.ItemSpec (a string) is the key and ITaskItem is the value.
         /// A hash table is used to remove duplicates.
         /// All source items that inspired this reference (possibly indirectly through a dependency chain).
         /// </summary>

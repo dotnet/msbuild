@@ -6707,8 +6707,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected hashtable to be a different instance"
-            Assert.Equal(1, table2.Count); // "Expected there to be one elements in the hashtable"
+            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
+            Assert.Equal(1, table2.Count); // "Expected there to be one elements in the dictionary"
             Assert.False(table2.ContainsKey(engineAssemblyName)); // "Expected to not find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
             mockEngine.AssertLogContains(warningMessage);
@@ -6746,8 +6746,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected hashtable to be a different instance"
-            Assert.Equal(2, table2.Count); // "Expected there to be two elements in the hashtable"
+            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
+            Assert.Equal(2, table2.Count); // "Expected there to be two elements in the dictionary"
             Assert.True(table2.ContainsKey(engineAssemblyName)); // "Expected to find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
             mockEngine.AssertLogDoesntContain(warningMessage);
@@ -6822,8 +6822,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected hashtable to be a different instance"
-            Assert.Equal(1, table2.Count); // "Expected there to be one elements in the hashtable"
+            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
+            Assert.Equal(1, table2.Count); // "Expected there to be one elements in the dictionary"
             Assert.False(table2.ContainsKey(engineAssemblyName)); // "Expected to not find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
             Assert.True(String.IsNullOrEmpty(mockEngine.Log));
@@ -7153,7 +7153,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string warningMessage3 = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem2.ItemSpec, dataAssemblyName.FullName, subsetName);
 
             Dictionary<AssemblyNameExtension, Reference> table = referenceTable.References;
-            Assert.Equal(0, table.Count); // "Expected there to be two elements in the hashtable"
+            Assert.Equal(0, table.Count); // "Expected there to be two elements in the dictionary"
             Assert.False(table.ContainsKey(sqlclientAssemblyName)); // "Expected to not find the sqlclientAssemblyName in the referenceList"
             Assert.False(table.ContainsKey(dataAssemblyName)); // "Expected to not to find the dataAssemblyName in the referenceList"
             Assert.False(table.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
@@ -7222,7 +7222,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string notExpectedwarningMessage2 = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
 
             Dictionary<AssemblyNameExtension, Reference> table = referenceTable.References;
-            Assert.Equal(3, table.Count); // "Expected there to be three elements in the hashtable"
+            Assert.Equal(3, table.Count); // "Expected there to be three elements in the dictionary"
             Assert.True(table.ContainsKey(sqlclientAssemblyName)); // "Expected to find the sqlclientAssemblyName in the referenceList"
             Assert.True(table.ContainsKey(dataAssemblyName)); // "Expected to find the dataAssemblyName in the referenceList"
             Assert.False(table.ContainsKey(xmlAssemblyName)); // "Expected not to find the xmlssemblyName in the referenceList"
@@ -7257,7 +7257,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private static void VerifyReferenceTable(ReferenceTable referenceTable, MockEngine mockEngine, AssemblyNameExtension engineAssemblyName, AssemblyNameExtension dataAssemblyName, AssemblyNameExtension sqlclientAssemblyName, AssemblyNameExtension xmlAssemblyName, string[] warningMessages)
         {
             Dictionary<AssemblyNameExtension, Reference> table = referenceTable.References;
-            Assert.Equal(0, table.Count); // "Expected there to be zero elements in the hashtable"
+            Assert.Equal(0, table.Count); // "Expected there to be zero elements in the dictionary"
 
             if (warningMessages != null)
             {
@@ -7787,7 +7787,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private static void VerifyReferenceTable(ReferenceTable referenceTable, MockEngine mockEngine, AssemblyNameExtension engineAssemblyName, AssemblyNameExtension dataAssemblyName, AssemblyNameExtension sqlclientAssemblyName, AssemblyNameExtension xmlAssemblyName, string warningMessage, string warningMessage2)
         {
             IDictionary<AssemblyNameExtension, Reference> table = referenceTable.References;
-            Assert.Equal(3, table.Count); // "Expected there to be three elements in the hashtable"
+            Assert.Equal(3, table.Count); // "Expected there to be three elements in the dictionary"
             Assert.False(table.ContainsKey(sqlclientAssemblyName)); // "Expected to not find the sqlclientAssemblyName in the referenceList"
             Assert.True(table.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
             Assert.True(table.ContainsKey(dataAssemblyName)); // "Expected to find the dataAssemblyName in the referenceList"
