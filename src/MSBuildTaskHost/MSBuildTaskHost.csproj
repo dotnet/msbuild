@@ -200,7 +200,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
-    <PackageReference Include="PdbGit" />
+    <!-- Disabled PdbGit because of warnings; it could/should be brought back.
+    <PackageReference Include="PdbGit" /> -->
     <PackageReference Include="SourceLink.Create.CommandLine" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
   </ItemGroup>
