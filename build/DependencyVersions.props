@@ -3,7 +3,7 @@
   <PropertyGroup>
     <DotNetCoreSdkLKGVersion>3.0.100-preview-009722</DotNetCoreSdkLKGVersion>
     <DotnetCliInternalVersion>3.0.100-preview.18569.5</DotnetCliInternalVersion>
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview.18565.3</MicrosoftNETSdkPackageVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview.18569.3</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftAspNetCoreAllPackageVersion>2.2.0-preview3-35497</MicrosoftAspNetCoreAllPackageVersion>
     <MicrosoftAspNetCoreAppPackageVersion>$(MicrosoftAspNetCoreAllPackageVersion)</MicrosoftAspNetCoreAppPackageVersion>
