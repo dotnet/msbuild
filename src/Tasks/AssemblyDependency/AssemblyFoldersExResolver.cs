@@ -3,7 +3,6 @@
 #if FEATURE_WIN32_REGISTRY
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -208,7 +207,7 @@ namespace Microsoft.Build.Tasks
             string[] executableExtensions,
             string hintPath,
             string assemblyFolderKey,
-            ArrayList assembliesConsideredAndRejected,
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
             out bool userRequestedSpecificFile
         )
