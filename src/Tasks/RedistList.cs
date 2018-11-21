@@ -497,7 +497,7 @@ namespace Microsoft.Build.Tasks
         /// 
         /// </summary>
         /// <param name="whiteListAssemblyTableInfo">List of paths to white list xml files</param>
-        /// <returns>A hashtable containing the full assembly names of black listed assemblies as the key, and null as the value. 
+        /// <returns>A dictionary containing the full assembly names of black listed assemblies as the key, and null as the value. 
         ///          If there is no assemblies in the redist list null is returned.
         /// </returns> 
         internal Dictionary<string, string> GenerateBlackList(AssemblyTableInfo[] whiteListAssemblyTableInfo, List<Exception> whiteListErrors, List<string> whiteListErrorFileNames)
@@ -601,7 +601,7 @@ namespace Microsoft.Build.Tasks
                     blackList.Remove(whiteListEntry.FullName + "," + whiteListEntry.RedistName);
                 }
 
-                // The output hashtable needs to be just the full names and not the names + redist name
+                // The output dictionary needs to be just the full names and not the names + redist name
                 var blackListOfAssemblyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (string name in blackList.Values)
                 {
@@ -771,7 +771,7 @@ namespace Microsoft.Build.Tasks
                             string hashIndex = String.Format(CultureInfo.InvariantCulture, "{0},{1}", newEntry.FullName, newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString());
 
                             assemblyEntries.TryGetValue(hashIndex, out AssemblyEntry dictionaryEntry);
-                            // If the entry is not in the hashtable or the entry is in the hashtable but the new entry has the ingac flag true, make sure the hashtable contains the entry with the ingac true.
+                            // If the entry is not in the dictionary or the entry is in the dictionary but the new entry has the ingac flag true, make sure the dictionary contains the entry with the ingac true.
                             if (dictionaryEntry == null || newEntry.InGAC)
                             {
                                 assemblyEntries[hashIndex] = newEntry;
