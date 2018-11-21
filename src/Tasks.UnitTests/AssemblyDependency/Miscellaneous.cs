@@ -5873,7 +5873,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[0]);
             List<Exception> whiteListErrors = new List<Exception>();
             List<string> whiteListErrorFileNames = new List<string>();
-            Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
+            Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
             Assert.Null(blackList); // "Should return null if the AssemblyTableInfo is empty and the redist list is empty"
         }
 
@@ -5891,7 +5891,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[0], whiteListErrors, whiteListErrorFileNames);
 
 
                 // Since there were no white list expect the black list to return null
@@ -5917,7 +5917,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
 
-                Hashtable blackList = redistList.GenerateBlackList(
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(
                                                                    new AssemblyTableInfo[]
                                                                                          {
                                                                                            new AssemblyTableInfo("c:\\RandomDirectory.xml", "TargetFrameworkDirectory"),
@@ -5960,7 +5960,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 Assert.Equal(0, blackList.Count); // "Expected to have no assemblies in the black list"
                 Assert.Equal(1, whiteListErrors.Count); // "Expected there to be an error in the whiteListErrors"
@@ -6007,7 +6007,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 // If the names do not match then i expect there to be no black list items
                 Assert.Equal(0, blackList.Count); // "Expected to have no assembly in the black list"
@@ -6060,7 +6060,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 // If the names do not match then i expect there to be no black list items
                 Assert.Equal(0, blackList.Count); // "Expected to have no assembly in the black list"
@@ -6107,7 +6107,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 // If the names do not match then i expect there to be no black list items
                 Assert.Equal(0, blackList.Count); // "Expected to have no assembly in the black list"
@@ -6142,7 +6142,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 // If the names do not match then i expect there to be no black list items
                 Assert.Equal(2, blackList.Count); // "Expected to have two assembly in the black list"
@@ -6151,7 +6151,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 ArrayList whiteListErrors2 = new ArrayList();
                 ArrayList whiteListErrorFileNames2 = new ArrayList();
-                Hashtable blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
                 Assert.Same(blackList, blackList2);
             }
             finally
@@ -6230,7 +6230,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 Assert.Equal(1, blackList.Count); // "Expected to have one assembly in the black list"
                 Assert.True(blackList.ContainsKey("System.Xml, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b03f5f7f11d50a3a")); // "Expected System.xml to be in the black list"
@@ -6246,7 +6246,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where we generate a black list based on a set of subset file paths, and then ask for
-        /// another black list using the same file paths. We expect to get the exact same Hashtable out
+        /// another black list using the same file paths. We expect to get the exact same Dictionary out
         /// as it should be pulled from the cache.
         /// </summary>
         [Fact]
@@ -6263,7 +6263,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Equal(1, blackList.Count); // "Expected to have one assembly in the black list"
@@ -6273,7 +6273,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 List<Exception> whiteListErrors2 = new List<Exception>();
                 List<string> whiteListErrorFileNames2 = new List<string>();
-                Hashtable blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors2, whiteListErrorFileNames2);
+                Dictionary<string, string> blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors2, whiteListErrorFileNames2);
                 Assert.Same(blackList, blackList2);
             }
             finally
@@ -6308,7 +6308,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo, subsetListInfo2 }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo, subsetListInfo2 }, whiteListErrors, whiteListErrorFileNames);
                 // Since there were no white list expect the black list to return null
                 Assert.Equal(0, blackList.Count); // "Expected to have no assemblies in the black list"
                 Assert.Equal(0, whiteListErrors.Count); // "Expected there to be no error in the whiteListErrors"
@@ -6349,7 +6349,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Equal(0, blackList.Count); // "Expected to have no assemblies in the black list"
@@ -6381,7 +6381,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFileNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Equal(0, blackList.Count); // "Expected to have no assemblies in the black list"
@@ -6422,7 +6422,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
                 List<Exception> whiteListErrors = new List<Exception>();
                 List<string> whiteListErrorFilesNames = new List<string>();
-                Hashtable blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFilesNames);
+                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFilesNames);
 
                 // Since there were no white list expect the black list to return null
                 Assert.Equal(0, blackList.Count); // "Expected to have no assemblies in the black list"
@@ -6644,8 +6644,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             referenceTable.MarkReferencesForExclusion(null);
             referenceTable.RemoveReferencesMarkedForExclusion(false, String.Empty);
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected hashtable to be a different instance"
-            Assert.Equal(2, table2.Count); // "Expected there to be two elements in the hashtable"
+            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected Dictionary to be a different instance"
+            Assert.Equal(2, table2.Count); // "Expected there to be two elements in the Dictionary"
             Assert.True(table2.ContainsKey(engineAssemblyName)); // "Expected to find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
         }
@@ -6666,11 +6666,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            referenceTable.MarkReferencesForExclusion(new Hashtable());
+            referenceTable.MarkReferencesForExclusion(new Dictionary<string, string>());
             referenceTable.RemoveReferencesMarkedForExclusion(false, String.Empty);
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected hashtable to be a different instance"
-            Assert.Equal(2, table2.Count); // "Expected there to be two elements in the hashtable"
+            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected Dictionary to be a different instance"
+            Assert.Equal(2, table2.Count); // "Expected there to be two elements in the Dictionary"
             Assert.True(table2.ContainsKey(engineAssemblyName)); // "Expected to find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
         }
@@ -6697,7 +6697,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            Hashtable blackList = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             blackList[engineAssemblyName.FullName] = null;
             string[] targetFrameworks = new string[] { "Client", "Web" };
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null);
@@ -6737,7 +6737,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            Hashtable blackList = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             blackList[engineAssemblyName.FullName] = null;
             string[] targetFrameworks = new string[] { "Client", "Web" };
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null);
@@ -6814,7 +6814,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            Hashtable blackList = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             blackList[engineAssemblyName.FullName] = null;
             referenceTable.MarkReferencesForExclusion(blackList);
             referenceTable.RemoveReferencesMarkedForExclusion(true, String.Empty);
@@ -6839,7 +6839,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6883,7 +6883,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6924,7 +6924,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension xmlAssemblyName = new AssemblyNameExtension("System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             Reference enginePrimaryReference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
@@ -6966,7 +6966,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension xmlAssemblyName = new AssemblyNameExtension("System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -7018,7 +7018,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -7069,7 +7069,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -7117,7 +7117,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -7183,7 +7183,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Hashtable blackList;
+            Dictionary<string, string> blackList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -7427,9 +7427,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         ///Initialize the black list and use it to remove references from the reference table
         /// </summary>
-        private void InitializeExclusionList(ReferenceTable referenceTable, AssemblyNameExtension[] assembliesForBlackList, out Hashtable blackList)
+        private void InitializeExclusionList(ReferenceTable referenceTable, AssemblyNameExtension[] assembliesForBlackList, out Dictionary<string, string> blackList)
         {
-            blackList = new Hashtable(StringComparer.OrdinalIgnoreCase);
+            blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (AssemblyNameExtension assemblyName in assembliesForBlackList)
             {
                 blackList[assemblyName.FullName] = null;

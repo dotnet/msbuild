@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
         private readonly ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension> _remappingCache = new ConcurrentDictionary<AssemblyNameExtension, AssemblyNameExtension>(AssemblyNameComparer.GenericComparerConsiderRetargetable);
 
         // List of cached BlackList RedistList objects, the key is a semi-colon delimited list of data file paths
-        private readonly ConcurrentDictionary<string, Hashtable> _cachedBlackList = new ConcurrentDictionary<string, Hashtable>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, Dictionary<string, string>> _cachedBlackList = new ConcurrentDictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
         
         /***************Fields which are only set in the constructor and should not be modified by the class. **********************/
         // Array of errors encountered while reading files.
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>A hashtable containing the full assembly names of black listed assemblies as the key, and null as the value. 
         ///          If there is no assemblies in the redist list null is returned.
         /// </returns> 
-        internal Hashtable GenerateBlackList(AssemblyTableInfo[] whiteListAssemblyTableInfo, List<Exception> whiteListErrors, List<string> whiteListErrorFileNames)
+        internal Dictionary<string, string> GenerateBlackList(AssemblyTableInfo[] whiteListAssemblyTableInfo, List<Exception> whiteListErrors, List<string> whiteListErrorFileNames)
         {
             // Return null if there are no assemblies in the redist list.
             if (_assemblyList.Count == 0)
@@ -522,7 +522,7 @@ namespace Microsoft.Build.Tasks
 
             string key = keyBuilder.ToString();
 
-            if (!_cachedBlackList.TryGetValue(key, out Hashtable returnTable))
+            if (!_cachedBlackList.TryGetValue(key, out Dictionary<string, string> returnTable))
             {
                 var whiteListAssemblies = new List<AssemblyEntry>();
 
@@ -602,7 +602,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // The output hashtable needs to be just the full names and not the names + redist name
-                var blackListOfAssemblyNames = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                var blackListOfAssemblyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (string name in blackList.Values)
                 {
                     blackListOfAssemblyNames[name] = null;

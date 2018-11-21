@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Text;
 using System.Diagnostics;
 using System.Reflection;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -876,7 +875,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Storage for names of all files writen to disk.
         /// </summary>
-        private ArrayList _filesWritten = new ArrayList();
+        private List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         /// <summary>
         /// The names of all files written to disk.
@@ -885,7 +884,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] FilesWritten
         {
             set { /*Do Nothing, Inputs not Allowed*/ }
-            get { return (ITaskItem[])_filesWritten.ToArray(typeof(ITaskItem)); }
+            get { return _filesWritten.ToArray(); }
         }
 
         /// <summary>
@@ -925,7 +924,7 @@ namespace Microsoft.Build.Tasks
             ReferenceTable dependencyTable,
             List<DependentAssembly> idealAssemblyRemappings,
             List<AssemblyNameReference> idealAssemblyRemappingsIdentities,
-            ArrayList generalResolutionExceptions
+            List<Exception> generalResolutionExceptions
         )
         {
             bool success = true;
@@ -1501,7 +1500,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="importance">The importance of the message.</param>
         private void LogReferenceErrors(Reference reference, MessageImportance importance)
         {
-            ICollection itemErrors = reference.GetErrors();
+            List<Exception> itemErrors = reference.GetErrors();
             foreach (Exception itemError in itemErrors)
             {
                 string message = String.Empty;
@@ -1663,7 +1662,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!reference.IsPrimary)
             {
-                ICollection dependees = reference.GetSourceItems();
+                ICollection<ITaskItem> dependees = reference.GetSourceItems();
                 foreach (ITaskItem dependee in dependees)
                 {
                     Log.LogMessageFromResources(importance, "ResolveAssemblyReference.FourSpaceIndent", Log.FormatResourceString("ResolveAssemblyReference.RequiredBy", dependee.ItemSpec));
@@ -1976,7 +1975,7 @@ namespace Microsoft.Build.Tasks
                         redistList = RedistList.GetRedistList(installedAssemblyTableInfo);
                     }
 
-                    Hashtable blackList = null;
+                    Dictionary<string, string> blackList = null;
 
                     // The name of the subset if it is generated or the name of the profile. This will be used for error messages and logging.
                     string subsetOrProfileName = null;
@@ -2157,7 +2156,7 @@ namespace Microsoft.Build.Tasks
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
                     // If AutoUnify, then compute the set of assembly remappings.
-                    ArrayList generalResolutionExceptions = new ArrayList();
+                    var generalResolutionExceptions = new List<Exception>();
 
                     subsetOrProfileName = targetingSubset && String.IsNullOrEmpty(_targetedFrameworkMoniker) ? subsetOrProfileName : _targetedFrameworkMoniker;
                     bool excludedReferencesExist = false;
@@ -2494,7 +2493,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="installedAssemblyTableInfo">Installed assembly info of the profile redist lists</param>
         /// <param name="fullRedistAssemblyTableInfo">Installed assemblyInfo for the full framework redist lists</param>
         /// <param name="blackList">Generated exclusion list</param>
-        private void HandleProfile(AssemblyTableInfo[] installedAssemblyTableInfo, out AssemblyTableInfo[] fullRedistAssemblyTableInfo, out Hashtable blackList, out RedistList fullFrameworkRedistList)
+        private void HandleProfile(AssemblyTableInfo[] installedAssemblyTableInfo, out AssemblyTableInfo[] fullRedistAssemblyTableInfo, out Dictionary<string, string> blackList, out RedistList fullFrameworkRedistList)
         {
             // Redist list which will contain the full framework redist list.
             fullFrameworkRedistList = null;

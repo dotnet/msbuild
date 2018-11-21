@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -485,7 +484,7 @@ namespace Microsoft.Build.Tasks
         (
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
-            ArrayList exceptions
+            List<Exception> exceptions
         )
         {
             // Loop over the referenceAssemblyFiles provided and add each one that doesn't exist.
@@ -1248,7 +1247,7 @@ namespace Microsoft.Build.Tasks
             bool userRequestedSpecificFile = false;
 
             // A list of assemblies that might have been matches but weren't
-            var assembliesConsideredAndRejected = new ArrayList();
+            var assembliesConsideredAndRejected = new List<ResolutionSearchLocation>();
 
             // First, look for the dependency in the parents' directories. Unless they are resolved from the GAC or assemblyFoldersEx then 
             // we should make sure we use the GAC and assemblyFolders resolvers themserves rather than a directory resolver to find the reference.
@@ -1391,7 +1390,7 @@ namespace Microsoft.Build.Tasks
 
                     // A Primary reference can also be dependency of other references. This means there may be other primary reference which depend on 
                     // the current primary reference and they need to be removed.
-                    ICollection dependees = assemblyReference.GetSourceItems();
+                    ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
 
                     // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the black list
                     if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees != null && dependees.Count > 1)))
@@ -1463,7 +1462,7 @@ namespace Microsoft.Build.Tasks
         {
             // For a dependency we would like to remove the primary references which caused this dependency to be found.
             // Source Items is the list of primary itemspecs which lead to the current reference being discovered. 
-            ICollection dependees = assemblyReference.GetSourceItems();
+            ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
             foreach (ITaskItem dependee in dependees)
             {
                 string dependeeItemSpec = dependee.ItemSpec;
@@ -1594,7 +1593,7 @@ namespace Microsoft.Build.Tasks
             IEnumerable<DependentAssembly> remappedAssembliesValue,
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
-            ArrayList exceptions
+            List<Exception> exceptions
         )
         {
 #if (!STANDALONEBUILD)
@@ -2518,7 +2517,7 @@ namespace Microsoft.Build.Tasks
             scatterFiles = scatterItems.ToArray();
 
             // Sort for stable outputs. (These came from a hashtable, which as undefined enumeration order.)
-            Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.Comparer);
+            Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.GenericComparer);
 
             // Find the copy-local items.
             FindCopyLocalItems(primaryFiles, copyLocalItems);
@@ -2641,7 +2640,7 @@ namespace Microsoft.Build.Tasks
                 bool hasWinMDFile = referenceItem.GetMetadata(ItemMetadataNames.winMDFile).Length > 0;
 
                 // If there were non-primary source items, then forward metadata from them.
-                ICollection sourceItems = reference.GetSourceItems();
+                ICollection<ITaskItem> sourceItems = reference.GetSourceItems();
                 foreach (ITaskItem sourceItem in sourceItems)
                 {
                     sourceItem.CopyMetadataTo(referenceItem);
@@ -2996,7 +2995,7 @@ namespace Microsoft.Build.Tasks
         /// Rather than have exclusion lists float around, we may as well just mark the reference themselves. This allows us to attach to a reference
         /// whether or not it is excluded and why.  This method will do a number of checks in a specific order and mark the reference as being excluded or not.
         /// </summary>
-        internal bool MarkReferencesForExclusion(Hashtable exclusionList)
+        internal bool MarkReferencesForExclusion(Dictionary<string, string> exclusionList)
         {
             bool anyMarkedReference = false;
             ListOfExcludedAssemblies = new List<string>();

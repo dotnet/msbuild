@@ -2,11 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
@@ -160,7 +158,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add items that caused (possibly indirectly through a dependency chain) this Reference.
         /// </summary>
-        internal void AddSourceItems(IEnumerable sourceItemsToAdd)
+        internal void AddSourceItems(ICollection<ITaskItem> sourceItemsToAdd)
         {
             foreach (ITaskItem sourceItem in sourceItemsToAdd)
             {
@@ -186,7 +184,7 @@ namespace Microsoft.Build.Tasks
         /// Get the source items for this reference.
         ///  This is collection of ITaskItems.
         /// </summary>
-        internal ICollection GetSourceItems()
+        internal ICollection<ITaskItem> GetSourceItems()
         {
             return _sourceItems.Values;
         }
@@ -220,7 +218,7 @@ namespace Microsoft.Build.Tasks
                 if (IsUnresolvable)
                 {
                     _errors = new List<Exception>();
-                    AssembliesConsideredAndRejected = new ArrayList();
+                    AssembliesConsideredAndRejected = new List<ResolutionSearchLocation>();
                 }
             }
         }
@@ -246,9 +244,9 @@ namespace Microsoft.Build.Tasks
         /// Get the dependee references for this reference.
         ///  This is collection of References.
         /// </summary>
-        internal ICollection GetDependees()
+        internal HashSet<Reference> GetDependees()
         {
-            return _dependees.ToList();
+            return _dependees;
         }
 
         /// <summary>
@@ -408,7 +406,7 @@ namespace Microsoft.Build.Tasks
         /// Return the list of dependency or resolution errors for this item.
         /// </summary>
         /// <returns>The collection of resolution errors.</returns>
-        internal ICollection GetErrors()
+        internal List<Exception> GetErrors()
         {
             return _errors;
         }
@@ -431,7 +429,7 @@ namespace Microsoft.Build.Tasks
         /// Return the list of related files for this item.
         /// </summary>
         /// <returns>The collection of related file extensions.</returns>
-        internal ICollection GetRelatedFileExtensions()
+        internal List<string> GetRelatedFileExtensions()
         {
             return _relatedFileExtensions;
         }
@@ -464,7 +462,7 @@ namespace Microsoft.Build.Tasks
         /// Return the list of satellite files for this item.
         /// </summary>
         /// <returns>The collection of satellit files.</returns>
-        internal ICollection GetSatelliteFiles()
+        internal List<string> GetSatelliteFiles()
         {
             return _satelliteFiles;
         }
@@ -473,7 +471,7 @@ namespace Microsoft.Build.Tasks
         /// Return the list of serialization assembly files for this item.
         /// </summary>
         /// <returns>The collection of serialization assembly files.</returns>
-        internal ICollection GetSerializationAssemblyFiles()
+        internal List<string> GetSerializationAssemblyFiles()
         {
             return _serializationAssemblyFiles;
         }
@@ -500,7 +498,7 @@ namespace Microsoft.Build.Tasks
                         _scatterFiles = Array.Empty<string>();
                         _satelliteFiles = new List<string>();
                         _serializationAssemblyFiles = new List<string>();
-                        AssembliesConsideredAndRejected = new ArrayList();
+                        AssembliesConsideredAndRejected = new List<ResolutionSearchLocation>();
                         ResolvedSearchPath = String.Empty;
                         _preUnificationVersions = new Dictionary<string, UnificationVersion>(StringComparer.OrdinalIgnoreCase);
                         IsBadImage = false;
@@ -804,7 +802,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add some records to the table of assemblies that were considered and then rejected.
         /// </summary>
-        internal void AddAssembliesConsideredAndRejected(ArrayList assembliesConsideredAndRejectedToAdd)
+        internal void AddAssembliesConsideredAndRejected(List<ResolutionSearchLocation> assembliesConsideredAndRejectedToAdd)
         {
             AssembliesConsideredAndRejected.AddRange(assembliesConsideredAndRejectedToAdd);
         }
@@ -813,7 +811,7 @@ namespace Microsoft.Build.Tasks
         /// Returns a collection of strings. Each string is the full path to an assembly that was 
         /// considered for resolution but then rejected because it wasn't a complete match.
         /// </summary>
-        internal ArrayList AssembliesConsideredAndRejected { get; private set; } = new ArrayList();
+        internal List<ResolutionSearchLocation> AssembliesConsideredAndRejected { get; private set; } = new List<ResolutionSearchLocation>();
 
         /// <summary>
         /// The searchpath location that the reference was found at.
