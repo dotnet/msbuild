@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Add items that caused (possibly indirectly through a dependency chain) this Reference.
         /// </summary>
-        internal void AddSourceItems(ICollection<ITaskItem> sourceItemsToAdd)
+        internal void AddSourceItems(IEnumerable<ITaskItem> sourceItemsToAdd)
         {
             foreach (ITaskItem sourceItem in sourceItemsToAdd)
             {
