@@ -94,7 +94,7 @@ Copyright (c) .NET Foundation. All rights reserved.
           Condition="'$(_UnsupportedTargetFrameworkError)' == 'true'"
           >
     <NETSdkError Condition="!$(TargetFramework.Contains(';'))"
-                 ResourceName="CannotInferTargetFrameworkIdentiferAndVersion"
+                 ResourceName="CannotInferTargetFrameworkIdentifierAndVersion"
                  FormatArguments="$([MSBuild]::Escape('$(TargetFramework)'))" />
 
     <NETSdkError Condition="$(TargetFramework.Contains(';'))"

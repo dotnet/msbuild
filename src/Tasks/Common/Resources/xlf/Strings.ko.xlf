@@ -122,7 +122,7 @@
         <target state="translated">NETSDK1012: '{0}'에 대해 예기치 않은 파일 형식입니다. 형식이 '{1}'인 동시에 '{2}'입니다.</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: TargetFramework 값 '{0}'을(를) 인식하지 못했습니다. 철자가 틀렸을 수 있습니다. 그렇지 않은 경우 TargetFrameworkIdentifier 및/또는 TargetFrameworkVersion 속성을 명시적으로 지정해야 합니다.</target>
         <note>{StrBegin="NETSDK1013: "}</note>

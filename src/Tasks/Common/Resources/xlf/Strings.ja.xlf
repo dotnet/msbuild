@@ -122,7 +122,7 @@
         <target state="translated">NETSDK1012: '{0}' のファイルの種類が正しくありません。種類は '{1}' と '{2}' の両方です。</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: TargetFramework 値 '{0}' が認識されませんでした。つづりが間違っている可能性があります。間違っていない場合は、TargetFrameworkIdentifier または TargetFrameworkVersion プロパティ (あるいはその両方) を明示的に指定する必要があります。</target>
         <note>{StrBegin="NETSDK1013: "}</note>

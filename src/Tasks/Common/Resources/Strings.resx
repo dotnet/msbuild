@@ -165,7 +165,7 @@
     <value>NETSDK1012: Unexpected file type for '{0}'. Type is both '{1}' and '{2}'.</value>
     <comment>{StrBegin="NETSDK1012: "}</comment>
   </data>
-  <data name="CannotInferTargetFrameworkIdentiferAndVersion" xml:space="preserve">
+  <data name="CannotInferTargetFrameworkIdentifierAndVersion" xml:space="preserve">
     <value>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</value>
     <comment>{StrBegin="NETSDK1013: "}</comment>
   </data>

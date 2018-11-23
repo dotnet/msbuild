@@ -122,7 +122,7 @@
         <target state="translated">NETSDK1012: Tipo de archivo no esperado para "{0}". El tipo es tanto "{1}" como "{2}".</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: El valor de TargetFramework "{0}" no se reconoció. Puede que esté mal escrito. Si este no es el caso, las propiedades TargetFrameworkIdentifier o TargetFrameworkVersion se deben especificar explícitamente.</target>
         <note>{StrBegin="NETSDK1013: "}</note>

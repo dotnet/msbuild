@@ -122,7 +122,7 @@
         <target state="translated">NETSDK1012:“{0}”的文件类型非预期。类型是“{1}”和“{2}”。</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: 未识别 TargetFramework 值“{0}”。可能是因为拼写错误。如果拼写正确，必须显式指定 TargetFrameworkIdentifier 和/或 TargetFrameworkVersion 属性。</target>
         <note>{StrBegin="NETSDK1013: "}</note>

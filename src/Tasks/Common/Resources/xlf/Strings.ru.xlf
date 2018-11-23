@@ -122,7 +122,7 @@
         <target state="translated">NETSDK1012: недопустимый тип файла для "{0}". Тип является "{1}" и "{2}".</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: значение "{0}" в TargetFramework не распознано. Возможно, оно содержит опечатку. Если это не так, задайте свойства TargetFrameworkIdentifier и (или) TargetFrameworkVersion явным образом.</target>
         <note>{StrBegin="NETSDK1013: "}</note>
