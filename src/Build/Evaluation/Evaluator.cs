@@ -1360,6 +1360,7 @@ namespace Microsoft.Build.Evaluation
                         !_data.GlobalPropertiesToTreatAsLocal.Contains(propertyElement.Name)
                     )
                 {
+                    _evaluationLoggingContext.LogComment(MessageImportance.Normal, "OM_GlobalProperty", propertyElement.Name);
                     return;
                 }
 
