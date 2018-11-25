@@ -138,12 +138,12 @@ namespace Microsoft.DotNet.Configurer.UnitTests
             // First run
             var telemetryFirstRun = RunConfigUsingMocks(isFirstRunInstallerRun);
 
-            firstRunExperienceActions.ForEach(a => a.EvaulateAfterFirstRun());
+            firstRunExperienceActions.ForEach(a => a.EvaluateAfterFirstRun());
 
             // Second run
             var telemetrySecondRun = RunConfigUsingMocks(false);
 
-            firstRunExperienceActions.ForEach(a => a.EvaulateAfterSecondRun());
+            firstRunExperienceActions.ForEach(a => a.EvaluateAfterSecondRun());
 
             // Assertion
             aspnetCertInstalledTime.Assert(aspnetCertInstalledTimeShouldBeCalledAt);
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 ActionCalledTime = Never;
             }
 
-            public void EvaulateAfterFirstRun()
+            public void EvaluateAfterFirstRun()
             {
                 if (_tellTheActionIsRun())
                 {
@@ -184,7 +184,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
                 }
             }
 
-            public void EvaulateAfterSecondRun()
+            public void EvaluateAfterSecondRun()
             {
                 if (ActionCalledTime != ActionCalledTime.FirstRun && _tellTheActionIsRun())
                 {
@@ -222,7 +222,7 @@ namespace Microsoft.DotNet.Configurer.UnitTests
         private Telemetry RunConfigUsingMocks(bool isInstallerRun)
         {
             // Assume the following objects set up are in sync with production behavior.
-            // subject to future refractoring to de-dup with production code.
+            // subject to future refactoring to de-dup with production code.
 
             var _environmentProviderObject = _environmentProvider.Object;
             bool generateAspNetCertificate =

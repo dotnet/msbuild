@@ -71,7 +71,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
         [NonWindowsOnlyTheory]
         [InlineData("/home/user/.dotnet/tools")]
         [InlineData("~/.dotnet/tools")]
-        public void GivenPathSetItPrintsNothing(string toolsDiretoryOnPath)
+        public void GivenPathSetItPrintsNothing(string toolsDirectoryOnPath)
         {
             var reporter = new BufferedReporter();
             var toolsPath = new BashPathUnderHomeDirectory("/home/user", ".dotnet/tools");
@@ -80,7 +80,7 @@ namespace Microsoft.DotNet.ShellShim.Tests
 
             provider
                 .Setup(p => p.GetEnvironmentVariable("PATH"))
-                .Returns(pathValue + ":" + toolsDiretoryOnPath);
+                .Returns(pathValue + ":" + toolsDirectoryOnPath);
 
             var environmentPath = new LinuxEnvironmentPath(
                 toolsPath,

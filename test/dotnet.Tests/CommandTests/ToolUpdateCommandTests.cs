@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenAnExistedLowerversionInstallationWhenCallItCanPrintSucessMessage()
+        public void GivenAnExistedLowerversionInstallationWhenCallItCanPrintSuccessMessage()
         {
             CreateInstallCommand($"-g {_packageId} --version {LowerPackageVersion}").Execute();
             _reporter.Lines.Clear();
@@ -121,7 +121,7 @@ namespace Microsoft.DotNet.Tests.Commands
         }
 
         [Fact]
-        public void GivenAnExistedSameVersionInstallationWhenCallItCanPrintSucessMessage()
+        public void GivenAnExistedSameVersionInstallationWhenCallItCanPrintSuccessMessage()
         {
             CreateInstallCommand($"-g {_packageId} --version {HigherPackageVersion}").Execute();
             _reporter.Lines.Clear();

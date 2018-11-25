@@ -26,7 +26,7 @@ namespace Microsoft.DotNet.Tools.Test.Utilities
 
         static TestBase()
         {
-            // set culture of test process to match CLI sub-processes when the UI language is overriden.
+            // set culture of test process to match CLI sub-processes when the UI language is overridden.
             string overriddenUILanguage = Environment.GetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE");
             if (overriddenUILanguage != null)
             {

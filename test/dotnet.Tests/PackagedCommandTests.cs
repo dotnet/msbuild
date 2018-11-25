@@ -231,7 +231,7 @@ namespace Microsoft.DotNet.Tests
             //                         ^-- index = 24
             string randomPackageName = Guid.NewGuid().ToString().Substring(24);
 
-            // TODO: This is a workround for https://github.com/dotnet/cli/issues/5020
+            // TODO: This is a workaround for https://github.com/dotnet/cli/issues/5020
             SetGeneratedPackageName(appWithDepOnToolDir.GetFile("AppWithDepOnTool.csproj"),
                                     randomPackageName);
 
