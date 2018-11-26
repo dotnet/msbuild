@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Framework;
@@ -56,6 +57,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.True(retrievedResult.HasResultsForTarget("testTarget"));
             Assert.True(retrievedResult.HasResultsForTarget("otherTarget"));
+        }
+
+        [Fact]
+        public void CacheCanBeEnumerated()
+        {
+            ResultsCache cache = new ResultsCache();
+            BuildRequest request = new BuildRequest(submissionId: 1, nodeRequestId: 0, configurationId: 1, new string[1] { "testTarget" }, null, BuildEventContext.Invalid, null);
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("result1target1", BuildResultUtilities.GetEmptyFailingTargetResult());
+            cache.AddResult(result);
+
+            request = new BuildRequest(1 /* submissionId */, 0, 1, new string[1] { "otherTarget" }, null, BuildEventContext.Invalid, null);
+            result = new BuildResult(request);
+            result.AddResultsForTarget("result1target2", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            cache.AddResult(result);
+
+            BuildResult result2 = new BuildResult(new BuildRequest(submissionId: 1, nodeRequestId: 0, configurationId: 2, new string[1] { "testTarget" }, null, BuildEventContext.Invalid, null));
+            result2.AddResultsForTarget("result2target1", BuildResultUtilities.GetEmptyFailingTargetResult());
+            cache.AddResult(result2);
+
+            var results = cache.GetEnumerator()
+                .ToEnumerable()
+                .ToArray();
+
+            results.Length.ShouldBe(2);
+
+            Assert.True(results[0].HasResultsForTarget("result1target1"));
+            Assert.True(results[0].HasResultsForTarget("result1target2"));
+            Assert.True(results[1].HasResultsForTarget("result2target1"));
         }
 
         [Fact]

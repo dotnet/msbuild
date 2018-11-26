@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -338,6 +339,16 @@ namespace Microsoft.Build.BackEnd
             }
 
             return returnValue;
+        }
+
+        public IEnumerator<BuildResult> GetEnumerator()
+        {
+            return _resultsByConfiguration.Values.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

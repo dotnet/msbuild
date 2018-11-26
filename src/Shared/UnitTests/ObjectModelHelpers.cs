@@ -1719,5 +1719,13 @@ namespace Microsoft.Build.UnitTests
                 return obj.Line.GetHashCode() ^ obj.Column.GetHashCode() ^ obj.File.GetHashCode();
             }
         }
+
+        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
+        {
+            while (enumerator.MoveNext())
+            {
+                yield return enumerator.Current;
+            }
+        }
     }
 }
