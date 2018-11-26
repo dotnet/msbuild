@@ -179,13 +179,6 @@ namespace Microsoft.Build.Shared
             Unknown
         }
 
-        internal enum MaxPathLimits
-        {
-            Unknown = 0,
-            LegacyWindows = MAX_PATH,
-            None = int.MaxValue,
-        };
-
         #endregion
 
         #region Structs
@@ -475,41 +468,46 @@ namespace Microsoft.Build.Shared
 
         #region Member data
 
+        internal static bool HasMaxPath => MaxPath == MAX_PATH;
+
         /// <summary>
-        /// Gets an enum for the max path limit of the current OS.
+        /// Gets the max path limit of the current OS.
         /// </summary>
-        internal static MaxPathLimits OSMaxPathLimit
+        internal static int MaxPath
         {
             get
             {
-                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                if (!IsMaxPathSet)
                 {
-                    SetOSMaxPathLimit();
+                    SetMaxPath();
                 }
-                return osMaxPathLimit;
+                return _maxPath;
             }
         }
 
         /// <summary>
-        /// Cached value for OSMaxPathLimit.
+        /// Cached value for MaxPath.
         /// </summary>
-        private static MaxPathLimits osMaxPathLimit = MaxPathLimits.Unknown;
+        private static int _maxPath;
 
-        private static readonly object osMaxPathLimitLock = new object();
+        private static bool IsMaxPathSet { get; set; }
 
-        private static void SetOSMaxPathLimit()
+        private static readonly object MaxPathLock = new object();
+
+        private static void SetMaxPath()
         {
-            lock (osMaxPathLimitLock)
+            lock (MaxPathLock)
             {
-                if (osMaxPathLimit == MaxPathLimits.Unknown)
+                if (!IsMaxPathSet)
                 {
-                    bool isMaxPathRestricted = Traits.Instance.EscapeHatches.DisableLongPaths || IsMaxPathLimitLegacyWindows();
-                    osMaxPathLimit = isMaxPathRestricted ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
+                    bool isMaxPathRestricted = Traits.Instance.EscapeHatches.DisableLongPaths || IsMaxPathLegacyWindows();
+                    _maxPath = isMaxPathRestricted ? MAX_PATH : int.MaxValue;
+                    IsMaxPathSet = true;
                 }
             }
         }
 
-        private static bool IsMaxPathLimitLegacyWindows()
+        private static bool IsMaxPathLegacyWindows()
         {
             try
             {
