@@ -503,7 +503,8 @@ namespace Microsoft.Build.Shared
             {
                 if (osMaxPathLimit == MaxPathLimits.Unknown)
                 {
-                    osMaxPathLimit = IsMaxPathLimitLegacyWindows() ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
+                    bool isMaxPathRestricted = Traits.Instance.EscapeHatches.DisableLongPaths || IsMaxPathLimitLegacyWindows();
+                    osMaxPathLimit = isMaxPathRestricted ? MaxPathLimits.LegacyWindows : MaxPathLimits.None;
                 }
             }
         }
