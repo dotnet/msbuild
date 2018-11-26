@@ -1403,9 +1403,10 @@ namespace Microsoft.Build.Execution
             /// <returns>The cloned metadata.</returns>
             IDictionary ITaskItem2.CloneCustomMetadataEscaped()
             {
-                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MetadataCollection.Count, MSBuildNameIgnoreCaseComparer.Default);
+                CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadataCollection = MetadataCollection;
+                Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(metadataCollection.Count, MSBuildNameIgnoreCaseComparer.Default);
 
-                foreach (ProjectMetadataInstance metadatum in MetadataCollection)
+                foreach (ProjectMetadataInstance metadatum in metadataCollection)
                 {
                     clonedMetadata[metadatum.Name] = metadatum.EvaluatedValueEscaped;
                 }
