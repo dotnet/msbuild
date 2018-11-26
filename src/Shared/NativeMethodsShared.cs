@@ -482,15 +482,11 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-#if EXPERIMENTAL_LONGPATHS_ENABLED
                 if (osMaxPathLimit == MaxPathLimits.Unknown)
                 {
                     SetOSMaxPathLimit();
                 }
                 return osMaxPathLimit;
-#else
-                return MaxPathLimits.LegacyWindows;
-#endif
             }
         }
 
