@@ -86,14 +86,6 @@ namespace Microsoft.DotNet.Scripts
             
             if (s_config.HasVersionFragment("aspnet"))
             {
-                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreAllPackageVersion", "Microsoft.AspNetCore.All");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetEfPackageVersion", "dotnet-ef");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreDeveloperCertificatesXPlatPackageVersion", "Microsoft.AspNetCore.DeveloperCertificates.XPlat");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftAspNetCoreMvcPackageVersion", "Microsoft.AspNetCore.Mvc");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetDevCertsPackageVersion", "dotnet-dev-certs");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetSqlCachePackageVersion", "dotnet-sql-cache");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetUserSecretsPackageVersion", "dotnet-user-secrets");
-                yield return CreateRegexUpdater(dependencyVersionsPath, "DotnetWatchPackageVersion", "dotnet-watch");
                 yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETSdkRazorPackageVersion", "Microsoft.NET.Sdk.Razor");
             }
             if (s_config.HasVersionFragment("clicommandlineparser"))
@@ -106,7 +98,6 @@ namespace Microsoft.DotNet.Scripts
             }
             if (s_config.HasVersionFragment("coresetup"))
             {
-                yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftNETCoreAppPackageVersion", "Microsoft.NETCore.App");
                 yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftDotNetPlatformAbstractionsPackageVersion", "Microsoft.DotNet.PlatformAbstractions");
                 yield return CreateRegexUpdater(dependencyVersionsPath, "MicrosoftExtensionsDependencyModelPackageVersion", "Microsoft.Extensions.DependencyModel");
             }
