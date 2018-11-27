@@ -236,7 +236,7 @@ namespace Microsoft.Build.Tasks
                 _copyLocalFiles = value.CopyLocalFiles;
                 DependsOnNETStandard = value.DependsOnNETStandard;
                 DependsOnSystemRuntime = value.DependsOnSystemRuntime;
-                _filesWritten = new ArrayList(value.FilesWritten);
+                _filesWritten = new List<ITaskItem>(value.FilesWritten);
                 _relatedFiles = value.RelatedFiles;
                 _resolvedDependencyFiles = value.ResolvedDependencyFiles;
                 _resolvedFiles = value.ResolvedFiles;
