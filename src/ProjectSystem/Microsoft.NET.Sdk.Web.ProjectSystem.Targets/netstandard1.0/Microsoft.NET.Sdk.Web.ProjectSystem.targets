@@ -22,12 +22,17 @@ Copyright (c) .NET Foundation. All rights reserved.
     <RunWorkingDirectory Condition=" '$(RunWorkingDirectory)' == '' and '$(EnableDefaultRunWorkingDirectory)' != 'false' ">$(MSBuildProjectDirectory)</RunWorkingDirectory>
     <MSBuildWebTargetsPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebTargetsPath>
     <AspNetCoreHostingModel Condition="'$(AspNetCoreHostingModel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">inprocess</AspNetCoreHostingModel>
+    <AspNetCoreModuleName Condition="'$(AspNetCoreModuleName)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">AspNetCoreModuleV2</AspNetCoreModuleName>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectCapability Include="DotNetCoreWeb" />
     <ProjectCapability Include="AspNetCore" />
     <ProjectCapability Include="Web" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">
+    <ProjectCapability Include="AspNetCoreInProcessHosting" />
   </ItemGroup>
 
   <!--
