@@ -81,25 +81,22 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
             };
         }
 
-        private static ResolveAssemblyReferenceResponse ConvertTaskOutputToResponse(
+        private static ResolveAssemblyReferenceResponse ConvertTaskOutputToResponse
+        (
             ResolveAssemblyReferenceTaskOutput taskOutput,
             ResolveAssemblyReferenceIOTracker ioTracker,
             EventQueueBuildEngine buildEngine
         )
         {
-            int estimatedTaskItemCount = EstimateTaskItemCount(taskOutput);
-            var taskItemPayloadList = new List<ReadOnlyTaskItem>(estimatedTaskItemCount);
-            var taskItemToPayload = new Dictionary<ITaskItem, ReadOnlyTaskItem>(estimatedTaskItemCount);
-
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.CopyLocalFiles, TaskItemField.CopyLocalFiles);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.FilesWritten, TaskItemField.FilesWritten);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.RelatedFiles, TaskItemField.RelatedFiles);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.ResolvedDependencyFiles, TaskItemField.ResolvedDependencyFiles);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.ResolvedFiles, TaskItemField.ResolvedFiles);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.SatelliteFiles, TaskItemField.SatelliteFiles);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.ScatterFiles, TaskItemField.ScatterFiles);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.SerializationAssemblyFiles, TaskItemField.SerializationAssemblyFiles);
-            ExtractTaskItemPayloadList(taskItemPayloadList, taskItemToPayload, taskOutput.SuggestedRedirects, TaskItemField.SuggestedRedirects);
+            var copyLocalFiles = new HashSet<ITaskItem>(taskOutput.CopyLocalFiles);
+            var filesWritten = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.FilesWritten);
+            var relatedFiles = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.RelatedFiles);
+            var resolvedDependencyFiles = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.ResolvedDependencyFiles);
+            var resolvedFiles = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.ResolvedFiles);
+            var satelliteFiles = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.SatelliteFiles);
+            var scatterFiles = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.ScatterFiles);
+            var serializationAssemblyFiles = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.SerializationAssemblyFiles);
+            var suggestedRedirects = ExtractTaskItemPayloadList(copyLocalFiles, taskOutput.SuggestedRedirects);
 
             HashSet<string> trackedPaths = ioTracker.TrackedPaths;
             var trackedDirectories = new List<string>(trackedPaths.Count);
@@ -130,53 +127,53 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Services
                 // payload size, resulting in slower serialization. RAR will likely need some method of knowing
                 // the current verbosity.
                 BuildEventArgsQueue = buildEngine.BuildEventArgsQueue,
+                NumCopyLocalFiles = taskOutput.CopyLocalFiles.Length,
                 DependsOnNETStandard = taskOutput.DependsOnNETStandard,
                 DependsOnSystemRuntime = taskOutput.DependsOnSystemRuntime,
-                TaskItems = taskItemPayloadList,
+                FilesWritten = filesWritten,
+                RelatedFiles = relatedFiles,
+                ResolvedDependencyFiles = resolvedDependencyFiles,
+                ResolvedFiles = resolvedFiles,
+                SatelliteFiles = satelliteFiles,
+                ScatterFiles = scatterFiles,
+                SerializationAssemblyFiles = serializationAssemblyFiles,
+                SuggestedRedirects = suggestedRedirects,
                 TrackedDirectories = trackedDirectories,
                 TrackedFiles = trackedFiles,
             };
         }
 
-        private static int EstimateTaskItemCount(ResolveAssemblyReferenceTaskOutput taskOutput)
+        private static ReadOnlyTaskItem[] ExtractTaskItemPayloadList(HashSet<ITaskItem> copyLocalFiles, ITaskItem[] taskItems)
         {
-            return taskOutput.CopyLocalFiles.Length + taskOutput.FilesWritten.Length
-                                             + taskOutput.RelatedFiles.Length + taskOutput.ResolvedDependencyFiles.Length
-                                             + taskOutput.ResolvedFiles.Length + taskOutput.SatelliteFiles.Length
-                                             + taskOutput.ScatterFiles.Length + taskOutput.SerializationAssemblyFiles.Length
-                                             + taskOutput.SuggestedRedirects.Length;
-        }
+            int numTaskItems = taskItems.Length;
+            var taskItemPayloadList = new ReadOnlyTaskItem[numTaskItems];
 
-        private static void ExtractTaskItemPayloadList(List<ReadOnlyTaskItem> taskItemPayloadList, Dictionary<ITaskItem, ReadOnlyTaskItem> taskItemToPayload, ITaskItem[] taskItems, TaskItemField field)
-        {
-            foreach (ITaskItem taskItem in taskItems)
+            for (int i = 0; i < numTaskItems; i++)
             {
-                if (!taskItemToPayload.TryGetValue(taskItem, out ReadOnlyTaskItem taskItemPayload))
+                ITaskItem taskItem = taskItems[i];
+                var taskItemPayload = new ReadOnlyTaskItem(taskItem.ItemSpec, taskItem.MetadataCount);
+
+                // TODO: Perf improvement, copying metadata from Utilities.TaskItem accounts for ~10% of RAR-aas overhead
+                // due to slow copying of metadata from the backing CopyOnWriteDictionary.
+                if (taskItem is ITaskItem2 taskItem2)
                 {
-                    taskItemPayload = new ReadOnlyTaskItem(taskItem.ItemSpec, taskItem.MetadataCount);
-
-                    // TODO: Perf improvement, copying metadata from Utilities.TaskItem accounts for ~10% of RAR-aas overhead
-                    // due to slow copying of metadata from the backing CopyOnWriteDictionary.
-                    if (taskItem is ITaskItem2 taskItem2)
+                    foreach (DictionaryEntry metadataNameWithValue in taskItem2.CloneCustomMetadataEscaped())
                     {
-                        foreach (DictionaryEntry metadataNameWithValue in taskItem2.CloneCustomMetadataEscaped())
-                        {
-                            var metadataName = (string) metadataNameWithValue.Key;
-                            var metadataValue = (string) metadataNameWithValue.Value;
-                            taskItemPayload.MetadataNameToValue[metadataName] = metadataValue;
-                        }
+                        var metadataName = (string)metadataNameWithValue.Key;
+                        var metadataValue = (string)metadataNameWithValue.Value;
+                        taskItemPayload.MetadataNameToValue[metadataName] = metadataValue;
                     }
-                    else
-                    {
-                        taskItem.CopyMetadataTo(taskItemPayload);
-                    }
-
-                    taskItemToPayload[taskItem] = taskItemPayload;
-                    taskItemPayloadList.Add(taskItemPayload);
+                }
+                else
+                {
+                    taskItem.CopyMetadataTo(taskItemPayload);
                 }
 
-                taskItemPayload.AddResponseField(field);
+                taskItemPayload.IsCopyLocalFile = copyLocalFiles.Contains(taskItem);
+                taskItemPayloadList[i] = taskItemPayload;
             }
+
+            return taskItemPayloadList;
         }
 
         private static bool IsDirectory(string path)

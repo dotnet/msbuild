@@ -106,17 +106,16 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Engine
 
         private static ResolveAssemblyReferenceTaskOutput ConvertResponseToTaskOutput(ResolveAssemblyReferenceResponse resp)
         {
-            var taskItems = resp.TaskItems;
-
-            ITaskItem[] copyLocalFiles = ExtractTaskItemsForField(taskItems, TaskItemField.CopyLocalFiles);
-            ITaskItem[] filesWritten = ExtractTaskItemsForField(taskItems, TaskItemField.FilesWritten);
-            ITaskItem[] relatedFiles = ExtractTaskItemsForField(taskItems, TaskItemField.RelatedFiles);
-            ITaskItem[] resolvedDependencyFiles = ExtractTaskItemsForField(taskItems, TaskItemField.ResolvedDependencyFiles);
-            ITaskItem[] resolvedFiles = ExtractTaskItemsForField(taskItems, TaskItemField.ResolvedFiles);
-            ITaskItem[] satelliteFiles = ExtractTaskItemsForField(taskItems, TaskItemField.SatelliteFiles);
-            ITaskItem[] scatterFiles = ExtractTaskItemsForField(taskItems, TaskItemField.ScatterFiles);
-            ITaskItem[] serializationAssemblyFiles = ExtractTaskItemsForField(taskItems, TaskItemField.SerializationAssemblyFiles);
-            ITaskItem[] suggestedRedirects = ExtractTaskItemsForField(taskItems, TaskItemField.SuggestedRedirects);
+            int nextCopyLocalFilesIndex = 0;
+            var copyLocalFiles = new ITaskItem[resp.NumCopyLocalFiles];
+            ITaskItem[] filesWritten = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.FilesWritten);
+            ITaskItem[] relatedFiles = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.RelatedFiles);
+            ITaskItem[] resolvedDependencyFiles = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.ResolvedDependencyFiles);
+            ITaskItem[] resolvedFiles = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.ResolvedFiles);
+            ITaskItem[] satelliteFiles = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.SatelliteFiles);
+            ITaskItem[] scatterFiles = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.ScatterFiles);
+            ITaskItem[] serializationAssemblyFiles = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.SerializationAssemblyFiles);
+            ITaskItem[] suggestedRedirects = ExtractTaskItems(copyLocalFiles, ref nextCopyLocalFilesIndex, resp.SuggestedRedirects);
 
             return new ResolveAssemblyReferenceTaskOutput
             {
@@ -134,33 +133,23 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Engine
             };
         }
 
-        private static ITaskItem[] ExtractTaskItemsForField
-        (
-            List<ReadOnlyTaskItem> taskItemPayloadList,
-            TaskItemField field
-        )
+        private static ITaskItem[] ExtractTaskItems(ITaskItem[] copyLocalFiles, ref int nextCopyLocalFilesIndex, ReadOnlyTaskItem[] taskItemPayloadList)
         {
-            int taskItemCount = 0;
+            int numTaskItems = taskItemPayloadList.Length;
+            var taskItems = new ITaskItem[numTaskItems];
 
-            foreach (ReadOnlyTaskItem taskItemPayload in taskItemPayloadList)
+            for (int i = 0; i < numTaskItems; i++)
             {
-                if (taskItemPayload.IsResponseField(field))
-                {
-                    taskItemCount++;
-                }
-            }
+                // TODO: Perf improvement, constructing Utilities.TaskItems accounts for ~10% of RAR-aas overhead
+                // due to slow setting of metadata in the backing CopyOnWriteDictionary.
+                ReadOnlyTaskItem taskItemPayload = taskItemPayloadList[i];
+                var taskItem = new TaskItem(taskItemPayload);
+                taskItems[i] = taskItem;
 
-            var taskItems = new ITaskItem[taskItemCount];
-            int nextTaskItemIndex = 0;
-
-            foreach (ReadOnlyTaskItem taskItemPayload in taskItemPayloadList)
-            {
-                if (taskItemPayload.IsResponseField(field))
+                if (taskItemPayload.IsCopyLocalFile)
                 {
-                    // TODO: Perf improvement, constructing Utilities.TaskItems accounts for ~10% of RAR-aas overhead
-                    // due to slow setting of metadata in the backing CopyOnWriteDictionary.
-                    taskItems[nextTaskItemIndex] = new TaskItem(taskItemPayload);
-                    nextTaskItemIndex++;
+                    copyLocalFiles[nextCopyLocalFilesIndex] = taskItem;
+                    nextCopyLocalFilesIndex++;
                 }
             }
 

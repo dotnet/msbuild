@@ -13,6 +13,9 @@
 
 
 // suppress "Missing XML comment for publicly visible type or member"
+
+using System;
+
 #pragma warning disable 1591
 
 
@@ -37,13 +40,37 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         public List<ResolveAssemblyReferenceBuildEventArgs> BuildEventArgsQueue { get; set; }
 
         [global::Bond.Id(1)]
-        public string DependsOnNETStandard { get; set; }
+        public int NumCopyLocalFiles { get; set; }
 
         [global::Bond.Id(2)]
-        public string DependsOnSystemRuntime { get; set; }
+        public string DependsOnNETStandard { get; set; }
 
         [global::Bond.Id(3)]
-        public List<ReadOnlyTaskItem> TaskItems { get; set; }
+        public string DependsOnSystemRuntime { get; set; }
+
+        [global::Bond.Id(4)]
+        public ReadOnlyTaskItem[] FilesWritten { get; set; }
+
+        [global::Bond.Id(5)]
+        public ReadOnlyTaskItem[] RelatedFiles { get; set; }
+
+        [global::Bond.Id(6)]
+        public ReadOnlyTaskItem[] ResolvedDependencyFiles { get; set; }
+
+        [global::Bond.Id(7)]
+        public ReadOnlyTaskItem[] ResolvedFiles { get; set; }
+
+        [global::Bond.Id(8)]
+        public ReadOnlyTaskItem[] SatelliteFiles { get; set; }
+
+        [global::Bond.Id(9)]
+        public ReadOnlyTaskItem[] ScatterFiles { get; set; }
+
+        [global::Bond.Id(10)]
+        public ReadOnlyTaskItem[] SerializationAssemblyFiles { get; set; }
+
+        [global::Bond.Id(11)]
+        public ReadOnlyTaskItem[] SuggestedRedirects { get; set; }
 
         public ResolveAssemblyReferenceResponse()
             : this("Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ResolveAssemblyReferenceResponse", "ResolveAssemblyReferenceResponse")
@@ -54,7 +81,14 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
             BuildEventArgsQueue = new List<ResolveAssemblyReferenceBuildEventArgs>();
             DependsOnNETStandard = "";
             DependsOnSystemRuntime = "";
-            TaskItems = new List<ReadOnlyTaskItem>();
+            FilesWritten = Array.Empty<ReadOnlyTaskItem>();
+            RelatedFiles = Array.Empty<ReadOnlyTaskItem>();
+            ResolvedDependencyFiles = Array.Empty<ReadOnlyTaskItem>();
+            ResolvedFiles = Array.Empty<ReadOnlyTaskItem>();
+            SatelliteFiles = Array.Empty<ReadOnlyTaskItem>();
+            ScatterFiles = Array.Empty<ReadOnlyTaskItem>();
+            SerializationAssemblyFiles = Array.Empty<ReadOnlyTaskItem>();
+            SuggestedRedirects = Array.Empty<ReadOnlyTaskItem>();
         }
     }
 } // Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain

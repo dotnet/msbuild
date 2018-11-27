@@ -48,7 +48,7 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         private Dictionary<string, string> _metadataNameToValue;
 
         [global::Bond.Id(2)]
-        public int ResponseFieldIds { get; set; }
+        public bool IsCopyLocalFile { get; set; }
 
         public ReadOnlyTaskItem()
             : this("Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem", "ReadOnlyTaskItem")

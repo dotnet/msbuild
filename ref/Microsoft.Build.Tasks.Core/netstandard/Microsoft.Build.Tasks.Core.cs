@@ -976,14 +976,14 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         public ReadOnlyTaskItem() { }
         protected ReadOnlyTaskItem(string fullName, string name) { }
         public string EvaluatedIncludeEscaped { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)2)]
+        public bool IsCopyLocalFile { get { throw null; } set { } }
         [Bond.IdAttribute((ushort)0)]
         public string ItemSpec { get { throw null; } set { } }
         public int MetadataCount { get { throw null; } }
         public System.Collections.ICollection MetadataNames { get { throw null; } }
         [Bond.IdAttribute((ushort)1)]
         public System.Collections.Generic.Dictionary<string, string> MetadataNameToValue { get { throw null; } set { } }
-        [Bond.IdAttribute((ushort)2)]
-        public int ResponseFieldIds { get { throw null; } set { } }
         public System.Collections.IDictionary CloneCustomMetadata() { throw null; }
         public System.Collections.IDictionary CloneCustomMetadataEscaped() { throw null; }
         public void CopyMetadataTo(Microsoft.Build.Framework.ITaskItem destinationItem) { }
@@ -1134,12 +1134,28 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         protected ResolveAssemblyReferenceResponse(string fullName, string name) { }
         [Bond.IdAttribute((ushort)0)]
         public System.Collections.Generic.List<Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ResolveAssemblyReferenceBuildEventArgs> BuildEventArgsQueue { get { throw null; } set { } }
-        [Bond.IdAttribute((ushort)1)]
-        public string DependsOnNETStandard { get { throw null; } set { } }
         [Bond.IdAttribute((ushort)2)]
-        public string DependsOnSystemRuntime { get { throw null; } set { } }
+        public string DependsOnNETStandard { get { throw null; } set { } }
         [Bond.IdAttribute((ushort)3)]
-        public System.Collections.Generic.List<Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem> TaskItems { get { throw null; } set { } }
+        public string DependsOnSystemRuntime { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)4)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] FilesWritten { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)1)]
+        public int NumCopyLocalFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)5)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] RelatedFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)6)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] ResolvedDependencyFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)7)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] ResolvedFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)8)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] SatelliteFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)9)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] ScatterFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)10)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] SerializationAssemblyFiles { get { throw null; } set { } }
+        [Bond.IdAttribute((ushort)11)]
+        public Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain.ReadOnlyTaskItem[] SuggestedRedirects { get { throw null; } set { } }
     }
 }
 namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.NamedPipeServer

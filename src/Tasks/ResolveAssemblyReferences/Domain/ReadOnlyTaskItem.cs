@@ -76,15 +76,5 @@ namespace Microsoft.Build.Tasks.ResolveAssemblyReferences.Domain
         {
             throw new System.NotImplementedException();
         }
-
-        internal void AddResponseField(TaskItemField field)
-        {
-            ResponseFieldIds |= (int)field;
-        }
-
-        internal bool IsResponseField(TaskItemField field)
-        {
-            return (ResponseFieldIds & (int) field) == (int) field;
-        }
     }
 }
