@@ -76,7 +76,7 @@ namespace Microsoft.NET.Perf.Tests
             TestProject(Path.Combine(testDir.Path, "mvc"), "Build Web Large", operation);
         }
 
-        [CoreMSBuildOnlyTheory(Skip = "https://github.com/dotnet/sdk/issues/2668")]
+        [CoreMSBuildOnlyTheory]
         [InlineData(ProjectPerfOperation.CleanBuild)]
         [InlineData(ProjectPerfOperation.BuildWithNoChanges)]
         public void BuildMVCApp(ProjectPerfOperation operation)

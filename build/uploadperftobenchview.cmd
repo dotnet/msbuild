@@ -1,4 +1,4 @@
-@echo off
+@echo on
 setlocal EnableDelayedExpansion
 
 REM The intent of this script is upload produced performance results to BenchView in a CI context.
