@@ -221,7 +221,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BuildRequestConfiguration(int configId, BuildRequestConfiguration other)
         {
-            ErrorUtilities.VerifyThrow(configId != 0, "Configuration ID must not be zero when using this constructor.");
+            ErrorUtilities.VerifyThrow(configId != InvalidConfigurationId, "Configuration ID must not be invalid when using this constructor.");
             ErrorUtilities.VerifyThrowArgumentNull(other, nameof(other));
             ErrorUtilities.VerifyThrow(other._transferredState == null, "Unexpected transferred state still set on other configuration.");
 
@@ -316,7 +316,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.
         /// </summary>
-        public bool WasGeneratedByNode => _configId < 0;
+        public bool WasGeneratedByNode => _configId < InvalidConfigurationId;
 
         /// <summary>
         /// Sets or returns the configuration id
@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow((_configId == 0) || (WasGeneratedByNode && (value > 0)), "Configuration ID must be zero, or it must be less than zero and the new config must be greater than zero.  It was {0}, the new value was {1}.", _configId, value);
+                ErrorUtilities.VerifyThrow((_configId == InvalidConfigurationId) || (WasGeneratedByNode && (value > InvalidConfigurationId)), "Configuration ID must be invalid, or it must be less than invalid and the new config must be greater than invalid.  It was {0}, the new value was {1}.", _configId, value);
                 _configId = value;
             }
         }
@@ -868,8 +868,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             if ((other.WasGeneratedByNode == WasGeneratedByNode) &&
-                (other._configId != 0) &&
-                (_configId != 0))
+                (other._configId != InvalidConfigurationId) &&
+                (_configId != InvalidConfigurationId))
             {
                 return _configId == other._configId;
             }
