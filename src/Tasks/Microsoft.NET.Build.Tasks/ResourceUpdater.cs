@@ -169,6 +169,38 @@ namespace Microsoft.NET.Build.Tasks
         /// </summary>
         private readonly SafeUpdateHandle hUpdate;
 
+        ///<summary>
+        /// Determines if the ResourceUpdater is supported by the current operating system.
+        /// Some versions of Windows, such as Nano Server, do not support the needed APIs.
+        /// </summary>
+        public static bool IsSupportedOS()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return false;
+            }
+
+            try
+            {
+                // On Nano Server 1709+, `BeginUpdateResource` is exported but returns a null handle with a zero error
+                // Try to call `BeginUpdateResource` with an invalid parameter; the error should be non-zero if supported
+                using (var handle = Kernel32.BeginUpdateResource("", false))
+                {
+                    if (handle.IsInvalid && Marshal.GetLastWin32Error() == 0)
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch (EntryPointNotFoundException)
+            {
+                // BeginUpdateResource isn't exported from Kernel32
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Create a resource updater for the given PE file. This will
         /// acquire a native resource update handle for the file,
