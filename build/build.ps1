@@ -300,7 +300,7 @@ function Build {
       # - Don't pack
       # - Do run tests (if not skipped)
       # - Don't try to create a bootstrap deployment
-      CallMSBuild `"$RepoToolsetBuildProj`" @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$runTests /p:Sign=false /p:Pack=false /p:CreateBootstrap=false @properties
+      CallMSBuild `"$RepoToolsetBuildProj`" @msbuildArgs /nr:false /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$runTests /p:Sign=false /p:Pack=false /p:CreateBootstrap=false /p:UsingToolMicrosoftNetCompilers=false @properties
     }
   }
   Finally
