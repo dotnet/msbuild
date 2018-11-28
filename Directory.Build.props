@@ -55,7 +55,7 @@
         you don't get those defaults.
     -->
 
-    <NoWarn>$(NoWarn);NU1603;NU5105;1701;1702</NoWarn>
+    <NoWarn>$(NoWarn);NU1603;NU5105;NU5125;1701;1702</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug-MONO'">
