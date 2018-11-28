@@ -3,8 +3,8 @@
   <file datatype="xml" source-language="en" target-language="zh-Hans" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="InstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</source>
-        <target state="new">Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallationSucceeded">
@@ -15,19 +15,19 @@ Tool '{1}' (version '{2}') was successfully installed.</source>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDescription">
-        <source>Install the tool and add to the local tool manifest.</source>
-        <target state="new">Install the tool and add to the local tool manifest.</target>
+        <source>Install the tool and add to the local tool manifest (default).</source>
+        <target state="new">Install the tool and add to the local tool manifest (default).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalOptionDoesNotSupportFrameworkOption">
-        <source>Local option(--local) does not support framework option.</source>
-        <target state="new">Local option(--local) does not support framework option.</target>
+        <source>The local option(--local) does not support the framework option (--framework).</source>
+        <target state="new">The local option(--local) does not support the framework option (--framework).</target>
         <note />
       </trans-unit>
       <trans-unit id="LocalToolInstallationSucceeded">
-        <source>You can invoke the tool using the following command with prefix: {0}
+        <source>You can invoke the tool from this directory using the following command: dotnet tool run {0}
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</source>
-        <target state="new">You can invoke the tool using the following command with prefix: {0}
+        <target state="new">You can invoke the tool from this directory using the following command: dotnet tool run {0}
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</target>
         <note />
       </trans-unit>
@@ -42,8 +42,8 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Only the local option (--local) supports the manifest file option (--tool-manifest).</source>
-        <target state="new">Only the local option (--local) supports the manifest file option (--tool-manifest).</target>
+        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
+        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -82,8 +82,8 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>Install the tool to the current user's tools directory.</source>
-        <target state="translated">将工具安装到当前用户的工具目录中。</target>
+        <source>Install the tool for the current user.</source>
+        <target state="needs-review-translation">将工具安装到当前用户的工具目录中。</target>
         <note />
       </trans-unit>
       <trans-unit id="InstallFullCommandNameLocalized">

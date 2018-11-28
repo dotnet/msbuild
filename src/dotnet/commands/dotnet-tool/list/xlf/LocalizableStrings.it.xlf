@@ -8,8 +8,13 @@
         <note />
       </trans-unit>
       <trans-unit id="GlobalOptionDescription">
-        <source>List tools in the current user's tools directory.</source>
-        <target state="translated">Elenca gli strumenti presenti nella directory degli strumenti dell'utente corrente.</target>
+        <source>List tools installed for the current user.</source>
+        <target state="needs-review-translation">Elenca gli strumenti presenti nella directory degli strumenti dell'utente corrente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LocalOptionDescription">
+        <source>List the tools installed in the local tool manifest.</source>
+        <target state="new">List the tools installed in the local tool manifest.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">

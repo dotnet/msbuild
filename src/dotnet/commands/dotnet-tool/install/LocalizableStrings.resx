@@ -160,15 +160,15 @@
     <value>You can invoke the tool using the following command: {0}
 Tool '{1}' (version '{2}') was successfully installed.</value>
   </data>
-    <data name="LocalToolInstallationSucceeded" xml:space="preserve">
-    <value>You can invoke the tool using the following command with prefix: {0}
+  <data name="LocalToolInstallationSucceeded" xml:space="preserve">
+    <value>You can invoke the tool from this directory using the following command: dotnet tool run {0}
 Tool '{1}' (version '{2}') was successfully installed. Entry is added to the manifest file {3}.</value>
   </data>
   <data name="GlobalOptionDescription" xml:space="preserve">
-    <value>Install the tool to the current user's tools directory.</value>
+    <value>Install the tool for the current user.</value>
   </data>
   <data name="LocalOptionDescription" xml:space="preserve">
-    <value>Install the tool and add to the local tool manifest.</value>
+    <value>Install the tool and add to the local tool manifest (default).</value>
   </data>
   <data name="InstallFullCommandNameLocalized" xml:space="preserve">
     <value>.NET Install Command</value>
@@ -203,7 +203,7 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
     <value>Specified version '{0}' is not a valid NuGet version range.</value>
   </data>
   <data name="InstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
-    <value>Cannot have options: {0}. The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options.</value>
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
   </data>
   <data name="ToolPathOptionName" xml:space="preserve">
     <value>PATH</value>
@@ -218,9 +218,9 @@ Tool '{1}' (version '{2}') was successfully installed. Entry is added to the man
     <value>PATH</value>
   </data>
   <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
-    <value>Only the local option (--local) supports the manifest file option (--tool-manifest).</value>
+    <value>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</value>
   </data>
-    <data name="LocalOptionDoesNotSupportFrameworkOption" xml:space="preserve">
-    <value>Local option(--local) does not support framework option.</value>
+  <data name="LocalOptionDoesNotSupportFrameworkOption" xml:space="preserve">
+    <value>The local option(--local) does not support the framework option (--framework).</value>
   </data>
 </root>

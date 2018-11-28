@@ -89,11 +89,10 @@ namespace Microsoft.DotNet.Tests.Commands
 
             var expectedString = string.Format(
                 LocalizableStrings.ManifestPackageIdCollision,
+                "2.1.4",
                 packageId.ToString(),
-                nuGetVersion.ToNormalizedString(),
                 manifestFile,
-                packageId.ToString(),
-                "2.1.4");
+                nuGetVersion.ToNormalizedString());
 
             a.ShouldThrow<ToolManifestException>()
                 .And.Message.Should().Contain(expectedString);

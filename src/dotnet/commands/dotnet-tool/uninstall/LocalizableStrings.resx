@@ -153,7 +153,7 @@
   <data name="InvalidToolPathOption" xml:space="preserve">
     <value>Tool path '{0}' does not exist.</value>
   </data>
-    <data name="ManifestPathOptionDescription" xml:space="preserve">
+  <data name="ManifestPathOptionDescription" xml:space="preserve">
     <value>Path to the manifest file.</value>
   </data>
   <data name="ManifestPathOptionName" xml:space="preserve">
@@ -163,10 +163,10 @@
     <value>Uninstall the tool and remove it from the local tool manifest.</value>
   </data>
   <data name="UninstallToolCommandInvalidGlobalAndLocalAndToolPath" xml:space="preserve">
-    <value>The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</value>
+    <value>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</value>
   </data>
   <data name="OnlyLocalOptionSupportManifestFileOption" xml:space="preserve">
-    <value>Only the local option(--local) support manifest file option (--tool-manifest).</value>
+    <value>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</value>
   </data>
   <data name="UninstallLocalToolSucceeded" xml:space="preserve">
     <value>Tool '{0}' was successfully uninstalled and removed from manifest file {1}.</value>

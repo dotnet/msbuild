@@ -3,13 +3,13 @@
   <file datatype="xml" source-language="en" target-language="cs" original="../LocalizableStrings.resx">
     <body>
       <trans-unit id="CannotFindPackageIdInManifest">
-        <source>Cannot find any package with package id {0} in manifest file.</source>
-        <target state="new">Cannot find any package with package id {0} in manifest file.</target>
+        <source>Cannot find a package with the package id {0} in the manifest file.</source>
+        <target state="new">Cannot find a package with the package id {0} in the manifest file.</target>
         <note />
       </trans-unit>
       <trans-unit id="ManifestPackageIdCollision">
-        <source>Cannot add package {0} version {1} to manifest file {2}. Package {3} version {4} exists.</source>
-        <target state="new">Cannot add package {0} version {1} to manifest file {2}. Package {3} version {4} exists.</target>
+        <source>Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</source>
+        <target state="new">Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionIsInvalid">

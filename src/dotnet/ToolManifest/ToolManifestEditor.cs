@@ -55,11 +55,10 @@ namespace Microsoft.DotNet.ToolManifest
 
                 throw new ToolManifestException(string.Format(
                     LocalizableStrings.ManifestPackageIdCollision,
-                    packageId.ToString(),
-                    nuGetVersion.ToNormalizedString(),
-                    to.Value,
+                    existingPackage.Version.ToNormalizedString(),
                     existingPackage.PackageId.ToString(),
-                    existingPackage.Version.ToNormalizedString()));
+                    to.Value,
+                    nuGetVersion.ToNormalizedString()));
             }
 
             deserializedManifest.Tools.Add(

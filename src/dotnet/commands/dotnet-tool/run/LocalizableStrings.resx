@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CannotFindCommandName" xml:space="preserve">
-    <value>Cannot find a command with command name '{0}'.</value>
+    <value>Cannot find a tool in the manifest file that has a command named '{0}'.</value>
   </data>
   <data name="CommandDescription" xml:space="preserve">
-    <value>Run local tools installed or restored.</value>
+    <value>Run local tool.</value>
   </data>
   <data name="CommandNameArgumentDescription" xml:space="preserve">
     <value>The command name of the tool to run.</value>

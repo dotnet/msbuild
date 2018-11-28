@@ -18,8 +18,8 @@
         <note />
       </trans-unit>
       <trans-unit id="OnlyLocalOptionSupportManifestFileOption">
-        <source>Only the local option(--local) support manifest file option (--tool-manifest).</source>
-        <target state="new">Only the local option(--local) support manifest file option (--tool-manifest).</target>
+        <source>Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</source>
+        <target state="new">Specifying the tool manifest (--tool-manifest) is only valid with the local option (--local or the default).</target>
         <note />
       </trans-unit>
       <trans-unit id="PackageIdArgumentDescription">
@@ -73,8 +73,8 @@
         <note />
       </trans-unit>
       <trans-unit id="UninstallToolCommandInvalidGlobalAndLocalAndToolPath">
-        <source>The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</source>
-        <target state="new">The following options conflict: {0}. Use only one of the following options: the local option (--local), the global option (--global), or the tool path option (--tool-path).</target>
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">
