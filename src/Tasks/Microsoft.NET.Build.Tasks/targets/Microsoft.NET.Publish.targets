@@ -597,7 +597,7 @@ Copyright (c) .NET Foundation. All rights reserved.
   <Target Name="GeneratePublishDependencyFile"
           DependsOnTargets="_ComputeUseBuildDependencyFile;
                             _DefaultMicrosoftNETPlatformLibrary;
-                            _HandlePackageFileConflictsForBuild;
+                            _HandlePackageFileConflicts;
                             _HandlePackageFileConflictsForPublish;
                             _ComputeReferenceAssemblies"
           Condition="'$(GenerateDependencyFile)' == 'true' and '$(_UseBuildDependencyFile)' != 'true'">
