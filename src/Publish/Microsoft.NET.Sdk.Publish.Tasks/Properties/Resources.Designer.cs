@@ -1772,7 +1772,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The acceptable value for AspNetCoreModuleHostingModel property is either &quot;InProcess&quot; or &quot;OutOfProcess&quot;..
+        ///   Looks up a localized string similar to The acceptable value for AspNetCoreHostingModel property is either &quot;InProcess&quot; or &quot;OutOfProcess&quot;..
         /// </summary>
         public static string WebConfigTransform_HostingModel_Error {
             get {
