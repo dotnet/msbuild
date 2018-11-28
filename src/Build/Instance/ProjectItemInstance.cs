@@ -1429,10 +1429,20 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _isImmutable);
                 translator.Translate(ref _definingFileEscaped);
 
-                CopyOnWritePropertyDictionary<ProjectMetadataInstance> temp = (translator.Mode == TranslationDirection.WriteToStream) ? MetadataCollection : null;
-                translator.TranslateDictionary<CopyOnWritePropertyDictionary<ProjectMetadataInstance>, ProjectMetadataInstance>(ref temp, ProjectMetadataInstance.FactoryForDeserialization);
-                ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream || _directMetadata == null, "Should be null");
-                _directMetadata = (temp.Count == 0) ? null : temp; // If the metadata was all removed, toss the dictionary
+                translator.Translate(ref _itemDefinitions, ProjectItemDefinitionInstance.FactoryForDeserialization);
+                translator.TranslateDictionary(ref _directMetadata, ProjectMetadataInstance.FactoryForDeserialization);
+
+                if (_itemDefinitions?.Count == 0)
+                {
+                    // If there are no item definitions, toss the list.
+                    _itemDefinitions = null;
+                }
+
+                if (_directMetadata?.Count == 0)
+                {
+                    // If there is no metadata, toss the dictionary.
+                    _directMetadata = null;
+                }
             }
 
             #endregion
