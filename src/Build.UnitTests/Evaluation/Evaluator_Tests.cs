@@ -4494,6 +4494,40 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Fact]
+        public void VerifyMSBuildLogsAMessageWhenLocalPropertyCannotOverrideValueOfGlobalProperty()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                             <Project>
+                               <PropertyGroup>
+                                 <Foo>Bar</Foo>
+                               </PropertyGroup>
+
+                               <Target Name='t'>
+                                 <Message Text='[$(Foo)]' />
+                               </Target>
+                             </Project>");
+            IDictionary<string, string> globalProperties =
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Foo", "Baz" }
+                };
+
+            MockLogger logger = new MockLogger();
+
+            Project project =
+                new Project(
+                    XmlReader.Create(new StringReader(content)),
+                    globalProperties,
+                    null,
+                    new ProjectCollection(
+                        globalProperties, new List<ILogger> { logger }, ToolsetDefinitionLocations.Default));
+
+            project.Build(logger);
+            logger.AssertLogContains(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OM_GlobalProperty", "Foo"));
+        }
+
 #if FEATURE_HTTP_LISTENER
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
