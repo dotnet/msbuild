@@ -429,7 +429,7 @@ function Build {
       # - Don't pack
       # - Do run tests (if not skipped)
       # - Don't try to create a bootstrap deployment
-    CallMSBuild $(QQ $RepoToolsetBuildProj) $commonMSBuildArgs /nr:false $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false $properties
+    CallMSBuild $(QQ $RepoToolsetBuildProj) $commonMSBuildArgs /nr:false $logCmd /p:Restore=$restore /p:Build=$build /p:Rebuild=$rebuild /p:Test=$test /p:Sign=false /p:Pack=false /p:CreateBootstrap=false /p:UsingToolMicrosoftNetCompilers=false $properties
   fi
 }
 
