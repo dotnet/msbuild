@@ -115,7 +115,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="GenerateBuildDependencyFile"
           DependsOnTargets="_DefaultMicrosoftNETPlatformLibrary;
-                            _HandlePackageFileConflictsForBuild;
+                            _HandlePackageFileConflicts;
                             _ComputeReferenceAssemblies"
           BeforeTargets="CopyFilesToOutputDirectory"
           Condition="'$(GenerateDependencyFile)' == 'true'"

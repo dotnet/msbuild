@@ -220,7 +220,7 @@ namespace Microsoft.NET.Build.Tests
                         // Add a target to validate that no conflicts are from support libs
                         var target = new XElement(ns + "Target",
                             new XAttribute("Name", "CheckForConflicts"),
-                            new XAttribute("AfterTargets", "_HandlePackageFileConflictsForBuild"));
+                            new XAttribute("AfterTargets", "_HandlePackageFileConflicts"));
                         project.Root.Add(target);
 
                         target.Add(new XElement(ns + "FindUnderPath",

@@ -71,12 +71,12 @@ Copyright (c) .NET Foundation. All rights reserved.
     <ResolveAssemblyReferencesDependsOn>
       $(ResolveAssemblyReferencesDependsOn);
       ResolvePackageDependenciesForBuild;
-      _HandlePackageFileConflictsForBuild;
+      _HandlePackageFileConflicts;
     </ResolveAssemblyReferencesDependsOn>
 
     <PrepareResourcesDependsOn>
       ResolvePackageDependenciesForBuild;
-      _HandlePackageFileConflictsForBuild;
+      _HandlePackageFileConflicts;
       $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
   </PropertyGroup>

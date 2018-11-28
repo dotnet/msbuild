@@ -24,7 +24,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="ImplicitlyExpandNETStandardFacades"
           Condition="'$(ImplicitlyExpandNETStandardFacades)' == 'true'"
-          BeforeTargets="_HandlePackageFileConflictsForBuild;ResolveAssemblyReferences">
+          BeforeTargets="_HandlePackageFileConflicts;ResolveAssemblyReferences">
 
     <ItemGroup>
       <_CandidateNETStandardReferences Include="@(Reference);@(_ResolvedProjectReferencePaths)" />

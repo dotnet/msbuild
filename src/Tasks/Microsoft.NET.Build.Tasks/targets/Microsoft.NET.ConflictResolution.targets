@@ -21,11 +21,11 @@ Copyright (c) .NET Foundation. All rights reserved.
   <UsingTask TaskName="ResolvePackageFileConflicts" AssemblyFile="$(MicrosoftNETBuildTasksAssembly)" />
 
   <!--
-    _HandlePackageFileConflictsForBuild
+    _HandlePackageFileConflicts
     Handles package file conflict resolution for build.
     This will differ from the conflict resolution at publish time if the publish assets differ from build.
   -->
-  <Target Name="_HandlePackageFileConflictsForBuild" DependsOnTargets="GetReferenceAssemblyPaths">
+  <Target Name="_HandlePackageFileConflicts" DependsOnTargets="GetReferenceAssemblyPaths">
 
     <ItemGroup>
       <!--
