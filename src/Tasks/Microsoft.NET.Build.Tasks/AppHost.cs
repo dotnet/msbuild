@@ -76,7 +76,7 @@ namespace Microsoft.NET.Build.Tasks
 
             if (intermediateAssembly != null && appHostIsPEImage)
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (ResourceUpdater.IsSupportedOS())
                 {
                     // Copy resources from managed dll to the apphost
                     new ResourceUpdater(appHostDestinationFilePath)
