@@ -1343,7 +1343,7 @@ namespace Microsoft.Build.UnitTests
 
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
 
-                string path = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
+                FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
             }
            );
         }
@@ -1365,7 +1365,7 @@ namespace Microsoft.Build.UnitTests
 
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
 
-                string path = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
+                FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
             }
            );
         }
@@ -1391,7 +1391,7 @@ namespace Microsoft.Build.UnitTests
 
                 FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
 
-                string path = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
+                FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
             }
            );
         }
@@ -1635,7 +1635,7 @@ namespace Microsoft.Build.UnitTests
                     Directory.CreateDirectory(redist41Directory);
                     File.WriteAllText(redist41, redistString41);
 
-                    string path = ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
+                    ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
                 }
                 finally
                 {
@@ -1672,7 +1672,7 @@ namespace Microsoft.Build.UnitTests
                     Directory.CreateDirectory(redist41Directory);
                     File.WriteAllText(redist41, redistString41);
 
-                    string path = ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
+                    ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
                 }
                 finally
                 {
@@ -1986,7 +1986,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetPathToReferenceAssembliesDefaultLocation99()
         {
-            string targetFrameworkRootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Reference Assemblies\\Microsoft\\Framework");
             string targetFrameworkIdentifier = ".Net Framework";
             Version targetFrameworkVersion = new Version("99.99");
 

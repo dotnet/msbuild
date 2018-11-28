@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", new string[0], null);
                 BuildRequestConfiguration config1 = new BuildRequestConfiguration(1, data, "2.0");
-                BuildRequestConfiguration config2 = config1.ShallowCloneWithNewId(0);
+                config1.ShallowCloneWithNewId(0);
             }
            );
         }

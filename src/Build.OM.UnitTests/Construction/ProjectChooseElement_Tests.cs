@@ -259,7 +259,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 content += builder2.ToString();
                 content += @"</Project>";
 
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+                ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             }
            );
         }

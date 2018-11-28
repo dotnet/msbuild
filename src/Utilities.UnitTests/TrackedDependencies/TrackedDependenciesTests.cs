@@ -410,7 +410,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
+            d.ComputeSourcesNeedingCompilation();
 
             Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have an error."
             Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
@@ -3076,7 +3076,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     true /* keep composite rooting markers */
                 );
 
-            ITaskItem[] outofdate2 = d2.ComputeSourcesNeedingCompilation();
+            d2.ComputeSourcesNeedingCompilation();
 
             Assert.Equal(0, outofdate.Length);
             Assert.Equal(4, d2.DependencyTable.Count);

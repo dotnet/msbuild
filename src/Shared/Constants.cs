@@ -78,6 +78,11 @@ namespace Microsoft.Build.Shared
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
         /// </summary>
         internal const string CurrentProductVersion = "16.0";
+		
+		/// <summary>
+        /// The name of the item used to specify references to other msbuild projects
+        /// </summary>
+        internal const string ProjectReferenceItemName = "ProjectReference";
     }
 
     /// <summary>

@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 string cache = null;
-                string modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"http://www.microsoft.com", String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache);
+                FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"http://www.microsoft.com", String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache);
             }
             catch (Exception e)
             {
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 file = FileUtilities.GetTemporaryFile();
-                var info = FileUtilities.GetFileInfoNoThrow(file);
+                FileInfo info = FileUtilities.GetFileInfoNoThrow(file);
                 Assert.Equal(info.LastWriteTime, new FileInfo(file).LastWriteTime);
             }
             finally
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetFileInfoNoThrowNonexistent()
         {
-            var info = FileUtilities.GetFileInfoNoThrow("this_file_is_nonexistent");
+            FileInfo info = FileUtilities.GetFileInfoNoThrow("this_file_is_nonexistent");
             Assert.Null(info);
         }
 
@@ -1013,6 +1013,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@".\", true)]
         [InlineData(@"\..", true)]
         [InlineData(@"\.", true)]
+        [InlineData(@"..\..\a", true)]
+        [InlineData(@"..\..\..\a", true)]
         [InlineData(@"b..\", false)]
         [InlineData(@"b.\", false)]
         [InlineData(@"\b..", false)]

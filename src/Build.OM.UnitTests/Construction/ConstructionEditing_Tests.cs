@@ -629,7 +629,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
 
             ProjectTargetElement target = project.AddTarget("t");
-            ProjectTaskElement task = target.AddTask("tt");
+            target.AddTask("tt");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             ProjectTargetElement target1 = project.AddTarget("t1");
-            ProjectTargetElement target2 = project.AddTarget("t2");
+            project.AddTarget("t2");
 
             project.RemoveChild(target1);
             project.PrependChild(target1);
@@ -1493,7 +1493,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             ProjectTargetElement target1 = project.AddTarget("t1");
-            ProjectTargetElement target2 = project.AddTarget("t2");
+            project.AddTarget("t2");
 
             project.RemoveAllChildren();
             project.AppendChild(target1);
@@ -1713,7 +1713,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddItem_EmptyProject()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1734,7 +1734,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             project.AddItemGroup();
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1756,7 +1756,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create();
             ProjectItemGroupElement itemGroup = project.AddItemGroup();
             itemGroup.Condition = "c";
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1780,7 +1780,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectItemGroupElement itemGroup = project.AddItemGroup();
             itemGroup.AddItem("h", "h1");
             project.AddItemGroup();
-            ProjectItemElement item = project.AddItem("i", "i1");
+            project.AddItem("i", "i1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2172,7 +2172,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             project.AddPropertyGroup();
-            ProjectPropertyElement property = project.AddProperty("p", "v1");
+            project.AddProperty("p", "v1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2195,7 +2195,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = project.AddPropertyGroup();
             propertyGroup.Condition = "c";
 
-            ProjectPropertyElement property = project.AddProperty("p", "v1");
+            project.AddProperty("p", "v1");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2242,7 +2242,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyElement property1 = project.AddProperty("p", "v1");
             property1.Condition = "c";
 
-            ProjectPropertyElement property2 = project.AddProperty("p", "v2");
+            project.AddProperty("p", "v2");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -2266,7 +2266,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyElement property1 = project.AddProperty("p", "v1");
             property1.Parent.Condition = "c";
 
-            ProjectPropertyElement property2 = project.AddProperty("p", "v2");
+            project.AddProperty("p", "v2");
 
             string expected = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -3229,7 +3229,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 var p = new Project(testProject.ProjectFile);
 
-                var addedProperty = p.Xml.AddProperty("propName", "propValue");
+                p.Xml.AddProperty("propName", "propValue");
 
                 var updated = Path.Combine(testProject.TestRoot, "updated.proj");
 

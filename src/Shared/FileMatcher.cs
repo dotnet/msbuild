@@ -24,7 +24,6 @@ namespace Microsoft.Build.Shared
     {
         private readonly IFileSystem _fileSystem;
         private const string recursiveDirectoryMatch = "**";
-        private const string dotdot = "..";
 
         private static readonly string s_directorySeparator = new string(Path.DirectorySeparatorChar, 1);
 
@@ -1931,10 +1930,11 @@ namespace Microsoft.Build.Shared
                 filespecUnescaped = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
 
                 // increase the chance of cache hits when multiple relative globs refer to the same base directory
-                if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
-                {
-                    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
-                }
+                // todo https://github.com/Microsoft/msbuild/issues/3889
+                //if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
+                //{
+                //    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
+                //}
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {

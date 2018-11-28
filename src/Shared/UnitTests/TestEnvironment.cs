@@ -9,12 +9,14 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
+using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -276,6 +278,29 @@ namespace Microsoft.Build.UnitTests
         public TransientTestFolder CreateFolder(bool createFolder)
         {
             return CreateFolder(null, createFolder);
+        }
+
+        /// <summary>
+        /// Creates a debugger which can be used to write to from anywhere in the msbuild code base
+        /// It also enables logging in the out of proc nodes, but the given writer object would not be available in the nodes, set one in OutOfProcNode
+        /// </summary>
+        public TransientPrintLineDebugger CreatePrintLineDebugger(CommonWriterType writer)
+        {
+            return WithTransientTestState(new TransientPrintLineDebugger(this, writer));
+        }
+
+        /// <summary>
+        /// Creates a debugger which can be used to write to from (hopefully) anywhere in the msbuild code base using the ITestOutputWriter in this TestEnvironmentHelper
+        /// Will not work for out of proc nodes since the output writer does not reach into those
+        public TransientPrintLineDebugger CreatePrintLineDebuggerWithTestOutputHelper()
+        {
+            ErrorUtilities.VerifyThrowInternalNull(_output, nameof(_output));
+            return WithTransientTestState(new TransientPrintLineDebugger(this, OutPutHelperWriter(_output)));
+
+            CommonWriterType OutPutHelperWriter(ITestOutputHelper output)
+            {
+                return (id, callsite, args) => output.WriteLine(PrintLineDebuggerWriters.SimpleFormat(id, callsite, args));
+            }
         }
 
         /// <summary>
@@ -650,6 +675,21 @@ namespace Microsoft.Build.UnitTests
         public override void Revert()
         {
             FileUtilities.DeleteNoThrow(Path);
+        }
+    }
+
+    public class TransientPrintLineDebugger : TransientTestState
+    {
+        private readonly PrintLineDebugger _printLineDebugger;
+
+        public TransientPrintLineDebugger(TestEnvironment environment, CommonWriterType writer)
+        {
+            _printLineDebugger = PrintLineDebugger.Create(writer);
+        }
+
+        public override void Revert()
+        {
+            _printLineDebugger.Dispose();
         }
     }
 }

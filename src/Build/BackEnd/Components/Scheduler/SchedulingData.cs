@@ -78,11 +78,6 @@ namespace Microsoft.Build.BackEnd
 
         #region Configuration-related Information
         /// <summary>
-        /// Maps a configuration id to the number of requests in the system which are assigned to that configuration.
-        /// </summary>
-        private readonly Dictionary<int, int> _configurationCounts = new Dictionary<int, int>(32);
-
-        /// <summary>
         /// Maps a configuration id to the node to which it is assigned.
         /// </summary>
         private readonly Dictionary<int, int> _configurationToNode = new Dictionary<int, int>(32);

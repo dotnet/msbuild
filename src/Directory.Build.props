@@ -1,12 +1,16 @@
 ﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Import the repo root props -->
+  <Import Project="..\Directory.Build.props"/>
+
   <PropertyGroup>
       <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <!-- Import the repo root props -->
-  <Import Project="..\Directory.Build.props"/>
+  <PropertyGroup>
+      <ShouldUseIBCOptimization Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and !( '$(BUILD_REASON)' == 'PullRequest' or '$(BUILD_REASON)' == 'IndividualCI' )">true</ShouldUseIBCOptimization>
+  </PropertyGroup>
 
-  <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4'))" />
+  <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.props" Condition="'$(ShouldUseIBCOptimization)' == 'true'" />
 
   <!-- Override project defaults provided by Repo toolset -->
   <PropertyGroup>

@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem(myreadonly_txt)
             };
 
-            bool success = Execute(t);
+            Execute(t);
         }
 
         [Fact]

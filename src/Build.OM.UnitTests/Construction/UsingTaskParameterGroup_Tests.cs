@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentDuplicateParameters);
+                GetParameterGroupXml(s_contentDuplicateParameters);
                 Assert.True(false);
             }
            );

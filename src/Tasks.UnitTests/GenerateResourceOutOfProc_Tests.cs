@@ -1328,10 +1328,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // resgen.exe error
                 Utilities.AssertLogContains(t, "ERROR RG0000");
 
-#if false       // we can't do this because FX strings ARE localized -- VSW#455956
-                // This is a literal because it comes from the ResX parser in the framework
-                Utilities.AssertLogContains(t, "'valueAB' start tag on line 18 does not match the end tag of 'value'");
-#endif
                 // so just look for the unlocalizable portions
                 Utilities.AssertLogContains(t, "valueAB");
                 Utilities.AssertLogContains(t, "value");

@@ -2051,7 +2051,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             int initial = project.AllEvaluatedProperties.Count();
 
-            ProjectProperty property = project.SetProperty("p", "1");
+            project.SetProperty("p", "1");
 
             Assert.Equal(initial, project.AllEvaluatedProperties.Count());
 
@@ -2636,7 +2636,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ReservedProjectProperties()
         {
             string file = NativeMethodsShared.IsWindows ? @"c:\foo\bar.csproj" : "/foo/bar.csproj";
-            string dir = NativeMethodsShared.IsWindows ? @"c:\foo" : "/foo";
             ProjectRootElement xml = ProjectRootElement.Create(file);
             xml.DefaultTargets = "Build";
             Project project = new Project(xml);
@@ -3015,7 +3014,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
 
                 MockLogger logger = new MockLogger();
-                bool result = project.Build(logger);
+                project.Build(logger);
 
                 // Should not reach this point.
                 Assert.True(false);
@@ -4241,7 +4240,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(projectFilename);
 
                 MockLogger logger = new MockLogger();
-                bool result = project.Build(logger);
+                project.Build(logger);
             }
             catch (XmlException)
             {
@@ -4295,7 +4294,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Project project = new Project(projectFilename);
 
                 MockLogger logger = new MockLogger();
-                bool result = project.Build(logger);
+                project.Build(logger);
             }
             finally
             {
@@ -4495,6 +4494,40 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Fact]
+        public void VerifyMSBuildLogsAMessageWhenLocalPropertyCannotOverrideValueOfGlobalProperty()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                             <Project>
+                               <PropertyGroup>
+                                 <Foo>Bar</Foo>
+                               </PropertyGroup>
+
+                               <Target Name='t'>
+                                 <Message Text='[$(Foo)]' />
+                               </Target>
+                             </Project>");
+            IDictionary<string, string> globalProperties =
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Foo", "Baz" }
+                };
+
+            MockLogger logger = new MockLogger();
+
+            Project project =
+                new Project(
+                    XmlReader.Create(new StringReader(content)),
+                    globalProperties,
+                    null,
+                    new ProjectCollection(
+                        globalProperties, new List<ILogger> { logger }, ToolsetDefinitionLocations.Default));
+
+            project.Build(logger);
+            logger.AssertLogContains(
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OM_GlobalProperty", "Foo"));
+        }
+
 #if FEATURE_HTTP_LISTENER
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
@@ -4649,68 +4682,5 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
             }
         }
-
-        #region ProjectPropertyComparer
-
-        /// <summary>
-        /// Checks two ProjectProperty objects belonging to the same project for equality.
-        /// </summary>
-        private class ProjectPropertyComparer : IEqualityComparer<ProjectProperty>
-        {
-            /// <summary>
-            /// Checks if two ProjectProperty objects are semantically equal.
-            /// </summary>
-            /// <param name="x"> The first object. </param>
-            /// <param name="y"> The second object. </param>
-            /// <returns> If they are semantically equal. </returns>
-            public bool Equals(ProjectProperty x, ProjectProperty y)
-            {
-                bool areEqual = false;
-
-                if (Object.ReferenceEquals(x, y))
-                {
-                    // If they point to the same object or are both null, they are equal.
-                    areEqual = true;
-                }
-                else if (x == null ^ y == null)
-                {
-                    // If only one of them is null, they are NOT equal.
-                    areEqual = false;
-                }
-                else if (!Object.ReferenceEquals(x.Project, y.Project))
-                {
-                    // If they don't belong to the same project, they are not equal.
-                    areEqual = false;
-                }
-                else if (x.Xml != null && y.Xml != null && Object.ReferenceEquals(x.Xml, y.Xml))
-                {
-                    // If their underlying construction model elements are the same, they are equal.
-                    // Note that certain properties such as global/environment/toolset properties
-                    // do not have a backing xml.
-                    areEqual = true;
-                }
-                else if (x.Xml == null && y.Xml == null) // both are global/environment/toolset properties
-                {
-                    // If both their unevaluated values as well as their evaluated values are same, then they are equal.
-                    areEqual = String.Equals(x.UnevaluatedValue, y.UnevaluatedValue, StringComparison.OrdinalIgnoreCase);
-                }
-
-                return areEqual;
-            }
-
-            /// <summary>
-            /// Returns the hash code for a ProjectProperty object.
-            /// </summary>
-            /// <param name="obj"> A ProjectProperty object. </param>
-            /// <returns> The has code. </returns>
-            public int GetHashCode(ProjectProperty obj)
-            {
-                int hashCode = StringComparer.OrdinalIgnoreCase.GetHashCode(obj.UnevaluatedValue);
-
-                return hashCode;
-            }
-        }
-
-        #endregion
     }
 }

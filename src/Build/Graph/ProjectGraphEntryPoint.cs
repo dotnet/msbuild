@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
@@ -26,6 +27,8 @@ namespace Microsoft.Build.Graph
         /// <param name="globalProperties">The global properties to use for this entry point. May be null, in which case the global properties of the project collection provided to the project graph will be used.</param>
         public ProjectGraphEntryPoint(string projectFile, IDictionary<string, string> globalProperties)
         {
+            ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
+
             ProjectFile = projectFile;
             GlobalProperties = globalProperties;
         }

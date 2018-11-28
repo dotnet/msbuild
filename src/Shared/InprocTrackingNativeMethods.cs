@@ -204,7 +204,6 @@ namespace Microsoft.Build.Shared
             private static void LoadFileTrackerDll()
             {
                 // Get the FileTracker in our directory that matches the currently running process
-                string frameworkDir = RuntimeEnvironment.GetRuntimeDirectory();
                 string buildToolsPath = FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion(MSBuildConstants.CurrentToolsVersion, DotNetFrameworkArchitecture.Current);
                 string fileTrackerPath = Path.Combine(buildToolsPath, fileTrackerDllName.Value);
 

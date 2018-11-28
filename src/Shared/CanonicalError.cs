@@ -230,26 +230,6 @@ namespace Microsoft.Build.Shared
             /// The error message text (localized)
             /// </summary>
             internal string text;
-
-#if NEVER
-            internal new string ToString()
-            {
-                return String.Format
-                (
-                     "Origin='{0}'\n"
-                    +"Filename='{1}'\n"
-                    +"Line='{2}'\n"
-                    +"Column='{3}'\n"
-                    +"EndLine='{4}'\n"
-                    +"EndColumn='{5}'\n"
-                    +"Category='{6}'\n"
-                    +"Subcategory='{7}'\n"
-                    +"Text='{8}'\n"
-                    , origin, line, column, endLine, endColumn, category.ToString(), subcategory, code, text
-                );
-
-            }
-#endif
         }
 
         /// <summary>

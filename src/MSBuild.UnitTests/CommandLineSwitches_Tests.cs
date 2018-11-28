@@ -1267,7 +1267,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         /// <summary>
-        /// Regress DDB #143341: 
+        /// Regress DDB #143341:
         ///     msbuild /clp:v=quiet /clp:v=diag /m:2
         /// gave console logger in quiet verbosity; expected diagnostic
         /// </summary>
@@ -1373,7 +1373,7 @@ namespace Microsoft.Build.UnitTests
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
 
             MSBuildApp.GatherCommandLineSwitches(new ArrayList(new [] { "/warnaserror" }), commandLineSwitches);
-            
+
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
             Assert.NotNull(actualWarningsAsErrors);
@@ -1491,9 +1491,11 @@ namespace Microsoft.Build.UnitTests
                     // All lines should be 80 characters or less
                     Assert.True(helpMessageLines[i].Length <= 80, $"Line {i + 1} of '{item.Key}' should be no longer than 80 characters.");
 
+                    string trimmedLine = helpMessageLines[i].Trim();
+
                     if (i == 0)
                     {
-                        if (helpMessageLines[i].Trim().StartsWith("/") || helpMessageLines[i].Trim().StartsWith("@"))
+                        if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
                         {
                             // If the first line in a switch it needs a certain amount of leading spaces
                             Assert.True(helpMessageLines[i].StartsWith(switchLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{switchLeadingSpaces}'.");
@@ -1509,13 +1511,13 @@ namespace Microsoft.Build.UnitTests
                         // Ignore empty lines
                         if (!String.IsNullOrWhiteSpace(helpMessageLines[i]))
                         {
-                            
+
                             if (item.Key.Contains("Examples"))
                             {
                                 // Examples require a certain number of leading spaces
                                 Assert.True(helpMessageLines[i].StartsWith(examplesLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{examplesLeadingSpaces}'.");
                             }
-                            else if (helpMessageLines[i].Trim().StartsWith("/") || helpMessageLines[i].Trim().StartsWith("@"))
+                            else if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
                             {
                                 // Switches require a certain number of leading spaces
                                 Assert.True(helpMessageLines[i].StartsWith(switchLeadingSpaces), $"Line {i + 1} of '{item.Key}' should start with '{switchLeadingSpaces}'.");

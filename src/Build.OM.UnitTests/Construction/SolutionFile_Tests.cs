@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
                 Assert.True(false, "Should not get here");
             }
            );
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (Exception ex)
             {
@@ -540,7 +540,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             try
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
             catch (InvalidProjectFileException e)
             {
@@ -783,7 +783,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -810,7 +810,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }
@@ -837,7 +837,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents);
             }
            );
         }

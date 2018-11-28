@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 File.WriteAllText(file, ObjectModelHelpers.CleanupFileContents("<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>\r\n<ItemGroup>") + new string(' ', 70000) + @"<x/></ItemGroup></Project>");
 
-                ProjectRootElement projectXml = ProjectRootElement.Open(file);
+                ProjectRootElement.Open(file);
             }
             catch (InvalidProjectFileException ex)
             {
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 File.WriteAllText(file, ObjectModelHelpers.CleanupFileContents("<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>\r\n<ItemGroup>") + longstring + @" <x/></ItemGroup></Project>");
 
-                ProjectRootElement projectXml = ProjectRootElement.Open(file);
+                ProjectRootElement.Open(file);
             }
             catch (InvalidProjectFileException ex)
             {
@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                IElementLocation location = ElementLocation.Create("file", -1, 2);
+                ElementLocation.Create("file", -1, 2);
             }
            );
         }
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                IElementLocation location = ElementLocation.Create("file", 1, -2);
+                ElementLocation.Create("file", 1, -2);
             }
            );
         }
