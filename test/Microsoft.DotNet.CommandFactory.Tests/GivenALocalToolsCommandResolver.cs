@@ -124,6 +124,31 @@ namespace Microsoft.DotNet.Tests
                 toolCommandNameA.ToString()));
         }
 
+        [Fact]
+        public void WhenNuGetGlobalPackageLocationIsNotRestoredItThrowsGracefulException()
+        {
+            ToolCommandName toolCommandNameA = new ToolCommandName("a");
+            NuGetVersion packageVersionA = NuGetVersion.Parse("1.0.4");
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, ManifestFilename),
+                _jsonContent.Replace("$TOOLCOMMAND$", toolCommandNameA.Value));
+            ToolManifestFinder toolManifest =
+                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+
+            var localToolsCommandResolver = new LocalToolsCommandResolver(
+                toolManifest,
+                _localToolsResolverCache,
+                _fileSystem,
+                _nugetGlobalPackagesFolder);
+
+            Action action = () => localToolsCommandResolver.Resolve(new CommandResolverArguments()
+            {
+                CommandName = $"dotnet-{toolCommandNameA.ToString()}",
+            });
+
+            action.ShouldThrow<GracefulException>(string.Format(CommandFactory.LocalizableStrings.NeedRunToolRestore,
+                toolCommandNameA.ToString()));
+        }
+
         private string _jsonContent =
             @"{
    ""version"":1,

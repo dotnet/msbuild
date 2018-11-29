@@ -82,8 +82,11 @@ namespace Microsoft.DotNet.CommandFactory
                     restoredCommand.Executable.Value,
                     arguments.CommandArguments);
             }
-
-            return null;
+            else
+            {
+                throw new GracefulException(string.Format(LocalizableStrings.NeedRunToolRestore,
+                        toolCommandName.ToString()));
+            }
         }
     }
 }
