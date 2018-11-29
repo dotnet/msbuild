@@ -72,8 +72,8 @@
         DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.NET.Sdk.Publish.Tasks.dll"
         OverwriteReadOnlyFiles="true" />
 
-    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/netcoreapp2.0/Microsoft.NET.Sdk.Publish.Tasks.dll"
-        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp2.0/Microsoft.NET.Sdk.Publish.Tasks.dll"
+    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/netcoreapp2.1/Microsoft.NET.Sdk.Publish.Tasks.dll"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp2.1/Microsoft.NET.Sdk.Publish.Tasks.dll"
         OverwriteReadOnlyFiles="true" />
 
     <!-- Copy Xdt assemblies -->
@@ -81,8 +81,8 @@
         DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/net46/Microsoft.Web.XmlTransform.dll"
         OverwriteReadOnlyFiles="true" />
 
-    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/netcoreapp2.0/Microsoft.Web.XmlTransform.dll"
-        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp2.0/Microsoft.Web.XmlTransform.dll"
+    <Copy SourceFiles="$(WebSdkRoot)/bin/$(Configuration)/netcoreapp2.1/Microsoft.Web.XmlTransform.dll"
+        DestinationFiles="$(DotNetSdksFolder)/Microsoft.NET.Sdk.Publish/tools/netcoreapp2.1/Microsoft.Web.XmlTransform.dll"
         OverwriteReadOnlyFiles="true" />
 
   </Target>
@@ -91,7 +91,7 @@
 
     <!-- Run .NET Core Tests -->
     <Exec
-      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp2.0 /p:Configuration=$(Configuration)" />
+      Command="$(DOTNET_EXE_PATH) test &quot;$(WebSdkRoot)/test/Publish/Microsoft.NET.Sdk.Publish.Tasks.Tests/Microsoft.NET.Sdk.Publish.Tasks.Tests.csproj&quot; -f=netcoreapp2.1 /p:Configuration=$(Configuration)" />
 
     <!-- Run .NET Framework Tests -->
     <Exec

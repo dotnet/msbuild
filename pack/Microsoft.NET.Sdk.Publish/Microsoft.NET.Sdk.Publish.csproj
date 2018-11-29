@@ -33,14 +33,14 @@
       <PackagePath>tools\net46\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
     </Content>
 
-    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\netcoreapp2.0\Microsoft.NET.Sdk.Publish.Tasks.dll">
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\netcoreapp2.1\Microsoft.NET.Sdk.Publish.Tasks.dll">
       <Pack>true</Pack>
-      <PackagePath>tools\netcoreapp2.0</PackagePath>
+      <PackagePath>tools\netcoreapp2.1</PackagePath>
     </Content>
 
-    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\netcoreapp2.0\Microsoft.Web.XmlTransform.dll">
+    <Content Include="$(WebSdkRoot)\bin\$(Configuration)\netcoreapp2.1\Microsoft.Web.XmlTransform.dll">
       <Pack>true</Pack>
-      <PackagePath>tools\netcoreapp2.0</PackagePath>
+      <PackagePath>tools\netcoreapp2.1</PackagePath>
     </Content>
 
     <Content Include="$(WebSdkSource)\Publish\Microsoft.NET.Sdk.Publish.Targets\netstandard1.0\ComputeTargets\*.*">
