@@ -5,7 +5,7 @@
   <Import Project="ProducesNoOutput.Settings.props" />
 
   <!-- The nuget resolver will download the sdk -->
-  <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset"/>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk"/>
 
   <Target Name="Build"/>
 

@@ -12,4 +12,5 @@
     <CentralPackagesFile>$(MSBuildThisFileDirectory)build/Packages.props</CentralPackagesFile>
   </PropertyGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.Build.CentralPackageVersions" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 </Project>

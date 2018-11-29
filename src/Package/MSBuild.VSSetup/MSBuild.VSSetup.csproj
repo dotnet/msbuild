@@ -6,7 +6,7 @@
        <ShouldSkipProject Condition="'$(MonoBuild)' == 'true' or '$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
    </PropertyGroup>
 
-   <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.props" />
+   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
    <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
@@ -54,5 +54,5 @@
 
   <Import Project="$(RepoRoot)build\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 
-  <Import Sdk="RoslynTools.RepoToolset" Project="Sdk.targets" />
+  <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 </Project>
