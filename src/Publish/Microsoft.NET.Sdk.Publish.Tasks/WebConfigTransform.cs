@@ -1,11 +1,9 @@
-﻿using System;
+﻿using Microsoft.NET.Sdk.Publish.Tasks.Properties;
+using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Microsoft.NET.Sdk.Publish.Tasks.Properties;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks
 {
