@@ -81,7 +81,7 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: packages'
   inputs:
-    PathtoPublish: 'artifacts\$(BuildConfiguration)\packages'
+    PathtoPublish: 'artifacts\$(BuildConfiguration)\packages\*Shipping\*.nupkg'
     ArtifactName: packages
   condition: succeededOrFailed()
 
