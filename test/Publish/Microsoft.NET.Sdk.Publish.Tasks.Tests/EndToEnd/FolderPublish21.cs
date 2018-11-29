@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Microsoft.NET.Sdk.Publish.Tasks.Tests.EndToEnd
 {
-    public class FolderPublish21
+    public class FolderPublish21 : IClassFixture<Initialize21Templates>
     {
         public string BaseTestDirectory
         {
