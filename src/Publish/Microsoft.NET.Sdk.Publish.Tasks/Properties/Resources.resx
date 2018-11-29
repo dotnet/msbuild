@@ -1150,7 +1150,7 @@ Environment-Specific Settings:
 For more information on this deploy script visit:	https://go.microsoft.com/fwlink/?LinkID=183544</value>
   </data>
   <data name="WebConfigTransform_HostingModel_Error" xml:space="preserve">
-    <value>The acceptable value for AspNetCoreModuleHostingModel property is either "InProcess" or "OutOfProcess".</value>
+    <value>The acceptable value for AspNetCoreHostingModel property is either "InProcess" or "OutOfProcess".</value>
   </data>
   <data name="WebConfigTransform_InvalidHostingOption" xml:space="preserve">
     <value>In process hosting is not supported for AspNetCoreModule. Change the AspNetCoreModule to at least AspNetCoreModuleV2.</value>
