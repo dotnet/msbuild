@@ -18,9 +18,9 @@ This project has adopted the code of conduct defined by the [Contributor Covenan
 
 # Build status
 
-|Windows x64 |
+|Windows x64|
 |:------:|
-|[![](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/7716/badge)](https://devdiv.visualstudio.com/DevDiv/_build?_a=completed&definitionId=7716)|
+|[![Build Status](https://dev.azure.com/dnceng/internal/_apis/build/status/224)](https://dev.azure.com/dnceng/internal/_build?definitionId=224)|
 
 # Basic usage
 
