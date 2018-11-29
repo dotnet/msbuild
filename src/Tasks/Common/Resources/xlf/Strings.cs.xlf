@@ -122,7 +122,7 @@
         <target state="translated">NETSDK1012: Neočekávaný typ souboru pro {0}. Typ je {1} i {2}.</target>
         <note>{StrBegin="NETSDK1012: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="translated">NETSDK1013: Hodnota TargetFramework {0} nebyla rozpoznána. Je možné, že obsahuje překlepy. Pokud tomu tak není, musíte vlastnosti TargetFrameworkIdentifier a TargetFrameworkVersion zadat explicitně.</target>
         <note>{StrBegin="NETSDK1013: "}</note>

@@ -97,7 +97,7 @@
         <target state="new">NETSDK1031: It is not supported to build or publish a self-contained application without specifying a RuntimeIdentifier.  Please either specify a RuntimeIdentifier or set SelfContained to false.</target>
         <note>{StrBegin="NETSDK1031: "}</note>
       </trans-unit>
-      <trans-unit id="CannotInferTargetFrameworkIdentiferAndVersion">
+      <trans-unit id="CannotInferTargetFrameworkIdentifierAndVersion">
         <source>NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</source>
         <target state="new">NETSDK1013: The TargetFramework value '{0}' was not recognized. It may be misspelled. If not, then the TargetFrameworkIdentifier and/or TargetFrameworkVersion properties must be specified explicitly.</target>
         <note>{StrBegin="NETSDK1013: "}</note>
