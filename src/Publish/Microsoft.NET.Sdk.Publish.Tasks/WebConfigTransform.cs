@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -150,7 +151,7 @@ namespace Microsoft.NET.Sdk.Publish.Tasks
             // Set the hostingmodel attribute only if it is not already set in the web.config and AspNetCoreHostingModel property is set.
             if (hostingModelAttributeValue == null && !string.IsNullOrEmpty(aspNetCoreHostingModel))
             {
-                switch(aspNetCoreHostingModel.ToLower())
+                switch(aspNetCoreHostingModel.ToLowerInvariant())
                 {
                     case "inprocess":
                         // In process is not supported for AspNetCoreModule.
