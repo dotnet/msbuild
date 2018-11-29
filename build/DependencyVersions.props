@@ -60,7 +60,7 @@
     <MicroBuildCorePackageVersion>0.2.0</MicroBuildCorePackageVersion>
     <MSTestVersion>1.3.2</MSTestVersion>
     <XUnitVersion>2.3.1</XUnitVersion>
-    <NUnit3TemplatesVersion>1.5.3</NUnit3TemplatesVersion>
+    <NUnit3TemplatesVersion>1.6.0</NUnit3TemplatesVersion>
   </PropertyGroup>
 
   <!-- NOTE: The property group above is in alignment with orchestrated build version naming conventions. -->
