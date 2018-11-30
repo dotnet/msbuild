@@ -54,26 +54,25 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache
                 .TryLoad(
                     new RestoredCommandIdentifier(packageId, NuGetVersion.Parse("1.0.0-wrong-version"), targetFramework,
-                        runtimeIdentifier, restoredCommands[0].Name), nuGetGlobalPackagesFolder, out _)
+                        runtimeIdentifier, restoredCommands[0].Name), out _)
                 .Should().BeFalse();
 
             localToolsResolverCache
                 .TryLoad(
                     new RestoredCommandIdentifier(packageId, nuGetVersion, NuGetFramework.Parse("wrongFramework"),
-                        runtimeIdentifier, restoredCommands[0].Name), nuGetGlobalPackagesFolder, out _)
+                        runtimeIdentifier, restoredCommands[0].Name), out _)
                 .Should().BeFalse();
 
             localToolsResolverCache
                 .TryLoad(
                     new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework,
                         "wrongRuntimeIdentifier", restoredCommands[0].Name),
-                    nuGetGlobalPackagesFolder, out _)
+                    out _)
                 .Should().BeFalse();
         }
 
@@ -95,18 +94,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommands[0].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand tool1).Should().BeTrue();
+                out RestoredCommand tool1).Should().BeTrue();
 
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommands[1].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand tool2).Should().BeTrue();
+                out RestoredCommand tool2).Should().BeTrue();
 
             tool1.ShouldBeEquivalentTo(restoredCommands[0]);
             tool2.ShouldBeEquivalentTo(restoredCommands[1]);
@@ -130,24 +128,22 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommands[0].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand tool1);
+                out RestoredCommand tool1);
 
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommands[1].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand tool2);
+                out RestoredCommand tool2);
 
 
             tool1.ShouldBeEquivalentTo(restoredCommands[0]);
@@ -184,20 +180,17 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommandsV0.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, previewNuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.Save(
                 restoredCommandsV1.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.Save(
                 restoredCommandsV2.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             bool loadSuccess =
                 localToolsResolverCache.TryLoadHighestVersion(
@@ -205,7 +198,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         packageId,
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
                         targetFramework, runtimeIdentifier, new ToolCommandName("tool1")),
-                    nuGetGlobalPackagesFolder, out RestoredCommand loadedResolverCache);
+                    out RestoredCommand loadedResolverCache);
 
             loadSuccess.Should().BeTrue();
 
@@ -223,7 +216,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
                         new PackageId("my.toolBundle"),
                         VersionRange.Parse("(0.0.0, 2.0.0)"),
                         NuGetFramework.Parse("netcoreapp2.1"), Constants.AnyRid, new ToolCommandName("tool1")),
-                    nuGetGlobalPackagesFolder, out _);
+                    out _);
 
             loadSuccess.Should().BeFalse();
         }
@@ -252,28 +245,26 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.Save(
                 restoredCommandsNewer.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommands[0].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand tool1);
+                out RestoredCommand tool1);
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommandsNewer[0].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand tool1Newer);
+                out RestoredCommand tool1Newer);
 
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, newerNuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommandsNewer[1].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand tool2Newer);
+                out RestoredCommand tool2Newer);
 
             tool1.ShouldBeEquivalentTo(restoredCommands[0]);
             tool1Newer.ShouldBeEquivalentTo(restoredCommandsNewer[0]);
@@ -329,8 +320,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             var cachePath = cacheDirectory
                 .WithSubDirectories(version.ToString())
@@ -346,13 +336,12 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommands[0].Name),
-                nuGetGlobalPackagesFolder, out RestoredCommand restoredCommand);
+                out RestoredCommand restoredCommand);
 
             restoredCommand.ShouldBeEquivalentTo(restoredCommands[0]);
         }
@@ -388,8 +377,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.Save(
                 restoredCommands.ToDictionary(
                     c => new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
-                        c.Name)),
-                nuGetGlobalPackagesFolder);
+                        c.Name)));
 
             var cachePath = cacheDirectory
                 .WithSubDirectories(version.ToString())
@@ -404,7 +392,7 @@ namespace Microsoft.DotNet.ToolPackage.Tests
             localToolsResolverCache.TryLoad(
                 new RestoredCommandIdentifier(packageId, nuGetVersion, targetFramework, runtimeIdentifier,
                     restoredCommands[0].Name),
-                nuGetGlobalPackagesFolder, out _).Should().BeFalse("Consider corrupted file cache miss");
+                out _).Should().BeFalse("Consider corrupted file cache miss");
         }
     }
 }

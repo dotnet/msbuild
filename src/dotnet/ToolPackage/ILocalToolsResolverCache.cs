@@ -9,17 +9,14 @@ namespace Microsoft.DotNet.ToolPackage
     internal interface ILocalToolsResolverCache
     {
         void Save(
-            IDictionary<RestoredCommandIdentifier, RestoredCommand> restoredCommandMap,
-            DirectoryPath nuGetGlobalPackagesFolder);
+            IDictionary<RestoredCommandIdentifier, RestoredCommand> restoredCommandMap);
 
         bool TryLoad(
             RestoredCommandIdentifier restoredCommandIdentifier,
-            DirectoryPath nuGetGlobalPackagesFolder,
             out RestoredCommand restoredCommand);
 
         bool TryLoadHighestVersion(
             RestoredCommandIdentifierVersionRange query,
-            DirectoryPath nuGetGlobalPackagesFolder,
             out RestoredCommand restoredCommandList);
     }
 }

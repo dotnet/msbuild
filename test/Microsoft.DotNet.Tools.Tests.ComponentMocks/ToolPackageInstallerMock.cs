@@ -11,6 +11,7 @@ using Microsoft.DotNet.Cli.Utils;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools;
 using Microsoft.DotNet.Tools.Test.Utilities;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.Extensions.EnvironmentAbstractions;
 using NuGet.Versioning;
 

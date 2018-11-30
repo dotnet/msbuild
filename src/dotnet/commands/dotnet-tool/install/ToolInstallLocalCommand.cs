@@ -20,7 +20,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
     {
         private readonly IToolManifestFinder _toolManifestFinder;
         private readonly IToolManifestEditor _toolManifestEditor;
-        private readonly DirectoryPath _nugetGlobalPackagesFolder;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
         private readonly IToolPackageInstaller _toolPackageInstaller;
         private readonly IReporter _reporter;
@@ -39,7 +38,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
             IToolManifestFinder toolManifestFinder = null,
             IToolManifestEditor toolManifestEditor = null,
             ILocalToolsResolverCache localToolsResolverCache = null,
-            DirectoryPath? nugetGlobalPackagesFolder = null,
             IReporter reporter = null)
             : base(parseResult)
         {
@@ -75,8 +73,6 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                                   new ToolManifestFinder(new DirectoryPath(Directory.GetCurrentDirectory()));
             _toolManifestEditor = toolManifestEditor ?? new ToolManifestEditor();
             _localToolsResolverCache = localToolsResolverCache ?? new LocalToolsResolverCache();
-            _nugetGlobalPackagesFolder =
-                nugetGlobalPackagesFolder ?? new DirectoryPath(NuGetGlobalPackagesFolder.GetLocation());
         }
 
         public override int Execute()
@@ -141,8 +137,7 @@ namespace Microsoft.DotNet.Tools.Tool.Install
                                     Constants.AnyRid,
                                     restoredCommand.Name)] =
                                 restoredCommand
-                        },
-                        _nugetGlobalPackagesFolder);
+                        });
                 }
 
                 _reporter.WriteLine(

@@ -5,11 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.DotNet.Cli;
 using Microsoft.DotNet.Cli.CommandLine;
 using Microsoft.DotNet.Cli.Utils;
-using Microsoft.DotNet.Configurer;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -24,7 +22,6 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
         private readonly IReporter _errorReporter;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
         private readonly IToolManifestFinder _toolManifestFinder;
-        private readonly DirectoryPath _nugetGlobalPackagesFolder;
         private readonly AppliedOption _options;
         private readonly IFileSystem _fileSystem;
         private readonly IReporter _reporter;
@@ -39,7 +36,6 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             IToolManifestFinder toolManifestFinder = null,
             ILocalToolsResolverCache localToolsResolverCache = null,
             IFileSystem fileSystem = null,
-            DirectoryPath? nugetGlobalPackagesFolder = null,
             IReporter reporter = null)
             : base(result)
         {
@@ -66,8 +62,6 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
             _localToolsResolverCache = localToolsResolverCache ?? new LocalToolsResolverCache();
             _fileSystem = fileSystem ?? new FileSystemWrapper();
 
-            _nugetGlobalPackagesFolder =
-                nugetGlobalPackagesFolder ?? new DirectoryPath(NuGetGlobalPackagesFolder.GetLocation());
             _reporter = reporter ?? Reporter.Output;
             _errorReporter = reporter ?? Reporter.Error;
 
@@ -108,7 +102,7 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
             EnsureNoCommandNameCollision(downloaded);
 
-            _localToolsResolverCache.Save(downloaded, _nugetGlobalPackagesFolder);
+            _localToolsResolverCache.Save(downloaded);
 
             return PrintConclusionAndReturn(toolRestoreResults);
         }
@@ -241,7 +235,6 @@ namespace Microsoft.DotNet.Tools.Tool.Restore
 
             return _localToolsResolverCache.TryLoad(
                        sampleRestoredCommandIdentifierOfThePackage,
-                       _nugetGlobalPackagesFolder,
                        out var restoredCommand)
                    && _fileSystem.File.Exists(restoredCommand.Executable.Value);
         }

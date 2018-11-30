@@ -20,20 +20,16 @@ namespace Microsoft.DotNet.CommandFactory
         private readonly ToolManifestFinder _toolManifest;
         private readonly ILocalToolsResolverCache _localToolsResolverCache;
         private readonly IFileSystem _fileSystem;
-        private readonly DirectoryPath _nugetGlobalPackagesFolder;
         private const string LeadingDotnetPrefix = "dotnet-";
 
         public LocalToolsCommandResolver(
             ToolManifestFinder toolManifest = null,
             ILocalToolsResolverCache localToolsResolverCache = null,
-            IFileSystem fileSystem = null,
-            DirectoryPath? nugetGlobalPackagesFolder = null)
+            IFileSystem fileSystem = null)
         {
             _toolManifest = toolManifest ?? new ToolManifestFinder(new DirectoryPath(Directory.GetCurrentDirectory()));
             _localToolsResolverCache = localToolsResolverCache ?? new LocalToolsResolverCache();
             _fileSystem = fileSystem ?? new FileSystemWrapper();
-            _nugetGlobalPackagesFolder =
-                nugetGlobalPackagesFolder ?? new DirectoryPath(NuGetGlobalPackagesFolder.GetLocation());
         }
 
         public CommandSpec Resolve(CommandResolverArguments arguments)
@@ -69,7 +65,6 @@ namespace Microsoft.DotNet.CommandFactory
                     NuGetFramework.Parse(BundledTargetFramework.GetTargetFrameworkMoniker()),
                     Constants.AnyRid,
                     toolCommandName),
-                _nugetGlobalPackagesFolder,
                 out var restoredCommand))
             {
                 if (!_fileSystem.File.Exists(restoredCommand.Executable.Value))

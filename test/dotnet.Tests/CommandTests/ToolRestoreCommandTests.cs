@@ -12,6 +12,7 @@ using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Test.Utilities;
 using Microsoft.DotNet.Tools.Tests.ComponentMocks;
+using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.DotNet.Tools.Tool.Restore;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -133,7 +134,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Tests.Commands
                         _packageVersionA,
                         NuGetFramework.Parse(BundledTargetFramework.GetTargetFrameworkMoniker()),
                         Constants.AnyRid,
-                        _toolCommandNameA), _nugetGlobalPackagesFolder, out RestoredCommand restoredCommand)
+                        _toolCommandNameA), out RestoredCommand restoredCommand)
                 .Should().BeTrue();
 
             _fileSystem.File.Exists(restoredCommand.Executable.Value)
@@ -172,7 +172,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
@@ -209,7 +208,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
@@ -266,7 +264,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
@@ -285,7 +282,7 @@ namespace Microsoft.DotNet.Tests.Commands
                         _packageVersionA,
                         NuGetFramework.Parse(BundledTargetFramework.GetTargetFrameworkMoniker()),
                         Constants.AnyRid,
-                        _toolCommandNameA), _nugetGlobalPackagesFolder, out _)
+                        _toolCommandNameA), out _)
                 .Should().BeTrue("Existing package will succeed despite other package failed");
         }
 
@@ -308,7 +305,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
@@ -332,7 +328,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 realManifestFinderImplementationWithMockFinderSystem,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
@@ -360,7 +355,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
@@ -389,7 +383,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 manifestFinder,
                 _localToolsResolverCache,
                 _fileSystem,
-                _nugetGlobalPackagesFolder,
                 _reporter
             );
 
