@@ -136,8 +136,7 @@ namespace Microsoft.DotNet.Tests
             var localToolsCommandResolver = new LocalToolsCommandResolver(
                 toolManifest,
                 _localToolsResolverCache,
-                _fileSystem,
-                _nugetGlobalPackagesFolder);
+                _fileSystem);
 
             Action action = () => localToolsCommandResolver.Resolve(new CommandResolverArguments()
             {
