@@ -18,6 +18,9 @@ namespace Microsoft.Build.Shared
         // regular expression used to match file-specs comprising exactly "<drive letter>:" (with no trailing characters)
         internal static readonly Regex DrivePattern = new Regex(@"^[A-Za-z]:$", RegexOptions.Compiled);
 
+        // regular expression used to match file-specs beginning with "<drive letter>:"
+        internal static readonly Regex StartWithDrivePattern = new Regex(@"^[A-Za-z]:", RegexOptions.Compiled);
+
         private static readonly string s_baseUncPattern = string.Format(
             CultureInfo.InvariantCulture,
             @"^[\{0}\{1}][\{0}\{1}][^\{0}\{1}]+[\{0}\{1}][^\{0}\{1}]+",

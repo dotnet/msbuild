@@ -472,7 +472,7 @@ namespace Microsoft.Build.Shared
                         if (NativeMethodsShared.IsWindows)
                         {
                             int length = -1;
-                            if (FileUtilitiesRegex.DrivePattern.IsMatch(modifiedItemSpec))
+                            if (FileUtilitiesRegex.StartWithDrivePattern.IsMatch(modifiedItemSpec))
                             {
                                 length = 2;
                             }
