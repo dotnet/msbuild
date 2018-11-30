@@ -427,7 +427,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void OneAttributeTwoSamePositionalParams()
+        public void OneAttributeTwoPositionalParamsWithSameValue()
         {
             WriteCodeFragment task = new WriteCodeFragment();
             MockEngine engine = new MockEngine(true);
