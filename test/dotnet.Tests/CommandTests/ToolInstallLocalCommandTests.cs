@@ -89,7 +89,7 @@ namespace Microsoft.DotNet.Tests.Commands
 
             _manifestFilePath = Path.Combine(_temporaryDirectory, "dotnet-tools.json");
             _fileSystem.File.WriteAllText(Path.Combine(_temporaryDirectory, _manifestFilePath), _jsonContent);
-            _toolManifestFinder = new ToolManifestFinder(new DirectoryPath(_temporaryDirectory), _fileSystem);
+            _toolManifestFinder = new ToolManifestFinder(new DirectoryPath(_temporaryDirectory), _fileSystem, new FakeDangerousFileDetector());
             _toolManifestEditor = new ToolManifestEditor(_fileSystem);
 
             ParseResult result = Parser.Instance.Parse($"dotnet tool install {_packageIdA.ToString()}");

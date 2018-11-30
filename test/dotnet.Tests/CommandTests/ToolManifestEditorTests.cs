@@ -37,7 +37,7 @@ namespace Microsoft.DotNet.Tests.Commands
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
 
-            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             toolManifestFileEditor.Add(new FilePath(manifestFile),
                 new PackageId("new-tool"),
@@ -77,7 +77,7 @@ namespace Microsoft.DotNet.Tests.Commands
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
 
-            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             PackageId packageId = new PackageId("dotnetsay");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("3.0.0");
@@ -106,7 +106,7 @@ namespace Microsoft.DotNet.Tests.Commands
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
 
-            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             PackageId packageId = new PackageId("dotnetsay");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("2.1.4");
@@ -126,7 +126,7 @@ namespace Microsoft.DotNet.Tests.Commands
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonWithInvalidField);
 
-            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             PackageId packageId = new PackageId("dotnetsay");
             NuGetVersion nuGetVersion = NuGetVersion.Parse("3.0.0");
@@ -150,7 +150,7 @@ namespace Microsoft.DotNet.Tests.Commands
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
 
-            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             toolManifestFileEditor.Remove(new FilePath(manifestFile),
                 new PackageId("dotnetsay"));
@@ -176,7 +176,7 @@ namespace Microsoft.DotNet.Tests.Commands
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonContent);
 
-            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             Action a = () => toolManifestFileEditor.Remove(
                 new FilePath(manifestFile),
@@ -195,7 +195,7 @@ namespace Microsoft.DotNet.Tests.Commands
             string manifestFile = Path.Combine(_testDirectoryRoot, _manifestFilename);
             _fileSystem.File.WriteAllText(manifestFile, _jsonWithInvalidField);
 
-            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem);
+            var toolManifestFileEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             Action a = () => toolManifestFileEditor.Remove(
                 new FilePath(manifestFile),

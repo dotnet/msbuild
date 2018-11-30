@@ -50,8 +50,8 @@ namespace Microsoft.DotNet.Tests.Commands
 
             _manifestFilePath = Path.Combine(_temporaryDirectory, "dotnet-tools.json");
             _fileSystem.File.WriteAllText(Path.Combine(_temporaryDirectory, _manifestFilePath), _jsonContent);
-            _toolManifestFinder = new ToolManifestFinder(new DirectoryPath(_temporaryDirectory), _fileSystem);
-            _toolManifestEditor = new ToolManifestEditor(_fileSystem);
+            _toolManifestFinder = new ToolManifestFinder(new DirectoryPath(_temporaryDirectory), _fileSystem, new FakeDangerousFileDetector());
+            _toolManifestEditor = new ToolManifestEditor(_fileSystem, new FakeDangerousFileDetector());
 
             _parseResult = Parser.Instance.Parse($"dotnet tool uninstall {_packageIdDotnsay.ToString()}");
             _appliedCommand = _parseResult["dotnet"]["tool"]["uninstall"];

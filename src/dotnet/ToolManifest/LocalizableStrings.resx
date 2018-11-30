@@ -156,4 +156,7 @@
   <data name="CannotFindPackageIdInManifest" xml:space="preserve">
     <value>Cannot find a package with the package id {0} in the manifest file.</value>
   </data>
+  <data name="ManifestHasMarkOfTheWeb" xml:space="preserve">
+    <value>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</value>
+  </data>
 </root>

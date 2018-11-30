@@ -19,13 +19,15 @@ namespace Microsoft.DotNet.ToolManifest
 {
     internal class ToolManifestEditor : IToolManifestEditor
     {
+        private readonly IDangerousFileDetector _dangerousFileDetector;
         private readonly IFileSystem _fileSystem;
 
         // The supported tool manifest file version.
         private const int SupportedVersion = 1;
 
-        public ToolManifestEditor(IFileSystem fileSystem = null)
+        public ToolManifestEditor(IFileSystem fileSystem = null, IDangerousFileDetector dangerousFileDetector = null)
         {
+            _dangerousFileDetector = dangerousFileDetector ?? new DangerousFileDetector();
             _fileSystem = fileSystem ?? new FileSystemWrapper();
         }
 
@@ -74,9 +76,15 @@ namespace Microsoft.DotNet.ToolManifest
                 JsonConvert.SerializeObject(deserializedManifest, Formatting.Indented));
         }
 
-        public (List<ToolManifestPackage> content, bool isRoot) 
+        public (List<ToolManifestPackage> content, bool isRoot)
             Read(FilePath manifest, DirectoryPath correspondingDirectory)
         {
+            if (_dangerousFileDetector.IsDangerous(manifest.Value))
+            {
+                throw new ToolManifestException(
+                    string.Format(LocalizableStrings.ManifestHasMarkOfTheWeb, manifest.Value));
+            }
+
             SerializableLocalToolsManifest deserializedManifest =
                 DeserializeLocalToolsManifest(manifest);
 

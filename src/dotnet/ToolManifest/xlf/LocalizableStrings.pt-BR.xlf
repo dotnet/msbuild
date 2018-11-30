@@ -7,6 +7,11 @@
         <target state="new">Cannot find a package with the package id {0} in the manifest file.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ManifestHasMarkOfTheWeb">
+        <source>File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</source>
+        <target state="new">File {0} came from another computer and might be blocked to help protect this computer. For more information, including how to unblock, see https://aka.ms/motw</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ManifestPackageIdCollision">
         <source>Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</source>
         <target state="new">Cannot add package. Manifest file already contains version {0} of the package {1}. Uninstall/install or edit manifest file {2} to specify the new version {3}.</target>

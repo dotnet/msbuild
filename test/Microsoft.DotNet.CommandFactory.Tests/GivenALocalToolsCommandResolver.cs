@@ -11,7 +11,6 @@ using Microsoft.DotNet.CommandFactory;
 using Microsoft.DotNet.ToolManifest;
 using Microsoft.DotNet.ToolPackage;
 using Microsoft.DotNet.Tools.Test.Utilities;
-using Microsoft.DotNet.Tools.Tests.ComponentMocks;
 using Microsoft.DotNet.Tools.Tests.Utilities;
 using Microsoft.Extensions.DependencyModel.Tests;
 using Microsoft.Extensions.EnvironmentAbstractions;
@@ -48,7 +47,7 @@ namespace Microsoft.DotNet.Tests
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, ManifestFilename),
                 _jsonContent.Replace("$TOOLCOMMAND$", toolCommand));
             ToolManifestFinder toolManifest =
-                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem, new FakeDangerousFileDetector());
             ToolCommandName toolCommandNameA = new ToolCommandName(toolCommand);
             var fakeExecutable = _nugetGlobalPackagesFolder.WithFile("fakeExecutable.dll");
             _fileSystem.Directory.CreateDirectory(_nugetGlobalPackagesFolder.Value);
@@ -90,7 +89,7 @@ namespace Microsoft.DotNet.Tests
             _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, ManifestFilename),
                 _jsonContent.Replace("$TOOLCOMMAND$", toolCommandNameA.Value));
             ToolManifestFinder toolManifest =
-                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem);
+                new ToolManifestFinder(new DirectoryPath(_testDirectoryRoot), _fileSystem, new FakeDangerousFileDetector());
 
             var fakeExecutable = _nugetGlobalPackagesFolder.WithFile("fakeExecutable.dll");
             _fileSystem.Directory.CreateDirectory(_nugetGlobalPackagesFolder.Value);
@@ -160,5 +159,13 @@ namespace Microsoft.DotNet.Tests
       }
    }
 }";
+    }
+
+    internal class FakeDangerousFileDetector : IDangerousFileDetector
+    {
+        public bool IsDangerous(string filePath)
+        {
+            return false;
+        }
     }
 }
