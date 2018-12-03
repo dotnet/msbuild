@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             // Make sure the log contains the correct strings.
-            Assert.Equal("MSB4130:", ml.FullLog); // "Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3."
+            Assert.Equal("MSB4130:", ml.FullLog, true); // "Need to warn for this expression - (a) == 1 and $(b) == 2 or $(c) == 3."
 
             ml = ObjectModelHelpers.BuildProjectExpectSuccess(@"
                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>

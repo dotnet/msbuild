@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectUsingTaskBodyElement body = GetBodyXml();
 
-            Assert.Equal(body.Evaluate, bool.FalseString);
+            Assert.Equal(body.Evaluate, bool.FalseString, true);
             Assert.Equal("Contents", body.TaskBody);
         }
 
