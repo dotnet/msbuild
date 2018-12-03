@@ -65,6 +65,8 @@ SDK commands:
 Additional commands from bundled tools:
   dev-certs         Create and manage development certificates.
   ef                Entity Framework Core command-line tools.
+  fsc               Execute F# compiler.
+  fsi               Start F# Interective / execute F# scripts.
   sql-cache         SQL Server cache command-line tools.
   user-secrets      Manage development user secrets.
   watch             Start a file watcher that runs a command when files change.
