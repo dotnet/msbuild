@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.True(retval);
-            Assert.Equal(0, e.Messages);
+            Assert.Empty(e.Messages);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.True(retval);
             e.AssertLogContains("c:\\file(0,0): WARNING : warningtext");
-            Assert.Equal(1, e.Warnings);
+            Assert.Single(e.Warnings);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.True(retval);
-            Assert.Equal(1, e.Warnings);
+            Assert.Single(e.Warnings);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.True(retval);
-            Assert.Equal(1, e.Warnings);
+            Assert.Single(e.Warnings);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.False(retval);
-            Assert.Equal(1, e.Errors);
+            Assert.Single(e.Errors);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("===");
 
             Assert.False(retval);
-            Assert.Equal(1, e.Errors);
+            Assert.Single(e.Errors);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(retval);
             e.AssertLogContains("c:\\file(0,0): ERROR : errortext");
-            Assert.Equal(1, e.Errors);
+            Assert.Single(e.Errors);
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace Microsoft.Build.UnitTests
 
             string message = AssemblyResources.GetString(err.Resource);
             e.AssertLogContains(message);
-            Assert.Equal(1, e.Errors);
+            Assert.Single(e.Errors);
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace Microsoft.Build.UnitTests
             string message = AssemblyResources.GetString(err.Resource);
             string updatedMessage = message.Replace("MSB3072", "ABC1234");
             e.AssertLogContains(updatedMessage);
-            Assert.Equal(1, e.Errors);
+            Assert.Single(e.Errors);
         }
 
         /// <summary>
@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests
 
             string message = String.Format(AssemblyResources.GetString(err.Resource), err.Arguments);
             e.AssertLogContains(message);
-            Assert.Equal(1, e.Errors);
+            Assert.Single(e.Errors);
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests
 
             e.AssertLogDoesntContain("a.txt");
             e.AssertLogContains("MSB3861");
-            Assert.Equal(1, e.Errors);
+            Assert.Single(e.Errors);
         }
 
         /// <summary>

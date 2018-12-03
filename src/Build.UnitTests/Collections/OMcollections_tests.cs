@@ -47,14 +47,14 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Equal("v1", properties["p1"].EvaluatedValue);
             Assert.Equal("v3", properties["p2"].EvaluatedValue);
 
-            Assert.Equal(true, properties.Remove("p1"));
+            Assert.True(properties.Remove("p1"));
             Assert.Null(properties["p1"]);
 
-            Assert.Equal(false, properties.Remove("x"));
+            Assert.False(properties.Remove("x"));
 
             properties.Clear();
 
-            Assert.Equal(0, properties.Count);
+            Assert.Empty(properties);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 list.Add(item);
             }
 
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
 
             // Cause an empty list for type 'x' to be added
             ICollection<ProjectItemInstance> itemList = items["x"];
@@ -137,15 +137,15 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 list.Add(item);
             }
 
-            Assert.Equal(0, list.Count);
+            Assert.Empty(list);
 
             // Add and remove some items
             ProjectItemInstance item1 = GetItemInstance("i", "i1");
-            Assert.Equal(false, items.Remove(item1));
-            Assert.Equal(0, items["j"].Count);
+            Assert.False(items.Remove(item1));
+            Assert.Empty(items["j"]);
 
             items.Add(item1);
-            Assert.Equal(1, items["i"].Count);
+            Assert.Single(items["i"]);
             Assert.Equal(item1, items["i"].First());
 
             ProjectItemInstance item2 = GetItemInstance("i", "i2");
@@ -168,12 +168,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Direct operations on the enumerator
             using (IEnumerator<ProjectItemInstance> enumerator = items.GetEnumerator())
             {
-                Assert.Equal(null, enumerator.Current);
-                Assert.Equal(true, enumerator.MoveNext());
+                Assert.Null(enumerator.Current);
+                Assert.True(enumerator.MoveNext());
                 Assert.NotNull(enumerator.Current);
                 enumerator.Reset();
-                Assert.Equal(null, enumerator.Current);
-                Assert.Equal(true, enumerator.MoveNext());
+                Assert.Null(enumerator.Current);
+                Assert.True(enumerator.MoveNext());
                 Assert.NotNull(enumerator.Current);
             }
         }
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         public void ReadOnlyDictionaryNullBackingClone()
         {
             var dictionary = CreateCloneDictionary<string>(null, StringComparer.OrdinalIgnoreCase);
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         public void ReadOnlyDictionaryNullBackingWrapper()
         {
             var dictionary = new ObjectModel.ReadOnlyDictionary<string, string>(new Dictionary<string, string>(0));
-            Assert.Equal(0, dictionary.Count);
+            Assert.Empty(dictionary);
         }
 
         /// <summary>
@@ -210,9 +210,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             var readOnlyDictionary = CreateCloneDictionary(dictionary, StringComparer.OrdinalIgnoreCase);
             dictionary.Add("p2", "v2");
 
-            Assert.Equal(1, readOnlyDictionary.Count);
-            Assert.Equal(true, readOnlyDictionary.ContainsKey("P"));
-            Assert.Equal(false, readOnlyDictionary.ContainsKey("p2"));
+            Assert.Single(readOnlyDictionary);
+            Assert.True(readOnlyDictionary.ContainsKey("P"));
+            Assert.False(readOnlyDictionary.ContainsKey("p2"));
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dictionary.Add("p2", "v2");
 
             Assert.Equal(2, dictionary.Count);
-            Assert.Equal(true, dictionary.ContainsKey("p2"));
+            Assert.True(dictionary.ContainsKey("p2"));
         }
 
         /// <summary>

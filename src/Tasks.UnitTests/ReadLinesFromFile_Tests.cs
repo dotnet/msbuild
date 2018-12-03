@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
                 r.File = new TaskItem(file);
                 Assert.True(r.Execute());
 
-                Assert.Equal(1, r.Lines.Length);
+                Assert.Single(r.Lines);
                 Assert.Equal("Line1", r.Lines[0].ItemSpec);
 
                 // Write two more lines to the file.
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
                 r.File = new TaskItem(file);
                 Assert.True(r.Execute());
 
-                Assert.Equal(1, r.Lines.Length);
+                Assert.Single(r.Lines);
                 Assert.Equal("Line1_%3b_", r.Lines[0].ItemSpec);
 
                 // Write two more lines to the file.
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests
                 r.File = new TaskItem(file);
                 Assert.True(r.Execute());
 
-                Assert.Equal(1, r.Lines.Length);
+                Assert.Single(r.Lines);
                 Assert.Equal("My special character is \u00C3", r.Lines[0].ItemSpec);
             }
             finally
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
             r.File = new TaskItem(file);
             Assert.True(r.Execute());
 
-            Assert.Equal(0, r.Lines.Length);
+            Assert.Empty(r.Lines);
         }
 
         /// <summary>
@@ -260,9 +260,9 @@ namespace Microsoft.Build.UnitTests
             a.File = new TaskItem("c:\\" + Guid.NewGuid().ToString());
             a.Lines = new TaskItem[] { new TaskItem("x") };
 
-            Assert.Equal(false, a.Execute());
+            Assert.False(a.Execute());
             ((MockEngine)a.BuildEngine).AssertLogContains("MSB3098");
-            Assert.Equal(false, File.Exists(a.File.ItemSpec));
+            Assert.False(File.Exists(a.File.ItemSpec));
         }
 
         /// <summary>

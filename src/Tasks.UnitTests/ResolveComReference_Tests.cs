@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests
 
             Assert.Equal(refGuid, refAttr.guid); // "incorrect guid"
             Assert.Equal(11, refAttr.wMajorVerNum); // "incorrect version major"
-            Assert.Equal(0, refAttr.wMinorVerNum); // "incorrect version minor"
+            Assert.Empty(refAttr.wMinorVerNum); // "incorrect version minor"
             Assert.Equal(1033, refAttr.lcid); // "incorrect lcid"
         }
 
@@ -374,7 +374,7 @@ namespace Microsoft.Build.UnitTests
             string path;
             IComReferenceResolver resolver = (IComReferenceResolver)rcr;
             Assert.False(resolver.ResolveComAssemblyReference("MyAssembly", out path));
-            Assert.Equal(null, path);
+            Assert.Null(path);
         }
 
         /// <summary>

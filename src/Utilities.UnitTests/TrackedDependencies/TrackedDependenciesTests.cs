@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
             Assert.Equal(outofdate[0].ItemSpec, "TestFiles\\one.cpp");
         }
 
@@ -354,7 +354,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
             Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
             Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
@@ -412,8 +412,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have an error."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have an error."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -440,8 +440,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -468,8 +468,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -496,8 +496,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -524,8 +524,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -570,8 +570,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem("TestFiles\\|one|.write.tlog"))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have an error."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have an error."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -589,8 +589,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -608,8 +608,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -627,8 +627,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -646,8 +646,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog")))
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, d.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(d.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -685,7 +685,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
             Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
@@ -725,7 +725,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
             Assert.Equal(outofdate[0].ItemSpec, Path.Combine("TestFiles", "one.cpp"));
         }
 
@@ -790,7 +790,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
         }
 
         [Fact]
@@ -857,7 +857,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* shred composite rooting markers */
                 );
 
-            Assert.Equal(1, writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].Count);
+            Assert.Single(writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].Count);
             Assert.Equal(4, writtenInputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].Count);
             // Everything to do with two.cpp should be left intact
             Assert.Equal(2, writtenOutputs.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "two.cpp"))].Count);
@@ -1139,7 +1139,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're out of date, since a missing dependency indicates out-of-dateness
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
 
             // The dependency has been recorded and retrieved correctly
             Assert.True(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
@@ -1163,7 +1163,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're out of date, since a missing dependency indicates out-of-dateness
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
 
             // We have a source outstanding for recompilation, it will not appear in
             // the tracking information as it will be written again
@@ -1232,7 +1232,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             compactInputs.SaveTlog();
 
             ITaskItem[] outofDate = compactInputs.ComputeSourcesNeedingCompilation();
-            Assert.Equal(0, outofDate.Length);
+            Assert.Empty(outofDate.Length);
         }
 
 
@@ -1272,7 +1272,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're out of date, since a missing dependency indicates out-of-dateness
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
 
             // The dependency has been recorded and retrieved correctly
             Assert.True(d.DependencyTable[Path.GetFullPath(Path.Combine("TestFiles", "one.cpp"))].ContainsKey(missing));
@@ -1299,7 +1299,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // We're not out of date, since the missing dependency has been removed
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
         }
 
 
@@ -1618,7 +1618,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
         }
 
         [Fact]
@@ -1906,7 +1906,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
         }
 
         [Fact]
@@ -2213,7 +2213,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs4 = d.OutputsForSource(sourcesPlusOne, /*searchForSubRootsInCompositeRootingMarkers*/ false);
 
-            Assert.Equal(0, outputs4.Length);
+            Assert.Empty(outputs4.Length);
         }
 
         [Fact]
@@ -2352,7 +2352,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             ITaskItem[] outputs = d.OutputsForSource(new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "four.cpp"))));
 
-            Assert.Equal(0, outputs.Length);
+            Assert.Empty(outputs.Length);
         }
 
         [Fact]
@@ -2430,7 +2430,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // First of all, all things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
 
             // Delete one of the outputs in the group
             File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
@@ -2453,7 +2453,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     );
 
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
             // And the source is.. two.cpp!
             Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
@@ -2530,7 +2530,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // First of all, all things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
 
             // Delete one of the outputs in the group
             File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "two.obj")));
@@ -2553,7 +2553,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 );
 
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
             // And the source is.. two.cpp!
             Assert.True(outofdate[0].ItemSpec == Path.Combine("TestFiles", "two.cpp"));
         }
@@ -2640,12 +2640,12 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 );
 
             // We should have one output for three.cpp
-            Assert.Equal(1, outputs.DependencyTable[threeRootingMarker].Count);
-            Assert.Equal(false, outputs.DependencyTable[threeRootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "three.obj"))));
+            Assert.Single(outputs.DependencyTable[threeRootingMarker].Count);
+            Assert.False(outputs.DependencyTable[threeRootingMarker].ContainsKey(Path.GetFullPath(Path.Combine("TestFiles", "three.obj"))));
 
             // All things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
 
             // Delete the new output
             File.Delete(Path.GetFullPath(Path.Combine("TestFiles", "three.i")));
@@ -2653,7 +2653,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // This means a recompile would be required for the roots
             d.SourcesNeedingCompilation = null;
             outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(1, outofdate.Length);
+            Assert.Single(outofdate.Length);
         }
 
         [Fact]
@@ -2731,7 +2731,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             // All things should be up to date
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
         }
 
         [Fact]
@@ -2938,7 +2938,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     tlogs2);
 
             outputs = d2.OutputsForSource(fooItem);
-            Assert.Equal(0, outputs.Length);
+            Assert.Empty(outputs.Length);
 
             outputs = d2.OutputsForSource(sources);
             Assert.True(outputs.Length == 3);
@@ -2951,7 +2951,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     tlogs);
 
             outputs = d3.OutputsForSource(fooItem);
-            Assert.Equal(0, outputs.Length);
+            Assert.Empty(outputs.Length);
 
             outputs = d3.OutputsForSource(sources);
             Assert.True(outputs.Length == 3);
@@ -3057,7 +3057,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             ITaskItem[] outofdate = d.ComputeSourcesNeedingCompilation();
 
             // nothing should be out of date
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
             Assert.Equal(4, d.DependencyTable.Count);
 
             // dependencies should include the three .h files written into the .tlogs + the rooting marker
@@ -3078,7 +3078,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
 
             d2.ComputeSourcesNeedingCompilation();
 
-            Assert.Equal(0, outofdate.Length);
+            Assert.Empty(outofdate.Length);
             Assert.Equal(4, d2.DependencyTable.Count);
 
             // dependencies should include the three .h files written into the .tlogs + the two rooting marker files
@@ -3104,8 +3104,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, data.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(data.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -3123,8 +3123,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, data.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(data.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -3142,8 +3142,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, data.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(data.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -3161,8 +3161,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(1, ((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
-            Assert.Equal(0, data.DependencyTable.Count); // "DependencyTable should be empty."
+            Assert.Single(((MockEngine) task.BuildEngine).Warnings); // "Should have a warning."
+            Assert.Empty(data.DependencyTable.Count); // "DependencyTable should be empty."
         }
 
         [Fact]
@@ -3180,8 +3180,8 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                     false /* don't skip missing files */
                 );
 
-            Assert.Equal(0, ((MockEngine) task.BuildEngine).Warnings); // "Should not warn -- root markers are ignored by default"
-            Assert.Equal(1, data.DependencyTable.Count); // "DependencyTable should only contain one entry."
+            Assert.Empty(((MockEngine) task.BuildEngine).Warnings); // "Should not warn -- root markers are ignored by default"
+            Assert.Single(data.DependencyTable.Count); // "DependencyTable should only contain one entry."
             Assert.NotNull(data.DependencyTable["FOO"]); // "FOO should be the only entry."
         }
 
@@ -3221,7 +3221,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData outputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.write.tlog"))), false);
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             Assert.Equal(2, inputs.MissingFiles.Count);
             Assert.Equal(3, outputs.MissingFiles.Count);
         }
@@ -3259,11 +3259,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing inputs, we're out of date
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
             Assert.Equal(2, inputs.MissingFiles.Count);
-            Assert.Equal(0, outputs.MissingFiles.Count);
+            Assert.Empty(outputs.MissingFiles.Count);
         }
 
         [Fact]
@@ -3299,10 +3299,10 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing outputs, we're out of date
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
-            Assert.Equal(0, inputs.MissingFiles.Count);
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.Empty(inputs.MissingFiles.Count);
             Assert.Equal(2, outputs.MissingFiles.Count);
         }
 
@@ -3318,9 +3318,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // No matter which way you look at it, if we're missing inputs, we're out of date
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
         }
 
         [Fact]
@@ -3347,11 +3347,11 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // Inputs newer than outputs - if there are no outputs, then we're out of date
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // Inputs newer than tracking - if there are no outputs, then we don't care
-            Assert.Equal(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
             // Inputs or Outputs newer than tracking - if there is an output tlog, even if there's no text written to it, we're not out of date
-            Assert.Equal(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
         }
 
         [Fact]
@@ -3386,7 +3386,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // Compact the read tlog
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
 
             // Touch the tracking logs so that are more recent that any of the inputs
             Thread.Sleep(_sleepTimeMilliseconds);
@@ -3400,9 +3400,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the outputs
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // We should be up to date with respect to the tracking data
-            Assert.Equal(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
         }
 
         [Fact]
@@ -3436,7 +3436,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // Compact the read tlog
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
-            Assert.Equal(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
+            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanTracking, inputs, outputs));
         }
 
         [Fact]
@@ -3526,9 +3526,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // Compact the read tlog
             FlatTrackingData inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
             // We should be up to date inputs vs outputs
-            Assert.Equal(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
             // We should be out of date inputs & outputs vs tracking (since we wrote the files after the tracking logs)
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
 
 
             // Touch the tracking logs so that are more recent that any of the inputs
@@ -3541,7 +3541,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be up to date with respect to the tracking data
-            Assert.Equal(true, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
+            Assert.True(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputOrOutputNewerThanTracking, inputs, outputs));
 
             // Touch the input so that we would be out of date with respect to the outputs, but up to date with respect to the tracking logs
             File.SetLastWriteTime(Path.GetFullPath(Path.Combine("TestFiles", "one.cpp")), DateTime.Now);
@@ -3550,7 +3550,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             inputs = new FlatTrackingData(DependencyTestHelper.MockTask, DependencyTestHelper.ItemArray(new TaskItem(Path.Combine("TestFiles", "one.read.tlog"))), false);
 
             // We should be out of date with respect to the outputs
-            Assert.Equal(false, FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
+            Assert.False(FlatTrackingData.IsUpToDate(DependencyTestHelper.MockTask.Log, UpToDateCheckType.InputNewerThanOutput, inputs, outputs));
         }
 
         [Fact]

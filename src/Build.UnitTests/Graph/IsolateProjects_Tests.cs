@@ -83,7 +83,7 @@ namespace Microsoft.Build.Graph.UnitTests
             AssertBuild(targets,
                 (result, logger) =>
                 {
-                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    result.OverallResult.ShouldBe(expectedBuildResult);
 
                     logger.Errors.ShouldBeEmpty();
                 });

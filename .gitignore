@@ -234,3 +234,6 @@ Samples/MultiprocessBuild/PortableTask.dll
 
 # Rider
 .idea/
+
+# Dotnet Core SDK
+.dotnet/

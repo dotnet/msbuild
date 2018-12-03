@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
-            Assert.Equal(0, taskoverrideRegistry.TaskRegistrations.Count);
+            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "msbuildoverridetasks");
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
-            Assert.Equal(0, taskoverrideRegistry.TaskRegistrations.Count);
+            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             mockLogger.AssertLogContains("MSB4194");
         }
 
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
-            Assert.Equal(0, taskoverrideRegistry.TaskRegistrations.Count);
+            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", tooLong);
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
-            Assert.Equal(0, taskoverrideRegistry.TaskRegistrations.Count);
+            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "k:\\Thecatinthehat");
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
@@ -263,14 +263,14 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(sortedTasksExpectedPaths.Count, foundFiles.Length);
             for (int i = 0; i < foundFiles.Length; i++)
             {
-                Assert.True(sortedTasksExpectedPaths[i].Equals(foundFiles[i], StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(foundFiles[i], sortedTasksExpectedPaths[i]);
             }
 
 
             Assert.Equal(sortedOverrideExpectedPaths.Count, foundoverrideFiles.Length);
             for (int i = 0; i < foundoverrideFiles.Length; i++)
             {
-                Assert.True(sortedOverrideExpectedPaths[i].Equals(foundoverrideFiles[i], StringComparison.OrdinalIgnoreCase));
+                Assert.Equal(foundoverrideFiles[i], sortedOverrideExpectedPaths[i]);
             }
         }
 

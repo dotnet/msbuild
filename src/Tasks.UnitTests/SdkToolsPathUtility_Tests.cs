@@ -49,11 +49,11 @@ namespace Microsoft.Build.UnitTests
 
             string comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathNotSpecifiedOrToolDoesNotExist", _toolName, null);
             _mockEngine.AssertLogContains(comment);
-            Assert.Equal(0, _mockEngine.Warnings);
+            Assert.Empty(_mockEngine.Warnings);
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, null, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest));
             _mockEngine.AssertLogContains(comment);
-            Assert.Equal(1, _mockEngine.Errors);
+            Assert.Single(_mockEngine.Errors);
         }
 
         /// <summary>
@@ -67,11 +67,11 @@ namespace Microsoft.Build.UnitTests
 
             string comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathNotSpecifiedOrToolDoesNotExist", _toolName, null);
             _mockEngine.AssertLogDoesntContain(comment);
-            Assert.Equal(0, _mockEngine.Warnings);
+            Assert.Empty(_mockEngine.Warnings);
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, null, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version45));
             _mockEngine.AssertLogDoesntContain(comment);
-            Assert.Equal(0, _mockEngine.Errors);
+            Assert.Empty(_mockEngine.Errors);
         }
 
         #endregion
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, _defaultSdkToolsPath, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest));
             _mockEngine.AssertLogContains(comment);
-            Assert.Equal(1, _mockEngine.Errors);
+            Assert.Single(_mockEngine.Errors);
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace Microsoft.Build.UnitTests
             string toolPath = SdkToolsPathUtility.GeneratePathToTool(_mockExists.MockFileDoesNotExist, ProcessorArchitecture.X86, "./?><;)(*&^%$#@!", _toolName, _log, true);
             Assert.Null(toolPath);
             _mockEngine.AssertLogContains("MSB3666");
-            Assert.Equal(1, _mockEngine.Errors);
+            Assert.Single(_mockEngine.Errors);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests
 
             comment = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.SdkToolsPathToolDoesNotExist", _toolName, _defaultSdkToolsPath, ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Version45));
             _mockEngine.AssertLogDoesntContain(comment);
-            Assert.Equal(0, _mockEngine.Errors);
+            Assert.Empty(_mockEngine.Errors);
         }
 
         #region Helper Classes

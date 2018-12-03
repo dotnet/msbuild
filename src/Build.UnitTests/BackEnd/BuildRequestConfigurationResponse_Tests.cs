@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestTranslation()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(1, 2, 3);
-            Assert.Equal(response.Type, NodePacketType.BuildRequestConfigurationResponse);
+            Assert.Equal(NodePacketType.BuildRequestConfigurationResponse, response.Type);
 
             ((ITranslatable)response).Translate(TranslationHelpers.GetWriteTranslator());
 

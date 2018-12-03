@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             itemDefinition.Condition = "c";
 
             Assert.Equal("c", itemDefinition.Condition);
-            Assert.Equal(true, project.HasUnsavedChanges);
+            Assert.True(project.HasUnsavedChanges);
         }
     }
 }

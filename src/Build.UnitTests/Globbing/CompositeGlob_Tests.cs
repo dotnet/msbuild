@@ -135,7 +135,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             foreach (var expectedGlob in expectedCollectedGlobs)
             {
-                Assert.True(leafGlobs.Contains(expectedGlob));
+                Assert.Contains(expectedGlob, leafGlobs);
             }
         }
     }

@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 
                 Execute(t);
 
-                Assert.Equal(1, t.ResolvedFiles.Length);
+                Assert.Single(t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder2", "assemblyfromconfig2.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Execute(t);
 
-                Assert.Equal(1, t.ResolvedFiles.Length);
+                Assert.Single(t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder_x86", "assemblyfromconfig_common.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
@@ -112,7 +112,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Execute(t);
 
-                Assert.Equal(1, t.ResolvedFiles.Length);
+                Assert.Single(t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
 
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 
                 Execute(t);
 
-                Assert.Equal(1, t.ResolvedFiles.Length);
+                Assert.Single(t.ResolvedFiles.Length);
                 Assert.Equal(Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder5010x64", "v5assembly.dll"), t.ResolvedFiles[0].ItemSpec);
                 t.ResolvedFiles[0].GetMetadata("ResolvedFrom").ShouldBe(moniker, StringCompareShould.IgnoreCase);
             }
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 var success = Execute(t);
 
                 Assert.False(success);
-                Assert.Equal(0, t.ResolvedFiles.Length);
+                Assert.Empty(t.ResolvedFiles.Length);
                 engine.AssertLogContains(") specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: ");
             }
             finally

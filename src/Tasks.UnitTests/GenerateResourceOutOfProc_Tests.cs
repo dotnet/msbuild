@@ -987,7 +987,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Check resources is output
                 resourcesFile = t.OutputResources[0].ItemSpec;
                 Assert.Equal(Path.GetExtension(resourcesFile), ".resources");
-                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Single(t.OutputResources.Length);
                 Assert.Equal(Path.GetExtension(t.FilesWritten[0].ItemSpec), ".resources");
                 Assert.True(File.Exists(resourcesFile));
 
@@ -1264,7 +1264,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Should have created the other file
                 Assert.False(File.Exists(resourcesFile1));
                 Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile2);
-                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Single(t.OutputResources.Length);
                 Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile2);
                 Assert.True(File.Exists(resourcesFile2));
 
@@ -1320,7 +1320,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Should have created the other file
                 Assert.False(File.Exists(resourcesFile1));
                 Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile2);
-                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Single(t.OutputResources.Length);
                 Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile2);
                 Assert.True(File.Exists(resourcesFile2));
 
@@ -1917,7 +1917,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 Utilities.AssertLogContains(t, "ERROR MSB3552");
 
                 // Should have processed remaining file
-                Assert.Equal(1, t.OutputResources.Length);
+                Assert.Single(t.OutputResources.Length);
                 Assert.Equal(t.OutputResources[0].ItemSpec, resourcesFile);
                 Assert.True(File.Exists(resourcesFile));
             }
@@ -2116,7 +2116,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // "str language but more than one source file"
                 Utilities.AssertLogContains(t, "MSB3573");
 
-                Assert.Equal(0, t.FilesWritten.Length);
+                Assert.Empty(t.FilesWritten.Length);
                 Assert.True(t.OutputResources == null || t.OutputResources.Length == 0);
             }
             finally
@@ -2197,7 +2197,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Even the .resources wasn't created
                 Assert.False(File.Exists(resourcesFile));
-                Assert.Equal(0, t.FilesWritten.Length);
+                Assert.Empty(t.FilesWritten.Length);
             }
             finally
             {
@@ -2231,7 +2231,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Even the .resources wasn't created
                 Assert.False(File.Exists(resourcesFile));
-                Assert.Equal(0, t.FilesWritten.Length);
+                Assert.Empty(t.FilesWritten.Length);
             }
             finally
             {
@@ -2265,7 +2265,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 // Even the .resources wasn't created
                 Assert.False(File.Exists(resourcesFile));
-                Assert.Equal(0, t.FilesWritten.Length);
+                Assert.Empty(t.FilesWritten.Length);
             }
             finally
             {
@@ -2310,7 +2310,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // Resgen.exe does not create either the resources or the STR file
                 Assert.False(File.Exists(resourcesFile));
                 Assert.False(File.Exists(csFile));
-                Assert.Equal(0, t.FilesWritten.Length);
+                Assert.Empty(t.FilesWritten.Length);
             }
             finally
             {

@@ -50,9 +50,9 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Equal(msbuildToolsetSection.MSBuildOverrideTasksPath, null);
             Assert.NotNull(msbuildToolsetSection);
-            Assert.Equal(null, msbuildToolsetSection.Default);
+            Assert.Null(msbuildToolsetSection.Default);
             Assert.NotNull(msbuildToolsetSection.Toolsets);
-            Assert.Equal(0, msbuildToolsetSection.Toolsets.Count);
+            Assert.Empty(msbuildToolsetSection.Toolsets.Count);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Equal(msbuildToolsetSection.MSBuildOverrideTasksPath, null);
             Assert.Equal(msbuildToolsetSection.Default, "2.0");
-            Assert.Equal(1, msbuildToolsetSection.Toolsets.Count);
+            Assert.Single(msbuildToolsetSection.Toolsets.Count);
 
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion, "2.0");
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count, 1);
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
             Assert.Equal(msbuildToolsetSection.Default, "2.0");
-            Assert.Equal(1, msbuildToolsetSection.Toolsets.Count);
+            Assert.Single(msbuildToolsetSection.Toolsets.Count);
 
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion, "2.0");
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count, 1);
@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
             Assert.Equal(msbuildToolsetSection.Default, "4.0");
-            Assert.Equal(1, msbuildToolsetSection.Toolsets.Count);
+            Assert.Single(msbuildToolsetSection.Toolsets.Count);
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion, "4.0");
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("4.0").PropertyElements.Count, 1);
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("4.0").PropertyElements.GetElement("MSBuildBinPath").Value,
@@ -456,7 +456,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
             Assert.Equal(msbuildToolsetSection.Default, "2.0");
-            Assert.Equal(1, msbuildToolsetSection.Toolsets.Count);
+            Assert.Single(msbuildToolsetSection.Toolsets.Count);
             Assert.Equal(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
 
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value,
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             // Verifications
             Assert.Equal(msbuildToolsetSection.Default, "2.0");
-            Assert.Equal(1, msbuildToolsetSection.Toolsets.Count);
+            Assert.Single(msbuildToolsetSection.Toolsets.Count);
             Assert.Equal(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
             Assert.Equal(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
                                    msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value);
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
             Assert.Equal(msbuildToolsetSection.Default, "2.0");
-            Assert.Equal(1, msbuildToolsetSection.Toolsets.Count);
+            Assert.Single(msbuildToolsetSection.Toolsets.Count);
 
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion, "2.0");
             Assert.Equal(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count, 2);

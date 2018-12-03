@@ -65,20 +65,20 @@ namespace Microsoft.Build.UnitTests.Logging
             // Create a synchronous logging service and do some quick checks
             Assert.NotNull(logServiceComponent);
             LoggingService logService = (LoggingService)logServiceComponent;
-            Assert.Equal(logService.LoggingMode, LoggerMode.Synchronous);
-            Assert.Equal(logService.ServiceState, LoggingServiceState.Instantiated);
+            Assert.Equal(LoggerMode.Synchronous, logService.LoggingMode);
+            Assert.Equal(LoggingServiceState.Instantiated, logService.ServiceState);
 
             // Create an asynchronous logging service
             logServiceComponent = (IBuildComponent)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
             Assert.NotNull(logServiceComponent);
             logService = (LoggingService)logServiceComponent;
-            Assert.Equal(logService.LoggingMode, LoggerMode.Asynchronous);
-            Assert.Equal(logService.ServiceState, LoggingServiceState.Instantiated);
+            Assert.Equal(LoggerMode.Asynchronous, logService.LoggingMode);
+            Assert.Equal(LoggingServiceState.Instantiated, logService.ServiceState);
 
             // Shutdown logging thread
             logServiceComponent.InitializeComponent(new MockHost());
             logServiceComponent.ShutdownComponent();
-            Assert.Equal(logService.ServiceState, LoggingServiceState.Shutdown);
+            Assert.Equal(LoggingServiceState.Shutdown, logService.ServiceState);
         }
 
         /// <summary>
@@ -96,13 +96,13 @@ namespace Microsoft.Build.UnitTests.Logging
             IBuildComponentHost loggingHost = new MockHost(parameters);
 
             // Make sure we are in the Instantiated state before initializing
-            Assert.Equal(((LoggingService)logServiceComponent).ServiceState, LoggingServiceState.Instantiated);
+            Assert.Equal(LoggingServiceState.Instantiated, ((LoggingService)logServiceComponent).ServiceState);
 
             logServiceComponent.InitializeComponent(loggingHost);
 
             // Make sure that the parameters in the host are set in the logging service
             LoggingService service = (LoggingService)logServiceComponent;
-            Assert.Equal(service.ServiceState, LoggingServiceState.Initialized);
+            Assert.Equal(LoggingServiceState.Initialized, service.ServiceState);
             Assert.Equal(4, service.MaxCPUCount);
             Assert.True(service.OnlyLogCriticalEvents);
         }
@@ -144,13 +144,13 @@ namespace Microsoft.Build.UnitTests.Logging
             string className = "Microsoft.Build.UnitTests.Logging.LoggingService_Tests+ShutdownLoggerExceptionFL";
             Type exceptionType = typeof(LoggerException);
             VerifyShutdownExceptions(null, className, exceptionType);
-            Assert.Equal(_initializedService.ServiceState, LoggingServiceState.Shutdown);
+            Assert.Equal(LoggingServiceState.Shutdown, _initializedService.ServiceState);
 
             // Cause a general exception which should result in an InternalLoggerException
             className = "Microsoft.Build.UnitTests.Logging.LoggingService_Tests+ShutdownGeneralExceptionFL";
             exceptionType = typeof(InternalLoggerException);
             VerifyShutdownExceptions(null, className, exceptionType);
-            Assert.Equal(_initializedService.ServiceState, LoggingServiceState.Shutdown);
+            Assert.Equal(LoggingServiceState.Shutdown, _initializedService.ServiceState);
 
 #if FEATURE_VARIOUS_EXCEPTIONS
             // Cause a StackOverflow exception in the shutdown of the logger
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.Logging
             VerifyShutdownExceptions(null, className, exceptionType);
 #endif
 
-            Assert.Equal(_initializedService.ServiceState, LoggingServiceState.Shutdown);
+            Assert.Equal(LoggingServiceState.Shutdown, _initializedService.ServiceState);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests.Logging
             VerifyShutdownExceptions(logger, null, typeof(StackOverflowException));
 #endif
 
-            Assert.Equal(_initializedService.ServiceState, LoggingServiceState.Shutdown);
+            Assert.Equal(LoggingServiceState.Shutdown, _initializedService.ServiceState);
         }
 
         /// <summary>
@@ -287,13 +287,13 @@ namespace Microsoft.Build.UnitTests.Logging
 
             // Should have 2 central loggers and 1 forwarding logger
             Assert.Equal(3, _initializedService.RegisteredLoggerTypeNames.Count);
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.Logging.ConsoleLogger"));
+            Assert.Contains("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.Logging.ConsoleLogger", _initializedService.RegisteredLoggerTypeNames);
 
             // Should have 1 event sink
             Assert.NotNull(_initializedService.RegisteredSinkNames);
-            Assert.Equal(1, _initializedService.RegisteredSinkNames.Count);
+            Assert.Single(_initializedService.RegisteredSinkNames);
         }
 
         /// <summary>
@@ -311,13 +311,13 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.NotNull(_initializedService.RegisteredLoggerTypeNames);
 
             Assert.Equal(3, _initializedService.RegisteredLoggerTypeNames.Count);
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.Logging.ConsoleLogger"));
+            Assert.Contains("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.Logging.ConsoleLogger", _initializedService.RegisteredLoggerTypeNames);
 
             // Should have 1 event sink
             Assert.NotNull(_initializedService.RegisteredSinkNames);
-            Assert.Equal(1, _initializedService.RegisteredSinkNames.Count);
+            Assert.Single(_initializedService.RegisteredSinkNames);
         }
 
         #endregion
@@ -379,10 +379,10 @@ namespace Microsoft.Build.UnitTests.Logging
 
             // Should have 2 central loggers and 2 forwarding logger
             Assert.Equal(4, _initializedService.RegisteredLoggerTypeNames.Count);
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.Logging.DistributedFileLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.BackEnd.Logging.NullCentralLogger"));
+            Assert.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.Logging.DistributedFileLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.BackEnd.Logging.NullCentralLogger", _initializedService.RegisteredLoggerTypeNames);
 
             // Should have 2 event sink
             Assert.NotNull(_initializedService.RegisteredSinkNames);
@@ -458,13 +458,13 @@ namespace Microsoft.Build.UnitTests.Logging
 
             // Should have 2 central loggers and 1 forwarding logger
             Assert.Equal(2, _initializedService.RegisteredLoggerTypeNames.Count);
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger"));
+            Assert.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger", _initializedService.RegisteredLoggerTypeNames);
 
             // Should have 1 sink
             Assert.NotNull(_initializedService.RegisteredSinkNames);
-            Assert.Equal(1, _initializedService.RegisteredSinkNames.Count);
-            Assert.Equal(1, _initializedService.LoggerDescriptions.Count);
+            Assert.Single(_initializedService.RegisteredSinkNames);
+            Assert.Single(_initializedService.LoggerDescriptions);
         }
 
         /// <summary>
@@ -496,8 +496,8 @@ namespace Microsoft.Build.UnitTests.Logging
             }
 
             Assert.Equal(2, countForwardingLogger);
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.BackEnd.Logging.NullCentralLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger"));
+            Assert.Contains("Microsoft.Build.BackEnd.Logging.NullCentralLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger", _initializedService.RegisteredLoggerTypeNames);
 
             // Should have 2 sink
             Assert.NotNull(_initializedService.RegisteredSinkNames);
@@ -585,8 +585,8 @@ namespace Microsoft.Build.UnitTests.Logging
 
             // Should have 6 forwarding logger. three of each type
             Assert.Equal(6, _initializedService.RegisteredLoggerTypeNames.Count);
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger"));
+            Assert.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.BackEnd.Logging.CentralForwardingLogger", _initializedService.RegisteredLoggerTypeNames);
 
             int countForwardingLogger = 0;
             foreach (string loggerName in _initializedService.RegisteredLoggerTypeNames)
@@ -617,7 +617,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(2, _initializedService.RegisteredSinkNames.Count);
 
             // There should not be any (this method is to be called on a child node)
-            Assert.Equal(0, _initializedService.LoggerDescriptions.Count);
+            Assert.Empty(_initializedService.LoggerDescriptions);
         }
 
         /// <summary>
@@ -639,13 +639,13 @@ namespace Microsoft.Build.UnitTests.Logging
 
             // Should have 2 central loggers and 1 forwarding logger
             Assert.Equal(2, _initializedService.RegisteredLoggerTypeNames.Count);
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger"));
-            Assert.True(_initializedService.RegisteredLoggerTypeNames.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger"));
+            Assert.Contains("Microsoft.Build.Logging.ConfigurableForwardingLogger", _initializedService.RegisteredLoggerTypeNames);
+            Assert.Contains("Microsoft.Build.UnitTests.Logging.LoggingService_Tests+RegularILogger", _initializedService.RegisteredLoggerTypeNames);
 
             // Should have 1 sink
             Assert.NotNull(_initializedService.RegisteredSinkNames);
-            Assert.Equal(1, _initializedService.RegisteredSinkNames.Count);
-            Assert.Equal(1, _initializedService.LoggerDescriptions.Count);
+            Assert.Single(_initializedService.RegisteredSinkNames);
+            Assert.Single(_initializedService.LoggerDescriptions);
         }
         #endregion
 
@@ -663,10 +663,10 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.True(loggingService.OnlyLogCriticalEvents); // "Expected only log critical events to be true"
 
             // Test LoggingMode
-            Assert.Equal(loggingService.LoggingMode, LoggerMode.Synchronous); // "Expected Logging mode to be Synchronous"
+            Assert.Equal(LoggerMode.Synchronous, loggingService.LoggingMode); // "Expected Logging mode to be Synchronous"
 
             // Test LoggerDescriptions
-            Assert.Equal(0, loggingService.LoggerDescriptions.Count); // "Expected LoggerDescriptions to be empty"
+            Assert.Empty(loggingService.LoggerDescriptions); // "Expected LoggerDescriptions to be empty"
 
             // Test Number of InitialNodes
             Assert.Equal(1, loggingService.MaxCPUCount);

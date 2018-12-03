@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             Assert.True(retVal);
 
-            Assert.True(engine.Log.Contains(telemetryTask.EventName));
+            Assert.Contains(telemetryTask.EventName, engine.Log);
         }
 
         [Fact]
@@ -45,9 +45,9 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             Assert.True(retVal);
 
-            Assert.True(engine.Log.Contains(propertyName));
+            Assert.Contains(propertyName, engine.Log);
 
-            Assert.True(engine.Log.Contains(propertyValue));
+            Assert.Contains(propertyValue, engine.Log);
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             bool retVal = telemetryTask.Execute();
 
             Assert.False(retVal);
-            Assert.True(engine.Log.Contains($"The property \"Property2\" in the telemetry event data property list \"{telemetryTask.EventData}\" is malformed."));
+            Assert.Contains($"The property \"Property2\" in the telemetry event data property list \"{telemetryTask.EventData}\" is malformed.", engine.Log);
         }
 
         /// <summary>
@@ -89,11 +89,11 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             // Should not contain the first value
             //
-            Assert.False(engine.Log.Contains("EE2493A167D24F00996DE7C8E769EAE6"));
+            Assert.DoesNotContain("EE2493A167D24F00996DE7C8E769EAE6", engine.Log);
             
             // Should contain the second value
             //
-            Assert.True(engine.Log.Contains("4ADE3D2622CA400B8B95A039DF540037"));
+            Assert.Contains("4ADE3D2622CA400B8B95A039DF540037", engine.Log);
         }
     }
 }

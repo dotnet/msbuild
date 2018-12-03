@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.Equal(1, engine.Errors);
+            Assert.Single(engine.Errors);
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.Equal(1, engine.Errors);
+            Assert.Single(engine.Errors);
         }
 
         [Fact]

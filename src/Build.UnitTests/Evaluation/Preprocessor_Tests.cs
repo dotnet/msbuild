@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         /// <summary>
         /// Clear out the cache
         /// </summary>
-        public void Setup()
+        private void Setup()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();

@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.Equal(null, resolvedProjectWithConfiguration);
+                Assert.Null(resolvedProjectWithConfiguration);
             }
         }
 
@@ -118,8 +118,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "IAmReallyABadOne");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Equal(0, referenceItem.GetMetadata("BuildReference").Length);
-            Assert.Equal(0, referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
+            Assert.Empty(referenceItem.GetMetadata("BuildReference").Length);
+            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
         }
 
         /// <summary>
@@ -138,8 +138,8 @@ namespace Microsoft.Build.UnitTests
             XmlDocument doc = new XmlDocument();
             XmlElement element = doc.CreateElement("TestElement");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Equal(0, referenceItem.GetMetadata("BuildReference").Length);
-            Assert.Equal(0, referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
+            Assert.Empty(referenceItem.GetMetadata("BuildReference").Length);
+            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
         }
 
         /// <summary>
@@ -158,8 +158,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "true");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Equal(0, referenceItem.GetMetadata("BuildReference").Length);
-            Assert.Equal(0, referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
+            Assert.Empty(referenceItem.GetMetadata("BuildReference").Length);
+            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
         }
 
 
@@ -181,8 +181,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "false");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(false, referenceItem, element);
-            Assert.Equal(0, referenceItem.GetMetadata("BuildReference").Length);
-            Assert.Equal(0, referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
+            Assert.Empty(referenceItem.GetMetadata("BuildReference").Length);
+            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly").Length);
         }
 
         /// <summary>
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectConfigurations, out unresolvedProjects, out resolvedProjects);
 
-            Assert.Equal(0, resolvedProjects.Count); // "No resolved refs expected for case 1"
+            Assert.Empty(resolvedProjects.Count); // "No resolved refs expected for case 1"
             Assert.Equal(2, unresolvedProjects.Count); // "Two unresolved refs expected for case 1"
             Assert.Equal(unresolvedProjects["MCDep1.vcproj"], projectRefs[0]);
             Assert.Equal(unresolvedProjects["MCDep2.vcproj"], projectRefs[1]);
@@ -317,9 +317,9 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectConfigurations, out unresolvedProjects, out resolvedProjects);
 
-            Assert.Equal(1, resolvedProjects.Count); // "One resolved ref expected for case 2"
+            Assert.Single(resolvedProjects.Count); // "One resolved ref expected for case 2"
             Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig|Platform"));
-            Assert.Equal(1, unresolvedProjects.Count); // "One unresolved ref expected for case 2"
+            Assert.Single(unresolvedProjects.Count); // "One unresolved ref expected for case 2"
             Assert.Equal(unresolvedProjects["MCDep1.vcproj"], projectRefs[0]);
 
             // 3. multiple projects, all resolvable
@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, resolvedProjects.Count); // "Two resolved refs expected for case 3"
             Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig|Platform"));
             Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig2|Platform"));
-            Assert.Equal(0, unresolvedProjects.Count); // "No unresolved refs expected for case 3"
+            Assert.Empty(unresolvedProjects.Count); // "No unresolved refs expected for case 3"
         }
 
         #region Test Defaults

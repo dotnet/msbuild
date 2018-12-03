@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     // Ignore: Causing issues with other tests
     // NOTE: marked as "internal" to disable the entire test class, as was done for MSTest.
-    internal class Scheduler_Tests : IDisposable
+    public class Scheduler_Tests : IDisposable
     {
         /// <summary>
         /// The host object.
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
             Assert.Equal(request, response[0].BuildRequest);
         }
@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
             Assert.Equal(request1, response[0].BuildRequest);
         }
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
             // exist yet.
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
             Assert.Equal(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
             Assert.Equal(1, response[0].NumberOfNodesToCreate);
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
             // exist yet.
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
             Assert.Equal(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
             Assert.Equal(2, response[0].NumberOfNodesToCreate);
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestBlocker blocker = new BuildRequestBlocker(request1.ParentGlobalRequestId, new string[] { }, new BuildRequest[] { request1, request2, request3, request4 });
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
 
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
             Assert.Equal(request1, response[0].BuildRequest);
         }
@@ -405,7 +405,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request3 = CreateBuildRequest(3, 1, new string[] { "bar" }, NodeAffinity.InProc, _defaultParentRequest);
 
             List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, new string[] { }, new BuildRequest[] { _defaultParentRequest, request1, request2, request3 })));
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
             Assert.Equal(NodeAffinity.InProc, response[0].RequiredNodeType);
             Assert.Equal(1, response[0].NumberOfNodesToCreate);
@@ -443,7 +443,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Parent request is blocked by the fact that both child requests require the out-of-proc node that doesn't
             // exist yet.
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.CreateNode, response[0].Action);
             Assert.Equal(NodeAffinity.OutOfProc, response[0].RequiredNodeType);
             Assert.Equal(3, response[0].NumberOfNodesToCreate);
@@ -528,7 +528,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // There will be no request to create a new node, because both of the above requests are traversals,
             // which have an affinity of "inproc", and the inproc node already exists.
-            Assert.Equal(1, response.Count);
+            Assert.Single(response);
             Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
             Assert.Equal(request1, response[0].BuildRequest);
         }

@@ -233,8 +233,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             List<ProjectItemGroupTaskMetadataInstance> metadata3 = Helpers.MakeList(items[2].Metadata);
 
             Assert.Equal(2, metadata1.Count);
-            Assert.Equal(0, metadata2.Count);
-            Assert.Equal(1, metadata3.Count);
+            Assert.Empty(metadata2);
+            Assert.Single(metadata3);
 
             Assert.Equal("c3", metadata1[0].Condition);
             Assert.Equal("m1", metadata1[0].Value);
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.Equal(true, p.TaskRegistry != null);
+            Assert.True(p.TaskRegistry != null);
         }
 
         /// <summary>
@@ -546,7 +546,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectInstance second = first.DeepCopy();
 
-            Assert.Equal(true, second.TranslateEntireState);
+            Assert.True(second.TranslateEntireState);
         }
 
         /// <summary>

@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 p = project.CreateProjectInstance();
 
                 // But are gone after resetting of course
-                Assert.Equal(0, Helpers.MakeList(p.GetItems("FilesWrittenItem")).Count);
+                Assert.Empty(Helpers.MakeList(p.GetItems("FilesWrittenItem")));
                 Assert.Equal(String.Empty, p.GetPropertyValue("FilesWrittenProperty"));
             }
             finally

@@ -271,7 +271,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 countFound++;
             }
-            Assert.Equal(countFound, 0);
+            Assert.Equal(0, countFound);
 
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             bool foundFoo = false;
@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
                 countFound++;
             }
-            Assert.Equal(countFound, 1);
+            Assert.Equal(1, countFound);
             Assert.True(foundFoo);
 
             result.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
@@ -305,7 +305,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
                 countFound++;
             }
-            Assert.Equal(countFound, 2);
+            Assert.Equal(2, countFound);
             Assert.True(foundFoo);
             Assert.True(foundBar);
         }

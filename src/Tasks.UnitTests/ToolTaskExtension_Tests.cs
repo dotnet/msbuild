@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
             MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = true;
 
-            Assert.Equal(true, t.GetBoolParameterWithDefault("Key", false));
+            Assert.True(t.GetBoolParameterWithDefault("Key", false));
         }
 
         /// <summary>
