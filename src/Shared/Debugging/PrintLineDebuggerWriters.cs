@@ -71,14 +71,14 @@ namespace Microsoft.Build.Shared.Debugging
             {
                 var executingAssembly = FileUtilities.ExecutingAssemblyPath;
 
-                var debugbinPart = $"Debug{Path.DirectorySeparatorChar}bin";
+                var binPart = $"bin";
 
-                var logIndex = executingAssembly.IndexOf(debugbinPart, StringComparison.Ordinal);
+                var logIndex = executingAssembly.IndexOf(binPart, StringComparison.Ordinal);
 
-                var debugPart = executingAssembly.Substring(0, logIndex + "debug".Length);
+                var artifactsPart = executingAssembly.Substring(0, logIndex);
                 return logIndex < 0
                     ? null
-                    : Path.Combine(debugPart, "log");
+                    : Path.Combine(artifactsPart, "log", "Debug");
             });
 
         public static string ArtifactsLogDirectory => _artifactsLogs.Value;

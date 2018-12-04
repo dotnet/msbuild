@@ -659,7 +659,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false);
                 Assert.NotNull(createdTask);
-                Assert.IsType<TaskHostTask>(createdTask);
+                Assert.IsNotType<TaskHostTask>(createdTask);
             }
             finally
             {
