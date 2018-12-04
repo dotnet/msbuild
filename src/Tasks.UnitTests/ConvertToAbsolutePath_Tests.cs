@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             Assert.Single(t.AbsolutePaths);
-            Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
+            Assert.EndsWith(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             Assert.Single(t.AbsolutePaths);
-            Assert.Equal(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
+            Assert.EndsWith(testFile.FullName, t.AbsolutePaths[0].ItemSpec);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
         }

@@ -30,7 +30,7 @@
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
     <VersionsPropsPath>$(RepoRoot)build\Versions.props</VersionsPropsPath>
 
-    <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot)artifacts\.dotnet\$(DotNetCliVersion)\</DOTNET_INSTALL_DIR>
+    <DOTNET_INSTALL_DIR Condition="'$(DOTNET_INSTALL_DIR)' == ''">$(RepoRoot).dotnet\</DOTNET_INSTALL_DIR>
 
     <!-- Repository and project URLs (used in nuget packages) -->
     <RepositoryUrl>https://github.com/microsoft/msbuild</RepositoryUrl>
