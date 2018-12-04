@@ -1320,38 +1320,53 @@ namespace Microsoft.Build.UnitTests
             result = project.Build(loggers);
         }
 
-        public static MockLogger BuildProjectUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
+        public static MockLogger BuildProjectContentUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
         {
             var logger = new MockLogger();
 
-            var result = BuildProjectUsingBuildManager(content, logger);
+            var result = BuildProjectContentUsingBuildManager(content, logger);
 
             result.OverallResult.ShouldBe(expectedResult);
 
             return logger;
         }
 
-        public static BuildResult BuildProjectUsingBuildManager(string content, MockLogger logger)
+        public static BuildResult BuildProjectContentUsingBuildManager(string content, MockLogger logger, BuildParameters parameters = null)
         {
             // Replace the crazy quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
             using (var env = TestEnvironment.Create())
-            using (var buildManager = new BuildManager())
             {
                 var testProject = env.CreateTestProjectWithFiles(content.Cleanup());
 
+                return BuildProjectFileUsingBuildManager(testProject.ProjectFile, logger, parameters);
+            }
+        }
+
+        public static BuildResult BuildProjectFileUsingBuildManager(string projectFile, MockLogger logger = null, BuildParameters parameters = null)
+        {
+            using (var buildManager = new BuildManager())
+            {
+                parameters = parameters ?? new BuildParameters();
+
+                if (logger != null)
+                {
+                    parameters.Loggers = parameters.Loggers == null
+                        ? new[] {logger}
+                        : parameters.Loggers.Concat(new[] {logger});
+                }
+
+                var request = new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string>(),
+                    MSBuildConstants.CurrentToolsVersion,
+                    new string[] {},
+                    null);
+
                 var result = buildManager.Build(
-                    new BuildParameters()
-                    {
-                        Loggers = new []{logger}
-                    },
-                    new BuildRequestData(
-                        testProject.ProjectFile,
-                        new Dictionary<string, string>(),
-                        MSBuildConstants.CurrentToolsVersion,
-                        new string[] {},
-                        null));
+                    parameters,
+                    request);
 
                 return result;
             }
@@ -1496,7 +1511,8 @@ namespace Microsoft.Build.UnitTests
             return result;
         }
 
-        internal delegate TransientTestFile CreateProjectFileDelegate(TestEnvironment env,
+        internal delegate TransientTestFile CreateProjectFileDelegate(
+            TestEnvironment env,
             int projectNumber,
             int[] projectReferences = null,
             Dictionary<string, string[]> projectReferenceTargets = null,

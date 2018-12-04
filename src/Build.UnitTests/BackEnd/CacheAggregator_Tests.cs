@@ -142,9 +142,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-                [Fact]
+        [Fact]
         public void RejectCollidingConfigurationsFromSeparateCaches()
         {
+            // collides with the config id from configCache2
             var configCache1 = new ConfigCache();
             configCache1.AddConfiguration(new BuildRequestConfiguration(configId: 1, new BuildRequestData("path", new Dictionary<string, string>(){["p"] = "v"}, "13", new []{"a", "b"}, null), "13"));
 
@@ -167,8 +168,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using (var env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER", "1");
-                var e = Should.Throw<ArgumentException>(() => aggregator.Aggregate());
-                e.Message.ShouldContain("An item with the same key has already been added");
+                var e = Should.Throw<InternalErrorException>(() => aggregator.Aggregate());
+                e.Message.ShouldContain("Input caches should not contain entries for the same configuration");
             }
         }
 
