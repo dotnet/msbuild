@@ -2,8 +2,8 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <DotNetCoreSdkLKGVersion>3.0.100-preview-009722</DotNetCoreSdkLKGVersion>
-    <DotnetCliInternalVersion>3.0.100-preview.18578.3</DotnetCliInternalVersion>
-    <MicrosoftNETSdkPackageVersion>3.0.100-preview.18578.2</MicrosoftNETSdkPackageVersion>
+    <DotnetCliInternalVersion>3.0.100-preview.18580.6</DotnetCliInternalVersion>
+    <MicrosoftNETSdkPackageVersion>3.0.100-preview.18578.4</MicrosoftNETSdkPackageVersion>
     <MicrosoftNETBuildExtensionsPackageVersion>$(MicrosoftNETSdkPackageVersion)</MicrosoftNETBuildExtensionsPackageVersion>
     <MicrosoftBuildPackageVersion>16.0.0-preview.225</MicrosoftBuildPackageVersion>
     <MicrosoftBuildFrameworkPackageVersion>$(MicrosoftBuildPackageVersion)</MicrosoftBuildFrameworkPackageVersion>
