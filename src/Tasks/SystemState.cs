@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -480,7 +480,8 @@ namespace Microsoft.Build.Tasks
             if (redistList != null)
             {
                 string extension = Path.GetExtension(path);
-                if (String.Compare(extension, ".dll", StringComparison.OrdinalIgnoreCase) == 0)
+
+                if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
                 {
                     IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName
                         (

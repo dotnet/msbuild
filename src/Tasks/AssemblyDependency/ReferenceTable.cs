@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -1192,7 +1192,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         private static bool IsPseudoAssembly(string name)
         {
-            return String.Compare(name, "mscorlib", StringComparison.OrdinalIgnoreCase) == 0;
+            return string.Equals(name, "mscorlib", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -1470,7 +1470,7 @@ namespace Microsoft.Build.Tasks
                 if (assemblyReference.IsPrimary)
                 {
                     // Dont process yourself
-                    if (String.Compare(dependeeItemSpec, assemblyReference.PrimarySourceItem.ItemSpec, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(dependeeItemSpec, assemblyReference.PrimarySourceItem.ItemSpec, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -1688,7 +1688,7 @@ namespace Microsoft.Build.Tasks
                             // frameworkPath is guaranteed to have a trailing slash, because 
                             // ResolveAssemblyReference.Execute takes care of adding it.
 
-                            if (String.Compare(referenceDirectoryName, frameworkPath, StringComparison.OrdinalIgnoreCase) == 0)
+                            if (string.Equals(referenceDirectoryName, frameworkPath, StringComparison.OrdinalIgnoreCase))
                             {
                                 hasFrameworkPath = true;
                             }
@@ -2403,7 +2403,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (0 != String.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(a.Name, b.Name, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
