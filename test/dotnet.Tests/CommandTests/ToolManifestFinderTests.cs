@@ -540,6 +540,37 @@ namespace Microsoft.DotNet.Tests.Commands
                 .Contain(string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched, ""));
         }
 
+        [Fact]
+        public void GivenConflictedManifestFileInDifferentDirectoriesItReturnMergedContentWithSourceManifestFile()
+        {
+            var subdirectoryOfTestRoot = Path.Combine(_testDirectoryRoot, "sub");
+            _fileSystem.Directory.CreateDirectory(subdirectoryOfTestRoot);
+            _fileSystem.File.WriteAllText(Path.Combine(_testDirectoryRoot, _manifestFilename),
+                _jsonContentInParentDirectory);
+            _fileSystem.File.WriteAllText(Path.Combine(subdirectoryOfTestRoot, _manifestFilename),
+                _jsonContentInCurrentDirectory);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(subdirectoryOfTestRoot), _fileSystem);
+            var manifestResult = toolManifest.Inspect();
+
+            manifestResult.Single(pair => pair.toolManifestPackage.PackageId.Equals(new PackageId("t-rex")))
+                .SourceManifest.Value.Should().Be(Path.Combine(_testDirectoryRoot, "sub", _manifestFilename));
+
+            manifestResult.Single(pair => pair.toolManifestPackage.PackageId.Equals(new PackageId("dotnetsay2")))
+                .SourceManifest.Value.Should().Be(Path.Combine(_testDirectoryRoot, _manifestFilename));
+
+            manifestResult.Single(pair => pair.toolManifestPackage.PackageId.Equals(new PackageId("dotnetsay")))
+                .SourceManifest.Value.Should().Be(Path.Combine(_testDirectoryRoot, "sub", _manifestFilename));
+        }
+
+        [Fact]
+        public void GivenNoManifestInspectShouldNotThrow()
+        {
+            var testRoot = Path.Combine(_testDirectoryRoot);
+            var toolManifest = new ToolManifestFinder(new DirectoryPath(testRoot), _fileSystem);
+            Action a = () => toolManifest.Inspect();
+            a.ShouldNotThrow();
+        }
+
         private string _jsonContent =
             @"{
    ""version"":1,

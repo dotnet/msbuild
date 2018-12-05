@@ -12,9 +12,19 @@
         <target state="needs-review-translation">Elenca gli strumenti presenti nella directory degli strumenti dell'utente corrente.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ListToolCommandInvalidGlobalAndLocalAndToolPath">
+        <source>The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</source>
+        <target state="new">The local option(--local), the global option (--global), the tool path option (--tool-path), can only have one at a time. Please specify only one of the options: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="LocalOptionDescription">
         <source>List the tools installed in the local tool manifest.</source>
         <target state="new">List the tools installed in the local tool manifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ManifestFileColumn">
+        <source>Manifest</source>
+        <target state="new">Manifest</target>
         <note />
       </trans-unit>
       <trans-unit id="VersionColumn">
@@ -36,16 +46,6 @@
         <source>Warning: tool package '{0}' is invalid, please contact tool author:
 {1}</source>
         <target state="needs-review-translation">Avviso: il pacchetto '{0}' dello strumento non è valido: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="NeedGlobalOrToolPath">
-        <source>Please specify either the global option (--global) or the tool path option (--tool-path).</source>
-        <target state="translated">Specificare l'opzione globale (--global) o quella relativa al percorso dello strumento (--tool-path).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="GlobalAndToolPathConflict">
-        <source>(--global) conflicts with the tool path option (--tool-path). Please specify only one of the options.</source>
-        <target state="translated">(--global) è in conflitto con l'opzione relativa al percorso dello strumento (--tool-path). Specificare solo una delle opzioni.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidToolPathOption">

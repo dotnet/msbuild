@@ -9,7 +9,7 @@ using Microsoft.Extensions.EnvironmentAbstractions;
 
 namespace Microsoft.DotNet.ToolManifest
 {
-    internal class ToolManifestFinder : IToolManifestFinder
+    internal class ToolManifestFinder : IToolManifestFinder, IToolManifestInspector
     {
         private readonly DirectoryPath _probeStart;
         private readonly IFileSystem _fileSystem;
@@ -35,8 +35,44 @@ namespace Microsoft.DotNet.ToolManifest
                     ? new[] {(filePath.Value, filePath.Value.GetDirectoryPath())}
                     : EnumerateDefaultAllPossibleManifests();
 
+            var findAnyManifest =
+                TryFindToolManifestPackages(allPossibleManifests, out var toolManifestPackageAndSource);
+
+            if (!findAnyManifest)
+            {
+                throw new ToolManifestCannotBeFoundException(
+                    string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
+                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => f.manifestfile.Value))));
+            }
+
+            return toolManifestPackageAndSource.Select(t => t.toolManifestPackage).ToArray();
+        }
+
+        public IReadOnlyCollection<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)> Inspect(
+            FilePath? filePath = null)
+        {
+            IEnumerable<(FilePath manifestfile, DirectoryPath _)> allPossibleManifests =
+                filePath != null
+                    ? new[] {(filePath.Value, filePath.Value.GetDirectoryPath())}
+                    : EnumerateDefaultAllPossibleManifests();
+
+
+            if (!TryFindToolManifestPackages(allPossibleManifests, out var toolManifestPackageAndSource))
+            {
+                toolManifestPackageAndSource =
+                    new List<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)>();
+            }
+
+            return toolManifestPackageAndSource.ToArray();
+        }
+
+        private bool TryFindToolManifestPackages(
+            IEnumerable<(FilePath manifestfile, DirectoryPath _)> allPossibleManifests, 
+            out List<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)> toolManifestPackageAndSource)
+        {
             bool findAnyManifest = false;
-            var result = new List<ToolManifestPackage>();
+            toolManifestPackageAndSource 
+                = new List<(ToolManifestPackage toolManifestPackage, FilePath SourceManifest)>();
             foreach ((FilePath possibleManifest, DirectoryPath correspondingDirectory) in allPossibleManifests)
             {
                 if (!_fileSystem.File.Exists(possibleManifest.Value))
@@ -49,29 +85,22 @@ namespace Microsoft.DotNet.ToolManifest
                 (List<ToolManifestPackage> toolManifestPackageFromOneManifestFile, bool isRoot) =
                     _toolManifestEditor.Read(possibleManifest, correspondingDirectory);
 
-                foreach (ToolManifestPackage p in toolManifestPackageFromOneManifestFile)
+                foreach (ToolManifestPackage toolManifestPackage in toolManifestPackageFromOneManifestFile)
                 {
-                    if (!result.Any(addedToolManifestPackages =>
-                        addedToolManifestPackages.PackageId.Equals(p.PackageId)))
+                    if (!toolManifestPackageAndSource.Any(addedToolManifestPackages =>
+                        addedToolManifestPackages.toolManifestPackage.PackageId.Equals(toolManifestPackage.PackageId)))
                     {
-                        result.Add(p);
+                        toolManifestPackageAndSource.Add((toolManifestPackage, possibleManifest));
                     }
                 }
 
                 if (isRoot)
                 {
-                    return result;
+                    return findAnyManifest;
                 }
             }
 
-            if (!findAnyManifest)
-            {
-                throw new ToolManifestCannotBeFoundException(
-                    string.Format(LocalizableStrings.CannotFindAnyManifestsFileSearched,
-                        string.Join(Environment.NewLine, allPossibleManifests.Select(f => f.manifestfile.Value))));
-            }
-
-            return result;
+            return findAnyManifest;
         }
 
         public bool TryFind(ToolCommandName toolCommandName, out ToolManifestPackage toolManifestPackage)

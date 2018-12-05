@@ -118,7 +118,7 @@ namespace Microsoft.DotNet.Tests.Commands
             a.ShouldThrow<GracefulException>().And.Message
                 .Should().Contain(LocalizableStrings.OnlyLocalOptionSupportManifestFileOption);
         }
-        
+
         [Fact]
         public void WhenRunWithLocalAndFrameworkShowErrorMessage()
         {
