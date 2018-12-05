@@ -1770,36 +1770,39 @@ namespace Microsoft.Build.Tasks
         /// This methods looks for conflicts between assemblies and attempts to 
         /// resolve them.
         /// </summary>
-        private int ResolveConflictsBetweenReferences()
+        private void ResolveConflictsBetweenReferences(Dictionary<string, List<AssemblyNameReference>> baseNameToReferences)
         {
-            int count = 0;
-
-            // Get a table of simple name mapped to (perhaps multiple) reference.
-            Dictionary<string, List<AssemblyNameReference>> baseNames = BuildSimpleNameTable();
-
             // Now we have references organized into groups that would conflict.
-            foreach (List<AssemblyNameReference> assemblyReferences in baseNames.Values)
+            foreach (List<AssemblyNameReference> assemblyReferences in baseNameToReferences.Values)
             {
-                // Sort to make it predictable. Choose to sort by ascending version number
-                // since this is known to reveal bugs in at least one circumstance.
-                assemblyReferences.Sort(AssemblyNameReferenceAscendingVersionComparer.comparer);
-
-                // Two or more references required for there to be a conflict.
-                while (assemblyReferences.Count > 1)
-                {
-                    // Resolve the conflict. Victim is the index of the item that lost.
-                    int victim = ResolveAssemblyNameConflict
-                    (
-                        assemblyReferences[0],
-                        assemblyReferences[1]
-                    );
-
-                    assemblyReferences.RemoveAt(victim);
-                    count++;
-                }
+                ResolveConflictsBetweenReferences(assemblyReferences);
             }
+        }
 
-            return count;
+        private void ResolveConflictsBetweenReferences(List<AssemblyNameReference> assemblyReferences)
+        {
+            // Sort to make it predictable. Choose to sort by ascending version number
+            // since this is known to reveal bugs in at least one circumstance.
+            assemblyReferences.Sort(AssemblyNameReferenceAscendingVersionComparer.comparer);
+
+            int leftIndex = 0;
+            int rightIndex = 1;
+
+            while (rightIndex < assemblyReferences.Count)
+            {
+                bool isLeftVictim = ResolveAssemblyNameConflict
+                (
+                    assemblyReferences[leftIndex],
+                    assemblyReferences[rightIndex]
+                ) == 0;
+
+                if (isLeftVictim)
+                {
+                    leftIndex = rightIndex;
+                }
+
+                rightIndex++;
+            }
         }
 
         /// <summary>
@@ -1815,83 +1818,83 @@ namespace Microsoft.Build.Tasks
             idealRemappings = null;
             conflictingReferences = null;
 
-            // First, resolve all conflicts between references.
-            if (0 == ResolveConflictsBetweenReferences())
+            // Get a table of simple name mapped to (perhaps multiple) reference.
+            Dictionary<string, List<AssemblyNameReference>> baseNameToReferences = BuildSimpleNameTable();
+            RemoveReferencesWithoutConflicts(baseNameToReferences);
+
+            // If there were no basename conflicts then there can be no version-to-version conflicts.
+            // In this case, short-circuit now rather than building up all the tables below.
+            if (baseNameToReferences.Count == 0)
             {
-                // If there were no basename conflicts then there can be no version-to-version conflicts.
-                // In this case, short-circuit now rather than building up all the tables below.
                 return;
             }
+
+            // First, resolve all conflicts between references.
+            ResolveConflictsBetweenReferences(baseNameToReferences);
 
             // Build two tables, one with a count and one with the corresponding references.
             // Dependencies which differ only by version number need a suggested redirect.
             // The count tells us whether there are two or more.
-            var counts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-            var references = new Dictionary<string, AssemblyNameReference>(StringComparer.OrdinalIgnoreCase);
+            var conflictingFullNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var fullNameToReference = new Dictionary<string, AssemblyNameReference>(References.Count, StringComparer.OrdinalIgnoreCase);
 
-            foreach (KeyValuePair<AssemblyNameExtension, Reference> kvp in References)
+            foreach (List<AssemblyNameReference> references in baseNameToReferences.Values)
             {
-                AssemblyNameExtension assemblyName = kvp.Key;
-                Reference reference = kvp.Value;
-
-                // If the assembly has a parent which has specific version set to true then we need to see if it is framework assembly
-                if (reference.CheckForSpecificVersionMetadataOnParentsReference(true))
+                foreach (AssemblyNameReference assemblyNameReference in references)
                 {
+                    AssemblyNameExtension assemblyName = assemblyNameReference.assemblyName;
+                    Reference reference = assemblyNameReference.reference;
+
+                    // If the assembly has a parent which has specific version set to true then we need to see if it is framework assembly
                     // Try and find an entry in the redist list by comparing everything except the version.
-                    AssemblyEntry entry = null;
+                    bool isFrameworkAssembly = _installedAssemblies != null
+                                               && reference.CheckForSpecificVersionMetadataOnParentsReference(true)
+                                               && _installedAssemblies.FindHighestVersionInRedistList(assemblyName) != null;
 
-                    if (_installedAssemblies != null)
-                    {
-                        entry = _installedAssemblies.FindHighestVersionInRedistList(assemblyName);
-                    }
-
-                    if (entry != null)
+                    if (isFrameworkAssembly)
                     {
                         // We have found an entry in the redist list that this assembly is a framework assembly of some version
                         // also one if its parent references has specific version set to true, therefore we need to make sure
                         // that we do not consider it for conflict resolution.
                         continue;
                     }
-                }
 
-                byte[] pkt = assemblyName.GetPublicKeyToken();
-                if (pkt != null && pkt.Length > 0)
-                {
-                    AssemblyName baseKey = assemblyName.AssemblyName.CloneIfPossible();
-                    Version version = baseKey.Version;
-                    baseKey.Version = null;
-                    string key = baseKey.ToString();
-
-                    if (counts.TryGetValue(key, out int c))
+                    byte[] pkt = assemblyName.GetPublicKeyToken();
+                    if (pkt != null && pkt.Length > 0)
                     {
-                        counts[key] = c + 1;
-                        Version lastVersion = references[key].assemblyName.Version;
+                        AssemblyName baseKey = assemblyName.AssemblyName.CloneIfPossible();
+                        Version version = baseKey.Version;
+                        baseKey.Version = null;
+                        string key = baseKey.ToString();
 
-                        if (lastVersion == null || lastVersion < version)
+                        if (fullNameToReference.TryGetValue(key, out AssemblyNameReference conflictingReference))
                         {
-                            references[key] = AssemblyNameReference.Create(assemblyName, reference);
+                            conflictingFullNames.Add(key);
+                            Version lastVersion = conflictingReference.assemblyName.Version;
+
+                            if (lastVersion == null || lastVersion < version)
+                            {
+                                fullNameToReference[key] = assemblyNameReference;
+                            }
                         }
-                    }
-                    else
-                    {
-                        counts[key] = 1;
-                        references[key] = AssemblyNameReference.Create(assemblyName, reference);
+                        else
+                        {
+                            fullNameToReference[key] = assemblyNameReference;
+                        }
                     }
                 }
             }
 
             // Build the list of conflicted assemblies.
-            var assemblyNamesList = new List<AssemblyNameReference>();
-            foreach (string versionLessAssemblyName in counts.Keys)
+            var assemblyNamesList = new List<AssemblyNameReference>(conflictingFullNames.Count);
+            foreach (string versionLessAssemblyName in conflictingFullNames)
             {
-                if (counts[versionLessAssemblyName] > 1)
-                {
-                    assemblyNamesList.Add(references[versionLessAssemblyName]);
-                }
+                assemblyNamesList.Add(fullNameToReference[versionLessAssemblyName]);
             }
 
             // Pass over the list of conflicting references and make a binding redirect for each.
-            var idealRemappingsList = new List<DependentAssembly>();
+            var idealRemappingsList = new List<DependentAssembly>(assemblyNamesList.Count);
+            var bindingRedirectVersion = new Version(0, 0, 0, 0);
 
             foreach (AssemblyNameReference assemblyNameReference in assemblyNamesList)
             {
@@ -1901,7 +1904,7 @@ namespace Microsoft.Build.Tasks
                 };
                 var bindingRedirect = new BindingRedirect
                 {
-                    OldVersionLow = new Version("0.0.0.0"),
+                    OldVersionLow = bindingRedirectVersion,
                     OldVersionHigh = assemblyNameReference.assemblyName.AssemblyName.Version,
                     NewVersion = assemblyNameReference.assemblyName.AssemblyName.Version
                 };
@@ -2150,29 +2153,47 @@ namespace Microsoft.Build.Tasks
         {
             // Build a list of base file names from references.
             // These would conflict with each other if copied to the output directory.
-            var baseNames = new Dictionary<string, List<AssemblyNameReference>>(StringComparer.CurrentCultureIgnoreCase);
+            var baseNameToReferences = new Dictionary<string, List<AssemblyNameReference>>(References.Count, StringComparer.OrdinalIgnoreCase);
 
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assemblyNameWithReference in References)
             {
-                AssemblyNameReference assemblyReference;
-                assemblyReference.assemblyName = assemblyName;
-                assemblyReference.reference = GetReference(assemblyName);
+                AssemblyNameExtension assemblyName = assemblyNameWithReference.Key;
+                Reference reference = assemblyNameWithReference.Value;
+                AssemblyNameReference assemblyReference = AssemblyNameReference.Create(assemblyName, reference);
 
                 // Notice that unresolved assemblies are still added to the table.
                 // This is because an unresolved assembly may have a different version 
                 // which would influence unification. We want to report this to the user.
                 string baseName = assemblyName.Name;
 
-                if (!baseNames.TryGetValue(baseName, out List<AssemblyNameReference> refs))
+                if (!baseNameToReferences.TryGetValue(baseName, out List<AssemblyNameReference> refs))
                 {
                     refs = new List<AssemblyNameReference>();
-                    baseNames[baseName] = refs;
+                    baseNameToReferences[baseName] = refs;
                 }
 
                 refs.Add(assemblyReference);
             }
 
-            return baseNames;
+            return baseNameToReferences;
+        }
+
+        private static void RemoveReferencesWithoutConflicts
+        (
+            Dictionary<string, List<AssemblyNameReference>> baseNameToReferences
+        )
+        {
+            string[] baseNames = new string[baseNameToReferences.Count];
+            baseNameToReferences.Keys.CopyTo(baseNames, 0);
+
+            foreach (string baseName in baseNames)
+            {
+                if (baseNameToReferences[baseName].Count == 1)
+                {
+                    baseNameToReferences.Remove(baseName);
+
+                }
+            }
         }
 
         /// <summary>
