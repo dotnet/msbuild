@@ -630,7 +630,7 @@ namespace Microsoft.Build.Tasks
         private bool FileTimestampIndicatesFileExists(DateTime lastModified)
         {
             // TODO: Standardize LastWriteTime value for nonexistent files. See https://github.com/Microsoft/msbuild/issues/3699
-            return lastModified != DateTime.MinValue && lastModified != DateTime.FromFileTimeUtc(0);
+            return lastModified != DateTime.MinValue && lastModified != NativeMethodsShared.MinFileDate;
         }
 
         /// <summary>

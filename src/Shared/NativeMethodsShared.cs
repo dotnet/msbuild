@@ -56,7 +56,7 @@ namespace Microsoft.Build.Shared
         private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
         private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
-        private static DateTime minFileDate = DateTime.FromFileTimeUtc(0);
+        internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
 #if FEATURE_HANDLEREF
         internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
@@ -844,7 +844,7 @@ namespace Microsoft.Build.Shared
             }
 
             DateTime lastWriteTime = Directory.GetLastWriteTimeUtc(fullPath);
-            bool directoryExists = lastWriteTime != minFileDate;
+            bool directoryExists = lastWriteTime != MinFileDate;
 
             fileModifiedTimeUtc = directoryExists ? lastWriteTime : DateTime.MinValue;
             return directoryExists;
@@ -987,7 +987,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 DateTime lastWriteTime = File.GetLastWriteTimeUtc(fullPath);
-                bool fileExists = lastWriteTime != minFileDate;
+                bool fileExists = lastWriteTime != MinFileDate;
 
                 fileModifiedTime = fileExists ? lastWriteTime : DateTime.MinValue;
             }
