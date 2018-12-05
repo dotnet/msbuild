@@ -107,7 +107,7 @@ namespace Microsoft.DotNet.New.Tests
                 var sharedFxDir = dotnetDir
                     .GetDirectory("shared", "Microsoft.NETCore.App")
                     .EnumerateDirectories()
-                    .Single(d => d.Name.StartsWith("2.2.0"));
+                    .Single(d => d.Name.StartsWith("2.2."));
 
                 if (packageName == "microsoft.netcore.app")
                 {
