@@ -527,9 +527,9 @@ namespace Microsoft.Build.Tasks
             string executableExtension = referenceAssemblyName.GetMetadata(ItemMetadataNames.executableExtension);
 
             // Get the assembly name, if possible.
-            string rawFileNameCandidate = referenceAssemblyName.ItemSpec;
-            AssemblyNameExtension assemblyName = null;
             string itemSpec = referenceAssemblyName.ItemSpec;
+            string rawFileNameCandidate = itemSpec;
+            AssemblyNameExtension assemblyName = null;
             string fusionName = referenceAssemblyName.GetMetadata(ItemMetadataNames.fusionName);
             bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyName, ItemMetadataNames.IgnoreVersionForFrameworkReference, out bool metadataFound);
             bool ignoreVersionForFrameworkReference = false;
@@ -830,18 +830,19 @@ namespace Microsoft.Build.Tasks
                 // Create the reference.
                 var reference = new Reference(_isWinMDFile, _fileExists, _getRuntimeVersion);
 
+                string itemSpec = referenceAssemblyFile.ItemSpec;
                 bool hasSpecificVersionMetadata = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyFile, ItemMetadataNames.specificVersion);
                 reference.MakePrimaryAssemblyReference
                 (
                     referenceAssemblyFile,
                     hasSpecificVersionMetadata,
-                    Path.GetExtension(referenceAssemblyFile.ItemSpec)
+                    Path.GetExtension(itemSpec)
                 );
 
                 AssemblyNameExtension assemblyName = NameAssemblyFileReference
                 (
                     reference,
-                    referenceAssemblyFile.ItemSpec  // Contains the assembly file name.
+                    itemSpec  // Contains the assembly file name.
                 );
 
                 // Embed Interop Types aka "NOPIAs" support is not available for Fx < 4.0
@@ -925,7 +926,9 @@ namespace Microsoft.Build.Tasks
                 }
 
                 string[] subDirectories = _getDirectories(reference.DirectoryName, "*");
-                string sateliteFilename = reference.FileNameWithoutExtension + ".resources.dll";
+                string sateliteFilename = subDirectories.Length > 0
+                    ? reference.FileNameWithoutExtension + ".resources.dll"
+                    : string.Empty;
 
                 foreach (string subDirectory in subDirectories)
                 {
@@ -2194,56 +2197,58 @@ namespace Microsoft.Build.Tasks
             ErrorUtilities.VerifyThrow(assemblyReference0.assemblyName.FullName != null, "Got a null assembly name fullname. (0)");
             ErrorUtilities.VerifyThrow(assemblyReference1.assemblyName.FullName != null, "Got a null assembly name fullname. (1)");
 
-            string[] conflictFusionNames = { assemblyReference0.assemblyName.FullName, assemblyReference1.assemblyName.FullName };
-            Reference[] conflictReferences = { assemblyReference0.reference, assemblyReference1.reference };
-            AssemblyNameExtension[] conflictAssemblyNames = { assemblyReference0.assemblyName, assemblyReference1.assemblyName };
-            bool[] conflictLegacyUnified = { assemblyReference0.reference.IsPrimary, assemblyReference1.reference.IsPrimary };
-
-            //  If both assemblies being compared are primary references, the caller should pass in a zero-flag 
-            // (non-unified) for both. (This conforms to the C# assumption that two direct references are meant to be 
-            // SxS.)
-            if (conflictReferences[0].IsPrimary && conflictReferences[1].IsPrimary)
-            {
-                conflictLegacyUnified[0] = false;
-                conflictLegacyUnified[1] = false;
-            }
-
-            // This is ok here because even if the method says two versions are equivilant the algorithm below will still pick the highest version.
-            NativeMethods.CompareAssemblyIdentity
-            (
-                conflictFusionNames[0],
-                conflictLegacyUnified[0],
-                conflictFusionNames[1],
-                conflictLegacyUnified[1],
-                out bool equivalent,
-                out _
-            );
+            Reference leftConflictReference = assemblyReference0.reference;
+            Reference rightConflictReference = assemblyReference1.reference;
 
             // Remove one and provide some information about why.
             var victim = 0;
             ConflictLossReason reason = ConflictLossReason.InsolubleConflict;
 
             // Pick the one with the highest version number.
-            if (conflictReferences[0].IsPrimary && !conflictReferences[1].IsPrimary)
+            if (leftConflictReference.IsPrimary && !rightConflictReference.IsPrimary)
             {
                 // Choose the primary version.
                 victim = 1;
                 reason = ConflictLossReason.WasNotPrimary;
             }
-            else if (!conflictReferences[0].IsPrimary && conflictReferences[1].IsPrimary)
+            else if (!leftConflictReference.IsPrimary && rightConflictReference.IsPrimary)
             {
                 // Choose the primary version.
                 victim = 0;
                 reason = ConflictLossReason.WasNotPrimary;
             }
-            else if (!conflictReferences[0].IsPrimary && !conflictReferences[1].IsPrimary)
+            else if (!leftConflictReference.IsPrimary && !rightConflictReference.IsPrimary)
             {
+                string leftConflictFusionName = assemblyReference0.assemblyName.FullName;
+                string rightConflictFusionName = assemblyReference1.assemblyName.FullName;
+
+                //  If both assemblies being compared are primary references, the caller should pass in a zero-flag 
+                // (non-unified) for both. (This conforms to the C# assumption that two direct references are meant to be 
+                // SxS.)
+                bool isNonUnified = leftConflictReference.IsPrimary && rightConflictReference.IsPrimary;
+                bool leftConflictLegacyUnified = !isNonUnified && assemblyReference0.reference.IsPrimary;
+                bool rightConflictLegacyUnified = !isNonUnified && assemblyReference1.reference.IsPrimary;
+
+                // This is ok here because even if the method says two versions are equivalent the algorithm below will still pick the highest version.
+                NativeMethods.CompareAssemblyIdentity
+                (
+                    leftConflictFusionName,
+                    leftConflictLegacyUnified,
+                    rightConflictFusionName,
+                    rightConflictLegacyUnified,
+                    out bool equivalent,
+                    out _
+                );
+
+                Version leftConflictVersion = assemblyReference0.assemblyName.Version;
+                Version rightConflictVersion = assemblyReference1.assemblyName.Version;
+
                 if
                 (
                     // Version comparison only if there are two versions to compare.
                     // Null versions can occur when simply-named assemblies are unresolved.
-                    conflictAssemblyNames[0].Version != null && conflictAssemblyNames[1].Version != null
-                    && conflictAssemblyNames[0].Version > conflictAssemblyNames[1].Version
+                    leftConflictVersion != null && rightConflictVersion != null
+                    && leftConflictVersion > rightConflictVersion
                 )
                 {
                     // Choose the higher version
@@ -2257,8 +2262,8 @@ namespace Microsoft.Build.Tasks
                 (
                     // Version comparison only if there are two versions to compare.
                     // Null versions can occur when simply-named assemblies are unresolved.
-                    conflictAssemblyNames[0].Version != null && conflictAssemblyNames[1].Version != null
-                    && conflictAssemblyNames[0].Version < conflictAssemblyNames[1].Version
+                    leftConflictVersion != null && rightConflictVersion != null
+                    && leftConflictVersion < rightConflictVersion
                 )
                 {
                     // Choose the higher version
@@ -2282,9 +2287,18 @@ namespace Microsoft.Build.Tasks
             
             // Remove the one chosen.
             int victor = 1 - victim;
-            conflictReferences[victim].ConflictVictorName = conflictAssemblyNames[victor];
-            conflictReferences[victim].ConflictLossExplanation = reason;
-            conflictReferences[victor].AddConflictVictim(conflictAssemblyNames[victim]);
+
+            AssemblyNameExtension leftAssemblyName = assemblyReference0.assemblyName;
+            AssemblyNameExtension rightAssemblyName = assemblyReference1.assemblyName;
+
+            Reference victimReference = victim == 0 ? leftConflictReference : rightConflictReference;
+            Reference victorReference = victor == 0 ? leftConflictReference : rightConflictReference;
+            AssemblyNameExtension victimAssemblyName = victim == 0 ? leftAssemblyName : rightAssemblyName;
+            AssemblyNameExtension victorAssemblyName = victor == 0 ? leftAssemblyName : rightAssemblyName;
+
+            victimReference.ConflictVictorName = victorAssemblyName;
+            victimReference.ConflictLossExplanation = reason;
+            victorReference.AddConflictVictim(victimAssemblyName);
 
             return victim;
         }

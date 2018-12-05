@@ -487,10 +487,10 @@ namespace Microsoft.Build.Tasks
                         (
                             Path.GetFileNameWithoutExtension(path)
                         );
+                    string filename = Path.GetFileName(path);
 
                     foreach (AssemblyEntry a in assemblyNames)
                     {
-                        string filename = Path.GetFileName(path);
                         string pathFromRedistList = Path.Combine(a.FrameworkDirectory, filename);
 
                         if (String.Equals(path, pathFromRedistList, StringComparison.OrdinalIgnoreCase))

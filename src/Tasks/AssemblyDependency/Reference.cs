@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -147,10 +147,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void AddSourceItem(ITaskItem sourceItem)
         {
-            bool sourceItemAlreadyInList = _sourceItems.ContainsKey(sourceItem.ItemSpec);
+            string itemSpec = sourceItem.ItemSpec;
+            bool sourceItemAlreadyInList = _sourceItems.ContainsKey(itemSpec);
             if (!sourceItemAlreadyInList)
             {
-                _sourceItems[sourceItem.ItemSpec] = sourceItem;
+                _sourceItems[itemSpec] = sourceItem;
                 PropagateSourceItems(sourceItem);
             }
         }
