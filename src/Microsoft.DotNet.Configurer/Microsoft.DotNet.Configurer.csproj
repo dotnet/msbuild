@@ -4,7 +4,7 @@
     <VersionPrefix>$(CliVersionPrefix)</VersionPrefix>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
-    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <RepositoryType>git</RepositoryType>

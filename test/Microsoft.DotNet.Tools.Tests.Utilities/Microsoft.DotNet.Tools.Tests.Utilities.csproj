@@ -4,7 +4,7 @@
     <TargetFrameworks>$(CliTargetFramework);net472</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(CliTargetFramework)</TargetFrameworks>
     <AssemblyName>Microsoft.DotNet.Tools.Tests.Utilities</AssemblyName>
-    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssetTargetFallback>$(AssetTargetFallback);dotnet5.4;portable-net451+win8</AssetTargetFallback>

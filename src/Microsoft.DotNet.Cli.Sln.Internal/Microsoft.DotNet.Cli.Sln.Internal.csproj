@@ -6,7 +6,7 @@
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>Microsoft.DotNet.Cli.Sln.Internal</AssemblyName>
-    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <IsPackable>true</IsPackable>
