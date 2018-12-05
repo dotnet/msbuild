@@ -419,7 +419,15 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (_directoryExists(assemblyFileName))
+                if (_fileExists(assemblyFileName))
+                {
+                    assemblyName = _getAssemblyName(assemblyFileName);
+                    if (assemblyName != null)
+                    {
+                        reference.ResolvedSearchPath = assemblyFileName;
+                    }
+                }
+                else if (_directoryExists(assemblyFileName))
                 {
                     assemblyName = new AssemblyNameExtension("*directory*");
 
@@ -433,24 +441,13 @@ namespace Microsoft.Build.Tasks
                     );
                     reference.FullPath = String.Empty;
                 }
-                else
-                {
-                    if (_fileExists(assemblyFileName))
-                    {
-                        assemblyName = _getAssemblyName(assemblyFileName);
-                        if (assemblyName != null)
-                        {
-                            reference.ResolvedSearchPath = assemblyFileName;
-                        }
-                    }
 
-                    if (assemblyName == null)
-                    {
-                        reference.AddError
-                        (
-                            new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
-                        );
-                    }
+                if (assemblyName == null)
+                {
+                    reference.AddError
+                    (
+                        new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
+                    );
                 }
             }
             catch (BadImageFormatException e)
