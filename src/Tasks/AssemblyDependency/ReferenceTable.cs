@@ -958,15 +958,6 @@ namespace Microsoft.Build.Tasks
             Reference reference
         )
         {
-            // If the directory doesn't exist (which is possible in the situation
-            // where we were passed in a pre-resolved reference from a P2P reference
-            // that hasn't actually been built yet), then GetDirectories will throw.
-            // Avoid that by just short-circuiting here.
-            if (!_directoryExists(reference.DirectoryName))
-            {
-                return;
-            }
-
             string serializationAssemblyFilename = reference.FileNameWithoutExtension + ".XmlSerializers.dll";
             string serializationAssemblyPath = Path.Combine(reference.DirectoryName, serializationAssemblyFilename);
             if (_fileExists(serializationAssemblyPath))
