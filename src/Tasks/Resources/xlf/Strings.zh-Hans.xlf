@@ -2283,6 +2283,11 @@
         <target state="translated">MSB3353: 未指定延迟签名所需的公钥。</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild.</source>
+        <target state="new">MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild.</target>
+        <note>{StrBegin="MSB4803: "}</note>
+      </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
         <target state="translated">MSB3661: 传递给 Transform 属性的值“{0}”无效。</target>

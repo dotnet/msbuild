@@ -657,6 +657,9 @@
     <Compile Include="WinMDExp.cs" />
     <Compile Include="XslTransformation.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <Compile Include="ResolveComReference.Stub.cs" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />
     <Compile Include="XamlTaskFactory\CommandLineToolSwitch.cs" />

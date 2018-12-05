@@ -2283,6 +2283,11 @@
         <target state="translated">MSB3353: 서명 연기에 필요한 공개 키를 지정하지 않았습니다.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRequiresFrameworkFailure">
+        <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild.</source>
+        <target state="new">MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild.</target>
+        <note>{StrBegin="MSB4803: "}</note>
+      </trans-unit>
       <trans-unit id="TlbImp.InvalidTransformParameter">
         <source>MSB3661: Invalid value '{0}' passed to the Transform property.</source>
         <target state="translated">MSB3661: Transform 속성에 잘못된 '{0}' 값이 전달되었습니다.</target>
