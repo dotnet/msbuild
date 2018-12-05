@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>$(CliTargetFramework)</TargetFramework>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <AssetTargetFallback>$(AssetTargetFallback);netstandardapp1.5;dotnet5.4;portable-net451+win8</AssetTargetFallback>

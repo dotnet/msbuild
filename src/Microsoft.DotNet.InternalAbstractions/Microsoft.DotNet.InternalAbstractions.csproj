@@ -5,7 +5,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <WarningsAsErrors>true</WarningsAsErrors>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <RepositoryType>git</RepositoryType>

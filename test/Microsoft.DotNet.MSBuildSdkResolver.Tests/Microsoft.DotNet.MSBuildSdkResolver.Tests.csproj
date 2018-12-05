@@ -3,7 +3,7 @@
     <TargetFrameworks>net472;$(CliTargetFramework)</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">$(CliTargetFramework)</TargetFrameworks>
 
-    <StrongNameKeyId>MicrosoftAspNet</StrongNameKeyId>
+    <StrongNameKeyId>MicrosoftAspNetCore</StrongNameKeyId>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <UseAppHost>false</UseAppHost>
