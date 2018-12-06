@@ -16,13 +16,10 @@ namespace Microsoft.DotNet.Cli.Fsc.Tests
         public void ItRuns()
         {
             new FscCommand()
-                .WithRuntime("win7-x64")
-                .WithWorkingDirectory(testInstance.Root)
                 .Execute()
                 .Should().Pass();
 
             new FscCommand()
-                .WithWorkingDirectory(testInstance.Root)
                 .Execute("--help")
                 .Should().Pass();
         }

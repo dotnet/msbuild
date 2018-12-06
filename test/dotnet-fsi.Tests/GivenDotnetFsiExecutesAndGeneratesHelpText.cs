@@ -16,13 +16,10 @@ namespace Microsoft.DotNet.Cli.Fsi.Tests
         public void ItRuns()
         {
             new FsiCommand()
-                .WithRuntime("win7-x64")
-                .WithWorkingDirectory(testInstance.Root)
                 .Execute()
                 .Should().Pass();
 
             new FsiCommand()
-                .WithWorkingDirectory(testInstance.Root)
                 .Execute("--help")
                 .Should().Pass();
         }
