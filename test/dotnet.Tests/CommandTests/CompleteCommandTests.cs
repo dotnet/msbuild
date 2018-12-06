@@ -29,7 +29,6 @@ namespace Microsoft.DotNet.Tests.Commands
                 "build",
                 "build-server",
                 "clean",
-                "fsc",
                 "fsi",
                 "help",
                 "list",

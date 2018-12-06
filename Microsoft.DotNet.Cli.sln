@@ -243,8 +243,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-install-tool.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.DotNet.MSBuildSdkResolver.Tests", "test\Microsoft.DotNet.MSBuildSdkResolver.Tests\Microsoft.DotNet.MSBuildSdkResolver.Tests.csproj", "{B7C82980-F01D-4B8A-A746-BFA0032CB152}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-fsc.Tests", "test\dotnet-fsc.Tests\dotnet-fsc.Tests.csproj", "{20E48AD3-B7CC-423C-8F84-913804FAF544}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "dotnet-fsi.Tests", "test\dotnet-fsi.Tests\dotnet-fsi.Tests.csproj", "{6219D61D-4013-44E9-974B-418818BAEA58}"
 EndProject
 Global

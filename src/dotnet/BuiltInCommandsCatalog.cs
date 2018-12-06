@@ -5,7 +5,6 @@ using Microsoft.DotNet.Tools.Add;
 using Microsoft.DotNet.Tools.Build;
 using Microsoft.DotNet.Tools.BuildServer;
 using Microsoft.DotNet.Tools.Clean;
-using Microsoft.DotNet.Tools.Fsc;
 using Microsoft.DotNet.Tools.Fsi;
 using Microsoft.DotNet.Tools.Help;
 using Microsoft.DotNet.Tools.List;
@@ -48,12 +47,6 @@ namespace Microsoft.DotNet.Cli
                 Command = CleanCommand.Run,
                 // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-clean
                 DocLink = "https://aka.ms/dotnet-clean"
-            },
-            ["fsc"] = new BuiltInCommandMetadata
-            {
-                Command = FscCommand.Run,
-                // aka.ms target: https://docs.microsoft.com/dotnet/articles/core/tools/dotnet-fsc
-                DocLink = "https://aka.ms/dotnet-fsc"
             },
             ["fsi"] = new BuiltInCommandMetadata
             {
