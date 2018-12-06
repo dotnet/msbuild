@@ -87,16 +87,6 @@ namespace Microsoft.DotNet.Cli.Telemetry
             ),
             new TopLevelCommandNameAndOptionToLog
             (
-                topLevelCommandName: new HashSet<string> {"fsc"},
-                optionsToLog: new HashSet<string> {""}
-            ),
-            new TopLevelCommandNameAndOptionToLog
-            (
-                topLevelCommandName: new HashSet<string> {"fsi"},
-                optionsToLog: new HashSet<string> {""}
-            ),
-            new TopLevelCommandNameAndOptionToLog
-            (
                 topLevelCommandName: new HashSet<string> {"vstest"},
                 optionsToLog: new HashSet<string> {"platform", "framework", "logger"}
             ),
