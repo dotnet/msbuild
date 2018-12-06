@@ -903,11 +903,8 @@ namespace Microsoft.Build.Tasks
         public string ResolvedCodeAnalysisRuleSet { get { throw null; } }
         public override bool Execute() { throw null; }
     }
-#if NETSTANDARD
-    public sealed partial class ResolveComReference : Microsoft.Build.Tasks.TaskExtension
-#else
+#if !NETSTANDARD
     public sealed partial class ResolveComReference : Microsoft.Build.Tasks.AppDomainIsolatedTaskExtension
-#endif
     {
         public ResolveComReference() { }
         public bool DelaySign { get { throw null; } set { } }
@@ -932,6 +929,7 @@ namespace Microsoft.Build.Tasks
         public string WrapperOutputDirectory { get { throw null; } set { } }
         public override bool Execute() { throw null; }
     }
+#endif
     public partial class ResolveKeySource : Microsoft.Build.Tasks.TaskExtension
     {
         public ResolveKeySource() { }
