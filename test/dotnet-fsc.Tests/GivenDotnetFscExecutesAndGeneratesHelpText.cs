@@ -16,10 +16,6 @@ namespace Microsoft.DotNet.Cli.Fsc.Tests
         public void ItRuns()
         {
             new FscCommand()
-                .Execute()
-                .Should().Pass();
-
-            new FscCommand()
                 .Execute("--help")
                 .Should().Pass();
         }

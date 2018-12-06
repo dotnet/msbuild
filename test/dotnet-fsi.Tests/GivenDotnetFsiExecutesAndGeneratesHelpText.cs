@@ -16,10 +16,6 @@ namespace Microsoft.DotNet.Cli.Fsi.Tests
         public void ItRuns()
         {
             new FsiCommand()
-                .Execute()
-                .Should().Pass();
-
-            new FsiCommand()
                 .Execute("--help")
                 .Should().Pass();
         }

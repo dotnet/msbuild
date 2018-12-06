@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.DotNet.Tools.Test.Utilities
 {
-    public sealed class Fsiommand : DotnetCommand
+    public sealed class FsiCommand : DotnetCommand
     {
         public override CommandResult Execute(string args = "")
         {
