@@ -386,17 +386,10 @@ namespace Microsoft.Build.Tasks
             bool isCachedInInstance = cachedInstanceFileState != null;
             bool isCachedInProcess =
                 s_processWideFileStateCache.TryGetValue(path, out FileState cachedProcessFileState);
-
-            bool isInstanceFileStateLatest = isCachedInInstance
-                                             && isCachedInProcess
-                                             && cachedInstanceFileState.LastModified > cachedProcessFileState.LastModified;
+            
             bool isInstanceFileStateUpToDate = isCachedInInstance && lastModified == cachedInstanceFileState.LastModified;
             bool isProcessFileStateUpToDate = isCachedInProcess && lastModified == cachedProcessFileState.LastModified;
 
-            if (isInstanceFileStateUpToDate && (!isCachedInProcess || isInstanceFileStateLatest))
-            {
-                return s_processWideFileStateCache[path] = cachedInstanceFileState;
-            }
             if (isProcessFileStateUpToDate)
             {
                 if (isCachedInInstance)
@@ -406,6 +399,10 @@ namespace Microsoft.Build.Tasks
                 }
 
                 return cachedProcessFileState;
+            }
+            if (isInstanceFileStateUpToDate)
+            {
+                return s_processWideFileStateCache[path] = cachedInstanceFileState;
             }
 
             return InitializeFileState(path, lastModified);
