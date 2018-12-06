@@ -334,6 +334,7 @@
     <Compile Include="CommandLineBuilderExtension.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="ResolveComReference.cs" />
     <Compile Include="BuildCacheDisposeWrapper.cs" />
     <Compile Include="DownloadFile.cs" />
     <Compile Include="FileIO\GetFileHash.cs" />
@@ -610,7 +611,6 @@
     </Compile>
     <Compile Include="ResGen.cs" />
     <Compile Include="ResGenDependencies.cs" />
-    <Compile Include="ResolveComReference.cs" />
     <Compile Include="ResolveComReferenceCache.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </Compile>
@@ -656,9 +656,6 @@
     </Compile>
     <Compile Include="WinMDExp.cs" />
     <Compile Include="XslTransformation.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-    <Compile Include="ResolveComReference.Stub.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Compile Include="XamlTaskFactory\CommandLineGenerator.cs" />
