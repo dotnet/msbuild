@@ -4,7 +4,7 @@ function InitializeCustomSDKToolset {
       $env:VSInstallDir = Join-Path $env:VSSDKInstall ".."
     }
 
-    $env:DOTNET_SDK_TEST_MSBUILD_PATH = Join-Path $env:VSInstallDir "MSBuild\15.0\Bin\msbuild.exe"
+    $env:DOTNET_SDK_TEST_MSBUILD_PATH = InitializeVisualStudioMSBuild
   }
 
   if (-not $restore) {
