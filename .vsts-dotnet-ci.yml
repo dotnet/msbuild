@@ -38,13 +38,13 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log'
+      PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'FullOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs/TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      PathtoPublish: 'artifacts/log/Debug/TestResults'
       ArtifactName: 'FullOnWindows test logs'
     condition: succeededOrFailed()
 
