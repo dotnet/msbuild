@@ -30,8 +30,11 @@
   <PropertyGroup>
     <UsingToolMicrosoftNetCompilers>false</UsingToolMicrosoftNetCompilers>
     <UsingToolVSSDK>true</UsingToolVSSDK>
+    <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
+
     <MicroBuildPluginsSwixBuildVersion>1.0.422</MicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
+
 
   <!-- Toolset Dependencies -->
   <PropertyGroup>
