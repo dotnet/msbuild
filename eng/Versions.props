@@ -47,12 +47,10 @@
     <NUnit3TemplatesVersion>1.5.1</NUnit3TemplatesVersion>
     <CLI_NETStandardLibraryNETFrameworkVersion>2.0.1-servicing-26011-01</CLI_NETStandardLibraryNETFrameworkVersion>
   </PropertyGroup>
-
   <PropertyGroup>
     <UsingToolNetFrameworkReferenceAssemblies>true</UsingToolNetFrameworkReferenceAssemblies>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
   </PropertyGroup>
-
   <PropertyGroup>
     <RestoreSources>
       $(RestoreSources);
