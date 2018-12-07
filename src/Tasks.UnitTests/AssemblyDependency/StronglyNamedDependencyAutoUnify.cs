@@ -149,9 +149,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 bool succeeded = Execute(t);
 
                 Assert.True(succeeded);
-                Assert.Single(t.ResolvedFiles.Length); // "Expected there to only be one resolved file"
-                    Assert.True(t.ResolvedFiles[0].ItemSpec.Contains(Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
-                Assert.Single(t.ResolvedDependencyFiles.Length); // "Expected there to be two resolved dependencies"
+                Assert.Single(t.ResolvedFiles); // "Expected there to only be one resolved file"
+                Assert.Contains(Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), t.ResolvedFiles[0].ItemSpec); // "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
+                Assert.Single(t.ResolvedDependencyFiles); // "Expected there to be two resolved dependencies"
                 t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                     t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V10Path, StringCompareShould.IgnoreCase);
 
@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 bool succeeded = Execute(t, false);
 
                 Assert.True(succeeded);
-                Assert.Empty(t.ResolvedDependencyFiles.Length);
+                Assert.Empty(t.ResolvedDependencyFiles);
                 engine.AssertLogDoesntContain
                     (
                         String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))
@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 bool succeeded = Execute(t, false);
 
                 Assert.True(succeeded);
-                Assert.Empty(t.ResolvedFiles.Length); // "Expected there to be no resolved files"
+                Assert.Empty(t.ResolvedFiles); // "Expected there to be no resolved files"
 
                     Assert.False(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to not be the item spec of the 1.0.0.0 assembly");
                     Assert.False(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to not be the item spec of the 2.0.0.0 assembly"
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
+            Assert.Single(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains
                 (

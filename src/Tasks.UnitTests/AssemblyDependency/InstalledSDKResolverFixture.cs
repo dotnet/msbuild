@@ -38,10 +38,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Empty(t.ResolvedFiles.Length);
+            Assert.Empty(t.ResolvedFiles);
 
-            Assert.Empty(engine.Errors);
-            Assert.Single(engine.Warnings);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(1, engine.Warnings);
         }
 
         /// <summary>
@@ -86,10 +86,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(expectedPath, StringComparison.OrdinalIgnoreCase));
+            Assert.Single(t.ResolvedFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
+            Assert.Equal(expectedPath, t.ResolvedFiles[0].ItemSpec);
         }
     }
 }

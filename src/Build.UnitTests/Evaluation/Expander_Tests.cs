@@ -3031,7 +3031,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::DoesTaskHostExist('   CurrentRuntime    ', 'CurrentArchitecture'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             // This is the current, so it had better be true!
-            Assert.True(String.Equals("true", result, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("true", result);
         }
 #endif
 
@@ -3091,7 +3091,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::DoesTaskHostExist('$(Runtime)', '$(Architecture)'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             // This is the current, so it had better be true!
-            Assert.True(String.Equals("true", result, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("true", result);
         }
 #endif
 
@@ -3115,7 +3115,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 string result = expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::DoesTaskHostExist('CLR2', 'CurrentArchitecture'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 // CLR has been forced to pretend not to exist, whether it actually does or not
-                Assert.True(String.Equals("false", result, StringComparison.OrdinalIgnoreCase));
+                Assert.Equal("false", result);
             }
             finally
             {

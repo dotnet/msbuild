@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.Equal(2, t.RelatedFiles.Length);
 
             bool dllFound = false;
@@ -155,28 +155,28 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.dll"))
                 {
                     dllFound = true;
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime).Length);
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile).Length);
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime));
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile));
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
                 }
                 if (item.ItemSpec.EndsWith(@"C:\WinMD\SampleWindowsRuntimeOnly.pri"))
                 {
                     priFound = true;
 
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime).Length);
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile).Length);
-                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.imageRuntime));
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winMDFile));
+                    Assert.Empty(item.GetMetadata(ItemMetadataNames.winmdImplmentationFile));
                 }
             }
 
             Assert.True(dllFound && priFound); // "Expected to find .dll and .pri related files."
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType).Equals("Native", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Equals("SampleWindowsRuntimeOnly.dll"));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals("WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("Native", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType));
+            Assert.Equal("SampleWindowsRuntimeOnly.dll", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+            Assert.Equal("WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
         }
 
         /// <summary>
@@ -204,17 +204,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Empty(t.RelatedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.RelatedFiles);
 
 
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType).Equals("Managed", StringComparison.OrdinalIgnoreCase));
-            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals("WindowsRuntime 1.0, CLR V2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal("Managed", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFileType));
+            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+            Assert.Equal("WindowsRuntime 1.0, CLR V2.0.50727", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
         }
 
         /// <summary>
@@ -240,13 +240,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
 
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
-            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile).Length);
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals("v2.0.50727", StringComparison.OrdinalIgnoreCase));
+            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
+            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile));
+            Assert.Equal("v2.0.50727", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
         }
 
         /// <summary>
@@ -274,9 +274,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(succeeded);
             Assert.Equal(2, t.ResolvedFiles.Length);
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
             engine.AssertLogDoesntContain("conflict");
         }
 
@@ -303,10 +303,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.Resolved", @"C:\WinMD\v4\mscorlib.dll");
         }
 
@@ -335,16 +335,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\WinMD\SampleWindowsRuntimeOnly2.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
+            Assert.Equal(@"C:\WinMD\SampleWindowsRuntimeOnly2.winmd", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
 
-            Assert.True(t.ResolvedDependencyFiles[0].ItemSpec.Equals(@"C:\WinMD\SampleWindowsRuntimeOnly.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMD\SampleWindowsRuntimeOnly.winmd", t.ResolvedDependencyFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
         }
 
@@ -376,10 +376,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(succeeded);
             Assert.Equal(2, t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
-            Assert.True(t.ResolvedDependencyFiles[0].ItemSpec.Equals(@"C:\DirectoryContainsdllAndWinmd\C.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
+            Assert.Equal(@"C:\DirectoryContainsdllAndWinmd\C.winmd", t.ResolvedDependencyFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -408,10 +408,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.True(succeeded);
             Assert.Equal(2, t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
-            Assert.True(t.ResolvedDependencyFiles[0].ItemSpec.Equals(@"C:\DirectoryContainstwoWinmd\C.winmd", StringComparison.OrdinalIgnoreCase));
+            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
+            Assert.Equal(@"C:\DirectoryContainstwoWinmd\C.winmd", t.ResolvedDependencyFiles[0].ItemSpec);
         }
 
         /// <summary>
@@ -440,13 +440,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
             Assert.Equal(4, t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
 
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\WinMD\SampleWindowsRuntimeOnly3.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMD\SampleWindowsRuntimeOnly3.winmd", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
         }
 
@@ -480,20 +480,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
 
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\WinMD\DotNetAssemblyDependsOnWinMD.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"v2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile).Equals("NOPE", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Equals("IMPL", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMD\DotNetAssemblyDependsOnWinMD.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"v2.0.50727", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
+            Assert.Equal("NOPE", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile));
+            Assert.Equal("IMPL", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
 
-            Assert.True(t.ResolvedDependencyFiles[0].ItemSpec.Equals(@"C:\WinMD\SampleWindowsRuntimeOnly.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMD\SampleWindowsRuntimeOnly.winmd", t.ResolvedDependencyFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
-            Assert.True(t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Equals("SampleWindowsRuntimeOnly.dll"));
+            Assert.Equal("SampleWindowsRuntimeOnly.dll", t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
         }
 
         /// <summary>
@@ -517,12 +517,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // Should fail since PE Header is not valid and this is always an error.
             Assert.False(succeeded);
-            Assert.Single(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Equal(1, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
 
             // The original winmd will resolve but its implementation dll must not be there
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
 
             string invalidPEMessage = ResourceUtilities.GetResourceString("ResolveAssemblyReference.ImplementationDllHasInvalidPEHeader");
             string fullMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.ProblemReadingImplementationDll", @"C:\WinMDArchVerification\DependsOnInvalidPeHeader.dll", invalidPEMessage);
@@ -549,16 +549,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.WarnOrErrorOnTargetArchitectureMismatch = "Error";
 
             bool succeeded = Execute(t);
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
 
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\WinMDArchVerification\DependsOnX86.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMDArchVerification\DependsOnX86.winmd", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
 
             Assert.True(succeeded);
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Equals("DependsOnX86.dll"));
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Equal("DependsOnX86.dll", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
         }
 
         /// <summary>
@@ -583,16 +583,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.WarnOrErrorOnTargetArchitectureMismatch = "Error";
 
             bool succeeded = Execute(t);
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
 
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\WinMDArchVerification\DependsOnAnyCPUUnknown.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMDArchVerification\DependsOnAnyCPUUnknown.winmd", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
 
             Assert.True(succeeded);
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Equals("DependsOnAnyCPUUnknown.dll"));
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Equal("DependsOnAnyCPUUnknown.dll", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
         }
 
         /// <summary>
@@ -644,10 +644,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.WarnOrErrorOnTargetArchitectureMismatch = warnOrErrorOnTargetArchitectureMismatch;
 
             bool succeeded = Execute(t);
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Single(t.ResolvedFiles);
 
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\WinMDArchVerification\" + winmdName + ".winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMDArchVerification\" + winmdName + ".winmd", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
 
             string fullMessage = null;
@@ -673,24 +673,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 // Should fail since PE Header is not valid and this is always an error.
                 Assert.True(succeeded);
-                Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Equals(winmdName + ".dll"));
-                Assert.Empty(engine.Errors);
-                Assert.Single(engine.Warnings);
+                Assert.Equal(winmdName + ".dll", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+                Assert.Equal(0, engine.Errors);
+                Assert.Equal(1, engine.Warnings);
             }
             else if (warnOrErrorOnTargetArchitectureMismatch.Equals("Error", StringComparison.OrdinalIgnoreCase))
             {
                 // Should fail since PE Header is not valid and this is always an error.
                 Assert.False(succeeded);
-                Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length);
-                Assert.Single(engine.Errors);
-                Assert.Empty(engine.Warnings);
+                Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+                Assert.Equal(1, engine.Errors);
+                Assert.Equal(0, engine.Warnings);
             }
             else if (warnOrErrorOnTargetArchitectureMismatch.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
                 Assert.True(succeeded);
-                Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile).Equals(winmdName + ".dll"));
-                Assert.Empty(engine.Errors);
-                Assert.Empty(engine.Warnings);
+                Assert.Equal(winmdName + ".dll", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winmdImplmentationFile));
+                Assert.Equal(0, engine.Errors);
+                Assert.Equal(0, engine.Warnings);
             }
         }
 
@@ -717,17 +717,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool succeeded = Execute(t);
 
             Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
-            Assert.Empty(engine.Errors);
-            Assert.Empty(engine.Warnings);
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.Equal(0, engine.Errors);
+            Assert.Equal(0, engine.Warnings);
 
-            Assert.True(t.ResolvedFiles[0].ItemSpec.Equals(@"C:\WinMD\DotNetAssemblyDependsOn255WinMD.dll", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"v2.0.50727", StringComparison.OrdinalIgnoreCase));
-            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile).Length);
+            Assert.Equal(@"C:\WinMD\DotNetAssemblyDependsOn255WinMD.dll", t.ResolvedFiles[0].ItemSpec);
+            Assert.Equal(@"v2.0.50727", t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
+            Assert.Empty(t.ResolvedFiles[0].GetMetadata(ItemMetadataNames.winMDFile));
 
-            Assert.True(t.ResolvedDependencyFiles[0].ItemSpec.Equals(@"C:\WinMD\WinMDWithVersion255.winmd", StringComparison.OrdinalIgnoreCase));
-            Assert.True(t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.imageRuntime).Equals(@"WindowsRuntime 1.0", StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(@"C:\WinMD\WinMDWithVersion255.winmd", t.ResolvedDependencyFiles[0].ItemSpec);
+            Assert.Equal(@"WindowsRuntime 1.0", t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.imageRuntime));
             Assert.True(bool.Parse(t.ResolvedDependencyFiles[0].GetMetadata(ItemMetadataNames.winMDFile)));
         }
         #endregion

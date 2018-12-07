@@ -37,9 +37,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -64,9 +64,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -91,9 +91,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -121,9 +121,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -148,10 +148,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo35Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo35Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -177,10 +177,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo4Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -209,10 +209,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -240,11 +240,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t, false);
 
-            Assert.Single(e.Warnings); // "One warning expected in this scenario."
+            Assert.Equal(1, e.Warnings); // "One warning expected in this scenario."
             e.AssertLogContains("MSB3275");
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Empty(t.ResolvedFiles.Length);
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Empty(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedDependencyFiles);
         }
 
         /// <summary>
@@ -271,10 +271,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.IgnoreTargetFrameworkAttributeVersionMismatch = true;
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Single(t.ResolvedDependencyFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
+            Assert.Single(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "IndirectDependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
             Assert.True(ContainsItem(t.ResolvedDependencyFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
@@ -304,9 +304,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Empty(e.Warnings); // "No warnings expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
 
@@ -334,11 +334,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new string[] { s_frameworksPath + Path.DirectorySeparatorChar };
             Execute(t, false);
 
-            Assert.Single(e.Warnings); // "One warning expected in this scenario."
+            Assert.Equal(1, e.Warnings); // "One warning expected in this scenario."
             e.AssertLogContains("MSB3274");
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Empty(t.ResolvedFiles.Length);
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Empty(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedDependencyFiles);
         }
 
         /// <summary>
@@ -390,10 +390,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             );
 
 
-            Assert.Empty(e.Warnings); // "No warning expected in this scenario."
-            Assert.Empty(e.Errors); // "No errors expected in this scenario."
-            Assert.Single(t.ResolvedFiles.Length);
-            Assert.Empty(t.ResolvedDependencyFiles.Length);
+            Assert.Equal(0, e.Warnings); // "No warning expected in this scenario."
+            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
+            Assert.Single(t.ResolvedFiles);
+            Assert.Empty(t.ResolvedDependencyFiles);
             Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_frameworksPath, "DependsOnFoo45Framework.dll"))); // "Expected to find assembly, but didn't."
         }
     }

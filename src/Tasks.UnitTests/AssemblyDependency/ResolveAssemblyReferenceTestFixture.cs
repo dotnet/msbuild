@@ -3036,11 +3036,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     {
                         loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();
                     }
-                    Assert.Empty(t.ResolvedDependencyFiles.Length);
-                    Assert.Empty(t.SatelliteFiles.Length);
-                    Assert.Empty(t.RelatedFiles.Length);
-                    Assert.Empty(t.SuggestedRedirects.Length);
-                    Assert.Empty(t.FilesWritten.Length);
+                    Assert.Empty(t.ResolvedDependencyFiles);
+                    Assert.Empty(t.SatelliteFiles);
+                    Assert.Empty(t.RelatedFiles);
+                    Assert.Empty(t.SuggestedRedirects);
+                    Assert.Empty(t.FilesWritten);
 
                     if (buildConsistencyCheck)
                     {
@@ -3093,8 +3093,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 	                    );
                     if (FileUtilities.FileExistsNoThrow(t.StateFile))
                     {
-                        Assert.Single(t.FilesWritten.Length);
-                        Assert.True(t.FilesWritten[0].ItemSpec.Equals(cache, StringComparison.OrdinalIgnoreCase));
+                        Assert.Single(t.FilesWritten);
+                        Assert.Equal(cache, t.FilesWritten[0].ItemSpec);
                     }
 
                     File.Delete(t.StateFile);

@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests
             i.SetMetadata("Access", "Private");
             t.EmbedResources = new ITaskItem[] { i };
 
-            Assert.Single(t.EmbedResources.Length); // "New value"
+            Assert.Single(t.EmbedResources); // "New value"
 
             // Check the parameters.
             CommandLine.ValidateHasParameter(
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests
             i.SetMetadata("Access", "Private");
             t.LinkResources = new ITaskItem[] { i };
 
-            Assert.Single(t.LinkResources.Length); // "New value"
+            Assert.Single(t.LinkResources); // "New value"
 
             // Check the parameters.
             CommandLine.ValidateHasParameter(

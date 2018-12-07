@@ -13,11 +13,11 @@ namespace Microsoft.Build.UnitTests
         {
             AssemblyRegistrationCache arc = new AssemblyRegistrationCache();
 
-            Assert.Empty(arc.Count);
+            Assert.Equal(0, arc.Count);
 
             arc.AddEntry("foo", "bar");
 
-            Assert.Single(arc.Count);
+            Assert.Equal(1, arc.Count);
 
             string assembly;
             string tlb;

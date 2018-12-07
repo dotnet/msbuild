@@ -727,6 +727,7 @@ namespace ItemCreationTask
         /// various task output-related operations, using a task built against the current 
         /// version of MSBuild.  
         /// </summary>
+        [Fact]
         public void ValidateDefiningProjectMetadataOnTaskOutputs()
         {
             string customTaskPath = CustomTaskHelper.GetAssemblyForTask(s_itemCreationTaskContents);

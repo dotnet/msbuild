@@ -78,14 +78,6 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Callback for toolset collection
-        /// </summary>
-        public void ToolsetAdded(Toolset toolset)
-        {
-            // Do nothing
-        }
-
-        /// <summary>
         /// Helper class to delete the testRegistryKey tree.
         /// </summary>
         private void DeleteTestRegistryKey()
@@ -129,7 +121,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Null(msbuildOverrideTasksPath);
             Assert.Null(defaultToolsVersion);
-            Assert.Empty(values.Count);
+            Assert.Empty(values);
         }
 #endif
 
@@ -175,9 +167,9 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("4.0", defaultOverrideToolsVersion);
             Assert.Equal("2.0", defaultToolsVersion);
             Assert.Equal(2, values.Count);
-            Assert.Empty(values["2.0"].Properties.Count);
+            Assert.Empty(values["2.0"].Properties);
             Assert.Equal(v2Folder, values["2.0"].ToolsPath);
-            Assert.Empty(values["4.0"].Properties.Count);
+            Assert.Empty(values["4.0"].Properties);
             Assert.Equal(v4Folder, values["4.0"].ToolsPath);
         }
 
@@ -402,8 +394,8 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(defaultToolsVersion);
-            Assert.Single(values.Count);
-            Assert.Empty(values["2.0"].Properties.Count);
+            Assert.Single(values);
+            Assert.Empty(values["2.0"].Properties);
             Assert.Equal(v2Folder, values["2.0"].ToolsPath);
             Assert.Equal("C:\\Cat", msbuildOverrideTasksPath);
         }
@@ -459,7 +451,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(defaultToolsVersion);
-            Assert.Empty(values.Count);
+            Assert.Empty(values);
         }
 
         /// <summary>
@@ -485,7 +477,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Null(defaultToolsVersion);
-            Assert.Empty(values.Count);
+            Assert.Empty(values);
         }
 
         /// <summary>
@@ -511,7 +503,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Empty(values.Count);
+            Assert.Empty(values);
         }
 
         /// <summary>
@@ -546,7 +538,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Equal("2.0", defaultToolsVersion);
             Assert.Equal(v2Folder, values["2.0"].ToolsPath);
-            Assert.Single(values.Count);
+            Assert.Single(values);
         }
 
         /// <summary>
@@ -800,9 +792,9 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             Assert.Equal("2.0", defaultToolsVersion);
-            Assert.Empty(values["2.0"].Properties.Count);
+            Assert.Empty(values["2.0"].Properties);
             Assert.Equal(binPath, values["2.0"].ToolsPath);
-            Assert.Single(values["2.0"].SubToolsets.Count);
+            Assert.Single(values["2.0"].SubToolsets);
             Assert.Equal("", values["2.0"].SubToolsets["11.0"].Properties["foo"].EvaluatedValue);
         }
 
@@ -929,7 +921,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Empty(values.Count);
+            Assert.Empty(values);
         }
 
         /// <summary>
@@ -959,8 +951,8 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion = null;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Single(values.Count);
-            Assert.Single(values["2.0"].Properties.Count);
+            Assert.Single(values);
+            Assert.Single(values["2.0"].Properties);
             Assert.Equal(String.Empty, values["2.0"].Properties["foo"].EvaluatedValue);
         }
 
@@ -993,7 +985,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), true, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             Assert.Equal("2>.0", defaultToolsVersion);
-            Assert.Single(values.Count);
+            Assert.Single(values);
             Assert.Equal(@"some>value", values["2>.0"].Properties["foo"].EvaluatedValue);
         }
 #endif
@@ -1107,7 +1099,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             // Verifications
-            Assert.Single(values.Count);
+            Assert.Single(values);
 
             string expectedDefault = "2.0";
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1396,7 +1388,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Default
                                                        );
 
-            Assert.Single(values.Count);
+            Assert.Single(values);
             Assert.Equal(@"D:\somePathToTasks", values["2.0"].ToolsPath);
             Assert.Equal(2, values["2.0"].Properties.Count);
             Assert.Equal(@"D:\somePathToDefault", values["2.0"].Properties["p1"].EvaluatedValue);
@@ -1904,7 +1896,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                            ToolsetDefinitionLocations.Registry
                                        );
 
-            Assert.Single(values.Count);
+            Assert.Single(values);
             Assert.Equal(expectedValue, values["2.0"].Properties["p"].EvaluatedValue);
         }
 
@@ -1965,7 +1957,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                            ToolsetDefinitionLocations.ConfigurationFile
                                        );
 
-            Assert.Single(values.Count);
+            Assert.Single(values);
             Assert.Equal(expectedValue, values["2.0"].Properties["p"].EvaluatedValue);
         }
 
@@ -2009,8 +2001,8 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Default
                                                        );
 
-            Assert.Single(values.Count);
-            Assert.Empty(values["2.0"].Properties.Count);
+            Assert.Single(values);
+            Assert.Empty(values["2.0"].Properties);
             Assert.Equal(overrideBinPath, values["2.0"].ToolsPath);
         }
 
@@ -2055,8 +2047,8 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Default
                                                        );
 
-            Assert.Single(values.Count);
-            Assert.Empty(values["2.0"].Properties.Count);
+            Assert.Single(values);
+            Assert.Empty(values["2.0"].Properties);
             Assert.Equal(binPath, values["2.0"].ToolsPath);
         }
 
@@ -2105,8 +2097,8 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Default
                                                        );
 
-            Assert.Single(values.Count);
-            Assert.Single(values["2.0"].Properties.Count);
+            Assert.Single(values);
+            Assert.Single(values["2.0"].Properties);
             Assert.Equal(overrideBinPath, values["2.0"].ToolsPath);
             Assert.Null(values["2.0"].Properties["SomeRegistryProperty"]); // Was zapped
             Assert.Equal(@"SomeConfigValue", values["2.0"].Properties["SomeConfigProperty"].EvaluatedValue);
@@ -2190,8 +2182,8 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Default
                                                        );
 
-            Assert.Single(values.Count);
-            Assert.Empty(values["2.0"].Properties.Count);
+            Assert.Single(values);
+            Assert.Empty(values["2.0"].Properties);
             Assert.Equal(binPath, values["2.0"].ToolsPath);
         }
 
@@ -2222,8 +2214,8 @@ namespace Microsoft.Build.UnitTests.Definition
                                                            ToolsetDefinitionLocations.Default
                                                        );
 
-            Assert.Single(values.Count);
-            Assert.Empty(values["2.0"].Properties.Count);
+            Assert.Single(values);
+            Assert.Empty(values["2.0"].Properties);
             Assert.Equal(binPath, values["2.0"].ToolsPath);
         }
 
@@ -2248,7 +2240,7 @@ namespace Microsoft.Build.UnitTests.Definition
                                                        );
 
             // Should either be the last-ditch 2.0 toolset, or if 2.0 is not installed, then the last-last-ditch of 4.0
-            Assert.Single(values.Count);
+            Assert.Single(values);
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
                 Assert.Equal("2.0", defaultToolsVersion);

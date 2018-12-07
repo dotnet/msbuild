@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.Single(engine.Errors);
+            Assert.Equal(1, engine.Errors);
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.Single(engine.Errors);
+            Assert.Equal(1, engine.Errors);
         }
 
         [Fact]
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /compiler:/platform:x86";
 
-            Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(targetCommandLine, commandLine);
         }
 
         [Fact]
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /type:System.String /type:System.Boolean";
 
-            Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(targetCommandLine, commandLine);
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"";
 
-            Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(targetCommandLine, commandLine);
         }
 
         [Fact]
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /reference:\"C:\\SomeFolder\\reference1.dll,C:\\SomeFolder\\reference2.dll\"";
             
-            Assert.True(String.Equals(commandLine, targetCommandLine, StringComparison.OrdinalIgnoreCase));
+            Assert.Equal(targetCommandLine, commandLine);
         }
     }
 }

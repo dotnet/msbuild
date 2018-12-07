@@ -60,9 +60,9 @@ namespace Microsoft.Build.UnitTests
             string warning4 = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("FindInvalidProjectReferences.WarnWhenVersionIsIncompatible", "Windows", "8.0", "proj4.proj", "Windows, Version=8.2");
             engine.AssertLogContains(warning4);
 
-            Assert.Equal(t.InvalidReferences.Length, 2);
-            Assert.Equal(t.InvalidReferences[0].ItemSpec, "proj3.proj");
-            Assert.Equal(t.InvalidReferences[1].ItemSpec, "proj4.proj");
+            Assert.Equal(2, t.InvalidReferences.Length);
+            Assert.Equal("proj3.proj", t.InvalidReferences[0].ItemSpec);
+            Assert.Equal("proj4.proj", t.InvalidReferences[1].ItemSpec);
         }
     }
 }

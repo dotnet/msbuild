@@ -1535,12 +1535,12 @@ namespace Microsoft.Build.UnitTests
                         if (trimmedLine.StartsWith("-") || trimmedLine.StartsWith("@"))
                         {
                             // If the first line in a switch it needs a certain amount of leading spaces
-                            Assert.True(switchLeadingSpaces, helpMessageLines[i]);
+                            Assert.StartsWith(switchLeadingSpaces, helpMessageLines[i]);
                         }
                         else
                         {
                             // Otherwise it should have no leading spaces because it's a section
-                            Assert.False(" ", helpMessageLines[i]);
+                            Assert.False(helpMessageLines[i].StartsWith(" "));
                         }
                     }
                     else
