@@ -83,13 +83,13 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Release/log'
+      PathtoPublish: 'artifacts/Log/Release'
       ArtifactName: 'FullOnWindows Release build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs/TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/Release/log/TestResults'
+      PathtoPublish: 'artifacts/log/Release/TestResults'
       ArtifactName: 'FullOnWindows Release test logs'
     condition: succeededOrFailed()
 
@@ -128,13 +128,13 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log'
+      PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnWindows build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs/TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      PathtoPublish: 'artifacts/log/Debug/TestResults'
       ArtifactName: 'CoreOnWindows test logs'
     condition: succeededOrFailed()
 
@@ -156,13 +156,13 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log'
+      PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnLinux build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs/TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      PathtoPublish: 'artifacts/log/Debug/TestResults'
       ArtifactName: 'CoreOnLinux test logs'
     condition: succeededOrFailed()
 
@@ -184,13 +184,13 @@ phases:
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
-      PathtoPublish: 'artifacts/Debug/log'
+      PathtoPublish: 'artifacts/log/Debug'
       ArtifactName: 'CoreOnMac build logs'
     condition: succeededOrFailed()
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs/TestResults'
     inputs:
-      PathtoPublish: 'artifacts/2/Debug/log/TestResults'
+      PathtoPublish: 'artifacts/log/Debug/TestResults'
       ArtifactName: 'CoreOnMac test logs'
     condition: succeededOrFailed()
 
