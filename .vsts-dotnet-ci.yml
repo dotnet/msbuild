@@ -16,7 +16,7 @@ phases:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'build/cibuild.cmd'
+      filename: 'eng/common/CIBuild.cmd'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -60,7 +60,7 @@ phases:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'build/cibuild.cmd'
+      filename: 'eng/common/CIBuild.cmd'
       arguments: '-configuration Release'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -105,7 +105,7 @@ phases:
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
-      filename: 'build/cibuild.cmd'
+      filename: 'eng/common/CIBuild.cmd'
       arguments: '-hostType Core'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -142,7 +142,7 @@ phases:
   displayName: "Build and test on Linux using .NET Core MSBuild"
   queue: 'Hosted Ubuntu 1604'
   steps:
-  - bash: . 'build/cibuild.sh'
+  - bash: . 'eng/common/cibuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
@@ -170,7 +170,7 @@ phases:
   displayName: "Build and test on macOS using .NET Core MSBuild"
   queue: 'Hosted macOS'
   steps:
-  - bash: . 'build/cibuild.sh'
+  - bash: . 'eng/common/cibuild.sh'
     displayName: CI Build
   - task: PublishTestResults@2
     displayName: Publish .NET Core 2.1 Test Results
