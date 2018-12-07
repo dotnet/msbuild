@@ -85,6 +85,7 @@
     <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
 
     <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
 
 
