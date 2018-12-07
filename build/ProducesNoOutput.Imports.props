@@ -3,6 +3,8 @@
     <MSBuildTargetsFilePath>$(MSBuildToolsPath)\Microsoft.CSharp.targets</MSBuildTargetsFilePath>
 
     <IsPackable>false</IsPackable>
+
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
   </PropertyGroup>
 
   <Import Project="$(MSBuildTargetsFilePath)" />
