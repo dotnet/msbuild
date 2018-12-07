@@ -24,7 +24,7 @@
     <PackageReference Update="RoslynDependencies.OptimizationData" Version="$(RoslynDependenciesOptimizationDataVersion)" />
     <PackageReference Update="Shouldly" Version="3.0.0" />
     <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
-    <PackageReference Update="System.CodeDom" Version="4.4.0" />
+    <PackageReference Update="System.CodeDom" Version="4.5.0" />
     <PackageReference Update="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Update="System.Collections.Immutable" Version="1.5.0" />
     <PackageReference Update="System.Diagnostics.TraceSource" Version="4.0.0" />
