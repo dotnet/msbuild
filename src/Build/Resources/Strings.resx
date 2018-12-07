@@ -1715,7 +1715,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" UESanitized="false" Visibility="Public">
-    <value>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the reference has not been previously built. In isolated builds this probably means that the reference is not explicitly specified as a ProjectReference item in "{0}".</value>
+    <value>MSB4252: Project "{0}" has a reference to "{1}" ({2} target(s)) but the build result for the reference is not in the engine cache. In isolated builds this could mean one of the following:
+    - the reference was not explicitly specified as a ProjectReference item in "{0}"
+    - the reference was not included in the provided input caches
+    - the reference was called with a target which is not specified in the ProjectReferenceTargets item in "{0}"
+    </value>
     <comment>
       {StrBegin="MSB4252:"}
       LOCALIZATION: Do not localize the following words: ProjectReference.
